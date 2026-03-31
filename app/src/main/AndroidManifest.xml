@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ══════════════════════ CAMERA & TORCH ══════════════════════ -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera"        android:required="false" />
+    <uses-feature android:name="android.hardware.camera.flash"  android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+
+    <!-- ══════════════════════ AUDIO ══════════════════════════════ -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- ══════════════════════ VIBRATION ══════════════════════════ -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- ══════════════════════ WIFI ════════════════════════════════ -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- ══════════════════════ BLUETOOTH ══════════════════════════ -->
+    <!-- Legacy for API 29-30 (Huawei P30) -->
+    <uses-permission android:name="android.permission.BLUETOOTH"       android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+    <!-- Modern for API 31+ (Xiaomi 14T Pro) -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"   android:usesPermissionFlags="neverForLocation" />
+
+    <!-- ══════════════════════ NFC ═════════════════════════════════ -->
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
+
+    <!-- ══════════════════════ LOCATION (for WiFi scan) ════════════ -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- ══════════════════════ NOTIFICATIONS / SERVICES ════════════ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"     />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+
+    <!-- ══════════════════════ OVERLAY (lock-screen widget) ════════ -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- ══════════════════════ DEVICE ADMIN ════════════════════════ -->
+    <!--  Allows locking the screen programmatically  -->
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+
+    <!-- ══════════════════════ SENSORS ════════════════════════════ -->
+    <uses-feature android:name="android.hardware.sensor.gyroscope"     android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.compass"       android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.proximity"     android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.light"         android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.barometer"     android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.HardwareDash"
+        android:hardwareAccelerated="true">
+
+        <!-- ── Main Activity ─────────────────────────────────────── -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- ── Device Admin Receiver (for screen lock) ───────────── -->
+        <receiver
+            android:name=".receivers.AdminReceiver"
+            android:exported="true"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                <action android:name="android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- ── Foreground Service ─────────────────────────────────── -->
+        <service
+            android:name=".services.HardwareService"
+            android:exported="false"
+            android:foregroundServiceType="camera|microphone" />
+
+    </application>
+</manifest>

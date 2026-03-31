@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">HardwareDash</string>
+    <string name="admin_description">Allows HardwareDash to lock the screen programmatically.</string>
+</resources>

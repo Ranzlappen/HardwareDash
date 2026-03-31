@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Declares Device Administration capabilities.
+    "uses-policies" decides what the admin can do.
+    We only need FORCE_LOCK to lock the screen programmatically.
+-->
+<device-admin>
+    <uses-policies>
+        <force-lock />
+    </uses-policies>
+</device-admin>
