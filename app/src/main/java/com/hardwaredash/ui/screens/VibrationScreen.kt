@@ -1,3 +1,7 @@
+// CHANGE: Dynamic N-step waveform builder, loop toggle, gap/frequency control, speed presets
+// REASON: Make vibration actuator much more flexible and customizable
+// DATE: 2026-04-02
+
 package com.hardwaredash.ui.screens
 
 import android.content.Context
@@ -9,9 +13,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Vibration
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -38,18 +43,29 @@ private val patterns = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) listO
     VibPattern("Tick")        { VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK) },
 ) else emptyList()
 
+// ─── Waveform step data ───────────────────────────────────────────────────────
+private data class WaveformStepData(
+    val amplitude: Float = 0.5f,
+    val duration: Float = 150f,
+)
+
 @Composable
 fun VibrationScreen() {
     val context  = LocalContext.current
     val vibrator = remember { getVibrator(context) }
 
-    // Custom waveform sliders
-    var amp1 by remember { mutableFloatStateOf(0.3f) }
-    var dur1 by remember { mutableFloatStateOf(100f) }
-    var amp2 by remember { mutableFloatStateOf(0.8f) }
-    var dur2 by remember { mutableFloatStateOf(200f) }
-    var amp3 by remember { mutableFloatStateOf(1.0f) }
-    var dur3 by remember { mutableFloatStateOf(150f) }
+    // Dynamic waveform steps
+    val steps = remember { mutableStateListOf(
+        WaveformStepData(0.3f, 100f),
+        WaveformStepData(0.8f, 200f),
+        WaveformStepData(1.0f, 150f),
+    ) }
+
+    // Gap between steps (ms)
+    var gapMs by remember { mutableFloatStateOf(50f) }
+
+    // Loop toggle
+    var loopEnabled by remember { mutableStateOf(false) }
 
     val hasAmplitude = vibrator.hasAmplitudeControl()
 
@@ -92,33 +108,95 @@ fun VibrationScreen() {
         HorizontalDivider()
 
         // ── Custom waveform ───────────────────────────────────────────────────
-        Text("Custom 3-Step Waveform", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text("Custom Waveform Builder", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(
-            "Amplitude: 0 = off, 1 = full\nDuration: ms",
+            "Amplitude: 0 = off, 1 = full\nDuration: ms  ·  Gap: pause between steps",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         )
 
-        WaveformStep("Step 1", amp1, dur1, hasAmplitude, { amp1 = it }, { dur1 = it })
-        WaveformStep("Step 2", amp2, dur2, hasAmplitude, { amp2 = it }, { dur2 = it })
-        WaveformStep("Step 3", amp3, dur3, hasAmplitude, { amp3 = it }, { dur3 = it })
+        // Speed presets
+        Text("Speed Presets", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("Slow" to 200f, "Medium" to 80f, "Fast" to 30f, "Rapid" to 10f).forEach { (label, gap) ->
+                FilterChip(
+                    selected = gapMs == gap,
+                    onClick  = { gapMs = gap },
+                    label    = { Text(label) },
+                )
+            }
+        }
+
+        // Gap slider
+        Text("Gap between steps: ${gapMs.toInt()} ms", style = MaterialTheme.typography.bodySmall)
+        Slider(value = gapMs, onValueChange = { gapMs = it }, valueRange = 0f..500f)
+
+        // Loop toggle
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                "Loop waveform",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f),
+            )
+            Switch(checked = loopEnabled, onCheckedChange = { loopEnabled = it })
+        }
+
+        // Dynamic steps
+        steps.forEachIndexed { idx, step ->
+            WaveformStep(
+                label = "Step ${idx + 1}",
+                amplitude = step.amplitude,
+                duration  = step.duration,
+                hasAmplitude = hasAmplitude,
+                onAmpChange  = { steps[idx] = step.copy(amplitude = it) },
+                onDurChange  = { steps[idx] = step.copy(duration = it) },
+                onRemove     = if (steps.size > 1) ({ steps.removeAt(idx) }) else null,
+            )
+        }
+
+        // Add/remove step buttons
+        if (steps.size < 10) {
+            OutlinedButton(
+                onClick = { steps.add(WaveformStepData()) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Default.Add, null)
+                Spacer(Modifier.width(8.dp))
+                Text("Add Step (${steps.size}/10)")
+            }
+        }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick  = {
                 vibrator.cancel()
-                val timings    = longArrayOf(0, dur1.toLong(), 50, dur2.toLong(), 50, dur3.toLong())
-                val amplitudes = intArrayOf(
-                    0,
-                    if (hasAmplitude) (amp1 * 255).toInt() else 255,
-                    0,
-                    if (hasAmplitude) (amp2 * 255).toInt() else 255,
-                    0,
-                    if (hasAmplitude) (amp3 * 255).toInt() else 255,
+                val timings    = mutableListOf<Long>()
+                val amplitudes = mutableListOf<Int>()
+                steps.forEachIndexed { idx, step ->
+                    if (idx > 0) {
+                        // Gap before this step
+                        timings.add(gapMs.toLong())
+                        amplitudes.add(0)
+                    }
+                    timings.add(step.duration.toLong())
+                    amplitudes.add(
+                        if (hasAmplitude) (step.amplitude * 255).toInt() else 255
+                    )
+                }
+                val repeatIdx = if (loopEnabled) 0 else -1
+                vibrator.vibrate(
+                    VibrationEffect.createWaveform(
+                        timings.toLongArray(),
+                        amplitudes.toIntArray(),
+                        repeatIdx,
+                    )
                 )
-                vibrator.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1))
             }
-        ) { Text("▶  Play Custom Waveform") }
+        ) { Text(if (loopEnabled) "▶  Play (Looping)" else "▶  Play Custom Waveform") }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
@@ -134,10 +212,22 @@ private fun WaveformStep(
     amplitude: Float, duration: Float,
     hasAmplitude: Boolean,
     onAmpChange: (Float) -> Unit, onDurChange: (Float) -> Unit,
+    onRemove: (() -> Unit)?,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+                if (onRemove != null) {
+                    IconButton(onClick = onRemove, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Close, "Remove step", modifier = Modifier.size(16.dp))
+                    }
+                }
+            }
 
             if (hasAmplitude) {
                 Text("Amplitude: ${"%.0f".format(amplitude * 100)}%", style = MaterialTheme.typography.bodySmall)
@@ -145,7 +235,7 @@ private fun WaveformStep(
             }
 
             Text("Duration: ${duration.toInt()} ms", style = MaterialTheme.typography.bodySmall)
-            Slider(value = duration, onValueChange = onDurChange, valueRange = 20f..500f)
+            Slider(value = duration, onValueChange = onDurChange, valueRange = 10f..2000f)
         }
     }
 }

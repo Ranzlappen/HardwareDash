@@ -33,6 +33,7 @@ private val features = listOf(
     FeatureCard(Routes.SENSORS,      "Sensors",       "Gyro · Accel · Light…",       Icons.Default.Analytics),
     FeatureCard(Routes.NOTIFICATIONS,"Notifications", "Rich + heads-up demos",       Icons.Default.Notifications),
     FeatureCard(Routes.LOCKSCREEN,   "Lock Screen",   "Admin lock + overlay",        Icons.Default.Lock),
+    FeatureCard(Routes.BATTERY,     "Battery",       "Health · Temp · Charging",    Icons.Default.BatteryStd),
 )
 
 @Composable

@@ -23,6 +23,7 @@ object Routes {
     const val SENSORS      = "sensors"
     const val NOTIFICATIONS = "notifications"
     const val LOCKSCREEN   = "lockscreen"
+    const val BATTERY      = "battery"
 }
 
 data class BottomNavItem(
@@ -41,6 +42,7 @@ private val bottomNavItems = listOf(
     BottomNavItem(Routes.SENSORS,      "Sensors", Icons.Default.Analytics),
     BottomNavItem(Routes.NOTIFICATIONS,"Notifs",  Icons.Default.Notifications),
     BottomNavItem(Routes.LOCKSCREEN,   "Lock",    Icons.Default.Lock),
+    BottomNavItem(Routes.BATTERY,     "Battery", Icons.Default.BatteryStd),
 )
 
 @Composable
@@ -83,6 +85,7 @@ fun NavGraph() {
             composable(Routes.SENSORS)       { SensorsScreen() }
             composable(Routes.NOTIFICATIONS) { NotificationsScreen() }
             composable(Routes.LOCKSCREEN)    { LockScreenScreen() }
+            composable(Routes.BATTERY)      { BatteryScreen() }
         }
     }
 }
