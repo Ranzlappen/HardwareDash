@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- ══════════════════════ CAMERA & TORCH ══════════════════════ -->
     <uses-permission android:name="android.permission.CAMERA" />
@@ -47,6 +48,16 @@
     <!--  Allows locking the screen programmatically  -->
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
+    <!-- ══════════════════════ STEP COUNTER ══════════════════════ -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
+    <!-- ══════════════════════ TELEPHONY (signal info) ════════════ -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- ══════════════════════ BRIGHTNESS ═════════════════════════ -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
     <!-- ══════════════════════ SENSORS ════════════════════════════ -->
     <uses-feature android:name="android.hardware.sensor.gyroscope"     android:required="false" />
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
@@ -54,6 +65,7 @@
     <uses-feature android:name="android.hardware.sensor.proximity"     android:required="false" />
     <uses-feature android:name="android.hardware.sensor.light"         android:required="false" />
     <uses-feature android:name="android.hardware.sensor.barometer"     android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.stepcounter"  android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -75,6 +87,24 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- NFC tag dispatch -->
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.TECH_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
         </activity>
 
         <!-- ── Device Admin Receiver (for screen lock) ───────────── -->

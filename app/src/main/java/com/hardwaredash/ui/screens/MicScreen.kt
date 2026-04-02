@@ -1,3 +1,7 @@
+// CHANGE: Added FFT-based real-time spectrum analyzer with frequency (Hz) visualization
+// REASON: Add live dB and frequency graph visualization (spectrum analyzer style)
+// DATE: 2026-04-02
+
 package com.hardwaredash.ui.screens
 
 import android.media.AudioFormat
@@ -6,6 +10,8 @@ import android.media.MediaRecorder
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
@@ -22,6 +28,60 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.*
 import kotlinx.coroutines.*
 import kotlin.math.*
+
+// ─── Radix-2 Cooley-Tukey FFT ────────────────────────────────────────────────
+// Operates on real input, returns magnitude spectrum (first half only)
+private fun fftMagnitude(input: FloatArray): FloatArray {
+    val n = input.size
+    // Ensure power of 2
+    if (n and (n - 1) != 0) return FloatArray(0)
+
+    // Bit-reversal permutation
+    val real = input.copyOf()
+    val imag = FloatArray(n)
+    var j = 0
+    for (i in 1 until n) {
+        var bit = n shr 1
+        while (j and bit != 0) {
+            j = j xor bit
+            bit = bit shr 1
+        }
+        j = j xor bit
+        if (i < j) {
+            real[i] = real[j].also { real[j] = real[i] }
+            imag[i] = imag[j].also { imag[j] = imag[i] }
+        }
+    }
+
+    // FFT butterfly
+    var len = 2
+    while (len <= n) {
+        val halfLen = len / 2
+        val angle = -2.0 * PI / len
+        for (i in 0 until n step len) {
+            for (k in 0 until halfLen) {
+                val theta = angle * k
+                val cosT = cos(theta).toFloat()
+                val sinT = sin(theta).toFloat()
+                val tReal = real[i + k + halfLen] * cosT - imag[i + k + halfLen] * sinT
+                val tImag = real[i + k + halfLen] * sinT + imag[i + k + halfLen] * cosT
+                real[i + k + halfLen] = real[i + k] - tReal
+                imag[i + k + halfLen] = imag[i + k] - tImag
+                real[i + k] += tReal
+                imag[i + k] += tImag
+            }
+        }
+        len = len shl 1
+    }
+
+    // Magnitude of first half (Nyquist)
+    val halfN = n / 2
+    val mag = FloatArray(halfN)
+    for (i in 0 until halfN) {
+        mag[i] = sqrt(real[i] * real[i] + imag[i] * imag[i])
+    }
+    return mag
+}
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -42,37 +102,41 @@ fun MicScreen() {
     }
 }
 
+private const val FFT_SIZE = 1024
+private const val SAMPLE_RATE = 44100
+
 @Composable
 private fun MicMeter() {
     var isRecording  by remember { mutableStateOf(false) }
     var amplitude    by remember { mutableFloatStateOf(0f) }       // 0..1 normalised
     var peakDb       by remember { mutableFloatStateOf(-60f) }     // dB
     var history      by remember { mutableStateOf(List(60) { 0f }) }
+    var spectrum     by remember { mutableStateOf(FloatArray(FFT_SIZE / 2)) }
+    var peakFreqHz   by remember { mutableFloatStateOf(0f) }
 
     // ── AudioRecord loop in coroutine ──────────────────────────────────────
     LaunchedEffect(isRecording) {
         if (!isRecording) { amplitude = 0f; return@LaunchedEffect }
 
-        val sampleRate  = 44100
-        val bufferSize  = AudioRecord.getMinBufferSize(
-            sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
-        ).coerceAtLeast(4096)
+        val bufferSize = AudioRecord.getMinBufferSize(
+            SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
+        ).coerceAtLeast(FFT_SIZE * 2)
 
         val recorder = AudioRecord(
             MediaRecorder.AudioSource.MIC,
-            sampleRate,
+            SAMPLE_RATE,
             AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT,
             bufferSize,
         )
         if (recorder.state != AudioRecord.STATE_INITIALIZED) return@LaunchedEffect
 
-        val buffer = ShortArray(bufferSize / 2)
+        val buffer = ShortArray(FFT_SIZE)
         recorder.startRecording()
 
         try {
             while (isRecording) {
-                val read = recorder.read(buffer, 0, buffer.size)
+                val read = recorder.read(buffer, 0, FFT_SIZE)
                 if (read > 0) {
                     // RMS amplitude
                     val rms  = sqrt(buffer.take(read).map { it.toDouble().pow(2) }.average())
@@ -82,6 +146,27 @@ private fun MicMeter() {
                     amplitude = norm
                     peakDb    = db
                     history   = (history.drop(1) + norm)
+
+                    // FFT spectrum
+                    if (read == FFT_SIZE) {
+                        val fftInput = FloatArray(FFT_SIZE) { i ->
+                            buffer[i].toFloat() / Short.MAX_VALUE
+                        }
+                        val mag = fftMagnitude(fftInput)
+                        if (mag.isNotEmpty()) {
+                            spectrum = mag
+                            // Find peak frequency (skip bin 0 = DC)
+                            var maxMag = 0f
+                            var maxIdx = 1
+                            for (i in 1 until mag.size) {
+                                if (mag[i] > maxMag) {
+                                    maxMag = mag[i]
+                                    maxIdx = i
+                                }
+                            }
+                            peakFreqHz = maxIdx * SAMPLE_RATE.toFloat() / FFT_SIZE
+                        }
+                    }
                 }
                 delay(16L) // ~60 fps
             }
@@ -102,9 +187,12 @@ private fun MicMeter() {
     )
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -170,6 +258,78 @@ private fun MicMeter() {
                 )
             }
         }
+
+        HorizontalDivider()
+
+        // ── Spectrum Analyzer ──────────────────────────────────────────────
+        Text(
+            "Spectrum Analyzer",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+
+        if (isRecording && peakFreqHz > 0) {
+            Text(
+                "Peak: ${"%.0f".format(peakFreqHz)} Hz",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+        }
+
+        val specColor   = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)
+        val specBgColor = MaterialTheme.colorScheme.surfaceVariant
+
+        Canvas(modifier = Modifier.fillMaxWidth().height(140.dp)) {
+            drawRect(specBgColor, size = size)
+
+            if (!isRecording || spectrum.isEmpty()) return@Canvas
+
+            // Show up to ~10kHz (bin index = freq * fftSize / sampleRate)
+            val maxBin = minOf(spectrum.size, (10000 * FFT_SIZE / SAMPLE_RATE))
+            if (maxBin <= 1) return@Canvas
+
+            val barW = size.width / maxBin
+            // Convert to dB, clamp range -80..0
+            var maxDb = -80f
+            for (i in 1 until maxBin) {
+                val magDb = if (spectrum[i] > 0) (20 * log10(spectrum[i].toDouble())).toFloat() else -80f
+                if (magDb > maxDb) maxDb = magDb
+            }
+            val dbFloor = -80f
+            val dbRange = (maxOf(maxDb, -10f) - dbFloor).coerceAtLeast(1f)
+
+            for (i in 1 until maxBin) {
+                val magDb = if (spectrum[i] > 0) (20 * log10(spectrum[i].toDouble())).toFloat() else -80f
+                val normH = ((magDb - dbFloor) / dbRange).coerceIn(0f, 1f)
+                val barH  = normH * size.height
+                drawRect(
+                    color   = specColor,
+                    topLeft = Offset((i - 1) * barW, size.height - barH),
+                    size    = Size(barW.coerceAtLeast(1f), barH),
+                )
+            }
+
+            // Frequency labels
+            val labelFreqs = listOf(100, 500, 1000, 2000, 5000, 10000)
+            labelFreqs.forEach { freq ->
+                val bin = freq * FFT_SIZE / SAMPLE_RATE
+                if (bin in 1 until maxBin) {
+                    val x = (bin - 1) * barW
+                    drawLine(
+                        Color.Gray.copy(alpha = 0.3f),
+                        Offset(x, 0f), Offset(x, size.height),
+                        strokeWidth = 0.5.dp.toPx(),
+                    )
+                }
+            }
+        }
+
+        Text(
+            "0 Hz                                                           10 kHz",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+        )
 
         // ── Control button ─────────────────────────────────────────────────
         Button(

@@ -1,5 +1,12 @@
+// CHANGE: Added lock screen notification designer with visibility, priority, category, and scheduling
+// REASON: Make lock screen notification panels fully designable and customizable with timing
+// DATE: 2026-04-02
+
 package com.hardwaredash.ui.screens
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
@@ -20,24 +27,52 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationCompat
+import com.hardwaredash.MainActivity
 import com.hardwaredash.receivers.AdminReceiver
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+private const val CH_LOCKSCREEN = "hwd_lockscreen"
+
+private fun ensureLockChannel(nm: NotificationManager) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+    val channel = NotificationChannel(
+        CH_LOCKSCREEN, "Lock Screen Notifications", NotificationManager.IMPORTANCE_HIGH
+    ).apply {
+        lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+    }
+    nm.createNotificationChannel(channel)
+}
 
 @Composable
 fun LockScreenScreen() {
     val context = LocalContext.current
     val dpm     = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val admin   = ComponentName(context, AdminReceiver::class.java)
+    val nm      = remember { context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+    val scope   = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) { ensureLockChannel(nm) }
 
     var isAdmin    by remember { mutableStateOf(false) }
     var hasOverlay by remember { mutableStateOf(false) }
 
-    // Re-check status every time the screen is composed (user may have just
-    // come back from the Settings screen after granting a permission)
+    // Re-check status every time the screen is composed
     LaunchedEffect(Unit) {
         isAdmin    = dpm.isAdminActive(admin)
         hasOverlay = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             Settings.canDrawOverlays(context) else true
     }
+
+    // Lock screen notification designer state
+    var lsTitle     by remember { mutableStateOf("Lock Screen Alert") }
+    var lsBody      by remember { mutableStateOf("Custom lock screen notification") }
+    var lsVisibility by remember { mutableIntStateOf(NotificationCompat.VISIBILITY_PUBLIC) }
+    var lsPriority  by remember { mutableIntStateOf(NotificationCompat.PRIORITY_HIGH) }
+    var lsCategory  by remember { mutableStateOf(NotificationCompat.CATEGORY_MESSAGE) }
+    var lsDelayMin  by remember { mutableFloatStateOf(0f) }
+    var lsScheduleStatus by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -70,6 +105,8 @@ fun LockScreenScreen() {
                     "✅  Show this Activity over the lock screen",
                     "✅  Draw a persistent overlay on the lock screen",
                     "✅  Turn the screen on programmatically",
+                    "✅  Design custom lock screen notifications",
+                    "✅  Schedule timed lock screen notifications",
                     "❌  Replace / fully customise the lock screen UI",
                     "❌  Permanently disable the lock screen",
                     "❌  Read or bypass the PIN / password",
@@ -196,6 +233,149 @@ fun LockScreenScreen() {
         HorizontalDivider()
 
         // ══════════════════════════════════════════════════════════════════════
+        // STEP 4 — Lock Screen Notification Designer
+        // ══════════════════════════════════════════════════════════════════════
+        Text("Step 4 — Lock Screen Notification Designer", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(
+            "Design notifications that appear on the lock screen. " +
+            "Visibility controls how much content is shown when the device is locked.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+        )
+
+        OutlinedTextField(
+            value = lsTitle,
+            onValueChange = { lsTitle = it },
+            label = { Text("Notification Title") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
+        OutlinedTextField(
+            value = lsBody,
+            onValueChange = { lsBody = it },
+            label = { Text("Notification Body") },
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 3,
+        )
+
+        // Visibility
+        Text("Lock Screen Visibility", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            listOf(
+                "Public — Full content visible on lock screen" to NotificationCompat.VISIBILITY_PUBLIC,
+                "Private — Icon only, content hidden" to NotificationCompat.VISIBILITY_PRIVATE,
+                "Secret — Completely hidden from lock screen" to NotificationCompat.VISIBILITY_SECRET,
+            ).forEach { (label, vis) ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = lsVisibility == vis,
+                        onClick  = { lsVisibility = vis },
+                    )
+                    Text(label, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+
+        // Priority
+        Text("Priority", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf(
+                "Low" to NotificationCompat.PRIORITY_LOW,
+                "Default" to NotificationCompat.PRIORITY_DEFAULT,
+                "High" to NotificationCompat.PRIORITY_HIGH,
+            ).forEach { (label, prio) ->
+                FilterChip(
+                    selected = lsPriority == prio,
+                    onClick  = { lsPriority = prio },
+                    label    = { Text(label) },
+                )
+            }
+        }
+
+        // Category
+        Text("Category", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf(
+                "Message" to NotificationCompat.CATEGORY_MESSAGE,
+                "Alarm" to NotificationCompat.CATEGORY_ALARM,
+                "Reminder" to NotificationCompat.CATEGORY_REMINDER,
+                "Event" to NotificationCompat.CATEGORY_EVENT,
+            ).forEach { (label, cat) ->
+                FilterChip(
+                    selected = lsCategory == cat,
+                    onClick  = { lsCategory = cat },
+                    label    = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                )
+            }
+        }
+
+        // Scheduling
+        Text("Schedule", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        Text(
+            "Delay: ${
+                if (lsDelayMin < 1f) "${(lsDelayMin * 60).toInt()} sec"
+                else "${"%.1f".format(lsDelayMin)} min"
+            }",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        Slider(
+            value = lsDelayMin,
+            onValueChange = { lsDelayMin = it },
+            valueRange = 0f..60f,
+        )
+
+        // Send buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Button(
+                onClick = {
+                    sendLockScreenNotification(context, nm, lsTitle, lsBody, lsVisibility, lsPriority, lsCategory)
+                    lsScheduleStatus = "✓ Sent immediately"
+                },
+                modifier = Modifier.weight(1f),
+                enabled = lsTitle.isNotBlank(),
+            ) { Text("Send Now") }
+
+            Button(
+                onClick = {
+                    val delayMs = (lsDelayMin * 60 * 1000).toLong()
+                    if (delayMs <= 0) {
+                        sendLockScreenNotification(context, nm, lsTitle, lsBody, lsVisibility, lsPriority, lsCategory)
+                        lsScheduleStatus = "✓ Sent immediately"
+                    } else {
+                        val label = if (lsDelayMin < 1f) "${(lsDelayMin * 60).toInt()}s"
+                                    else "${"%.1f".format(lsDelayMin)}m"
+                        lsScheduleStatus = "⏱ Scheduled in $label…"
+                        // Capture values for the coroutine
+                        val t = lsTitle; val b = lsBody; val v = lsVisibility
+                        val p = lsPriority; val c = lsCategory
+                        scope.launch {
+                            delay(delayMs)
+                            sendLockScreenNotification(context, nm, t, b, v, p, c)
+                            lsScheduleStatus = "✓ Scheduled notification sent"
+                        }
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                enabled = lsTitle.isNotBlank() && lsDelayMin > 0,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+            ) { Text("Schedule") }
+        }
+
+        if (lsScheduleStatus.isNotEmpty()) {
+            Text(
+                lsScheduleStatus,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (lsScheduleStatus.startsWith("✓")) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.secondary,
+            )
+        }
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════════
         // HOW IT WORKS — detail card
         // ══════════════════════════════════════════════════════════════════════
         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
@@ -216,6 +396,37 @@ fun LockScreenScreen() {
             }
         }
     }
+}
+
+private fun sendLockScreenNotification(
+    context: Context,
+    nm: NotificationManager,
+    title: String,
+    body: String,
+    visibility: Int,
+    priority: Int,
+    category: String,
+) {
+    val pi = PendingIntent.getActivity(
+        context, 0,
+        Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        },
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+
+    val n = NotificationCompat.Builder(context, CH_LOCKSCREEN)
+        .setSmallIcon(android.R.drawable.ic_dialog_info)
+        .setContentTitle(title)
+        .setContentText(body)
+        .setVisibility(visibility)
+        .setPriority(priority)
+        .setCategory(category)
+        .setContentIntent(pi)
+        .setAutoCancel(true)
+        .build()
+
+    nm.notify(3000 + (System.currentTimeMillis() % 1000).toInt(), n)
 }
 
 // ─── Small status badge row ───────────────────────────────────────────────────
