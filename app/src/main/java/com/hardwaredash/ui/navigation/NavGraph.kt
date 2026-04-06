@@ -1,17 +1,13 @@
 package com.hardwaredash.ui.navigation
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
@@ -34,20 +30,16 @@ object Routes {
 data class BottomNavItem(
     val route: String,
     val label: String,
-    val icon: ImageVector,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector,
 )
 
 private val bottomNavItems = listOf(
-    BottomNavItem(Routes.DASHBOARD,    "Home",    Icons.Default.Dashboard),
-    BottomNavItem(Routes.TORCH,        "Torch",   Icons.Default.FlashlightOn),
-    BottomNavItem(Routes.CAMERA,       "Camera",  Icons.Default.CameraAlt),
-    BottomNavItem(Routes.VIBRATION,    "Vibrate", Icons.Default.Vibration),
-    BottomNavItem(Routes.MIC,          "Mic",     Icons.Default.Mic),
-    BottomNavItem(Routes.RADIOS,       "Radios",  Icons.Default.Wifi),
-    BottomNavItem(Routes.SENSORS,      "Sensors", Icons.Default.Analytics),
-    BottomNavItem(Routes.NOTIFICATIONS,"Notifs",  Icons.Default.Notifications),
-    BottomNavItem(Routes.LOCKSCREEN,   "Lock",    Icons.Default.Lock),
-    BottomNavItem(Routes.BATTERY,     "Battery", Icons.Default.BatteryStd),
+    BottomNavItem(Routes.DASHBOARD, "Home",    Icons.Filled.Dashboard,    Icons.Outlined.Dashboard),
+    BottomNavItem(Routes.TORCH,     "Torch",   Icons.Filled.FlashlightOn, Icons.Outlined.FlashlightOn),
+    BottomNavItem(Routes.CAMERA,    "Camera",  Icons.Filled.CameraAlt,   Icons.Outlined.CameraAlt),
+    BottomNavItem(Routes.RADIOS,    "Radios",  Icons.Filled.Wifi,        Icons.Outlined.Wifi),
+    BottomNavItem(Routes.BATTERY,   "Battery", Icons.Filled.BatteryStd,  Icons.Outlined.BatteryStd),
 )
 
 @Composable
@@ -56,51 +48,40 @@ fun NavGraph() {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val selectedIndex = bottomNavItems.indexOfFirst { item ->
-        currentDestination?.hierarchy?.any { it.route == item.route } == true
-    }.coerceAtLeast(0)
 
     Scaffold(
         bottomBar = {
-            Surface(
-                color = NavigationBarDefaults.containerColor,
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 tonalElevation = NavigationBarDefaults.Elevation,
             ) {
-                ScrollableTabRow(
-                    selectedTabIndex = selectedIndex,
-                    edgePadding = 8.dp,
-                    containerColor = NavigationBarDefaults.containerColor,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    divider = {},
-                ) {
-                    bottomNavItems.forEachIndexed { idx, item ->
-                        Tab(
-                            selected = idx == selectedIndex,
-                            onClick = {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            selectedContentColor = MaterialTheme.colorScheme.primary,
-                            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(vertical = 10.dp),
-                            ) {
-                                Icon(item.icon, contentDescription = item.label, modifier = Modifier.size(24.dp))
-                                Text(
-                                    item.label,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Visible,
-                                    softWrap = false,
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
+                bottomNavItems.forEach { item ->
+                    val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+                    NavigationBarItem(
+                        selected = selected,
+                        onClick = {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                        }
-                    }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                                contentDescription = item.label,
+                            )
+                        },
+                        label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                        ),
+                    )
                 }
             }
         }
@@ -108,7 +89,7 @@ fun NavGraph() {
         NavHost(
             navController = navController,
             startDestination = Routes.DASHBOARD,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
         ) {
             composable(Routes.DASHBOARD)     { DashboardScreen(navController) }
             composable(Routes.TORCH)         { TorchScreen() }
@@ -119,7 +100,7 @@ fun NavGraph() {
             composable(Routes.SENSORS)       { SensorsScreen() }
             composable(Routes.NOTIFICATIONS) { NotificationsScreen() }
             composable(Routes.LOCKSCREEN)    { LockScreenScreen() }
-            composable(Routes.BATTERY)      { BatteryScreen() }
+            composable(Routes.BATTERY)       { BatteryScreen() }
         }
     }
 }

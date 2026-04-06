@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">HardwareDash</string>
     <string name="admin_description">Allows HardwareDash to lock the screen programmatically.</string>
+    <string name="widget_description">Show a live hardware metric on your home screen. Choose from battery, sensors, WiFi, and more.</string>
 </resources>

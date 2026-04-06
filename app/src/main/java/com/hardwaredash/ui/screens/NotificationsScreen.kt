@@ -139,7 +139,7 @@ fun NotificationsScreen() {
         }
 
         if (!granted) {
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+            Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("POST_NOTIFICATIONS permission required (Android 13+)",
                         color = MaterialTheme.colorScheme.onErrorContainer)
@@ -350,7 +350,7 @@ fun NotificationsScreen() {
 
         // ── Emergency Alerts Info ─────────────────────────────────────────────
         Text("Emergency Alerts", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))) {
+        Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Wireless Emergency Alerts (WEA)", fontWeight = FontWeight.SemiBold)
                 Text(
@@ -385,7 +385,7 @@ fun NotificationsScreen() {
         Text("Display Brightness", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
         if (!hasWriteSettings) {
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+            Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("WRITE_SETTINGS permission needed to control brightness",
                         color = MaterialTheme.colorScheme.onErrorContainer)
@@ -433,7 +433,7 @@ fun NotificationsScreen() {
 
         // ── WiFi Signal Quick Reference ───────────────────────────────────────
         Text("WiFi Signal", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
             Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("SSID: $wifiSsid", style = MaterialTheme.typography.bodyMedium)
                 Text("RSSI: $wifiRssi dBm  ·  Link Speed: $wifiLinkSpeed Mbps",
@@ -466,7 +466,7 @@ private fun NotifDemoCard(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     onFire: () -> Unit,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
