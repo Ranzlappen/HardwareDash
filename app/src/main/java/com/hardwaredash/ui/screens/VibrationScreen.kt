@@ -1,6 +1,6 @@
-// CHANGE: Dynamic N-step waveform builder, loop toggle, gap/frequency control, speed presets
-// REASON: Make vibration actuator much more flexible and customizable
-// DATE: 2026-04-02
+// CHANGE: Save/load vibration patterns, visual canvas pattern drawing
+// REASON: Persist patterns via SharedPreferences, add finger-draw two-axis vibration interface
+// DATE: 2026-04-06
 
 package com.hardwaredash.ui.screens
 
@@ -9,6 +9,9 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,12 +19,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.json.JSONArray
+import org.json.JSONObject
 
 // ─── Helper: get Vibrator from context regardless of API level ────────────────
 private fun getVibrator(context: Context): Vibrator =
@@ -49,6 +59,64 @@ private data class WaveformStepData(
     val duration: Float = 150f,
 )
 
+// ─── SharedPreferences helpers for save/load ──────────────────────────────────
+private const val PREFS_NAME = "vibration_patterns"
+private const val PREFS_KEY = "saved_patterns"
+private const val MAX_SAVED = 20
+
+private fun savePatterns(context: Context, patterns: List<SavedPattern>) {
+    val arr = JSONArray()
+    patterns.take(MAX_SAVED).forEach { p ->
+        val obj = JSONObject().apply {
+            put("name", p.name)
+            put("gapMs", p.gapMs.toDouble())
+            put("loop", p.loop)
+            val stepsArr = JSONArray()
+            p.steps.forEach { s ->
+                stepsArr.put(JSONObject().apply {
+                    put("amp", s.amplitude.toDouble())
+                    put("dur", s.duration.toDouble())
+                })
+            }
+            put("steps", stepsArr)
+        }
+        arr.put(obj)
+    }
+    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        .edit().putString(PREFS_KEY, arr.toString()).apply()
+}
+
+private fun loadPatterns(context: Context): List<SavedPattern> {
+    val json = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        .getString(PREFS_KEY, null) ?: return emptyList()
+    return try {
+        val arr = JSONArray(json)
+        (0 until arr.length()).map { i ->
+            val obj = arr.getJSONObject(i)
+            val stepsArr = obj.getJSONArray("steps")
+            SavedPattern(
+                name = obj.getString("name"),
+                gapMs = obj.getDouble("gapMs").toFloat(),
+                loop = obj.getBoolean("loop"),
+                steps = (0 until stepsArr.length()).map { j ->
+                    val s = stepsArr.getJSONObject(j)
+                    WaveformStepData(s.getDouble("amp").toFloat(), s.getDouble("dur").toFloat())
+                },
+            )
+        }
+    } catch (_: Exception) { emptyList() }
+}
+
+private data class SavedPattern(
+    val name: String,
+    val steps: List<WaveformStepData>,
+    val gapMs: Float,
+    val loop: Boolean,
+)
+
+// ─── Drawn point for canvas pattern ───────────────────────────────────────────
+private data class DrawnPoint(val timeNorm: Float, val intensity: Float)
+
 @Composable
 fun VibrationScreen() {
     val context  = LocalContext.current
@@ -69,6 +137,16 @@ fun VibrationScreen() {
 
     val hasAmplitude = vibrator.hasAmplitudeControl()
 
+    // Save/Load state
+    var showSaveDialog by remember { mutableStateOf(false) }
+    var showLoadDialog by remember { mutableStateOf(false) }
+    var saveName by remember { mutableStateOf("") }
+    var savedPatterns by remember { mutableStateOf(loadPatterns(context)) }
+
+    // Canvas drawing state
+    val drawnPoints = remember { mutableStateListOf<DrawnPoint>() }
+    var drawLoopEnabled by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -85,7 +163,7 @@ fun VibrationScreen() {
         if (!hasAmplitude) {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                 Text(
-                    "⚠️  This device doesn't support amplitude control. Patterns will play at full strength.",
+                    "This device doesn't support amplitude control. Patterns will play at full strength.",
                     modifier = Modifier.padding(12.dp),
                     color    = MaterialTheme.colorScheme.onErrorContainer,
                 )
@@ -95,12 +173,15 @@ fun VibrationScreen() {
         // ── Predefined patterns ───────────────────────────────────────────────
         if (patterns.isNotEmpty()) {
             Text("Predefined Haptic Effects", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            ) {
                 patterns.forEach { p ->
                     ElevatedButton(onClick = {
                         vibrator.cancel()
                         vibrator.vibrate(p.effect())
-                    }) { Text(p.label) }
+                    }) { Text(p.label, maxLines = 1, softWrap = false) }
                 }
             }
         }
@@ -174,36 +255,341 @@ fun VibrationScreen() {
             modifier = Modifier.fillMaxWidth(),
             onClick  = {
                 vibrator.cancel()
-                val timings    = mutableListOf<Long>()
-                val amplitudes = mutableListOf<Int>()
-                steps.forEachIndexed { idx, step ->
-                    if (idx > 0) {
-                        // Gap before this step
-                        timings.add(gapMs.toLong())
-                        amplitudes.add(0)
-                    }
-                    timings.add(step.duration.toLong())
-                    amplitudes.add(
-                        if (hasAmplitude) (step.amplitude * 255).toInt() else 255
-                    )
-                }
-                val repeatIdx = if (loopEnabled) 0 else -1
-                vibrator.vibrate(
-                    VibrationEffect.createWaveform(
-                        timings.toLongArray(),
-                        amplitudes.toIntArray(),
-                        repeatIdx,
-                    )
-                )
+                playWaveform(vibrator, steps.toList(), gapMs, loopEnabled, hasAmplitude)
             }
-        ) { Text(if (loopEnabled) "▶  Play (Looping)" else "▶  Play Custom Waveform") }
+        ) { Text(if (loopEnabled) "Play (Looping)" else "Play Custom Waveform", maxLines = 1, softWrap = false) }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
             colors   = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
             onClick  = { vibrator.cancel() },
-        ) { Text("⏹  Stop") }
+        ) { Text("Stop") }
+
+        // ── Save / Load ───────────────────────────────────────────────────────
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            OutlinedButton(
+                onClick = { showSaveDialog = true },
+                modifier = Modifier.weight(1f),
+            ) {
+                Icon(Icons.Default.Save, null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Save Pattern", maxLines = 1, softWrap = false)
+            }
+            OutlinedButton(
+                onClick = {
+                    savedPatterns = loadPatterns(context)
+                    showLoadDialog = true
+                },
+                modifier = Modifier.weight(1f),
+            ) {
+                Icon(Icons.Default.FolderOpen, null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Load Pattern", maxLines = 1, softWrap = false)
+            }
+        }
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════════
+        // ── Visual Pattern Drawing (Canvas) ──────────────────────────────────
+        // ══════════════════════════════════════════════════════════════════════
+        Text("Draw Vibration Pattern", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(
+            "Draw with your finger: X = time (0–2s), Y = intensity (0–100%)",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        )
+
+        val canvasBg = MaterialTheme.colorScheme.surfaceVariant
+        val drawColor = MaterialTheme.colorScheme.primary
+        val fillColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+        val gridColor = Color.Gray.copy(alpha = 0.3f)
+
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            drawnPoints.clear()
+                            val tNorm = (offset.x / size.width).coerceIn(0f, 1f)
+                            val iNorm = (1f - offset.y / size.height).coerceIn(0f, 1f)
+                            drawnPoints.add(DrawnPoint(tNorm, iNorm))
+                        },
+                        onDrag = { change, _ ->
+                            change.consume()
+                            val tNorm = (change.position.x / size.width).coerceIn(0f, 1f)
+                            val iNorm = (1f - change.position.y / size.height).coerceIn(0f, 1f)
+                            drawnPoints.add(DrawnPoint(tNorm, iNorm))
+                        },
+                    )
+                }
+        ) {
+            drawRect(canvasBg, size = size)
+
+            // Grid lines
+            for (i in 1..3) {
+                val y = size.height * i / 4f
+                drawLine(gridColor, Offset(0f, y), Offset(size.width, y), 0.5.dp.toPx())
+            }
+            for (i in 1..3) {
+                val x = size.width * i / 4f
+                drawLine(gridColor, Offset(x, 0f), Offset(x, size.height), 0.5.dp.toPx())
+            }
+
+            if (drawnPoints.isNotEmpty()) {
+                // Sort by time
+                val sorted = drawnPoints.sortedBy { it.timeNorm }
+
+                // Filled area
+                val fillPath = Path().apply {
+                    moveTo(sorted.first().timeNorm * size.width, size.height)
+                    sorted.forEach { p ->
+                        lineTo(p.timeNorm * size.width, size.height * (1f - p.intensity))
+                    }
+                    lineTo(sorted.last().timeNorm * size.width, size.height)
+                    close()
+                }
+                drawPath(fillPath, fillColor)
+
+                // Line
+                val linePath = Path()
+                sorted.forEachIndexed { i, p ->
+                    val x = p.timeNorm * size.width
+                    val y = size.height * (1f - p.intensity)
+                    if (i == 0) linePath.moveTo(x, y) else linePath.lineTo(x, y)
+                }
+                drawPath(linePath, drawColor, style = Stroke(3.dp.toPx()))
+            }
+        }
+
+        // Axis labels
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text("0 ms", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+            Text("2000 ms", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+        }
+
+        // Draw loop toggle
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                "Loop drawn pattern",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f),
+            )
+            Switch(checked = drawLoopEnabled, onCheckedChange = { drawLoopEnabled = it })
+        }
+
+        // Draw action buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Button(
+                onClick = {
+                    vibrator.cancel()
+                    if (drawnPoints.isNotEmpty()) {
+                        playDrawnPattern(vibrator, drawnPoints.toList(), drawLoopEnabled, hasAmplitude)
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                enabled = drawnPoints.isNotEmpty(),
+            ) { Text("Play Drawn", maxLines = 1, softWrap = false) }
+
+            OutlinedButton(
+                onClick = { drawnPoints.clear() },
+                modifier = Modifier.weight(1f),
+            ) { Text("Clear Drawing", maxLines = 1, softWrap = false) }
+        }
     }
+
+    // ── Save dialog ───────────────────────────────────────────────────────────
+    if (showSaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showSaveDialog = false },
+            title = { Text("Save Pattern") },
+            text = {
+                OutlinedTextField(
+                    value = saveName,
+                    onValueChange = { saveName = it },
+                    label = { Text("Pattern name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (saveName.isNotBlank()) {
+                            val pattern = SavedPattern(
+                                name = saveName.trim(),
+                                steps = steps.toList(),
+                                gapMs = gapMs,
+                                loop = loopEnabled,
+                            )
+                            savedPatterns = (listOf(pattern) + savedPatterns).take(MAX_SAVED)
+                            savePatterns(context, savedPatterns)
+                            saveName = ""
+                            showSaveDialog = false
+                        }
+                    },
+                    enabled = saveName.isNotBlank(),
+                ) { Text("Save") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSaveDialog = false }) { Text("Cancel") }
+            },
+        )
+    }
+
+    // ── Load dialog ───────────────────────────────────────────────────────────
+    if (showLoadDialog) {
+        AlertDialog(
+            onDismissRequest = { showLoadDialog = false },
+            title = { Text("Load Pattern") },
+            text = {
+                if (savedPatterns.isEmpty()) {
+                    Text("No saved patterns yet.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        savedPatterns.forEachIndexed { idx, p ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(p.name, fontWeight = FontWeight.SemiBold)
+                                        Text(
+                                            "${p.steps.size} steps · gap ${p.gapMs.toInt()}ms${if (p.loop) " · loop" else ""}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        )
+                                    }
+                                    Row {
+                                        IconButton(onClick = {
+                                            // Load pattern
+                                            steps.clear()
+                                            steps.addAll(p.steps)
+                                            gapMs = p.gapMs
+                                            loopEnabled = p.loop
+                                            showLoadDialog = false
+                                        }) {
+                                            Icon(Icons.Default.FileOpen, "Load")
+                                        }
+                                        IconButton(onClick = {
+                                            savedPatterns = savedPatterns.toMutableList().also { it.removeAt(idx) }
+                                            savePatterns(context, savedPatterns)
+                                        }) {
+                                            Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLoadDialog = false }) { Text("Close") }
+            },
+        )
+    }
+}
+
+// ─── Play waveform from steps ─────────────────────────────────────────────────
+private fun playWaveform(
+    vibrator: Vibrator,
+    steps: List<WaveformStepData>,
+    gapMs: Float,
+    loop: Boolean,
+    hasAmplitude: Boolean,
+) {
+    val timings    = mutableListOf<Long>()
+    val amplitudes = mutableListOf<Int>()
+    steps.forEachIndexed { idx, step ->
+        if (idx > 0) {
+            timings.add(gapMs.toLong())
+            amplitudes.add(0)
+        }
+        timings.add(step.duration.toLong())
+        amplitudes.add(if (hasAmplitude) (step.amplitude * 255).toInt() else 255)
+    }
+    val repeatIdx = if (loop) 0 else -1
+    vibrator.vibrate(
+        VibrationEffect.createWaveform(
+            timings.toLongArray(),
+            amplitudes.toIntArray(),
+            repeatIdx,
+        )
+    )
+}
+
+// ─── Play drawn canvas pattern ────────────────────────────────────────────────
+private fun playDrawnPattern(
+    vibrator: Vibrator,
+    points: List<DrawnPoint>,
+    loop: Boolean,
+    hasAmplitude: Boolean,
+) {
+    if (points.isEmpty()) return
+    val sorted = points.sortedBy { it.timeNorm }
+
+    // Total duration is 2000ms. Sample at 50ms intervals.
+    val totalMs = 2000L
+    val sampleInterval = 50L
+    val numSamples = (totalMs / sampleInterval).toInt()
+
+    val timings = mutableListOf<Long>()
+    val amplitudes = mutableListOf<Int>()
+
+    for (i in 0 until numSamples) {
+        val tNorm = i.toFloat() / numSamples
+        // Find surrounding points and interpolate intensity
+        val intensity = interpolateIntensity(sorted, tNorm)
+        timings.add(sampleInterval)
+        amplitudes.add(if (hasAmplitude) (intensity * 255).toInt().coerceIn(0, 255) else if (intensity > 0.1f) 255 else 0)
+    }
+
+    val repeatIdx = if (loop) 0 else -1
+    vibrator.vibrate(
+        VibrationEffect.createWaveform(
+            timings.toLongArray(),
+            amplitudes.toIntArray(),
+            repeatIdx,
+        )
+    )
+}
+
+private fun interpolateIntensity(points: List<DrawnPoint>, tNorm: Float): Float {
+    if (points.isEmpty()) return 0f
+    if (tNorm <= points.first().timeNorm) return points.first().intensity
+    if (tNorm >= points.last().timeNorm) return points.last().intensity
+
+    for (i in 0 until points.size - 1) {
+        val p1 = points[i]
+        val p2 = points[i + 1]
+        if (tNorm in p1.timeNorm..p2.timeNorm) {
+            val frac = if (p2.timeNorm > p1.timeNorm) (tNorm - p1.timeNorm) / (p2.timeNorm - p1.timeNorm) else 0f
+            return p1.intensity + frac * (p2.intensity - p1.intensity)
+        }
+    }
+    return points.last().intensity
 }
 
 @Composable

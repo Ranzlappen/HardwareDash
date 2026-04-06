@@ -14,6 +14,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -294,7 +295,10 @@ fun LockScreenScreen() {
 
         // Category
         Text("Category", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+        ) {
             listOf(
                 "Message" to NotificationCompat.CATEGORY_MESSAGE,
                 "Alarm" to NotificationCompat.CATEGORY_ALARM,
@@ -304,7 +308,7 @@ fun LockScreenScreen() {
                 FilterChip(
                     selected = lsCategory == cat,
                     onClick  = { lsCategory = cat },
-                    label    = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                    label    = { Text(label, maxLines = 1, style = MaterialTheme.typography.labelSmall) },
                 )
             }
         }

@@ -1,19 +1,36 @@
+// CHANGE: Live real-time metric cards on dashboard
+// REASON: Show live sensor/battery/wifi data on each feature tile
+// DATE: 2026-04-06
+
 package com.hardwaredash.ui.screens
 
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.net.wifi.WifiManager
+import android.os.BatteryManager
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.hardwaredash.ui.navigation.Routes
+import kotlinx.coroutines.delay
+import kotlin.math.sqrt
 
 // ─── Data model for each feature tile ────────────────────────────────────────
 private data class FeatureCard(
@@ -38,6 +55,26 @@ private val features = listOf(
 
 @Composable
 fun DashboardScreen(navController: NavController) {
+    val context = LocalContext.current
+
+    // Live metrics
+    val batteryMetric = rememberBatteryMetric(context)
+    val accelMetric = rememberAccelMetric(context)
+    val wifiMetric = rememberWifiMetric(context)
+    val lightMetric = rememberLightMetric(context)
+
+    val liveMetrics = mapOf(
+        Routes.BATTERY to batteryMetric,
+        Routes.SENSORS to accelMetric,
+        Routes.RADIOS to wifiMetric,
+        Routes.MIC to lightMetric,
+        Routes.TORCH to "Tap to toggle",
+        Routes.CAMERA to "Ready",
+        Routes.VIBRATION to "Motor ready",
+        Routes.NOTIFICATIONS to "Ready",
+        Routes.LOCKSCREEN to "Secure",
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -65,18 +102,22 @@ fun DashboardScreen(navController: NavController) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(features) { card ->
-                FeatureTile(card) { navController.navigate(card.route) }
+                FeatureTile(
+                    card = card,
+                    liveMetric = liveMetrics[card.route],
+                    onClick = { navController.navigate(card.route) },
+                )
             }
         }
     }
 }
 
 @Composable
-private fun FeatureTile(card: FeatureCard, onClick: () -> Unit) {
+private fun FeatureTile(card: FeatureCard, liveMetric: String?, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
+            .aspectRatio(0.85f)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -106,8 +147,109 @@ private fun FeatureTile(card: FeatureCard, onClick: () -> Unit) {
                     text  = card.subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
+                if (!liveMetric.isNullOrBlank()) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = liveMetric,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
     }
+}
+
+// ─── Live metric composables ──────────────────────────────────────────────────
+
+@Composable
+private fun rememberBatteryMetric(context: Context): String {
+    var metric by remember { mutableStateOf("--") }
+    LaunchedEffect(Unit) {
+        while (true) {
+            val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            if (intent != null) {
+                val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+                val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100)
+                val pct = if (scale > 0) (level * 100) / scale else level
+                val status = when (intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)) {
+                    BatteryManager.BATTERY_STATUS_CHARGING -> "Charging"
+                    BatteryManager.BATTERY_STATUS_FULL -> "Full"
+                    else -> "Discharging"
+                }
+                metric = "$pct% · $status"
+            }
+            delay(3000L)
+        }
+    }
+    return metric
+}
+
+@Composable
+private fun rememberAccelMetric(context: Context): String {
+    var metric by remember { mutableStateOf("--") }
+    DisposableEffect(Unit) {
+        val sm = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensor = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        if (sensor == null) {
+            metric = "N/A"
+            return@DisposableEffect onDispose {}
+        }
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(e: SensorEvent) {
+                val mag = sqrt(e.values[0] * e.values[0] + e.values[1] * e.values[1] + e.values[2] * e.values[2])
+                metric = "${"%.1f".format(mag)} m/s²"
+            }
+            override fun onAccuracyChanged(s: Sensor, a: Int) {}
+        }
+        sm.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        onDispose { sm.unregisterListener(listener) }
+    }
+    return metric
+}
+
+@Composable
+private fun rememberWifiMetric(context: Context): String {
+    var metric by remember { mutableStateOf("--") }
+    LaunchedEffect(Unit) {
+        while (true) {
+            val wm = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            if (wm.isWifiEnabled) {
+                @Suppress("DEPRECATION")
+                val info = wm.connectionInfo
+                val ssid = info?.ssid?.removeSurrounding("\"") ?: ""
+                metric = if (ssid.isNotBlank() && ssid != "<unknown ssid>") ssid else "No network"
+            } else {
+                metric = "WiFi off"
+            }
+            delay(3000L)
+        }
+    }
+    return metric
+}
+
+@Composable
+private fun rememberLightMetric(context: Context): String {
+    var metric by remember { mutableStateOf("Tap to monitor") }
+    DisposableEffect(Unit) {
+        val sm = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensor = sm.getDefaultSensor(Sensor.TYPE_LIGHT)
+        if (sensor == null) {
+            return@DisposableEffect onDispose {}
+        }
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(e: SensorEvent) {
+                metric = "${"%.0f".format(e.values[0])} lux"
+            }
+            override fun onAccuracyChanged(s: Sensor, a: Int) {}
+        }
+        sm.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        onDispose { sm.unregisterListener(listener) }
+    }
+    return metric
 }
