@@ -141,8 +141,9 @@ private fun MicMeter() {
                     // RMS amplitude
                     val rms  = sqrt(buffer.take(read).map { it.toDouble().pow(2) }.average())
                     val norm = (rms / Short.MAX_VALUE).toFloat().coerceIn(0f, 1f)
-                    val db   = if (rms > 0) (20 * log10(rms / Short.MAX_VALUE)).toFloat()
+                    val dbFs = if (rms > 0) (20 * log10(rms / Short.MAX_VALUE)).toFloat()
                                else         -60f
+                    val db   = (60f + dbFs).coerceIn(0f, 60f)
                     amplitude = norm
                     peakDb    = db
                     history   = (history.drop(1) + norm)
@@ -238,10 +239,10 @@ private fun MicMeter() {
         }
 
         Text(
-            "${"%.1f".format(peakDb)} dBFS",
+            "${"%.1f".format(peakDb)} dB",
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold,
-            color = if (peakDb > -6f) MaterialTheme.colorScheme.error
+            color = if (peakDb > 54f) MaterialTheme.colorScheme.error
                     else MaterialTheme.colorScheme.primary,
         )
 

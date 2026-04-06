@@ -1,15 +1,18 @@
-// CHANGE: Fix proximity/step counter display, add additional sensor types
-// REASON: Proximity now shows NEAR/FAR, Step Counter shows session delta, added 9 more sensor types
-// DATE: 2026-04-02
+// CHANGE: Multi-axis charts for all sensor values, clipboard copy button
+// REASON: Show all available metrics per sensor, allow copying readings to clipboard
+// DATE: 2026-04-06
 
 package com.hardwaredash.ui.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -18,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
@@ -80,6 +84,16 @@ private fun SensorManager.flowFor(type: Int): Flow<FloatArray> = callbackFlow {
     awaitClose { unregisterListener(listener) }
 }
 
+// ─── Axis colors for multi-line charts ────────────────────────────────────────
+private val axisColors = listOf(
+    Color(0xFF00BCD4), // Cyan  (axis 0 / X)
+    Color(0xFF4CAF50), // Green (axis 1 / Y)
+    Color(0xFFFFC107), // Amber (axis 2 / Z)
+    Color(0xFF9C27B0), // Purple (bias X)
+    Color(0xFFFF5722), // Deep Orange (bias Y)
+    Color(0xFF2196F3), // Blue (bias Z)
+)
+
 @Composable
 fun SensorsScreen() {
     val context = LocalContext.current
@@ -93,18 +107,59 @@ fun SensorsScreen() {
         SENSOR_SPECS.filter { sm.getDefaultSensor(it.type) != null }
     }
 
+    // Shared map of current sensor values for clipboard copy
+    val sensorValues = remember { mutableStateMapOf<Int, FloatArray>() }
+
     Column(Modifier.fillMaxSize()) {
         Row(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+            modifier = Modifier
+                .padding(horizontal = 20.dp, vertical = 14.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Icon(Icons.Default.Analytics, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
-            Spacer(Modifier.width(10.dp))
-            Text(
-                "Sensors  (${availableTypes.size} found)",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Analytics, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    "Sensors  (${availableTypes.size} found)",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            IconButton(onClick = {
+                val text = buildString {
+                    appendLine("HardwareDash — Sensor Readings")
+                    appendLine("─".repeat(40))
+                    availableTypes.forEach { spec ->
+                        val vals = sensorValues[spec.type]
+                        if (vals != null) {
+                            val formatted = when (spec.type) {
+                                Sensor.TYPE_PROXIMITY -> {
+                                    val dist = vals.getOrElse(0) { 0f }
+                                    val maxRange = sm.getDefaultSensor(spec.type)?.maximumRange ?: 5f
+                                    val nearFar = if (dist < maxRange) "NEAR" else "FAR"
+                                    "Dist: ${"%.1f".format(dist)} ${spec.unit} ($nearFar)"
+                                }
+                                Sensor.TYPE_STATIONARY_DETECT, Sensor.TYPE_MOTION_DETECT -> {
+                                    if (vals.getOrElse(0) { 0f } > 0.5f) "Detected" else "Not detected"
+                                }
+                                else -> {
+                                    spec.axisLabels.mapIndexed { i, lbl ->
+                                        "$lbl=${"%.3f".format(vals.getOrElse(i) { 0f })}"
+                                    }.joinToString("  ") + if (spec.unit.isNotEmpty()) " ${spec.unit}" else ""
+                                }
+                            }
+                            appendLine("${spec.name}: $formatted")
+                        }
+                    }
+                }
+                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.setPrimaryClip(ClipData.newPlainText("Sensor Readings", text))
+                Toast.makeText(context, "Sensor readings copied!", Toast.LENGTH_SHORT).show()
+            }) {
+                Icon(Icons.Default.ContentCopy, "Copy sensor readings")
+            }
         }
 
         LazyColumn(
@@ -118,6 +173,7 @@ fun SensorsScreen() {
                     spec     = spec,
                     expanded = expandedType == spec.type,
                     onExpand = { expandedType = if (expandedType == spec.type) -1 else spec.type },
+                    onValuesUpdate = { sensorValues[spec.type] = it },
                 )
             }
         }
@@ -128,9 +184,12 @@ fun SensorsScreen() {
 private fun SensorCard(
     sm: SensorManager, spec: SensorSpec,
     expanded: Boolean, onExpand: () -> Unit,
+    onValuesUpdate: (FloatArray) -> Unit,
 ) {
-    var values  by remember(spec.type) { mutableStateOf(FloatArray(spec.axisLabels.size)) }
-    var history by remember(spec.type) { mutableStateOf(List(80) { 0f }) }
+    val axisCount = spec.axisLabels.size
+    var values  by remember(spec.type) { mutableStateOf(FloatArray(axisCount)) }
+    // History stores FloatArray per sample for all axes
+    var history by remember(spec.type) { mutableStateOf(List(80) { FloatArray(axisCount) }) }
 
     // Track initial step count for session delta
     var initialSteps by remember(spec.type) { mutableStateOf<Float?>(null) }
@@ -142,25 +201,25 @@ private fun SensorCard(
         } else 0f
     }
 
-    // Subscribe to sensor only when card is visible (always subscribed here)
+    // Subscribe to sensor
     LaunchedEffect(spec.type) {
         sm.flowFor(spec.type).collect { v ->
-            values  = v
-            // track first axis for chart
-            val chartVal = when (spec.type) {
+            values = v
+            onValuesUpdate(v)
+            // Build chart sample
+            val sample = when (spec.type) {
                 Sensor.TYPE_STEP_COUNTER -> {
                     val raw = v.getOrElse(0) { 0f }
                     if (initialSteps == null) initialSteps = raw
-                    raw - (initialSteps ?: raw)
+                    floatArrayOf(raw - (initialSteps ?: raw))
                 }
-                else -> v.getOrElse(0) { 0f }
+                else -> FloatArray(axisCount) { i -> v.getOrElse(i) { 0f } }
             }
-            history = (history.drop(1) + chartVal)
+            history = (history.drop(1) + listOf(sample))
         }
     }
 
-    val lineColor = MaterialTheme.colorScheme.primary
-    val chartBg   = MaterialTheme.colorScheme.surfaceVariant
+    val chartBg = MaterialTheme.colorScheme.surfaceVariant
 
     Card(modifier = Modifier
         .fillMaxWidth()
@@ -173,7 +232,7 @@ private fun SensorCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(spec.name, fontWeight = FontWeight.SemiBold)
                     Text(
                         when (spec.type) {
@@ -215,42 +274,85 @@ private fun SensorCard(
                         when (spec.type) {
                             Sensor.TYPE_STEP_COUNTER -> "Live chart — session steps"
                             Sensor.TYPE_PROXIMITY -> "Live chart — distance"
-                            else -> "Live chart — ${spec.axisLabels.first()} axis"
+                            else -> {
+                                val axesLabel = spec.axisLabels.joinToString(", ")
+                                "Live chart — $axesLabel"
+                            }
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     )
                     Spacer(Modifier.height(6.dp))
+
+                    // Determine how many axes to chart
+                    val chartAxes = if (spec.type == Sensor.TYPE_STEP_COUNTER) 1 else axisCount
+
                     Canvas(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(100.dp)
+                            .height(120.dp)
                     ) {
-                        val max   = history.maxOrNull()?.let { maxOf(it, 1f) } ?: 1f
-                        val min   = history.minOrNull() ?: -1f
-                        val range = (max - min).takeIf { it > 0f } ?: 1f
-                        val pts   = history.size
+                        // Find global min/max across all axes
+                        var globalMin = Float.MAX_VALUE
+                        var globalMax = Float.MIN_VALUE
+                        for (sample in history) {
+                            for (a in 0 until chartAxes.coerceAtMost(sample.size)) {
+                                val v = sample.getOrElse(a) { 0f }
+                                if (v < globalMin) globalMin = v
+                                if (v > globalMax) globalMax = v
+                            }
+                        }
+                        if (globalMin == Float.MAX_VALUE) globalMin = -1f
+                        if (globalMax == Float.MIN_VALUE) globalMax = 1f
+                        val range = (globalMax - globalMin).takeIf { it > 0f } ?: 1f
+                        val pts = history.size
                         val stepX = size.width / (pts - 1)
 
                         // Background
                         drawRect(chartBg, size = size)
 
                         // Zero line
-                        val zeroY = size.height * (1 - (-min / range)).coerceIn(0f, 1f)
+                        val zeroY = size.height * (1 - (-globalMin / range)).coerceIn(0f, 1f)
                         drawLine(
                             Color.Gray.copy(alpha = 0.4f),
                             Offset(0f, zeroY), Offset(size.width, zeroY),
                             strokeWidth = 1.dp.toPx()
                         )
 
-                        // Line chart
-                        val path = Path()
-                        history.forEachIndexed { i, v ->
-                            val x = i * stepX
-                            val y = size.height * (1 - ((v - min) / range)).coerceIn(0f, 1f)
-                            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                        // Draw one line per axis
+                        for (a in 0 until chartAxes) {
+                            val lineColor = axisColors.getOrElse(a) { Color.White }
+                            val path = Path()
+                            history.forEachIndexed { i, sample ->
+                                val v = sample.getOrElse(a) { 0f }
+                                val x = i * stepX
+                                val y = size.height * (1 - ((v - globalMin) / range)).coerceIn(0f, 1f)
+                                if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                            }
+                            drawPath(path, lineColor, style = Stroke(2.dp.toPx()))
                         }
-                        drawPath(path, lineColor, style = Stroke(2.dp.toPx()))
+                    }
+
+                    // Axis color legend
+                    if (chartAxes > 1) {
+                        Spacer(Modifier.height(4.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            for (a in 0 until chartAxes) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Canvas(Modifier.size(8.dp)) {
+                                        drawCircle(axisColors.getOrElse(a) { Color.White })
+                                    }
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        spec.axisLabels.getOrElse(a) { "?" },
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

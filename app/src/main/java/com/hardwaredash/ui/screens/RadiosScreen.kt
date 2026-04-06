@@ -19,6 +19,7 @@ import android.nfc.tech.NdefFormatable
 import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -395,16 +396,19 @@ fun RadiosScreen() {
         // ── Quick panel launcher (Android 10+) ────────────────────────────────
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             Text("Quick Toggles (System Panel)", style = MaterialTheme.typography.titleMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            ) {
                 OutlinedButton(onClick = {
                     context.startActivity(Intent(Settings.Panel.ACTION_WIFI))
-                }) { Text("WiFi Panel") }
+                }) { Text("WiFi Panel", maxLines = 1, softWrap = false) }
                 OutlinedButton(onClick = {
                     context.startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
-                }) { Text("BT Settings") }
+                }) { Text("BT Settings", maxLines = 1, softWrap = false) }
                 OutlinedButton(onClick = {
                     context.startActivity(Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY))
-                }) { Text("Internet Panel") }
+                }) { Text("Internet Panel", maxLines = 1, softWrap = false) }
             }
         }
     }

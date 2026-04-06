@@ -1,12 +1,17 @@
 package com.hardwaredash.ui.navigation
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
@@ -49,24 +54,53 @@ private val bottomNavItems = listOf(
 fun NavGraph() {
     val navController = rememberNavController()
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+    val selectedIndex = bottomNavItems.indexOfFirst { item ->
+        currentDestination?.hierarchy?.any { it.route == item.route } == true
+    }.coerceAtLeast(0)
+
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-                bottomNavItems.forEach { item ->
-                    NavigationBarItem(
-                        icon  = { Icon(item.icon, contentDescription = item.label) },
-                        label = { Text(item.label, maxLines = 1) },
-                        selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
+            Surface(
+                color = NavigationBarDefaults.containerColor,
+                tonalElevation = NavigationBarDefaults.Elevation,
+            ) {
+                ScrollableTabRow(
+                    selectedTabIndex = selectedIndex,
+                    edgePadding = 8.dp,
+                    containerColor = NavigationBarDefaults.containerColor,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    divider = {},
+                ) {
+                    bottomNavItems.forEachIndexed { idx, item ->
+                        Tab(
+                            selected = idx == selectedIndex,
+                            onClick = {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            selectedContentColor = MaterialTheme.colorScheme.primary,
+                            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(vertical = 10.dp),
+                            ) {
+                                Icon(item.icon, contentDescription = item.label, modifier = Modifier.size(24.dp))
+                                Text(
+                                    item.label,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Visible,
+                                    softWrap = false,
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
                             }
                         }
-                    )
+                    }
                 }
             }
         }

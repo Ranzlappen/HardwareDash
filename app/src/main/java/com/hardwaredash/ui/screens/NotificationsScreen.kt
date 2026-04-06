@@ -16,6 +16,7 @@ import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -264,7 +265,10 @@ fun NotificationsScreen() {
 
         // Priority
         Text("Priority", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+        ) {
             listOf(
                 "Min" to NotificationCompat.PRIORITY_MIN,
                 "Low" to NotificationCompat.PRIORITY_LOW,
@@ -275,7 +279,7 @@ fun NotificationsScreen() {
                 FilterChip(
                     selected = customPriority == prio,
                     onClick  = { customPriority = prio },
-                    label    = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                    label    = { Text(label, maxLines = 1, style = MaterialTheme.typography.labelSmall) },
                 )
             }
         }
