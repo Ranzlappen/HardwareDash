@@ -98,7 +98,7 @@ fun LockScreenScreen() {
         }
 
         // ── Capability overview ───────────────────────────────────────────────
-        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+        Card(shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text("What is possible without root:", fontWeight = FontWeight.SemiBold)
                 listOf(
@@ -382,7 +382,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // HOW IT WORKS — detail card
         // ══════════════════════════════════════════════════════════════════════
-        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+        Card(shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("How \"show over lock screen\" works", fontWeight = FontWeight.SemiBold)
                 Text(

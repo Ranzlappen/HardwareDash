@@ -28,6 +28,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -221,9 +222,12 @@ private fun SensorCard(
 
     val chartBg = MaterialTheme.colorScheme.surfaceVariant
 
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .clickable(onClick = onExpand)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onExpand),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             // ── Header row ────────────────────────────────────────────────
@@ -290,7 +294,8 @@ private fun SensorCard(
                     Canvas(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp)
+                            .aspectRatio(2.5f)
+                            .clip(MaterialTheme.shapes.medium)
                     ) {
                         // Find global min/max across all axes
                         var globalMin = Float.MAX_VALUE

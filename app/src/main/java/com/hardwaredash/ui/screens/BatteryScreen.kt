@@ -18,6 +18,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -120,6 +121,8 @@ fun BatteryScreen() {
 
         // ── Level + status hero card ──────────────────────────────────────
         Card(
+            shape = MaterialTheme.shapes.large,
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
             )
@@ -190,7 +193,8 @@ fun BatteryScreen() {
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .aspectRatio(2.5f)
+                .clip(MaterialTheme.shapes.medium)
         ) {
             val max   = currentHistory.maxOrNull()?.let { maxOf(abs(it), 1f) } ?: 1f
             val min   = currentHistory.minOrNull() ?: -1f
@@ -227,7 +231,11 @@ fun BatteryScreen() {
 
 @Composable
 private fun BatteryRow(label: String, value: String) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

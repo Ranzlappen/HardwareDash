@@ -13,6 +13,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.net.wifi.WifiManager
 import android.os.BatteryManager
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -78,28 +79,28 @@ fun DashboardScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         // ── Header ───────────────────────────────────────────────────────────
         Text(
             text       = "HardwareDash",
-            style      = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
+            style      = MaterialTheme.typography.headlineLarge,
             color      = MaterialTheme.colorScheme.primary,
-            modifier   = Modifier.padding(vertical = 12.dp)
+            modifier   = Modifier.padding(top = 16.dp, bottom = 4.dp)
         )
         Text(
             text  = "Tap a module to interact with your device hardware.",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(20.dp))
 
         // ── Feature grid ─────────────────────────────────────────────────────
         LazyVerticalGrid(
             columns         = GridCells.Fixed(2),
             verticalArrangement   = Arrangement.spacedBy(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding  = PaddingValues(bottom = 16.dp),
         ) {
             items(features) { card ->
                 FeatureTile(
@@ -117,12 +118,17 @@ private fun FeatureTile(card: FeatureCard, liveMetric: String?, onClick: () -> U
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.85f)
+            .aspectRatio(1f)
             .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant,
+        ),
     ) {
         Column(
             modifier = Modifier
@@ -131,34 +137,47 @@ private fun FeatureTile(card: FeatureCard, liveMetric: String?, onClick: () -> U
             verticalArrangement   = Arrangement.SpaceBetween,
             horizontalAlignment   = Alignment.Start,
         ) {
-            Icon(
-                imageVector        = card.icon,
-                contentDescription = card.title,
-                tint               = MaterialTheme.colorScheme.primary,
-                modifier           = Modifier.size(36.dp),
-            )
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(48.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector        = card.icon,
+                        contentDescription = card.title,
+                        tint               = MaterialTheme.colorScheme.primary,
+                        modifier           = Modifier.size(28.dp),
+                    )
+                }
+            }
             Column {
                 Text(
                     text       = card.title,
                     style      = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
                 )
                 Text(
                     text  = card.subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (!liveMetric.isNullOrBlank()) {
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = liveMetric,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    Spacer(Modifier.height(6.dp))
+                    Surface(
+                        shape = MaterialTheme.shapes.extraSmall,
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                    ) {
+                        Text(
+                            text = liveMetric,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        )
+                    }
                 }
             }
         }

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:padding="12dp">
+
+    <!-- Refresh button (top-right) -->
+    <ImageView
+        android:id="@+id/widget_refresh"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:contentDescription="Refresh"
+        android:src="@drawable/widget_refresh_icon"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:padding="4dp" />
+
+    <!-- Metric name (top-left) -->
+    <TextView
+        android:id="@+id/widget_metric_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@id/widget_refresh"
+        android:layout_marginEnd="8dp"
+        android:text="Metric"
+        android:textColor="#B0BEC5"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- Metric value (centered, large) -->
+    <TextView
+        android:id="@+id/widget_metric_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/widget_metric_name"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="4dp"
+        android:text="--"
+        android:textColor="#E0E0E0"
+        android:textSize="20sp"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="2"
+        android:ellipsize="end" />
+
+</RelativeLayout>

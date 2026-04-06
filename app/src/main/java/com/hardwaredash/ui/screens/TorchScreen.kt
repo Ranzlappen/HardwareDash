@@ -137,6 +137,7 @@ fun TorchScreen() {
                     errorMsg = e.message
                 }
             },
+            shape = MaterialTheme.shapes.medium,
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (torchOn) MaterialTheme.colorScheme.primary
                                  else         MaterialTheme.colorScheme.surfaceVariant
