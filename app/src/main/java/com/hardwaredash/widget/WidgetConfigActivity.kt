@@ -66,6 +66,7 @@ class WidgetConfigActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MetricPicker(onSelect: (WidgetMetric) -> Unit) {
     val grouped = remember { WidgetMetric.grouped() }
