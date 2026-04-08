@@ -139,7 +139,13 @@
             android:exported="false"
             android:foregroundServiceType="camera|microphone" />
 
-        <!-- ── Home Screen Widget ─────────────────────────────────── -->
+        <!-- ── Strobe Service ──────────────────────────────────────── -->
+        <service
+            android:name=".services.StrobeService"
+            android:exported="false"
+            android:foregroundServiceType="camera" />
+
+        <!-- ── Home Screen Widget (Metric) ───────────────────────── -->
         <receiver
             android:name=".widget.HardwareDashWidgetProvider"
             android:exported="true">
@@ -149,6 +155,45 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_info" />
+        </receiver>
+
+        <!-- ── Log Now Widget ────────────────────────────────────── -->
+        <receiver
+            android:name=".widget.LogNowWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_LOG_NOW" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_log_now_info" />
+        </receiver>
+
+        <!-- ── Flashlight Widget ─────────────────────────────────── -->
+        <receiver
+            android:name=".widget.FlashlightWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_FLASHLIGHT_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_flashlight_info" />
+        </receiver>
+
+        <!-- ── Strobe Widget ─────────────────────────────────────── -->
+        <receiver
+            android:name=".widget.StrobeWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_STROBE_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_strobe_info" />
         </receiver>
 
         <activity
