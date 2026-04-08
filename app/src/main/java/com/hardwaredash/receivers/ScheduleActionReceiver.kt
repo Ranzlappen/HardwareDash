@@ -77,6 +77,9 @@ class ScheduleActionReceiver : BroadcastReceiver() {
     }
 
     private fun fireRing(context: Context) {
+        val prefs = context.getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
+        val durationSec = prefs.getInt("phone_ring_duration_seconds", 30)
+
         val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
         val ringtone = RingtoneManager.getRingtone(context, uri)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -86,11 +89,11 @@ class ScheduleActionReceiver : BroadcastReceiver() {
         val originalVolume = am.getStreamVolume(AudioManager.STREAM_RING)
         am.setStreamVolume(AudioManager.STREAM_RING, am.getStreamMaxVolume(AudioManager.STREAM_RING), 0)
         ringtone.play()
-        // Stop after 15 seconds
+        // Stop after configured duration
         Handler(Looper.getMainLooper()).postDelayed({
             ringtone.stop()
             am.setStreamVolume(AudioManager.STREAM_RING, originalVolume, 0)
-        }, 15_000L)
+        }, durationSec * 1000L)
     }
 
     private fun ensureChannel(nm: NotificationManager) {

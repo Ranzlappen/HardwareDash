@@ -19,6 +19,8 @@ class PhoneRingWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         if (intent.action == ACTION_RING_30S) {
+            val prefs = context.getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
+            val delaySec = prefs.getInt("phone_ring_duration_seconds", 30)
             val id = (System.currentTimeMillis() % Int.MAX_VALUE).toInt()
             val alarmIntent = Intent(context, ScheduleActionReceiver::class.java).apply {
                 action = ScheduleActionReceiver.ACTION_FIRE
@@ -33,10 +35,10 @@ class PhoneRingWidgetProvider : AppWidgetProvider() {
             val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             am.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + 30_000L,
+                System.currentTimeMillis() + delaySec * 1000L,
                 pi,
             )
-            WidgetActionHandler.showToast(context, "Phone will ring in 30 seconds")
+            WidgetActionHandler.showToast(context, "Phone will ring in $delaySec seconds")
         }
     }
 
