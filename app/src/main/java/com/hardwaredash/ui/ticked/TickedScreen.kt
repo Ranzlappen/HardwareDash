@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 
@@ -567,43 +568,20 @@ private fun LogInputCard(vm: TickedViewModel) {
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        // Date field
-                        OutlinedTextField(
-                            value = customDate.toString(),
-                            onValueChange = {
-                                try { customDate = LocalDate.parse(it) } catch (_: Exception) {}
-                            },
-                            label = { Text("Date") },
-                            singleLine = true,
+                        // Date field (native picker)
+                        DatePickerField(
+                            label = "Date",
+                            date = customDate,
+                            onDateSelected = { customDate = it },
                             modifier = Modifier.weight(1f),
-                            textStyle = MaterialTheme.typography.bodySmall,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.tertiary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            ),
-                            shape = MaterialTheme.shapes.small,
                         )
                         Spacer(Modifier.width(8.dp))
-                        // Time field
-                        OutlinedTextField(
-                            value = "%02d:%02d".format(customTime.hour, customTime.minute),
-                            onValueChange = { v ->
-                                try {
-                                    val parts = v.split(":")
-                                    if (parts.size == 2) {
-                                        customTime = LocalTime.of(parts[0].toInt(), parts[1].toInt())
-                                    }
-                                } catch (_: Exception) {}
-                            },
-                            label = { Text("Time") },
-                            singleLine = true,
+                        // Time field (native picker)
+                        TimePickerField(
+                            label = "Time",
+                            time = customTime,
+                            onTimeSelected = { customTime = it },
                             modifier = Modifier.weight(1f),
-                            textStyle = MaterialTheme.typography.bodySmall,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.tertiary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            ),
-                            shape = MaterialTheme.shapes.small,
                         )
                         Spacer(Modifier.width(8.dp))
                         FilledTonalButton(
@@ -993,27 +971,14 @@ private fun FilterPanel(
 
             Spacer(Modifier.height(8.dp))
 
-            // Date filter
-            OutlinedTextField(
-                value = dateValue,
-                onValueChange = onDateChange,
-                placeholder = { Text("YYYY-MM-DD", style = MaterialTheme.typography.bodySmall) },
-                singleLine = true,
+            // Date filter (native picker)
+            DatePickerField(
+                label = "Filter by date",
+                date = if (dateValue.isNotBlank()) try { LocalDate.parse(dateValue) } catch (_: Exception) { null } else null,
+                onDateSelected = { onDateChange(it.toString()) },
                 modifier = Modifier.fillMaxWidth(),
-                textStyle = MaterialTheme.typography.bodySmall,
-                leadingIcon = { Icon(Icons.Filled.CalendarMonth, null, Modifier.size(18.dp)) },
-                trailingIcon = {
-                    if (dateValue.isNotBlank()) {
-                        IconButton(onClick = { onDateChange("") }, modifier = Modifier.size(18.dp)) {
-                            Icon(Icons.Filled.Clear, "Clear")
-                        }
-                    }
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                ),
-                shape = MaterialTheme.shapes.small,
+                clearable = true,
+                onClear = { onDateChange("") },
             )
 
             Spacer(Modifier.height(8.dp))
@@ -1963,42 +1928,30 @@ private fun CheckpointDetailSheet(
 
         Spacer(Modifier.height(12.dp))
 
-        // Due date
+        // Due date (native picker)
         Text("Due Date", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(4.dp))
-        OutlinedTextField(
-            value = dueDate, onValueChange = { dueDate = it },
-            placeholder = { Text("YYYY-MM-DD") },
-            singleLine = true, modifier = Modifier.fillMaxWidth(),
-            leadingIcon = { Icon(Icons.Filled.CalendarMonth, null, Modifier.size(18.dp)) },
-            trailingIcon = {
-                if (dueDate.isNotBlank()) {
-                    IconButton(onClick = { dueDate = "" }, modifier = Modifier.size(18.dp)) {
-                        Icon(Icons.Filled.Clear, "Clear")
-                    }
-                }
-            },
-            shape = MaterialTheme.shapes.small,
+        DatePickerField(
+            label = "Due Date",
+            date = if (dueDate.isNotBlank()) try { LocalDate.parse(dueDate) } catch (_: Exception) { null } else null,
+            onDateSelected = { dueDate = it.toString() },
+            modifier = Modifier.fillMaxWidth(),
+            clearable = true,
+            onClear = { dueDate = "" },
         )
 
         Spacer(Modifier.height(12.dp))
 
-        // Reminder time
+        // Reminder time (native date + time pickers)
         Text("Reminder Time", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(4.dp))
-        OutlinedTextField(
-            value = remindAt, onValueChange = { remindAt = it },
-            placeholder = { Text("YYYY-MM-DDThh:mm") },
-            singleLine = true, modifier = Modifier.fillMaxWidth(),
-            leadingIcon = { Icon(Icons.Filled.Alarm, null, Modifier.size(18.dp)) },
-            trailingIcon = {
-                if (remindAt.isNotBlank()) {
-                    IconButton(onClick = { remindAt = "" }, modifier = Modifier.size(18.dp)) {
-                        Icon(Icons.Filled.Clear, "Clear")
-                    }
-                }
-            },
-            shape = MaterialTheme.shapes.small,
+        DateTimePickerField(
+            label = "Reminder",
+            dateTimeIso = remindAt,
+            onDateTimeSelected = { remindAt = it },
+            modifier = Modifier.fillMaxWidth(),
+            clearable = true,
+            onClear = { remindAt = "" },
         )
 
         Spacer(Modifier.height(8.dp))
@@ -2182,28 +2135,20 @@ private fun TimeEditorSheet(
         Text("Change Time", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(12.dp))
 
-        OutlinedTextField(
-            value = date.toString(), onValueChange = { try { date = LocalDate.parse(it) } catch (_: Exception) {} },
-            label = { Text("Date") },
-            singleLine = true, modifier = Modifier.fillMaxWidth(),
-            leadingIcon = { Icon(Icons.Filled.CalendarMonth, null, Modifier.size(18.dp)) },
-            shape = MaterialTheme.shapes.small,
+        DatePickerField(
+            label = "Date",
+            date = date,
+            onDateSelected = { date = it },
+            modifier = Modifier.fillMaxWidth(),
         )
 
         Spacer(Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = "%02d:%02d".format(time.hour, time.minute),
-            onValueChange = { v ->
-                try {
-                    val parts = v.split(":")
-                    if (parts.size == 2) time = LocalTime.of(parts[0].toInt(), parts[1].toInt())
-                } catch (_: Exception) {}
-            },
-            label = { Text("Time") },
-            singleLine = true, modifier = Modifier.fillMaxWidth(),
-            leadingIcon = { Icon(Icons.Filled.Schedule, null, Modifier.size(18.dp)) },
-            shape = MaterialTheme.shapes.small,
+        TimePickerField(
+            label = "Time",
+            time = time,
+            onTimeSelected = { time = it },
+            modifier = Modifier.fillMaxWidth(),
         )
 
         Spacer(Modifier.height(16.dp))
@@ -2356,5 +2301,247 @@ private fun ColorPickerSheet(
                 shape = MaterialTheme.shapes.small,
             ) { Text("Apply") }
         }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Native Date / Time Picker Fields
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DatePickerField(
+    label: String,
+    date: LocalDate?,
+    onDateSelected: (LocalDate) -> Unit,
+    modifier: Modifier = Modifier,
+    clearable: Boolean = false,
+    onClear: (() -> Unit)? = null,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    val displayText = date?.toString() ?: ""
+
+    OutlinedTextField(
+        value = displayText,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(label) },
+        placeholder = { Text("Tap to select", style = MaterialTheme.typography.bodySmall) },
+        singleLine = true,
+        modifier = modifier.clickable { showDialog = true },
+        textStyle = MaterialTheme.typography.bodySmall,
+        leadingIcon = { Icon(Icons.Filled.CalendarMonth, null, Modifier.size(18.dp)) },
+        trailingIcon = {
+            if (clearable && displayText.isNotBlank() && onClear != null) {
+                IconButton(onClick = onClear, modifier = Modifier.size(18.dp)) {
+                    Icon(Icons.Filled.Clear, "Clear")
+                }
+            }
+        },
+        shape = MaterialTheme.shapes.small,
+        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }.also { source ->
+            LaunchedEffect(source) {
+                source.interactions.collect { interaction ->
+                    if (interaction is androidx.compose.foundation.interaction.PressInteraction.Release) {
+                        showDialog = true
+                    }
+                }
+            }
+        },
+    )
+
+    if (showDialog) {
+        val initial = date ?: LocalDate.now()
+        val pickerState = rememberDatePickerState(
+            initialSelectedDateMillis = initial.atStartOfDay(ZoneId.of("UTC"))
+                .toInstant().toEpochMilli()
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    pickerState.selectedDateMillis?.let { millis ->
+                        val selected = Instant.ofEpochMilli(millis)
+                            .atZone(ZoneId.of("UTC")).toLocalDate()
+                        onDateSelected(selected)
+                    }
+                    showDialog = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+            },
+        ) {
+            DatePicker(state = pickerState)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TimePickerField(
+    label: String,
+    time: LocalTime,
+    onTimeSelected: (LocalTime) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    val displayText = "%02d:%02d".format(time.hour, time.minute)
+
+    OutlinedTextField(
+        value = displayText,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(label) },
+        singleLine = true,
+        modifier = modifier.clickable { showDialog = true },
+        textStyle = MaterialTheme.typography.bodySmall,
+        leadingIcon = { Icon(Icons.Filled.Schedule, null, Modifier.size(18.dp)) },
+        shape = MaterialTheme.shapes.small,
+        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }.also { source ->
+            LaunchedEffect(source) {
+                source.interactions.collect { interaction ->
+                    if (interaction is androidx.compose.foundation.interaction.PressInteraction.Release) {
+                        showDialog = true
+                    }
+                }
+            }
+        },
+    )
+
+    if (showDialog) {
+        val pickerState = rememberTimePickerState(
+            initialHour = time.hour,
+            initialMinute = time.minute,
+            is24Hour = true,
+        )
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Select Time") },
+            text = { TimePicker(state = pickerState) },
+            confirmButton = {
+                TextButton(onClick = {
+                    onTimeSelected(LocalTime.of(pickerState.hour, pickerState.minute))
+                    showDialog = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+            },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DateTimePickerField(
+    label: String,
+    dateTimeIso: String,
+    onDateTimeSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    clearable: Boolean = false,
+    onClear: (() -> Unit)? = null,
+) {
+    var showDateDialog by remember { mutableStateOf(false) }
+    var showTimeDialog by remember { mutableStateOf(false) }
+    var pendingDate by remember { mutableStateOf<LocalDate?>(null) }
+
+    // Parse existing value
+    val parsed = remember(dateTimeIso) {
+        if (dateTimeIso.isBlank()) null
+        else try {
+            LocalDateTime.parse(dateTimeIso)
+        } catch (_: Exception) {
+            try {
+                Instant.parse(dateTimeIso).atZone(ZoneId.systemDefault()).toLocalDateTime()
+            } catch (_: Exception) { null }
+        }
+    }
+
+    val displayText = if (parsed != null) {
+        "%s %02d:%02d".format(parsed.toLocalDate(), parsed.hour, parsed.minute)
+    } else ""
+
+    OutlinedTextField(
+        value = displayText,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(label) },
+        placeholder = { Text("Tap to select date & time", style = MaterialTheme.typography.bodySmall) },
+        singleLine = true,
+        modifier = modifier.clickable { showDateDialog = true },
+        textStyle = MaterialTheme.typography.bodySmall,
+        leadingIcon = { Icon(Icons.Filled.Alarm, null, Modifier.size(18.dp)) },
+        trailingIcon = {
+            if (clearable && displayText.isNotBlank() && onClear != null) {
+                IconButton(onClick = onClear, modifier = Modifier.size(18.dp)) {
+                    Icon(Icons.Filled.Clear, "Clear")
+                }
+            }
+        },
+        shape = MaterialTheme.shapes.small,
+        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }.also { source ->
+            LaunchedEffect(source) {
+                source.interactions.collect { interaction ->
+                    if (interaction is androidx.compose.foundation.interaction.PressInteraction.Release) {
+                        showDateDialog = true
+                    }
+                }
+            }
+        },
+    )
+
+    // Step 1: Date picker
+    if (showDateDialog) {
+        val initialDate = parsed?.toLocalDate() ?: LocalDate.now()
+        val pickerState = rememberDatePickerState(
+            initialSelectedDateMillis = initialDate.atStartOfDay(ZoneId.of("UTC"))
+                .toInstant().toEpochMilli()
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDateDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    pickerState.selectedDateMillis?.let { millis ->
+                        pendingDate = Instant.ofEpochMilli(millis)
+                            .atZone(ZoneId.of("UTC")).toLocalDate()
+                        showDateDialog = false
+                        showTimeDialog = true
+                    }
+                }) { Text("Next") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDateDialog = false }) { Text("Cancel") }
+            },
+        ) {
+            DatePicker(state = pickerState)
+        }
+    }
+
+    // Step 2: Time picker
+    if (showTimeDialog) {
+        val initialTime = parsed?.toLocalTime() ?: LocalTime.now().withSecond(0).withNano(0)
+        val timePickerState = rememberTimePickerState(
+            initialHour = initialTime.hour,
+            initialMinute = initialTime.minute,
+            is24Hour = true,
+        )
+        AlertDialog(
+            onDismissRequest = { showTimeDialog = false },
+            title = { Text("Select Time") },
+            text = { TimePicker(state = timePickerState) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val selectedDate = pendingDate ?: LocalDate.now()
+                    val selectedTime = LocalTime.of(timePickerState.hour, timePickerState.minute)
+                    val ldt = LocalDateTime.of(selectedDate, selectedTime)
+                    onDateTimeSelected(ldt.toString())
+                    showTimeDialog = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimeDialog = false }) { Text("Cancel") }
+            },
+        )
     }
 }
