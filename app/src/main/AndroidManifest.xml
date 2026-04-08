@@ -196,6 +196,38 @@
                 android:resource="@xml/widget_strobe_info" />
         </receiver>
 
+        <!-- ── Camera Snapshot Widget ────────────────────────────── -->
+        <receiver
+            android:name=".widget.CameraSnapshotWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_CAMERA_SNAPSHOT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_camera_snapshot_info" />
+        </receiver>
+
+        <!-- ── Video Toggle Widget ───────────────────────────────── -->
+        <receiver
+            android:name=".widget.VideoToggleWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_VIDEO_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_video_toggle_info" />
+        </receiver>
+
+        <!-- ── Video Record Service ──────────────────────────────── -->
+        <service
+            android:name=".services.VideoRecordService"
+            android:exported="false"
+            android:foregroundServiceType="camera" />
+
         <activity
             android:name=".widget.WidgetConfigActivity"
             android:exported="true">
