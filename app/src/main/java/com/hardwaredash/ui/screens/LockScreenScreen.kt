@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.core.app.NotificationCompat
 import com.google.accompanist.permissions.*
 import com.hardwaredash.MainActivity
@@ -67,6 +68,7 @@ private fun ensureAllChannels(nm: NotificationManager) {
     ).forEach { nm.createNotificationChannel(it) }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun LockScreenScreen() {
