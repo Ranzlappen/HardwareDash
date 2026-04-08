@@ -12,4 +12,4 @@
     android:configure="com.hardwaredash.widget.WidgetConfigActivity"
     android:widgetCategory="home_screen"
     android:previewLayout="@layout/widget_layout"
-    android:description="@string/widget_description" />
+    android:description="@string/widget_desc_metric" />
