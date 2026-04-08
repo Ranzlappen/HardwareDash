@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import androidx.core.app.NotificationCompat
+import com.hardwaredash.CallerScreenActivity
 import com.hardwaredash.MainActivity
 
 class ScheduleActionReceiver : BroadcastReceiver() {
@@ -80,20 +81,12 @@ class ScheduleActionReceiver : BroadcastReceiver() {
         val prefs = context.getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
         val durationSec = prefs.getInt("phone_ring_duration_seconds", 30)
 
-        val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
-        val ringtone = RingtoneManager.getRingtone(context, uri)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            ringtone.isLooping = false
+        // Launch full-screen caller activity which handles ringing and stop button
+        val callerIntent = Intent(context, CallerScreenActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(CallerScreenActivity.EXTRA_DURATION, durationSec)
         }
-        val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val originalVolume = am.getStreamVolume(AudioManager.STREAM_RING)
-        am.setStreamVolume(AudioManager.STREAM_RING, am.getStreamMaxVolume(AudioManager.STREAM_RING), 0)
-        ringtone.play()
-        // Stop after configured duration
-        Handler(Looper.getMainLooper()).postDelayed({
-            ringtone.stop()
-            am.setStreamVolume(AudioManager.STREAM_RING, originalVolume, 0)
-        }, durationSec * 1000L)
+        context.startActivity(callerIntent)
     }
 
     private fun ensureChannel(nm: NotificationManager) {

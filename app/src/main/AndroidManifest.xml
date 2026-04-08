@@ -110,6 +110,16 @@
                 android:resource="@xml/nfc_tech_filter" />
         </activity>
 
+        <!-- ── Caller Screen Activity (phone ring overlay) ────────── -->
+        <activity
+            android:name=".CallerScreenActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- ── Device Admin Receiver (for screen lock) ───────────── -->
         <receiver
             android:name=".receivers.AdminReceiver"
