@@ -84,7 +84,7 @@ class VideoRecordService : Service() {
                             is VideoRecordEvent.Finalize -> {
                                 val msg = if (event.hasError()) "Video error: ${event.cause?.message}"
                                           else "Saved: $filename"
-                                WidgetActionHandler.showToast(this, msg)
+                                android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_SHORT).show()
                                 isRunning = false
                                 provider.unbindAll()
                                 lco.destroy()
@@ -92,9 +92,9 @@ class VideoRecordService : Service() {
                         }
                     }
                 isRunning = true
-                WidgetActionHandler.showToast(this, "Recording video...")
+                android.widget.Toast.makeText(this, "Recording video...", android.widget.Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                WidgetActionHandler.showToast(this, "Camera error: ${e.message}")
+                android.widget.Toast.makeText(this, "Camera error: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
                 Log.e("VideoRecordService", "Start failed", e)
                 stopSelf()
             }
