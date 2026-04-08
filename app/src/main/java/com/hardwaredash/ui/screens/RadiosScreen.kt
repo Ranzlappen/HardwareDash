@@ -338,6 +338,7 @@ fun RadiosScreen() {
                     Text("RSSI: $wifiRssi dBm  ·  Link: $wifiLinkSpeed Mbps  ·  Band: $band ($wifiFreqMhz MHz)",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                     // Signal strength bar
+                    @Suppress("DEPRECATION")
                     val signalPercent = WifiManager.calculateSignalLevel(wifiRssi, 100) / 100f
                     LinearProgressIndicator(
                         progress = { signalPercent },

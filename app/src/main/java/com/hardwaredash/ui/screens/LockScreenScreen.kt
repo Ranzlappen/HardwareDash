@@ -29,6 +29,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -75,8 +76,6 @@ fun LockScreenScreen() {
     val dpm     = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val admin   = ComponentName(context, AdminReceiver::class.java)
     val nm      = remember { context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
-    val scope   = rememberCoroutineScope()
-
     LaunchedEffect(Unit) { ensureAllChannels(nm) }
 
     var isAdmin    by remember { mutableStateOf(false) }
@@ -358,7 +357,7 @@ fun LockScreenScreen() {
             modifier = Modifier.fillMaxWidth(),
             enabled = notifGranted && customTitle.isNotBlank(),
         ) {
-            Icon(Icons.Default.Send, null)
+            Icon(Icons.AutoMirrored.Filled.Send, null)
             Spacer(Modifier.width(8.dp))
             Text("Send Custom Notification")
         }

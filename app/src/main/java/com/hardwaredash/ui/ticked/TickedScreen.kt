@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -662,7 +663,7 @@ private fun LogToolbar(
                 vm.setViewMode(if (viewMode == ViewMode.LIST) ViewMode.TIMELINE else ViewMode.LIST)
             }) {
                 Icon(
-                    if (viewMode == ViewMode.LIST) Icons.Filled.ViewList else Icons.Filled.ViewTimeline,
+                    if (viewMode == ViewMode.LIST) Icons.AutoMirrored.Filled.ViewList else Icons.Filled.ViewTimeline,
                     "Toggle view",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -2192,7 +2193,7 @@ private fun ColorPickerSheet(
 
     // Current color for this item
     val currentColor = remember(targetId, tab, mode) {
-        val item = if (tab == ActiveTab.LOG) store.entries.find { it.id == targetId }
+        val item: Any? = if (tab == ActiveTab.LOG) store.entries.find { it.id == targetId }
         else store.processes.find { it.id == targetId }
         when {
             item is TickedEntry && mode == "bg" -> item.bgColor
