@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hardwaredash.localization.S
 import kotlinx.coroutines.delay
 
 @Composable
@@ -43,6 +44,7 @@ fun TorchScreen() {
     var brightness     by remember { mutableFloatStateOf(0.5f) }
     var autoBrightness by remember { mutableStateOf(false) }
     var hasWriteSettings by remember { mutableStateOf(false) }
+    val strings = S.torch
 
     // Check for flash hardware on first composition
     LaunchedEffect(Unit) {
@@ -62,7 +64,7 @@ fun TorchScreen() {
             }
             override fun onTorchModeUnavailable(cameraId: String) {
                 torchOn = false
-                errorMsg = "Torch unavailable -- camera in use?"
+                errorMsg = strings.torchUnavailable
             }
         }
         cm.registerTorchCallback(callback, null)
@@ -147,13 +149,13 @@ fun TorchScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            "Torch / Flashlight",
+            strings.title,
             style      = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            if (hasFlash) "Flash hardware detected" else "No flash hardware on this device",
+            if (hasFlash) strings.flashDetected else strings.noFlash,
             style = MaterialTheme.typography.bodyMedium,
             color = if (hasFlash) MaterialTheme.colorScheme.secondary
                     else MaterialTheme.colorScheme.error,
@@ -217,7 +219,7 @@ fun TorchScreen() {
                 modifier = Modifier.weight(1f).height(56.dp),
             ) {
                 Text(
-                    if (torchOn) "Turn OFF" else "Turn ON",
+                    if (torchOn) strings.turnOff else strings.turnOn,
                     style = MaterialTheme.typography.titleMedium,
                 )
             }
@@ -234,7 +236,7 @@ fun TorchScreen() {
                 modifier = Modifier.weight(1f).height(56.dp),
             ) {
                 Text(
-                    if (strobeActive) "Stop" else "Strobe",
+                    if (strobeActive) strings.stop else strings.strobe,
                     style = MaterialTheme.typography.titleMedium,
                 )
             }
@@ -264,7 +266,7 @@ fun TorchScreen() {
 
         Spacer(Modifier.height(16.dp))
         Text(
-            "Uses CameraManager.setTorchMode() -- no CAMERA permission needed for torch alone.",
+            strings.torchNote,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
         )
@@ -276,19 +278,19 @@ fun TorchScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // Display Brightness Control
         // ══════════════════════════════════════════════════════════════════════
-        Text("Display Brightness", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(strings.displayBrightness, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(8.dp))
 
         if (!hasWriteSettings) {
             Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("WRITE_SETTINGS permission needed to control brightness",
+                    Text(strings.writeSettingsNeeded,
                         color = MaterialTheme.colorScheme.onErrorContainer)
                     Button(onClick = {
                         context.startActivity(Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
                             data = Uri.parse("package:${context.packageName}")
                         })
-                    }) { Text("Grant Write Settings") }
+                    }) { Text(strings.grantWriteSettings) }
                 }
             }
         } else {
@@ -297,7 +299,7 @@ fun TorchScreen() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text("Auto Brightness", style = MaterialTheme.typography.bodyMedium)
+                Text(strings.autoBrightness, style = MaterialTheme.typography.bodyMedium)
                 Switch(checked = autoBrightness, onCheckedChange = { auto ->
                     autoBrightness = auto
                     Settings.System.putInt(

@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.*
+import com.hardwaredash.localization.S
 import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
@@ -103,9 +104,9 @@ fun MicScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Microphone access is needed to show live audio levels.")
+            Text(S.mic.micPermRationale)
             Spacer(Modifier.height(12.dp))
-            Button(onClick = { perm.launchPermissionRequest() }) { Text("Grant Permission") }
+            Button(onClick = { perm.launchPermissionRequest() }) { Text(S.mic.grantPermission) }
         }
         else -> LaunchedEffect(Unit) { perm.launchPermissionRequest() }
     }
@@ -229,7 +230,7 @@ private fun MicMeter() {
                 modifier = Modifier.size(28.dp),
             )
             Spacer(Modifier.width(10.dp))
-            Text("Microphone Meter", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(S.mic.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         }
 
         // ── Arc meter ──────────────────────────────────────────────────────
@@ -291,7 +292,7 @@ private fun MicMeter() {
 
         // ── Spectrum Analyzer ──────────────────────────────────────────────
         Text(
-            "Spectrum Analyzer",
+            S.mic.spectrumAnalyzer,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
         )
@@ -369,7 +370,7 @@ private fun MicMeter() {
                                  else             MaterialTheme.colorScheme.primary
             ),
         ) {
-            Text(if (isRecording) "Stop Monitor" else "Start Monitoring")
+            Text(if (isRecording) S.mic.stopMonitor else S.mic.startMonitoring)
         }
 
         HorizontalDivider()
@@ -377,7 +378,7 @@ private fun MicMeter() {
         // ══════════════════════════════════════════════════════════════════════
         // Recording Section
         // ══════════════════════════════════════════════════════════════════════
-        Text("Audio Recording", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.mic.audioRecording, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
         if (isSaving) {
             val mins = (recElapsed / 60000).toInt()
@@ -450,7 +451,7 @@ private fun MicMeter() {
 
         // Saved recordings list
         if (savedFiles.isNotEmpty()) {
-            Text("Saved Recordings", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Text(S.mic.savedRecordings, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
             savedFiles.forEach { (name, uri) ->
                 Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.small) {
                     Row(
@@ -479,7 +480,7 @@ private fun MicMeter() {
                                     }
                                 }
                             } catch (_: Exception) {
-                                Toast.makeText(context, "Playback error", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, S.mic.playbackError, Toast.LENGTH_SHORT).show()
                             }
                         }, modifier = Modifier.size(28.dp)) {
                             Icon(

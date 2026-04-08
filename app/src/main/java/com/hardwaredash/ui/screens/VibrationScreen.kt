@@ -31,6 +31,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hardwaredash.localization.S
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -158,13 +159,13 @@ fun VibrationScreen() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.Vibration, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
             Spacer(Modifier.width(10.dp))
-            Text("Vibration Motor", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(S.vibration.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         }
 
         if (!hasAmplitude) {
             Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                 Text(
-                    "This device doesn't support amplitude control. Patterns will play at full strength.",
+                    S.vibration.noAmplitude,
                     modifier = Modifier.padding(12.dp),
                     color    = MaterialTheme.colorScheme.onErrorContainer,
                 )
@@ -173,7 +174,7 @@ fun VibrationScreen() {
 
         // ── Predefined patterns ───────────────────────────────────────────────
         if (patterns.isNotEmpty()) {
-            Text("Predefined Haptic Effects", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text(S.vibration.predefinedEffects, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -190,7 +191,7 @@ fun VibrationScreen() {
         HorizontalDivider()
 
         // ── Custom waveform ───────────────────────────────────────────────────
-        Text("Custom Waveform Builder", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.vibration.customWaveform, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(
             "Amplitude: 0 = off, 1 = full\nDuration: ms  ·  Gap: pause between steps",
             style = MaterialTheme.typography.bodySmall,
@@ -198,7 +199,7 @@ fun VibrationScreen() {
         )
 
         // Speed presets
-        Text("Speed Presets", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+        Text(S.vibration.speedPresets, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("Slow" to 200f, "Medium" to 80f, "Fast" to 30f, "Rapid" to 10f).forEach { (label, gap) ->
                 FilterChip(
@@ -258,13 +259,13 @@ fun VibrationScreen() {
                 vibrator.cancel()
                 playWaveform(vibrator, steps.toList(), gapMs, loopEnabled, hasAmplitude)
             }
-        ) { Text(if (loopEnabled) "Play (Looping)" else "Play Custom Waveform", maxLines = 1, softWrap = false) }
+        ) { Text(if (loopEnabled) S.vibration.playLooping else S.vibration.playCustom, maxLines = 1, softWrap = false) }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
             colors   = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
             onClick  = { vibrator.cancel() },
-        ) { Text("Stop") }
+        ) { Text(S.vibration.stop) }
 
         // ── Save / Load ───────────────────────────────────────────────────────
         Row(
@@ -277,7 +278,7 @@ fun VibrationScreen() {
             ) {
                 Icon(Icons.Default.Save, null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("Save Pattern", maxLines = 1, softWrap = false)
+                Text(S.vibration.savePattern, maxLines = 1, softWrap = false)
             }
             OutlinedButton(
                 onClick = {
@@ -288,7 +289,7 @@ fun VibrationScreen() {
             ) {
                 Icon(Icons.Default.FolderOpen, null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("Load Pattern", maxLines = 1, softWrap = false)
+                Text(S.vibration.loadPattern, maxLines = 1, softWrap = false)
             }
         }
 
@@ -297,9 +298,9 @@ fun VibrationScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // ── Visual Pattern Drawing (Canvas) ──────────────────────────────────
         // ══════════════════════════════════════════════════════════════════════
-        Text("Draw Vibration Pattern", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.vibration.drawPattern, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(
-            "Draw with your finger: X = time (0–2s), Y = intensity (0–100%)",
+            S.vibration.drawInstructions,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
         )
@@ -406,12 +407,12 @@ fun VibrationScreen() {
                 },
                 modifier = Modifier.weight(1f),
                 enabled = drawnPoints.isNotEmpty(),
-            ) { Text("Play Drawn", maxLines = 1, softWrap = false) }
+            ) { Text(S.vibration.playDrawn, maxLines = 1, softWrap = false) }
 
             OutlinedButton(
                 onClick = { drawnPoints.clear() },
                 modifier = Modifier.weight(1f),
-            ) { Text("Clear Drawing", maxLines = 1, softWrap = false) }
+            ) { Text(S.vibration.clearDrawing, maxLines = 1, softWrap = false) }
         }
     }
 
@@ -419,12 +420,12 @@ fun VibrationScreen() {
     if (showSaveDialog) {
         AlertDialog(
             onDismissRequest = { showSaveDialog = false },
-            title = { Text("Save Pattern") },
+            title = { Text(S.vibration.savePattern) },
             text = {
                 OutlinedTextField(
                     value = saveName,
                     onValueChange = { saveName = it },
-                    label = { Text("Pattern name") },
+                    label = { Text(S.vibration.patternName) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -446,10 +447,10 @@ fun VibrationScreen() {
                         }
                     },
                     enabled = saveName.isNotBlank(),
-                ) { Text("Save") }
+                ) { Text(S.vibration.save) }
             },
             dismissButton = {
-                TextButton(onClick = { showSaveDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showSaveDialog = false }) { Text(S.vibration.cancel) }
             },
         )
     }
@@ -458,10 +459,10 @@ fun VibrationScreen() {
     if (showLoadDialog) {
         AlertDialog(
             onDismissRequest = { showLoadDialog = false },
-            title = { Text("Load Pattern") },
+            title = { Text(S.vibration.loadPattern) },
             text = {
                 if (savedPatterns.isEmpty()) {
-                    Text("No saved patterns yet.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                    Text(S.vibration.noSavedPatterns, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         savedPatterns.forEachIndexed { idx, p ->
@@ -508,7 +509,7 @@ fun VibrationScreen() {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showLoadDialog = false }) { Text("Close") }
+                TextButton(onClick = { showLoadDialog = false }) { Text(S.vibration.close) }
             },
         )
     }

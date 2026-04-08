@@ -183,11 +183,19 @@ object S {
     val torch: Torch @Composable get() = Torch(lang)
 
     class Torch(private val l: Language) {
-        val title get() = m(l, "Torch & Flashlight", "Taschenlampe & Blitzlicht", "Linterna y flash", "Lampe torche et flash")
-        val flashlightToggle get() = m(l, "Flashlight", "Taschenlampe", "Linterna", "Lampe torche")
-        val strobeMode get() = m(l, "Strobe Mode", "Stroboskop-Modus", "Modo estroboscópico", "Mode stroboscopique")
-        val frequency get() = m(l, "Frequency", "Frequenz", "Frecuencia", "Fréquence")
-        val brightness get() = m(l, "Brightness", "Helligkeit", "Brillo", "Luminosité")
+        val title get() = m(l, "Torch / Flashlight", "Taschenlampe / Blitzlicht", "Linterna / Flash", "Lampe torche / Flash")
+        val flashDetected get() = m(l, "Flash hardware detected", "Flash-Hardware erkannt", "Hardware de flash detectado", "Matériel flash détecté")
+        val noFlash get() = m(l, "No flash hardware on this device", "Kein Flash-Hardware auf diesem Gerät", "Sin hardware de flash en este dispositivo", "Pas de matériel flash sur cet appareil")
+        val turnOn get() = m(l, "Turn ON", "Einschalten", "Encender", "Allumer")
+        val turnOff get() = m(l, "Turn OFF", "Ausschalten", "Apagar", "Éteindre")
+        val strobe get() = m(l, "Strobe", "Stroboskop", "Estrobo", "Stroboscope")
+        val stop get() = m(l, "Stop", "Stopp", "Parar", "Arrêter")
+        val torchUnavailable get() = m(l, "Torch unavailable -- camera in use?", "Taschenlampe nicht verfügbar -- Kamera in Benutzung?", "Linterna no disponible -- ¿cámara en uso?", "Lampe torche indisponible -- caméra en cours d'utilisation ?")
+        val torchNote get() = m(l, "Uses CameraManager.setTorchMode() -- no CAMERA permission needed for torch alone.", "Verwendet CameraManager.setTorchMode() -- keine CAMERA-Berechtigung für die Taschenlampe allein benötigt.", "Usa CameraManager.setTorchMode() -- no se necesita permiso de CÁMARA solo para la linterna.", "Utilise CameraManager.setTorchMode() -- aucune permission CAMÉRA nécessaire pour la lampe seule.")
+        val displayBrightness get() = m(l, "Display Brightness", "Bildschirmhelligkeit", "Brillo de pantalla", "Luminosité de l'écran")
+        val writeSettingsNeeded get() = m(l, "WRITE_SETTINGS permission needed to control brightness", "WRITE_SETTINGS-Berechtigung zur Steuerung der Helligkeit erforderlich", "Se necesita permiso WRITE_SETTINGS para controlar el brillo", "Permission WRITE_SETTINGS nécessaire pour contrôler la luminosité")
+        val grantWriteSettings get() = m(l, "Grant Write Settings", "Schreibeinstellungen gewähren", "Conceder configuración de escritura", "Accorder les paramètres d'écriture")
+        val autoBrightness get() = m(l, "Auto Brightness", "Automatische Helligkeit", "Brillo automático", "Luminosité automatique")
     }
 
     // ── Camera ──────────────────────────────────────────────────────────
@@ -195,35 +203,55 @@ object S {
 
     class Camera(private val l: Language) {
         val title get() = m(l, "Camera", "Kamera", "Cámara", "Caméra")
-        val takeSnapshot get() = m(l, "Take Snapshot", "Foto aufnehmen", "Tomar foto", "Prendre une photo")
-        val startRecording get() = m(l, "Start Recording", "Aufnahme starten", "Iniciar grabación", "Démarrer l'enregistrement")
-        val stopRecording get() = m(l, "Stop Recording", "Aufnahme stoppen", "Detener grabación", "Arrêter l'enregistrement")
-        val switchCamera get() = m(l, "Switch Camera", "Kamera wechseln", "Cambiar cámara", "Changer de caméra")
-        val cameraPermRequired get() = m(l, "Camera permission required", "Kameraberechtigung erforderlich", "Se requiere permiso de cámara", "Permission caméra requise")
+        val lens get() = m(l, "Lens", "Objektiv", "Lente", "Objectif")
+        val tapToFocus get() = m(l, "Tap-to-Focus", "Tippen-zum-Fokussieren", "Toque para enfocar", "Toucher pour la mise au point")
+        val cameraControls get() = m(l, "Camera controls", "Kamerasteuerung", "Controles de cámara", "Contrôles de la caméra")
+        val focusPointSet get() = m(l, "Focus point set", "Fokuspunkt gesetzt", "Punto de enfoque establecido", "Point de mise au point défini")
+        val grantCameraPerm get() = m(l, "Grant Camera Permission", "Kameraberechtigung erteilen", "Conceder permiso de cámara", "Accorder la permission caméra")
+        val cameraPermRationale get() = m(l, "Camera access is needed to show the live preview and capture photos.", "Kamerazugriff wird benötigt, um die Live-Vorschau anzuzeigen und Fotos aufzunehmen.", "Se necesita acceso a la cámara para mostrar la vista previa en vivo y capturar fotos.", "L'accès à la caméra est nécessaire pour afficher l'aperçu en direct et capturer des photos.")
     }
 
     // ── Vibration ───────────────────────────────────────────────────────
     val vibration: Vibration @Composable get() = Vibration(lang)
 
     class Vibration(private val l: Language) {
-        val title get() = m(l, "Vibration", "Vibration", "Vibración", "Vibration")
-        val pattern get() = m(l, "Pattern", "Muster", "Patrón", "Modèle")
-        val intensity get() = m(l, "Intensity", "Intensität", "Intensidad", "Intensité")
-        val duration get() = m(l, "Duration", "Dauer", "Duración", "Durée")
-        val vibrate get() = m(l, "Vibrate", "Vibrieren", "Vibrar", "Vibrer")
-        val stop get() = m(l, "Stop", "Stoppen", "Parar", "Arrêter")
+        val title get() = m(l, "Vibration Motor", "Vibrationsmotor", "Motor de vibración", "Moteur de vibration")
+        val noAmplitude get() = m(l, "This device doesn't support amplitude control. Patterns will play at full strength.", "Dieses Gerät unterstützt keine Amplitudensteuerung. Muster werden mit voller Stärke abgespielt.", "Este dispositivo no soporta control de amplitud. Los patrones se reproducirán a máxima intensidad.", "Cet appareil ne prend pas en charge le contrôle d'amplitude. Les motifs seront joués à pleine puissance.")
+        val predefinedEffects get() = m(l, "Predefined Haptic Effects", "Vordefinierte haptische Effekte", "Efectos hápticos predefinidos", "Effets haptiques prédéfinis")
+        val customWaveform get() = m(l, "Custom Waveform Builder", "Benutzerdefinierter Wellenform-Builder", "Constructor de forma de onda personalizada", "Constructeur de forme d'onde personnalisé")
+        val speedPresets get() = m(l, "Speed Presets", "Geschwindigkeitsvoreinstellungen", "Preajustes de velocidad", "Préréglages de vitesse")
+        val loopWaveform get() = m(l, "Loop waveform", "Wellenform wiederholen", "Repetir forma de onda", "Boucler la forme d'onde")
+        val addStep get() = m(l, "Add Step", "Schritt hinzufügen", "Añadir paso", "Ajouter une étape")
+        val playLooping get() = m(l, "Play (Looping)", "Abspielen (Schleife)", "Reproducir (bucle)", "Lire (en boucle)")
+        val playCustom get() = m(l, "Play Custom Waveform", "Benutzerdefinierte Wellenform abspielen", "Reproducir forma de onda personalizada", "Lire la forme d'onde personnalisée")
+        val stop get() = m(l, "Stop", "Stopp", "Parar", "Arrêter")
+        val savePattern get() = m(l, "Save Pattern", "Muster speichern", "Guardar patrón", "Enregistrer le motif")
+        val loadPattern get() = m(l, "Load Pattern", "Muster laden", "Cargar patrón", "Charger le motif")
+        val drawPattern get() = m(l, "Draw Vibration Pattern", "Vibrationsmuster zeichnen", "Dibujar patrón de vibración", "Dessiner le motif de vibration")
+        val drawInstructions get() = m(l, "Draw with your finger: X = time (0\u20132s), Y = intensity (0\u2013100%)", "Mit dem Finger zeichnen: X = Zeit (0\u20132s), Y = Intensität (0\u2013100%)", "Dibuje con su dedo: X = tiempo (0\u20132s), Y = intensidad (0\u2013100%)", "Dessinez avec votre doigt: X = temps (0\u20132s), Y = intensité (0\u2013100%)")
+        val loopDrawn get() = m(l, "Loop drawn pattern", "Gezeichnetes Muster wiederholen", "Repetir patrón dibujado", "Boucler le motif dessiné")
+        val playDrawn get() = m(l, "Play Drawn", "Gezeichnetes abspielen", "Reproducir dibujado", "Lire le dessin")
+        val clearDrawing get() = m(l, "Clear Drawing", "Zeichnung löschen", "Borrar dibujo", "Effacer le dessin")
+        val patternName get() = m(l, "Pattern name", "Mustername", "Nombre del patrón", "Nom du motif")
+        val save get() = m(l, "Save", "Speichern", "Guardar", "Enregistrer")
+        val cancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
+        val close get() = m(l, "Close", "Schließen", "Cerrar", "Fermer")
+        val noSavedPatterns get() = m(l, "No saved patterns yet.", "Noch keine gespeicherten Muster.", "Aún no hay patrones guardados.", "Aucun motif enregistré.")
     }
 
     // ── Mic ─────────────────────────────────────────────────────────────
     val mic: Mic @Composable get() = Mic(lang)
 
     class Mic(private val l: Language) {
-        val title get() = m(l, "Microphone", "Mikrofon", "Micrófono", "Microphone")
-        val startListening get() = m(l, "Start Listening", "Zuhören starten", "Empezar a escuchar", "Commencer à écouter")
-        val stopListening get() = m(l, "Stop Listening", "Zuhören stoppen", "Dejar de escuchar", "Arrêter d'écouter")
-        val dbLevel get() = m(l, "dB Level", "dB-Pegel", "Nivel dB", "Niveau dB")
-        val audioPermRequired get() = m(l, "Audio permission required", "Audioberechtigung erforderlich", "Se requiere permiso de audio", "Permission audio requise")
-        val recording get() = m(l, "Recording", "Aufnahme", "Grabando", "Enregistrement")
+        val title get() = m(l, "Microphone Meter", "Mikrofon-Messgerät", "Medidor de micrófono", "Mètre de microphone")
+        val micPermRationale get() = m(l, "Microphone access is needed to show live audio levels.", "Mikrofonzugriff wird benötigt, um Live-Audiopegel anzuzeigen.", "Se necesita acceso al micrófono para mostrar niveles de audio en vivo.", "L'accès au microphone est nécessaire pour afficher les niveaux audio en direct.")
+        val grantPermission get() = m(l, "Grant Permission", "Berechtigung erteilen", "Conceder permiso", "Accorder la permission")
+        val spectrumAnalyzer get() = m(l, "Spectrum Analyzer", "Spektrumanalysator", "Analizador de espectro", "Analyseur de spectre")
+        val startMonitoring get() = m(l, "Start Monitoring", "Überwachung starten", "Iniciar monitoreo", "Démarrer la surveillance")
+        val stopMonitor get() = m(l, "Stop Monitor", "Überwachung stoppen", "Detener monitoreo", "Arrêter la surveillance")
+        val audioRecording get() = m(l, "Audio Recording", "Audioaufnahme", "Grabación de audio", "Enregistrement audio")
+        val savedRecordings get() = m(l, "Saved Recordings", "Gespeicherte Aufnahmen", "Grabaciones guardadas", "Enregistrements sauvegardés")
+        val playbackError get() = m(l, "Playback error", "Wiedergabefehler", "Error de reproducción", "Erreur de lecture")
     }
 
     // ── Radios ──────────────────────────────────────────────────────────

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.*
+import com.hardwaredash.localization.S
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -84,7 +85,7 @@ fun CameraScreen() {
     when {
         cameraPermState.status.isGranted -> CameraPreview()
         cameraPermState.status.shouldShowRationale -> {
-            PermissionRationale("Camera access is needed to show the live preview and capture photos.") {
+            PermissionRationale(S.camera.cameraPermRationale) {
                 cameraPermState.launchPermissionRequest()
             }
         }
@@ -201,7 +202,7 @@ private fun CameraPreview() {
                             .setAutoCancelDuration(3, java.util.concurrent.TimeUnit.SECONDS)
                             .build()
                         cam.cameraControl.startFocusAndMetering(action)
-                        statusMsg = "Focus point set"
+                        statusMsg = S.camera.focusPointSet
                     }
                 },
             factory = { ctx -> PreviewView(ctx).also { previewViewRef = it } },
@@ -242,7 +243,7 @@ private fun CameraPreview() {
                     ) {
                         // Lens selector
                         if (lenses.size > 1) {
-                            Text("Lens", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                            Text(S.camera.lens, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 modifier = Modifier.fillMaxWidth(),
@@ -300,7 +301,7 @@ private fun CameraPreview() {
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Text(
-                                "Tap-to-Focus",
+                                S.camera.tapToFocus,
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.weight(1f),
@@ -324,7 +325,7 @@ private fun CameraPreview() {
                 FilledTonalIconButton(onClick = { showControls = !showControls }) {
                     Icon(
                         if (showControls) Icons.Default.ExpandMore else Icons.Default.Tune,
-                        "Camera controls"
+                        S.camera.cameraControls
                     )
                 }
 
@@ -413,6 +414,6 @@ private fun PermissionRationale(text: String, onRequest: () -> Unit) {
     ) {
         Text(text, textAlign = TextAlign.Center)
         Spacer(Modifier.height(16.dp))
-        Button(onClick = onRequest) { Text("Grant Camera Permission") }
+        Button(onClick = onRequest) { Text(S.camera.grantCameraPerm) }
     }
 }
