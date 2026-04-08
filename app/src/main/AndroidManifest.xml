@@ -228,6 +228,70 @@
             android:exported="false"
             android:foregroundServiceType="camera" />
 
+        <!-- ── Voice Record Widget ───────────────────────────────── -->
+        <receiver
+            android:name=".widget.VoiceRecordWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_VOICE_RECORD_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_voice_record_info" />
+        </receiver>
+
+        <!-- ── Voice Record Service ──────────────────────────────── -->
+        <service
+            android:name=".services.VoiceRecordService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
+        <!-- ── Phone Ring Widget ─────────────────────────────────── -->
+        <receiver
+            android:name=".widget.PhoneRingWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_RING_30S" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_phone_ring_info" />
+        </receiver>
+
+        <!-- ── Notify in 30s Widget ──────────────────────────────── -->
+        <receiver
+            android:name=".widget.NotifyWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_NOTIFY_30S" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_notify_info" />
+        </receiver>
+
+        <!-- ── dB Meter Widget ───────────────────────────────────── -->
+        <receiver
+            android:name=".widget.DbMeterWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_DB_METER_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_db_meter_info" />
+        </receiver>
+
+        <!-- ── dB Meter Service ──────────────────────────────────── -->
+        <service
+            android:name=".services.DbMeterService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
         <activity
             android:name=".widget.WidgetConfigActivity"
             android:exported="true">
