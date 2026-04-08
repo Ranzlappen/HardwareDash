@@ -4,11 +4,13 @@
 
 package com.hardwaredash.ui.screens
 
+import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
+import android.location.Location
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.TrafficStats
@@ -17,6 +19,7 @@ import android.nfc.*
 import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
 import android.os.Build
+import android.os.Looper
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import androidx.compose.foundation.horizontalScroll
@@ -34,8 +37,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.permissions.*
+import com.google.android.gms.location.*
 import kotlinx.coroutines.delay
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -82,6 +95,19 @@ fun RadiosScreen() {
     var nfcUriPrefix  by remember { mutableStateOf("https://") }
     var nfcMimeType   by remember { mutableStateOf("text/plain") }
     var showNfcInfo   by remember { mutableStateOf(false) }
+
+    // GPS state
+    var gpsActive     by remember { mutableStateOf(false) }
+    var gpsLat        by remember { mutableStateOf("--") }
+    var gpsLon        by remember { mutableStateOf("--") }
+    var gpsAlt        by remember { mutableStateOf("--") }
+    var gpsSpeed      by remember { mutableStateOf("--") }
+    var gpsAccuracy   by remember { mutableStateOf("--") }
+    var gpsBearing    by remember { mutableStateOf("--") }
+    var gpsProvider   by remember { mutableStateOf("--") }
+    var gpsLog        by remember { mutableStateOf<List<String>>(emptyList()) }
+    var showGpsLog    by remember { mutableStateOf(false) }
+    var gpsLocation   by remember { mutableStateOf<Location?>(null) }
 
     // Enable NFC reader mode
     DisposableEffect(nfcReaderActive) {
@@ -166,6 +192,40 @@ fun RadiosScreen() {
         )
         onDispose {
             nfcAdapter.disableReaderMode(activity)
+        }
+    }
+
+    // GPS location updates
+    val locationPermState = rememberMultiplePermissionsState(
+        listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+    )
+    DisposableEffect(gpsActive) {
+        if (!gpsActive || !locationPermState.allPermissionsGranted) return@DisposableEffect onDispose { }
+        val fusedClient = LocationServices.getFusedLocationProviderClient(context)
+        val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000L)
+            .setMinUpdateIntervalMillis(500L)
+            .build()
+        val callback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                val loc = result.lastLocation ?: return
+                gpsLocation = loc
+                gpsLat = "%.6f".format(loc.latitude)
+                gpsLon = "%.6f".format(loc.longitude)
+                gpsAlt = if (loc.hasAltitude()) "%.1f m".format(loc.altitude) else "--"
+                gpsSpeed = if (loc.hasSpeed()) "%.1f km/h".format(loc.speed * 3.6f) else "--"
+                gpsAccuracy = if (loc.hasAccuracy()) "%.1f m".format(loc.accuracy) else "--"
+                gpsBearing = if (loc.hasBearing()) "%.0f°".format(loc.bearing) else "--"
+                gpsProvider = loc.provider ?: "unknown"
+                val ts = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(loc.time))
+                val entry = "$ts  ${gpsLat}, ${gpsLon}  alt=$gpsAlt  spd=$gpsSpeed  acc=$gpsAccuracy"
+                gpsLog = (listOf(entry) + gpsLog).take(100)
+            }
+        }
+        try {
+            fusedClient.requestLocationUpdates(request, callback, Looper.getMainLooper())
+        } catch (_: SecurityException) { }
+        onDispose {
+            fusedClient.removeLocationUpdates(callback)
         }
     }
 
@@ -555,6 +615,152 @@ fun RadiosScreen() {
                              "  - Test with reader before writing to verify\n" +
                              "  - Lock tags after writing to prevent tampering",
                             style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+        }
+
+        HorizontalDivider()
+
+        // ── GPS section ──────────────────────────────────────────────────────
+        Text("GPS / Location", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+
+        if (!locationPermState.allPermissionsGranted) {
+            Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Location permission required for GPS", color = MaterialTheme.colorScheme.onErrorContainer)
+                    Button(onClick = { locationPermState.launchMultiplePermissionRequest() }) {
+                        Text("Grant Location Permission")
+                    }
+                }
+            }
+        }
+
+        Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("GPS Tracking", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Switch(
+                        checked = gpsActive,
+                        onCheckedChange = {
+                            if (it && !locationPermState.allPermissionsGranted) {
+                                locationPermState.launchMultiplePermissionRequest()
+                            } else {
+                                gpsActive = it
+                                if (!it) {
+                                    gpsLocation = null
+                                }
+                            }
+                        },
+                    )
+                }
+
+                if (gpsActive && locationPermState.allPermissionsGranted) {
+                    // Metrics display
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Column {
+                            Text("Latitude", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(gpsLat, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                        }
+                        Column {
+                            Text("Longitude", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(gpsLon, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Column {
+                            Text("Altitude", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(gpsAlt, style = MaterialTheme.typography.bodySmall)
+                        }
+                        Column {
+                            Text("Speed", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(gpsSpeed, style = MaterialTheme.typography.bodySmall)
+                        }
+                        Column {
+                            Text("Accuracy", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(gpsAccuracy, style = MaterialTheme.typography.bodySmall)
+                        }
+                        Column {
+                            Text("Bearing", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(gpsBearing, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                    Text("Provider: $gpsProvider", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                }
+            }
+        }
+
+        // Live map
+        if (gpsActive && gpsLocation != null) {
+            Card(modifier = Modifier.fillMaxWidth().height(250.dp), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+                val loc = gpsLocation
+                AndroidView(
+                    modifier = Modifier.fillMaxSize(),
+                    factory = { ctx ->
+                        Configuration.getInstance().userAgentValue = ctx.packageName
+                        MapView(ctx).apply {
+                            setTileSource(TileSourceFactory.MAPNIK)
+                            setMultiTouchControls(true)
+                            controller.setZoom(17.0)
+                            if (loc != null) {
+                                val point = GeoPoint(loc.latitude, loc.longitude)
+                                controller.setCenter(point)
+                                val marker = Marker(this)
+                                marker.position = point
+                                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                                marker.title = "Current Location"
+                                overlays.add(marker)
+                            }
+                        }
+                    },
+                    update = { mapView ->
+                        if (loc != null) {
+                            val point = GeoPoint(loc.latitude, loc.longitude)
+                            mapView.controller.animateTo(point)
+                            // Update marker
+                            mapView.overlays.clear()
+                            val marker = Marker(mapView)
+                            marker.position = point
+                            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            marker.title = "Current Location"
+                            mapView.overlays.add(marker)
+                            mapView.invalidate()
+                        }
+                    },
+                )
+            }
+        }
+
+        // GPS Log
+        if (gpsActive && gpsLog.isNotEmpty()) {
+            Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium) {
+                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("GPS Log (${gpsLog.size} entries)", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                        Row {
+                            IconButton(onClick = { showGpsLog = !showGpsLog }, modifier = Modifier.size(24.dp)) {
+                                Icon(if (showGpsLog) Icons.Default.ExpandLess else Icons.Default.ExpandMore, "Toggle log")
+                            }
+                            IconButton(onClick = { gpsLog = emptyList() }, modifier = Modifier.size(24.dp)) {
+                                Icon(Icons.Default.Delete, "Clear log", tint = MaterialTheme.colorScheme.error)
+                            }
+                        }
+                    }
+                    if (showGpsLog) {
+                        gpsLog.take(20).forEach { entry ->
+                            Text(entry, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        if (gpsLog.size > 20) {
+                            Text("... and ${gpsLog.size - 20} more", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 }
             }
