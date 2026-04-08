@@ -68,8 +68,7 @@ private fun ensureAllChannels(nm: NotificationManager) {
     ).forEach { nm.createNotificationChannel(it) }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LockScreenScreen() {
     val context = LocalContext.current
