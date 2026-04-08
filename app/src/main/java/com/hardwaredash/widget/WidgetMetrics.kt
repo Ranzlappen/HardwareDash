@@ -109,6 +109,7 @@ enum class WidgetMetric(
             if (!wm.isWifiEnabled) return "Off"
             @Suppress("DEPRECATION")
             val rssi = wm.connectionInfo?.rssi ?: 0
+            @Suppress("DEPRECATION")
             val pct = WifiManager.calculateSignalLevel(rssi, 100)
             return "$rssi dBm ($pct%)"
         }
