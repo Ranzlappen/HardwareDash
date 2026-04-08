@@ -4,17 +4,21 @@
 
 package com.hardwaredash.ui.screens
 
+import android.content.ContentValues
 import android.media.AudioFormat
 import android.media.AudioRecord
+import android.media.MediaPlayer
 import android.media.MediaRecorder
+import android.net.Uri
+import android.provider.MediaStore
+import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,10 +28,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.*
 import kotlinx.coroutines.*
+import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import kotlin.math.*
 
 // ─── Radix-2 Cooley-Tukey FFT ────────────────────────────────────────────────
@@ -108,12 +116,22 @@ private const val SAMPLE_RATE = 44100
 
 @Composable
 private fun MicMeter() {
+    val context = LocalContext.current
     var isRecording  by remember { mutableStateOf(false) }
     var amplitude    by remember { mutableFloatStateOf(0f) }       // 0..1 normalised
     var peakDb       by remember { mutableFloatStateOf(-60f) }     // dB
     var history      by remember { mutableStateOf(List(60) { 0f }) }
     var spectrum     by remember { mutableStateOf(FloatArray(FFT_SIZE / 2)) }
     var peakFreqHz   by remember { mutableFloatStateOf(0f) }
+
+    // Recording state
+    var isSaving     by remember { mutableStateOf(false) }
+    var recStartTime by remember { mutableLongStateOf(0L) }
+    var recElapsed   by remember { mutableLongStateOf(0L) }
+    val pcmBuffer    = remember { ByteArrayOutputStream() }
+    var savedFiles   by remember { mutableStateOf<List<Pair<String, Uri>>>(emptyList()) }
+    var playingUri   by remember { mutableStateOf<Uri?>(null) }
+    val mediaPlayer  = remember { MediaPlayer() }
 
     // ── AudioRecord loop in coroutine ──────────────────────────────────────
     LaunchedEffect(isRecording) {
@@ -149,6 +167,14 @@ private fun MicMeter() {
                     peakDb    = db
                     history   = (history.drop(1) + norm)
 
+                    // Write PCM data to buffer if saving
+                    if (isSaving) {
+                        val byteBuffer = ByteBuffer.allocate(read * 2).order(ByteOrder.LITTLE_ENDIAN)
+                        for (i in 0 until read) byteBuffer.putShort(buffer[i])
+                        pcmBuffer.write(byteBuffer.array())
+                        recElapsed = System.currentTimeMillis() - recStartTime
+                    }
+
                     // FFT spectrum
                     if (read == FFT_SIZE) {
                         val fftInput = FloatArray(FFT_SIZE) { i ->
@@ -157,7 +183,6 @@ private fun MicMeter() {
                         val mag = fftMagnitude(fftInput)
                         if (mag.isNotEmpty()) {
                             spectrum = mag
-                            // Find peak frequency (skip bin 0 = DC)
                             var maxMag = 0f
                             var maxIdx = 1
                             for (i in 1 until mag.size) {
@@ -344,13 +369,161 @@ private fun MicMeter() {
                                  else             MaterialTheme.colorScheme.primary
             ),
         ) {
-            Text(if (isRecording) "⏹  Stop" else "⏺  Start Monitoring")
+            Text(if (isRecording) "Stop Monitor" else "Start Monitoring")
+        }
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Recording Section
+        // ══════════════════════════════════════════════════════════════════════
+        Text("Audio Recording", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+
+        if (isSaving) {
+            val mins = (recElapsed / 60000).toInt()
+            val secs = ((recElapsed % 60000) / 1000).toInt()
+            Text(
+                "Recording: %02d:%02d".format(mins, secs),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth(0.85f),
+        ) {
+            // Record / Stop
+            Button(
+                onClick = {
+                    if (!isSaving) {
+                        // Start recording
+                        if (!isRecording) isRecording = true // ensure monitor is running
+                        pcmBuffer.reset()
+                        recStartTime = System.currentTimeMillis()
+                        recElapsed = 0L
+                        isSaving = true
+                    } else {
+                        // Stop recording and save
+                        isSaving = false
+                        val pcmData = pcmBuffer.toByteArray()
+                        pcmBuffer.reset()
+                        if (pcmData.isNotEmpty()) {
+                            val filename = "HWD_Rec_${System.currentTimeMillis()}.wav"
+                            val wavBytes = createWavFile(pcmData, SAMPLE_RATE, 1, 16)
+                            val cv = ContentValues().apply {
+                                put(MediaStore.Audio.Media.DISPLAY_NAME, filename)
+                                put(MediaStore.Audio.Media.MIME_TYPE, "audio/wav")
+                                put(MediaStore.Audio.Media.RELATIVE_PATH, "Music/HardwareDash")
+                            }
+                            val uri = context.contentResolver.insert(
+                                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, cv
+                            )
+                            if (uri != null) {
+                                context.contentResolver.openOutputStream(uri)?.use { it.write(wavBytes) }
+                                savedFiles = listOf(filename to uri) + savedFiles
+                                Toast.makeText(context, "Saved: $filename", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                },
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isSaving) MaterialTheme.colorScheme.error
+                                     else MaterialTheme.colorScheme.tertiary
+                ),
+                modifier = Modifier.weight(1f).height(52.dp),
+            ) {
+                Icon(if (isSaving) Icons.Default.Stop else Icons.Default.FiberManualRecord, null)
+                Spacer(Modifier.width(6.dp))
+                Text(if (isSaving) "Stop & Save" else "Record")
+            }
         }
 
         Text(
-            "Audio is processed locally — nothing is saved or transmitted.",
+            "System-level call recording (phone, WhatsApp, Discord) requires " +
+            "privileged permissions not available to third-party apps on Android.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
         )
+
+        // Saved recordings list
+        if (savedFiles.isNotEmpty()) {
+            Text("Saved Recordings", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            savedFiles.forEach { (name, uri) ->
+                Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.small) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.Default.AudioFile, null, modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(8.dp))
+                        Text(name, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                        IconButton(onClick = {
+                            try {
+                                if (playingUri == uri) {
+                                    mediaPlayer.stop()
+                                    mediaPlayer.reset()
+                                    playingUri = null
+                                } else {
+                                    mediaPlayer.reset()
+                                    mediaPlayer.setDataSource(context, uri)
+                                    mediaPlayer.prepare()
+                                    mediaPlayer.start()
+                                    playingUri = uri
+                                    mediaPlayer.setOnCompletionListener {
+                                        playingUri = null
+                                        mediaPlayer.reset()
+                                    }
+                                }
+                            } catch (_: Exception) {
+                                Toast.makeText(context, "Playback error", Toast.LENGTH_SHORT).show()
+                            }
+                        }, modifier = Modifier.size(28.dp)) {
+                            Icon(
+                                if (playingUri == uri) Icons.Default.Stop else Icons.Default.PlayArrow,
+                                "Play/Stop",
+                                tint = if (playingUri == uri) MaterialTheme.colorScheme.error
+                                       else MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
+
+    // Cleanup media player
+    DisposableEffect(Unit) { onDispose { mediaPlayer.release() } }
+}
+
+/** Create a WAV file from raw PCM data. */
+private fun createWavFile(pcmData: ByteArray, sampleRate: Int, channels: Int, bitsPerSample: Int): ByteArray {
+    val byteRate = sampleRate * channels * bitsPerSample / 8
+    val blockAlign = channels * bitsPerSample / 8
+    val dataSize = pcmData.size
+    val fileSize = 36 + dataSize
+
+    val header = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN).apply {
+        // RIFF header
+        put("RIFF".toByteArray())
+        putInt(fileSize)
+        put("WAVE".toByteArray())
+        // fmt sub-chunk
+        put("fmt ".toByteArray())
+        putInt(16) // sub-chunk size
+        putShort(1) // PCM format
+        putShort(channels.toShort())
+        putInt(sampleRate)
+        putInt(byteRate)
+        putShort(blockAlign.toShort())
+        putShort(bitsPerSample.toShort())
+        // data sub-chunk
+        put("data".toByteArray())
+        putInt(dataSize)
+    }
+
+    return header.array() + pcmData
 }
