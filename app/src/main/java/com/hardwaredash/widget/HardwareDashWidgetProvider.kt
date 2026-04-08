@@ -30,22 +30,8 @@ class HardwareDashWidgetProvider : AppWidgetProvider() {
         prefs.apply()
     }
 
-    override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-        if (intent.action == ACTION_REFRESH) {
-            val id = intent.getIntExtra(
-                AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID,
-            )
-            if (id != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                updateWidget(context, AppWidgetManager.getInstance(context), id)
-            }
-        }
-    }
-
     companion object {
         const val PREFS_NAME = "widget_config"
-        const val ACTION_REFRESH = "com.hardwaredash.widget.ACTION_REFRESH"
 
         fun prefKey(appWidgetId: Int) = "metric_$appWidgetId"
 
@@ -69,17 +55,6 @@ class HardwareDashWidgetProvider : AppWidgetProvider() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
             views.setOnClickPendingIntent(R.id.widget_root, launchPi)
-
-            // Refresh button
-            val refreshIntent = Intent(context, HardwareDashWidgetProvider::class.java).apply {
-                action = ACTION_REFRESH
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-            }
-            val refreshPi = PendingIntent.getBroadcast(
-                context, appWidgetId + 10000, refreshIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-            views.setOnClickPendingIntent(R.id.widget_refresh, refreshPi)
 
             manager.updateAppWidget(appWidgetId, views)
         }
