@@ -72,10 +72,16 @@ fun RadiosScreen() {
     var nfcTagId      by remember { mutableStateOf<String?>(null) }
     var nfcTechList   by remember { mutableStateOf<List<String>>(emptyList()) }
     var nfcRecords    by remember { mutableStateOf<List<String>>(emptyList()) }
+    var nfcTagCapacity by remember { mutableIntStateOf(0) }
+    var nfcTagWritable by remember { mutableStateOf<Boolean?>(null) }
     var nfcWriteMsg   by remember { mutableStateOf("") }
     var nfcWriteStatus by remember { mutableStateOf("") }
     var currentTag    by remember { mutableStateOf<Tag?>(null) }
     var nfcReaderActive by remember { mutableStateOf(false) }
+    var nfcWriteType  by remember { mutableStateOf("Text") } // Text, URI, MIME
+    var nfcUriPrefix  by remember { mutableStateOf("https://") }
+    var nfcMimeType   by remember { mutableStateOf("text/plain") }
+    var showNfcInfo   by remember { mutableStateOf(false) }
 
     // Enable NFC reader mode
     DisposableEffect(nfcReaderActive) {
@@ -88,23 +94,61 @@ fun RadiosScreen() {
             nfcTagId = tag.id?.joinToString(":") { "%02X".format(it) } ?: "Unknown"
             nfcTechList = tag.techList?.map { it.substringAfterLast('.') } ?: emptyList()
 
-            // Read NDEF records
+            // Read NDEF records + tag metadata
             val ndef = Ndef.get(tag)
             val records = mutableListOf<String>()
             if (ndef != null) {
                 try {
                     ndef.connect()
+                    nfcTagCapacity = ndef.maxSize
+                    nfcTagWritable = ndef.isWritable
                     val msg = ndef.ndefMessage
-                    msg?.records?.forEach { record ->
-                        val payload = String(record.payload, Charsets.UTF_8)
-                        val type = String(record.type, Charsets.UTF_8)
-                        records.add("Type: $type  ·  $payload")
+                    if (msg != null && msg.records.isNotEmpty()) {
+                        msg.records.forEachIndexed { idx, record ->
+                            val tnf = when (record.tnf) {
+                                NdefRecord.TNF_EMPTY -> "EMPTY"
+                                NdefRecord.TNF_WELL_KNOWN -> "WELL_KNOWN"
+                                NdefRecord.TNF_MIME_MEDIA -> "MIME"
+                                NdefRecord.TNF_ABSOLUTE_URI -> "URI"
+                                NdefRecord.TNF_EXTERNAL_TYPE -> "EXTERNAL"
+                                else -> "OTHER(${record.tnf})"
+                            }
+                            val type = String(record.type, Charsets.UTF_8)
+                            val payload = record.payload
+                            val payloadStr = when {
+                                record.tnf == NdefRecord.TNF_WELL_KNOWN && type == "U" -> {
+                                    // URI record: first byte is prefix code
+                                    if (payload.isNotEmpty()) {
+                                        val prefixByte = payload[0].toInt()
+                                        val uriPrefixes = arrayOf("", "http://www.", "https://www.", "http://", "https://", "tel:", "mailto:", "ftp://anonymous:anonymous@", "ftp://ftp.", "ftps://", "sftp://", "smb://", "nfs://", "ftp://", "dav://", "news:", "telnet://", "imap:", "rtsp://", "urn:", "pop:", "sip:", "sips:", "tftp:", "btspp://", "btl2cap://", "btgoep://", "tcpobex://", "irdaobex://", "file://", "urn:epc:id:", "urn:epc:tag:", "urn:epc:pat:", "urn:epc:raw:", "urn:epc:", "urn:nfc:")
+                                        val prefix = if (prefixByte < uriPrefixes.size) uriPrefixes[prefixByte] else ""
+                                        prefix + String(payload, 1, payload.size - 1, Charsets.UTF_8)
+                                    } else ""
+                                }
+                                record.tnf == NdefRecord.TNF_WELL_KNOWN && type == "T" -> {
+                                    // Text record: first byte = status (encoding + lang length)
+                                    if (payload.isNotEmpty()) {
+                                        val langLen = (payload[0].toInt() and 0x3F)
+                                        if (payload.size > 1 + langLen) {
+                                            String(payload, 1 + langLen, payload.size - 1 - langLen, Charsets.UTF_8)
+                                        } else String(payload, Charsets.UTF_8)
+                                    } else ""
+                                }
+                                else -> String(payload, Charsets.UTF_8)
+                            }
+                            records.add("[${idx + 1}] TNF=$tnf  Type=$type")
+                            records.add("    $payloadStr")
+                        }
+                    } else {
+                        records.add("Tag is NDEF-formatted but empty")
                     }
                     ndef.close()
                 } catch (e: Exception) {
                     records.add("Read error: ${e.message}")
                 }
             } else {
+                nfcTagCapacity = 0
+                nfcTagWritable = null
                 records.add("No NDEF data (tag may be unformatted)")
             }
             nfcRecords = records
@@ -331,6 +375,8 @@ fun RadiosScreen() {
                                 nfcTagId = null
                                 nfcTechList = emptyList()
                                 nfcRecords = emptyList()
+                                nfcTagCapacity = 0
+                                nfcTagWritable = null
                                 currentTag = null
                             }
                         })
@@ -340,15 +386,20 @@ fun RadiosScreen() {
                         if (nfcTagId != null) {
                             Text("Tag ID: $nfcTagId", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                             Text("Technologies: ${nfcTechList.joinToString(", ")}", style = MaterialTheme.typography.bodySmall)
+                            if (nfcTagCapacity > 0) {
+                                Text("Capacity: $nfcTagCapacity bytes  |  Writable: ${nfcTagWritable ?: "N/A"}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.secondary)
+                            }
                             if (nfcRecords.isNotEmpty()) {
                                 Text("NDEF Records:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
                                 nfcRecords.forEach { record ->
-                                    Text("  · $record", style = MaterialTheme.typography.bodySmall,
+                                    Text(record, style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.primary)
                                 }
                             }
                         } else {
-                            Text("Hold an NFC tag near the device…",
+                            Text("Hold an NFC tag near the device...",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                         }
@@ -356,36 +407,154 @@ fun RadiosScreen() {
                 }
             }
 
-            // NFC Writer
+            // NFC Writer — supports Text, URI, MIME
             if (nfcReaderActive && currentTag != null) {
                 Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
                     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Write to Tag", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                        OutlinedTextField(
-                            value = nfcWriteMsg,
-                            onValueChange = { nfcWriteMsg = it },
-                            label = { Text("Text to write") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                        )
+
+                        // Write type selector
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            listOf("Text", "URI", "MIME").forEach { type ->
+                                FilterChip(
+                                    selected = nfcWriteType == type,
+                                    onClick = { nfcWriteType = type },
+                                    label = { Text(type) },
+                                )
+                            }
+                        }
+
+                        when (nfcWriteType) {
+                            "Text" -> {
+                                OutlinedTextField(
+                                    value = nfcWriteMsg,
+                                    onValueChange = { nfcWriteMsg = it },
+                                    label = { Text("Text to write") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true,
+                                )
+                            }
+                            "URI" -> {
+                                // URI prefix selector
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                ) {
+                                    listOf("https://", "http://", "tel:", "mailto:", "geo:", "sms:").forEach { prefix ->
+                                        FilterChip(
+                                            selected = nfcUriPrefix == prefix,
+                                            onClick = { nfcUriPrefix = prefix },
+                                            label = { Text(prefix, style = MaterialTheme.typography.labelSmall) },
+                                            modifier = Modifier.height(28.dp),
+                                        )
+                                    }
+                                }
+                                OutlinedTextField(
+                                    value = nfcWriteMsg,
+                                    onValueChange = { nfcWriteMsg = it },
+                                    label = { Text("URI path") },
+                                    placeholder = { Text("example.com") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true,
+                                )
+                            }
+                            "MIME" -> {
+                                OutlinedTextField(
+                                    value = nfcMimeType,
+                                    onValueChange = { nfcMimeType = it },
+                                    label = { Text("MIME type") },
+                                    placeholder = { Text("text/plain") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true,
+                                )
+                                OutlinedTextField(
+                                    value = nfcWriteMsg,
+                                    onValueChange = { nfcWriteMsg = it },
+                                    label = { Text("Payload") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    maxLines = 3,
+                                )
+                            }
+                        }
+
                         Button(
                             onClick = {
                                 val tag = currentTag ?: run {
                                     nfcWriteStatus = "No tag present"
                                     return@Button
                                 }
-                                nfcWriteStatus = writeNdefText(tag, nfcWriteMsg)
+                                nfcWriteStatus = when (nfcWriteType) {
+                                    "URI" -> writeNdefRecord(tag, NdefRecord.createUri(nfcUriPrefix + nfcWriteMsg))
+                                    "MIME" -> writeNdefRecord(tag, NdefRecord.createMime(nfcMimeType, nfcWriteMsg.toByteArray()))
+                                    else -> writeNdefRecord(tag, NdefRecord.createTextRecord("en", nfcWriteMsg))
+                                }
                             },
                             enabled = nfcWriteMsg.isNotBlank(),
                             modifier = Modifier.fillMaxWidth(),
-                        ) { Text("Write NDEF Text") }
+                        ) { Text("Write NDEF ${nfcWriteType}") }
 
                         if (nfcWriteStatus.isNotEmpty()) {
                             Text(nfcWriteStatus,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (nfcWriteStatus.startsWith("✓")) MaterialTheme.colorScheme.primary
+                                color = if (nfcWriteStatus.startsWith("OK")) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.error)
                         }
+                    }
+                }
+            }
+
+            // NFC Info Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            ) {
+                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("NFC Guide", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                        IconButton(onClick = { showNfcInfo = !showNfcInfo }, modifier = Modifier.size(24.dp)) {
+                            Icon(
+                                if (showNfcInfo) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                "Toggle info",
+                            )
+                        }
+                    }
+                    if (showNfcInfo) {
+                        Text("NDEF Record Types:", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
+                        Text("  Text — Plain text with language code\n" +
+                             "  URI — URLs, phone numbers, emails (compact encoding)\n" +
+                             "  MIME — Any MIME type with custom payload\n" +
+                             "  Smart Poster — URI + metadata (title, icon)",
+                            style = MaterialTheme.typography.bodySmall)
+
+                        Spacer(Modifier.height(4.dp))
+                        Text("Common Tag Types:", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
+                        Text("  NTAG213 — 144 bytes, most common small tags\n" +
+                             "  NTAG215 — 504 bytes, used for Amiibo\n" +
+                             "  NTAG216 — 888 bytes, large capacity\n" +
+                             "  Mifare Classic 1K — 1024 bytes, proprietary",
+                            style = MaterialTheme.typography.bodySmall)
+
+                        Spacer(Modifier.height(4.dp))
+                        Text("Common Uses:", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
+                        Text("  URLs — Share links by tapping\n" +
+                             "  Wi-Fi — Share network credentials\n" +
+                             "  vCard — Share contact information\n" +
+                             "  App Launch — Open specific apps\n" +
+                             "  Smart Home — Trigger automations",
+                            style = MaterialTheme.typography.bodySmall)
+
+                        Spacer(Modifier.height(4.dp))
+                        Text("Best Practices:", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
+                        Text("  - Use URI records for URLs (more compact than text)\n" +
+                             "  - Keep payloads small for faster read/write\n" +
+                             "  - Test with reader before writing to verify\n" +
+                             "  - Lock tags after writing to prevent tampering",
+                            style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -414,8 +583,7 @@ fun RadiosScreen() {
     }
 }
 
-private fun writeNdefText(tag: Tag, text: String): String {
-    val record = NdefRecord.createTextRecord("en", text)
+private fun writeNdefRecord(tag: Tag, record: NdefRecord): String {
     val message = NdefMessage(arrayOf(record))
 
     // Try NDEF first
@@ -429,11 +597,11 @@ private fun writeNdefText(tag: Tag, text: String): String {
             }
             if (message.toByteArray().size > ndef.maxSize) {
                 ndef.close()
-                return "Message too large for tag (${ndef.maxSize} bytes max)"
+                return "Message too large (${message.toByteArray().size}B > ${ndef.maxSize}B max)"
             }
             ndef.writeNdefMessage(message)
             ndef.close()
-            "✓ Written successfully"
+            "OK Written successfully (${message.toByteArray().size} bytes)"
         } catch (e: Exception) {
             "Write error: ${e.message}"
         }
@@ -446,7 +614,7 @@ private fun writeNdefText(tag: Tag, text: String): String {
             formatable.connect()
             formatable.format(message)
             formatable.close()
-            "✓ Formatted and written"
+            "OK Formatted and written"
         } catch (e: Exception) {
             "Format error: ${e.message}"
         }
