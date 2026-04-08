@@ -43,6 +43,7 @@ private data class FeatureCard(
 )
 
 private val features = listOf(
+    FeatureCard(Routes.TICKED,       "Ticked",        "Log & process tracker",       Icons.Default.CheckCircle),
     FeatureCard(Routes.TORCH,        "Torch",         "Toggle flash LED",            Icons.Default.FlashlightOn),
     FeatureCard(Routes.CAMERA,       "Camera",        "Preview & capture",           Icons.Default.CameraAlt),
     FeatureCard(Routes.VIBRATION,    "Vibration",     "Patterns & waveforms",        Icons.Default.Vibration),
@@ -69,6 +70,7 @@ fun DashboardScreen(navController: NavController) {
         Routes.SENSORS to accelMetric,
         Routes.RADIOS to wifiMetric,
         Routes.MIC to lightMetric,
+        Routes.TICKED to "Offline tracker",
         Routes.TORCH to "Tap to toggle",
         Routes.CAMERA to "Ready",
         Routes.VIBRATION to "Motor ready",

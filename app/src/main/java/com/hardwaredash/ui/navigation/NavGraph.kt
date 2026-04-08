@@ -12,6 +12,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 import com.hardwaredash.ui.screens.*
+import com.hardwaredash.ui.ticked.TickedScreen
 
 // ─── Route constants ──────────────────────────────────────────────────────────
 object Routes {
@@ -25,6 +26,7 @@ object Routes {
     const val NOTIFICATIONS = "notifications"
     const val LOCKSCREEN   = "lockscreen"
     const val BATTERY      = "battery"
+    const val TICKED       = "ticked"
 }
 
 data class BottomNavItem(
@@ -36,6 +38,7 @@ data class BottomNavItem(
 
 private val bottomNavItems = listOf(
     BottomNavItem(Routes.DASHBOARD, "Home",    Icons.Filled.Dashboard,    Icons.Outlined.Dashboard),
+    BottomNavItem(Routes.TICKED,    "Ticked",  Icons.Filled.CheckCircle,  Icons.Outlined.CheckCircle),
     BottomNavItem(Routes.TORCH,     "Torch",   Icons.Filled.FlashlightOn, Icons.Outlined.FlashlightOn),
     BottomNavItem(Routes.CAMERA,    "Camera",  Icons.Filled.CameraAlt,   Icons.Outlined.CameraAlt),
     BottomNavItem(Routes.RADIOS,    "Radios",  Icons.Filled.Wifi,        Icons.Outlined.Wifi),
@@ -92,6 +95,7 @@ fun NavGraph() {
             modifier = Modifier.padding(innerPadding),
         ) {
             composable(Routes.DASHBOARD)     { DashboardScreen(navController) }
+            composable(Routes.TICKED)        { TickedScreen() }
             composable(Routes.TORCH)         { TorchScreen() }
             composable(Routes.CAMERA)        { CameraScreen() }
             composable(Routes.VIBRATION)     { VibrationScreen() }
