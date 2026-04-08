@@ -496,7 +496,122 @@ fun parseHexColor(hex: String): Color? {
 
 @Composable
 private fun LogInputCard(vm: TickedViewModel) {
-    // STUB — replaced in 4B
+    var text by remember { mutableStateOf("") }
+    var showCustom by remember { mutableStateOf(false) }
+    var customDate by remember { mutableStateOf(LocalDate.now()) }
+    var customTime by remember { mutableStateOf(LocalTime.now().withSecond(0).withNano(0)) }
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            // Main input row
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    placeholder = { Text("Optional note\u2026", style = MaterialTheme.typography.bodyMedium) },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                    ),
+                    shape = MaterialTheme.shapes.small,
+                )
+                Spacer(Modifier.width(8.dp))
+                // Custom timestamp toggle
+                IconButton(
+                    onClick = { showCustom = !showCustom },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = if (showCustom) MaterialTheme.colorScheme.tertiary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
+                ) {
+                    Icon(Icons.Filled.EditCalendar, "Custom timestamp")
+                }
+                // Quick-log button
+                Button(
+                    onClick = {
+                        vm.addEntry(text)
+                        text = ""
+                    },
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    shape = MaterialTheme.shapes.small,
+                ) {
+                    Text("Log", style = MaterialTheme.typography.labelLarge)
+                }
+            }
+
+            // Custom timestamp panel
+            AnimatedVisibility(visible = showCustom) {
+                Column(modifier = Modifier.padding(top = 8.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        // Date field
+                        OutlinedTextField(
+                            value = customDate.toString(),
+                            onValueChange = {
+                                try { customDate = LocalDate.parse(it) } catch (_: Exception) {}
+                            },
+                            label = { Text("Date") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            textStyle = MaterialTheme.typography.bodySmall,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            ),
+                            shape = MaterialTheme.shapes.small,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        // Time field
+                        OutlinedTextField(
+                            value = "%02d:%02d".format(customTime.hour, customTime.minute),
+                            onValueChange = { v ->
+                                try {
+                                    val parts = v.split(":")
+                                    if (parts.size == 2) {
+                                        customTime = LocalTime.of(parts[0].toInt(), parts[1].toInt())
+                                    }
+                                } catch (_: Exception) {}
+                            },
+                            label = { Text("Time") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            textStyle = MaterialTheme.typography.bodySmall,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            ),
+                            shape = MaterialTheme.shapes.small,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        FilledTonalButton(
+                            onClick = {
+                                vm.addCustomEntry(text, customDate, customTime)
+                                text = ""
+                                showCustom = false
+                            },
+                            shape = MaterialTheme.shapes.small,
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
+                                contentColor = MaterialTheme.colorScheme.tertiary,
+                            ),
+                        ) {
+                            Text("\u2726 Log", style = MaterialTheme.typography.labelLarge)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -512,12 +627,195 @@ private fun LogToolbar(
     filteredCount: Int,
     onClearAll: () -> Unit,
 ) {
-    // STUB — replaced in 4B
+    var showFilters by remember { mutableStateOf(false) }
+    var showClearConfirm by remember { mutableStateOf(false) }
+    val hasActiveFilter = typeFilter != EntryTypeFilter.ALL || search.isNotBlank() || dateFilter.isNotBlank()
+
+    Column {
+        // Top row: result count + filter toggle + view toggle + clear
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            // Result count
+            Text(
+                text = if (hasActiveFilter) "$filteredCount / $totalCount" else "$totalCount entries",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.weight(1f))
+
+            // Filter toggle
+            IconButton(onClick = { showFilters = !showFilters }) {
+                BadgedBox(
+                    badge = {
+                        if (hasActiveFilter) {
+                            Badge(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(8.dp),
+                            ) {}
+                        }
+                    }
+                ) {
+                    Icon(
+                        if (showFilters) Icons.Filled.FilterList else Icons.Outlined.FilterList,
+                        "Filters",
+                        tint = if (hasActiveFilter) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            // View mode toggle
+            IconButton(onClick = {
+                vm.setViewMode(if (viewMode == ViewMode.LIST) ViewMode.TIMELINE else ViewMode.LIST)
+            }) {
+                Icon(
+                    if (viewMode == ViewMode.LIST) Icons.Filled.ViewList else Icons.Filled.ViewTimeline,
+                    "Toggle view",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            // Clear all
+            if (totalCount > 0) {
+                IconButton(onClick = { showClearConfirm = true }) {
+                    Icon(Icons.Outlined.DeleteSweep, "Clear all", tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f))
+                }
+            }
+        }
+
+        // Filter panel
+        AnimatedVisibility(visible = showFilters) {
+            FilterPanel(
+                searchValue = search,
+                onSearchChange = { vm.setEntrySearch(it) },
+                dateValue = dateFilter,
+                onDateChange = { vm.setEntryDateFilter(it) },
+                filterChips = {
+                    EntryTypeFilter.entries.forEach { f ->
+                        FilterChip(
+                            selected = typeFilter == f,
+                            onClick = { vm.setEntryTypeFilter(f) },
+                            label = { Text(f.label, style = MaterialTheme.typography.labelSmall) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                selectedLabelColor = MaterialTheme.colorScheme.primary,
+                            ),
+                            modifier = Modifier.height(32.dp),
+                        )
+                    }
+                },
+                onClearFilters = { vm.clearEntryFilters() },
+                hasActiveFilter = hasActiveFilter,
+            )
+        }
+
+        // Sort controls
+        SortRow(
+            sortField = sortField,
+            sortDir = sortDir,
+            onToggleSort = { vm.toggleEntrySort(it) },
+            enabled = viewMode == ViewMode.LIST,
+        )
+    }
+
+    // Clear-all confirmation dialog
+    if (showClearConfirm) {
+        AlertDialog(
+            onDismissRequest = { showClearConfirm = false },
+            title = { Text("Clear all entries?") },
+            text = { Text("This will delete all $totalCount entries. This cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = { onClearAll(); showClearConfirm = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text("Delete all") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+            },
+        )
+    }
 }
 
 @Composable
 private fun ProcessInputCard(vm: TickedViewModel) {
-    // STUB — replaced in 4B
+    var text by remember { mutableStateOf("") }
+    var showTemplates by remember { mutableStateOf(false) }
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    placeholder = { Text("Process name\u2026", style = MaterialTheme.typography.bodyMedium) },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                    ),
+                    shape = MaterialTheme.shapes.small,
+                )
+                Spacer(Modifier.width(8.dp))
+
+                // Template dropdown
+                Box {
+                    IconButton(onClick = { showTemplates = !showTemplates }) {
+                        Icon(
+                            Icons.Filled.Dashboard,
+                            "Templates",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showTemplates,
+                        onDismissRequest = { showTemplates = false },
+                    ) {
+                        ProcessTemplate.entries.forEach { tpl ->
+                            DropdownMenuItem(
+                                text = { Text(tpl.baseName) },
+                                onClick = {
+                                    vm.addProcessFromTemplate(tpl)
+                                    showTemplates = false
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        when (tpl) {
+                                            ProcessTemplate.DAILY_ROUTINE -> Icons.Filled.WbSunny
+                                            ProcessTemplate.CONTENT_CREATION -> Icons.Filled.Create
+                                            ProcessTemplate.BUG_FIX -> Icons.Filled.BugReport
+                                        },
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                    )
+                                },
+                            )
+                        }
+                    }
+                }
+
+                Button(
+                    onClick = {
+                        vm.addProcess(text)
+                        text = ""
+                    },
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    shape = MaterialTheme.shapes.small,
+                ) {
+                    Text("Add", style = MaterialTheme.typography.labelLarge)
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -532,7 +830,264 @@ private fun ProcessToolbar(
     filteredCount: Int,
     onClearAll: () -> Unit,
 ) {
-    // STUB — replaced in 4B
+    var showFilters by remember { mutableStateOf(false) }
+    var showClearConfirm by remember { mutableStateOf(false) }
+    val hasActiveFilter = typeFilter != ProcessTypeFilter.ALL || search.isNotBlank() || dateFilter.isNotBlank()
+
+    Column {
+        // Top row: result count + filter toggle + clear
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = if (hasActiveFilter) "$filteredCount / $totalCount" else "$totalCount processes",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.weight(1f))
+
+            // Filter toggle
+            IconButton(onClick = { showFilters = !showFilters }) {
+                BadgedBox(
+                    badge = {
+                        if (hasActiveFilter) {
+                            Badge(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(8.dp),
+                            ) {}
+                        }
+                    }
+                ) {
+                    Icon(
+                        if (showFilters) Icons.Filled.FilterList else Icons.Outlined.FilterList,
+                        "Filters",
+                        tint = if (hasActiveFilter) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            if (totalCount > 0) {
+                IconButton(onClick = { showClearConfirm = true }) {
+                    Icon(Icons.Outlined.DeleteSweep, "Clear all", tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f))
+                }
+            }
+        }
+
+        // Filter panel
+        AnimatedVisibility(visible = showFilters) {
+            FilterPanel(
+                searchValue = search,
+                onSearchChange = { vm.setProcSearch(it) },
+                dateValue = dateFilter,
+                onDateChange = { vm.setProcDateFilter(it) },
+                filterChips = {
+                    ProcessTypeFilter.entries.forEach { f ->
+                        FilterChip(
+                            selected = typeFilter == f,
+                            onClick = { vm.setProcTypeFilter(f) },
+                            label = { Text(f.label, style = MaterialTheme.typography.labelSmall) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = if (f == ProcessTypeFilter.OVERDUE)
+                                    MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
+                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                selectedLabelColor = if (f == ProcessTypeFilter.OVERDUE)
+                                    MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.primary,
+                            ),
+                            modifier = Modifier.height(32.dp),
+                        )
+                    }
+                },
+                onClearFilters = { vm.clearProcFilters() },
+                hasActiveFilter = hasActiveFilter,
+            )
+        }
+
+        // Sort controls
+        SortRow(
+            sortField = sortField,
+            sortDir = sortDir,
+            onToggleSort = { vm.toggleProcSort(it) },
+            enabled = true,
+        )
+    }
+
+    // Clear-all confirmation dialog
+    if (showClearConfirm) {
+        AlertDialog(
+            onDismissRequest = { showClearConfirm = false },
+            title = { Text("Clear all processes?") },
+            text = { Text("This will delete all $totalCount processes and their reminders. This cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = { onClearAll(); showClearConfirm = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text("Delete all") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+            },
+        )
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Shared: FilterPanel + SortRow (used by both tabs)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun FilterPanel(
+    searchValue: String,
+    onSearchChange: (String) -> Unit,
+    dateValue: String,
+    onDateChange: (String) -> Unit,
+    filterChips: @Composable () -> Unit,
+    onClearFilters: () -> Unit,
+    hasActiveFilter: Boolean,
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+    ) {
+        Column(modifier = Modifier.padding(10.dp)) {
+            // Search
+            OutlinedTextField(
+                value = searchValue,
+                onValueChange = onSearchChange,
+                placeholder = { Text("Search\u2026", style = MaterialTheme.typography.bodySmall) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = MaterialTheme.typography.bodySmall,
+                leadingIcon = { Icon(Icons.Filled.Search, null, Modifier.size(18.dp)) },
+                trailingIcon = {
+                    if (searchValue.isNotBlank()) {
+                        IconButton(onClick = { onSearchChange("") }, modifier = Modifier.size(18.dp)) {
+                            Icon(Icons.Filled.Clear, "Clear")
+                        }
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                ),
+                shape = MaterialTheme.shapes.small,
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            // Date filter
+            OutlinedTextField(
+                value = dateValue,
+                onValueChange = onDateChange,
+                placeholder = { Text("YYYY-MM-DD", style = MaterialTheme.typography.bodySmall) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = MaterialTheme.typography.bodySmall,
+                leadingIcon = { Icon(Icons.Filled.CalendarMonth, null, Modifier.size(18.dp)) },
+                trailingIcon = {
+                    if (dateValue.isNotBlank()) {
+                        IconButton(onClick = { onDateChange("") }, modifier = Modifier.size(18.dp)) {
+                            Icon(Icons.Filled.Clear, "Clear")
+                        }
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                ),
+                shape = MaterialTheme.shapes.small,
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            // Filter chips
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            ) {
+                filterChips()
+            }
+
+            // Clear filters
+            if (hasActiveFilter) {
+                Spacer(Modifier.height(4.dp))
+                TextButton(
+                    onClick = onClearFilters,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                ) {
+                    Text("Clear filters", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SortRow(
+    sortField: SortField,
+    sortDir: SortDirection,
+    onToggleSort: (SortField) -> Unit,
+    enabled: Boolean,
+) {
+    val alpha = if (enabled) 1f else 0.35f
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp)
+            .then(if (!enabled) Modifier else Modifier),
+    ) {
+        Text("Sort:", style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha))
+
+        // Time sort
+        val timeActive = sortField == SortField.TIME
+        TextButton(
+            onClick = { onToggleSort(SortField.TIME) },
+            enabled = enabled,
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = if (timeActive) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+        ) {
+            Text("Time", style = MaterialTheme.typography.labelSmall)
+            if (timeActive) {
+                Icon(
+                    if (sortDir == SortDirection.DESC) Icons.Filled.ArrowDownward else Icons.Filled.ArrowUpward,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                )
+            }
+        }
+
+        // Text sort
+        val textActive = sortField == SortField.TEXT
+        TextButton(
+            onClick = { onToggleSort(SortField.TEXT) },
+            enabled = enabled,
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = if (textActive) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+        ) {
+            Text("Name", style = MaterialTheme.typography.labelSmall)
+            if (textActive) {
+                Icon(
+                    if (sortDir == SortDirection.DESC) Icons.Filled.ArrowDownward else Icons.Filled.ArrowUpward,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                )
+            }
+        }
+    }
 }
 
 // ── 4C stubs: list views ────────────────────────────────────────────
