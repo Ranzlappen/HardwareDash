@@ -1,7 +1,7 @@
 name: Build Signed Release APK
 
 on:
-  workflow_dispatch:   # Run manually from your phone
+  workflow_dispatch:
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
           java-version: '17'
 
       - name: Decode Keystore
-        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > HardwareDash-release.jks
+        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > app/HardwareDash-release.jks
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
