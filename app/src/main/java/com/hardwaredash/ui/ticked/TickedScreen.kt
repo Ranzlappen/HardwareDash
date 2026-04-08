@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -252,8 +253,20 @@ private fun TickedTabRow(
         indicator = { tabPositions ->
             if (tabPositions.isNotEmpty()) {
                 val idx = if (activeTab == ActiveTab.LOG) 0 else 1
+                val currentTabWidth by animateDpAsState(
+                    targetValue = tabPositions[idx].width,
+                    label = "tabWidth",
+                )
+                val indicatorOffset by animateDpAsState(
+                    targetValue = tabPositions[idx].left,
+                    label = "tabOffset",
+                )
                 TabRowDefaults.SecondaryIndicator(
-                    Modifier.tabIndicatorOffset(tabPositions[idx]),
+                    Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.BottomStart)
+                        .offset(x = indicatorOffset)
+                        .width(currentTabWidth),
                     color = MaterialTheme.colorScheme.primary,
                 )
             }

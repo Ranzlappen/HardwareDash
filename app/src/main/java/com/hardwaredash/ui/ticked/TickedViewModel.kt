@@ -54,8 +54,13 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
     // ── Derived state ────────────────────────────────────────────────
 
     val filteredEntries: StateFlow<List<TickedEntry>> = combine(
-        _store, _entryTypeFilter, _entrySearch, _entryDateFilter, _entrySortField, _entrySortDir
-    ) { store, typeFilter, search, dateFilter, sortField, sortDir ->
+        _store,
+        _entryTypeFilter,
+        _entrySearch,
+        _entryDateFilter,
+        combine(_entrySortField, _entrySortDir) { f, d -> f to d }
+    ) { store, typeFilter, search, dateFilter, sortPair ->
+        val (sortField, sortDir) = sortPair
         var list = store.entries
 
         // Type filter
@@ -86,8 +91,13 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val filteredProcesses: StateFlow<List<TickedProcess>> = combine(
-        _store, _procTypeFilter, _procSearch, _procDateFilter, _procSortField, _procSortDir
-    ) { store, typeFilter, search, dateFilter, sortField, sortDir ->
+        _store,
+        _procTypeFilter,
+        _procSearch,
+        _procDateFilter,
+        combine(_procSortField, _procSortDir) { f, d -> f to d }
+    ) { store, typeFilter, search, dateFilter, sortPair ->
+        val (sortField, sortDir) = sortPair
         var list = store.processes
 
         // Type filter
