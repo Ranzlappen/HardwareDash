@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 // ─── Lens descriptor ─────────────────────────────────────────────────────────
 private data class LensInfo(
@@ -100,15 +102,18 @@ private fun CameraPreview() {
     val context        = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // Available lenses
-    val lenses = remember { enumerateLenses(context) }
+    // Available lenses — re-enumerate if initially empty
+    var lenses by remember { mutableStateOf(enumerateLenses(context)) }
     var selectedLensIdx by remember { mutableIntStateOf(
-        // Default to first rear lens
         lenses.indexOfFirst { it.lensFacing == CameraCharacteristics.LENS_FACING_BACK }.coerceAtLeast(0)
     ) }
 
     var statusMsg by remember { mutableStateOf("") }
     var showControls by remember { mutableStateOf(false) }
+
+    // Cached provider — resolved once, reused for instant switching
+    var cachedProvider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
+    var previewViewRef by remember { mutableStateOf<PreviewView?>(null) }
 
     // Camera references
     var imageCaptureRef by remember { mutableStateOf<ImageCapture?>(null) }
@@ -127,6 +132,41 @@ private fun CameraPreview() {
 
     // Focus mode
     var tapToFocusEnabled by remember { mutableStateOf(false) }
+
+    // Resolve provider once asynchronously
+    LaunchedEffect(Unit) {
+        val provider = suspendCoroutine { cont ->
+            val future = ProcessCameraProvider.getInstance(context)
+            future.addListener(
+                { cont.resume(future.get()) },
+                ContextCompat.getMainExecutor(context)
+            )
+        }
+        cachedProvider = provider
+        // Re-enumerate lenses now that camera service is fully ready
+        val freshLenses = enumerateLenses(context)
+        if (freshLenses.size > lenses.size) {
+            lenses = freshLenses
+            selectedLensIdx = freshLenses.indexOfFirst {
+                it.lensFacing == CameraCharacteristics.LENS_FACING_BACK
+            }.coerceAtLeast(0)
+        }
+    }
+
+    // Bind camera whenever lens selection or provider changes — instant switching
+    LaunchedEffect(selectedLensIdx, cachedProvider, previewViewRef) {
+        val provider = cachedProvider ?: return@LaunchedEffect
+        val pv = previewViewRef ?: return@LaunchedEffect
+        val cam = bindCamera(
+            provider       = provider,
+            previewView    = pv,
+            lifecycleOwner = lifecycleOwner,
+            lensFacing     = lenses.getOrNull(selectedLensIdx)?.lensFacing
+                ?: CameraSelector.LENS_FACING_BACK,
+        )
+        imageCaptureRef = cam?.second
+        cameraRef = cam?.first
+    }
 
     // Observe zoom state from CameraInfo
     LaunchedEffect(cameraRef) {
@@ -164,37 +204,7 @@ private fun CameraPreview() {
                         statusMsg = "Focus point set"
                     }
                 },
-            factory = { ctx ->
-                PreviewView(ctx).also { previewView ->
-                    val provider = ProcessCameraProvider.getInstance(ctx)
-                    provider.addListener({
-                        val cam = bindCamera(
-                            provider       = provider.get(),
-                            previewView    = previewView,
-                            lifecycleOwner = lifecycleOwner,
-                            lensFacing     = lenses.getOrNull(selectedLensIdx)?.lensFacing
-                                ?: CameraSelector.LENS_FACING_BACK,
-                        )
-                        imageCaptureRef = cam?.second
-                        cameraRef = cam?.first
-                    }, ContextCompat.getMainExecutor(ctx))
-                }
-            },
-            update = { previewView ->
-                // Re-bind when lens changes
-                val provider = ProcessCameraProvider.getInstance(context)
-                provider.addListener({
-                    val cam = bindCamera(
-                        provider       = provider.get(),
-                        previewView    = previewView,
-                        lifecycleOwner = lifecycleOwner,
-                        lensFacing     = lenses.getOrNull(selectedLensIdx)?.lensFacing
-                            ?: CameraSelector.LENS_FACING_BACK,
-                    )
-                    imageCaptureRef = cam?.second
-                    cameraRef = cam?.first
-                }, ContextCompat.getMainExecutor(context))
-            }
+            factory = { ctx -> PreviewView(ctx).also { previewViewRef = it } },
         )
 
         // ── Controls overlay ─────────────────────────────────────────────
