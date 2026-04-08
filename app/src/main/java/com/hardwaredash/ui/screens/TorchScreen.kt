@@ -35,6 +35,10 @@ fun TorchScreen() {
     var hasFlash by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
 
+    // Strobe state
+    var strobeActive by remember { mutableStateOf(false) }
+    var strobeFreqHz by remember { mutableFloatStateOf(5f) }
+
     // Brightness state
     var brightness     by remember { mutableFloatStateOf(0.5f) }
     var autoBrightness by remember { mutableStateOf(false) }
@@ -87,6 +91,35 @@ fun TorchScreen() {
             }
             delay(2000L)
         }
+    }
+
+    // Strobe loop
+    LaunchedEffect(strobeActive, strobeFreqHz) {
+        if (!strobeActive || !hasFlash) return@LaunchedEffect
+        val cm = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val cid = try {
+            cm.cameraIdList.first { id ->
+                cm.getCameraCharacteristics(id)
+                    .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+            }
+        } catch (_: Exception) { return@LaunchedEffect }
+
+        val halfPeriodMs = (500f / strobeFreqHz).toLong().coerceAtLeast(10L)
+        try {
+            while (strobeActive) {
+                cm.setTorchMode(cid, true)
+                delay(halfPeriodMs)
+                cm.setTorchMode(cid, false)
+                delay(halfPeriodMs)
+            }
+        } finally {
+            try { cm.setTorchMode(cid, false) } catch (_: Exception) {}
+        }
+    }
+
+    // Stop strobe when leaving screen
+    DisposableEffect(Unit) {
+        onDispose { strobeActive = false }
     }
 
     // Pulsing glow animation when torch is on
@@ -155,34 +188,72 @@ fun TorchScreen() {
 
         Spacer(Modifier.height(40.dp))
 
-        // ── Toggle button ────────────────────────────────────────────────────
-        Button(
-            enabled = hasFlash,
-            onClick = {
-                errorMsg = null
-                try {
-                    val cm  = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-                    val cid = cm.cameraIdList.first { id ->
-                        cm.getCameraCharacteristics(id)
-                            .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
-                    }
-                    cm.setTorchMode(cid, !torchOn)
-                } catch (e: Exception) {
-                    errorMsg = e.message
-                }
-            },
-            shape = MaterialTheme.shapes.medium,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (torchOn) MaterialTheme.colorScheme.primary
-                                 else         MaterialTheme.colorScheme.surfaceVariant
-            ),
-            modifier = Modifier
-                .fillMaxWidth(0.6f)
-                .height(56.dp),
+        // ── Toggle buttons ───────────────────────────────────────────────────
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth(0.85f),
         ) {
+            // Turn ON/OFF
+            Button(
+                enabled = hasFlash && !strobeActive,
+                onClick = {
+                    errorMsg = null
+                    try {
+                        val cm  = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+                        val cid = cm.cameraIdList.first { id ->
+                            cm.getCameraCharacteristics(id)
+                                .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+                        }
+                        cm.setTorchMode(cid, !torchOn)
+                    } catch (e: Exception) {
+                        errorMsg = e.message
+                    }
+                },
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (torchOn) MaterialTheme.colorScheme.primary
+                                     else         MaterialTheme.colorScheme.surfaceVariant
+                ),
+                modifier = Modifier.weight(1f).height(56.dp),
+            ) {
+                Text(
+                    if (torchOn) "Turn OFF" else "Turn ON",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+
+            // Strobe
+            Button(
+                enabled = hasFlash,
+                onClick = { strobeActive = !strobeActive },
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (strobeActive) MaterialTheme.colorScheme.error
+                                     else             MaterialTheme.colorScheme.tertiary
+                ),
+                modifier = Modifier.weight(1f).height(56.dp),
+            ) {
+                Text(
+                    if (strobeActive) "Stop" else "Strobe",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+        }
+
+        // Strobe frequency slider
+        if (strobeActive || hasFlash) {
+            Spacer(Modifier.height(8.dp))
             Text(
-                if (torchOn) "Turn OFF" else "Turn ON",
-                style = MaterialTheme.typography.titleMedium,
+                "Strobe: ${"%.0f".format(strobeFreqHz)} Hz",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            )
+            Slider(
+                value = strobeFreqHz,
+                onValueChange = { strobeFreqHz = it },
+                valueRange = 1f..20f,
+                steps = 18,
+                modifier = Modifier.fillMaxWidth(0.7f),
             )
         }
 
