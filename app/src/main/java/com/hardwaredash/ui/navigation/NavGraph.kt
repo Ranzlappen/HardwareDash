@@ -1,6 +1,8 @@
 package com.hardwaredash.ui.navigation
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -16,14 +18,12 @@ import com.hardwaredash.ui.ticked.TickedScreen
 
 // ─── Route constants ──────────────────────────────────────────────────────────
 object Routes {
-    const val DASHBOARD    = "dashboard"
     const val TORCH        = "torch"
     const val CAMERA       = "camera"
     const val VIBRATION    = "vibration"
     const val MIC          = "mic"
     const val RADIOS       = "radios"
     const val SENSORS      = "sensors"
-    const val NOTIFICATIONS = "notifications"
     const val LOCKSCREEN   = "lockscreen"
     const val BATTERY      = "battery"
     const val TICKED       = "ticked"
@@ -37,12 +37,15 @@ data class BottomNavItem(
 )
 
 private val bottomNavItems = listOf(
-    BottomNavItem(Routes.DASHBOARD, "Home",    Icons.Filled.Dashboard,    Icons.Outlined.Dashboard),
-    BottomNavItem(Routes.TICKED,    "Ticked",  Icons.Filled.CheckCircle,  Icons.Outlined.CheckCircle),
-    BottomNavItem(Routes.TORCH,     "Torch",   Icons.Filled.FlashlightOn, Icons.Outlined.FlashlightOn),
-    BottomNavItem(Routes.CAMERA,    "Camera",  Icons.Filled.CameraAlt,   Icons.Outlined.CameraAlt),
-    BottomNavItem(Routes.RADIOS,    "Radios",  Icons.Filled.Wifi,        Icons.Outlined.Wifi),
-    BottomNavItem(Routes.BATTERY,   "Battery", Icons.Filled.BatteryStd,  Icons.Outlined.BatteryStd),
+    BottomNavItem(Routes.TICKED,     "Ticked",    Icons.Filled.CheckCircle,    Icons.Outlined.CheckCircle),
+    BottomNavItem(Routes.TORCH,      "Torch",     Icons.Filled.FlashlightOn,  Icons.Outlined.FlashlightOn),
+    BottomNavItem(Routes.CAMERA,     "Camera",    Icons.Filled.CameraAlt,     Icons.Outlined.CameraAlt),
+    BottomNavItem(Routes.VIBRATION,  "Vibration", Icons.Filled.Vibration,     Icons.Outlined.Vibration),
+    BottomNavItem(Routes.MIC,        "Mic",       Icons.Filled.Mic,           Icons.Outlined.Mic),
+    BottomNavItem(Routes.RADIOS,     "Radios",    Icons.Filled.Wifi,          Icons.Outlined.Wifi),
+    BottomNavItem(Routes.SENSORS,    "Sensors",   Icons.Filled.Analytics,     Icons.Outlined.Analytics),
+    BottomNavItem(Routes.BATTERY,    "Battery",   Icons.Filled.BatteryStd,    Icons.Outlined.BatteryStd),
+    BottomNavItem(Routes.LOCKSCREEN, "Lock",      Icons.Filled.Lock,          Icons.Outlined.Lock),
 )
 
 @Composable
@@ -58,6 +61,7 @@ fun NavGraph() {
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 tonalElevation = NavigationBarDefaults.Elevation,
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
             ) {
                 bottomNavItems.forEach { item ->
                     val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
@@ -91,10 +95,9 @@ fun NavGraph() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.DASHBOARD,
+            startDestination = Routes.TICKED,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(Routes.DASHBOARD)     { DashboardScreen(navController) }
             composable(Routes.TICKED)        { TickedScreen() }
             composable(Routes.TORCH)         { TorchScreen() }
             composable(Routes.CAMERA)        { CameraScreen() }
@@ -102,7 +105,6 @@ fun NavGraph() {
             composable(Routes.MIC)           { MicScreen() }
             composable(Routes.RADIOS)        { RadiosScreen() }
             composable(Routes.SENSORS)       { SensorsScreen() }
-            composable(Routes.NOTIFICATIONS) { NotificationsScreen() }
             composable(Routes.LOCKSCREEN)    { LockScreenScreen() }
             composable(Routes.BATTERY)       { BatteryScreen() }
         }

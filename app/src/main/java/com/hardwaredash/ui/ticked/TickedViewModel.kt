@@ -88,7 +88,7 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
 
         // Sort
         sortList(list, sortField, sortDir)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val filteredProcesses: StateFlow<List<TickedProcess>> = combine(
         _store,
@@ -128,10 +128,10 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
 
         // Sort
         sortList(list, sortField, sortDir)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val overdueCount: StateFlow<Int> = _store.map { countOverdue(it.processes) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, 0)
 
     // ── Init ─────────────────────────────────────────────────────────
 
@@ -149,7 +149,6 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
     // ═══════════════════════════════════════════════════════════════════
 
     fun addEntry(text: String) {
-        if (text.isBlank()) return
         val entry = TickedEntry(
             id = UUID.randomUUID().toString(),
             isoDate = Instant.now().toString(),
@@ -161,7 +160,6 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun addCustomEntry(text: String, date: LocalDate, time: LocalTime) {
-        if (text.isBlank()) return
         val ldt = LocalDateTime.of(date, time)
         val iso = ldt.atZone(ZoneId.systemDefault()).toInstant().toString()
         val entry = TickedEntry(

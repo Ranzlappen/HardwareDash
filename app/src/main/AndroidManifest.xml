@@ -124,13 +124,28 @@
             </intent-filter>
         </receiver>
 
+        <!-- ── Schedule Action Receiver ──────────────────────────────── -->
+        <receiver
+            android:name=".receivers.ScheduleActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.hardwaredash.SCHEDULE_ACTION_FIRE" />
+            </intent-filter>
+        </receiver>
+
         <!-- ── Foreground Service ─────────────────────────────────── -->
         <service
             android:name=".services.HardwareService"
             android:exported="false"
             android:foregroundServiceType="camera|microphone" />
 
-        <!-- ── Home Screen Widget ─────────────────────────────────── -->
+        <!-- ── Strobe Service ──────────────────────────────────────── -->
+        <service
+            android:name=".services.StrobeService"
+            android:exported="false"
+            android:foregroundServiceType="camera" />
+
+        <!-- ── Home Screen Widget (Metric) ───────────────────────── -->
         <receiver
             android:name=".widget.HardwareDashWidgetProvider"
             android:exported="true">
@@ -141,6 +156,141 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_info" />
         </receiver>
+
+        <!-- ── Log Now Widget ────────────────────────────────────── -->
+        <receiver
+            android:name=".widget.LogNowWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_LOG_NOW" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_log_now_info" />
+        </receiver>
+
+        <!-- ── Flashlight Widget ─────────────────────────────────── -->
+        <receiver
+            android:name=".widget.FlashlightWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_FLASHLIGHT_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_flashlight_info" />
+        </receiver>
+
+        <!-- ── Strobe Widget ─────────────────────────────────────── -->
+        <receiver
+            android:name=".widget.StrobeWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_STROBE_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_strobe_info" />
+        </receiver>
+
+        <!-- ── Camera Snapshot Widget ────────────────────────────── -->
+        <receiver
+            android:name=".widget.CameraSnapshotWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_CAMERA_SNAPSHOT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_camera_snapshot_info" />
+        </receiver>
+
+        <!-- ── Video Toggle Widget ───────────────────────────────── -->
+        <receiver
+            android:name=".widget.VideoToggleWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_VIDEO_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_video_toggle_info" />
+        </receiver>
+
+        <!-- ── Video Record Service ──────────────────────────────── -->
+        <service
+            android:name=".services.VideoRecordService"
+            android:exported="false"
+            android:foregroundServiceType="camera" />
+
+        <!-- ── Voice Record Widget ───────────────────────────────── -->
+        <receiver
+            android:name=".widget.VoiceRecordWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_VOICE_RECORD_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_voice_record_info" />
+        </receiver>
+
+        <!-- ── Voice Record Service ──────────────────────────────── -->
+        <service
+            android:name=".services.VoiceRecordService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
+        <!-- ── Phone Ring Widget ─────────────────────────────────── -->
+        <receiver
+            android:name=".widget.PhoneRingWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_RING_30S" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_phone_ring_info" />
+        </receiver>
+
+        <!-- ── Notify in 30s Widget ──────────────────────────────── -->
+        <receiver
+            android:name=".widget.NotifyWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_NOTIFY_30S" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_notify_info" />
+        </receiver>
+
+        <!-- ── dB Meter Widget ───────────────────────────────────── -->
+        <receiver
+            android:name=".widget.DbMeterWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_DB_METER_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_db_meter_info" />
+        </receiver>
+
+        <!-- ── dB Meter Service ──────────────────────────────────── -->
+        <service
+            android:name=".services.DbMeterService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
 
         <activity
             android:name=".widget.WidgetConfigActivity"
