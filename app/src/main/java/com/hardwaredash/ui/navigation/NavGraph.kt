@@ -31,6 +31,7 @@ object Routes {
     const val BATTERY      = "battery"
     const val LOGBOOK      = "logbook"
     const val SETTINGS     = "settings"
+    const val FILE_META    = "file_meta"
 }
 
 data class BottomNavItem(
@@ -50,6 +51,7 @@ private val bottomNavItems = listOf(
     BottomNavItem(Routes.SENSORS,    "Sensors",   Icons.Filled.Analytics,     Icons.Outlined.Analytics),
     BottomNavItem(Routes.BATTERY,    "Battery",   Icons.Filled.BatteryStd,    Icons.Outlined.BatteryStd),
     BottomNavItem(Routes.LOCKSCREEN, "Lock",      Icons.Filled.Lock,          Icons.Outlined.Lock),
+    BottomNavItem(Routes.FILE_META,  "Files",     Icons.Filled.InsertDriveFile, Icons.Outlined.InsertDriveFile),
     BottomNavItem(Routes.SETTINGS,   "Settings",  Icons.Filled.Settings,      Icons.Outlined.Settings),
 )
 
@@ -122,6 +124,7 @@ fun NavGraph() {
             composable(Routes.SENSORS)       { SensorsScreen() }
             composable(Routes.LOCKSCREEN)    { LockScreenScreen() }
             composable(Routes.BATTERY)       { BatteryScreen() }
+            composable(Routes.FILE_META)     { FileMetadataScreen() }
             composable(Routes.SETTINGS)      { SettingsScreen() }
         }
     }
