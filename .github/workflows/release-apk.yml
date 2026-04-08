@@ -17,7 +17,7 @@ jobs:
           java-version: '17'
 
       - name: Decode Keystore
-        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > app/HardwareDash-release.jks
+        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > HardwareDash-release.jks
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -25,7 +25,7 @@ jobs:
       - name: Build Signed Release APK
         run: |
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=HardwareDash-release.jks \
+            -Pandroid.injected.signing.store.file=${{ github.workspace }}/HardwareDash-release.jks \
             -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
             -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
             -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
