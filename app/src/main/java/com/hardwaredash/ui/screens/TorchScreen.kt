@@ -1,13 +1,18 @@
 package com.hardwaredash.ui.screens
 
 import android.content.Context
+import android.content.Intent
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashlightOff
 import androidx.compose.material.icons.filled.FlashlightOn
@@ -21,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 
 @Composable
 fun TorchScreen() {
@@ -28,6 +34,11 @@ fun TorchScreen() {
     var torchOn  by remember { mutableStateOf(false) }
     var hasFlash by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
+
+    // Brightness state
+    var brightness     by remember { mutableFloatStateOf(0.5f) }
+    var autoBrightness by remember { mutableStateOf(false) }
+    var hasWriteSettings by remember { mutableStateOf(false) }
 
     // Check for flash hardware on first composition
     LaunchedEffect(Unit) {
@@ -47,11 +58,35 @@ fun TorchScreen() {
             }
             override fun onTorchModeUnavailable(cameraId: String) {
                 torchOn = false
-                errorMsg = "Torch unavailable — camera in use?"
+                errorMsg = "Torch unavailable -- camera in use?"
             }
         }
         cm.registerTorchCallback(callback, null)
         onDispose { cm.unregisterTorchCallback(callback) }
+    }
+
+    // Poll brightness state
+    LaunchedEffect(Unit) {
+        while (true) {
+            hasWriteSettings = Settings.System.canWrite(context)
+            if (hasWriteSettings) {
+                try {
+                    val curBrightness = Settings.System.getInt(
+                        context.contentResolver,
+                        Settings.System.SCREEN_BRIGHTNESS,
+                        128
+                    )
+                    brightness = curBrightness / 255f
+                    val mode = Settings.System.getInt(
+                        context.contentResolver,
+                        Settings.System.SCREEN_BRIGHTNESS_MODE,
+                        Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+                    )
+                    autoBrightness = mode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
+                } catch (_: Exception) { }
+            }
+            delay(2000L)
+        }
     }
 
     // Pulsing glow animation when torch is on
@@ -74,9 +109,9 @@ fun TorchScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             "Torch / Flashlight",
@@ -127,7 +162,6 @@ fun TorchScreen() {
                 errorMsg = null
                 try {
                     val cm  = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-                    // Find the first back camera with flash
                     val cid = cm.cameraIdList.first { id ->
                         cm.getCameraCharacteristics(id)
                             .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
@@ -157,11 +191,66 @@ fun TorchScreen() {
             Text(msg, color = MaterialTheme.colorScheme.error)
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(16.dp))
         Text(
-            "Uses CameraManager.setTorchMode() — no CAMERA permission needed for torch alone.",
+            "Uses CameraManager.setTorchMode() -- no CAMERA permission needed for torch alone.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
         )
+
+        Spacer(Modifier.height(32.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(16.dp))
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Display Brightness Control
+        // ══════════════════════════════════════════════════════════════════════
+        Text("Display Brightness", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(8.dp))
+
+        if (!hasWriteSettings) {
+            Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("WRITE_SETTINGS permission needed to control brightness",
+                        color = MaterialTheme.colorScheme.onErrorContainer)
+                    Button(onClick = {
+                        context.startActivity(Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                        })
+                    }) { Text("Grant Write Settings") }
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text("Auto Brightness", style = MaterialTheme.typography.bodyMedium)
+                Switch(checked = autoBrightness, onCheckedChange = { auto ->
+                    autoBrightness = auto
+                    Settings.System.putInt(
+                        context.contentResolver,
+                        Settings.System.SCREEN_BRIGHTNESS_MODE,
+                        if (auto) Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
+                        else Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+                    )
+                })
+            }
+
+            Text("Brightness: ${"%.0f".format(brightness * 100)}%", style = MaterialTheme.typography.bodySmall)
+            Slider(
+                value = brightness,
+                onValueChange = { v ->
+                    brightness = v
+                    Settings.System.putInt(
+                        context.contentResolver,
+                        Settings.System.SCREEN_BRIGHTNESS,
+                        (v * 255).toInt(),
+                    )
+                },
+                enabled = !autoBrightness,
+            )
+        }
     }
 }
