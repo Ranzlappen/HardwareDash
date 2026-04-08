@@ -1092,15 +1092,183 @@ private fun SortRow(
 
 // ── 4C stubs: list views ────────────────────────────────────────────
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EntryListView(
     entries: List<TickedEntry>,
     onDelete: (String) -> Unit,
     onOpenSheet: (SheetType, String, ActiveTab) -> Unit,
 ) {
-    // STUB — replaced in 4C
+    val listState = rememberLazyListState()
+    LazyColumn(
+        state = listState,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        items(entries, key = { it.id }) { entry ->
+            EntrySwipeCard(
+                entry = entry,
+                onDelete = { onDelete(entry.id) },
+                onOpenSheet = { type -> onOpenSheet(type, entry.id, ActiveTab.LOG) },
+            )
+        }
+        item { Spacer(Modifier.height(80.dp)) } // bottom padding for nav bar
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EntrySwipeCard(
+    entry: TickedEntry,
+    onDelete: () -> Unit,
+    onOpenSheet: (SheetType) -> Unit,
+) {
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var showActions by remember { mutableStateOf(false) }
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            when (value) {
+                SwipeToDismissBoxValue.EndToStart -> { showDeleteConfirm = true; false }
+                SwipeToDismissBoxValue.StartToEnd -> { showActions = true; false }
+                SwipeToDismissBoxValue.Settled -> false
+            }
+        },
+        positionalThreshold = { it * 0.35f },
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            SwipeBackground(dismissState)
+        },
+        enableDismissFromStartToEnd = true,
+        enableDismissFromEndToStart = true,
+    ) {
+        EntryCardContent(entry = entry)
+    }
+
+    // Delete confirmation
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete entry?") },
+            text = { Text("\"${entry.text.take(50)}\" will be removed.") },
+            confirmButton = {
+                TextButton(
+                    onClick = { showDeleteConfirm = false; onDelete() },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text("Delete") }
+            },
+            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") } },
+        )
+    }
+
+    // Actions dropdown
+    DropdownMenu(expanded = showActions, onDismissRequest = { showActions = false }) {
+        DropdownMenuItem(
+            text = { Text("Set Background") },
+            onClick = { showActions = false; onOpenSheet(SheetType.COLOR_PICKER_BG) },
+            leadingIcon = { Icon(Icons.Filled.FormatPaint, null, tint = MaterialTheme.colorScheme.primary) },
+        )
+        DropdownMenuItem(
+            text = { Text("Set Border") },
+            onClick = { showActions = false; onOpenSheet(SheetType.COLOR_PICKER_BORDER) },
+            leadingIcon = { Icon(Icons.Filled.BorderColor, null, tint = MaterialTheme.colorScheme.primary) },
+        )
+        DropdownMenuItem(
+            text = { Text("Change Time") },
+            onClick = { showActions = false; onOpenSheet(SheetType.TIME_EDITOR) },
+            leadingIcon = { Icon(Icons.Filled.Schedule, null, tint = MaterialTheme.colorScheme.primary) },
+        )
+        DropdownMenuItem(
+            text = { Text("Change Text") },
+            onClick = { showActions = false; onOpenSheet(SheetType.TEXT_EDITOR) },
+            leadingIcon = { Icon(Icons.Filled.Edit, null, tint = MaterialTheme.colorScheme.primary) },
+        )
+    }
+}
+
+@Composable
+private fun EntryCardContent(entry: TickedEntry) {
+    val bgColor = parseHexColor(entry.bgColor)
+    val borderColor = parseHexColor(entry.borderColor)
+    val todayStr = remember { LocalDate.now().toString() }
+    val isToday = TickedViewModel.isoToDateStr(entry.isoDate) == todayStr
+
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = bgColor ?: MaterialTheme.colorScheme.surfaceVariant,
+        ),
+        border = if (borderColor != null) BorderStroke(1.5.dp, borderColor) else null,
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            // Dot indicator
+            Box(
+                modifier = Modifier
+                    .padding(top = 5.dp)
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(
+                        when {
+                            entry.custom -> MaterialTheme.colorScheme.tertiary
+                            isToday -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                        }
+                    ),
+            )
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                // Text
+                if (entry.text.isNotBlank()) {
+                    Text(
+                        text = entry.text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (bgColor != null) Color.White else MaterialTheme.colorScheme.onSurface,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Spacer(Modifier.height(2.dp))
+                }
+                // Timestamp
+                Text(
+                    text = TickedViewModel.isoToDisplayDate(entry.isoDate),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (bgColor != null) Color.White.copy(alpha = 0.7f)
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                // Tags
+                if (entry.tags.isNotEmpty()) {
+                    Spacer(Modifier.height(4.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        entry.tags.forEach { tag ->
+                            val tagColor = when (tag) {
+                                "custom" -> MaterialTheme.colorScheme.tertiary
+                                "edited" -> Color(0xFFA78BFA) // purple for edited
+                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                            Text(
+                                text = tag,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = tagColor,
+                                modifier = Modifier
+                                    .background(tagColor.copy(alpha = 0.12f), RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 6.dp, vertical = 1.dp),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProcessListView(
     processes: List<TickedProcess>,
@@ -1108,7 +1276,343 @@ private fun ProcessListView(
     onDelete: (String) -> Unit,
     onOpenSheet: (SheetType, String, ActiveTab, Int) -> Unit,
 ) {
-    // STUB — replaced in 4C
+    val listState = rememberLazyListState()
+    LazyColumn(
+        state = listState,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        items(processes, key = { it.id }) { proc ->
+            ProcessSwipeCard(
+                process = proc,
+                vm = vm,
+                onDelete = { onDelete(proc.id) },
+                onOpenSheet = { type, cpIdx -> onOpenSheet(type, proc.id, ActiveTab.PROCESSES, cpIdx) },
+            )
+        }
+        item { Spacer(Modifier.height(80.dp)) }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProcessSwipeCard(
+    process: TickedProcess,
+    vm: TickedViewModel,
+    onDelete: () -> Unit,
+    onOpenSheet: (SheetType, Int) -> Unit,
+) {
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var showActions by remember { mutableStateOf(false) }
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            when (value) {
+                SwipeToDismissBoxValue.EndToStart -> { showDeleteConfirm = true; false }
+                SwipeToDismissBoxValue.StartToEnd -> { showActions = true; false }
+                SwipeToDismissBoxValue.Settled -> false
+            }
+        },
+        positionalThreshold = { it * 0.35f },
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = { SwipeBackground(dismissState) },
+        enableDismissFromStartToEnd = true,
+        enableDismissFromEndToStart = true,
+    ) {
+        ProcessCardContent(
+            process = process,
+            vm = vm,
+            onCheckpointClick = { cpIdx -> onOpenSheet(SheetType.CHECKPOINT_DETAIL, cpIdx) },
+        )
+    }
+
+    // Delete confirmation
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete process?") },
+            text = { Text("\"${process.text.take(50)}\" and all its checkpoints will be removed.") },
+            confirmButton = {
+                TextButton(
+                    onClick = { showDeleteConfirm = false; onDelete() },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text("Delete") }
+            },
+            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") } },
+        )
+    }
+
+    // Actions dropdown
+    DropdownMenu(expanded = showActions, onDismissRequest = { showActions = false }) {
+        DropdownMenuItem(
+            text = { Text("Set Background") },
+            onClick = { showActions = false; onOpenSheet(SheetType.COLOR_PICKER_BG, -1) },
+            leadingIcon = { Icon(Icons.Filled.FormatPaint, null, tint = MaterialTheme.colorScheme.primary) },
+        )
+        DropdownMenuItem(
+            text = { Text("Set Border") },
+            onClick = { showActions = false; onOpenSheet(SheetType.COLOR_PICKER_BORDER, -1) },
+            leadingIcon = { Icon(Icons.Filled.BorderColor, null, tint = MaterialTheme.colorScheme.primary) },
+        )
+        DropdownMenuItem(
+            text = { Text("Change Time") },
+            onClick = { showActions = false; onOpenSheet(SheetType.TIME_EDITOR, -1) },
+            leadingIcon = { Icon(Icons.Filled.Schedule, null, tint = MaterialTheme.colorScheme.primary) },
+        )
+        DropdownMenuItem(
+            text = { Text("Change Text") },
+            onClick = { showActions = false; onOpenSheet(SheetType.TEXT_EDITOR, -1) },
+            leadingIcon = { Icon(Icons.Filled.Edit, null, tint = MaterialTheme.colorScheme.primary) },
+        )
+        DropdownMenuItem(
+            text = { Text("Add Checkpoint") },
+            onClick = { showActions = false; vm.addCheckpoint(process.id) },
+            leadingIcon = { Icon(Icons.Filled.AddCircleOutline, null, tint = MaterialTheme.colorScheme.secondary) },
+        )
+    }
+}
+
+@Composable
+private fun ProcessCardContent(
+    process: TickedProcess,
+    vm: TickedViewModel,
+    onCheckpointClick: (Int) -> Unit,
+) {
+    val bgColor = parseHexColor(process.bgColor)
+    val borderColor = parseHexColor(process.borderColor)
+    val overdue = process.isOverdue()
+
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = bgColor ?: MaterialTheme.colorScheme.surfaceVariant,
+        ),
+        border = BorderStroke(
+            1.5.dp,
+            borderColor ?: if (overdue) MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
+            else Color.Transparent,
+        ),
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            // Title row
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Filled.Loop,
+                    contentDescription = null,
+                    tint = if (overdue) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = process.text,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (bgColor != null) Color.White else MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                if (overdue) {
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "OVERDUE",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.12f), RoundedCornerShape(4.dp))
+                            .padding(horizontal = 6.dp, vertical = 1.dp),
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(2.dp))
+
+            // Timestamp
+            Text(
+                text = TickedViewModel.isoToDisplayDate(process.isoDate),
+                style = MaterialTheme.typography.bodySmall,
+                color = if (bgColor != null) Color.White.copy(alpha = 0.7f)
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            // Tags
+            if (process.tags.isNotEmpty()) {
+                Spacer(Modifier.height(4.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    process.tags.forEach { tag ->
+                        Text(
+                            text = tag,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFFA78BFA),
+                            modifier = Modifier
+                                .background(Color(0xFFA78BFA).copy(alpha = 0.12f), RoundedCornerShape(4.dp))
+                                .padding(horizontal = 6.dp, vertical = 1.dp),
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // Checkpoint track
+            CheckpointTrack(
+                checkpoints = process.checkpoints,
+                currentCheckpoint = process.currentCheckpoint,
+                overdue = overdue,
+                onCheckpointClick = onCheckpointClick,
+                onAddCheckpoint = { vm.addCheckpoint(process.id) },
+                bgColor = bgColor,
+            )
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Checkpoint track (horizontal dots + connector line)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun CheckpointTrack(
+    checkpoints: List<Checkpoint>,
+    currentCheckpoint: Int,
+    overdue: Boolean,
+    onCheckpointClick: (Int) -> Unit,
+    onAddCheckpoint: () -> Unit,
+    bgColor: Color?,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+    ) {
+        checkpoints.forEachIndexed { idx, cp ->
+            val isCurrent = idx == currentCheckpoint
+            val isCompleted = idx < currentCheckpoint
+            val isOverdueCp = isCurrent && overdue
+
+            // Dot
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .clickable { onCheckpointClick(idx) }
+                    .padding(horizontal = 2.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(if (isCurrent) 14.dp else 10.dp)
+                        .clip(CircleShape)
+                        .background(
+                            when {
+                                isOverdueCp -> MaterialTheme.colorScheme.error
+                                isCurrent -> MaterialTheme.colorScheme.primary
+                                isCompleted -> MaterialTheme.colorScheme.secondary
+                                else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                            }
+                        )
+                        .then(
+                            if (isCurrent) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                            else Modifier
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (isCompleted) {
+                        Icon(
+                            Icons.Filled.Check, null,
+                            tint = Color.White,
+                            modifier = Modifier.size(7.dp),
+                        )
+                    }
+                }
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = cp.name.take(8),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                    color = when {
+                        isCurrent -> if (bgColor != null) Color.White else MaterialTheme.colorScheme.primary
+                        isCompleted -> if (bgColor != null) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.secondary
+                        else -> if (bgColor != null) Color.White.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    },
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            // Connector line between dots
+            if (idx < checkpoints.lastIndex) {
+                Box(
+                    modifier = Modifier
+                        .width(16.dp)
+                        .height(2.dp)
+                        .background(
+                            if (idx < currentCheckpoint) MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)
+                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
+                        ),
+                )
+            }
+        }
+
+        // Add checkpoint button
+        Spacer(Modifier.width(6.dp))
+        IconButton(
+            onClick = onAddCheckpoint,
+            modifier = Modifier.size(24.dp),
+        ) {
+            Icon(
+                Icons.Filled.AddCircleOutline,
+                "Add checkpoint",
+                tint = if (bgColor != null) Color.White.copy(alpha = 0.5f)
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(16.dp),
+            )
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Swipe background (shared by entry + process cards)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeBackground(dismissState: SwipeToDismissBoxState) {
+    val direction = dismissState.dismissDirection
+    val color by animateColorAsState(
+        targetValue = when (direction) {
+            SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error.copy(alpha = 0.25f)
+            SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+            else -> Color.Transparent
+        },
+        label = "swipeBg",
+    )
+    val icon = when (direction) {
+        SwipeToDismissBoxValue.EndToStart -> Icons.Filled.Delete
+        SwipeToDismissBoxValue.StartToEnd -> Icons.Filled.MoreHoriz
+        else -> Icons.Filled.MoreHoriz
+    }
+    val iconTint = when (direction) {
+        SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.primary
+    }
+    val alignment = when (direction) {
+        SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+        else -> Alignment.CenterStart
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(MaterialTheme.shapes.small)
+            .background(color)
+            .padding(horizontal = 20.dp),
+        contentAlignment = alignment,
+    ) {
+        Icon(icon, contentDescription = null, tint = iconTint)
+    }
 }
 
 // ── 4D stubs: timeline + bottom sheets ──────────────────────────────
