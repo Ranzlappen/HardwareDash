@@ -1,4 +1,4 @@
-package com.hardwaredash.ui.ticked
+package com.hardwaredash.ui.logbook
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -15,10 +15,10 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-// ---- DataStore singleton ----
-private val Context.tickedDataStore: DataStore<Preferences> by preferencesDataStore(name = "ticked_store")
+// ---- DataStore singleton (keep "ticked_store" name for backwards compatibility) ----
+private val Context.logbookDataStore: DataStore<Preferences> by preferencesDataStore(name = "ticked_store")
 
-class TickedRepository(private val context: Context) {
+class LogbookRepository(private val context: Context) {
 
     companion object {
         private val KEY_STORE = stringPreferencesKey("ticked_store_json")
@@ -32,29 +32,29 @@ class TickedRepository(private val context: Context) {
     // ---- Public API ----
 
     /** Observe the full store reactively. */
-    val storeFlow: Flow<TickedStore> = context.tickedDataStore.data.map { prefs ->
+    val storeFlow: Flow<LogbookStore> = context.logbookDataStore.data.map { prefs ->
         val raw = prefs[KEY_STORE]
         if (raw != null) {
             try {
                 val obj = Json.parseToJsonElement(raw).jsonObject
                 val migrated = migrate(obj)
-                json.decodeFromJsonElement<TickedStore>(migrated)
+                json.decodeFromJsonElement<LogbookStore>(migrated)
             } catch (_: Exception) {
-                TickedStore()
+                LogbookStore()
             }
         } else {
-            TickedStore()
+            LogbookStore()
         }
     }
 
     /** Persist the full store. */
-    suspend fun save(store: TickedStore) {
+    suspend fun save(store: LogbookStore) {
         val payload = store.copy(
-            version = TICKED_SCHEMA_VERSION,
+            version = LOGBOOK_SCHEMA_VERSION,
             savedAt = Instant.now().toString(),
         )
-        val encoded = json.encodeToString(TickedStore.serializer(), payload)
-        context.tickedDataStore.edit { prefs ->
+        val encoded = json.encodeToString(LogbookStore.serializer(), payload)
+        context.logbookDataStore.edit { prefs ->
             prefs[KEY_STORE] = encoded
         }
     }
@@ -62,7 +62,7 @@ class TickedRepository(private val context: Context) {
     // ---- Import / Export helpers ----
 
     /** Parse an imported JSON string, migrate it, and merge with current state. */
-    fun parseImport(jsonString: String, current: TickedStore): TickedStore {
+    fun parseImport(jsonString: String, current: LogbookStore): LogbookStore {
         val parsed = Json.parseToJsonElement(jsonString)
 
         // Support both legacy array format and new envelope format
@@ -77,7 +77,7 @@ class TickedRepository(private val context: Context) {
         }
 
         val migrated = migrate(envelope)
-        val imported = json.decodeFromJsonElement<TickedStore>(migrated)
+        val imported = json.decodeFromJsonElement<LogbookStore>(migrated)
 
         // Merge with duplicate detection by ID
         val existingEntryIds = current.entries.map { it.id }.toSet()
@@ -95,17 +95,17 @@ class TickedRepository(private val context: Context) {
         )
     }
 
-    /** Build the export JSON string (cross-compatible with web app). */
-    fun buildExportJson(store: TickedStore): String {
-        val export = TickedExport(
+    /** Build the export JSON string (cross-compatible with web app — keeps "Ticked" name). */
+    fun buildExportJson(store: LogbookStore): String {
+        val export = LogbookExport(
             app = "Ticked",
-            version = TICKED_SCHEMA_VERSION,
+            version = LOGBOOK_SCHEMA_VERSION,
             exportedAt = Instant.now().toString(),
             palette = store.palette,
             entries = store.entries,
             processes = store.processes,
         )
-        return json.encodeToString(TickedExport.serializer(), export)
+        return json.encodeToString(LogbookExport.serializer(), export)
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -115,7 +115,7 @@ class TickedRepository(private val context: Context) {
     private fun migrate(raw: JsonObject): JsonObject {
         var store = raw
         val startVersion = store["version"]?.jsonPrimitive?.intOrNull ?: 1
-        for (v in (startVersion + 1)..TICKED_SCHEMA_VERSION) {
+        for (v in (startVersion + 1)..LOGBOOK_SCHEMA_VERSION) {
             store = when (v) {
                 2 -> migrateV2(store)
                 3 -> migrateV3(store)
@@ -127,7 +127,7 @@ class TickedRepository(private val context: Context) {
         }
         return buildJsonObject {
             store.forEach { (k, v) -> put(k, v) }
-            put("version", TICKED_SCHEMA_VERSION)
+            put("version", LOGBOOK_SCHEMA_VERSION)
         }
     }
 

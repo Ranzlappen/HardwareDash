@@ -17,7 +17,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 import com.hardwaredash.ui.screens.*
-import com.hardwaredash.ui.ticked.TickedScreen
+import com.hardwaredash.ui.logbook.LogbookScreen
 
 // ─── Route constants ──────────────────────────────────────────────────────────
 object Routes {
@@ -29,7 +29,7 @@ object Routes {
     const val SENSORS      = "sensors"
     const val LOCKSCREEN   = "lockscreen"
     const val BATTERY      = "battery"
-    const val TICKED       = "ticked"
+    const val LOGBOOK      = "logbook"
 }
 
 data class BottomNavItem(
@@ -40,7 +40,7 @@ data class BottomNavItem(
 )
 
 private val bottomNavItems = listOf(
-    BottomNavItem(Routes.TICKED,     "Ticked",    Icons.Filled.CheckCircle,    Icons.Outlined.CheckCircle),
+    BottomNavItem(Routes.LOGBOOK,    "Logbook",   Icons.Filled.CheckCircle,    Icons.Outlined.CheckCircle),
     BottomNavItem(Routes.TORCH,      "Torch",     Icons.Filled.FlashlightOn,  Icons.Outlined.FlashlightOn),
     BottomNavItem(Routes.CAMERA,     "Camera",    Icons.Filled.CameraAlt,     Icons.Outlined.CameraAlt),
     BottomNavItem(Routes.VIBRATION,  "Vibration", Icons.Filled.Vibration,     Icons.Outlined.Vibration),
@@ -106,10 +106,10 @@ fun NavGraph() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.TICKED,
+            startDestination = Routes.LOGBOOK,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(Routes.TICKED)        { TickedScreen() }
+            composable(Routes.LOGBOOK)       { LogbookScreen() }
             composable(Routes.TORCH)         { TorchScreen() }
             composable(Routes.CAMERA)        { CameraScreen() }
             composable(Routes.VIBRATION)     { VibrationScreen() }

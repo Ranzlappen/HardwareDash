@@ -1,4 +1,4 @@
-package com.hardwaredash.ui.ticked
+package com.hardwaredash.ui.logbook
 
 import android.app.Activity
 import android.content.Intent
@@ -41,7 +41,7 @@ import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TickedScreen(vm: TickedViewModel = viewModel()) {
+fun LogbookScreen(vm: LogbookViewModel = viewModel()) {
     val context = LocalContext.current
     val store      by vm.store.collectAsState()
     val activeTab  by vm.activeTab.collectAsState()
@@ -105,7 +105,7 @@ fun TickedScreen(vm: TickedViewModel = viewModel()) {
             .padding(horizontal = 16.dp),
     ) {
         // Header
-        TickedHeader(
+        LogbookHeader(
             entryCount = store.entries.size,
             onImport = { importLauncher.launch(arrayOf("application/json")) },
             onExport = {
@@ -117,7 +117,7 @@ fun TickedScreen(vm: TickedViewModel = viewModel()) {
         Spacer(Modifier.height(8.dp))
 
         // Tab row
-        TickedTabRow(
+        LogbookTabRow(
             activeTab = activeTab,
             entryCount = store.entries.size,
             processCount = store.processes.size,
@@ -166,7 +166,7 @@ fun TickedScreen(vm: TickedViewModel = viewModel()) {
     }
 
     // ── Bottom sheets (added in 4D) ─────────────────────────────────
-    TickedBottomSheets(
+    LogbookBottomSheets(
         sheetType = sheetType,
         targetId = sheetTargetId,
         cpIdx = sheetCpIdx,
@@ -194,7 +194,7 @@ enum class SheetType {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun TickedHeader(
+private fun LogbookHeader(
     entryCount: Int,
     onImport: () -> Unit,
     onExport: () -> Unit,
@@ -213,7 +213,7 @@ private fun TickedHeader(
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = "Ticked",
+            text = "Logbook",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -241,7 +241,7 @@ private fun TickedHeader(
 // ═══════════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun TickedTabRow(
+private fun LogbookTabRow(
     activeTab: ActiveTab,
     entryCount: Int,
     processCount: Int,
@@ -345,9 +345,9 @@ private fun TickedTabRow(
 
 @Composable
 private fun LogTabContent(
-    vm: TickedViewModel,
-    entries: List<TickedEntry>,
-    store: TickedStore,
+    vm: LogbookViewModel,
+    entries: List<LogbookEntry>,
+    store: LogbookStore,
     viewMode: ViewMode,
     typeFilter: EntryTypeFilter,
     search: String,
@@ -380,7 +380,7 @@ private fun LogTabContent(
 
         // List / Timeline
         if (entries.isEmpty()) {
-            TickedEmptyState(
+            LogbookEmptyState(
                 icon = Icons.Outlined.EditNote,
                 message = if (store.entries.isEmpty()) "No entries yet" else "No matches",
             )
@@ -403,9 +403,9 @@ private fun LogTabContent(
 
 @Composable
 private fun ProcessesTabContent(
-    vm: TickedViewModel,
-    processes: List<TickedProcess>,
-    store: TickedStore,
+    vm: LogbookViewModel,
+    processes: List<LogbookProcess>,
+    store: LogbookStore,
     typeFilter: ProcessTypeFilter,
     search: String,
     dateFilter: String,
@@ -436,7 +436,7 @@ private fun ProcessesTabContent(
 
         // List
         if (processes.isEmpty()) {
-            TickedEmptyState(
+            LogbookEmptyState(
                 icon = Icons.Outlined.Loop,
                 message = if (store.processes.isEmpty()) "No processes yet" else "No matches",
             )
@@ -456,7 +456,7 @@ private fun ProcessesTabContent(
 // ═══════════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun TickedEmptyState(
+private fun LogbookEmptyState(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     message: String,
 ) {
@@ -510,7 +510,7 @@ fun parseHexColor(hex: String): Color? {
 // ── 4B stubs: input cards & toolbars ────────────────────────────────
 
 @Composable
-private fun LogInputCard(vm: TickedViewModel) {
+private fun LogInputCard(vm: LogbookViewModel) {
     var text by remember { mutableStateOf("") }
     var showCustom by remember { mutableStateOf(false) }
     var customDate by remember { mutableStateOf(LocalDate.now()) }
@@ -608,7 +608,7 @@ private fun LogInputCard(vm: TickedViewModel) {
 
 @Composable
 private fun LogToolbar(
-    vm: TickedViewModel,
+    vm: LogbookViewModel,
     viewMode: ViewMode,
     typeFilter: EntryTypeFilter,
     search: String,
@@ -732,7 +732,7 @@ private fun LogToolbar(
 }
 
 @Composable
-private fun ProcessInputCard(vm: TickedViewModel) {
+private fun ProcessInputCard(vm: LogbookViewModel) {
     var text by remember { mutableStateOf("") }
     var showTemplates by remember { mutableStateOf(false) }
 
@@ -812,7 +812,7 @@ private fun ProcessInputCard(vm: TickedViewModel) {
 
 @Composable
 private fun ProcessToolbar(
-    vm: TickedViewModel,
+    vm: LogbookViewModel,
     typeFilter: ProcessTypeFilter,
     search: String,
     dateFilter: String,
@@ -1074,7 +1074,7 @@ private fun SortRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EntryListView(
-    entries: List<TickedEntry>,
+    entries: List<LogbookEntry>,
     onDelete: (String) -> Unit,
     onOpenSheet: (SheetType, String, ActiveTab) -> Unit,
 ) {
@@ -1098,7 +1098,7 @@ private fun EntryListView(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EntrySwipeCard(
-    entry: TickedEntry,
+    entry: LogbookEntry,
     onDelete: () -> Unit,
     onOpenSheet: (SheetType) -> Unit,
 ) {
@@ -1169,11 +1169,11 @@ private fun EntrySwipeCard(
 }
 
 @Composable
-private fun EntryCardContent(entry: TickedEntry) {
+private fun EntryCardContent(entry: LogbookEntry) {
     val bgColor = parseHexColor(entry.bgColor)
     val borderColor = parseHexColor(entry.borderColor)
     val todayStr = remember { LocalDate.now().toString() }
-    val isToday = TickedViewModel.isoToDateStr(entry.isoDate) == todayStr
+    val isToday = LogbookViewModel.isoToDateStr(entry.isoDate) == todayStr
 
     Card(
         colors = CardDefaults.cardColors(
@@ -1216,7 +1216,7 @@ private fun EntryCardContent(entry: TickedEntry) {
                 }
                 // Timestamp
                 Text(
-                    text = TickedViewModel.isoToDisplayDate(entry.isoDate),
+                    text = LogbookViewModel.isoToDisplayDate(entry.isoDate),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (bgColor != null) Color.White.copy(alpha = 0.7f)
                     else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1250,8 +1250,8 @@ private fun EntryCardContent(entry: TickedEntry) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProcessListView(
-    processes: List<TickedProcess>,
-    vm: TickedViewModel,
+    processes: List<LogbookProcess>,
+    vm: LogbookViewModel,
     onDelete: (String) -> Unit,
     onOpenSheet: (SheetType, String, ActiveTab, Int) -> Unit,
 ) {
@@ -1276,8 +1276,8 @@ private fun ProcessListView(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProcessSwipeCard(
-    process: TickedProcess,
-    vm: TickedViewModel,
+    process: LogbookProcess,
+    vm: LogbookViewModel,
     onDelete: () -> Unit,
     onOpenSheet: (SheetType, Int) -> Unit,
 ) {
@@ -1356,8 +1356,8 @@ private fun ProcessSwipeCard(
 
 @Composable
 private fun ProcessCardContent(
-    process: TickedProcess,
-    vm: TickedViewModel,
+    process: LogbookProcess,
+    vm: LogbookViewModel,
     onCheckpointClick: (Int) -> Unit,
 ) {
     val bgColor = parseHexColor(process.bgColor)
@@ -1412,7 +1412,7 @@ private fun ProcessCardContent(
 
             // Timestamp
             Text(
-                text = TickedViewModel.isoToDisplayDate(process.isoDate),
+                text = LogbookViewModel.isoToDisplayDate(process.isoDate),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (bgColor != null) Color.White.copy(alpha = 0.7f)
                 else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1597,14 +1597,14 @@ private fun SwipeBackground(dismissState: SwipeToDismissBoxState) {
 // ── 4D stubs: timeline + bottom sheets ──────────────────────────────
 
 @Composable
-private fun TimelineView(entries: List<TickedEntry>) {
+private fun TimelineView(entries: List<LogbookEntry>) {
     val todayStr = remember { LocalDate.now().toString() }
 
     // Group entries by date (chronological order within each day)
     val dayGroups = remember(entries) {
-        val grouped = mutableMapOf<String, MutableList<TickedEntry>>()
+        val grouped = mutableMapOf<String, MutableList<LogbookEntry>>()
         entries.sortedBy { it.isoDate }.forEach { e ->
-            val d = TickedViewModel.isoToDateStr(e.isoDate)
+            val d = LogbookViewModel.isoToDateStr(e.isoDate)
             grouped.getOrPut(d) { mutableListOf() }.add(e)
         }
         // Reverse: newest day first
@@ -1676,7 +1676,7 @@ private fun LegendDot(color: Color, label: String) {
 private fun TimelineDaySection(
     dateStr: String,
     isToday: Boolean,
-    entries: List<TickedEntry>,
+    entries: List<LogbookEntry>,
 ) {
     Column {
         // Day header
@@ -1730,7 +1730,7 @@ private fun TimelineDaySection(
 }
 
 @Composable
-private fun TimelineNode(entry: TickedEntry, isToday: Boolean) {
+private fun TimelineNode(entry: LogbookEntry, isToday: Boolean) {
     val dotColor = when {
         entry.custom -> MaterialTheme.colorScheme.tertiary
         isToday -> MaterialTheme.colorScheme.primary
@@ -1812,13 +1812,13 @@ private fun TimelineNode(entry: TickedEntry, isToday: Boolean) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TickedBottomSheets(
+private fun LogbookBottomSheets(
     sheetType: SheetType?,
     targetId: String,
     cpIdx: Int,
     tab: ActiveTab,
-    vm: TickedViewModel,
-    store: TickedStore,
+    vm: LogbookViewModel,
+    store: LogbookStore,
     onDismiss: () -> Unit,
 ) {
     if (sheetType == null) return
@@ -1860,8 +1860,8 @@ private fun TickedBottomSheets(
 private fun CheckpointDetailSheet(
     procId: String,
     cpIdx: Int,
-    vm: TickedViewModel,
-    store: TickedStore,
+    vm: LogbookViewModel,
+    store: LogbookStore,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -2045,8 +2045,8 @@ private fun CheckpointDetailSheet(
 private fun TextEditorSheet(
     targetId: String,
     tab: ActiveTab,
-    vm: TickedViewModel,
-    store: TickedStore,
+    vm: LogbookViewModel,
+    store: LogbookStore,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -2103,8 +2103,8 @@ private fun TextEditorSheet(
 private fun TimeEditorSheet(
     targetId: String,
     tab: ActiveTab,
-    vm: TickedViewModel,
-    store: TickedStore,
+    vm: LogbookViewModel,
+    store: LogbookStore,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -2184,8 +2184,8 @@ private fun ColorPickerSheet(
     targetId: String,
     tab: ActiveTab,
     mode: String, // "bg" or "border"
-    vm: TickedViewModel,
-    store: TickedStore,
+    vm: LogbookViewModel,
+    store: LogbookStore,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -2196,10 +2196,10 @@ private fun ColorPickerSheet(
         val item: Any? = if (tab == ActiveTab.LOG) store.entries.find { it.id == targetId }
         else store.processes.find { it.id == targetId }
         when {
-            item is TickedEntry && mode == "bg" -> item.bgColor
-            item is TickedEntry -> item.borderColor
-            item is TickedProcess && mode == "bg" -> item.bgColor
-            item is TickedProcess -> item.borderColor
+            item is LogbookEntry && mode == "bg" -> item.bgColor
+            item is LogbookEntry -> item.borderColor
+            item is LogbookProcess && mode == "bg" -> item.bgColor
+            item is LogbookProcess -> item.borderColor
             else -> ""
         }
     }
