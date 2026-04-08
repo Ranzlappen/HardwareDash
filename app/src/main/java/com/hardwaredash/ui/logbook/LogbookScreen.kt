@@ -1079,6 +1079,14 @@ private fun EntryListView(
     onOpenSheet: (SheetType, String, ActiveTab) -> Unit,
 ) {
     val listState = rememberLazyListState()
+    // Auto-scroll to top when a new entry is prepended
+    var previousCount by remember { mutableIntStateOf(entries.size) }
+    LaunchedEffect(entries.size) {
+        if (entries.size > previousCount && previousCount > 0) {
+            listState.animateScrollToItem(0)
+        }
+        previousCount = entries.size
+    }
     LazyColumn(
         state = listState,
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -1256,6 +1264,14 @@ private fun ProcessListView(
     onOpenSheet: (SheetType, String, ActiveTab, Int) -> Unit,
 ) {
     val listState = rememberLazyListState()
+    // Auto-scroll to top when a new process is prepended
+    var previousCount by remember { mutableIntStateOf(processes.size) }
+    LaunchedEffect(processes.size) {
+        if (processes.size > previousCount && previousCount > 0) {
+            listState.animateScrollToItem(0)
+        }
+        previousCount = processes.size
+    }
     LazyColumn(
         state = listState,
         verticalArrangement = Arrangement.spacedBy(8.dp),

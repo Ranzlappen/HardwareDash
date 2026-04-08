@@ -73,34 +73,36 @@ fun NavGraph() {
                         .horizontalScroll(rememberScrollState())
                         .defaultMinSize(minHeight = 80.dp)
                         .selectableGroup(),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.Top,
                 ) {
                     bottomNavItems.forEach { item ->
                         val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                                    contentDescription = item.label,
-                                )
-                            },
-                            label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                            ),
-                        )
+                        Box(modifier = Modifier.width(82.dp)) {
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = {
+                                    navController.navigate(item.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                                icon = {
+                                    Icon(
+                                        imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                                        contentDescription = item.label,
+                                    )
+                                },
+                                label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                ),
+                            )
+                        }
                     }
                 }
             }
