@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # ← This fixes the 403 release error
 
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +40,6 @@ jobs:
           files: app/build/outputs/apk/release/*.apk
           draft: false
           prerelease: false
-          generate_release_notes: true
+          generate_release_notes: false   # ← turned off to avoid permission issues
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
