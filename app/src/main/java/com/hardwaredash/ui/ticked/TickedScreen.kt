@@ -1619,7 +1619,216 @@ private fun SwipeBackground(dismissState: SwipeToDismissBoxState) {
 
 @Composable
 private fun TimelineView(entries: List<TickedEntry>) {
-    // STUB — replaced in 4D
+    val todayStr = remember { LocalDate.now().toString() }
+
+    // Group entries by date (chronological order within each day)
+    val dayGroups = remember(entries) {
+        val grouped = mutableMapOf<String, MutableList<TickedEntry>>()
+        entries.sortedBy { it.isoDate }.forEach { e ->
+            val d = TickedViewModel.isoToDateStr(e.isoDate)
+            grouped.getOrPut(d) { mutableListOf() }.add(e)
+        }
+        // Reverse: newest day first
+        grouped.entries.sortedByDescending { it.key }
+    }
+
+    if (dayGroups.isEmpty()) return
+
+    // Legend
+    val hasAuto = entries.any { !it.custom }
+    val hasCustom = entries.any { it.custom }
+
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        // Legend row
+        if (hasAuto || hasCustom) {
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(bottom = 4.dp),
+                ) {
+                    if (hasAuto) {
+                        LegendDot(color = MaterialTheme.colorScheme.primary, label = "Auto-logged")
+                    }
+                    if (hasCustom) {
+                        LegendDot(color = MaterialTheme.colorScheme.tertiary, label = "Custom")
+                    }
+                }
+            }
+        }
+
+        // Day sections
+        dayGroups.forEach { (dateStr, dayEntries) ->
+            item(key = "day_$dateStr") {
+                val isToday = dateStr == todayStr
+                TimelineDaySection(
+                    dateStr = dateStr,
+                    isToday = isToday,
+                    entries = dayEntries,
+                )
+            }
+        }
+
+        item { Spacer(Modifier.height(80.dp)) }
+    }
+}
+
+@Composable
+private fun LegendDot(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(color),
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun TimelineDaySection(
+    dateStr: String,
+    isToday: Boolean,
+    entries: List<TickedEntry>,
+) {
+    Column {
+        // Day header
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = if (isToday) "Today" else dateStr,
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = if (isToday) FontWeight.Bold else FontWeight.Medium,
+                ),
+                color = if (isToday) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "${entries.size}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant,
+                        RoundedCornerShape(4.dp),
+                    )
+                    .padding(horizontal = 6.dp, vertical = 1.dp),
+            )
+        }
+
+        Spacer(Modifier.height(6.dp))
+
+        // Horizontal scrollable timeline row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.Top,
+        ) {
+            entries.forEachIndexed { idx, entry ->
+                TimelineNode(entry = entry, isToday = isToday)
+                if (idx < entries.lastIndex) {
+                    // Connector stem
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 14.dp)
+                            .width(24.dp)
+                            .height(2.dp)
+                            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimelineNode(entry: TickedEntry, isToday: Boolean) {
+    val dotColor = when {
+        entry.custom -> MaterialTheme.colorScheme.tertiary
+        isToday -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+    }
+    val bgColor = parseHexColor(entry.bgColor)
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(100.dp),
+    ) {
+        // Time label
+        val timeStr = try {
+            val instant = Instant.parse(entry.isoDate)
+            val zdt = instant.atZone(ZoneId.systemDefault())
+            "%02d:%02d".format(zdt.hour, zdt.minute)
+        } catch (_: Exception) { "" }
+
+        Text(
+            text = timeStr,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Spacer(Modifier.height(2.dp))
+
+        // Dot
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .clip(CircleShape)
+                .background(dotColor),
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        // Stem
+        Box(
+            modifier = Modifier
+                .width(2.dp)
+                .height(12.dp)
+                .background(dotColor.copy(alpha = 0.4f)),
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        // Card
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = bgColor ?: MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
+            shape = MaterialTheme.shapes.extraSmall,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(modifier = Modifier.padding(6.dp)) {
+                if (entry.text.isNotBlank()) {
+                    Text(
+                        text = entry.text,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+                        color = if (bgColor != null) Color.White
+                        else MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                if (entry.tags.isNotEmpty()) {
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = entry.tags.joinToString(" "),
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                        color = if (entry.custom) MaterialTheme.colorScheme.tertiary
+                        else Color(0xFFA78BFA),
+                    )
+                }
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1633,5 +1842,506 @@ private fun TickedBottomSheets(
     store: TickedStore,
     onDismiss: () -> Unit,
 ) {
-    // STUB — replaced in 4D
+    if (sheetType == null) return
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+    ) {
+        when (sheetType) {
+            SheetType.CHECKPOINT_DETAIL -> CheckpointDetailSheet(
+                procId = targetId, cpIdx = cpIdx, vm = vm, store = store, onDismiss = onDismiss,
+            )
+            SheetType.TEXT_EDITOR -> TextEditorSheet(
+                targetId = targetId, tab = tab, vm = vm, store = store, onDismiss = onDismiss,
+            )
+            SheetType.TIME_EDITOR -> TimeEditorSheet(
+                targetId = targetId, tab = tab, vm = vm, store = store, onDismiss = onDismiss,
+            )
+            SheetType.COLOR_PICKER_BG -> ColorPickerSheet(
+                targetId = targetId, tab = tab, mode = "bg", vm = vm, store = store, onDismiss = onDismiss,
+            )
+            SheetType.COLOR_PICKER_BORDER -> ColorPickerSheet(
+                targetId = targetId, tab = tab, mode = "border", vm = vm, store = store, onDismiss = onDismiss,
+            )
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Checkpoint detail sheet
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun CheckpointDetailSheet(
+    procId: String,
+    cpIdx: Int,
+    vm: TickedViewModel,
+    store: TickedStore,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    val proc = store.processes.find { it.id == procId } ?: run { onDismiss(); return }
+    val cp = proc.checkpoints.getOrNull(cpIdx) ?: run { onDismiss(); return }
+    val curCp = proc.currentCheckpoint
+
+    var name by remember(cp.id) { mutableStateOf(cp.name) }
+    var comment by remember(cp.id) { mutableStateOf(cp.comment) }
+    var dueDate by remember(cp.id) { mutableStateOf(cp.dueDate) }
+    var remindAt by remember(cp.id) { mutableStateOf(cp.remindAt) }
+    var notify by remember(cp.id) { mutableStateOf(cp.notify) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 32.dp)
+            .verticalScroll(rememberScrollState()),
+    ) {
+        // Title
+        Text(
+            text = cp.name.ifBlank { "Checkpoint ${cpIdx + 1}" },
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Spacer(Modifier.height(4.dp))
+
+        // Status
+        val statusText = when {
+            cpIdx == curCp -> "\u25CF Current checkpoint"
+            cpIdx < curCp -> "\u2713 Completed"
+            else -> "\u25CB Upcoming"
+        }
+        val statusColor = when {
+            cpIdx == curCp -> MaterialTheme.colorScheme.primary
+            cpIdx < curCp -> MaterialTheme.colorScheme.secondary
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        }
+        Text(text = statusText, style = MaterialTheme.typography.bodySmall, color = statusColor)
+
+        Spacer(Modifier.height(16.dp))
+
+        // Name field
+        Text("Name", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(4.dp))
+        OutlinedTextField(
+            value = name, onValueChange = { name = it },
+            placeholder = { Text("Checkpoint name\u2026") },
+            singleLine = true, modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small,
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // Comment field
+        Text("Comment / Note", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(4.dp))
+        OutlinedTextField(
+            value = comment, onValueChange = { comment = it },
+            placeholder = { Text("Add a note\u2026") },
+            minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small,
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // Due date
+        Text("Due Date", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(4.dp))
+        OutlinedTextField(
+            value = dueDate, onValueChange = { dueDate = it },
+            placeholder = { Text("YYYY-MM-DD") },
+            singleLine = true, modifier = Modifier.fillMaxWidth(),
+            leadingIcon = { Icon(Icons.Filled.CalendarMonth, null, Modifier.size(18.dp)) },
+            trailingIcon = {
+                if (dueDate.isNotBlank()) {
+                    IconButton(onClick = { dueDate = "" }, modifier = Modifier.size(18.dp)) {
+                        Icon(Icons.Filled.Clear, "Clear")
+                    }
+                }
+            },
+            shape = MaterialTheme.shapes.small,
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // Reminder time
+        Text("Reminder Time", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(4.dp))
+        OutlinedTextField(
+            value = remindAt, onValueChange = { remindAt = it },
+            placeholder = { Text("YYYY-MM-DDThh:mm") },
+            singleLine = true, modifier = Modifier.fillMaxWidth(),
+            leadingIcon = { Icon(Icons.Filled.Alarm, null, Modifier.size(18.dp)) },
+            trailingIcon = {
+                if (remindAt.isNotBlank()) {
+                    IconButton(onClick = { remindAt = "" }, modifier = Modifier.size(18.dp)) {
+                        Icon(Icons.Filled.Clear, "Clear")
+                    }
+                }
+            },
+            shape = MaterialTheme.shapes.small,
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        // Notify toggle
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Enable reminder", style = MaterialTheme.typography.bodyMedium)
+            Spacer(Modifier.weight(1f))
+            Switch(
+                checked = notify,
+                onCheckedChange = { notify = it },
+                colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.primary),
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Button row: Jump + Save
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(
+                onClick = {
+                    vm.jumpToCheckpoint(procId, cpIdx)
+                    onDismiss()
+                    Toast.makeText(context, "Moved to \"${cp.name}\"", Toast.LENGTH_SHORT).show()
+                },
+                enabled = cpIdx != curCp,
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
+            ) {
+                Text(if (cpIdx == curCp) "Current" else "Jump here")
+            }
+
+            Button(
+                onClick = {
+                    if (notify && remindAt.isBlank()) {
+                        Toast.makeText(context, "Set a reminder time first", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    vm.updateCheckpoint(procId, cpIdx, name, comment, dueDate, remindAt, notify)
+                    onDismiss()
+                    Toast.makeText(context, "Checkpoint updated", Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
+            ) {
+                Text("Save")
+            }
+        }
+
+        // Delete checkpoint (only if >1)
+        if (proc.checkpoints.size > 1) {
+            Spacer(Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = { showDeleteConfirm = true },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.small,
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
+            ) {
+                Text("Delete Checkpoint")
+            }
+        }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete checkpoint?") },
+            text = { Text("\"${cp.name}\" will be removed from this process.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirm = false
+                        vm.deleteCheckpoint(procId, cpIdx)
+                        onDismiss()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text("Delete") }
+            },
+            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") } },
+        )
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Text editor sheet
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun TextEditorSheet(
+    targetId: String,
+    tab: ActiveTab,
+    vm: TickedViewModel,
+    store: TickedStore,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    val currentText = remember(targetId, tab) {
+        if (tab == ActiveTab.LOG) store.entries.find { it.id == targetId }?.text ?: ""
+        else store.processes.find { it.id == targetId }?.text ?: ""
+    }
+    var text by remember(targetId) { mutableStateOf(currentText) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 32.dp),
+    ) {
+        Text("Change Text", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = text, onValueChange = { text = it },
+            placeholder = { Text("Enter text\u2026") },
+            singleLine = true, modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small,
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
+            ) { Text("Cancel") }
+
+            Button(
+                onClick = {
+                    if (tab == ActiveTab.LOG) vm.updateEntryText(targetId, text)
+                    else vm.updateProcessText(targetId, text)
+                    onDismiss()
+                    Toast.makeText(context, "Text updated", Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
+            ) { Text("Save") }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Time editor sheet
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun TimeEditorSheet(
+    targetId: String,
+    tab: ActiveTab,
+    vm: TickedViewModel,
+    store: TickedStore,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    val currentIso = remember(targetId, tab) {
+        if (tab == ActiveTab.LOG) store.entries.find { it.id == targetId }?.isoDate ?: ""
+        else store.processes.find { it.id == targetId }?.isoDate ?: ""
+    }
+
+    val initialDate = remember(currentIso) {
+        try {
+            Instant.parse(currentIso).atZone(ZoneId.systemDefault()).toLocalDate()
+        } catch (_: Exception) { LocalDate.now() }
+    }
+    val initialTime = remember(currentIso) {
+        try {
+            Instant.parse(currentIso).atZone(ZoneId.systemDefault()).toLocalTime().withSecond(0).withNano(0)
+        } catch (_: Exception) { LocalTime.now().withSecond(0).withNano(0) }
+    }
+
+    var date by remember(targetId) { mutableStateOf(initialDate) }
+    var time by remember(targetId) { mutableStateOf(initialTime) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 32.dp),
+    ) {
+        Text("Change Time", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = date.toString(), onValueChange = { try { date = LocalDate.parse(it) } catch (_: Exception) {} },
+            label = { Text("Date") },
+            singleLine = true, modifier = Modifier.fillMaxWidth(),
+            leadingIcon = { Icon(Icons.Filled.CalendarMonth, null, Modifier.size(18.dp)) },
+            shape = MaterialTheme.shapes.small,
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = "%02d:%02d".format(time.hour, time.minute),
+            onValueChange = { v ->
+                try {
+                    val parts = v.split(":")
+                    if (parts.size == 2) time = LocalTime.of(parts[0].toInt(), parts[1].toInt())
+                } catch (_: Exception) {}
+            },
+            label = { Text("Time") },
+            singleLine = true, modifier = Modifier.fillMaxWidth(),
+            leadingIcon = { Icon(Icons.Filled.Schedule, null, Modifier.size(18.dp)) },
+            shape = MaterialTheme.shapes.small,
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
+            ) { Text("Cancel") }
+
+            Button(
+                onClick = {
+                    if (tab == ActiveTab.LOG) vm.updateEntryTime(targetId, date, time)
+                    else vm.updateProcessTime(targetId, date, time)
+                    onDismiss()
+                    Toast.makeText(context, "Time updated", Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
+            ) { Text("Save") }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  Color picker sheet
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun ColorPickerSheet(
+    targetId: String,
+    tab: ActiveTab,
+    mode: String, // "bg" or "border"
+    vm: TickedViewModel,
+    store: TickedStore,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    val palette = store.palette
+
+    // Current color for this item
+    val currentColor = remember(targetId, tab, mode) {
+        val item = if (tab == ActiveTab.LOG) store.entries.find { it.id == targetId }
+        else store.processes.find { it.id == targetId }
+        when {
+            item is TickedEntry && mode == "bg" -> item.bgColor
+            item is TickedEntry -> item.borderColor
+            item is TickedProcess && mode == "bg" -> item.bgColor
+            item is TickedProcess -> item.borderColor
+            else -> ""
+        }
+    }
+
+    var selectedColor by remember(targetId) { mutableStateOf(currentColor) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 32.dp),
+    ) {
+        Text(
+            text = if (mode == "bg") "Set Background" else "Set Border",
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Spacer(Modifier.height(16.dp))
+
+        // Palette swatches
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            palette.forEach { hex ->
+                val color = parseHexColor(hex) ?: Color.Gray
+                val isSelected = selectedColor == hex
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                        .then(
+                            if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                            else Modifier.border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), CircleShape)
+                        )
+                        .clickable { selectedColor = hex },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (isSelected) {
+                        Icon(Icons.Filled.Check, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // "None" option
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.small)
+                .clickable { selectedColor = "" }
+                .padding(8.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .then(
+                        if (selectedColor.isBlank()) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        else Modifier
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Filled.Block, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+            }
+            Spacer(Modifier.width(8.dp))
+            Text("None", style = MaterialTheme.typography.bodyMedium)
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // Palette editing hint
+        Text(
+            text = "Long-press a swatch to edit its color",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
+            ) { Text("Cancel") }
+
+            Button(
+                onClick = {
+                    if (tab == ActiveTab.LOG) vm.applyEntryColor(targetId, mode, selectedColor)
+                    else vm.applyProcessColor(targetId, mode, selectedColor)
+                    onDismiss()
+                    Toast.makeText(context, "Color applied", Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
+            ) { Text("Apply") }
+        }
+    }
 }
