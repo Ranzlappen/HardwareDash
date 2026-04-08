@@ -124,6 +124,15 @@
             </intent-filter>
         </receiver>
 
+        <!-- ── Schedule Action Receiver ──────────────────────────────── -->
+        <receiver
+            android:name=".receivers.ScheduleActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.hardwaredash.SCHEDULE_ACTION_FIRE" />
+            </intent-filter>
+        </receiver>
+
         <!-- ── Foreground Service ─────────────────────────────────── -->
         <service
             android:name=".services.HardwareService"
