@@ -7,12 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import com.hardwaredash.R
-import com.hardwaredash.ui.ticked.TickedRepository
+import com.hardwaredash.ui.logbook.LogbookRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import com.hardwaredash.ui.ticked.TickedEntry
+import com.hardwaredash.ui.logbook.LogbookEntry
 import java.time.Instant
 import java.util.UUID
 
@@ -27,9 +27,9 @@ class LogNowWidgetProvider : AppWidgetProvider() {
         if (intent.action == ACTION_LOG_NOW) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val repo = TickedRepository(context)
+                    val repo = LogbookRepository(context)
                     val store = repo.storeFlow.first()
-                    val entry = TickedEntry(
+                    val entry = LogbookEntry(
                         id = UUID.randomUUID().toString(),
                         isoDate = Instant.now().toString(),
                         text = "",

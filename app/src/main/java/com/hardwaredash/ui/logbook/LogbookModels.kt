@@ -1,11 +1,11 @@
-package com.hardwaredash.ui.ticked
+package com.hardwaredash.ui.logbook
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
 // ---- Schema version (matches Ticked web app v6) ----
-const val TICKED_SCHEMA_VERSION = 6
+const val LOGBOOK_SCHEMA_VERSION = 6
 
 // ---- Default colour palette (matches web app) ----
 val DEFAULT_PALETTE = listOf("#05004d", "#002e0d", "#2b0026", "#363506", "#3b0000")
@@ -24,7 +24,7 @@ data class Checkpoint(
 )
 
 @Serializable
-data class TickedEntry(
+data class LogbookEntry(
     val id: String = UUID.randomUUID().toString(),
     val isoDate: String = "",
     val text: String = "",
@@ -35,7 +35,7 @@ data class TickedEntry(
 )
 
 @Serializable
-data class TickedProcess(
+data class LogbookProcess(
     val id: String = UUID.randomUUID().toString(),
     val isoDate: String = "",
     val text: String = "",
@@ -49,23 +49,23 @@ data class TickedProcess(
 
 /** Top-level persistence envelope (mirrors web app's localStorage shape). */
 @Serializable
-data class TickedStore(
-    val version: Int = TICKED_SCHEMA_VERSION,
+data class LogbookStore(
+    val version: Int = LOGBOOK_SCHEMA_VERSION,
     val savedAt: String = "",
     val palette: List<String> = DEFAULT_PALETTE,
-    val entries: List<TickedEntry> = emptyList(),
-    val processes: List<TickedProcess> = emptyList(),
+    val entries: List<LogbookEntry> = emptyList(),
+    val processes: List<LogbookProcess> = emptyList(),
 )
 
-/** JSON export envelope (cross-compatible with web app). */
+/** JSON export envelope (cross-compatible with web app — keeps "Ticked" app name). */
 @Serializable
-data class TickedExport(
+data class LogbookExport(
     val app: String = "Ticked",
-    val version: Int = TICKED_SCHEMA_VERSION,
+    val version: Int = LOGBOOK_SCHEMA_VERSION,
     val exportedAt: String = "",
     val palette: List<String> = DEFAULT_PALETTE,
-    val entries: List<TickedEntry> = emptyList(),
-    val processes: List<TickedProcess> = emptyList(),
+    val entries: List<LogbookEntry> = emptyList(),
+    val processes: List<LogbookProcess> = emptyList(),
 )
 
 // ---- Process templates (matches web app's 3 built-in templates) ----
@@ -101,7 +101,7 @@ enum class ActiveTab { LOG, PROCESSES }
 
 // ---- Helpers ----
 
-fun TickedProcess.isOverdue(): Boolean {
+fun LogbookProcess.isOverdue(): Boolean {
     val cp = checkpoints.getOrNull(currentCheckpoint) ?: return false
     if (cp.dueDate.isBlank()) return false
     return try {
@@ -112,5 +112,5 @@ fun TickedProcess.isOverdue(): Boolean {
     }
 }
 
-fun countOverdue(processes: List<TickedProcess>): Int =
+fun countOverdue(processes: List<LogbookProcess>): Int =
     processes.count { it.isOverdue() }

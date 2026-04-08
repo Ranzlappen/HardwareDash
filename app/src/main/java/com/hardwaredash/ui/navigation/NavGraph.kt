@@ -17,7 +17,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 import com.hardwaredash.ui.screens.*
-import com.hardwaredash.ui.ticked.TickedScreen
+import com.hardwaredash.ui.logbook.LogbookScreen
 
 // ─── Route constants ──────────────────────────────────────────────────────────
 object Routes {
@@ -29,7 +29,9 @@ object Routes {
     const val SENSORS      = "sensors"
     const val LOCKSCREEN   = "lockscreen"
     const val BATTERY      = "battery"
-    const val TICKED       = "ticked"
+    const val LOGBOOK      = "logbook"
+    const val SETTINGS     = "settings"
+    const val FILE_META    = "file_meta"
 }
 
 data class BottomNavItem(
@@ -40,7 +42,7 @@ data class BottomNavItem(
 )
 
 private val bottomNavItems = listOf(
-    BottomNavItem(Routes.TICKED,     "Ticked",    Icons.Filled.CheckCircle,    Icons.Outlined.CheckCircle),
+    BottomNavItem(Routes.LOGBOOK,    "Logbook",   Icons.Filled.CheckCircle,    Icons.Outlined.CheckCircle),
     BottomNavItem(Routes.TORCH,      "Torch",     Icons.Filled.FlashlightOn,  Icons.Outlined.FlashlightOn),
     BottomNavItem(Routes.CAMERA,     "Camera",    Icons.Filled.CameraAlt,     Icons.Outlined.CameraAlt),
     BottomNavItem(Routes.VIBRATION,  "Vibration", Icons.Filled.Vibration,     Icons.Outlined.Vibration),
@@ -49,6 +51,8 @@ private val bottomNavItems = listOf(
     BottomNavItem(Routes.SENSORS,    "Sensors",   Icons.Filled.Analytics,     Icons.Outlined.Analytics),
     BottomNavItem(Routes.BATTERY,    "Battery",   Icons.Filled.BatteryStd,    Icons.Outlined.BatteryStd),
     BottomNavItem(Routes.LOCKSCREEN, "Lock",      Icons.Filled.Lock,          Icons.Outlined.Lock),
+    BottomNavItem(Routes.FILE_META,  "Files",     Icons.Filled.InsertDriveFile, Icons.Outlined.InsertDriveFile),
+    BottomNavItem(Routes.SETTINGS,   "Settings",  Icons.Filled.Settings,      Icons.Outlined.Settings),
 )
 
 @Composable
@@ -71,34 +75,36 @@ fun NavGraph() {
                         .horizontalScroll(rememberScrollState())
                         .defaultMinSize(minHeight = 80.dp)
                         .selectableGroup(),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.Top,
                 ) {
                     bottomNavItems.forEach { item ->
                         val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                                    contentDescription = item.label,
-                                )
-                            },
-                            label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                            ),
-                        )
+                        Box(modifier = Modifier.width(82.dp)) {
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = {
+                                    navController.navigate(item.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                                icon = {
+                                    Icon(
+                                        imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                                        contentDescription = item.label,
+                                    )
+                                },
+                                label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                ),
+                            )
+                        }
                     }
                 }
             }
@@ -106,10 +112,10 @@ fun NavGraph() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.TICKED,
+            startDestination = Routes.LOGBOOK,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(Routes.TICKED)        { TickedScreen() }
+            composable(Routes.LOGBOOK)       { LogbookScreen() }
             composable(Routes.TORCH)         { TorchScreen() }
             composable(Routes.CAMERA)        { CameraScreen() }
             composable(Routes.VIBRATION)     { VibrationScreen() }
@@ -118,6 +124,8 @@ fun NavGraph() {
             composable(Routes.SENSORS)       { SensorsScreen() }
             composable(Routes.LOCKSCREEN)    { LockScreenScreen() }
             composable(Routes.BATTERY)       { BatteryScreen() }
+            composable(Routes.FILE_META)     { FileMetadataScreen() }
+            composable(Routes.SETTINGS)      { SettingsScreen() }
         }
     }
 }

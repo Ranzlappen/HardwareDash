@@ -1,4 +1,4 @@
-package com.hardwaredash.ui.ticked
+package com.hardwaredash.ui.logbook
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -15,10 +15,10 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 /**
- * WorkManager worker that fires a native notification for a Ticked checkpoint reminder.
+ * WorkManager worker that fires a native notification for a Logbook checkpoint reminder.
  * Scheduled as a OneTimeWorkRequest with an initial delay matching the reminder time.
  */
-class TickedReminderWorker(
+class LogbookReminderWorker(
     context: Context,
     params: WorkerParameters,
 ) : Worker(context, params) {
@@ -59,15 +59,15 @@ class TickedReminderWorker(
     }
 
     companion object {
-        const val CHANNEL_ID = "ticked_reminders"
-        private const val CHANNEL_NAME = "Ticked Reminders"
+        const val CHANNEL_ID = "logbook_reminders"
+        private const val CHANNEL_NAME = "Logbook Reminders"
 
         private const val KEY_PROC_ID = "proc_id"
         private const val KEY_CP_IDX = "cp_idx"
         private const val KEY_PROC_NAME = "proc_name"
         private const val KEY_CP_NAME = "cp_name"
 
-        private fun workName(procId: String, cpIdx: Int) = "ticked_reminder_${procId}_$cpIdx"
+        private fun workName(procId: String, cpIdx: Int) = "logbook_reminder_${procId}_$cpIdx"
         private fun notificationId(procId: String, cpIdx: Int) = (procId.hashCode() + cpIdx * 31)
 
         /** Create the notification channel (idempotent). */
@@ -77,7 +77,7 @@ class TickedReminderWorker(
             val channel = NotificationChannel(
                 CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH,
             ).apply {
-                description = "Reminders for Ticked checkpoint due dates"
+                description = "Reminders for Logbook checkpoint due dates"
                 enableVibration(true)
             }
             nm.createNotificationChannel(channel)
@@ -119,10 +119,10 @@ class TickedReminderWorker(
                 .putString(KEY_CP_NAME, cpName)
                 .build()
 
-            val request = OneTimeWorkRequestBuilder<TickedReminderWorker>()
+            val request = OneTimeWorkRequestBuilder<LogbookReminderWorker>()
                 .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
                 .setInputData(data)
-                .addTag("ticked_reminder")
+                .addTag("logbook_reminder")
                 .build()
 
             WorkManager.getInstance(context).enqueueUniqueWork(

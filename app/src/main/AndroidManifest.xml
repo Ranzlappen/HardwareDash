@@ -14,7 +14,8 @@
     <!-- ══════════════════════ VIBRATION ══════════════════════════ -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- ══════════════════════ WIFI ════════════════════════════════ -->
+    <!-- ══════════════════════ WIFI / NETWORK ═════════════════════ -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -54,7 +55,7 @@
     <!-- ══════════════════════ TELEPHONY (signal info) ════════════ -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-    <!-- ══════════════════════ TICKED REMINDERS ══════════════════ -->
+    <!-- ══════════════════════ LOGBOOK REMINDERS ═════════════════ -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <!-- ══════════════════════ BRIGHTNESS ═════════════════════════ -->
@@ -110,6 +111,16 @@
                 android:resource="@xml/nfc_tech_filter" />
         </activity>
 
+        <!-- ── Caller Screen Activity (phone ring overlay) ────────── -->
+        <activity
+            android:name=".CallerScreenActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- ── Device Admin Receiver (for screen lock) ───────────── -->
         <receiver
             android:name=".receivers.AdminReceiver"
@@ -148,6 +159,7 @@
         <!-- ── Home Screen Widget (Metric) ───────────────────────── -->
         <receiver
             android:name=".widget.HardwareDashWidgetProvider"
+            android:label="@string/widget_label_metric"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -160,6 +172,7 @@
         <!-- ── Log Now Widget ────────────────────────────────────── -->
         <receiver
             android:name=".widget.LogNowWidgetProvider"
+            android:label="@string/widget_label_log_now"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -173,6 +186,7 @@
         <!-- ── Flashlight Widget ─────────────────────────────────── -->
         <receiver
             android:name=".widget.FlashlightWidgetProvider"
+            android:label="@string/widget_label_flashlight"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -186,6 +200,7 @@
         <!-- ── Strobe Widget ─────────────────────────────────────── -->
         <receiver
             android:name=".widget.StrobeWidgetProvider"
+            android:label="@string/widget_label_strobe"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -199,6 +214,7 @@
         <!-- ── Camera Snapshot Widget ────────────────────────────── -->
         <receiver
             android:name=".widget.CameraSnapshotWidgetProvider"
+            android:label="@string/widget_label_camera_snapshot"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -212,6 +228,7 @@
         <!-- ── Video Toggle Widget ───────────────────────────────── -->
         <receiver
             android:name=".widget.VideoToggleWidgetProvider"
+            android:label="@string/widget_label_video_toggle"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -231,6 +248,7 @@
         <!-- ── Voice Record Widget ───────────────────────────────── -->
         <receiver
             android:name=".widget.VoiceRecordWidgetProvider"
+            android:label="@string/widget_label_voice_record"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -250,6 +268,7 @@
         <!-- ── Phone Ring Widget ─────────────────────────────────── -->
         <receiver
             android:name=".widget.PhoneRingWidgetProvider"
+            android:label="@string/widget_label_phone_ring"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -263,6 +282,7 @@
         <!-- ── Notify in 30s Widget ──────────────────────────────── -->
         <receiver
             android:name=".widget.NotifyWidgetProvider"
+            android:label="@string/widget_label_notify"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -276,6 +296,7 @@
         <!-- ── dB Meter Widget ───────────────────────────────────── -->
         <receiver
             android:name=".widget.DbMeterWidgetProvider"
+            android:label="@string/widget_label_db_meter"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

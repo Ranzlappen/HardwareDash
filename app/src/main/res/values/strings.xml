@@ -1,5 +1,28 @@
 <resources>
     <string name="app_name">HardwareDash</string>
     <string name="admin_description">Allows HardwareDash to lock the screen programmatically.</string>
-    <string name="widget_description">Show a live hardware metric on your home screen. Choose from battery, sensors, WiFi, and more.</string>
+
+    <!-- Widget labels (shown in widget picker title) -->
+    <string name="widget_label_metric">HardwareDash Metric</string>
+    <string name="widget_label_log_now">Quick Log</string>
+    <string name="widget_label_flashlight">Flashlight Toggle</string>
+    <string name="widget_label_strobe">Strobe Toggle</string>
+    <string name="widget_label_camera_snapshot">Camera Snapshot</string>
+    <string name="widget_label_video_toggle">Video Toggle</string>
+    <string name="widget_label_voice_record">Voice Record</string>
+    <string name="widget_label_phone_ring">Phone Ring</string>
+    <string name="widget_label_notify">Quick Notify</string>
+    <string name="widget_label_db_meter">dB Meter</string>
+
+    <!-- Widget descriptions (shown in widget picker subtitle) -->
+    <string name="widget_desc_metric">Show a live hardware metric on your home screen. Choose from battery, sensors, WiFi, and more.</string>
+    <string name="widget_desc_log_now">Tap to quickly log an entry to your Logbook.</string>
+    <string name="widget_desc_flashlight">Toggle the flashlight on or off from your home screen.</string>
+    <string name="widget_desc_strobe">Toggle strobe light on or off from your home screen.</string>
+    <string name="widget_desc_camera_snapshot">Take a quick photo from your home screen.</string>
+    <string name="widget_desc_video_toggle">Start or stop video recording from your home screen.</string>
+    <string name="widget_desc_voice_record">Start or stop voice recording from your home screen.</string>
+    <string name="widget_desc_phone_ring">Ring your phone after a configurable delay.</string>
+    <string name="widget_desc_notify">Send yourself a notification after a configurable delay.</string>
+    <string name="widget_desc_db_meter">Monitor ambient noise level from your home screen.</string>
 </resources>

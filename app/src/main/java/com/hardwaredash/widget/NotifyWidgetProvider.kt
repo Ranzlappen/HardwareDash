@@ -19,12 +19,14 @@ class NotifyWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         if (intent.action == ACTION_NOTIFY_30S) {
+            val prefs = context.getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
+            val delaySec = prefs.getInt("notify_delay_seconds", 30)
             val id = (System.currentTimeMillis() % Int.MAX_VALUE).toInt()
             val alarmIntent = Intent(context, ScheduleActionReceiver::class.java).apply {
                 action = ScheduleActionReceiver.ACTION_FIRE
                 putExtra(ScheduleActionReceiver.EXTRA_TYPE, "notification")
                 putExtra(ScheduleActionReceiver.EXTRA_TITLE, "HardwareDash Reminder")
-                putExtra(ScheduleActionReceiver.EXTRA_BODY, "30-second notification from widget")
+                putExtra(ScheduleActionReceiver.EXTRA_BODY, "Notification from widget")
                 putExtra(ScheduleActionReceiver.EXTRA_ID, id)
             }
             val pi = PendingIntent.getBroadcast(
@@ -34,10 +36,10 @@ class NotifyWidgetProvider : AppWidgetProvider() {
             val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             am.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + 30_000L,
+                System.currentTimeMillis() + delaySec * 1000L,
                 pi,
             )
-            WidgetActionHandler.showToast(context, "Notification in 30 seconds")
+            WidgetActionHandler.showToast(context, "Notification in $delaySec seconds")
         }
     }
 

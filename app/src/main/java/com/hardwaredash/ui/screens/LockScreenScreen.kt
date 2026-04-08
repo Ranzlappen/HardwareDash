@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.core.app.NotificationCompat
 import com.google.accompanist.permissions.*
+import com.hardwaredash.localization.S
 import com.hardwaredash.MainActivity
 import com.hardwaredash.receivers.AdminReceiver
 import kotlinx.coroutines.delay
@@ -128,6 +129,18 @@ fun LockScreenScreen() {
         Color(0xFF9C27B0) to "Purple",
         Color(0xFF00BCD4) to "Cyan",
     )
+    // Enhanced builder state
+    var customActionCount by remember { mutableIntStateOf(0) }
+    var customAction1 by remember { mutableStateOf("Open App") }
+    var customAction2 by remember { mutableStateOf("Dismiss") }
+    var customAction3 by remember { mutableStateOf("More") }
+    var customShowProgress by remember { mutableStateOf(false) }
+    var customProgressIndeterminate by remember { mutableStateOf(true) }
+    var customProgressValue by remember { mutableIntStateOf(50) }
+    var customOngoing by remember { mutableStateOf(false) }
+    var customAutoCancel by remember { mutableStateOf(true) }
+    var customDelaySec by remember { mutableFloatStateOf(0f) }
+    var customStyleIdx by remember { mutableIntStateOf(0) } // 0=Normal, 1=BigText, 2=Inbox
 
     Column(
         modifier = Modifier
@@ -145,7 +158,7 @@ fun LockScreenScreen() {
             )
             Spacer(Modifier.width(10.dp))
             Text(
-                "Lock Screen & Notifications",
+                S.lock.title,
                 style      = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
             )
@@ -155,10 +168,10 @@ fun LockScreenScreen() {
         if (!notifGranted) {
             Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("POST_NOTIFICATIONS permission required (Android 13+)",
+                    Text(S.lock.grantPermission,
                         color = MaterialTheme.colorScheme.onErrorContainer)
                     Button(onClick = { notifPerm?.launchPermissionRequest() }) {
-                        Text("Grant Permission")
+                        Text(S.lock.grantPermission)
                     }
                 }
             }
@@ -167,7 +180,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 1 — Notification Demos
         // ══════════════════════════════════════════════════════════════════════
-        Text("Notification Demos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.notificationDemos, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
         NotifDemoCard(
             title    = "1. Simple Notification",
@@ -265,7 +278,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 2 — Custom Notification Builder
         // ══════════════════════════════════════════════════════════════════════
-        Text("Custom Notification Builder", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.customNotifBuilder, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
         OutlinedTextField(
             value = customTitle,
@@ -334,6 +347,134 @@ fun LockScreenScreen() {
             }
         }
 
+        // ── Action Buttons ────────────────────────────────────────────────
+        Text(S.lock.actionButtons, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            (0..3).forEach { count ->
+                FilterChip(
+                    selected = customActionCount == count,
+                    onClick = { customActionCount = count },
+                    label = { Text("$count", style = MaterialTheme.typography.labelSmall) },
+                )
+            }
+        }
+        if (customActionCount >= 1) {
+            OutlinedTextField(value = customAction1, onValueChange = { customAction1 = it },
+                label = { Text("Action 1") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        }
+        if (customActionCount >= 2) {
+            OutlinedTextField(value = customAction2, onValueChange = { customAction2 = it },
+                label = { Text("Action 2") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        }
+        if (customActionCount >= 3) {
+            OutlinedTextField(value = customAction3, onValueChange = { customAction3 = it },
+                label = { Text("Action 3") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        }
+
+        // ── Progress Bar ─────────────────────────────────────────────────
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(S.lock.enableProgress, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+            Switch(checked = customShowProgress, onCheckedChange = { customShowProgress = it })
+        }
+        if (customShowProgress) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                FilterChip(
+                    selected = customProgressIndeterminate,
+                    onClick = { customProgressIndeterminate = true },
+                    label = { Text("Indeterminate", style = MaterialTheme.typography.labelSmall) },
+                )
+                FilterChip(
+                    selected = !customProgressIndeterminate,
+                    onClick = { customProgressIndeterminate = false },
+                    label = { Text("Determinate", style = MaterialTheme.typography.labelSmall) },
+                )
+            }
+            if (!customProgressIndeterminate) {
+                Text("${customProgressValue}%", style = MaterialTheme.typography.bodySmall)
+                Slider(
+                    value = customProgressValue.toFloat(),
+                    onValueChange = { customProgressValue = it.toInt() },
+                    valueRange = 0f..100f,
+                )
+            }
+        }
+
+        // ── Style ────────────────────────────────────────────────────────
+        Text(S.lock.style, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf("Normal", S.lock.bigText, S.lock.inbox).forEachIndexed { idx, label ->
+                FilterChip(
+                    selected = customStyleIdx == idx,
+                    onClick = { customStyleIdx = idx },
+                    label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                )
+            }
+        }
+
+        // ── Ongoing & Auto-cancel ────────────────────────────────────────
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(S.lock.ongoing, style = MaterialTheme.typography.labelMedium)
+            Switch(checked = customOngoing, onCheckedChange = { customOngoing = it })
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(S.lock.autoCancel, style = MaterialTheme.typography.labelMedium)
+            Switch(checked = customAutoCancel, onCheckedChange = { customAutoCancel = it })
+        }
+
+        // ── Delay ────────────────────────────────────────────────────────
+        Text(
+            "${S.lock.delay}: ${if (customDelaySec < 1f) "${(customDelaySec * 60).toInt()} sec" else "${"%.0f".format(customDelaySec)} min"}",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Slider(
+            value = customDelaySec,
+            onValueChange = { customDelaySec = it },
+            valueRange = 0f..30f,
+        )
+
+        // ── Preview Card ─────────────────────────────────────────────────
+        Text(S.lock.preview, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        ) {
+            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(customTitle, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium)
+                Text(customBody, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                if (customShowProgress) {
+                    if (customProgressIndeterminate) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    } else {
+                        LinearProgressIndicator(
+                            progress = { customProgressValue / 100f },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
+                if (customActionCount > 0) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
+                        if (customActionCount >= 1) TextButton(onClick = {}) { Text(customAction1, style = MaterialTheme.typography.labelSmall) }
+                        if (customActionCount >= 2) TextButton(onClick = {}) { Text(customAction2, style = MaterialTheme.typography.labelSmall) }
+                        if (customActionCount >= 3) TextButton(onClick = {}) { Text(customAction3, style = MaterialTheme.typography.labelSmall) }
+                    }
+                }
+            }
+        }
+
+        // ── Send Button ──────────────────────────────────────────────────
         Button(
             onClick = {
                 val pi = PendingIntent.getActivity(
@@ -342,7 +483,7 @@ fun LockScreenScreen() {
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
                 val channel = if (customPriority >= NotificationCompat.PRIORITY_HIGH) CH_HIGH else CH_CUSTOM
-                val n = NotificationCompat.Builder(context, channel)
+                val builder = NotificationCompat.Builder(context, channel)
                     .setSmallIcon(android.R.drawable.ic_dialog_info)
                     .setContentTitle(customTitle)
                     .setContentText(customBody)
@@ -350,16 +491,61 @@ fun LockScreenScreen() {
                     .setVisibility(customVisibility)
                     .setColor(colorOptions[customColorIdx].first.toArgb())
                     .setContentIntent(pi)
-                    .setAutoCancel(true)
-                    .build()
-                if (notifGranted) nm.notify(2000 + (System.currentTimeMillis() % 1000).toInt(), n)
+                    .setAutoCancel(customAutoCancel)
+                    .setOngoing(customOngoing)
+
+                // Action buttons
+                if (customActionCount >= 1) builder.addAction(0, customAction1, pi)
+                if (customActionCount >= 2) builder.addAction(0, customAction2, pi)
+                if (customActionCount >= 3) builder.addAction(0, customAction3, pi)
+
+                // Progress bar
+                if (customShowProgress) {
+                    if (customProgressIndeterminate) {
+                        builder.setProgress(0, 0, true)
+                    } else {
+                        builder.setProgress(100, customProgressValue, false)
+                    }
+                }
+
+                // Style
+                when (customStyleIdx) {
+                    1 -> builder.setStyle(NotificationCompat.BigTextStyle().bigText(customBody))
+                    2 -> {
+                        val inboxStyle = NotificationCompat.InboxStyle()
+                        customBody.lines().forEach { inboxStyle.addLine(it) }
+                        builder.setStyle(inboxStyle)
+                    }
+                }
+
+                val notifId = 2000 + (System.currentTimeMillis() % 1000).toInt()
+
+                if (customDelaySec > 0 && notifGranted) {
+                    // Schedule with delay
+                    val delayMs = (customDelaySec * 60 * 1000).toLong()
+                    val schedIntent = Intent(context, com.hardwaredash.receivers.ScheduleActionReceiver::class.java).apply {
+                        action = com.hardwaredash.receivers.ScheduleActionReceiver.ACTION_FIRE
+                        putExtra(com.hardwaredash.receivers.ScheduleActionReceiver.EXTRA_TYPE, "notification")
+                        putExtra(com.hardwaredash.receivers.ScheduleActionReceiver.EXTRA_TITLE, customTitle)
+                        putExtra(com.hardwaredash.receivers.ScheduleActionReceiver.EXTRA_BODY, customBody)
+                        putExtra(com.hardwaredash.receivers.ScheduleActionReceiver.EXTRA_ID, notifId)
+                    }
+                    val schedPi = PendingIntent.getBroadcast(
+                        context, notifId, schedIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                    )
+                    val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delayMs, schedPi)
+                } else if (notifGranted) {
+                    nm.notify(notifId, builder.build())
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = notifGranted && customTitle.isNotBlank(),
         ) {
             Icon(Icons.AutoMirrored.Filled.Send, null)
             Spacer(Modifier.width(8.dp))
-            Text("Send Custom Notification")
+            Text(S.lock.sendCustomNotif)
         }
 
         HorizontalDivider()
@@ -367,7 +553,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 3 — Emergency Alerts
         // ══════════════════════════════════════════════════════════════════════
-        Text("Emergency Alerts", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.emergencyAlerts, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Wireless Emergency Alerts (WEA)", fontWeight = FontWeight.SemiBold)
@@ -391,7 +577,7 @@ fun LockScreenScreen() {
                 ) {
                     Icon(Icons.Default.Warning, null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Open Emergency Alert Settings")
+                    Text(S.lock.openEmergencySettings)
                 }
             }
         }
@@ -407,7 +593,7 @@ fun LockScreenScreen() {
         ) {
             Icon(Icons.Default.ClearAll, null)
             Spacer(Modifier.width(8.dp))
-            Text("Cancel All Notifications")
+            Text(S.lock.cancelAllNotif)
         }
 
         HorizontalDivider()
@@ -415,7 +601,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 5 — Capability overview
         // ══════════════════════════════════════════════════════════════════════
-        Text("Lock Screen Capabilities", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.capabilities, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Card(shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text("What is possible without root:", fontWeight = FontWeight.SemiBold)
@@ -440,7 +626,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 6 — Device Admin
         // ══════════════════════════════════════════════════════════════════════
-        Text("Device Admin", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.deviceAdmin, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(
             "Required to call DevicePolicyManager.lockNow(). " +
             "Android will show its own confirmation dialog.",
@@ -466,7 +652,7 @@ fun LockScreenScreen() {
             ) {
                 Icon(Icons.Default.AdminPanelSettings, null)
                 Spacer(Modifier.width(8.dp))
-                Text("Activate Device Admin")
+                Text(S.lock.activateDeviceAdmin)
             }
         } else {
             OutlinedButton(
@@ -481,7 +667,7 @@ fun LockScreenScreen() {
             ) {
                 Icon(Icons.Default.RemoveModerator, null)
                 Spacer(Modifier.width(8.dp))
-                Text("Deactivate Device Admin")
+                Text(S.lock.deactivateDeviceAdmin)
             }
         }
 
@@ -490,7 +676,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 7 — Overlay permission
         // ══════════════════════════════════════════════════════════════════════
-        Text("Overlay Permission", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.overlayPermission, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(
             "SYSTEM_ALERT_WINDOW lets HardwareDash draw a floating window " +
             "directly on top of the lock screen.",
@@ -514,7 +700,7 @@ fun LockScreenScreen() {
             ) {
                 Icon(Icons.Default.Layers, null)
                 Spacer(Modifier.width(8.dp))
-                Text("Open Overlay Permission Settings")
+                Text(S.lock.openOverlaySettings)
             }
         }
 
@@ -523,7 +709,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 8 — Actions
         // ══════════════════════════════════════════════════════════════════════
-        Text("Actions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.actions, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
         Button(
             enabled  = isAdmin,
@@ -533,7 +719,7 @@ fun LockScreenScreen() {
         ) {
             Icon(Icons.Default.LockClock, null)
             Spacer(Modifier.width(8.dp))
-            Text("Lock Screen Now", style = MaterialTheme.typography.titleMedium)
+            Text(S.lock.lockScreenNow, style = MaterialTheme.typography.titleMedium)
         }
 
         if (!isAdmin) {
@@ -549,7 +735,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 9 — Lock Screen Notification Designer
         // ══════════════════════════════════════════════════════════════════════
-        Text("Lock Screen Notification Designer", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.lockScreenDesigner, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(
             "Design notifications that appear on the lock screen. " +
             "Visibility controls how much content is shown when the device is locked.",
@@ -624,7 +810,7 @@ fun LockScreenScreen() {
         }
 
         // ── Enhanced Scheduling ──────────────────────────────────────────────
-        Text("Schedule Action", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.scheduleAction, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
 
         // Schedule type
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -720,7 +906,7 @@ fun LockScreenScreen() {
                 },
                 modifier = Modifier.weight(1f),
                 enabled = lsTitle.isNotBlank(),
-            ) { Text("Send Now") }
+            ) { Text(S.lock.sendNow) }
 
             Button(
                 onClick = {
@@ -771,7 +957,7 @@ fun LockScreenScreen() {
                 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-            ) { Text("Schedule") }
+            ) { Text(S.lock.schedule) }
         }
 
         if (lsScheduleStatus.isNotEmpty()) {
@@ -968,7 +1154,7 @@ private fun NotifDemoCard(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                 }
             }
-            FilledTonalButton(onClick = onFire) { Text("Send") }
+            FilledTonalButton(onClick = onFire) { Text(S.lock.send) }
         }
     }
 }

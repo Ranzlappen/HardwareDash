@@ -1,4 +1,4 @@
-package com.hardwaredash.ui.ticked
+package com.hardwaredash.ui.logbook
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -12,13 +12,13 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.util.UUID
 
-class TickedViewModel(application: Application) : AndroidViewModel(application) {
+class LogbookViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repo = TickedRepository(application)
+    private val repo = LogbookRepository(application)
 
     // ── Persisted state (from DataStore) ─────────────────────────────
-    private val _store = MutableStateFlow(TickedStore())
-    val store: StateFlow<TickedStore> = _store.asStateFlow()
+    private val _store = MutableStateFlow(LogbookStore())
+    val store: StateFlow<LogbookStore> = _store.asStateFlow()
 
     // ── UI-only state ────────────────────────────────────────────────
     private val _activeTab = MutableStateFlow(ActiveTab.LOG)
@@ -53,7 +53,7 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
 
     // ── Derived state ────────────────────────────────────────────────
 
-    val filteredEntries: StateFlow<List<TickedEntry>> = combine(
+    val filteredEntries: StateFlow<List<LogbookEntry>> = combine(
         _store,
         _entryTypeFilter,
         _entrySearch,
@@ -90,7 +90,7 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
         sortList(list, sortField, sortDir)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val filteredProcesses: StateFlow<List<TickedProcess>> = combine(
+    val filteredProcesses: StateFlow<List<LogbookProcess>> = combine(
         _store,
         _procTypeFilter,
         _procSearch,
@@ -149,7 +149,7 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
     // ═══════════════════════════════════════════════════════════════════
 
     fun addEntry(text: String) {
-        val entry = TickedEntry(
+        val entry = LogbookEntry(
             id = UUID.randomUUID().toString(),
             isoDate = Instant.now().toString(),
             text = text.trim(),
@@ -162,7 +162,7 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
     fun addCustomEntry(text: String, date: LocalDate, time: LocalTime) {
         val ldt = LocalDateTime.of(date, time)
         val iso = ldt.atZone(ZoneId.systemDefault()).toInstant().toString()
-        val entry = TickedEntry(
+        val entry = LogbookEntry(
             id = UUID.randomUUID().toString(),
             isoDate = iso,
             text = text.trim(),
@@ -224,7 +224,7 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
     fun addProcess(text: String) {
         if (text.isBlank()) return
         val now = Instant.now().toString()
-        val proc = TickedProcess(
+        val proc = LogbookProcess(
             id = UUID.randomUUID().toString(),
             isoDate = now,
             text = text.trim(),
@@ -249,7 +249,7 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
                 timestamp = if (idx == 0) now else "",
             )
         }
-        val proc = TickedProcess(
+        val proc = LogbookProcess(
             id = UUID.randomUUID().toString(),
             isoDate = now,
             text = "${template.baseName} #$count",
@@ -262,7 +262,7 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
         // Cancel any pending reminders for this process
         val proc = processes().find { it.id == id }
         proc?.checkpoints?.forEachIndexed { idx, _ ->
-            TickedReminderWorker.cancel(getApplication(), id, idx)
+            LogbookReminderWorker.cancel(getApplication(), id, idx)
         }
         updateStore { copy(processes = processes.filter { it.id != id }) }
     }
@@ -307,7 +307,7 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
         // Cancel all reminders
         processes().forEach { proc ->
             proc.checkpoints.forEachIndexed { idx, _ ->
-                TickedReminderWorker.cancel(getApplication(), proc.id, idx)
+                LogbookReminderWorker.cancel(getApplication(), proc.id, idx)
             }
         }
         updateStore { copy(processes = emptyList()) }
@@ -373,14 +373,14 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
         if (notify && remindAt.isNotBlank()) {
             val proc = _store.value.processes.find { it.id == procId } ?: return
             val cp = proc.checkpoints.getOrNull(cpIdx) ?: return
-            TickedReminderWorker.schedule(app, procId, cpIdx, proc.text, cp.name, remindAt)
+            LogbookReminderWorker.schedule(app, procId, cpIdx, proc.text, cp.name, remindAt)
         } else {
-            TickedReminderWorker.cancel(app, procId, cpIdx)
+            LogbookReminderWorker.cancel(app, procId, cpIdx)
         }
     }
 
     fun deleteCheckpoint(procId: String, cpIdx: Int) {
-        TickedReminderWorker.cancel(getApplication(), procId, cpIdx)
+        LogbookReminderWorker.cancel(getApplication(), procId, cpIdx)
         updateStore {
             copy(processes = processes.map { p ->
                 if (p.id != procId) p
@@ -476,14 +476,14 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
     private fun processes() = _store.value.processes
 
     /** Apply a transform to the store and persist. */
-    private fun updateStore(transform: TickedStore.() -> TickedStore) {
+    private fun updateStore(transform: LogbookStore.() -> LogbookStore) {
         val updated = _store.value.transform()
         _store.value = updated
         viewModelScope.launch { repo.save(updated) }
     }
 
     /** Convenience overload for direct replacement. */
-    private fun updateStore(direct: TickedStore) {
+    private fun updateStore(direct: LogbookStore) {
         _store.value = direct
         viewModelScope.launch { repo.save(direct) }
     }
@@ -493,7 +493,7 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
         _store.value.processes.forEach { proc ->
             proc.checkpoints.forEachIndexed { idx, cp ->
                 if (cp.notify && cp.remindAt.isNotBlank()) {
-                    TickedReminderWorker.schedule(app, proc.id, idx, proc.text, cp.name, cp.remindAt)
+                    LogbookReminderWorker.schedule(app, proc.id, idx, proc.text, cp.name, cp.remindAt)
                 }
             }
         }
@@ -512,8 +512,8 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
             SortField.TIME -> {
                 val selector: (T) -> String = { item ->
                     when (item) {
-                        is TickedEntry -> item.isoDate
-                        is TickedProcess -> item.isoDate
+                        is LogbookEntry -> item.isoDate
+                        is LogbookProcess -> item.isoDate
                         else -> ""
                     }
                 }
@@ -523,8 +523,8 @@ class TickedViewModel(application: Application) : AndroidViewModel(application) 
             SortField.TEXT -> {
                 val selector: (T) -> String = { item ->
                     when (item) {
-                        is TickedEntry -> item.text.lowercase()
-                        is TickedProcess -> item.text.lowercase()
+                        is LogbookEntry -> item.text.lowercase()
+                        is LogbookProcess -> item.text.lowercase()
                         else -> ""
                     }
                 }

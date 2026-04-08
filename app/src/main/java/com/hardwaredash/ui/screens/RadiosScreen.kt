@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.permissions.*
+import com.hardwaredash.localization.S
 import com.google.android.gms.location.*
 import kotlinx.coroutines.delay
 import org.osmdroid.config.Configuration
@@ -624,14 +625,14 @@ fun RadiosScreen() {
         HorizontalDivider()
 
         // ── GPS section ──────────────────────────────────────────────────────
-        Text("GPS / Location", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.radios.gpsLocation, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
         if (!locationPermState.allPermissionsGranted) {
             Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Location permission required for GPS", color = MaterialTheme.colorScheme.onErrorContainer)
+                    Text(S.radios.locationPermRequired, color = MaterialTheme.colorScheme.onErrorContainer)
                     Button(onClick = { locationPermState.launchMultiplePermissionRequest() }) {
-                        Text("Grant Location Permission")
+                        Text(S.radios.grantLocationPerm)
                     }
                 }
             }
@@ -644,7 +645,7 @@ fun RadiosScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("GPS Tracking", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(S.radios.gpsTracking, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Switch(
                         checked = gpsActive,
                         onCheckedChange = {
@@ -664,29 +665,29 @@ fun RadiosScreen() {
                     // Metrics display
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
-                            Text("Latitude", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(S.radios.latitude, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(gpsLat, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                         }
                         Column {
-                            Text("Longitude", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(S.radios.longitude, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(gpsLon, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                         }
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
-                            Text("Altitude", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(S.radios.altitude, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(gpsAlt, style = MaterialTheme.typography.bodySmall)
                         }
                         Column {
-                            Text("Speed", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(S.radios.speed, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(gpsSpeed, style = MaterialTheme.typography.bodySmall)
                         }
                         Column {
-                            Text("Accuracy", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(S.radios.accuracy, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(gpsAccuracy, style = MaterialTheme.typography.bodySmall)
                         }
                         Column {
-                            Text("Bearing", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(S.radios.bearing, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(gpsBearing, style = MaterialTheme.typography.bodySmall)
                         }
                     }
