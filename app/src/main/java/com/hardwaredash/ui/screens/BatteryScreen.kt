@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hardwaredash.localization.S
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 
@@ -116,7 +117,7 @@ fun BatteryScreen() {
                 modifier = Modifier.size(28.dp),
             )
             Spacer(Modifier.width(10.dp))
-            Text("Battery", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(S.battery.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         }
 
         // ── Level + status hero card ──────────────────────────────────────
@@ -164,10 +165,10 @@ fun BatteryScreen() {
         }
 
         // ── Detail rows ───────────────────────────────────────────────────
-        BatteryRow("Health", health)
-        BatteryRow("Temperature", "${"%.1f".format(temperature)} °C")
-        BatteryRow("Voltage", "${"%.3f".format(voltage)} V")
-        BatteryRow("Technology", technology)
+        BatteryRow(S.battery.health, health)
+        BatteryRow(S.battery.temperature, "${"%.1f".format(temperature)} °C")
+        BatteryRow(S.battery.voltage, "${"%.3f".format(voltage)} V")
+        BatteryRow(S.battery.technology, technology)
         BatteryRow("Current (now)", "${currentNow / 1000} mA")
         BatteryRow("Current (avg)", "${currentAvg / 1000} mA")
 

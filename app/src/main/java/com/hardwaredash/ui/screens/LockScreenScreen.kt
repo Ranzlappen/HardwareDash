@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.core.app.NotificationCompat
 import com.google.accompanist.permissions.*
+import com.hardwaredash.localization.S
 import com.hardwaredash.MainActivity
 import com.hardwaredash.receivers.AdminReceiver
 import kotlinx.coroutines.delay
@@ -145,7 +146,7 @@ fun LockScreenScreen() {
             )
             Spacer(Modifier.width(10.dp))
             Text(
-                "Lock Screen & Notifications",
+                S.lock.title,
                 style      = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
             )
@@ -155,10 +156,10 @@ fun LockScreenScreen() {
         if (!notifGranted) {
             Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("POST_NOTIFICATIONS permission required (Android 13+)",
+                    Text(S.lock.grantPermission,
                         color = MaterialTheme.colorScheme.onErrorContainer)
                     Button(onClick = { notifPerm?.launchPermissionRequest() }) {
-                        Text("Grant Permission")
+                        Text(S.lock.grantPermission)
                     }
                 }
             }
@@ -167,7 +168,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 1 — Notification Demos
         // ══════════════════════════════════════════════════════════════════════
-        Text("Notification Demos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.notificationDemos, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
         NotifDemoCard(
             title    = "1. Simple Notification",
@@ -265,7 +266,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 2 — Custom Notification Builder
         // ══════════════════════════════════════════════════════════════════════
-        Text("Custom Notification Builder", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.customNotifBuilder, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
         OutlinedTextField(
             value = customTitle,
@@ -359,7 +360,7 @@ fun LockScreenScreen() {
         ) {
             Icon(Icons.AutoMirrored.Filled.Send, null)
             Spacer(Modifier.width(8.dp))
-            Text("Send Custom Notification")
+            Text(S.lock.sendCustomNotif)
         }
 
         HorizontalDivider()
@@ -367,7 +368,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 3 — Emergency Alerts
         // ══════════════════════════════════════════════════════════════════════
-        Text("Emergency Alerts", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.emergencyAlerts, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Wireless Emergency Alerts (WEA)", fontWeight = FontWeight.SemiBold)
@@ -391,7 +392,7 @@ fun LockScreenScreen() {
                 ) {
                     Icon(Icons.Default.Warning, null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Open Emergency Alert Settings")
+                    Text(S.lock.openEmergencySettings)
                 }
             }
         }
@@ -407,7 +408,7 @@ fun LockScreenScreen() {
         ) {
             Icon(Icons.Default.ClearAll, null)
             Spacer(Modifier.width(8.dp))
-            Text("Cancel All Notifications")
+            Text(S.lock.cancelAllNotif)
         }
 
         HorizontalDivider()
@@ -415,7 +416,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 5 — Capability overview
         // ══════════════════════════════════════════════════════════════════════
-        Text("Lock Screen Capabilities", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.capabilities, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Card(shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text("What is possible without root:", fontWeight = FontWeight.SemiBold)
@@ -440,7 +441,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 6 — Device Admin
         // ══════════════════════════════════════════════════════════════════════
-        Text("Device Admin", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.deviceAdmin, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(
             "Required to call DevicePolicyManager.lockNow(). " +
             "Android will show its own confirmation dialog.",
@@ -466,7 +467,7 @@ fun LockScreenScreen() {
             ) {
                 Icon(Icons.Default.AdminPanelSettings, null)
                 Spacer(Modifier.width(8.dp))
-                Text("Activate Device Admin")
+                Text(S.lock.activateDeviceAdmin)
             }
         } else {
             OutlinedButton(
@@ -481,7 +482,7 @@ fun LockScreenScreen() {
             ) {
                 Icon(Icons.Default.RemoveModerator, null)
                 Spacer(Modifier.width(8.dp))
-                Text("Deactivate Device Admin")
+                Text(S.lock.deactivateDeviceAdmin)
             }
         }
 
@@ -490,7 +491,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 7 — Overlay permission
         // ══════════════════════════════════════════════════════════════════════
-        Text("Overlay Permission", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.overlayPermission, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(
             "SYSTEM_ALERT_WINDOW lets HardwareDash draw a floating window " +
             "directly on top of the lock screen.",
@@ -514,7 +515,7 @@ fun LockScreenScreen() {
             ) {
                 Icon(Icons.Default.Layers, null)
                 Spacer(Modifier.width(8.dp))
-                Text("Open Overlay Permission Settings")
+                Text(S.lock.openOverlaySettings)
             }
         }
 
@@ -523,7 +524,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 8 — Actions
         // ══════════════════════════════════════════════════════════════════════
-        Text("Actions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.actions, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
         Button(
             enabled  = isAdmin,
@@ -533,7 +534,7 @@ fun LockScreenScreen() {
         ) {
             Icon(Icons.Default.LockClock, null)
             Spacer(Modifier.width(8.dp))
-            Text("Lock Screen Now", style = MaterialTheme.typography.titleMedium)
+            Text(S.lock.lockScreenNow, style = MaterialTheme.typography.titleMedium)
         }
 
         if (!isAdmin) {
@@ -549,7 +550,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 9 — Lock Screen Notification Designer
         // ══════════════════════════════════════════════════════════════════════
-        Text("Lock Screen Notification Designer", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.lockScreenDesigner, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(
             "Design notifications that appear on the lock screen. " +
             "Visibility controls how much content is shown when the device is locked.",
@@ -624,7 +625,7 @@ fun LockScreenScreen() {
         }
 
         // ── Enhanced Scheduling ──────────────────────────────────────────────
-        Text("Schedule Action", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.scheduleAction, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
 
         // Schedule type
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -720,7 +721,7 @@ fun LockScreenScreen() {
                 },
                 modifier = Modifier.weight(1f),
                 enabled = lsTitle.isNotBlank(),
-            ) { Text("Send Now") }
+            ) { Text(S.lock.sendNow) }
 
             Button(
                 onClick = {
@@ -771,7 +772,7 @@ fun LockScreenScreen() {
                 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-            ) { Text("Schedule") }
+            ) { Text(S.lock.schedule) }
         }
 
         if (lsScheduleStatus.isNotEmpty()) {
@@ -968,7 +969,7 @@ private fun NotifDemoCard(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                 }
             }
-            FilledTonalButton(onClick = onFire) { Text("Send") }
+            FilledTonalButton(onClick = onFire) { Text(S.lock.send) }
         }
     }
 }
