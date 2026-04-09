@@ -1,8 +1,8 @@
-# HardwareDash
+# Gadget
 
 **Your phone's hardware toolkit — monitor, control, and test every sensor, radio, and feature from one app.**
 
-HardwareDash is an open-source Android app built with Kotlin and Jetpack Compose that gives you direct access to your device's hardware capabilities. No ads, no tracking, no cloud — everything runs locally on your device.
+Gadget is an open-source Android app built with Kotlin and Jetpack Compose that gives you direct access to your device's hardware capabilities. No ads, no tracking, no cloud — everything runs locally on your device.
 
 ## Features
 
@@ -40,7 +40,7 @@ Multi-language support (English, German, Spanish, French). Widget customizer for
 Browse any file on your device, view all metadata (name, size, MIME type, dates), read and edit EXIF data for images, and view media metadata for audio/video files.
 
 ### Home Screen Widgets (10)
-- **HardwareDash Metric** — Live hardware metric display (battery, sensors, WiFi, etc.)
+- **Gadget Metric** — Live hardware metric display (battery, sensors, WiFi, etc.)
 - **Quick Log** — One-tap entry to your Logbook
 - **Flashlight Toggle** — Turn flashlight on/off
 - **Strobe Toggle** — Start/stop strobe light
@@ -93,7 +93,7 @@ Requires Android Studio with SDK 35 and JDK 17.
 
 > Monitor and control your phone's hardware from one powerful app.
 >
-> HardwareDash puts your device's full hardware capabilities at your fingertips. Toggle the flashlight, test vibration patterns, read NFC tags, track your GPS location on a live map, monitor battery health, analyze audio with a real-time spectrum analyzer, and much more.
+> Gadget puts your device's full hardware capabilities at your fingertips. Toggle the flashlight, test vibration patterns, read NFC tags, track your GPS location on a live map, monitor battery health, analyze audio with a real-time spectrum analyzer, and much more.
 >
 > Key features:
 > - Logbook for timestamped event logging with processes and checkpoints

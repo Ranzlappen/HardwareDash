@@ -30,7 +30,7 @@ jobs:
           java-version: '17'
 
       - name: Decode Keystore
-        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > HardwareDash-release.jks
+        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > Gadget-release.jks
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -43,12 +43,12 @@ jobs:
           echo "BUILD_COMMIT=${{ github.sha }}" >> $GITHUB_ENV
           echo "BUILD_BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "BUILD_AUTHOR=${{ github.actor }}" >> $GITHUB_ENV
-          echo "APP_DESCRIPTION=Hardware Dashboard — monitor and control device sensors, camera, audio, and more" >> $GITHUB_ENV
+          echo "APP_DESCRIPTION=Gadget — monitor and control device sensors, camera, audio, and more" >> $GITHUB_ENV
 
       - name: Build Signed Release APK
         run: |
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=${{ github.workspace }}/HardwareDash-release.jks \
+            -Pandroid.injected.signing.store.file=${{ github.workspace }}/Gadget-release.jks \
             -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
             -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
             -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }} \
@@ -63,7 +63,7 @@ jobs:
       - name: Build Signed Release AAB (Play Store)
         run: |
           ./gradlew bundleRelease \
-            -Pandroid.injected.signing.store.file=${{ github.workspace }}/HardwareDash-release.jks \
+            -Pandroid.injected.signing.store.file=${{ github.workspace }}/Gadget-release.jks \
             -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
             -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
             -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }} \
@@ -78,20 +78,20 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: HardwareDash-v${{ env.VERSION_NAME }}-apk
+          name: Gadget-v${{ env.VERSION_NAME }}-apk
           path: app/build/outputs/apk/release/*.apk
 
       - name: Upload AAB artifact (Play Store)
         uses: actions/upload-artifact@v4
         with:
-          name: HardwareDash-v${{ env.VERSION_NAME }}-aab
+          name: Gadget-v${{ env.VERSION_NAME }}-aab
           path: app/build/outputs/bundle/release/*.aab
 
       - name: Create Release & Upload APK
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION_NAME }}
-          name: HardwareDash v${{ env.VERSION_NAME }}
+          name: Gadget v${{ env.VERSION_NAME }}
           body: |
             **Build:** #${{ github.run_number }}
             **Commit:** ${{ env.BUILD_COMMIT }}

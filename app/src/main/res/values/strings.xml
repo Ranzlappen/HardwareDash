@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">HardwareDash</string>
-    <string name="admin_description">Allows HardwareDash to lock the screen programmatically.</string>
+    <string name="app_name">Gadget</string>
+    <string name="admin_description">Allows Gadget to lock the screen programmatically.</string>
 
     <!-- Widget labels (shown in widget picker title) -->
-    <string name="widget_label_metric">HardwareDash Metric</string>
+    <string name="widget_label_metric">Gadget Metric</string>
     <string name="widget_label_log_now">Quick Log</string>
     <string name="widget_label_flashlight">Flashlight Toggle</string>
     <string name="widget_label_strobe">Strobe Toggle</string>
