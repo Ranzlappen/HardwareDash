@@ -80,7 +80,7 @@ fun NavGraph() {
                     bottomNavItems.forEach { item ->
                         val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
                         Box(modifier = Modifier.width(82.dp)) {
-                            NavigationBarItem(
+                            this@Row.NavigationBarItem(
                                 selected = selected,
                                 onClick = {
                                     navController.navigate(item.route) {
