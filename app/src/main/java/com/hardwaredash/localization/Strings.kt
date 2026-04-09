@@ -30,6 +30,7 @@ object S {
         val lock get() = m(l, "Lock", "Sperre", "Bloqueo", "Verrou")
         val settings get() = m(l, "Settings", "Einstellungen", "Ajustes", "Paramètres")
         val fileMeta get() = m(l, "Files", "Dateien", "Archivos", "Fichiers")
+        val bug get() = m(l, "Bug", "Fehler", "Error", "Bug")
     }
 
     // ── Logbook (formerly Ticked) ───────────────────────────────────────
@@ -88,6 +89,44 @@ object S {
         val all get() = m(l, "All", "Alle", "Todos", "Tous")
         val autoLogged get() = m(l, "Auto-logged", "Automatisch", "Automático", "Automatique")
         val edited get() = m(l, "Edited", "Bearbeitet", "Editado", "Modifié")
+        // Dialog strings
+        val clearAllEntries get() = m(l, "Clear all entries?", "Alle Einträge löschen?", "¿Borrar todas las entradas?", "Effacer toutes les entrées ?")
+        fun clearAllEntriesMsg(count: Int) = m(l,
+            "This will delete all $count entries. This cannot be undone.",
+            "Dies löscht alle $count Einträge. Dies kann nicht rückgängig gemacht werden.",
+            "Esto eliminará todas las $count entradas. No se puede deshacer.",
+            "Cela supprimera toutes les $count entrées. Cette action est irréversible.")
+        val clearAllProcesses get() = m(l, "Clear all processes?", "Alle Prozesse löschen?", "¿Borrar todos los procesos?", "Effacer tous les processus ?")
+        fun clearAllProcessesMsg(count: Int) = m(l,
+            "This will delete all $count processes and their reminders. This cannot be undone.",
+            "Dies löscht alle $count Prozesse und deren Erinnerungen. Dies kann nicht rückgängig gemacht werden.",
+            "Esto eliminará todos los $count procesos y sus recordatorios. No se puede deshacer.",
+            "Cela supprimera tous les $count processus et leurs rappels. Cette action est irréversible.")
+        val deleteEntry get() = m(l, "Delete entry?", "Eintrag löschen?", "¿Eliminar entrada?", "Supprimer l'entrée ?")
+        fun deleteEntryMsg(text: String) = m(l,
+            "\"$text\" will be removed.",
+            "\"$text\" wird entfernt.",
+            "\"$text\" será eliminado.",
+            "\"$text\" sera supprimé.")
+        val deleteProcess get() = m(l, "Delete process?", "Prozess löschen?", "¿Eliminar proceso?", "Supprimer le processus ?")
+        fun deleteProcessMsg(text: String) = m(l,
+            "\"$text\" and all its checkpoints will be removed.",
+            "\"$text\" und alle Prüfpunkte werden entfernt.",
+            "\"$text\" y todos sus puntos de control serán eliminados.",
+            "\"$text\" et tous ses points de contrôle seront supprimés.")
+        val deleteCheckpointConfirm get() = m(l, "Delete checkpoint?", "Prüfpunkt löschen?", "¿Eliminar punto de control?", "Supprimer le point de contrôle ?")
+        val processNamePlaceholder get() = m(l, "Process name\u2026", "Prozessname\u2026", "Nombre del proceso\u2026", "Nom du processus\u2026")
+        val checkpointNamePlaceholder get() = m(l, "Checkpoint name\u2026", "Prüfpunktname\u2026", "Nombre del punto de control\u2026", "Nom du point de contrôle\u2026")
+        val commentNote get() = m(l, "Comment / Note", "Kommentar / Notiz", "Comentario / Nota", "Commentaire / Note")
+        val addNote get() = m(l, "Add a note\u2026", "Notiz hinzufügen\u2026", "Añadir una nota\u2026", "Ajouter une note\u2026")
+        val enterText get() = m(l, "Enter text\u2026", "Text eingeben\u2026", "Introduzca texto\u2026", "Entrez du texte\u2026")
+        val tapToSelect get() = m(l, "Tap to select", "Tippen zum Auswählen", "Toque para seleccionar", "Appuyez pour sélectionner")
+        val tapToSelectDateTime get() = m(l, "Tap to select date & time", "Tippen zum Auswählen von Datum und Uhrzeit", "Toque para seleccionar fecha y hora", "Appuyez pour sélectionner la date et l'heure")
+        fun movedTo(name: String) = m(l, "Moved to \"$name\"", "Verschoben zu \"$name\"", "Movido a \"$name\"", "Déplacé vers \"$name\"")
+        val textUpdated get() = m(l, "Text updated", "Text aktualisiert", "Texto actualizado", "Texte mis à jour")
+        val timeUpdated get() = m(l, "Time updated", "Zeit aktualisiert", "Hora actualizada", "Heure mise à jour")
+        val colorApplied get() = m(l, "Color applied", "Farbe angewendet", "Color aplicado", "Couleur appliquée")
+        val searchPlaceholder get() = m(l, "Search\u2026", "Suchen\u2026", "Buscar\u2026", "Rechercher\u2026")
     }
 
     // ── Settings ────────────────────────────────────────────────────────
@@ -177,6 +216,9 @@ object S {
         val style get() = m(l, "Style", "Stil", "Estilo", "Style")
         val bigText get() = m(l, "Big Text", "Großer Text", "Texto grande", "Grand texte")
         val inbox get() = m(l, "Inbox", "Posteingang", "Bandeja", "Boîte de réception")
+        val determinate get() = m(l, "Determinate", "Bestimmt", "Determinado", "Déterminé")
+        val indeterminate get() = m(l, "Indeterminate", "Unbestimmt", "Indeterminado", "Indéterminé")
+        val normal get() = m(l, "Normal", "Normal", "Normal", "Normal")
     }
 
     // ── Torch ───────────────────────────────────────────────────────────
@@ -196,6 +238,8 @@ object S {
         val writeSettingsNeeded get() = m(l, "WRITE_SETTINGS permission needed to control brightness", "WRITE_SETTINGS-Berechtigung zur Steuerung der Helligkeit erforderlich", "Se necesita permiso WRITE_SETTINGS para controlar el brillo", "Permission WRITE_SETTINGS nécessaire pour contrôler la luminosité")
         val grantWriteSettings get() = m(l, "Grant Write Settings", "Schreibeinstellungen gewähren", "Conceder configuración de escritura", "Accorder les paramètres d'écriture")
         val autoBrightness get() = m(l, "Auto Brightness", "Automatische Helligkeit", "Brillo automático", "Luminosité automatique")
+        val strobeHz get() = m(l, "Strobe Frequency", "Stroboskop-Frequenz", "Frecuencia de estrobo", "Fréquence stroboscope")
+        val alsoAppliesToWidget get() = m(l, "Also applies to home screen widget", "Gilt auch für das Startbildschirm-Widget", "También se aplica al widget de pantalla de inicio", "S'applique également au widget de l'écran d'accueil")
     }
 
     // ── Camera ──────────────────────────────────────────────────────────
@@ -237,6 +281,10 @@ object S {
         val cancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
         val close get() = m(l, "Close", "Schließen", "Cerrar", "Fermer")
         val noSavedPatterns get() = m(l, "No saved patterns yet.", "Noch keine gespeicherten Muster.", "Aún no hay patrones guardados.", "Aucun motif enregistré.")
+        val slow get() = m(l, "Slow", "Langsam", "Lento", "Lent")
+        val medium get() = m(l, "Medium", "Mittel", "Medio", "Moyen")
+        val fast get() = m(l, "Fast", "Schnell", "Rápido", "Rapide")
+        val rapid get() = m(l, "Rapid", "Sehr schnell", "Muy rápido", "Très rapide")
     }
 
     // ── Mic ─────────────────────────────────────────────────────────────
@@ -252,6 +300,7 @@ object S {
         val audioRecording get() = m(l, "Audio Recording", "Audioaufnahme", "Grabación de audio", "Enregistrement audio")
         val savedRecordings get() = m(l, "Saved Recordings", "Gespeicherte Aufnahmen", "Grabaciones guardadas", "Enregistrements sauvegardés")
         val playbackError get() = m(l, "Playback error", "Wiedergabefehler", "Error de reproducción", "Erreur de lecture")
+        fun savedFile(name: String) = m(l, "Saved: $name", "Gespeichert: $name", "Guardado: $name", "Enregistré : $name")
     }
 
     // ── Radios ──────────────────────────────────────────────────────────
@@ -276,6 +325,8 @@ object S {
         val grantLocationPerm get() = m(l, "Grant Location Permission", "Standortberechtigung erteilen", "Conceder permiso de ubicación", "Accorder la permission de localisation")
         val currentLocation get() = m(l, "Current Location", "Aktueller Standort", "Ubicación actual", "Position actuelle")
         val clearLog get() = m(l, "Clear log", "Protokoll löschen", "Borrar registro", "Effacer le journal")
+        val exampleDomain get() = m(l, "example.com", "beispiel.de", "ejemplo.com", "exemple.com")
+        val textPlain get() = m(l, "text/plain", "text/plain", "text/plain", "text/plain")
     }
 
     // ── Sensors ─────────────────────────────────────────────────────────
@@ -290,6 +341,7 @@ object S {
         val light get() = m(l, "Light", "Licht", "Luz", "Lumière")
         val barometer get() = m(l, "Barometer", "Barometer", "Barómetro", "Baromètre")
         val stepCounter get() = m(l, "Step Counter", "Schrittzähler", "Podómetro", "Compteur de pas")
+        val sensorReadingsCopied get() = m(l, "Sensor readings copied!", "Sensorwerte kopiert!", "¡Lecturas de sensores copiadas!", "Lectures de capteurs copiées !")
     }
 
     // ── Battery ─────────────────────────────────────────────────────────
@@ -328,6 +380,11 @@ object S {
         val version get() = m(l, "Version", "Version", "Versión", "Version")
         val copyright get() = m(l, "Copyright", "Urheberrecht", "Derechos de autor", "Droits d'auteur")
         val description get() = m(l, "Description", "Beschreibung", "Descripción", "Description")
+        val exifSection get() = m(l, "EXIF", "EXIF", "EXIF", "EXIF")
+        val mediaSection get() = m(l, "Media", "Medien", "Medios", "Médias")
+        val exifSaved get() = m(l, "EXIF data saved", "EXIF-Daten gespeichert", "Datos EXIF guardados", "Données EXIF enregistrées")
+        val exifSaveFailed get() = m(l, "Failed to save EXIF data", "EXIF-Daten konnten nicht gespeichert werden", "Error al guardar datos EXIF", "Échec de l'enregistrement des données EXIF")
+        val allFieldsPresent get() = m(l, "All common fields are already present.", "Alle gängigen Felder sind bereits vorhanden.", "Todos los campos comunes ya están presentes.", "Tous les champs courants sont déjà présents.")
     }
 
     // ── Caller Screen (Batch 8) ─────────────────────────────────────────
@@ -338,6 +395,26 @@ object S {
         val hardwareDash get() = m(l, "HardwareDash", "HardwareDash", "HardwareDash", "HardwareDash")
         val decline get() = m(l, "Decline", "Ablehnen", "Rechazar", "Refuser")
         val stopRinging get() = m(l, "Stop Ringing", "Klingeln stoppen", "Dejar de sonar", "Arrêter la sonnerie")
+    }
+
+    // ── Bug Report ──────────────────────────────────────────────────────
+    val bug: Bug @Composable get() = Bug(lang)
+
+    class Bug(private val l: Language) {
+        val title get() = m(l, "Bug Report", "Fehlerbericht", "Informe de error", "Rapport de bug")
+        val permissionsTitle get() = m(l, "Permission Status", "Berechtigungsstatus", "Estado de permisos", "État des permissions")
+        val deviceInfoTitle get() = m(l, "Device Information", "Geräteinformationen", "Información del dispositivo", "Informations sur l'appareil")
+        val describeBug get() = m(l, "Describe the Bug", "Fehler beschreiben", "Describir el error", "Décrire le bug")
+        val describeBugHint get() = m(l, "Describe the issue you encountered\u2026", "Beschreiben Sie das aufgetretene Problem\u2026", "Describa el problema que encontró\u2026", "Décrivez le problème rencontré\u2026")
+        val createBugReport get() = m(l, "Create Bug Report", "Fehlerbericht erstellen", "Crear informe de error", "Créer un rapport de bug")
+        val bugReportReady get() = m(l, "Bug Report Ready", "Fehlerbericht bereit", "Informe de error listo", "Rapport de bug prêt")
+        val openGithubIssue get() = m(l, "Open GitHub Issue", "GitHub-Issue öffnen", "Abrir issue en GitHub", "Ouvrir une issue GitHub")
+        val copyText get() = m(l, "Copy Text", "Text kopieren", "Copiar texto", "Copier le texte")
+        val copiedToClipboard get() = m(l, "Copied to clipboard", "In Zwischenablage kopiert", "Copiado al portapapeles", "Copié dans le presse-papiers")
+        val permissionLabel get() = m(l, "Permission", "Berechtigung", "Permiso", "Permission")
+        val statusLabel get() = m(l, "Status", "Status", "Estado", "Statut")
+        val granted get() = m(l, "Granted", "Erteilt", "Concedido", "Accordé")
+        val notGranted get() = m(l, "Not Granted", "Nicht erteilt", "No concedido", "Non accordé")
     }
 
     // ── Common / Shared ─────────────────────────────────────────────────
@@ -355,9 +432,18 @@ object S {
         val loading get() = m(l, "Loading...", "Laden...", "Cargando...", "Chargement...")
         val search get() = m(l, "Search", "Suchen", "Buscar", "Rechercher")
         val back get() = m(l, "Back", "Zurück", "Atrás", "Retour")
+        val apply get() = m(l, "Apply", "Anwenden", "Aplicar", "Appliquer")
+        val add get() = m(l, "Add", "Hinzufügen", "Añadir", "Ajouter")
+        val sort get() = m(l, "Sort", "Sortieren", "Ordenar", "Trier")
+        val none get() = m(l, "None", "Keine", "Ninguno", "Aucun")
+        val next get() = m(l, "Next", "Weiter", "Siguiente", "Suivant")
+        val selectTime get() = m(l, "Select Time", "Zeit auswählen", "Seleccionar hora", "Sélectionner l'heure")
+        val selectDate get() = m(l, "Select Date", "Datum auswählen", "Seleccionar fecha", "Sélectionner la date")
+        val deleteAll get() = m(l, "Delete all", "Alle löschen", "Eliminar todo", "Tout supprimer")
+        val clearAll get() = m(l, "Clear all", "Alle löschen", "Borrar todo", "Tout effacer")
     }
 
-    // ── Widget toasts (non-Composable context) ──────────────────────────
+    // ── Widget / Service toasts (non-Composable context) ─────────────────
     object Widget {
         fun phoneRingToast(lang: Language, seconds: Int) = m(lang,
             "Phone will ring in $seconds seconds",
@@ -370,6 +456,63 @@ object S {
             "Benachrichtigung in $seconds Sekunden",
             "Notificación en $seconds segundos",
             "Notification dans $seconds secondes")
+
+        // Flashlight widget
+        fun torchOn(lang: Language) = m(lang, "Torch ON", "Taschenlampe AN", "Linterna encendida", "Lampe allumée")
+        fun torchOff(lang: Language) = m(lang, "Torch OFF", "Taschenlampe AUS", "Linterna apagada", "Lampe éteinte")
+        fun noFlashAvailable(lang: Language) = m(lang, "No flash available", "Kein Blitz verfügbar", "Sin flash disponible", "Pas de flash disponible")
+
+        // Strobe widget
+        fun strobeStarted(lang: Language) = m(lang, "Strobe started", "Stroboskop gestartet", "Estrobo iniciado", "Stroboscope démarré")
+        fun strobeStopped(lang: Language) = m(lang, "Strobe stopped", "Stroboskop gestoppt", "Estrobo detenido", "Stroboscope arrêté")
+
+        // Vibration widget
+        fun vibrationOn(lang: Language) = m(lang, "Vibration ON", "Vibration AN", "Vibración encendida", "Vibration activée")
+        fun vibrationOff(lang: Language) = m(lang, "Vibration OFF", "Vibration AUS", "Vibración apagada", "Vibration désactivée")
+
+        // Widget config
+        fun chooseMetric(lang: Language) = m(lang, "Choose a Metric", "Metrik auswählen", "Elegir una métrica", "Choisir une métrique")
+        fun unit(lang: Language) = m(lang, "Unit", "Einheit", "Unidad", "Unité")
+    }
+
+    // ── Service notifications (non-Composable context) ─────────────────
+    object Services {
+        // Strobe service
+        fun strobeActive(lang: Language) = m(lang, "Strobe Active", "Stroboskop aktiv", "Estrobo activo", "Stroboscope actif")
+        fun tapToStop(lang: Language) = m(lang, "Tap to stop", "Tippen zum Stoppen", "Toque para detener", "Appuyez pour arrêter")
+
+        // Voice record service
+        fun recordingAudio(lang: Language) = m(lang, "Recording Audio", "Audioaufnahme", "Grabando audio", "Enregistrement audio")
+        fun tapToStopSave(lang: Language) = m(lang, "Tap to stop and save", "Tippen zum Stoppen und Speichern", "Toque para detener y guardar", "Appuyez pour arrêter et enregistrer")
+        fun micInitFailed(lang: Language) = m(lang, "Mic init failed", "Mikrofon-Initialisierung fehlgeschlagen", "Error al inicializar el micrófono", "Échec d'initialisation du micro")
+        fun savedFile(lang: Language, name: String) = m(lang, "Saved: $name", "Gespeichert: $name", "Guardado: $name", "Enregistré : $name")
+        fun nothingRecorded(lang: Language) = m(lang, "Nothing recorded", "Nichts aufgenommen", "Nada grabado", "Rien enregistré")
+
+        // dB Meter service
+        fun dbMeterActive(lang: Language) = m(lang, "dB Meter Active", "dB-Messgerät aktiv", "Medidor dB activo", "Mètre dB actif")
+        fun monitoringMicLevel(lang: Language) = m(lang, "Monitoring microphone level", "Mikrofonpegel wird überwacht", "Monitoreando nivel del micrófono", "Surveillance du niveau du microphone")
+
+        // Video record service
+        fun recordingVideo(lang: Language) = m(lang, "Recording Video", "Video wird aufgenommen", "Grabando video", "Enregistrement vidéo")
+
+        // Hardware service
+        fun hardwareMonitoring(lang: Language) = m(lang, "Hardware monitoring is running in the background.", "Hardware-Überwachung läuft im Hintergrund.", "La monitorización de hardware se ejecuta en segundo plano.", "La surveillance matérielle fonctionne en arrière-plan.")
+        fun stop(lang: Language) = m(lang, "Stop", "Stopp", "Parar", "Arrêter")
+
+        // Admin receiver
+        fun deviceAdminEnabled(lang: Language) = m(lang, "HardwareDash Device Admin: enabled", "HardwareDash Geräteadministrator: aktiviert", "HardwareDash Administrador del dispositivo: habilitado", "HardwareDash Administrateur de l'appareil : activé")
+        fun deviceAdminDisabled(lang: Language) = m(lang, "HardwareDash Device Admin: disabled", "HardwareDash Geräteadministrator: deaktiviert", "HardwareDash Administrador del dispositivo: deshabilitado", "HardwareDash Administrateur de l'appareil : désactivé")
+
+        // Sensors
+        fun sensorReadingsCopied(lang: Language) = m(lang, "Sensor readings copied!", "Sensorwerte kopiert!", "¡Lecturas de sensores copiadas!", "Lectures de capteurs copiées !")
+
+        // Logbook reminder
+        fun checkpointTitle(lang: Language, name: String) = m(lang, "Checkpoint: $name", "Prüfpunkt: $name", "Punto de control: $name", "Point de contrôle : $name")
+        fun checkpointDue(lang: Language, procName: String, cpName: String) = m(lang,
+            "Process \"$procName\" \u2014 $cpName is due now.",
+            "Prozess \"$procName\" \u2014 $cpName ist jetzt fällig.",
+            "Proceso \"$procName\" \u2014 $cpName vence ahora.",
+            "Processus \"$procName\" \u2014 $cpName est dû maintenant.")
     }
 }
 

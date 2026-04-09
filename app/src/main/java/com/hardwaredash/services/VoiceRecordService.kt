@@ -14,6 +14,8 @@ import android.media.MediaRecorder
 import android.os.Build
 import android.os.IBinder
 import android.provider.MediaStore
+import com.hardwaredash.localization.LocalizationManager
+import com.hardwaredash.localization.S
 import com.hardwaredash.widget.WidgetActionHandler
 import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
@@ -38,9 +40,10 @@ class VoiceRecordService : Service() {
 
     private fun startRecording() {
         ensureChannel()
+        val lang = LocalizationManager.loadLanguage(this)
         val notification = Notification.Builder(this, CH_VOICE)
-            .setContentTitle("Recording Audio")
-            .setContentText("Tap to stop and save")
+            .setContentTitle(S.Services.recordingAudio(lang))
+            .setContentText(S.Services.tapToStopSave(lang))
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setOngoing(true)
             .setContentIntent(
@@ -66,7 +69,7 @@ class VoiceRecordService : Service() {
                 AudioFormat.ENCODING_PCM_16BIT, bufSize,
             )
             if (recorder.state != AudioRecord.STATE_INITIALIZED) {
-                WidgetActionHandler.showToast(this@VoiceRecordService, "Mic init failed")
+                WidgetActionHandler.showToast(this@VoiceRecordService, S.Services.micInitFailed(LocalizationManager.loadLanguage(this@VoiceRecordService)))
                 stopSelf()
                 return@launch
             }
@@ -111,10 +114,12 @@ class VoiceRecordService : Service() {
             val uri = contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, cv)
             if (uri != null) {
                 contentResolver.openOutputStream(uri)?.use { it.write(wavBytes) }
-                WidgetActionHandler.showToast(this, "Saved: $filename")
+                val lang2 = LocalizationManager.loadLanguage(this)
+                WidgetActionHandler.showToast(this, S.Services.savedFile(lang2, filename))
             }
         } else {
-            WidgetActionHandler.showToast(this, "Nothing recorded")
+            val lang2 = LocalizationManager.loadLanguage(this)
+            WidgetActionHandler.showToast(this, S.Services.nothingRecorded(lang2))
         }
 
         stopForeground(STOP_FOREGROUND_REMOVE)

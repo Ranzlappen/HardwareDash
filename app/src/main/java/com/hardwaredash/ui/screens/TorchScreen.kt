@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hardwaredash.localization.S
+import com.hardwaredash.ui.components.SliderWithInput
 import kotlinx.coroutines.delay
 
 @Composable
@@ -36,9 +37,10 @@ fun TorchScreen() {
     var hasFlash by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
 
-    // Strobe state
+    // Strobe state — persisted so widget can read it
+    val strobePrefs = remember { context.getSharedPreferences("strobe_settings", Context.MODE_PRIVATE) }
     var strobeActive by remember { mutableStateOf(false) }
-    var strobeFreqHz by remember { mutableFloatStateOf(5f) }
+    var strobeFreqHz by remember { mutableFloatStateOf(strobePrefs.getFloat("strobe_freq_hz", 5f)) }
 
     // Brightness state
     var brightness     by remember { mutableFloatStateOf(0.5f) }
@@ -245,17 +247,22 @@ fun TorchScreen() {
         // Strobe frequency slider
         if (strobeActive || hasFlash) {
             Spacer(Modifier.height(8.dp))
-            Text(
-                "Strobe: ${"%.0f".format(strobeFreqHz)} Hz",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-            )
-            Slider(
+            SliderWithInput(
                 value = strobeFreqHz,
                 onValueChange = { strobeFreqHz = it },
+                onValueChangeFinished = {
+                    strobePrefs.edit().putFloat("strobe_freq_hz", strobeFreqHz).apply()
+                },
                 valueRange = 1f..20f,
-                steps = 18,
+                formatValue = { "%.0f".format(it) },
+                suffix = "Hz",
+                label = "Strobe: ${"%.0f".format(strobeFreqHz)} Hz",
                 modifier = Modifier.fillMaxWidth(0.7f),
+            )
+            Text(
+                strings.alsoAppliesToWidget,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
             )
         }
 
@@ -311,10 +318,10 @@ fun TorchScreen() {
                 })
             }
 
-            Text("Brightness: ${"%.0f".format(brightness * 100)}%", style = MaterialTheme.typography.bodySmall)
-            Slider(
-                value = brightness,
-                onValueChange = { v ->
+            SliderWithInput(
+                value = brightness * 100f,
+                onValueChange = { pct ->
+                    val v = pct / 100f
                     brightness = v
                     Settings.System.putInt(
                         context.contentResolver,
@@ -322,7 +329,10 @@ fun TorchScreen() {
                         (v * 255).toInt(),
                     )
                 },
-                enabled = !autoBrightness,
+                valueRange = 0f..100f,
+                formatValue = { "%.0f".format(it) },
+                suffix = "%",
+                label = "Brightness: ${"%.0f".format(brightness * 100)}%",
             )
         }
     }

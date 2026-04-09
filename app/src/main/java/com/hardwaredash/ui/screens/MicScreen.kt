@@ -425,7 +425,7 @@ private fun MicMeter() {
                             if (uri != null) {
                                 context.contentResolver.openOutputStream(uri)?.use { it.write(wavBytes) }
                                 savedFiles = listOf(filename to uri) + savedFiles
-                                Toast.makeText(context, "Saved: $filename", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, S.mic.savedFile(filename), Toast.LENGTH_SHORT).show()
                             }
                         }
                     }

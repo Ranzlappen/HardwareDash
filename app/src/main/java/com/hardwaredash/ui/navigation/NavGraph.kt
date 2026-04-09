@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
+import com.hardwaredash.localization.S
 import com.hardwaredash.ui.screens.*
 import com.hardwaredash.ui.logbook.LogbookScreen
 
@@ -32,27 +33,28 @@ object Routes {
     const val LOGBOOK      = "logbook"
     const val SETTINGS     = "settings"
     const val FILE_META    = "file_meta"
+    const val BUG          = "bug"
 }
 
 data class BottomNavItem(
     val route: String,
-    val label: String,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
 )
 
 private val bottomNavItems = listOf(
-    BottomNavItem(Routes.LOGBOOK,    "Logbook",   Icons.Filled.CheckCircle,    Icons.Outlined.CheckCircle),
-    BottomNavItem(Routes.TORCH,      "Torch",     Icons.Filled.FlashlightOn,  Icons.Outlined.FlashlightOn),
-    BottomNavItem(Routes.CAMERA,     "Camera",    Icons.Filled.CameraAlt,     Icons.Outlined.CameraAlt),
-    BottomNavItem(Routes.VIBRATION,  "Vibration", Icons.Filled.Vibration,     Icons.Outlined.Vibration),
-    BottomNavItem(Routes.MIC,        "Mic",       Icons.Filled.Mic,           Icons.Outlined.Mic),
-    BottomNavItem(Routes.RADIOS,     "Radios",    Icons.Filled.Wifi,          Icons.Outlined.Wifi),
-    BottomNavItem(Routes.SENSORS,    "Sensors",   Icons.Filled.Analytics,     Icons.Outlined.Analytics),
-    BottomNavItem(Routes.BATTERY,    "Battery",   Icons.Filled.BatteryStd,    Icons.Outlined.BatteryStd),
-    BottomNavItem(Routes.LOCKSCREEN, "Lock",      Icons.Filled.Lock,          Icons.Outlined.Lock),
-    BottomNavItem(Routes.FILE_META,  "Files",     Icons.Filled.InsertDriveFile, Icons.Outlined.InsertDriveFile),
-    BottomNavItem(Routes.SETTINGS,   "Settings",  Icons.Filled.Settings,      Icons.Outlined.Settings),
+    BottomNavItem(Routes.LOGBOOK,    Icons.Filled.CheckCircle,    Icons.Outlined.CheckCircle),
+    BottomNavItem(Routes.TORCH,      Icons.Filled.FlashlightOn,  Icons.Outlined.FlashlightOn),
+    BottomNavItem(Routes.CAMERA,     Icons.Filled.CameraAlt,     Icons.Outlined.CameraAlt),
+    BottomNavItem(Routes.VIBRATION,  Icons.Filled.Vibration,     Icons.Outlined.Vibration),
+    BottomNavItem(Routes.MIC,        Icons.Filled.Mic,           Icons.Outlined.Mic),
+    BottomNavItem(Routes.RADIOS,     Icons.Filled.Wifi,          Icons.Outlined.Wifi),
+    BottomNavItem(Routes.SENSORS,    Icons.Filled.Analytics,     Icons.Outlined.Analytics),
+    BottomNavItem(Routes.BATTERY,    Icons.Filled.BatteryStd,    Icons.Outlined.BatteryStd),
+    BottomNavItem(Routes.LOCKSCREEN, Icons.Filled.Lock,          Icons.Outlined.Lock),
+    BottomNavItem(Routes.FILE_META,  Icons.Filled.InsertDriveFile, Icons.Outlined.InsertDriveFile),
+    BottomNavItem(Routes.SETTINGS,   Icons.Filled.Settings,      Icons.Outlined.Settings),
+    BottomNavItem(Routes.BUG,        Icons.Filled.BugReport,     Icons.Outlined.BugReport),
 )
 
 @Composable
@@ -61,6 +63,23 @@ fun NavGraph() {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    // Resolve localized labels inside composable scope
+    val nav = S.nav
+    val navLabels = mapOf(
+        Routes.LOGBOOK    to nav.logbook,
+        Routes.TORCH      to nav.torch,
+        Routes.CAMERA     to nav.camera,
+        Routes.VIBRATION  to nav.vibration,
+        Routes.MIC        to nav.mic,
+        Routes.RADIOS     to nav.radios,
+        Routes.SENSORS    to nav.sensors,
+        Routes.BATTERY    to nav.battery,
+        Routes.LOCKSCREEN to nav.lock,
+        Routes.FILE_META  to nav.fileMeta,
+        Routes.SETTINGS   to nav.settings,
+        Routes.BUG        to nav.bug,
+    )
 
     Scaffold(
         bottomBar = {
@@ -79,6 +98,7 @@ fun NavGraph() {
                 ) {
                     bottomNavItems.forEach { item ->
                         val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+                        val label = navLabels[item.route] ?: item.route
                         Box(modifier = Modifier.width(82.dp)) {
                             this@Row.NavigationBarItem(
                                 selected = selected,
@@ -92,10 +112,10 @@ fun NavGraph() {
                                 icon = {
                                     Icon(
                                         imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                                        contentDescription = item.label,
+                                        contentDescription = label,
                                     )
                                 },
-                                label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
+                                label = { Text(label, style = MaterialTheme.typography.labelSmall) },
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = MaterialTheme.colorScheme.primary,
                                     selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -126,6 +146,7 @@ fun NavGraph() {
             composable(Routes.BATTERY)       { BatteryScreen() }
             composable(Routes.FILE_META)     { FileMetadataScreen() }
             composable(Routes.SETTINGS)      { SettingsScreen() }
+            composable(Routes.BUG)           { BugReportScreen() }
         }
     }
 }

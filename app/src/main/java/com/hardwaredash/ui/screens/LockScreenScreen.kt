@@ -45,6 +45,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.core.app.NotificationCompat
 import com.google.accompanist.permissions.*
 import com.hardwaredash.localization.S
+import com.hardwaredash.ui.components.SliderWithInput
 import com.hardwaredash.MainActivity
 import com.hardwaredash.receivers.AdminReceiver
 import kotlinx.coroutines.delay
@@ -385,20 +386,21 @@ fun LockScreenScreen() {
                 FilterChip(
                     selected = customProgressIndeterminate,
                     onClick = { customProgressIndeterminate = true },
-                    label = { Text("Indeterminate", style = MaterialTheme.typography.labelSmall) },
+                    label = { Text(S.lock.indeterminate, style = MaterialTheme.typography.labelSmall) },
                 )
                 FilterChip(
                     selected = !customProgressIndeterminate,
                     onClick = { customProgressIndeterminate = false },
-                    label = { Text("Determinate", style = MaterialTheme.typography.labelSmall) },
+                    label = { Text(S.lock.determinate, style = MaterialTheme.typography.labelSmall) },
                 )
             }
             if (!customProgressIndeterminate) {
-                Text("${customProgressValue}%", style = MaterialTheme.typography.bodySmall)
-                Slider(
+                SliderWithInput(
                     value = customProgressValue.toFloat(),
                     onValueChange = { customProgressValue = it.toInt() },
                     valueRange = 0f..100f,
+                    formatValue = { "%.0f".format(it) },
+                    suffix = "%",
                 )
             }
         }
@@ -406,7 +408,7 @@ fun LockScreenScreen() {
         // ── Style ────────────────────────────────────────────────────────
         Text(S.lock.style, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf("Normal", S.lock.bigText, S.lock.inbox).forEachIndexed { idx, label ->
+            listOf(S.lock.normal, S.lock.bigText, S.lock.inbox).forEachIndexed { idx, label ->
                 FilterChip(
                     selected = customStyleIdx == idx,
                     onClick = { customStyleIdx = idx },
@@ -434,15 +436,13 @@ fun LockScreenScreen() {
         }
 
         // ── Delay ────────────────────────────────────────────────────────
-        Text(
-            "${S.lock.delay}: ${if (customDelaySec < 1f) "${(customDelaySec * 60).toInt()} sec" else "${"%.0f".format(customDelaySec)} min"}",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Slider(
+        SliderWithInput(
             value = customDelaySec,
             onValueChange = { customDelaySec = it },
             valueRange = 0f..30f,
+            formatValue = { "%.1f".format(it) },
+            suffix = "min",
+            label = "${S.lock.delay}: ${if (customDelaySec < 1f) "${(customDelaySec * 60).toInt()} sec" else "${"%.0f".format(customDelaySec)} min"}",
         )
 
         // ── Preview Card ─────────────────────────────────────────────────
@@ -881,17 +881,16 @@ fun LockScreenScreen() {
         }
 
         // Quick delay slider (alternative to exact date/time)
-        Text(
-            "Or quick delay: ${
-                if (lsDelayMin < 1f) "${(lsDelayMin * 60).toInt()} sec"
-                else "${"%.1f".format(lsDelayMin)} min"
-            }",
-            style = MaterialTheme.typography.bodySmall,
-        )
-        Slider(
+        SliderWithInput(
             value = lsDelayMin,
             onValueChange = { lsDelayMin = it },
             valueRange = 0f..60f,
+            formatValue = { "%.1f".format(it) },
+            suffix = "min",
+            label = "Or quick delay: ${
+                if (lsDelayMin < 1f) "${(lsDelayMin * 60).toInt()} sec"
+                else "${"%.1f".format(lsDelayMin)} min"
+            }",
         )
 
         // Action buttons

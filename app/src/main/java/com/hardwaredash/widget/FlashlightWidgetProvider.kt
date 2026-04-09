@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import com.hardwaredash.R
+import com.hardwaredash.localization.LocalizationManager
+import com.hardwaredash.localization.S
 
 class FlashlightWidgetProvider : AppWidgetProvider() {
 
@@ -21,16 +23,17 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
             val prefs = context.getSharedPreferences("widget_flashlight", Context.MODE_PRIVATE)
             val currentlyOn = prefs.getBoolean("torch_on", false)
             val newState = !currentlyOn
+            val lang = LocalizationManager.loadLanguage(context)
             val success = WidgetActionHandler.toggleTorch(context, newState)
             if (success) {
                 prefs.edit().putBoolean("torch_on", newState).apply()
-                WidgetActionHandler.showToast(context, if (newState) "Torch ON" else "Torch OFF")
+                WidgetActionHandler.showToast(context, if (newState) S.Widget.torchOn(lang) else S.Widget.torchOff(lang))
                 // Update all flashlight widgets to reflect state
                 val manager = AppWidgetManager.getInstance(context)
                 val ids = manager.getAppWidgetIds(ComponentName(context, FlashlightWidgetProvider::class.java))
                 for (id in ids) setupWidget(context, manager, id)
             } else {
-                WidgetActionHandler.showToast(context, "No flash available")
+                WidgetActionHandler.showToast(context, S.Widget.noFlashAvailable(lang))
             }
         }
     }

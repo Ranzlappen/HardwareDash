@@ -21,12 +21,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.exifinterface.media.ExifInterface
 import com.hardwaredash.localization.S
-import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// Common EXIF tags that can be edited
+// All EXIF tags that can be edited (expanded list)
 private val EDITABLE_EXIF_TAGS = listOf(
     ExifInterface.TAG_ARTIST to "Artist",
     ExifInterface.TAG_COPYRIGHT to "Copyright",
@@ -35,7 +34,64 @@ private val EDITABLE_EXIF_TAGS = listOf(
     ExifInterface.TAG_MAKE to "Camera Make",
     ExifInterface.TAG_MODEL to "Camera Model",
     ExifInterface.TAG_USER_COMMENT to "User Comment",
+    ExifInterface.TAG_DATETIME to "Date/Time",
+    ExifInterface.TAG_DATETIME_ORIGINAL to "Date/Time Original",
+    ExifInterface.TAG_DATETIME_DIGITIZED to "Date/Time Digitized",
+    ExifInterface.TAG_GPS_LATITUDE to "GPS Latitude",
+    ExifInterface.TAG_GPS_LONGITUDE to "GPS Longitude",
+    ExifInterface.TAG_GPS_ALTITUDE to "GPS Altitude",
+    ExifInterface.TAG_SHUTTER_SPEED_VALUE to "Shutter Speed",
+    ExifInterface.TAG_APERTURE_VALUE to "Aperture",
+    ExifInterface.TAG_METERING_MODE to "Metering Mode",
+    ExifInterface.TAG_LIGHT_SOURCE to "Light Source",
+    ExifInterface.TAG_SCENE_TYPE to "Scene Type",
+    ExifInterface.TAG_LENS_MAKE to "Lens Make",
+    ExifInterface.TAG_LENS_MODEL to "Lens Model",
 )
+
+// All EXIF tags to read (display-only + editable)
+private val ALL_EXIF_TAGS = listOf(
+    ExifInterface.TAG_IMAGE_WIDTH to "Width",
+    ExifInterface.TAG_IMAGE_LENGTH to "Height",
+    ExifInterface.TAG_ORIENTATION to "Orientation",
+    ExifInterface.TAG_DATETIME to "Date/Time",
+    ExifInterface.TAG_DATETIME_ORIGINAL to "Date/Time Original",
+    ExifInterface.TAG_DATETIME_DIGITIZED to "Date/Time Digitized",
+    ExifInterface.TAG_MAKE to "Camera Make",
+    ExifInterface.TAG_MODEL to "Camera Model",
+    ExifInterface.TAG_F_NUMBER to "F-Number",
+    ExifInterface.TAG_EXPOSURE_TIME to "Exposure Time",
+    ExifInterface.TAG_SHUTTER_SPEED_VALUE to "Shutter Speed",
+    ExifInterface.TAG_APERTURE_VALUE to "Aperture",
+    ExifInterface.TAG_ISO_SPEED_RATINGS to "ISO",
+    ExifInterface.TAG_FOCAL_LENGTH to "Focal Length",
+    ExifInterface.TAG_FLASH to "Flash",
+    ExifInterface.TAG_WHITE_BALANCE to "White Balance",
+    ExifInterface.TAG_METERING_MODE to "Metering Mode",
+    ExifInterface.TAG_LIGHT_SOURCE to "Light Source",
+    ExifInterface.TAG_SCENE_TYPE to "Scene Type",
+    ExifInterface.TAG_DIGITAL_ZOOM_RATIO to "Digital Zoom Ratio",
+    ExifInterface.TAG_SCENE_CAPTURE_TYPE to "Scene Capture Type",
+    ExifInterface.TAG_CONTRAST to "Contrast",
+    ExifInterface.TAG_SATURATION to "Saturation",
+    ExifInterface.TAG_SHARPNESS to "Sharpness",
+    ExifInterface.TAG_IMAGE_UNIQUE_ID to "Image Unique ID",
+    ExifInterface.TAG_CAMERA_OWNER_NAME to "Camera Owner",
+    ExifInterface.TAG_BODY_SERIAL_NUMBER to "Body Serial Number",
+    ExifInterface.TAG_LENS_MAKE to "Lens Make",
+    ExifInterface.TAG_LENS_MODEL to "Lens Model",
+    ExifInterface.TAG_GPS_LATITUDE to "GPS Latitude",
+    ExifInterface.TAG_GPS_LONGITUDE to "GPS Longitude",
+    ExifInterface.TAG_GPS_ALTITUDE to "GPS Altitude",
+    ExifInterface.TAG_ARTIST to "Artist",
+    ExifInterface.TAG_COPYRIGHT to "Copyright",
+    ExifInterface.TAG_IMAGE_DESCRIPTION to "Description",
+    ExifInterface.TAG_SOFTWARE to "Software",
+    ExifInterface.TAG_USER_COMMENT to "User Comment",
+)
+
+// Set of editable tag constants for quick lookup
+private val EDITABLE_TAG_KEYS = EDITABLE_EXIF_TAGS.map { it.first }.toSet()
 
 // Common metadata fields for the help modal
 private val COMMON_METADATA_FIELDS = listOf(
@@ -51,9 +107,12 @@ private val COMMON_METADATA_FIELDS = listOf(
     "Date Modified" to "When the file was last changed",
     "GPS Coordinates" to "Geographic location where a photo was taken",
     "Camera Make / Model" to "The device used to capture an image",
+    "Lens Make / Model" to "The lens used to capture an image",
     "Resolution / Dimensions" to "Width and height of image or video",
     "Duration" to "Length of audio or video content",
     "Bitrate" to "Data rate for audio or video encoding",
+    "Scene / Capture Type" to "Scene mode used during capture",
+    "Metering / Light" to "Metering mode and light source info",
 )
 
 @Composable
@@ -67,14 +126,12 @@ fun FileMetadataScreen() {
     var mimeType by remember { mutableStateOf("") }
     var lastModified by remember { mutableStateOf("") }
     var generalMeta by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
-    var exifData by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+    // EXIF now stored as tag->value map for inline editing
+    var exifTagValues by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     var mediaMeta by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
     var isImage by remember { mutableStateOf(false) }
     var showHelpDialog by remember { mutableStateOf(false) }
     var showAddDialog by remember { mutableStateOf(false) }
-
-    // Editable EXIF state
-    var editableExif by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
 
     val filePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -102,10 +159,9 @@ fun FileMetadataScreen() {
         mimeType = result.mimeType
         lastModified = result.lastModified
         generalMeta = result.general
-        exifData = result.exif
+        exifTagValues = result.exifMap
         mediaMeta = result.media
         isImage = result.mimeType.startsWith("image/")
-        editableExif = result.editableExif
     }
 
     Column(
@@ -182,26 +238,8 @@ fun FileMetadataScreen() {
                 }
             }
 
-            // ── EXIF Data (Images) ────────────────────────────────────
-            if (exifData.isNotEmpty()) {
-                HorizontalDivider()
-                Text("EXIF", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                exifData.forEach { (key, value) ->
-                    MetaRow(key, value)
-                }
-            }
-
-            // ── Media Metadata (Audio/Video) ──────────────────────────
-            if (mediaMeta.isNotEmpty()) {
-                HorizontalDivider()
-                Text("Media", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                mediaMeta.forEach { (key, value) ->
-                    MetaRow(key, value)
-                }
-            }
-
-            // ── Edit EXIF (Images only) ───────────────────────────────
-            if (isImage && editableExif.isNotEmpty()) {
+            // ── EXIF Data (Images) — inline editable ─────────────────
+            if (isImage && exifTagValues.isNotEmpty()) {
                 HorizontalDivider()
                 Text(
                     strings.editMetadata,
@@ -209,27 +247,34 @@ fun FileMetadataScreen() {
                     fontWeight = FontWeight.SemiBold,
                 )
 
-                editableExif.forEach { (tag, value) ->
-                    val label = EDITABLE_EXIF_TAGS.firstOrNull { it.first == tag }?.second ?: tag
-                    var fieldValue by remember(tag, value) { mutableStateOf(value) }
-                    OutlinedTextField(
-                        value = fieldValue,
-                        onValueChange = {
-                            fieldValue = it
-                            editableExif = editableExif.toMutableMap().apply { put(tag, it) }
-                        },
-                        label = { Text(label) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                    )
+                // Show all EXIF values; editable tags get OutlinedTextField, others get MetaRow
+                ALL_EXIF_TAGS.forEach { (tag, label) ->
+                    val currentValue = exifTagValues[tag] ?: return@forEach
+                    if (tag in EDITABLE_TAG_KEYS) {
+                        var fieldValue by remember(tag, currentValue) { mutableStateOf(currentValue) }
+                        OutlinedTextField(
+                            value = fieldValue,
+                            onValueChange = {
+                                fieldValue = it
+                                exifTagValues = exifTagValues.toMutableMap().apply { put(tag, it) }
+                            },
+                            label = { Text(label) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                        )
+                    } else {
+                        MetaRow(label, currentValue)
+                    }
                 }
 
                 Button(
                     onClick = {
-                        val success = writeExifData(context, selectedUri!!, editableExif)
+                        // Write only editable tags
+                        val editableData = exifTagValues.filterKeys { it in EDITABLE_TAG_KEYS }
+                        val success = writeExifData(context, selectedUri!!, editableData)
                         Toast.makeText(
                             context,
-                            if (success) "EXIF data saved" else "Failed to save EXIF data",
+                            if (success) strings.exifSaved else strings.exifSaveFailed,
                             Toast.LENGTH_SHORT,
                         ).show()
                     },
@@ -238,6 +283,15 @@ fun FileMetadataScreen() {
                     Icon(Icons.Default.Save, null)
                     Spacer(Modifier.width(8.dp))
                     Text(strings.saveChanges)
+                }
+            }
+
+            // ── Media Metadata (Audio/Video) ──────────────────────────
+            if (mediaMeta.isNotEmpty()) {
+                HorizontalDivider()
+                Text(strings.mediaSection, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                mediaMeta.forEach { (key, value) ->
+                    MetaRow(key, value)
                 }
             }
 
@@ -302,19 +356,19 @@ fun FileMetadataScreen() {
 
     // ── Add Metadata Dialog ───────────────────────────────────────────
     if (showAddDialog) {
-        val availableTags = EDITABLE_EXIF_TAGS.filter { it.first !in editableExif }
+        val availableTags = EDITABLE_EXIF_TAGS.filter { it.first !in exifTagValues }
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
             title = { Text(strings.addMetadata) },
             text = {
                 if (availableTags.isEmpty()) {
-                    Text("All common fields are already present.")
+                    Text(strings.allFieldsPresent)
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         availableTags.forEach { (tag, label) ->
                             TextButton(
                                 onClick = {
-                                    editableExif = editableExif.toMutableMap().apply { put(tag, "") }
+                                    exifTagValues = exifTagValues.toMutableMap().apply { put(tag, "") }
                                     showAddDialog = false
                                 },
                                 modifier = Modifier.fillMaxWidth(),
@@ -363,9 +417,8 @@ private data class FileMetadataResult(
     val mimeType: String,
     val lastModified: String,
     val general: List<Pair<String, String>>,
-    val exif: List<Pair<String, String>>,
+    val exifMap: Map<String, String>,
     val media: List<Pair<String, String>>,
-    val editableExif: Map<String, String>,
 )
 
 private fun readFileMetadata(context: Context, uri: Uri): FileMetadataResult {
@@ -374,9 +427,8 @@ private fun readFileMetadata(context: Context, uri: Uri): FileMetadataResult {
     var mimeTypeStr = context.contentResolver.getType(uri) ?: "unknown"
     var lastMod = ""
     val general = mutableListOf<Pair<String, String>>()
-    val exif = mutableListOf<Pair<String, String>>()
+    val exifMap = mutableMapOf<String, String>()
     val media = mutableListOf<Pair<String, String>>()
-    val editableExif = mutableMapOf<String, String>()
 
     // Basic metadata from ContentResolver
     context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -401,51 +453,22 @@ private fun readFileMetadata(context: Context, uri: Uri): FileMetadataResult {
     val ext = name.substringAfterLast('.', "").lowercase()
     if (ext.isNotBlank()) general.add("Extension" to ".$ext")
 
-    // EXIF for images
+    // EXIF for images — read all tags into map
     if (mimeTypeStr.startsWith("image/")) {
         try {
             context.contentResolver.openInputStream(uri)?.use { stream ->
                 val exifInterface = ExifInterface(stream)
-                val tags = listOf(
-                    ExifInterface.TAG_IMAGE_WIDTH to "Width",
-                    ExifInterface.TAG_IMAGE_LENGTH to "Height",
-                    ExifInterface.TAG_ORIENTATION to "Orientation",
-                    ExifInterface.TAG_DATETIME to "Date/Time",
-                    ExifInterface.TAG_MAKE to "Camera Make",
-                    ExifInterface.TAG_MODEL to "Camera Model",
-                    ExifInterface.TAG_F_NUMBER to "F-Number",
-                    ExifInterface.TAG_EXPOSURE_TIME to "Exposure Time",
-                    ExifInterface.TAG_ISO_SPEED_RATINGS to "ISO",
-                    ExifInterface.TAG_FOCAL_LENGTH to "Focal Length",
-                    ExifInterface.TAG_FLASH to "Flash",
-                    ExifInterface.TAG_WHITE_BALANCE to "White Balance",
-                    ExifInterface.TAG_GPS_LATITUDE to "GPS Latitude",
-                    ExifInterface.TAG_GPS_LONGITUDE to "GPS Longitude",
-                    ExifInterface.TAG_GPS_ALTITUDE to "GPS Altitude",
-                    ExifInterface.TAG_ARTIST to "Artist",
-                    ExifInterface.TAG_COPYRIGHT to "Copyright",
-                    ExifInterface.TAG_IMAGE_DESCRIPTION to "Description",
-                    ExifInterface.TAG_SOFTWARE to "Software",
-                    ExifInterface.TAG_USER_COMMENT to "User Comment",
-                )
-                tags.forEach { (tag, label) ->
+                ALL_EXIF_TAGS.forEach { (tag, _) ->
                     val value = exifInterface.getAttribute(tag)
                     if (!value.isNullOrBlank()) {
-                        exif.add(label to value)
-                    }
-                }
-                // Populate editable fields
-                EDITABLE_EXIF_TAGS.forEach { (tag, _) ->
-                    val value = exifInterface.getAttribute(tag)
-                    if (!value.isNullOrBlank()) {
-                        editableExif[tag] = value
+                        exifMap[tag] = value
                     }
                 }
             }
         } catch (_: Exception) {}
     }
 
-    // Media metadata for audio/video
+    // Media metadata for audio/video (expanded)
     if (mimeTypeStr.startsWith("audio/") || mimeTypeStr.startsWith("video/")) {
         try {
             val retriever = MediaMetadataRetriever()
@@ -454,15 +477,30 @@ private fun readFileMetadata(context: Context, uri: Uri): FileMetadataResult {
                 MediaMetadataRetriever.METADATA_KEY_DURATION to "Duration",
                 MediaMetadataRetriever.METADATA_KEY_TITLE to "Title",
                 MediaMetadataRetriever.METADATA_KEY_ARTIST to "Artist",
+                MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST to "Album Artist",
                 MediaMetadataRetriever.METADATA_KEY_ALBUM to "Album",
+                MediaMetadataRetriever.METADATA_KEY_COMPOSER to "Composer",
+                MediaMetadataRetriever.METADATA_KEY_WRITER to "Writer",
                 MediaMetadataRetriever.METADATA_KEY_GENRE to "Genre",
                 MediaMetadataRetriever.METADATA_KEY_YEAR to "Year",
+                MediaMetadataRetriever.METADATA_KEY_DATE to "Date",
+                MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER to "Track Number",
+                MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER to "Disc Number",
+                MediaMetadataRetriever.METADATA_KEY_COMPILATION to "Compilation",
                 MediaMetadataRetriever.METADATA_KEY_BITRATE to "Bitrate",
                 MediaMetadataRetriever.METADATA_KEY_MIMETYPE to "Codec MIME",
                 MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH to "Video Width",
                 MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT to "Video Height",
                 MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION to "Rotation",
+                MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE to "Frame Rate",
                 MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS to "Tracks",
+                MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO to "Has Audio",
+                MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO to "Has Video",
+                MediaMetadataRetriever.METADATA_KEY_LOCATION to "Location",
+                MediaMetadataRetriever.METADATA_KEY_COLOR_STANDARD to "Color Standard",
+                MediaMetadataRetriever.METADATA_KEY_COLOR_TRANSFER to "Color Transfer",
+                MediaMetadataRetriever.METADATA_KEY_COLOR_RANGE to "Color Range",
+                MediaMetadataRetriever.METADATA_KEY_SAMPLERATE to "Sample Rate",
             )
             keys.forEach { (key, label) ->
                 val value = retriever.extractMetadata(key)
@@ -477,6 +515,17 @@ private fun readFileMetadata(context: Context, uri: Uri): FileMetadataResult {
                             val bps = value.toLongOrNull() ?: 0
                             "${bps / 1000} kbps"
                         }
+                        MediaMetadataRetriever.METADATA_KEY_SAMPLERATE -> {
+                            val hz = value.toLongOrNull() ?: 0
+                            "${hz / 1000.0} kHz"
+                        }
+                        MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE -> {
+                            "$value fps"
+                        }
+                        MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO,
+                        MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO -> {
+                            if (value == "yes") "Yes" else "No"
+                        }
                         else -> value
                     }
                     media.add(label to display)
@@ -486,7 +535,7 @@ private fun readFileMetadata(context: Context, uri: Uri): FileMetadataResult {
         } catch (_: Exception) {}
     }
 
-    return FileMetadataResult(name, size, mimeTypeStr, lastMod, general, exif, media, editableExif)
+    return FileMetadataResult(name, size, mimeTypeStr, lastMod, general, exifMap, media)
 }
 
 private fun writeExifData(context: Context, uri: Uri, data: Map<String, String>): Boolean {

@@ -25,4 +25,8 @@
     <string name="widget_desc_phone_ring">Ring your phone after a configurable delay.</string>
     <string name="widget_desc_notify">Send yourself a notification after a configurable delay.</string>
     <string name="widget_desc_db_meter">Monitor ambient noise level from your home screen.</string>
+
+    <!-- Vibration widget -->
+    <string name="widget_label_vibration">Vibration Toggle</string>
+    <string name="widget_desc_vibration">Toggle vibration on or off from your home screen.</string>
 </resources>

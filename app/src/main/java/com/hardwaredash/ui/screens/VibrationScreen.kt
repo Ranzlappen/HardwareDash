@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hardwaredash.localization.S
+import com.hardwaredash.ui.components.SliderWithInput
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -201,7 +202,7 @@ fun VibrationScreen() {
         // Speed presets
         Text(S.vibration.speedPresets, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("Slow" to 200f, "Medium" to 80f, "Fast" to 30f, "Rapid" to 10f).forEach { (label, gap) ->
+            listOf(S.vibration.slow to 200f, S.vibration.medium to 80f, S.vibration.fast to 30f, S.vibration.rapid to 10f).forEach { (label, gap) ->
                 FilterChip(
                     selected = gapMs == gap,
                     onClick  = { gapMs = gap },
@@ -211,8 +212,14 @@ fun VibrationScreen() {
         }
 
         // Gap slider
-        Text("Gap between steps: ${gapMs.toInt()} ms", style = MaterialTheme.typography.bodySmall)
-        Slider(value = gapMs, onValueChange = { gapMs = it }, valueRange = 0f..500f)
+        SliderWithInput(
+            value = gapMs,
+            onValueChange = { gapMs = it },
+            valueRange = 0f..500f,
+            formatValue = { "%.0f".format(it) },
+            suffix = "ms",
+            label = "Gap between steps: ${gapMs.toInt()} ms",
+        )
 
         // Loop toggle
         Row(
@@ -220,7 +227,7 @@ fun VibrationScreen() {
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                "Loop waveform",
+                S.vibration.loopWaveform,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f),
@@ -623,12 +630,24 @@ private fun WaveformStep(
             }
 
             if (hasAmplitude) {
-                Text("Amplitude: ${"%.0f".format(amplitude * 100)}%", style = MaterialTheme.typography.bodySmall)
-                Slider(value = amplitude, onValueChange = onAmpChange, valueRange = 0f..1f)
+                SliderWithInput(
+                    value = amplitude * 100f,
+                    onValueChange = { onAmpChange(it / 100f) },
+                    valueRange = 0f..100f,
+                    formatValue = { "%.0f".format(it) },
+                    suffix = "%",
+                    label = "Amplitude: ${"%.0f".format(amplitude * 100)}%",
+                )
             }
 
-            Text("Duration: ${duration.toInt()} ms", style = MaterialTheme.typography.bodySmall)
-            Slider(value = duration, onValueChange = onDurChange, valueRange = 10f..2000f)
+            SliderWithInput(
+                value = duration,
+                onValueChange = onDurChange,
+                valueRange = 10f..2000f,
+                formatValue = { "%.0f".format(it) },
+                suffix = "ms",
+                label = "Duration: ${duration.toInt()} ms",
+            )
         }
     }
 }

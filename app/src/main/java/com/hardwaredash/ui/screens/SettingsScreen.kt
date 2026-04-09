@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.hardwaredash.localization.Language
 import com.hardwaredash.localization.LocalizationManager
 import com.hardwaredash.localization.S
+import com.hardwaredash.ui.components.SliderWithInput
 import kotlin.math.roundToInt
 
 private const val WIDGET_PREFS = "widget_settings"
@@ -166,20 +167,16 @@ fun SettingsScreen() {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                 )
-                Text(
-                    "$ringDuration ${strings.seconds}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Slider(
+                SliderWithInput(
                     value = ringDuration.toFloat(),
                     onValueChange = { ringDuration = it.roundToInt() },
                     onValueChangeFinished = {
                         widgetPrefs.edit().putInt(KEY_RING_DURATION, ringDuration).apply()
                     },
                     valueRange = 5f..120f,
-                    steps = 22, // 5-second increments: (120-5)/5 - 1 = 22
+                    formatValue = { "%.0f".format(it) },
+                    suffix = "s",
+                    label = "$ringDuration ${strings.seconds}",
                 )
             }
         }
@@ -213,20 +210,16 @@ fun SettingsScreen() {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                 )
-                Text(
-                    "$notifyDelay ${strings.seconds}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Slider(
+                SliderWithInput(
                     value = notifyDelay.toFloat(),
                     onValueChange = { notifyDelay = it.roundToInt() },
                     onValueChangeFinished = {
                         widgetPrefs.edit().putInt(KEY_NOTIFY_DELAY, notifyDelay).apply()
                     },
                     valueRange = 5f..300f,
-                    steps = 58, // 5-second increments: (300-5)/5 - 1 = 58
+                    formatValue = { "%.0f".format(it) },
+                    suffix = "s",
+                    label = "$notifyDelay ${strings.seconds}",
                 )
             }
         }
