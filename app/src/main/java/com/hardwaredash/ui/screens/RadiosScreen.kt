@@ -16,8 +16,12 @@ import android.net.NetworkCapabilities
 import android.net.TrafficStats
 import android.net.wifi.WifiManager
 import android.nfc.*
+import android.nfc.tech.IsoDep
+import android.nfc.tech.MifareClassic
+import android.nfc.tech.MifareUltralight
 import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
+import android.nfc.tech.NfcA
 import android.os.Build
 import android.os.Looper
 import android.provider.Settings
@@ -41,7 +45,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.permissions.*
 import com.hardwaredash.localization.S
 import com.google.android.gms.location.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -55,6 +61,7 @@ import java.util.Locale
 @Composable
 fun RadiosScreen() {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     // ── Live state, polled every second ───────────────────────────────────────
     var wifiEnabled by remember { mutableStateOf(false) }
@@ -96,6 +103,14 @@ fun RadiosScreen() {
     var nfcUriPrefix  by remember { mutableStateOf("https://") }
     var nfcMimeType   by remember { mutableStateOf("text/plain") }
     var showNfcInfo   by remember { mutableStateOf(false) }
+    // Write protection analysis state
+    var nfcProtectionInfo    by remember { mutableStateOf<List<String>>(emptyList()) }
+    var nfcProtectionType    by remember { mutableStateOf<String?>(null) }
+    var nfcBypassPossible    by remember { mutableStateOf<String?>(null) }
+    var nfcTagType           by remember { mutableStateOf<String?>(null) }
+    var nfcBypassLog         by remember { mutableStateOf<List<String>>(emptyList()) }
+    var nfcBypassInProgress  by remember { mutableStateOf(false) }
+    var showProtectionDetails by remember { mutableStateOf(false) }
 
     // GPS state
     var gpsActive     by remember { mutableStateOf(false) }
@@ -179,6 +194,13 @@ fun RadiosScreen() {
                 records.add("No NDEF data (tag may be unformatted)")
             }
             nfcRecords = records
+
+            // Detect write protection details
+            val protResult = detectWriteProtection(tag)
+            nfcTagType = protResult.tagType
+            nfcProtectionType = protResult.protectionType
+            nfcBypassPossible = protResult.bypassPossible
+            nfcProtectionInfo = protResult.details
         }
 
         nfcAdapter.enableReaderMode(
@@ -440,6 +462,13 @@ fun RadiosScreen() {
                                 nfcTagCapacity = 0
                                 nfcTagWritable = null
                                 currentTag = null
+                                nfcProtectionInfo = emptyList()
+                                nfcProtectionType = null
+                                nfcBypassPossible = null
+                                nfcTagType = null
+                                nfcBypassLog = emptyList()
+                                nfcBypassInProgress = false
+                                showProtectionDetails = false
                             }
                         })
                     }
@@ -464,6 +493,50 @@ fun RadiosScreen() {
                             Text("Hold an NFC tag near the device...",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                        }
+                    }
+                }
+            }
+
+            // Write Protection Analysis
+            if (nfcReaderActive && nfcTagId != null && nfcProtectionType != null) {
+                Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Write Protection Analysis", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        if (nfcTagType != null) {
+                            Text("Tag Type: $nfcTagType", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Text("Protection: ${nfcProtectionType ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text("Bypassable:", style = MaterialTheme.typography.bodyMedium)
+                            val bypassColor = when (nfcBypassPossible) {
+                                "Yes" -> Color(0xFF4CAF50)
+                                "No" -> MaterialTheme.colorScheme.error
+                                "Maybe" -> Color(0xFFFFA000)
+                                else -> MaterialTheme.colorScheme.onSurface
+                            }
+                            Text(nfcBypassPossible ?: "N/A", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = bypassColor)
+                        }
+                        if (nfcProtectionInfo.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text("Details", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                                IconButton(onClick = { showProtectionDetails = !showProtectionDetails }, modifier = Modifier.size(24.dp)) {
+                                    Icon(
+                                        if (showProtectionDetails) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                        "Toggle details",
+                                    )
+                                }
+                            }
+                            if (showProtectionDetails) {
+                                nfcProtectionInfo.forEach { line ->
+                                    Text(line, style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
                         }
                     }
                 }
@@ -545,21 +618,43 @@ fun RadiosScreen() {
                                     nfcWriteStatus = "No tag present"
                                     return@Button
                                 }
-                                nfcWriteStatus = when (nfcWriteType) {
-                                    "URI" -> writeNdefRecord(tag, NdefRecord.createUri(nfcUriPrefix + nfcWriteMsg))
-                                    "MIME" -> writeNdefRecord(tag, NdefRecord.createMime(nfcMimeType, nfcWriteMsg.toByteArray()))
-                                    else -> writeNdefRecord(tag, NdefRecord.createTextRecord("en", nfcWriteMsg))
+                                val record = when (nfcWriteType) {
+                                    "URI" -> NdefRecord.createUri(nfcUriPrefix + nfcWriteMsg)
+                                    "MIME" -> NdefRecord.createMime(nfcMimeType, nfcWriteMsg.toByteArray())
+                                    else -> NdefRecord.createTextRecord("en", nfcWriteMsg)
+                                }
+                                nfcBypassLog = emptyList()
+                                nfcBypassInProgress = true
+                                nfcWriteStatus = ""
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    val result = writeNdefRecord(tag, record) { logLine ->
+                                        nfcBypassLog = nfcBypassLog + logLine
+                                    }
+                                    nfcWriteStatus = result
+                                    nfcBypassInProgress = false
                                 }
                             },
-                            enabled = nfcWriteMsg.isNotBlank(),
+                            enabled = nfcWriteMsg.isNotBlank() && !nfcBypassInProgress,
                             modifier = Modifier.fillMaxWidth(),
-                        ) { Text("Write NDEF ${nfcWriteType}") }
+                        ) { Text(if (nfcBypassInProgress) "Writing..." else "Write NDEF $nfcWriteType") }
+
+                        if (nfcBypassInProgress) {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        }
 
                         if (nfcWriteStatus.isNotEmpty()) {
                             Text(nfcWriteStatus,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = if (nfcWriteStatus.startsWith("OK")) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.error)
+                        }
+
+                        if (nfcBypassLog.isNotEmpty()) {
+                            Text("Bypass log:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                            nfcBypassLog.forEach { line ->
+                                Text(line, style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
                     }
                 }
@@ -791,17 +886,18 @@ fun RadiosScreen() {
     }
 }
 
-private fun writeNdefRecord(tag: Tag, record: NdefRecord): String {
+private fun writeNdefRecord(tag: Tag, record: NdefRecord, onLog: (String) -> Unit): String {
     val message = NdefMessage(arrayOf(record))
 
     // Try NDEF first
     val ndef = Ndef.get(tag)
     if (ndef != null) {
-        return try {
+        try {
             ndef.connect()
             if (!ndef.isWritable) {
                 ndef.close()
-                return "Tag is read-only"
+                onLog("Tag reports read-only, attempting bypass...")
+                return attemptBypassAndWrite(tag, record, onLog)
             }
             if (message.toByteArray().size > ndef.maxSize) {
                 ndef.close()
@@ -809,9 +905,10 @@ private fun writeNdefRecord(tag: Tag, record: NdefRecord): String {
             }
             ndef.writeNdefMessage(message)
             ndef.close()
-            "OK Written successfully (${message.toByteArray().size} bytes)"
+            return "OK Written successfully (${message.toByteArray().size} bytes)"
         } catch (e: Exception) {
-            "Write error: ${e.message}"
+            try { ndef.close() } catch (_: Exception) {}
+            return "Write error: ${e.message}"
         }
     }
 
@@ -835,6 +932,550 @@ private fun formatSpeed(bytesPerSec: Long): String = when {
     bytesPerSec >= 1_000_000 -> "${"%.1f".format(bytesPerSec / 1_000_000f)} MB/s"
     bytesPerSec >= 1_000     -> "${"%.0f".format(bytesPerSec / 1_000f)} KB/s"
     else                     -> "$bytesPerSec B/s"
+}
+
+// ── NFC Write Protection Detection & Bypass ──────────────────────────────────
+
+private data class WriteProtectionResult(
+    val tagType: String?,
+    val protectionType: String?,
+    val bypassPossible: String?,  // "Yes", "No", "Maybe"
+    val details: List<String>,
+)
+
+private val NTAG_DEFAULT_PASSWORDS = listOf(
+    byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte()),
+    byteArrayOf(0x00, 0x00, 0x00, 0x00),
+    byteArrayOf(0x01, 0x02, 0x03, 0x04),
+    byteArrayOf(0x11, 0x22, 0x33, 0x44),
+    byteArrayOf(0xAA.toByte(), 0xBB.toByte(), 0xCC.toByte(), 0xDD.toByte()),
+)
+
+private val MIFARE_DEFAULT_KEYS = listOf(
+    byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte()),
+    byteArrayOf(0xA0.toByte(), 0xA1.toByte(), 0xA2.toByte(), 0xA3.toByte(), 0xA4.toByte(), 0xA5.toByte()),
+    byteArrayOf(0xD3.toByte(), 0xF7.toByte(), 0xD3.toByte(), 0xF7.toByte(), 0xD3.toByte(), 0xF7.toByte()),
+    byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x00),
+    byteArrayOf(0xB0.toByte(), 0xB1.toByte(), 0xB2.toByte(), 0xB3.toByte(), 0xB4.toByte(), 0xB5.toByte()),
+    byteArrayOf(0x4D.toByte(), 0x3A.toByte(), 0x99.toByte(), 0xC3.toByte(), 0x51.toByte(), 0xDD.toByte()),
+    byteArrayOf(0x1A.toByte(), 0x98.toByte(), 0x2C.toByte(), 0x7E.toByte(), 0x45.toByte(), 0x9A.toByte()),
+    byteArrayOf(0xAA.toByte(), 0xBB.toByte(), 0xCC.toByte(), 0xDD.toByte(), 0xEE.toByte(), 0xFF.toByte()),
+)
+
+/** Identifies NTAG type from GET_VERSION response. Returns (name, configPage, totalPages) or null. */
+private fun identifyNtagType(version: ByteArray): Triple<String, Int, Int>? {
+    if (version.size < 8) return null
+    val storageSize = version[6].toInt() and 0xFF
+    return when (storageSize) {
+        0x0F -> Triple("NTAG213", 41, 45)
+        0x11 -> Triple("NTAG215", 131, 135)
+        0x13 -> Triple("NTAG216", 227, 231)
+        0x0E -> Triple("NTAG210", 16, 20)
+        0x06 -> Triple("Mifare Ultralight", -1, 20)
+        else -> Triple("NfcA (unknown, storage=0x${"%02X".format(storageSize)})", -1, -1)
+    }
+}
+
+/** Detects write protection details for the current tag. */
+private fun detectWriteProtection(tag: Tag): WriteProtectionResult {
+    val techList = tag.techList.map { it.substringAfterLast('.') }
+    val details = mutableListOf<String>()
+    var tagType: String? = null
+    var protectionType: String? = null
+    var bypassPossible: String? = null
+
+    // ── NTAG / Mifare Ultralight (NfcA) ──
+    if ("NfcA" in techList) {
+        val nfcA = NfcA.get(tag)
+        if (nfcA != null) {
+            try {
+                nfcA.connect()
+                nfcA.timeout = 1000
+
+                // GET_VERSION to identify chip
+                var configPage = -1
+                var totalPages = -1
+                try {
+                    val version = nfcA.transceive(byteArrayOf(0x60))
+                    val info = identifyNtagType(version)
+                    if (info != null) {
+                        tagType = info.first
+                        configPage = info.second
+                        totalPages = info.third
+                        details.add("Tag type: $tagType")
+                    }
+                } catch (_: Exception) {
+                    tagType = if ("MifareUltralight" in techList) "Mifare Ultralight" else "NfcA (unknown)"
+                    details.add("Tag type: $tagType (GET_VERSION not supported)")
+                }
+
+                // Read page 2 (static lock bits in bytes 2-3) and page 3 (CC bytes)
+                try {
+                    val pages2to5 = nfcA.transceive(byteArrayOf(0x30, 0x02))
+                    if (pages2to5.size >= 8) {
+                        val lockByte0 = pages2to5[2].toInt() and 0xFF
+                        val lockByte1 = pages2to5[3].toInt() and 0xFF
+                        val staticLockBits = (lockByte0 shl 8) or lockByte1
+                        val ccByte3 = pages2to5[7].toInt() and 0xFF
+
+                        details.add("Static lock bits: 0x${"%04X".format(staticLockBits)}${if (staticLockBits != 0) " (SET — irreversible)" else " (clear)"}")
+                        details.add("CC byte 3 (access): 0x${"%02X".format(ccByte3)}${if (ccByte3 and 0x0F != 0) " (read-only flag set)" else " (read-write)"}")
+
+                        val hasStaticLocks = staticLockBits != 0
+                        val hasCCReadOnly = ccByte3 and 0x0F != 0
+
+                        // Read dynamic lock bits if tag type known
+                        var hasDynamicLocks = false
+                        if (configPage > 0) {
+                            val dynLockPage = when (tagType) {
+                                "NTAG213" -> 40
+                                "NTAG215" -> 130
+                                "NTAG216" -> 226
+                                else -> -1
+                            }
+                            if (dynLockPage > 0) {
+                                try {
+                                    val dynPages = nfcA.transceive(byteArrayOf(0x30, dynLockPage.toByte()))
+                                    if (dynPages.size >= 3) {
+                                        val dyn = ((dynPages[0].toInt() and 0xFF) shl 16) or
+                                                  ((dynPages[1].toInt() and 0xFF) shl 8) or
+                                                   (dynPages[2].toInt() and 0xFF)
+                                        hasDynamicLocks = dyn != 0
+                                        details.add("Dynamic lock bits: 0x${"%06X".format(dyn)}${if (hasDynamicLocks) " (SET — irreversible)" else " (clear)"}")
+                                    }
+                                } catch (_: Exception) {
+                                    details.add("Dynamic lock bits: could not read")
+                                }
+                            }
+                        }
+
+                        // Read password / auth config if NTAG21x
+                        var hasPasswordProtection = false
+                        if (configPage > 0) {
+                            try {
+                                val cfgPages = nfcA.transceive(byteArrayOf(0x30, configPage.toByte()))
+                                if (cfgPages.size >= 8) {
+                                    val auth0 = cfgPages[3].toInt() and 0xFF
+                                    val access = cfgPages[4].toInt() and 0xFF
+                                    val protBit = (access shr 7) and 1
+                                    val cfglck = (access shr 6) and 1
+                                    val authLim = access and 0x07
+
+                                    hasPasswordProtection = auth0 < (totalPages and 0xFF)
+                                    details.add("AUTH0: 0x${"%02X".format(auth0)} (password required from page $auth0)${if (hasPasswordProtection) " — ACTIVE" else " — not active"}")
+                                    details.add("ACCESS: PROT=${if (protBit == 1) "read+write" else "write-only"}, CFGLCK=${if (cfglck == 1) "locked" else "unlocked"}, AUTHLIM=$authLim")
+                                }
+                            } catch (_: Exception) {
+                                details.add("Auth config: could not read (may be protected)")
+                                hasPasswordProtection = true
+                            }
+                        }
+
+                        // Determine bypass possibility
+                        when {
+                            hasStaticLocks || hasDynamicLocks -> {
+                                protectionType = if (hasStaticLocks) "Static lock bits (irreversible)" else "Dynamic lock bits (irreversible)"
+                                bypassPossible = "No"
+                                if (hasCCReadOnly) protectionType += " + CC read-only"
+                                if (hasPasswordProtection) protectionType += " + Password"
+                            }
+                            hasCCReadOnly && !hasPasswordProtection -> {
+                                protectionType = "CC byte read-only"
+                                bypassPossible = "Yes"
+                            }
+                            hasPasswordProtection && !hasCCReadOnly -> {
+                                protectionType = "Password protected"
+                                bypassPossible = "Maybe"
+                            }
+                            hasPasswordProtection && hasCCReadOnly -> {
+                                protectionType = "CC read-only + Password protected"
+                                bypassPossible = "Maybe"
+                            }
+                            else -> {
+                                protectionType = "No protection detected"
+                                bypassPossible = "N/A"
+                            }
+                        }
+                    }
+                } catch (_: Exception) {
+                    details.add("Could not read lock/CC bytes")
+                    protectionType = "Unknown (read error)"
+                    bypassPossible = "Maybe"
+                }
+            } catch (e: TagLostException) {
+                details.add("Tag removed during scan")
+                protectionType = "Unknown (tag lost)"
+                bypassPossible = "Maybe"
+            } catch (e: Exception) {
+                details.add("NfcA error: ${e.message}")
+                protectionType = "Unknown (error)"
+                bypassPossible = "Maybe"
+            } finally {
+                try { nfcA.close() } catch (_: Exception) {}
+            }
+            return WriteProtectionResult(tagType, protectionType, bypassPossible, details)
+        }
+    }
+
+    // ── Mifare Classic ──
+    if ("MifareClassic" in techList) {
+        val mfc = MifareClassic.get(tag)
+        if (mfc != null) {
+            try {
+                mfc.connect()
+                tagType = "Mifare Classic ${mfc.size / 1024}K"
+                details.add("Tag type: $tagType (${mfc.sectorCount} sectors)")
+                var accessibleSectors = 0
+                var testedSectors = 0
+                for (sector in 0 until minOf(mfc.sectorCount, 16)) {
+                    testedSectors++
+                    val accessible = MIFARE_DEFAULT_KEYS.any { key ->
+                        try { mfc.authenticateSectorWithKeyA(sector, key) } catch (_: Exception) { false } ||
+                        try { mfc.authenticateSectorWithKeyB(sector, key) } catch (_: Exception) { false }
+                    }
+                    if (accessible) accessibleSectors++
+                }
+                details.add("Sectors accessible with default keys: $accessibleSectors/$testedSectors")
+                when {
+                    accessibleSectors == testedSectors -> {
+                        protectionType = "Default keys (all sectors accessible)"
+                        bypassPossible = "Yes"
+                    }
+                    accessibleSectors > 0 -> {
+                        protectionType = "Partial key protection"
+                        bypassPossible = "Maybe"
+                    }
+                    else -> {
+                        protectionType = "Custom keys on all sectors"
+                        bypassPossible = "No"
+                    }
+                }
+            } catch (e: TagLostException) {
+                details.add("Tag removed during scan")
+                protectionType = "Unknown (tag lost)"
+                bypassPossible = "Maybe"
+            } catch (e: Exception) {
+                details.add("Mifare Classic error: ${e.message}")
+                protectionType = "Unknown (error)"
+                bypassPossible = "Maybe"
+            } finally {
+                try { mfc.close() } catch (_: Exception) {}
+            }
+            return WriteProtectionResult(tagType, protectionType, bypassPossible, details)
+        }
+    }
+
+    // ── ISO-DEP / Type 4 ──
+    if ("IsoDep" in techList) {
+        val isoDep = IsoDep.get(tag)
+        if (isoDep != null) {
+            try {
+                isoDep.connect()
+                isoDep.timeout = 2000
+                tagType = "ISO-DEP (Type 4)"
+                details.add("Tag type: $tagType")
+                // Select NDEF application
+                val selectApp = isoDep.transceive(byteArrayOf(
+                    0x00, 0xA4.toByte(), 0x04, 0x00, 0x07,
+                    0xD2.toByte(), 0x76, 0x00, 0x00, 0x85.toByte(), 0x01, 0x01, 0x00
+                ))
+                if (selectApp.size >= 2 && selectApp[selectApp.size - 2] == 0x90.toByte()) {
+                    // Select CC file
+                    val selectCC = isoDep.transceive(byteArrayOf(0x00, 0xA4.toByte(), 0x00, 0x0C, 0x02, 0xE1.toByte(), 0x03))
+                    if (selectCC.size >= 2 && selectCC[selectCC.size - 2] == 0x90.toByte()) {
+                        val readCC = isoDep.transceive(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x0F))
+                        if (readCC.size >= 16) {
+                            val writeAccess = readCC[7].toInt() and 0xFF
+                            details.add("CC write access byte: 0x${"%02X".format(writeAccess)}${if (writeAccess == 0xFF) " (read-only)" else if (writeAccess == 0x00) " (writable)" else " (proprietary)"}")
+                            when (writeAccess) {
+                                0xFF -> {
+                                    protectionType = "Type 4 CC read-only"
+                                    bypassPossible = "No"
+                                }
+                                0x00 -> {
+                                    protectionType = "No protection detected"
+                                    bypassPossible = "N/A"
+                                }
+                                else -> {
+                                    protectionType = "Type 4 proprietary access control"
+                                    bypassPossible = "No"
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    details.add("NDEF application not found")
+                    protectionType = "No NDEF application"
+                    bypassPossible = "No"
+                }
+            } catch (e: Exception) {
+                details.add("ISO-DEP error: ${e.message}")
+                protectionType = "Unknown (error)"
+                bypassPossible = "Maybe"
+            } finally {
+                try { isoDep.close() } catch (_: Exception) {}
+            }
+            return WriteProtectionResult(tagType, protectionType, bypassPossible, details)
+        }
+    }
+
+    return WriteProtectionResult(null, "Unknown tag type", "No", listOf("No supported low-level technology detected"))
+}
+
+/** Attempts to bypass write protection and write the NDEF record. */
+private fun attemptBypassAndWrite(tag: Tag, record: NdefRecord, onLog: (String) -> Unit): String {
+    val message = NdefMessage(arrayOf(record))
+    val techList = tag.techList.map { it.substringAfterLast('.') }
+
+    // ── Attempt 1: CC byte 3 reset (NTAG/Ultralight) ──
+    if ("NfcA" in techList) {
+        onLog("Attempt 1: CC byte reset...")
+        val ccResult = attemptCCByteReset(tag, onLog)
+        if (ccResult) {
+            // Try NDEF write after CC reset
+            val ndef = Ndef.get(tag)
+            if (ndef != null) {
+                try {
+                    ndef.connect()
+                    ndef.writeNdefMessage(message)
+                    ndef.close()
+                    onLog("NDEF write succeeded after CC byte reset")
+                    return "OK Bypass successful (CC byte reset) — ${message.toByteArray().size} bytes written"
+                } catch (e: Exception) {
+                    onLog("NDEF write still failed after CC reset: ${e.message}")
+                    try { ndef.close() } catch (_: Exception) {}
+                }
+            }
+        }
+
+        // ── Attempt 2: Password authentication (NTAG21x) ──
+        onLog("Attempt 2: Password authentication...")
+        val pwdResult = attemptPasswordBypass(tag, message, onLog)
+        if (pwdResult != null) return pwdResult
+    }
+
+    // ── Attempt 3: Mifare Classic default keys ──
+    if ("MifareClassic" in techList) {
+        onLog("Attempt 3: Mifare Classic default keys...")
+        val mfcResult = attemptMifareClassicWrite(tag, message, onLog)
+        if (mfcResult != null) return mfcResult
+    }
+
+    // ── Attempt 4: Check lock bits and report ──
+    if ("NfcA" in techList) {
+        onLog("Checking lock bit state...")
+        val nfcA = NfcA.get(tag)
+        if (nfcA != null) {
+            try {
+                nfcA.connect()
+                nfcA.timeout = 1000
+                val pages2to5 = nfcA.transceive(byteArrayOf(0x30, 0x02))
+                if (pages2to5.size >= 4) {
+                    val lock0 = pages2to5[2].toInt() and 0xFF
+                    val lock1 = pages2to5[3].toInt() and 0xFF
+                    if (lock0 != 0 || lock1 != 0) {
+                        onLog("Static lock bits set (0x${"%02X".format(lock0)}${"%02X".format(lock1)}) — IRREVERSIBLE")
+                    }
+                }
+            } catch (e: Exception) {
+                onLog("Lock bit read error: ${e.message}")
+            } finally {
+                try { nfcA.close() } catch (_: Exception) {}
+            }
+        }
+    }
+
+    onLog("All bypass attempts exhausted")
+    return "Write protection could not be bypassed"
+}
+
+/** Attempts to clear CC byte 3 to remove NDEF read-only flag. Returns true if the write succeeded. */
+private fun attemptCCByteReset(tag: Tag, onLog: (String) -> Unit): Boolean {
+    val nfcA = NfcA.get(tag) ?: return false
+    try {
+        nfcA.connect()
+        nfcA.timeout = 1000
+        // Read page 3 (CC bytes) — READ command returns pages 3-6
+        val pages = nfcA.transceive(byteArrayOf(0x30, 0x03))
+        if (pages.size < 4) {
+            onLog("  CC read returned too few bytes")
+            return false
+        }
+        val cc0 = pages[0]
+        val cc1 = pages[1]
+        val cc2 = pages[2]
+        val cc3 = pages[3].toInt() and 0xFF
+        if (cc3 and 0x0F == 0) {
+            onLog("  CC byte 3 already clear (0x${"%02X".format(cc3)}), skipping")
+            return false
+        }
+        onLog("  CC byte 3 = 0x${"%02X".format(cc3)}, clearing read-only bits...")
+        val newCc3 = (cc3 and 0xF0).toByte()  // Clear lower nibble (access bits)
+        nfcA.transceive(byteArrayOf(0xA2.toByte(), 0x03, cc0, cc1, cc2, newCc3))
+        onLog("  CC byte 3 reset to 0x${"%02X".format(newCc3.toInt() and 0xFF)}")
+        return true
+    } catch (e: TagLostException) {
+        onLog("  Tag removed during CC byte reset")
+        return false
+    } catch (e: Exception) {
+        onLog("  CC byte reset failed: ${e.message}")
+        return false
+    } finally {
+        try { nfcA.close() } catch (_: Exception) {}
+    }
+}
+
+/** Tries default passwords on NTAG21x, then attempts write. Returns status string on success, null on failure. */
+private fun attemptPasswordBypass(tag: Tag, message: NdefMessage, onLog: (String) -> Unit): String? {
+    val nfcA = NfcA.get(tag) ?: return null
+    try {
+        nfcA.connect()
+        nfcA.timeout = 1000
+
+        // Identify tag to find config page
+        val configPage: Int
+        val totalPages: Int
+        try {
+            val version = nfcA.transceive(byteArrayOf(0x60))
+            val info = identifyNtagType(version)
+            if (info == null || info.second < 0) {
+                onLog("  Not an NTAG21x, skipping password auth")
+                return null
+            }
+            configPage = info.second
+            totalPages = info.third
+        } catch (_: Exception) {
+            onLog("  GET_VERSION failed, skipping password auth")
+            return null
+        }
+
+        // Check if password protection is active
+        try {
+            val cfgPages = nfcA.transceive(byteArrayOf(0x30, configPage.toByte()))
+            if (cfgPages.size >= 4) {
+                val auth0 = cfgPages[3].toInt() and 0xFF
+                if (auth0 >= totalPages) {
+                    onLog("  AUTH0=0x${"%02X".format(auth0)} (not active), skipping")
+                    return null
+                }
+                onLog("  AUTH0=0x${"%02X".format(auth0)}, password protection active from page $auth0")
+            }
+        } catch (_: Exception) {
+            onLog("  Config read failed, trying passwords anyway...")
+        }
+
+        // Try each default password
+        for (pwd in NTAG_DEFAULT_PASSWORDS) {
+            try {
+                // Need to reconnect for each attempt since failed auth may close connection
+                if (!nfcA.isConnected) {
+                    nfcA.connect()
+                    nfcA.timeout = 1000
+                }
+                val authCmd = byteArrayOf(0x1B, pwd[0], pwd[1], pwd[2], pwd[3])
+                val response = nfcA.transceive(authCmd)
+                if (response.size >= 2) {
+                    // PACK received — authentication succeeded
+                    val pwdHex = pwd.joinToString("") { "%02X".format(it) }
+                    onLog("  Password 0x$pwdHex accepted (PACK: ${response.joinToString("") { "%02X".format(it) }})")
+
+                    // Try to disable password protection by setting AUTH0 to max
+                    try {
+                        val cfgPages = nfcA.transceive(byteArrayOf(0x30, configPage.toByte()))
+                        if (cfgPages.size >= 4) {
+                            nfcA.transceive(byteArrayOf(0xA2.toByte(), configPage.toByte(), cfgPages[0], cfgPages[1], cfgPages[2], 0xFF.toByte()))
+                            onLog("  AUTH0 reset to 0xFF (password protection disabled)")
+                        }
+                    } catch (e: Exception) {
+                        onLog("  Could not disable password protection: ${e.message}")
+                    }
+                    nfcA.close()
+
+                    // Now try NDEF write
+                    val ndef = Ndef.get(tag)
+                    if (ndef != null) {
+                        try {
+                            ndef.connect()
+                            ndef.writeNdefMessage(message)
+                            ndef.close()
+                            onLog("  NDEF write succeeded after password auth")
+                            return "OK Bypass successful (password auth) — ${message.toByteArray().size} bytes written"
+                        } catch (e: Exception) {
+                            onLog("  NDEF write failed after auth: ${e.message}")
+                            try { ndef.close() } catch (_: Exception) {}
+                        }
+                    }
+                    return null  // Auth worked but write still failed
+                }
+            } catch (_: Exception) {
+                // Password rejected or connection error, try next
+                try { if (nfcA.isConnected) nfcA.close() } catch (_: Exception) {}
+                try {
+                    val freshNfcA = NfcA.get(tag)
+                    if (freshNfcA != null) {
+                        // Re-get won't help since nfcA is the same object; just reconnect
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+        onLog("  No default password worked")
+        return null
+    } catch (e: TagLostException) {
+        onLog("  Tag removed during password auth")
+        return null
+    } catch (e: Exception) {
+        onLog("  Password auth error: ${e.message}")
+        return null
+    } finally {
+        try { nfcA.close() } catch (_: Exception) {}
+    }
+}
+
+/** Tries default keys on Mifare Classic sectors and attempts NDEF write. Returns status or null. */
+private fun attemptMifareClassicWrite(tag: Tag, message: NdefMessage, onLog: (String) -> Unit): String? {
+    // First try the normal NDEF approach with a fresh connection
+    // (Mifare Classic NDEF write works if sector keys are defaults)
+    val ndef = Ndef.get(tag)
+    if (ndef != null) {
+        try {
+            ndef.connect()
+            ndef.writeNdefMessage(message)
+            ndef.close()
+            onLog("  NDEF write succeeded (default key access)")
+            return "OK Written via Mifare Classic NDEF — ${message.toByteArray().size} bytes"
+        } catch (e: Exception) {
+            onLog("  NDEF write failed: ${e.message}")
+            try { ndef.close() } catch (_: Exception) {}
+        }
+    }
+
+    // Try authenticating individual sectors with default keys
+    val mfc = MifareClassic.get(tag) ?: return null
+    try {
+        mfc.connect()
+        var anyKeyWorked = false
+        for (sector in 0 until minOf(mfc.sectorCount, 16)) {
+            for (key in MIFARE_DEFAULT_KEYS) {
+                val authed = try { mfc.authenticateSectorWithKeyA(sector, key) } catch (_: Exception) { false } ||
+                             try { mfc.authenticateSectorWithKeyB(sector, key) } catch (_: Exception) { false }
+                if (authed) {
+                    anyKeyWorked = true
+                    break
+                }
+            }
+        }
+        if (!anyKeyWorked) {
+            onLog("  No default key worked on any sector")
+            return null
+        }
+        onLog("  Default keys work but low-level Mifare Classic NDEF write not supported in bypass")
+        return null
+    } catch (e: Exception) {
+        onLog("  Mifare Classic error: ${e.message}")
+        return null
+    } finally {
+        try { mfc.close() } catch (_: Exception) {}
+    }
 }
 
 @Composable
