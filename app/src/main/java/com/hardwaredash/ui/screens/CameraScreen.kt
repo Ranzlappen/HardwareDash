@@ -35,6 +35,7 @@ import com.hardwaredash.localization.S
 import com.hardwaredash.ui.components.SliderWithInput
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.roundToInt
 
 // ─── Lens descriptor ─────────────────────────────────────────────────────────
 private data class LensInfo(
@@ -127,7 +128,7 @@ private fun CameraPreview() {
     var maxZoom   by remember { mutableFloatStateOf(1f) }
 
     // Exposure compensation
-    var exposureIdx  by remember { mutableIntStateOf(0) }
+    var exposureIdx  by remember { mutableFloatStateOf(0f) }
     var exposureMin  by remember { mutableIntStateOf(0) }
     var exposureMax  by remember { mutableIntStateOf(0) }
     var exposureStep by remember { mutableFloatStateOf(0f) }
@@ -184,7 +185,7 @@ private fun CameraPreview() {
         exposureMin  = expState.exposureCompensationRange.lower
         exposureMax  = expState.exposureCompensationRange.upper
         exposureStep = expState.exposureCompensationStep.toFloat()
-        exposureIdx  = expState.exposureCompensationIndex
+        exposureIdx  = expState.exposureCompensationIndex.toFloat()
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -280,11 +281,10 @@ private fun CameraPreview() {
                         if (exposureMax > exposureMin) {
                             val evValue = exposureIdx * exposureStep
                             SliderWithInput(
-                                value = exposureIdx.toFloat(),
+                                value = exposureIdx,
                                 onValueChange = { v ->
-                                    val idx = v.toInt()
-                                    exposureIdx = idx
-                                    cameraRef?.cameraControl?.setExposureCompensationIndex(idx)
+                                    exposureIdx = v
+                                    cameraRef?.cameraControl?.setExposureCompensationIndex(v.roundToInt())
                                 },
                                 valueRange = exposureMin.toFloat()..exposureMax.toFloat(),
                                 formatValue = { "%.1f".format(it * exposureStep) },

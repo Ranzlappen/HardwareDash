@@ -385,6 +385,9 @@ object S {
         val exifSaved get() = m(l, "EXIF data saved", "EXIF-Daten gespeichert", "Datos EXIF guardados", "Données EXIF enregistrées")
         val exifSaveFailed get() = m(l, "Failed to save EXIF data", "EXIF-Daten konnten nicht gespeichert werden", "Error al guardar datos EXIF", "Échec de l'enregistrement des données EXIF")
         val allFieldsPresent get() = m(l, "All common fields are already present.", "Alle gängigen Felder sind bereits vorhanden.", "Todos los campos comunes ya están presentes.", "Tous les champs courants sont déjà présents.")
+        val editMediaMetadata get() = m(l, "Edit Media Metadata", "Medien-Metadaten bearbeiten", "Editar metadatos multimedia", "Modifier les métadonnées média")
+        val mediaSaved get() = m(l, "Media metadata saved", "Medien-Metadaten gespeichert", "Metadatos multimedia guardados", "Métadonnées média enregistrées")
+        val mediaSaveFailed get() = m(l, "Failed to save media metadata", "Medien-Metadaten konnten nicht gespeichert werden", "Error al guardar metadatos multimedia", "Échec de l'enregistrement des métadonnées média")
     }
 
     // ── Caller Screen (Batch 8) ─────────────────────────────────────────
