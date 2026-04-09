@@ -261,6 +261,16 @@ enum class WidgetMetric(
         override fun fetch(ctx: Context): String = readLastLocation(ctx) { loc ->
             if (loc.hasSpeed()) "${"%.1f".format(loc.speed * 3.6f)} km/h" else "N/A"
         }
+    },
+    GPS_LATITUDE("gps_lat", "GPS Latitude", "Location", "°", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readLastLocation(ctx) { loc ->
+            "${"%.6f".format(loc.latitude)}"
+        }
+    },
+    GPS_LONGITUDE("gps_lon", "GPS Longitude", "Location", "°", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readLastLocation(ctx) { loc ->
+            "${"%.6f".format(loc.longitude)}"
+        }
     };
 
     abstract fun fetch(ctx: Context): String

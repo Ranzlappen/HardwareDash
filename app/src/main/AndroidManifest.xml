@@ -41,6 +41,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"     />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!-- ══════════════════════ OVERLAY (lock-screen widget) ════════ -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -163,6 +164,16 @@
             android:name=".services.StrobeService"
             android:exported="false"
             android:foregroundServiceType="camera" />
+
+        <!-- ── Link Service ──────────────────────────────────────── -->
+        <service
+            android:name=".services.LinkService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Continuous sensor monitoring for user-defined link rules" />
+        </service>
 
         <!-- ── Home Screen Widget (Metric) ───────────────────────── -->
         <receiver
