@@ -327,6 +327,8 @@ object S {
         val clearLog get() = m(l, "Clear log", "Protokoll löschen", "Borrar registro", "Effacer le journal")
         val exampleDomain get() = m(l, "example.com", "beispiel.de", "ejemplo.com", "exemple.com")
         val textPlain get() = m(l, "text/plain", "text/plain", "text/plain", "text/plain")
+        val hotspot get() = m(l, "Hotspot", "Hotspot", "Punto de acceso", "Point d'accès")
+        val wirelessProjection get() = m(l, "Wireless Projection", "Drahtlose Projektion", "Proyección inalámbrica", "Projection sans fil")
     }
 
     // ── Sensors ─────────────────────────────────────────────────────────
