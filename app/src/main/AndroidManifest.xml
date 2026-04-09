@@ -73,12 +73,20 @@
 
     <application
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.HardwareDash"
         android:hardwareAccelerated="true">
+
+        <!-- ══════════════════════ APP METADATA ══════════════════════ -->
+        <meta-data android:name="com.hardwaredash.AUTHOR"      android:value="Ranzlappen" />
+        <meta-data android:name="com.hardwaredash.LICENSE"      android:value="Proprietary — All Rights Reserved" />
+        <meta-data android:name="com.hardwaredash.DESCRIPTION"  android:value="Hardware Dashboard — monitor and control device sensors, camera, audio, and more" />
+        <meta-data android:name="com.hardwaredash.REPOSITORY"   android:value="github.com/Ranzlappen/HardwareDash" />
 
         <!-- ── Main Activity ─────────────────────────────────────── -->
         <activity

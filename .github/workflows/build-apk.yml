@@ -1,4 +1,4 @@
-name: Build Signed Release APK
+name: Build Signed Release
 
 on:
   workflow_dispatch:
@@ -60,11 +60,32 @@ jobs:
             -PBUILD_BRANCH=${{ env.BUILD_BRANCH }} \
             -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}"
 
+      - name: Build Signed Release AAB (Play Store)
+        run: |
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=${{ github.workspace }}/HardwareDash-release.jks \
+            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }} \
+            -PCI_VERSION_CODE=${{ env.VERSION_CODE }} \
+            -PCI_VERSION_NAME=${{ env.VERSION_NAME }} \
+            -PBUILD_AUTHOR="${{ env.BUILD_AUTHOR }}" \
+            -PBUILD_DATE="${{ env.BUILD_DATE }}" \
+            -PBUILD_COMMIT=${{ env.BUILD_COMMIT }} \
+            -PBUILD_BRANCH=${{ env.BUILD_BRANCH }} \
+            -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}"
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: HardwareDash-v${{ env.VERSION_NAME }}
+          name: HardwareDash-v${{ env.VERSION_NAME }}-apk
           path: app/build/outputs/apk/release/*.apk
+
+      - name: Upload AAB artifact (Play Store)
+        uses: actions/upload-artifact@v4
+        with:
+          name: HardwareDash-v${{ env.VERSION_NAME }}-aab
+          path: app/build/outputs/bundle/release/*.aab
 
       - name: Create Release & Upload APK
         uses: softprops/action-gh-release@v2
@@ -77,7 +98,9 @@ jobs:
             **Branch:** ${{ env.BUILD_BRANCH }}
             **Author:** ${{ env.BUILD_AUTHOR }}
             **Date:** ${{ env.BUILD_DATE }}
-          files: app/build/outputs/apk/release/*.apk
+          files: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
           draft: false
           prerelease: false
         env:
