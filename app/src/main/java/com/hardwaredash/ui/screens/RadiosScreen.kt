@@ -371,6 +371,37 @@ fun RadiosScreen() {
             }
         }
 
+        // WiFi quick actions: Hotspot & Wireless Projection
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            OutlinedButton(
+                onClick = {
+                    context.startActivity(Intent("android.settings.TETHERING_SETTINGS").also {
+                        it.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    })
+                },
+                modifier = Modifier.weight(1f),
+            ) {
+                Icon(Icons.Default.WifiTethering, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(S.radios.hotspot, maxLines = 1, softWrap = false)
+            }
+            OutlinedButton(
+                onClick = {
+                    context.startActivity(Intent(Settings.ACTION_CAST_SETTINGS).also {
+                        it.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    })
+                },
+                modifier = Modifier.weight(1f),
+            ) {
+                Icon(Icons.Default.Cast, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(S.radios.wirelessProjection, maxLines = 1, softWrap = false)
+            }
+        }
+
         RadioCard(
             title   = "Bluetooth",
             icon    = Icons.Default.Bluetooth,
