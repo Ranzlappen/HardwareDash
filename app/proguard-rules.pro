@@ -5,17 +5,27 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ── Kotlin Serialization ─────────────────────────────────────────────
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepclassmembers class kotlinx.serialization.json.** { *** Companion; }
+-keepclasseswithmembers class kotlinx.serialization.json.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+-keep,includedescriptorclasses class com.hardwaredash.**$$serializer { *; }
+-keepclassmembers class com.hardwaredash.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.hardwaredash.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# ── Preserve line numbers for crash reports ──────────────────────────
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# ── OSMDroid ─────────────────────────────────────────────────────────
+-keep class org.osmdroid.** { *; }
+-dontwarn org.osmdroid.**
