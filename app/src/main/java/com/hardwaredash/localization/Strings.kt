@@ -142,6 +142,8 @@ object S {
         val seconds get() = m(l, "seconds", "Sekunden", "segundos", "secondes")
         val phoneRingDesc get() = m(l, "How long the phone rings when triggered", "Wie lange das Telefon klingelt", "Cuánto tiempo suena el teléfono", "Combien de temps le téléphone sonne")
         val notifyDesc get() = m(l, "Delay before notification appears", "Verzögerung vor der Benachrichtigung", "Retraso antes de que aparezca la notificación", "Délai avant l'apparition de la notification")
+        val metricLogging get() = m(l, "Metric Logging", "Metrik-Protokollierung", "Registro de métricas", "Journalisation des métriques")
+        val metricLoggingDesc get() = m(l, "Select metrics to capture with each log entry", "Metriken auswählen, die bei jedem Logbuch-Eintrag erfasst werden", "Seleccione métricas para capturar con cada entrada del registro", "Sélectionnez les métriques à capturer avec chaque entrée du journal")
     }
 
     // ── Lock Screen & Notifications ─────────────────────────────────────

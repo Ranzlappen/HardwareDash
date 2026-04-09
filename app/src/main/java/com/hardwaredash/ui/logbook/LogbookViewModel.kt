@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import com.hardwaredash.widget.WidgetMetric
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -149,12 +150,14 @@ class LogbookViewModel(application: Application) : AndroidViewModel(application)
     // ═══════════════════════════════════════════════════════════════════
 
     fun addEntry(text: String) {
+        val metrics = WidgetMetric.snapshotEnabled(getApplication())
         val entry = LogbookEntry(
             id = UUID.randomUUID().toString(),
             isoDate = Instant.now().toString(),
             text = text.trim(),
             custom = false,
             tags = emptyList(),
+            metrics = metrics,
         )
         updateStore { copy(entries = listOf(entry) + entries) }
     }
@@ -162,12 +165,14 @@ class LogbookViewModel(application: Application) : AndroidViewModel(application)
     fun addCustomEntry(text: String, date: LocalDate, time: LocalTime) {
         val ldt = LocalDateTime.of(date, time)
         val iso = ldt.atZone(ZoneId.systemDefault()).toInstant().toString()
+        val metrics = WidgetMetric.snapshotEnabled(getApplication())
         val entry = LogbookEntry(
             id = UUID.randomUUID().toString(),
             isoDate = iso,
             text = text.trim(),
             custom = true,
             tags = listOf("custom"),
+            metrics = metrics,
         )
         val sorted = (entries() + entry).sortedByDescending { it.isoDate }
         updateStore { copy(entries = sorted) }

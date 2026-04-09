@@ -122,6 +122,7 @@ class LogbookRepository(private val context: Context) {
                 4 -> migrateV4(store)
                 5 -> migrateV5(store)
                 6 -> migrateV6(store)
+                7 -> migrateV7(store)
                 else -> store
             }
         }
@@ -273,6 +274,24 @@ class LogbookRepository(private val context: Context) {
             store.forEach { (k, v) -> put(k, v) }
             put("processes", patched)
             put("version", 6)
+        }
+    }
+
+    /** v7: Ensure all entries have `metrics` field. */
+    private fun migrateV7(store: JsonObject): JsonObject {
+        val entries = store["entries"]?.jsonArray ?: JsonArray(emptyList())
+        val patched = JsonArray(entries.map { e ->
+            val obj = e.jsonObject
+            if ("metrics" in obj) obj
+            else buildJsonObject {
+                obj.forEach { (k, v) -> put(k, v) }
+                put("metrics", buildJsonObject {})
+            }
+        })
+        return buildJsonObject {
+            store.forEach { (k, v) -> put(k, v) }
+            put("entries", patched)
+            put("version", 7)
         }
     }
 

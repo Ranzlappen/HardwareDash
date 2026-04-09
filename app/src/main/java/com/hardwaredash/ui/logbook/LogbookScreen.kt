@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hardwaredash.localization.S
+import com.hardwaredash.widget.WidgetMetric
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -1255,6 +1256,22 @@ private fun EntryCardContent(entry: LogbookEntry) {
                         }
                     }
                 }
+                // Metrics
+                if (entry.metrics.isNotEmpty()) {
+                    Spacer(Modifier.height(4.dp))
+                    val metricColor = if (bgColor != null) Color.White.copy(alpha = 0.6f)
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                        entry.metrics.forEach { (key, value) ->
+                            val displayName = WidgetMetric.fromKey(key)?.displayName ?: key
+                            Text(
+                                text = "$displayName: $value",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = metricColor,
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -1825,6 +1842,28 @@ private fun TimelineNode(entry: LogbookEntry, isToday: Boolean) {
                         color = if (entry.custom) MaterialTheme.colorScheme.tertiary
                         else Color(0xFFA78BFA),
                     )
+                }
+                if (entry.metrics.isNotEmpty()) {
+                    Spacer(Modifier.height(2.dp))
+                    val metricTextColor = if (bgColor != null) Color.White.copy(alpha = 0.6f)
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    entry.metrics.entries.take(3).forEach { (key, value) ->
+                        val name = WidgetMetric.fromKey(key)?.displayName ?: key
+                        Text(
+                            text = "$name: $value",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                            color = metricTextColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    if (entry.metrics.size > 3) {
+                        Text(
+                            text = "+${entry.metrics.size - 3} more",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                            color = metricTextColor,
+                        )
+                    }
                 }
             }
         }

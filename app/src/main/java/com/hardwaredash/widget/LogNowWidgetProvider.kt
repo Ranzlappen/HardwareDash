@@ -29,12 +29,14 @@ class LogNowWidgetProvider : AppWidgetProvider() {
                 try {
                     val repo = LogbookRepository(context)
                     val store = repo.storeFlow.first()
+                    val metrics = WidgetMetric.snapshotEnabled(context)
                     val entry = LogbookEntry(
                         id = UUID.randomUUID().toString(),
                         isoDate = Instant.now().toString(),
                         text = "",
                         custom = false,
                         tags = listOf("widget"),
+                        metrics = metrics,
                     )
                     repo.save(store.copy(entries = listOf(entry) + store.entries))
                     WidgetActionHandler.showToast(context, "Logged!")
