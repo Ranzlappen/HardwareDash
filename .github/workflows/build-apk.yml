@@ -1,13 +1,16 @@
 name: Build Signed Release APK
 
 on:
-  workflow_dispatch:        # Manual trigger from browser
+  workflow_dispatch:
   push:
-    branches: [ main ]     # Or whatever your default branch is
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
 
@@ -31,8 +34,19 @@ jobs:
             -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
             -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: HardwareDash-release-apk
           path: app/build/outputs/apk/release/*.apk
+
+      - name: Create Release & Upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: HardwareDash v${{ github.run_number }}
+          files: app/build/outputs/apk/release/*.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
