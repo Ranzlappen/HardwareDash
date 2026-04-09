@@ -71,6 +71,10 @@ fun LogbookScreen(vm: LogbookViewModel = viewModel()) {
     var sheetCpIdx by remember { mutableIntStateOf(-1) }
     var sheetTab by remember { mutableStateOf(ActiveTab.LOG) }
 
+    // Capture composable string accessors for use inside non-composable callbacks
+    val logbookStrings = S.logbook
+    val commonStrings = S.common
+
     // ── Import / Export launchers ────────────────────────────────────
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
@@ -79,9 +83,9 @@ fun LogbookScreen(vm: LogbookViewModel = viewModel()) {
         try {
             val json = vm.buildExportJson()
             context.contentResolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) }
-            Toast.makeText(context, S.logbook.exportedSuccessfully, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, logbookStrings.exportedSuccessfully, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            Toast.makeText(context, S.logbook.exportFailed + ": ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, logbookStrings.exportFailed + ": ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -92,9 +96,9 @@ fun LogbookScreen(vm: LogbookViewModel = viewModel()) {
         try {
             val json = context.contentResolver.openInputStream(uri)?.bufferedReader()?.readText() ?: return@rememberLauncherForActivityResult
             val (newE, newP) = vm.importJson(json)
-            Toast.makeText(context, S.logbook.imported(newE, newP), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, logbookStrings.imported(newE, newP), Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            Toast.makeText(context, S.logbook.importFailed + ": ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, logbookStrings.importFailed + ": ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -1893,6 +1897,11 @@ private fun CheckpointDetailSheet(
     var notify by remember(cp.id) { mutableStateOf(cp.notify) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
+    // Capture composable strings for non-composable onClick lambdas
+    val strMovedTo = S.logbook.movedTo(cp.name)
+    val strSetReminderFirst = S.logbook.setReminderFirst
+    val strCheckpointUpdated = S.logbook.checkpointUpdated
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -1993,7 +2002,7 @@ private fun CheckpointDetailSheet(
                 onClick = {
                     vm.jumpToCheckpoint(procId, cpIdx)
                     onDismiss()
-                    Toast.makeText(context, S.logbook.movedTo(cp.name), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, strMovedTo, Toast.LENGTH_SHORT).show()
                 },
                 enabled = cpIdx != curCp,
                 modifier = Modifier.weight(1f),
@@ -2005,12 +2014,12 @@ private fun CheckpointDetailSheet(
             Button(
                 onClick = {
                     if (notify && remindAt.isBlank()) {
-                        Toast.makeText(context, S.logbook.setReminderFirst, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, strSetReminderFirst, Toast.LENGTH_SHORT).show()
                         return@Button
                     }
                     vm.updateCheckpoint(procId, cpIdx, name, comment, dueDate, remindAt, notify)
                     onDismiss()
-                    Toast.makeText(context, S.logbook.checkpointUpdated, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, strCheckpointUpdated, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
@@ -2072,6 +2081,7 @@ private fun TextEditorSheet(
         else store.processes.find { it.id == targetId }?.text ?: ""
     }
     var text by remember(targetId) { mutableStateOf(currentText) }
+    val strTextUpdated = S.logbook.textUpdated
 
     Column(
         modifier = Modifier
@@ -2103,7 +2113,7 @@ private fun TextEditorSheet(
                     if (tab == ActiveTab.LOG) vm.updateEntryText(targetId, text)
                     else vm.updateProcessText(targetId, text)
                     onDismiss()
-                    Toast.makeText(context, S.logbook.textUpdated, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, strTextUpdated, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
@@ -2143,6 +2153,7 @@ private fun TimeEditorSheet(
 
     var date by remember(targetId) { mutableStateOf(initialDate) }
     var time by remember(targetId) { mutableStateOf(initialTime) }
+    val strTimeUpdated = S.logbook.timeUpdated
 
     Column(
         modifier = Modifier
@@ -2183,7 +2194,7 @@ private fun TimeEditorSheet(
                     if (tab == ActiveTab.LOG) vm.updateEntryTime(targetId, date, time)
                     else vm.updateProcessTime(targetId, date, time)
                     onDismiss()
-                    Toast.makeText(context, S.logbook.timeUpdated, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, strTimeUpdated, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
@@ -2222,6 +2233,7 @@ private fun ColorPickerSheet(
     }
 
     var selectedColor by remember(targetId) { mutableStateOf(currentColor) }
+    val strColorApplied = S.logbook.colorApplied
 
     Column(
         modifier = Modifier
@@ -2313,7 +2325,7 @@ private fun ColorPickerSheet(
                     if (tab == ActiveTab.LOG) vm.applyEntryColor(targetId, mode, selectedColor)
                     else vm.applyProcessColor(targetId, mode, selectedColor)
                     onDismiss()
-                    Toast.makeText(context, S.logbook.colorApplied, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, strColorApplied, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
