@@ -9,6 +9,8 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.hardwaredash.MainActivity
+import com.hardwaredash.localization.LocalizationManager
+import com.hardwaredash.localization.S
 
 /**
  * Optional foreground Service for continuous background hardware access.
@@ -76,10 +78,12 @@ class HardwareService : Service() {
 
     // ── Notification helpers ──────────────────────────────────────────────────
 
-    private fun buildNotification() = NotificationCompat.Builder(this, CHANNEL_ID)
+    private fun buildNotification(): android.app.Notification {
+        val lang = LocalizationManager.loadLanguage(this)
+        return NotificationCompat.Builder(this, CHANNEL_ID)
         .setSmallIcon(android.R.drawable.ic_menu_compass)
         .setContentTitle("HardwareDash")
-        .setContentText("Hardware monitoring is running in the background.")
+        .setContentText(S.Services.hardwareMonitoring(lang))
         .setOngoing(true)           // cannot be swiped away by the user
         .setSilent(true)            // no sound/vibration
         .setContentIntent(
@@ -93,7 +97,7 @@ class HardwareService : Service() {
         )
         .addAction(
             android.R.drawable.ic_delete,
-            "Stop",
+            S.Services.stop(lang),
             PendingIntent.getService(
                 this, 1,
                 Intent(this, HardwareService::class.java).apply { action = ACTION_STOP },
@@ -101,6 +105,7 @@ class HardwareService : Service() {
             )
         )
         .build()
+    }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return

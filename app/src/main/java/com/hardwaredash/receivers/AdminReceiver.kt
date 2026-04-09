@@ -4,6 +4,8 @@ import android.app.admin.DeviceAdminReceiver
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import com.hardwaredash.localization.LocalizationManager
+import com.hardwaredash.localization.S
 
 /**
  * Device Administration receiver.
@@ -21,17 +23,19 @@ import android.widget.Toast
 class AdminReceiver : DeviceAdminReceiver() {
 
     override fun onEnabled(context: Context, intent: Intent) {
+        val lang = LocalizationManager.loadLanguage(context)
         Toast.makeText(
             context,
-            "HardwareDash Device Admin: enabled ✓",
+            S.Services.deviceAdminEnabled(lang),
             Toast.LENGTH_SHORT
         ).show()
     }
 
     override fun onDisabled(context: Context, intent: Intent) {
+        val lang = LocalizationManager.loadLanguage(context)
         Toast.makeText(
             context,
-            "HardwareDash Device Admin: disabled",
+            S.Services.deviceAdminDisabled(lang),
             Toast.LENGTH_SHORT
         ).show()
     }

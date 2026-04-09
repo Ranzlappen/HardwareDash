@@ -515,7 +515,7 @@ fun RadiosScreen() {
                                     value = nfcWriteMsg,
                                     onValueChange = { nfcWriteMsg = it },
                                     label = { Text("URI path") },
-                                    placeholder = { Text("example.com") },
+                                    placeholder = { Text(S.radios.exampleDomain) },
                                     modifier = Modifier.fillMaxWidth(),
                                     singleLine = true,
                                 )
@@ -525,7 +525,7 @@ fun RadiosScreen() {
                                     value = nfcMimeType,
                                     onValueChange = { nfcMimeType = it },
                                     label = { Text("MIME type") },
-                                    placeholder = { Text("text/plain") },
+                                    placeholder = { Text(S.radios.textPlain) },
                                     modifier = Modifier.fillMaxWidth(),
                                     singleLine = true,
                                 )

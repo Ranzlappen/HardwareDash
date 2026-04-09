@@ -10,6 +10,8 @@ import androidx.core.app.NotificationCompat
 import androidx.work.*
 import com.hardwaredash.MainActivity
 import com.hardwaredash.R
+import com.hardwaredash.localization.LocalizationManager
+import com.hardwaredash.localization.S
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit
@@ -42,10 +44,11 @@ class LogbookReminderWorker(
             tapIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
+        val lang = LocalizationManager.loadLanguage(applicationContext)
         val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Checkpoint: $cpName")
-            .setContentText("Process \"$procName\" \u2014 $cpName is due now.")
+            .setContentTitle(S.Services.checkpointTitle(lang, cpName))
+            .setContentText(S.Services.checkpointDue(lang, procName, cpName))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)

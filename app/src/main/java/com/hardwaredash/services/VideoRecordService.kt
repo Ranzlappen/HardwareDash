@@ -20,6 +20,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 
+import com.hardwaredash.localization.LocalizationManager
+import com.hardwaredash.localization.S
+
 class VideoRecordService : Service() {
 
     private var recording: Recording? = null
@@ -37,9 +40,10 @@ class VideoRecordService : Service() {
 
     private fun startRecording() {
         ensureChannel()
+        val lang = LocalizationManager.loadLanguage(this)
         val notification = Notification.Builder(this, CH_VIDEO)
-            .setContentTitle("Recording Video")
-            .setContentText("Tap to stop")
+            .setContentTitle(S.Services.recordingVideo(lang))
+            .setContentText(S.Services.tapToStop(lang))
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setOngoing(true)
             .setContentIntent(
@@ -82,8 +86,9 @@ class VideoRecordService : Service() {
                     .start(ContextCompat.getMainExecutor(this)) { event ->
                         when (event) {
                             is VideoRecordEvent.Finalize -> {
+                                val vLang = LocalizationManager.loadLanguage(this)
                                 val msg = if (event.hasError()) "Video error: ${event.cause?.message}"
-                                          else "Saved: $filename"
+                                          else S.Services.savedFile(vLang, filename)
                                 android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_SHORT).show()
                                 isRunning = false
                                 provider.unbindAll()
@@ -92,7 +97,8 @@ class VideoRecordService : Service() {
                         }
                     }
                 isRunning = true
-                android.widget.Toast.makeText(this, "Recording video...", android.widget.Toast.LENGTH_SHORT).show()
+                val rLang = LocalizationManager.loadLanguage(this)
+                android.widget.Toast.makeText(this, S.Services.recordingVideo(rLang) + "...", android.widget.Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 android.widget.Toast.makeText(this, "Camera error: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
                 Log.e("VideoRecordService", "Start failed", e)

@@ -158,7 +158,7 @@ fun SensorsScreen() {
                 }
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText("Sensor Readings", text))
-                Toast.makeText(context, "Sensor readings copied!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, S.sensors.sensorReadingsCopied, Toast.LENGTH_SHORT).show()
             }) {
                 Icon(Icons.Default.ContentCopy, "Copy sensor readings")
             }

@@ -32,6 +32,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.*
 import com.hardwaredash.localization.S
+import com.hardwaredash.ui.components.SliderWithInput
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -262,30 +263,23 @@ private fun CameraPreview() {
 
                         // Zoom slider
                         if (maxZoom > minZoom) {
-                            Text(
-                                "Zoom: ${"%.1f".format(zoomRatio)}x",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                            Slider(
+                            SliderWithInput(
                                 value = zoomRatio,
                                 onValueChange = { ratio ->
                                     zoomRatio = ratio
                                     cameraRef?.cameraControl?.setZoomRatio(ratio)
                                 },
                                 valueRange = minZoom..maxZoom,
+                                formatValue = { "%.1f".format(it) },
+                                suffix = "x",
+                                label = "Zoom: ${"%.1f".format(zoomRatio)}x",
                             )
                         }
 
                         // Exposure compensation slider
                         if (exposureMax > exposureMin) {
                             val evValue = exposureIdx * exposureStep
-                            Text(
-                                "Exposure: ${"%.1f".format(evValue)} EV",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                            Slider(
+                            SliderWithInput(
                                 value = exposureIdx.toFloat(),
                                 onValueChange = { v ->
                                     val idx = v.toInt()
@@ -293,7 +287,9 @@ private fun CameraPreview() {
                                     cameraRef?.cameraControl?.setExposureCompensationIndex(idx)
                                 },
                                 valueRange = exposureMin.toFloat()..exposureMax.toFloat(),
-                                steps = (exposureMax - exposureMin - 1).coerceAtLeast(0),
+                                formatValue = { "%.1f".format(it * exposureStep) },
+                                suffix = "EV",
+                                label = "Exposure: ${"%.1f".format(evValue)} EV",
                             )
                         }
 

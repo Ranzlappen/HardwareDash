@@ -16,6 +16,8 @@ import android.os.Build
 import android.os.IBinder
 import android.widget.RemoteViews
 import com.hardwaredash.R
+import com.hardwaredash.localization.LocalizationManager
+import com.hardwaredash.localization.S
 import com.hardwaredash.widget.DbMeterWidgetProvider
 import kotlinx.coroutines.*
 import kotlin.math.*
@@ -38,9 +40,10 @@ class DbMeterService : Service() {
     private fun start() {
         if (job != null) return
         ensureChannel()
+        val lang = LocalizationManager.loadLanguage(this)
         val notification = Notification.Builder(this, CH_DB)
-            .setContentTitle("dB Meter Active")
-            .setContentText("Monitoring microphone level")
+            .setContentTitle(S.Services.dbMeterActive(lang))
+            .setContentText(S.Services.monitoringMicLevel(lang))
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setOngoing(true)
             .setContentIntent(

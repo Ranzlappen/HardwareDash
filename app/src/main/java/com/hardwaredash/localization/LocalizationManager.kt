@@ -26,4 +26,11 @@ object LocalizationManager {
             .putString(KEY_LANGUAGE, language.code)
             .apply()
     }
+
+    /** Load the saved language from prefs — safe to call from services/receivers. */
+    fun loadLanguage(context: Context): Language {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val code = prefs.getString(KEY_LANGUAGE, Language.EN.code) ?: Language.EN.code
+        return Language.entries.firstOrNull { it.code == code } ?: Language.EN
+    }
 }

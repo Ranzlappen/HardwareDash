@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import com.hardwaredash.R
+import com.hardwaredash.localization.LocalizationManager
+import com.hardwaredash.localization.S
 import com.hardwaredash.services.StrobeService
 
 class StrobeWidgetProvider : AppWidgetProvider() {
@@ -18,10 +20,11 @@ class StrobeWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         if (intent.action == ACTION_TOGGLE) {
+            val lang = LocalizationManager.loadLanguage(context)
             val nowRunning = StrobeService.toggle(context)
             WidgetActionHandler.showToast(
                 context,
-                if (nowRunning) "Strobe started" else "Strobe stopped"
+                if (nowRunning) S.Widget.strobeStarted(lang) else S.Widget.strobeStopped(lang)
             )
         }
     }

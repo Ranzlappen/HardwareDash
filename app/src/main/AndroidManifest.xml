@@ -313,6 +313,20 @@
             android:exported="false"
             android:foregroundServiceType="microphone" />
 
+        <!-- ── Vibration Toggle Widget ───────────────────────────── -->
+        <receiver
+            android:name=".widget.VibrationWidgetProvider"
+            android:label="@string/widget_label_vibration"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.hardwaredash.widget.ACTION_VIBRATION_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_vibration_info" />
+        </receiver>
+
         <activity
             android:name=".widget.WidgetConfigActivity"
             android:exported="true">

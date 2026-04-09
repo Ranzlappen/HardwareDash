@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hardwaredash.localization.S
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -78,9 +79,9 @@ fun LogbookScreen(vm: LogbookViewModel = viewModel()) {
         try {
             val json = vm.buildExportJson()
             context.contentResolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) }
-            Toast.makeText(context, "Exported successfully", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, S.logbook.exportedSuccessfully, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            Toast.makeText(context, "Export failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, S.logbook.exportFailed + ": ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -91,9 +92,9 @@ fun LogbookScreen(vm: LogbookViewModel = viewModel()) {
         try {
             val json = context.contentResolver.openInputStream(uri)?.bufferedReader()?.readText() ?: return@rememberLauncherForActivityResult
             val (newE, newP) = vm.importJson(json)
-            Toast.makeText(context, "Imported $newE entries, $newP processes", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, S.logbook.imported(newE, newP), Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            Toast.makeText(context, "Import failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, S.logbook.importFailed + ": ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -282,7 +283,7 @@ private fun LogbookTabRow(
             onClick = { onTabSelected(ActiveTab.LOG) },
             text = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Log")
+                    Text(S.logbook.logTab)
                     if (entryCount > 0) {
                         Spacer(Modifier.width(6.dp))
                         Badge(
@@ -308,7 +309,7 @@ private fun LogbookTabRow(
             onClick = { onTabSelected(ActiveTab.PROCESSES) },
             text = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Processes")
+                    Text(S.logbook.processesTab)
                     if (processCount > 0) {
                         Spacer(Modifier.width(6.dp))
                         Badge(
@@ -527,7 +528,7 @@ private fun LogInputCard(vm: LogbookViewModel) {
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
-                    placeholder = { Text("Optional note\u2026", style = MaterialTheme.typography.bodyMedium) },
+                    placeholder = { Text(S.logbook.optionalNote, style = MaterialTheme.typography.bodyMedium) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     textStyle = MaterialTheme.typography.bodyMedium,
@@ -558,7 +559,7 @@ private fun LogInputCard(vm: LogbookViewModel) {
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     shape = MaterialTheme.shapes.small,
                 ) {
-                    Text("Log", style = MaterialTheme.typography.labelLarge)
+                    Text(S.logbook.log, style = MaterialTheme.typography.labelLarge)
                 }
             }
 
@@ -597,7 +598,7 @@ private fun LogInputCard(vm: LogbookViewModel) {
                                 contentColor = MaterialTheme.colorScheme.tertiary,
                             ),
                         ) {
-                            Text("\u2726 Log", style = MaterialTheme.typography.labelLarge)
+                            Text("\u2726 " + S.logbook.log, style = MaterialTheme.typography.labelLarge)
                         }
                     }
                 }
@@ -716,16 +717,16 @@ private fun LogToolbar(
     if (showClearConfirm) {
         AlertDialog(
             onDismissRequest = { showClearConfirm = false },
-            title = { Text("Clear all entries?") },
-            text = { Text("This will delete all $totalCount entries. This cannot be undone.") },
+            title = { Text(S.logbook.clearAllEntries) },
+            text = { Text(S.logbook.clearAllEntriesMsg(totalCount)) },
             confirmButton = {
                 TextButton(
                     onClick = { onClearAll(); showClearConfirm = false },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                ) { Text("Delete all") }
+                ) { Text(S.logbook.deleteAll) }
             },
             dismissButton = {
-                TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showClearConfirm = false }) { Text(S.common.cancel) }
             },
         )
     }
@@ -746,7 +747,7 @@ private fun ProcessInputCard(vm: LogbookViewModel) {
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
-                    placeholder = { Text("Process name\u2026", style = MaterialTheme.typography.bodyMedium) },
+                    placeholder = { Text(S.logbook.processNamePlaceholder, style = MaterialTheme.typography.bodyMedium) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     textStyle = MaterialTheme.typography.bodyMedium,
@@ -803,7 +804,7 @@ private fun ProcessInputCard(vm: LogbookViewModel) {
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     shape = MaterialTheme.shapes.small,
                 ) {
-                    Text("Add", style = MaterialTheme.typography.labelLarge)
+                    Text(S.logbook.add, style = MaterialTheme.typography.labelLarge)
                 }
             }
         }
@@ -910,16 +911,16 @@ private fun ProcessToolbar(
     if (showClearConfirm) {
         AlertDialog(
             onDismissRequest = { showClearConfirm = false },
-            title = { Text("Clear all processes?") },
-            text = { Text("This will delete all $totalCount processes and their reminders. This cannot be undone.") },
+            title = { Text(S.logbook.clearAllProcesses) },
+            text = { Text(S.logbook.clearAllProcessesMsg(totalCount)) },
             confirmButton = {
                 TextButton(
                     onClick = { onClearAll(); showClearConfirm = false },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                ) { Text("Delete all") }
+                ) { Text(S.logbook.deleteAll) }
             },
             dismissButton = {
-                TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showClearConfirm = false }) { Text(S.common.cancel) }
             },
         )
     }
@@ -951,7 +952,7 @@ private fun FilterPanel(
             OutlinedTextField(
                 value = searchValue,
                 onValueChange = onSearchChange,
-                placeholder = { Text("Search\u2026", style = MaterialTheme.typography.bodySmall) },
+                placeholder = { Text(S.logbook.searchPlaceholder, style = MaterialTheme.typography.bodySmall) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = MaterialTheme.typography.bodySmall,
@@ -999,7 +1000,7 @@ private fun FilterPanel(
                     onClick = onClearFilters,
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                 ) {
-                    Text("Clear filters", style = MaterialTheme.typography.labelSmall)
+                    Text(S.logbook.clearFilters, style = MaterialTheme.typography.labelSmall)
                 }
             }
         }
@@ -1022,7 +1023,7 @@ private fun SortRow(
             .padding(vertical = 2.dp)
             .then(if (!enabled) Modifier else Modifier),
     ) {
-        Text("Sort:", style = MaterialTheme.typography.labelSmall,
+        Text(S.common.sort + ":", style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha))
 
         // Time sort
@@ -1036,7 +1037,7 @@ private fun SortRow(
                 else MaterialTheme.colorScheme.onSurfaceVariant,
             ),
         ) {
-            Text("Time", style = MaterialTheme.typography.labelSmall)
+            Text(S.logbook.time, style = MaterialTheme.typography.labelSmall)
             if (timeActive) {
                 Icon(
                     if (sortDir == SortDirection.DESC) Icons.Filled.ArrowDownward else Icons.Filled.ArrowUpward,
@@ -1057,7 +1058,7 @@ private fun SortRow(
                 else MaterialTheme.colorScheme.onSurfaceVariant,
             ),
         ) {
-            Text("Name", style = MaterialTheme.typography.labelSmall)
+            Text(S.logbook.name, style = MaterialTheme.typography.labelSmall)
             if (textActive) {
                 Icon(
                     if (sortDir == SortDirection.DESC) Icons.Filled.ArrowDownward else Icons.Filled.ArrowUpward,
@@ -1139,37 +1140,37 @@ private fun EntrySwipeCard(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete entry?") },
-            text = { Text("\"${entry.text.take(50)}\" will be removed.") },
+            title = { Text(S.logbook.deleteEntry) },
+            text = { Text(S.logbook.deleteEntryMsg(entry.text.take(50))) },
             confirmButton = {
                 TextButton(
                     onClick = { showDeleteConfirm = false; onDelete() },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                ) { Text("Delete") }
+                ) { Text(S.logbook.delete) }
             },
-            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text(S.common.cancel) } },
         )
     }
 
     // Actions dropdown
     DropdownMenu(expanded = showActions, onDismissRequest = { showActions = false }) {
         DropdownMenuItem(
-            text = { Text("Set Background") },
+            text = { Text(S.logbook.setBackground) },
             onClick = { showActions = false; onOpenSheet(SheetType.COLOR_PICKER_BG) },
             leadingIcon = { Icon(Icons.Filled.FormatPaint, null, tint = MaterialTheme.colorScheme.primary) },
         )
         DropdownMenuItem(
-            text = { Text("Set Border") },
+            text = { Text(S.logbook.setBorder) },
             onClick = { showActions = false; onOpenSheet(SheetType.COLOR_PICKER_BORDER) },
             leadingIcon = { Icon(Icons.Filled.BorderColor, null, tint = MaterialTheme.colorScheme.primary) },
         )
         DropdownMenuItem(
-            text = { Text("Change Time") },
+            text = { Text(S.logbook.changeTime) },
             onClick = { showActions = false; onOpenSheet(SheetType.TIME_EDITOR) },
             leadingIcon = { Icon(Icons.Filled.Schedule, null, tint = MaterialTheme.colorScheme.primary) },
         )
         DropdownMenuItem(
-            text = { Text("Change Text") },
+            text = { Text(S.logbook.changeText) },
             onClick = { showActions = false; onOpenSheet(SheetType.TEXT_EDITOR) },
             leadingIcon = { Icon(Icons.Filled.Edit, null, tint = MaterialTheme.colorScheme.primary) },
         )
@@ -1328,42 +1329,42 @@ private fun ProcessSwipeCard(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete process?") },
-            text = { Text("\"${process.text.take(50)}\" and all its checkpoints will be removed.") },
+            title = { Text(S.logbook.deleteProcess) },
+            text = { Text(S.logbook.deleteProcessMsg(process.text.take(50))) },
             confirmButton = {
                 TextButton(
                     onClick = { showDeleteConfirm = false; onDelete() },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                ) { Text("Delete") }
+                ) { Text(S.logbook.delete) }
             },
-            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text(S.common.cancel) } },
         )
     }
 
     // Actions dropdown
     DropdownMenu(expanded = showActions, onDismissRequest = { showActions = false }) {
         DropdownMenuItem(
-            text = { Text("Set Background") },
+            text = { Text(S.logbook.setBackground) },
             onClick = { showActions = false; onOpenSheet(SheetType.COLOR_PICKER_BG, -1) },
             leadingIcon = { Icon(Icons.Filled.FormatPaint, null, tint = MaterialTheme.colorScheme.primary) },
         )
         DropdownMenuItem(
-            text = { Text("Set Border") },
+            text = { Text(S.logbook.setBorder) },
             onClick = { showActions = false; onOpenSheet(SheetType.COLOR_PICKER_BORDER, -1) },
             leadingIcon = { Icon(Icons.Filled.BorderColor, null, tint = MaterialTheme.colorScheme.primary) },
         )
         DropdownMenuItem(
-            text = { Text("Change Time") },
+            text = { Text(S.logbook.changeTime) },
             onClick = { showActions = false; onOpenSheet(SheetType.TIME_EDITOR, -1) },
             leadingIcon = { Icon(Icons.Filled.Schedule, null, tint = MaterialTheme.colorScheme.primary) },
         )
         DropdownMenuItem(
-            text = { Text("Change Text") },
+            text = { Text(S.logbook.changeText) },
             onClick = { showActions = false; onOpenSheet(SheetType.TEXT_EDITOR, -1) },
             leadingIcon = { Icon(Icons.Filled.Edit, null, tint = MaterialTheme.colorScheme.primary) },
         )
         DropdownMenuItem(
-            text = { Text("Add Checkpoint") },
+            text = { Text(S.logbook.addCheckpoint) },
             onClick = { showActions = false; vm.addCheckpoint(process.id) },
             leadingIcon = { Icon(Icons.Filled.AddCircleOutline, null, tint = MaterialTheme.colorScheme.secondary) },
         )
@@ -1922,11 +1923,11 @@ private fun CheckpointDetailSheet(
         Spacer(Modifier.height(16.dp))
 
         // Name field
-        Text("Name", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(S.logbook.name, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(4.dp))
         OutlinedTextField(
             value = name, onValueChange = { name = it },
-            placeholder = { Text("Checkpoint name\u2026") },
+            placeholder = { Text(S.logbook.checkpointNamePlaceholder) },
             singleLine = true, modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.small,
         )
@@ -1934,11 +1935,11 @@ private fun CheckpointDetailSheet(
         Spacer(Modifier.height(12.dp))
 
         // Comment field
-        Text("Comment / Note", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(S.logbook.commentNote, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(4.dp))
         OutlinedTextField(
             value = comment, onValueChange = { comment = it },
-            placeholder = { Text("Add a note\u2026") },
+            placeholder = { Text(S.logbook.addNote) },
             minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.small,
         )
@@ -1946,7 +1947,7 @@ private fun CheckpointDetailSheet(
         Spacer(Modifier.height(12.dp))
 
         // Due date (native picker)
-        Text("Due Date", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(S.logbook.dueDate, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(4.dp))
         DatePickerField(
             label = "Due Date",
@@ -1960,7 +1961,7 @@ private fun CheckpointDetailSheet(
         Spacer(Modifier.height(12.dp))
 
         // Reminder time (native date + time pickers)
-        Text("Reminder Time", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(S.logbook.reminderTime, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(4.dp))
         DateTimePickerField(
             label = "Reminder",
@@ -1975,7 +1976,7 @@ private fun CheckpointDetailSheet(
 
         // Notify toggle
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Enable reminder", style = MaterialTheme.typography.bodyMedium)
+            Text(S.logbook.enableReminder, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.weight(1f))
             Switch(
                 checked = notify,
@@ -1992,29 +1993,29 @@ private fun CheckpointDetailSheet(
                 onClick = {
                     vm.jumpToCheckpoint(procId, cpIdx)
                     onDismiss()
-                    Toast.makeText(context, "Moved to \"${cp.name}\"", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, S.logbook.movedTo(cp.name), Toast.LENGTH_SHORT).show()
                 },
                 enabled = cpIdx != curCp,
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
             ) {
-                Text(if (cpIdx == curCp) "Current" else "Jump here")
+                Text(if (cpIdx == curCp) S.logbook.current else S.logbook.jumpHere)
             }
 
             Button(
                 onClick = {
                     if (notify && remindAt.isBlank()) {
-                        Toast.makeText(context, "Set a reminder time first", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, S.logbook.setReminderFirst, Toast.LENGTH_SHORT).show()
                         return@Button
                     }
                     vm.updateCheckpoint(procId, cpIdx, name, comment, dueDate, remindAt, notify)
                     onDismiss()
-                    Toast.makeText(context, "Checkpoint updated", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, S.logbook.checkpointUpdated, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
             ) {
-                Text("Save")
+                Text(S.logbook.save)
             }
         }
 
@@ -2028,7 +2029,7 @@ private fun CheckpointDetailSheet(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
             ) {
-                Text("Delete Checkpoint")
+                Text(S.logbook.deleteCheckpoint)
             }
         }
     }
@@ -2036,8 +2037,8 @@ private fun CheckpointDetailSheet(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete checkpoint?") },
-            text = { Text("\"${cp.name}\" will be removed from this process.") },
+            title = { Text(S.logbook.deleteCheckpointConfirm) },
+            text = { Text(S.logbook.deleteProcessMsg(cp.name)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -2046,9 +2047,9 @@ private fun CheckpointDetailSheet(
                         onDismiss()
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                ) { Text("Delete") }
+                ) { Text(S.logbook.delete) }
             },
-            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text(S.common.cancel) } },
         )
     }
 }
@@ -2078,12 +2079,12 @@ private fun TextEditorSheet(
             .padding(horizontal = 20.dp)
             .padding(bottom = 32.dp),
     ) {
-        Text("Change Text", style = MaterialTheme.typography.titleMedium)
+        Text(S.logbook.changeText, style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(12.dp))
 
         OutlinedTextField(
             value = text, onValueChange = { text = it },
-            placeholder = { Text("Enter text\u2026") },
+            placeholder = { Text(S.logbook.enterText) },
             singleLine = true, modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.small,
         )
@@ -2095,18 +2096,18 @@ private fun TextEditorSheet(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
-            ) { Text("Cancel") }
+            ) { Text(S.common.cancel) }
 
             Button(
                 onClick = {
                     if (tab == ActiveTab.LOG) vm.updateEntryText(targetId, text)
                     else vm.updateProcessText(targetId, text)
                     onDismiss()
-                    Toast.makeText(context, "Text updated", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, S.logbook.textUpdated, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
-            ) { Text("Save") }
+            ) { Text(S.logbook.save) }
         }
     }
 }
@@ -2149,7 +2150,7 @@ private fun TimeEditorSheet(
             .padding(horizontal = 20.dp)
             .padding(bottom = 32.dp),
     ) {
-        Text("Change Time", style = MaterialTheme.typography.titleMedium)
+        Text(S.logbook.changeTime, style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(12.dp))
 
         DatePickerField(
@@ -2175,18 +2176,18 @@ private fun TimeEditorSheet(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
-            ) { Text("Cancel") }
+            ) { Text(S.common.cancel) }
 
             Button(
                 onClick = {
                     if (tab == ActiveTab.LOG) vm.updateEntryTime(targetId, date, time)
                     else vm.updateProcessTime(targetId, date, time)
                     onDismiss()
-                    Toast.makeText(context, "Time updated", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, S.logbook.timeUpdated, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
-            ) { Text("Save") }
+            ) { Text(S.logbook.save) }
         }
     }
 }
@@ -2229,7 +2230,7 @@ private fun ColorPickerSheet(
             .padding(bottom = 32.dp),
     ) {
         Text(
-            text = if (mode == "bg") "Set Background" else "Set Border",
+            text = if (mode == "bg") S.logbook.setBackground else S.logbook.setBorder,
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(Modifier.height(16.dp))
@@ -2286,7 +2287,7 @@ private fun ColorPickerSheet(
                 Icon(Icons.Filled.Block, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
             }
             Spacer(Modifier.width(8.dp))
-            Text("None", style = MaterialTheme.typography.bodyMedium)
+            Text(S.common.none, style = MaterialTheme.typography.bodyMedium)
         }
 
         Spacer(Modifier.height(12.dp))
@@ -2305,18 +2306,18 @@ private fun ColorPickerSheet(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
-            ) { Text("Cancel") }
+            ) { Text(S.common.cancel) }
 
             Button(
                 onClick = {
                     if (tab == ActiveTab.LOG) vm.applyEntryColor(targetId, mode, selectedColor)
                     else vm.applyProcessColor(targetId, mode, selectedColor)
                     onDismiss()
-                    Toast.makeText(context, "Color applied", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, S.logbook.colorApplied, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.small,
-            ) { Text("Apply") }
+            ) { Text(S.common.apply) }
         }
     }
 }
@@ -2343,7 +2344,7 @@ private fun DatePickerField(
         onValueChange = {},
         readOnly = true,
         label = { Text(label) },
-        placeholder = { Text("Tap to select", style = MaterialTheme.typography.bodySmall) },
+        placeholder = { Text(S.logbook.tapToSelect, style = MaterialTheme.typography.bodySmall) },
         singleLine = true,
         modifier = modifier.clickable { showDialog = true },
         textStyle = MaterialTheme.typography.bodySmall,
@@ -2383,10 +2384,10 @@ private fun DatePickerField(
                         onDateSelected(selected)
                     }
                     showDialog = false
-                }) { Text("OK") }
+                }) { Text(S.common.ok) }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showDialog = false }) { Text(S.common.cancel) }
             },
         ) {
             DatePicker(state = pickerState)
@@ -2434,16 +2435,16 @@ private fun TimePickerField(
         )
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Select Time") },
+            title = { Text(S.common.selectTime) },
             text = { TimePicker(state = pickerState) },
             confirmButton = {
                 TextButton(onClick = {
                     onTimeSelected(LocalTime.of(pickerState.hour, pickerState.minute))
                     showDialog = false
-                }) { Text("OK") }
+                }) { Text(S.common.ok) }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showDialog = false }) { Text(S.common.cancel) }
             },
         )
     }
@@ -2484,7 +2485,7 @@ private fun DateTimePickerField(
         onValueChange = {},
         readOnly = true,
         label = { Text(label) },
-        placeholder = { Text("Tap to select date & time", style = MaterialTheme.typography.bodySmall) },
+        placeholder = { Text(S.logbook.tapToSelectDateTime, style = MaterialTheme.typography.bodySmall) },
         singleLine = true,
         modifier = modifier.clickable { showDateDialog = true },
         textStyle = MaterialTheme.typography.bodySmall,
@@ -2525,10 +2526,10 @@ private fun DateTimePickerField(
                         showDateDialog = false
                         showTimeDialog = true
                     }
-                }) { Text("Next") }
+                }) { Text(S.common.next) }
             },
             dismissButton = {
-                TextButton(onClick = { showDateDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showDateDialog = false }) { Text(S.common.cancel) }
             },
         ) {
             DatePicker(state = pickerState)
@@ -2545,7 +2546,7 @@ private fun DateTimePickerField(
         )
         AlertDialog(
             onDismissRequest = { showTimeDialog = false },
-            title = { Text("Select Time") },
+            title = { Text(S.common.selectTime) },
             text = { TimePicker(state = timePickerState) },
             confirmButton = {
                 TextButton(onClick = {
@@ -2554,10 +2555,10 @@ private fun DateTimePickerField(
                     val ldt = LocalDateTime.of(selectedDate, selectedTime)
                     onDateTimeSelected(ldt.toString())
                     showTimeDialog = false
-                }) { Text("OK") }
+                }) { Text(S.common.ok) }
             },
             dismissButton = {
-                TextButton(onClick = { showTimeDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showTimeDialog = false }) { Text(S.common.cancel) }
             },
         )
     }

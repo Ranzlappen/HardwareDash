@@ -11,6 +11,8 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.IBinder
+import com.hardwaredash.localization.LocalizationManager
+import com.hardwaredash.localization.S
 import kotlinx.coroutines.*
 
 class StrobeService : Service() {
@@ -30,9 +32,10 @@ class StrobeService : Service() {
 
     private fun startStrobe() {
         ensureChannel()
+        val lang = LocalizationManager.loadLanguage(this)
         val notification = Notification.Builder(this, CH_STROBE)
-            .setContentTitle("Strobe Active")
-            .setContentText("Tap to stop")
+            .setContentTitle(S.Services.strobeActive(lang))
+            .setContentText(S.Services.tapToStop(lang))
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setOngoing(true)
             .setContentIntent(
@@ -53,12 +56,16 @@ class StrobeService : Service() {
                     .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
             } ?: return@launch
 
+            val prefs = getSharedPreferences("strobe_settings", Context.MODE_PRIVATE)
+            val freq = prefs.getFloat("strobe_freq_hz", 5f)
+            val halfPeriodMs = (500f / freq).toLong().coerceAtLeast(10L)
+
             try {
                 while (isActive) {
                     cm.setTorchMode(cid, true)
-                    delay(100L) // 5 Hz
+                    delay(halfPeriodMs)
                     cm.setTorchMode(cid, false)
-                    delay(100L)
+                    delay(halfPeriodMs)
                 }
             } finally {
                 try { cm.setTorchMode(cid, false) } catch (_: Exception) {}
