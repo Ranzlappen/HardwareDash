@@ -134,6 +134,8 @@ private fun CameraPreview() {
     // Focus mode
     var tapToFocusEnabled by remember { mutableStateOf(false) }
 
+    val focusPointSetMsg = S.camera.focusPointSet
+
     // Resolve provider once asynchronously
     LaunchedEffect(Unit) {
         val provider = suspendCoroutine { cont ->
@@ -202,7 +204,7 @@ private fun CameraPreview() {
                             .setAutoCancelDuration(3, java.util.concurrent.TimeUnit.SECONDS)
                             .build()
                         cam.cameraControl.startFocusAndMetering(action)
-                        statusMsg = S.camera.focusPointSet
+                        statusMsg = focusPointSetMsg
                     }
                 },
             factory = { ctx -> PreviewView(ctx).also { previewViewRef = it } },
