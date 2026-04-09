@@ -137,7 +137,7 @@ fun LockScreenScreen() {
     var customAction3 by remember { mutableStateOf("More") }
     var customShowProgress by remember { mutableStateOf(false) }
     var customProgressIndeterminate by remember { mutableStateOf(true) }
-    var customProgressValue by remember { mutableIntStateOf(50) }
+    var customProgressValue by remember { mutableFloatStateOf(50f) }
     var customOngoing by remember { mutableStateOf(false) }
     var customAutoCancel by remember { mutableStateOf(true) }
     var customDelaySec by remember { mutableFloatStateOf(0f) }
@@ -396,8 +396,8 @@ fun LockScreenScreen() {
             }
             if (!customProgressIndeterminate) {
                 SliderWithInput(
-                    value = customProgressValue.toFloat(),
-                    onValueChange = { customProgressValue = it.toInt() },
+                    value = customProgressValue,
+                    onValueChange = { customProgressValue = it },
                     valueRange = 0f..100f,
                     formatValue = { "%.0f".format(it) },
                     suffix = "%",
@@ -504,7 +504,7 @@ fun LockScreenScreen() {
                     if (customProgressIndeterminate) {
                         builder.setProgress(0, 0, true)
                     } else {
-                        builder.setProgress(100, customProgressValue, false)
+                        builder.setProgress(100, customProgressValue.toInt(), false)
                     }
                 }
 

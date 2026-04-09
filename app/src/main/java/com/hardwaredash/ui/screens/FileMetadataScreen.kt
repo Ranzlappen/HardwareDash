@@ -1,8 +1,10 @@
 package com.hardwaredash.ui.screens
 
+import android.content.ContentValues
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -93,6 +95,65 @@ private val ALL_EXIF_TAGS = listOf(
 // Set of editable tag constants for quick lookup
 private val EDITABLE_TAG_KEYS = EDITABLE_EXIF_TAGS.map { it.first }.toSet()
 
+// Editable media metadata tags for audio/video (MediaMetadataRetriever key -> label)
+private val EDITABLE_MEDIA_TAGS = listOf(
+    MediaMetadataRetriever.METADATA_KEY_TITLE to "Title",
+    MediaMetadataRetriever.METADATA_KEY_ARTIST to "Artist",
+    MediaMetadataRetriever.METADATA_KEY_ALBUM to "Album",
+    MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST to "Album Artist",
+    MediaMetadataRetriever.METADATA_KEY_COMPOSER to "Composer",
+    MediaMetadataRetriever.METADATA_KEY_WRITER to "Writer",
+    MediaMetadataRetriever.METADATA_KEY_GENRE to "Genre",
+    MediaMetadataRetriever.METADATA_KEY_YEAR to "Year",
+    MediaMetadataRetriever.METADATA_KEY_DATE to "Date",
+    MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER to "Track Number",
+    MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER to "Disc Number",
+)
+
+private val EDITABLE_MEDIA_KEYS = EDITABLE_MEDIA_TAGS.map { it.first }.toSet()
+
+// All media metadata tags to read
+private val ALL_MEDIA_TAGS = listOf(
+    MediaMetadataRetriever.METADATA_KEY_DURATION to "Duration",
+    MediaMetadataRetriever.METADATA_KEY_TITLE to "Title",
+    MediaMetadataRetriever.METADATA_KEY_ARTIST to "Artist",
+    MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST to "Album Artist",
+    MediaMetadataRetriever.METADATA_KEY_ALBUM to "Album",
+    MediaMetadataRetriever.METADATA_KEY_COMPOSER to "Composer",
+    MediaMetadataRetriever.METADATA_KEY_WRITER to "Writer",
+    MediaMetadataRetriever.METADATA_KEY_GENRE to "Genre",
+    MediaMetadataRetriever.METADATA_KEY_YEAR to "Year",
+    MediaMetadataRetriever.METADATA_KEY_DATE to "Date",
+    MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER to "Track Number",
+    MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER to "Disc Number",
+    MediaMetadataRetriever.METADATA_KEY_COMPILATION to "Compilation",
+    MediaMetadataRetriever.METADATA_KEY_BITRATE to "Bitrate",
+    MediaMetadataRetriever.METADATA_KEY_MIMETYPE to "Codec MIME",
+    MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH to "Video Width",
+    MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT to "Video Height",
+    MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION to "Rotation",
+    MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE to "Frame Rate",
+    MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS to "Tracks",
+    MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO to "Has Audio",
+    MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO to "Has Video",
+    MediaMetadataRetriever.METADATA_KEY_LOCATION to "Location",
+    MediaMetadataRetriever.METADATA_KEY_COLOR_STANDARD to "Color Standard",
+    MediaMetadataRetriever.METADATA_KEY_COLOR_TRANSFER to "Color Transfer",
+    MediaMetadataRetriever.METADATA_KEY_COLOR_RANGE to "Color Range",
+    MediaMetadataRetriever.METADATA_KEY_SAMPLERATE to "Sample Rate",
+)
+
+// Mapping from MediaMetadataRetriever keys to MediaStore column names for writing
+private val MEDIA_KEY_TO_COLUMN = mapOf(
+    MediaMetadataRetriever.METADATA_KEY_TITLE to MediaStore.MediaColumns.DISPLAY_NAME,
+    MediaMetadataRetriever.METADATA_KEY_ARTIST to MediaStore.Audio.AudioColumns.ARTIST,
+    MediaMetadataRetriever.METADATA_KEY_ALBUM to MediaStore.Audio.AudioColumns.ALBUM,
+    MediaMetadataRetriever.METADATA_KEY_COMPOSER to MediaStore.Audio.AudioColumns.COMPOSER,
+    MediaMetadataRetriever.METADATA_KEY_YEAR to MediaStore.Audio.AudioColumns.YEAR,
+    MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER to MediaStore.Audio.AudioColumns.TRACK,
+    MediaMetadataRetriever.METADATA_KEY_GENRE to MediaStore.Audio.AudioColumns.GENRE_ID,
+)
+
 // Common metadata fields for the help modal
 private val COMMON_METADATA_FIELDS = listOf(
     "Title" to "The name or title of the content",
@@ -128,8 +189,12 @@ fun FileMetadataScreen() {
     var generalMeta by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
     // EXIF now stored as tag->value map for inline editing
     var exifTagValues by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
-    var mediaMeta by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+    // Media metadata stored as key->value map for inline editing
+    var mediaTagValues by remember { mutableStateOf<Map<Int, String>>(emptyMap()) }
+    // Read-only media metadata (non-editable fields)
+    var mediaReadOnly by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
     var isImage by remember { mutableStateOf(false) }
+    var isMedia by remember { mutableStateOf(false) }
     var showHelpDialog by remember { mutableStateOf(false) }
     var showAddDialog by remember { mutableStateOf(false) }
 
@@ -160,8 +225,10 @@ fun FileMetadataScreen() {
         lastModified = result.lastModified
         generalMeta = result.general
         exifTagValues = result.exifMap
-        mediaMeta = result.media
+        mediaTagValues = result.mediaMap
+        mediaReadOnly = result.mediaReadOnly
         isImage = result.mimeType.startsWith("image/")
+        isMedia = result.mimeType.startsWith("audio/") || result.mimeType.startsWith("video/")
     }
 
     Column(
@@ -286,17 +353,60 @@ fun FileMetadataScreen() {
                 }
             }
 
-            // ── Media Metadata (Audio/Video) ──────────────────────────
-            if (mediaMeta.isNotEmpty()) {
+            // ── Media Metadata (Audio/Video) — inline editable ───────
+            if (isMedia && (mediaTagValues.isNotEmpty() || mediaReadOnly.isNotEmpty())) {
                 HorizontalDivider()
-                Text(strings.mediaSection, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                mediaMeta.forEach { (key, value) ->
-                    MetaRow(key, value)
+                Text(
+                    strings.editMediaMetadata,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+
+                // Show editable media tags
+                ALL_MEDIA_TAGS.forEach { (key, label) ->
+                    val currentValue = mediaTagValues[key]
+                    if (currentValue != null && key in EDITABLE_MEDIA_KEYS) {
+                        var fieldValue by remember(key, currentValue) { mutableStateOf(currentValue) }
+                        OutlinedTextField(
+                            value = fieldValue,
+                            onValueChange = {
+                                fieldValue = it
+                                mediaTagValues = mediaTagValues.toMutableMap().apply { put(key, it) }
+                            },
+                            label = { Text(label) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                        )
+                    }
+                }
+
+                // Show read-only media metadata
+                if (mediaReadOnly.isNotEmpty()) {
+                    mediaReadOnly.forEach { (key, value) ->
+                        MetaRow(key, value)
+                    }
+                }
+
+                Button(
+                    onClick = {
+                        val editableData = mediaTagValues.filterKeys { it in EDITABLE_MEDIA_KEYS }
+                        val success = writeMediaMetadata(context, selectedUri!!, editableData, mimeType)
+                        Toast.makeText(
+                            context,
+                            if (success) strings.mediaSaved else strings.mediaSaveFailed,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Default.Save, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(strings.saveChanges)
                 }
             }
 
             // ── Add Metadata + Help ───────────────────────────────────
-            if (isImage) {
+            if (isImage || isMedia) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -317,7 +427,7 @@ fun FileMetadataScreen() {
                     }
                 }
             } else {
-                // Non-image: just show help button
+                // Non-image/media: just show help button
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
@@ -339,7 +449,10 @@ fun FileMetadataScreen() {
             onDismissRequest = { showHelpDialog = false },
             title = { Text(strings.commonFields) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     COMMON_METADATA_FIELDS.forEach { (field, desc) ->
                         Column {
                             Text(field, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium)
@@ -356,35 +469,75 @@ fun FileMetadataScreen() {
 
     // ── Add Metadata Dialog ───────────────────────────────────────────
     if (showAddDialog) {
-        val availableTags = EDITABLE_EXIF_TAGS.filter { it.first !in exifTagValues }
-        AlertDialog(
-            onDismissRequest = { showAddDialog = false },
-            title = { Text(strings.addMetadata) },
-            text = {
-                if (availableTags.isEmpty()) {
-                    Text(strings.allFieldsPresent)
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        availableTags.forEach { (tag, label) ->
-                            TextButton(
-                                onClick = {
-                                    exifTagValues = exifTagValues.toMutableMap().apply { put(tag, "") }
-                                    showAddDialog = false
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp))
-                                Spacer(Modifier.width(8.dp))
-                                Text(label, modifier = Modifier.weight(1f))
+        if (isImage) {
+            // Image: show available EXIF tags
+            val availableTags = EDITABLE_EXIF_TAGS.filter { it.first !in exifTagValues }
+            AlertDialog(
+                onDismissRequest = { showAddDialog = false },
+                title = { Text(strings.addMetadata) },
+                text = {
+                    if (availableTags.isEmpty()) {
+                        Text(strings.allFieldsPresent)
+                    } else {
+                        Column(
+                            modifier = Modifier.verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            availableTags.forEach { (tag, label) ->
+                                TextButton(
+                                    onClick = {
+                                        exifTagValues = exifTagValues.toMutableMap().apply { put(tag, "") }
+                                        showAddDialog = false
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(label, modifier = Modifier.weight(1f))
+                                }
                             }
                         }
                     }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showAddDialog = false }) { Text(S.common.close) }
-            },
-        )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showAddDialog = false }) { Text(S.common.close) }
+                },
+            )
+        } else if (isMedia) {
+            // Audio/Video: show available media tags
+            val availableTags = EDITABLE_MEDIA_TAGS.filter { it.first !in mediaTagValues }
+            AlertDialog(
+                onDismissRequest = { showAddDialog = false },
+                title = { Text(strings.addMetadata) },
+                text = {
+                    if (availableTags.isEmpty()) {
+                        Text(strings.allFieldsPresent)
+                    } else {
+                        Column(
+                            modifier = Modifier.verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            availableTags.forEach { (key, label) ->
+                                TextButton(
+                                    onClick = {
+                                        mediaTagValues = mediaTagValues.toMutableMap().apply { put(key, "") }
+                                        showAddDialog = false
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(label, modifier = Modifier.weight(1f))
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showAddDialog = false }) { Text(S.common.close) }
+                },
+            )
+        }
     }
 }
 
@@ -418,7 +571,8 @@ private data class FileMetadataResult(
     val lastModified: String,
     val general: List<Pair<String, String>>,
     val exifMap: Map<String, String>,
-    val media: List<Pair<String, String>>,
+    val mediaMap: Map<Int, String>,
+    val mediaReadOnly: List<Pair<String, String>>,
 )
 
 private fun readFileMetadata(context: Context, uri: Uri): FileMetadataResult {
@@ -428,7 +582,8 @@ private fun readFileMetadata(context: Context, uri: Uri): FileMetadataResult {
     var lastMod = ""
     val general = mutableListOf<Pair<String, String>>()
     val exifMap = mutableMapOf<String, String>()
-    val media = mutableListOf<Pair<String, String>>()
+    val mediaMap = mutableMapOf<Int, String>()
+    val mediaReadOnly = mutableListOf<Pair<String, String>>()
 
     // Basic metadata from ContentResolver
     context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -468,74 +623,47 @@ private fun readFileMetadata(context: Context, uri: Uri): FileMetadataResult {
         } catch (_: Exception) {}
     }
 
-    // Media metadata for audio/video (expanded)
+    // Media metadata for audio/video — split into editable map + read-only list
     if (mimeTypeStr.startsWith("audio/") || mimeTypeStr.startsWith("video/")) {
         try {
             val retriever = MediaMetadataRetriever()
             retriever.setDataSource(context, uri)
-            val keys = listOf(
-                MediaMetadataRetriever.METADATA_KEY_DURATION to "Duration",
-                MediaMetadataRetriever.METADATA_KEY_TITLE to "Title",
-                MediaMetadataRetriever.METADATA_KEY_ARTIST to "Artist",
-                MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST to "Album Artist",
-                MediaMetadataRetriever.METADATA_KEY_ALBUM to "Album",
-                MediaMetadataRetriever.METADATA_KEY_COMPOSER to "Composer",
-                MediaMetadataRetriever.METADATA_KEY_WRITER to "Writer",
-                MediaMetadataRetriever.METADATA_KEY_GENRE to "Genre",
-                MediaMetadataRetriever.METADATA_KEY_YEAR to "Year",
-                MediaMetadataRetriever.METADATA_KEY_DATE to "Date",
-                MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER to "Track Number",
-                MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER to "Disc Number",
-                MediaMetadataRetriever.METADATA_KEY_COMPILATION to "Compilation",
-                MediaMetadataRetriever.METADATA_KEY_BITRATE to "Bitrate",
-                MediaMetadataRetriever.METADATA_KEY_MIMETYPE to "Codec MIME",
-                MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH to "Video Width",
-                MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT to "Video Height",
-                MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION to "Rotation",
-                MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE to "Frame Rate",
-                MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS to "Tracks",
-                MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO to "Has Audio",
-                MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO to "Has Video",
-                MediaMetadataRetriever.METADATA_KEY_LOCATION to "Location",
-                MediaMetadataRetriever.METADATA_KEY_COLOR_STANDARD to "Color Standard",
-                MediaMetadataRetriever.METADATA_KEY_COLOR_TRANSFER to "Color Transfer",
-                MediaMetadataRetriever.METADATA_KEY_COLOR_RANGE to "Color Range",
-                MediaMetadataRetriever.METADATA_KEY_SAMPLERATE to "Sample Rate",
-            )
-            keys.forEach { (key, label) ->
+            ALL_MEDIA_TAGS.forEach { (key, label) ->
                 val value = retriever.extractMetadata(key)
                 if (!value.isNullOrBlank()) {
-                    val display = when (key) {
-                        MediaMetadataRetriever.METADATA_KEY_DURATION -> {
-                            val ms = value.toLongOrNull() ?: 0
-                            val sec = ms / 1000
-                            "%d:%02d".format(sec / 60, sec % 60)
-                        }
-                        MediaMetadataRetriever.METADATA_KEY_BITRATE -> {
-                            val bps = value.toLongOrNull() ?: 0
-                            "${bps / 1000} kbps"
-                        }
-                        MediaMetadataRetriever.METADATA_KEY_SAMPLERATE -> {
-                            val hz = value.toLongOrNull() ?: 0
-                            "${hz / 1000.0} kHz"
-                        }
-                        MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE -> {
-                            "$value fps"
-                        }
-                        MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO,
-                        MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO -> {
-                            if (value == "yes") "Yes" else "No"
-                        }
-                        else -> value
+                    if (key in EDITABLE_MEDIA_KEYS) {
+                        mediaMap[key] = value
+                    } else {
+                        val display = formatMediaValue(key, value)
+                        mediaReadOnly.add(label to display)
                     }
-                    media.add(label to display)
                 }
             }
             retriever.release()
         } catch (_: Exception) {}
     }
 
-    return FileMetadataResult(name, size, mimeTypeStr, lastMod, general, exifMap, media)
+    return FileMetadataResult(name, size, mimeTypeStr, lastMod, general, exifMap, mediaMap, mediaReadOnly)
+}
+
+private fun formatMediaValue(key: Int, value: String): String = when (key) {
+    MediaMetadataRetriever.METADATA_KEY_DURATION -> {
+        val ms = value.toLongOrNull() ?: 0
+        val sec = ms / 1000
+        "%d:%02d".format(sec / 60, sec % 60)
+    }
+    MediaMetadataRetriever.METADATA_KEY_BITRATE -> {
+        val bps = value.toLongOrNull() ?: 0
+        "${bps / 1000} kbps"
+    }
+    MediaMetadataRetriever.METADATA_KEY_SAMPLERATE -> {
+        val hz = value.toLongOrNull() ?: 0
+        "${hz / 1000.0} kHz"
+    }
+    MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE -> "$value fps"
+    MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO,
+    MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO -> if (value == "yes") "Yes" else "No"
+    else -> value
 }
 
 private fun writeExifData(context: Context, uri: Uri, data: Map<String, String>): Boolean {
@@ -546,6 +674,29 @@ private fun writeExifData(context: Context, uri: Uri, data: Map<String, String>)
                 exif.setAttribute(tag, value.ifBlank { null })
             }
             exif.saveAttributes()
+        }
+        true
+    } catch (_: Exception) {
+        false
+    }
+}
+
+private fun writeMediaMetadata(
+    context: Context,
+    uri: Uri,
+    data: Map<Int, String>,
+    mimeType: String,
+): Boolean {
+    return try {
+        val values = ContentValues()
+        data.forEach { (key, value) ->
+            val column = MEDIA_KEY_TO_COLUMN[key]
+            if (column != null && value.isNotBlank()) {
+                values.put(column, value)
+            }
+        }
+        if (values.size() > 0) {
+            context.contentResolver.update(uri, values, null, null)
         }
         true
     } catch (_: Exception) {

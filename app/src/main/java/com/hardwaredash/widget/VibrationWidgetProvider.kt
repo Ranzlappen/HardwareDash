@@ -18,6 +18,11 @@ import com.hardwaredash.localization.S
 class VibrationWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
+        // Reset persisted vibrating state on widget update (e.g. after reboot)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        if (prefs.getBoolean(KEY_VIBRATING, false)) {
+            prefs.edit().putBoolean(KEY_VIBRATING, false).apply()
+        }
         for (id in ids) setupWidget(context, manager, id)
     }
 
@@ -27,21 +32,33 @@ class VibrationWidgetProvider : AppWidgetProvider() {
             val lang = LocalizationManager.loadLanguage(context)
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val currentlyVibrating = prefs.getBoolean(KEY_VIBRATING, false)
+            val vibrator = getVibrator(context)
+
+            if (!vibrator.hasVibrator()) {
+                WidgetActionHandler.showToast(context, "No vibrator available on this device")
+                return
+            }
 
             if (currentlyVibrating) {
                 // Stop vibration
-                getVibrator(context).cancel()
+                try {
+                    vibrator.cancel()
+                } catch (_: Exception) {}
                 prefs.edit().putBoolean(KEY_VIBRATING, false).apply()
                 WidgetActionHandler.showToast(context, S.Widget.vibrationOff(lang))
             } else {
                 // Start looping vibration
-                val vibrator = getVibrator(context)
-                val timings = longArrayOf(0, 400, 200, 400) // wait, vib, wait, vib
-                val amplitudes = intArrayOf(0, 200, 0, 200)
-                val effect = VibrationEffect.createWaveform(timings, amplitudes, 0) // repeat at index 0
-                vibrator.vibrate(effect)
-                prefs.edit().putBoolean(KEY_VIBRATING, true).apply()
-                WidgetActionHandler.showToast(context, S.Widget.vibrationOn(lang))
+                try {
+                    val timings = longArrayOf(0, 400, 200, 400) // wait, vib, wait, vib
+                    val amplitudes = intArrayOf(0, 200, 0, 200)
+                    val effect = VibrationEffect.createWaveform(timings, amplitudes, 0) // repeat at index 0
+                    vibrator.vibrate(effect)
+                    prefs.edit().putBoolean(KEY_VIBRATING, true).apply()
+                    WidgetActionHandler.showToast(context, S.Widget.vibrationOn(lang))
+                } catch (e: Exception) {
+                    prefs.edit().putBoolean(KEY_VIBRATING, false).apply()
+                    WidgetActionHandler.showToast(context, "Vibration failed: ${e.message}")
+                }
             }
 
             // Update all vibration widgets to reflect state

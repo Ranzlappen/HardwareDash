@@ -38,10 +38,10 @@ fun SettingsScreen() {
     // Widget settings from SharedPreferences
     val widgetPrefs = remember { context.getSharedPreferences(WIDGET_PREFS, Context.MODE_PRIVATE) }
     var ringDuration by remember {
-        mutableIntStateOf(widgetPrefs.getInt(KEY_RING_DURATION, DEFAULT_RING_DURATION))
+        mutableFloatStateOf(widgetPrefs.getInt(KEY_RING_DURATION, DEFAULT_RING_DURATION).toFloat())
     }
     var notifyDelay by remember {
-        mutableIntStateOf(widgetPrefs.getInt(KEY_NOTIFY_DELAY, DEFAULT_NOTIFY_DELAY))
+        mutableFloatStateOf(widgetPrefs.getInt(KEY_NOTIFY_DELAY, DEFAULT_NOTIFY_DELAY).toFloat())
     }
 
     // Language dropdown expanded state
@@ -168,15 +168,15 @@ fun SettingsScreen() {
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                 )
                 SliderWithInput(
-                    value = ringDuration.toFloat(),
-                    onValueChange = { ringDuration = it.roundToInt() },
+                    value = ringDuration,
+                    onValueChange = { ringDuration = it },
                     onValueChangeFinished = {
-                        widgetPrefs.edit().putInt(KEY_RING_DURATION, ringDuration).apply()
+                        widgetPrefs.edit().putInt(KEY_RING_DURATION, ringDuration.roundToInt()).apply()
                     },
                     valueRange = 5f..120f,
                     formatValue = { "%.0f".format(it) },
                     suffix = "s",
-                    label = "$ringDuration ${strings.seconds}",
+                    label = "${ringDuration.roundToInt()} ${strings.seconds}",
                 )
             }
         }
@@ -211,15 +211,15 @@ fun SettingsScreen() {
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                 )
                 SliderWithInput(
-                    value = notifyDelay.toFloat(),
-                    onValueChange = { notifyDelay = it.roundToInt() },
+                    value = notifyDelay,
+                    onValueChange = { notifyDelay = it },
                     onValueChangeFinished = {
-                        widgetPrefs.edit().putInt(KEY_NOTIFY_DELAY, notifyDelay).apply()
+                        widgetPrefs.edit().putInt(KEY_NOTIFY_DELAY, notifyDelay.roundToInt()).apply()
                     },
                     valueRange = 5f..300f,
                     formatValue = { "%.0f".format(it) },
                     suffix = "s",
-                    label = "$notifyDelay ${strings.seconds}",
+                    label = "${notifyDelay.roundToInt()} ${strings.seconds}",
                 )
             }
         }
