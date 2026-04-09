@@ -329,6 +329,17 @@ object S {
         val textPlain get() = m(l, "text/plain", "text/plain", "text/plain", "text/plain")
         val hotspot get() = m(l, "Hotspot", "Hotspot", "Punto de acceso", "Point d'accès")
         val wirelessProjection get() = m(l, "Wireless Projection", "Drahtlose Projektion", "Proyección inalámbrica", "Projection sans fil")
+        val saveTag get() = m(l, "Save Tag", "Tag speichern", "Guardar etiqueta", "Enregistrer le tag")
+        val savedNfcTags get() = m(l, "Saved NFC Tags", "Gespeicherte NFC-Tags", "Etiquetas NFC guardadas", "Tags NFC enregistrés")
+        val emulate get() = m(l, "Emulate", "Emulieren", "Emular", "Émuler")
+        val emulating get() = m(l, "Emulating — hold device near reader…", "Emuliert — Gerät an Leser halten…", "Emulando — acerque el dispositivo…", "Émulation — approchez l'appareil…")
+        val stopEmulating get() = m(l, "Stop", "Stoppen", "Detener", "Arrêter")
+        val tagName get() = m(l, "Tag name", "Tag-Name", "Nombre de etiqueta", "Nom du tag")
+        val noSavedTags get() = m(l, "No saved tags", "Keine gespeicherten Tags", "Sin etiquetas guardadas", "Aucun tag enregistré")
+        val loadFromSaved get() = m(l, "Load from saved tag…", "Aus gespeichertem Tag laden…", "Cargar desde etiqueta guardada…", "Charger depuis un tag enregistré…")
+        val selectTag get() = m(l, "Select a tag…", "Tag auswählen…", "Seleccionar etiqueta…", "Sélectionner un tag…")
+        val deleteTag get() = m(l, "Delete", "Löschen", "Eliminar", "Supprimer")
+        val cancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
     }
 
     // ── Sensors ─────────────────────────────────────────────────────────

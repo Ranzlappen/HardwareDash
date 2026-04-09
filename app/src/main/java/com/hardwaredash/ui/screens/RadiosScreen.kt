@@ -1,6 +1,6 @@
-// CHANGE: Added WiFi/cellular signal strength, upload/download speed, NFC tag read/write
-// REASON: Add signal monitoring, speed indicators, and full NFC capabilities
-// DATE: 2026-04-02
+// CHANGE: Added NFC tag save/load, HCE emulation, and writer load-from-saved
+// REASON: Persist scanned NFC tags, emulate them via HCE, populate writer from saved tags
+// DATE: 2026-04-09
 
 package com.hardwaredash.ui.screens
 
@@ -16,16 +16,19 @@ import android.net.NetworkCapabilities
 import android.net.TrafficStats
 import android.net.wifi.WifiManager
 import android.nfc.*
+import android.nfc.cardemulation.CardEmulation
 import android.nfc.tech.IsoDep
 import android.nfc.tech.MifareClassic
 import android.nfc.tech.MifareUltralight
 import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
 import android.nfc.tech.NfcA
+import android.content.ComponentName
 import android.os.Build
 import android.os.Looper
 import android.provider.Settings
 import android.telephony.TelephonyManager
+import android.util.Base64
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -44,7 +47,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.permissions.*
 import com.hardwaredash.localization.S
+import com.hardwaredash.services.NfcEmulationService
 import com.google.android.gms.location.*
+import org.json.JSONArray
+import org.json.JSONObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -57,7 +63,112 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalPermissionsApi::class)
+// ─── Saved NFC Tags: data model & SharedPreferences helpers ─────────────────
+
+private data class SavedNfcTag(
+    val name: String,
+    val tagId: String,
+    val techList: List<String>,
+    val records: List<String>,
+    val capacity: Int,
+    val writable: Boolean?,
+    val tagType: String?,
+    val ndefBytes: String?,    // Base64-encoded raw NdefMessage bytes
+    val writeType: String,     // "Text", "URI", or "MIME"
+    val writeContent: String,
+    val uriPrefix: String,
+    val mimeType: String,
+)
+
+private const val NFC_PREFS_NAME = "nfc_saved_tags"
+private const val NFC_PREFS_KEY = "saved_tags"
+private const val NFC_MAX_SAVED = 50
+
+private fun saveNfcTags(context: Context, tags: List<SavedNfcTag>) {
+    val arr = JSONArray()
+    tags.take(NFC_MAX_SAVED).forEach { t ->
+        arr.put(JSONObject().apply {
+            put("name", t.name)
+            put("tagId", t.tagId)
+            put("techList", JSONArray(t.techList))
+            put("records", JSONArray(t.records))
+            put("capacity", t.capacity)
+            put("writable", t.writable ?: JSONObject.NULL)
+            put("tagType", t.tagType ?: JSONObject.NULL)
+            put("ndefBytes", t.ndefBytes ?: JSONObject.NULL)
+            put("writeType", t.writeType)
+            put("writeContent", t.writeContent)
+            put("uriPrefix", t.uriPrefix)
+            put("mimeType", t.mimeType)
+        })
+    }
+    context.getSharedPreferences(NFC_PREFS_NAME, Context.MODE_PRIVATE)
+        .edit().putString(NFC_PREFS_KEY, arr.toString()).apply()
+}
+
+private fun loadNfcTags(context: Context): List<SavedNfcTag> {
+    val json = context.getSharedPreferences(NFC_PREFS_NAME, Context.MODE_PRIVATE)
+        .getString(NFC_PREFS_KEY, null) ?: return emptyList()
+    return try {
+        val arr = JSONArray(json)
+        (0 until arr.length()).map { i ->
+            val obj = arr.getJSONObject(i)
+            val techArr = obj.getJSONArray("techList")
+            val recArr = obj.getJSONArray("records")
+            SavedNfcTag(
+                name = obj.getString("name"),
+                tagId = obj.getString("tagId"),
+                techList = (0 until techArr.length()).map { techArr.getString(it) },
+                records = (0 until recArr.length()).map { recArr.getString(it) },
+                capacity = obj.optInt("capacity", 0),
+                writable = if (obj.isNull("writable")) null else obj.getBoolean("writable"),
+                tagType = if (obj.isNull("tagType")) null else obj.getString("tagType"),
+                ndefBytes = if (obj.isNull("ndefBytes")) null else obj.getString("ndefBytes"),
+                writeType = obj.optString("writeType", "Text"),
+                writeContent = obj.optString("writeContent", ""),
+                uriPrefix = obj.optString("uriPrefix", "https://"),
+                mimeType = obj.optString("mimeType", "text/plain"),
+            )
+        }
+    } catch (_: Exception) { emptyList() }
+}
+
+/** Extract write parameters from the first NDEF record of raw bytes. */
+private fun extractWriteParams(ndefBytes: ByteArray): Triple<String, String, String>? {
+    return try {
+        val msg = NdefMessage(ndefBytes)
+        val rec = msg.records.firstOrNull() ?: return null
+        val payload = rec.payload
+        when {
+            rec.tnf == NdefRecord.TNF_WELL_KNOWN && String(rec.type) == "T" -> {
+                if (payload.isNotEmpty()) {
+                    val langLen = payload[0].toInt() and 0x3F
+                    val text = if (payload.size > 1 + langLen)
+                        String(payload, 1 + langLen, payload.size - 1 - langLen, Charsets.UTF_8)
+                    else String(payload, Charsets.UTF_8)
+                    Triple("Text", text, "")
+                } else null
+            }
+            rec.tnf == NdefRecord.TNF_WELL_KNOWN && String(rec.type) == "U" -> {
+                if (payload.isNotEmpty()) {
+                    val prefixByte = payload[0].toInt()
+                    val uriPrefixes = arrayOf("", "http://www.", "https://www.", "http://", "https://", "tel:", "mailto:")
+                    val prefix = if (prefixByte < uriPrefixes.size) uriPrefixes[prefixByte] else ""
+                    val path = String(payload, 1, payload.size - 1, Charsets.UTF_8)
+                    Triple("URI", path, prefix)
+                } else null
+            }
+            rec.tnf == NdefRecord.TNF_MIME_MEDIA -> {
+                val mime = String(rec.type, Charsets.UTF_8)
+                val content = String(payload, Charsets.UTF_8)
+                Triple("MIME", content, mime)
+            }
+            else -> null
+        }
+    } catch (_: Exception) { null }
+}
+
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RadiosScreen() {
     val context = LocalContext.current
@@ -111,6 +222,15 @@ fun RadiosScreen() {
     var nfcBypassLog         by remember { mutableStateOf<List<String>>(emptyList()) }
     var nfcBypassInProgress  by remember { mutableStateOf(false) }
     var showProtectionDetails by remember { mutableStateOf(false) }
+    var nfcRawNdefBase64 by remember { mutableStateOf<String?>(null) }
+    // Saved NFC tags state
+    var savedNfcTags by remember { mutableStateOf(loadNfcTags(context)) }
+    var showNfcSaveDialog by remember { mutableStateOf(false) }
+    var nfcSaveName by remember { mutableStateOf("") }
+    var selectedSavedTagIndex by remember { mutableIntStateOf(-1) }
+    var nfcEmulating by remember { mutableStateOf(false) }
+    var savedTagDropdownExpanded by remember { mutableStateOf(false) }
+    var writerSavedTagDropdownExpanded by remember { mutableStateOf(false) }
 
     // GPS state
     var gpsActive     by remember { mutableStateOf(false) }
@@ -145,6 +265,9 @@ fun RadiosScreen() {
                     nfcTagCapacity = ndef.maxSize
                     nfcTagWritable = ndef.isWritable
                     val msg = ndef.ndefMessage
+                    nfcRawNdefBase64 = try {
+                        msg?.toByteArray()?.let { Base64.encodeToString(it, Base64.NO_WRAP) }
+                    } catch (_: Exception) { null }
                     if (msg != null && msg.records.isNotEmpty()) {
                         msg.records.forEachIndexed { idx, record ->
                             val tnf = when (record.tnf) {
@@ -191,6 +314,7 @@ fun RadiosScreen() {
             } else {
                 nfcTagCapacity = 0
                 nfcTagWritable = null
+                nfcRawNdefBase64 = null
                 records.add("No NDEF data (tag may be unformatted)")
             }
             nfcRecords = records
@@ -490,6 +614,7 @@ fun RadiosScreen() {
                                 nfcTagId = null
                                 nfcTechList = emptyList()
                                 nfcRecords = emptyList()
+                                nfcRawNdefBase64 = null
                                 nfcTagCapacity = 0
                                 nfcTagWritable = null
                                 currentTag = null
@@ -519,6 +644,14 @@ fun RadiosScreen() {
                                     Text(record, style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.primary)
                                 }
+                            }
+                            OutlinedButton(
+                                onClick = { nfcSaveName = ""; showNfcSaveDialog = true },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Icon(Icons.Default.Save, null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(S.radios.saveTag)
                             }
                         } else {
                             Text("Hold an NFC tag near the device...",
@@ -573,11 +706,184 @@ fun RadiosScreen() {
                 }
             }
 
+            // ── Saved NFC Tags ───────────────────────────────────────
+            Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(S.radios.savedNfcTags, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+
+                    if (savedNfcTags.isEmpty()) {
+                        Text(S.radios.noSavedTags, style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                    } else {
+                        // Dropdown to select a saved tag
+                        ExposedDropdownMenuBox(
+                            expanded = savedTagDropdownExpanded,
+                            onExpandedChange = { savedTagDropdownExpanded = it },
+                        ) {
+                            OutlinedTextField(
+                                value = if (selectedSavedTagIndex in savedNfcTags.indices) savedNfcTags[selectedSavedTagIndex].name else S.radios.selectTag,
+                                onValueChange = {},
+                                readOnly = true,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = savedTagDropdownExpanded) },
+                                modifier = Modifier.menuAnchor().fillMaxWidth(),
+                                singleLine = true,
+                            )
+                            ExposedDropdownMenu(
+                                expanded = savedTagDropdownExpanded,
+                                onDismissRequest = { savedTagDropdownExpanded = false },
+                            ) {
+                                savedNfcTags.forEachIndexed { idx, tag ->
+                                    DropdownMenuItem(
+                                        text = { Text(tag.name) },
+                                        onClick = {
+                                            selectedSavedTagIndex = idx
+                                            savedTagDropdownExpanded = false
+                                        },
+                                    )
+                                }
+                            }
+                        }
+
+                        // Display selected tag info
+                        if (selectedSavedTagIndex in savedNfcTags.indices) {
+                            val sel = savedNfcTags[selectedSavedTagIndex]
+                            Text("Tag ID: ${sel.tagId}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                            Text("Technologies: ${sel.techList.joinToString(", ")}", style = MaterialTheme.typography.bodySmall)
+                            if (sel.capacity > 0) {
+                                Text("Capacity: ${sel.capacity} bytes  |  Writable: ${sel.writable ?: "N/A"}",
+                                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                            }
+                            if (sel.tagType != null) {
+                                Text("Tag Type: ${sel.tagType}", style = MaterialTheme.typography.bodySmall)
+                            }
+                            if (sel.records.isNotEmpty()) {
+                                Text("NDEF Records:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                                sel.records.forEach { r ->
+                                    Text(r, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                                }
+                            }
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                                // Emulate toggle
+                                Button(
+                                    onClick = {
+                                        if (nfcEmulating) {
+                                            NfcEmulationService.ndefMessageBytes = null
+                                            nfcEmulating = false
+                                        } else {
+                                            val bytes = sel.ndefBytes?.let { Base64.decode(it, Base64.NO_WRAP) }
+                                            if (bytes != null) {
+                                                NfcEmulationService.ndefMessageBytes = bytes
+                                                // Set as preferred service
+                                                val adapter = NfcAdapter.getDefaultAdapter(context)
+                                                if (adapter != null) {
+                                                    val cardEmu = CardEmulation.getInstance(adapter)
+                                                    val component = ComponentName(context, NfcEmulationService::class.java)
+                                                    val activity = context as? Activity
+                                                    if (activity != null) {
+                                                        cardEmu.setPreferredService(activity, component)
+                                                    }
+                                                }
+                                                nfcEmulating = true
+                                            }
+                                        }
+                                    },
+                                    enabled = sel.ndefBytes != null,
+                                    modifier = Modifier.weight(1f),
+                                    colors = if (nfcEmulating) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                                             else ButtonDefaults.buttonColors(),
+                                ) {
+                                    Icon(
+                                        if (nfcEmulating) Icons.Default.StopCircle else Icons.Default.Nfc,
+                                        null, modifier = Modifier.size(18.dp),
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(if (nfcEmulating) S.radios.stopEmulating else S.radios.emulate)
+                                }
+
+                                // Delete button
+                                OutlinedButton(
+                                    onClick = {
+                                        if (nfcEmulating) {
+                                            NfcEmulationService.ndefMessageBytes = null
+                                            nfcEmulating = false
+                                        }
+                                        savedNfcTags = savedNfcTags.toMutableList().also { it.removeAt(selectedSavedTagIndex) }
+                                        saveNfcTags(context, savedNfcTags)
+                                        selectedSavedTagIndex = -1
+                                    },
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                                ) {
+                                    Icon(Icons.Default.Delete, S.radios.deleteTag, modifier = Modifier.size(18.dp))
+                                }
+                            }
+
+                            if (nfcEmulating) {
+                                Text(S.radios.emulating, style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Stop emulation when leaving NFC section
+            DisposableEffect(Unit) {
+                onDispose {
+                    if (nfcEmulating) {
+                        NfcEmulationService.ndefMessageBytes = null
+                        val adapter = NfcAdapter.getDefaultAdapter(context)
+                        if (adapter != null) {
+                            val cardEmu = CardEmulation.getInstance(adapter)
+                            val activity = context as? Activity
+                            if (activity != null) {
+                                cardEmu.unsetPreferredService(activity)
+                            }
+                        }
+                    }
+                }
+            }
+
             // NFC Writer — supports Text, URI, MIME
             if (nfcReaderActive && currentTag != null) {
                 Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
                     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Write to Tag", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+
+                        // Load from saved tag dropdown
+                        if (savedNfcTags.isNotEmpty()) {
+                            ExposedDropdownMenuBox(
+                                expanded = writerSavedTagDropdownExpanded,
+                                onExpandedChange = { writerSavedTagDropdownExpanded = it },
+                            ) {
+                                OutlinedTextField(
+                                    value = S.radios.loadFromSaved,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = writerSavedTagDropdownExpanded) },
+                                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                                    singleLine = true,
+                                    textStyle = MaterialTheme.typography.bodySmall,
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = writerSavedTagDropdownExpanded,
+                                    onDismissRequest = { writerSavedTagDropdownExpanded = false },
+                                ) {
+                                    savedNfcTags.forEach { saved ->
+                                        DropdownMenuItem(
+                                            text = { Text(saved.name) },
+                                            onClick = {
+                                                nfcWriteType = saved.writeType
+                                                nfcWriteMsg = saved.writeContent
+                                                nfcUriPrefix = saved.uriPrefix
+                                                nfcMimeType = saved.mimeType
+                                                writerSavedTagDropdownExpanded = false
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        }
 
                         // Write type selector
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -745,6 +1051,54 @@ fun RadiosScreen() {
                             style = MaterialTheme.typography.bodySmall)
                     }
                 }
+            }
+
+            // ── Save NFC Tag Dialog ──────────────────────────────────
+            if (showNfcSaveDialog && nfcTagId != null) {
+                AlertDialog(
+                    onDismissRequest = { showNfcSaveDialog = false },
+                    title = { Text(S.radios.saveTag) },
+                    text = {
+                        OutlinedTextField(
+                            value = nfcSaveName,
+                            onValueChange = { nfcSaveName = it },
+                            label = { Text(S.radios.tagName) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                val rawBytes = nfcRawNdefBase64?.let { Base64.decode(it, Base64.NO_WRAP) }
+                                val writeParams = rawBytes?.let { extractWriteParams(it) }
+                                val saved = SavedNfcTag(
+                                    name = nfcSaveName.trim(),
+                                    tagId = nfcTagId ?: "",
+                                    techList = nfcTechList,
+                                    records = nfcRecords,
+                                    capacity = nfcTagCapacity,
+                                    writable = nfcTagWritable,
+                                    tagType = nfcTagType,
+                                    ndefBytes = nfcRawNdefBase64,
+                                    writeType = writeParams?.first ?: "Text",
+                                    writeContent = writeParams?.second ?: "",
+                                    uriPrefix = if (writeParams?.first == "URI") writeParams.third else "https://",
+                                    mimeType = if (writeParams?.first == "MIME") writeParams.third else "text/plain",
+                                )
+                                savedNfcTags = (listOf(saved) + savedNfcTags).take(NFC_MAX_SAVED)
+                                saveNfcTags(context, savedNfcTags)
+                                showNfcSaveDialog = false
+                            },
+                            enabled = nfcSaveName.isNotBlank(),
+                        ) { Text(S.radios.saveTag) }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showNfcSaveDialog = false }) {
+                            Text(S.radios.cancel)
+                        }
+                    },
+                )
             }
         }
 
