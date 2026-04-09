@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace 'com.hardwaredash'
+    namespace 'com.gadget'
     compileSdk 35
 
     defaultConfig {
-        applicationId "com.hardwaredash"
+        applicationId "com.gadget"
         minSdk 29            // Android 10 — covers Huawei P30
         targetSdk 35         // Android 15 — targets Xiaomi 14T Pro
         versionCode project.hasProperty('CI_VERSION_CODE') ? project.property('CI_VERSION_CODE').toInteger() : 1
@@ -22,7 +22,7 @@ android {
         buildConfigField "String", "BUILD_DATE", "\"${project.findProperty('BUILD_DATE') ?: 'unknown'}\""
         buildConfigField "String", "BUILD_COMMIT", "\"${project.findProperty('BUILD_COMMIT') ?: 'unknown'}\""
         buildConfigField "String", "BUILD_BRANCH", "\"${project.findProperty('BUILD_BRANCH') ?: 'unknown'}\""
-        buildConfigField "String", "APP_DESCRIPTION", "\"${project.findProperty('APP_DESCRIPTION') ?: 'Hardware Dashboard — monitor and control device sensors, camera, audio, and more'}\""
+        buildConfigField "String", "APP_DESCRIPTION", "\"${project.findProperty('APP_DESCRIPTION') ?: 'Gadget — monitor and control device sensors, camera, audio, and more'}\""
     }
 
     buildTypes {
@@ -50,7 +50,7 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
-            outputFileName = "HardwareDash-v${variant.versionName}-release.apk"
+            outputFileName = "Gadget-v${variant.versionName}-release.apk"
         }
     }
 }

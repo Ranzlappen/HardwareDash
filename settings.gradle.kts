@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "HardwareDash"
+rootProject.name = "Gadget"
 include(":app")
  

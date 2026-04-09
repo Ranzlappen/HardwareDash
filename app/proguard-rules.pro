@@ -14,11 +14,11 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
--keep,includedescriptorclasses class com.hardwaredash.**$$serializer { *; }
--keepclassmembers class com.hardwaredash.** {
+-keep,includedescriptorclasses class com.gadget.**$$serializer { *; }
+-keepclassmembers class com.gadget.** {
     *** Companion;
 }
--keepclasseswithmembers class com.hardwaredash.** {
+-keepclasseswithmembers class com.gadget.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 

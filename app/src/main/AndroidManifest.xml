@@ -79,14 +79,14 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.HardwareDash"
+        android:theme="@style/Theme.Gadget"
         android:hardwareAccelerated="true">
 
         <!-- ══════════════════════ APP METADATA ══════════════════════ -->
-        <meta-data android:name="com.hardwaredash.AUTHOR"      android:value="Ranzlappen" />
-        <meta-data android:name="com.hardwaredash.LICENSE"      android:value="Proprietary — All Rights Reserved" />
-        <meta-data android:name="com.hardwaredash.DESCRIPTION"  android:value="Hardware Dashboard — monitor and control device sensors, camera, audio, and more" />
-        <meta-data android:name="com.hardwaredash.REPOSITORY"   android:value="github.com/Ranzlappen/HardwareDash" />
+        <meta-data android:name="com.gadget.AUTHOR"      android:value="Ranzlappen" />
+        <meta-data android:name="com.gadget.LICENSE"      android:value="Proprietary — All Rights Reserved" />
+        <meta-data android:name="com.gadget.DESCRIPTION"  android:value="Gadget — monitor and control device sensors, camera, audio, and more" />
+        <meta-data android:name="com.gadget.REPOSITORY"   android:value="github.com/Ranzlappen/HardwareDash" />
 
         <!-- ── Main Activity ─────────────────────────────────────── -->
         <activity
@@ -148,13 +148,13 @@
             android:name=".receivers.ScheduleActionReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.hardwaredash.SCHEDULE_ACTION_FIRE" />
+                <action android:name="com.gadget.SCHEDULE_ACTION_FIRE" />
             </intent-filter>
         </receiver>
 
         <!-- ── Foreground Service ─────────────────────────────────── -->
         <service
-            android:name=".services.HardwareService"
+            android:name=".services.GadgetService"
             android:exported="false"
             android:foregroundServiceType="camera|microphone" />
 
@@ -166,7 +166,7 @@
 
         <!-- ── Home Screen Widget (Metric) ───────────────────────── -->
         <receiver
-            android:name=".widget.HardwareDashWidgetProvider"
+            android:name=".widget.GadgetWidgetProvider"
             android:label="@string/widget_label_metric"
             android:exported="true">
             <intent-filter>
@@ -184,7 +184,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.hardwaredash.widget.ACTION_LOG_NOW" />
+                <action android:name="com.gadget.widget.ACTION_LOG_NOW" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -198,7 +198,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.hardwaredash.widget.ACTION_FLASHLIGHT_TOGGLE" />
+                <action android:name="com.gadget.widget.ACTION_FLASHLIGHT_TOGGLE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -212,7 +212,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.hardwaredash.widget.ACTION_STROBE_TOGGLE" />
+                <action android:name="com.gadget.widget.ACTION_STROBE_TOGGLE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -226,7 +226,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.hardwaredash.widget.ACTION_CAMERA_SNAPSHOT" />
+                <action android:name="com.gadget.widget.ACTION_CAMERA_SNAPSHOT" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -240,7 +240,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.hardwaredash.widget.ACTION_VIDEO_TOGGLE" />
+                <action android:name="com.gadget.widget.ACTION_VIDEO_TOGGLE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -260,7 +260,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.hardwaredash.widget.ACTION_VOICE_RECORD_TOGGLE" />
+                <action android:name="com.gadget.widget.ACTION_VOICE_RECORD_TOGGLE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -280,7 +280,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.hardwaredash.widget.ACTION_RING_30S" />
+                <action android:name="com.gadget.widget.ACTION_RING_30S" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -294,7 +294,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.hardwaredash.widget.ACTION_NOTIFY_30S" />
+                <action android:name="com.gadget.widget.ACTION_NOTIFY_30S" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -308,7 +308,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.hardwaredash.widget.ACTION_DB_METER_TOGGLE" />
+                <action android:name="com.gadget.widget.ACTION_DB_METER_TOGGLE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -341,7 +341,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.hardwaredash.widget.ACTION_VIBRATION_TOGGLE" />
+                <action android:name="com.gadget.widget.ACTION_VIBRATION_TOGGLE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
