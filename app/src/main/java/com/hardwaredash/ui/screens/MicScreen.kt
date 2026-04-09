@@ -134,6 +134,7 @@ private fun MicMeter() {
     var playingUri   by remember { mutableStateOf<Uri?>(null) }
     val mediaPlayer  = remember { MediaPlayer() }
     val playbackErrorMsg = S.mic.playbackError
+    val micStrings = S.mic
 
     // ── AudioRecord loop in coroutine ──────────────────────────────────────
     LaunchedEffect(isRecording) {
@@ -425,7 +426,7 @@ private fun MicMeter() {
                             if (uri != null) {
                                 context.contentResolver.openOutputStream(uri)?.use { it.write(wavBytes) }
                                 savedFiles = listOf(filename to uri) + savedFiles
-                                Toast.makeText(context, S.mic.savedFile(filename), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, micStrings.savedFile(filename), Toast.LENGTH_SHORT).show()
                             }
                         }
                     }

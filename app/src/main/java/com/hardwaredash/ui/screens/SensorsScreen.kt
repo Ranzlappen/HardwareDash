@@ -100,6 +100,7 @@ private val axisColors = listOf(
 fun SensorsScreen() {
     val context = LocalContext.current
     val sm      = remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
+    val strSensorReadingsCopied = S.sensors.sensorReadingsCopied
 
     // Which sensor is expanded to show chart
     var expandedType by remember { mutableIntStateOf(-1) }
@@ -158,7 +159,7 @@ fun SensorsScreen() {
                 }
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText("Sensor Readings", text))
-                Toast.makeText(context, S.sensors.sensorReadingsCopied, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, strSensorReadingsCopied, Toast.LENGTH_SHORT).show()
             }) {
                 Icon(Icons.Default.ContentCopy, "Copy sensor readings")
             }
