@@ -48,6 +48,16 @@ import com.hardwaredash.localization.S
 import com.hardwaredash.ui.components.SliderWithInput
 import com.hardwaredash.MainActivity
 import com.hardwaredash.receivers.AdminReceiver
+import com.hardwaredash.widget.LogNowWidgetProvider
+import com.hardwaredash.widget.FlashlightWidgetProvider
+import com.hardwaredash.widget.StrobeWidgetProvider
+import com.hardwaredash.widget.CameraSnapshotWidgetProvider
+import com.hardwaredash.widget.VideoToggleWidgetProvider
+import com.hardwaredash.widget.VoiceRecordWidgetProvider
+import com.hardwaredash.widget.VibrationWidgetProvider
+import com.hardwaredash.widget.DbMeterWidgetProvider
+import com.hardwaredash.widget.PhoneRingWidgetProvider
+import com.hardwaredash.widget.NotifyWidgetProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -69,6 +79,39 @@ private fun ensureAllChannels(nm: NotificationManager) {
         NotificationChannel(CH_PROGRESS, "Progress",        NotificationManager.IMPORTANCE_LOW),
         NotificationChannel(CH_CUSTOM,   "Custom",          NotificationManager.IMPORTANCE_HIGH),
     ).forEach { nm.createNotificationChannel(it) }
+}
+
+// ─── Available actions for notification buttons ─────────────────────────────
+private enum class NotifActionEntry(
+    val label: String,
+    val broadcastAction: String?,
+    val receiverClass: Class<*>?,
+) {
+    OPEN_APP("Open App", null, null),
+    LOG_NOW("Log Now", "com.hardwaredash.widget.ACTION_LOG_NOW", LogNowWidgetProvider::class.java),
+    FLASHLIGHT("Flashlight Toggle", "com.hardwaredash.widget.ACTION_FLASHLIGHT_TOGGLE", FlashlightWidgetProvider::class.java),
+    STROBE("Strobe Toggle", "com.hardwaredash.widget.ACTION_STROBE_TOGGLE", StrobeWidgetProvider::class.java),
+    CAMERA_SNAPSHOT("Camera Snapshot", "com.hardwaredash.widget.ACTION_CAMERA_SNAPSHOT", CameraSnapshotWidgetProvider::class.java),
+    VIDEO_TOGGLE("Video Toggle", "com.hardwaredash.widget.ACTION_VIDEO_TOGGLE", VideoToggleWidgetProvider::class.java),
+    VOICE_RECORD("Voice Record Toggle", "com.hardwaredash.widget.ACTION_VOICE_RECORD_TOGGLE", VoiceRecordWidgetProvider::class.java),
+    VIBRATION("Vibration Toggle", "com.hardwaredash.widget.ACTION_VIBRATION_TOGGLE", VibrationWidgetProvider::class.java),
+    DB_METER("dB Meter Toggle", "com.hardwaredash.widget.ACTION_DB_METER_TOGGLE", DbMeterWidgetProvider::class.java),
+    PHONE_RING("Phone Ring", "com.hardwaredash.widget.ACTION_RING_30S", PhoneRingWidgetProvider::class.java),
+    SEND_NOTIFICATION("Send Notification", "com.hardwaredash.widget.ACTION_NOTIFY_30S", NotifyWidgetProvider::class.java),
+    ;
+
+    fun buildPendingIntent(context: Context, requestCode: Int): PendingIntent {
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        if (this == OPEN_APP) {
+            return PendingIntent.getActivity(
+                context, requestCode,
+                Intent(context, MainActivity::class.java),
+                flags,
+            )
+        }
+        val intent = Intent(context, receiverClass!!).apply { action = broadcastAction }
+        return PendingIntent.getBroadcast(context, requestCode, intent, flags)
+    }
 }
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
@@ -132,9 +175,12 @@ fun LockScreenScreen() {
     )
     // Enhanced builder state
     var customActionCount by remember { mutableIntStateOf(0) }
-    var customAction1 by remember { mutableStateOf("Open App") }
-    var customAction2 by remember { mutableStateOf("Dismiss") }
-    var customAction3 by remember { mutableStateOf("More") }
+    var customAction1 by remember { mutableStateOf(NotifActionEntry.OPEN_APP) }
+    var customAction2 by remember { mutableStateOf(NotifActionEntry.OPEN_APP) }
+    var customAction3 by remember { mutableStateOf(NotifActionEntry.OPEN_APP) }
+    var actionExpanded1 by remember { mutableStateOf(false) }
+    var actionExpanded2 by remember { mutableStateOf(false) }
+    var actionExpanded3 by remember { mutableStateOf(false) }
     var customShowProgress by remember { mutableStateOf(false) }
     var customProgressIndeterminate by remember { mutableStateOf(true) }
     var customProgressValue by remember { mutableFloatStateOf(50f) }
@@ -360,16 +406,85 @@ fun LockScreenScreen() {
             }
         }
         if (customActionCount >= 1) {
-            OutlinedTextField(value = customAction1, onValueChange = { customAction1 = it },
-                label = { Text("Action 1") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            ExposedDropdownMenuBox(
+                expanded = actionExpanded1,
+                onExpandedChange = { actionExpanded1 = it },
+            ) {
+                OutlinedTextField(
+                    value = customAction1.label,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Action 1") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actionExpanded1) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    singleLine = true,
+                )
+                ExposedDropdownMenu(
+                    expanded = actionExpanded1,
+                    onDismissRequest = { actionExpanded1 = false },
+                ) {
+                    NotifActionEntry.entries.forEach { entry ->
+                        DropdownMenuItem(
+                            text = { Text(entry.label) },
+                            onClick = { customAction1 = entry; actionExpanded1 = false },
+                        )
+                    }
+                }
+            }
         }
         if (customActionCount >= 2) {
-            OutlinedTextField(value = customAction2, onValueChange = { customAction2 = it },
-                label = { Text("Action 2") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            ExposedDropdownMenuBox(
+                expanded = actionExpanded2,
+                onExpandedChange = { actionExpanded2 = it },
+            ) {
+                OutlinedTextField(
+                    value = customAction2.label,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Action 2") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actionExpanded2) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    singleLine = true,
+                )
+                ExposedDropdownMenu(
+                    expanded = actionExpanded2,
+                    onDismissRequest = { actionExpanded2 = false },
+                ) {
+                    NotifActionEntry.entries.forEach { entry ->
+                        DropdownMenuItem(
+                            text = { Text(entry.label) },
+                            onClick = { customAction2 = entry; actionExpanded2 = false },
+                        )
+                    }
+                }
+            }
         }
         if (customActionCount >= 3) {
-            OutlinedTextField(value = customAction3, onValueChange = { customAction3 = it },
-                label = { Text("Action 3") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            ExposedDropdownMenuBox(
+                expanded = actionExpanded3,
+                onExpandedChange = { actionExpanded3 = it },
+            ) {
+                OutlinedTextField(
+                    value = customAction3.label,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Action 3") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actionExpanded3) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    singleLine = true,
+                )
+                ExposedDropdownMenu(
+                    expanded = actionExpanded3,
+                    onDismissRequest = { actionExpanded3 = false },
+                ) {
+                    NotifActionEntry.entries.forEach { entry ->
+                        DropdownMenuItem(
+                            text = { Text(entry.label) },
+                            onClick = { customAction3 = entry; actionExpanded3 = false },
+                        )
+                    }
+                }
+            }
         }
 
         // ── Progress Bar ─────────────────────────────────────────────────
@@ -466,9 +581,9 @@ fun LockScreenScreen() {
                 }
                 if (customActionCount > 0) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
-                        if (customActionCount >= 1) TextButton(onClick = {}) { Text(customAction1, style = MaterialTheme.typography.labelSmall) }
-                        if (customActionCount >= 2) TextButton(onClick = {}) { Text(customAction2, style = MaterialTheme.typography.labelSmall) }
-                        if (customActionCount >= 3) TextButton(onClick = {}) { Text(customAction3, style = MaterialTheme.typography.labelSmall) }
+                        if (customActionCount >= 1) TextButton(onClick = {}) { Text(customAction1.label, style = MaterialTheme.typography.labelSmall) }
+                        if (customActionCount >= 2) TextButton(onClick = {}) { Text(customAction2.label, style = MaterialTheme.typography.labelSmall) }
+                        if (customActionCount >= 3) TextButton(onClick = {}) { Text(customAction3.label, style = MaterialTheme.typography.labelSmall) }
                     }
                 }
             }
@@ -495,9 +610,9 @@ fun LockScreenScreen() {
                     .setOngoing(customOngoing)
 
                 // Action buttons
-                if (customActionCount >= 1) builder.addAction(0, customAction1, pi)
-                if (customActionCount >= 2) builder.addAction(0, customAction2, pi)
-                if (customActionCount >= 3) builder.addAction(0, customAction3, pi)
+                if (customActionCount >= 1) builder.addAction(0, customAction1.label, customAction1.buildPendingIntent(context, 3001))
+                if (customActionCount >= 2) builder.addAction(0, customAction2.label, customAction2.buildPendingIntent(context, 3002))
+                if (customActionCount >= 3) builder.addAction(0, customAction3.label, customAction3.buildPendingIntent(context, 3003))
 
                 // Progress bar
                 if (customShowProgress) {
