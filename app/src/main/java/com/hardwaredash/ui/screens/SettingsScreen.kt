@@ -1,6 +1,8 @@
 package com.hardwaredash.ui.screens
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -17,6 +19,7 @@ import com.hardwaredash.localization.Language
 import com.hardwaredash.localization.LocalizationManager
 import com.hardwaredash.localization.S
 import com.hardwaredash.ui.components.SliderWithInput
+import com.hardwaredash.widget.WidgetMetric
 import kotlin.math.roundToInt
 
 private const val WIDGET_PREFS = "widget_settings"
@@ -221,6 +224,123 @@ fun SettingsScreen() {
                     suffix = "s",
                     label = "${notifyDelay.roundToInt()} ${strings.seconds}",
                 )
+            }
+        }
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 3 — Metric Logging
+        // ══════════════════════════════════════════════════════════════════
+        Text(
+            strings.metricLogging,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Text(
+            strings.metricLoggingDesc,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+        )
+
+        val grouped = remember { WidgetMetric.grouped() }
+        grouped.forEach { (category, metrics) ->
+            MetricCategoryCard(
+                category = category,
+                metrics = metrics,
+                prefs = widgetPrefs,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MetricCategoryCard(
+    category: String,
+    metrics: List<WidgetMetric>,
+    prefs: android.content.SharedPreferences,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Card(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Category header (clickable to expand/collapse)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    category,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f),
+                )
+                // Show count of enabled metrics
+                val enabledCount = metrics.count {
+                    prefs.getBoolean("metric_log_${it.key}", false)
+                }
+                if (enabledCount > 0) {
+                    Text(
+                        "$enabledCount/${metrics.size}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+
+            AnimatedVisibility(visible = expanded) {
+                Column {
+                    metrics.forEach { metric ->
+                        val prefKey = "metric_log_${metric.key}"
+                        var checked by remember {
+                            mutableStateOf(prefs.getBoolean(prefKey, false))
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    checked = !checked
+                                    prefs.edit().putBoolean(prefKey, checked).apply()
+                                },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Checkbox(
+                                checked = checked,
+                                onCheckedChange = { value ->
+                                    checked = value
+                                    prefs.edit().putBoolean(prefKey, value).apply()
+                                },
+                            )
+                            Column {
+                                Text(
+                                    metric.displayName,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                                if (metric.unit.isNotBlank()) {
+                                    Text(
+                                        metric.unit,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

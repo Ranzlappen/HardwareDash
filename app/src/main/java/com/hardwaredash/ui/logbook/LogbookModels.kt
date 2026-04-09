@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import java.util.UUID
 
 // ---- Schema version (matches Ticked web app v6) ----
-const val LOGBOOK_SCHEMA_VERSION = 6
+const val LOGBOOK_SCHEMA_VERSION = 7
 
 // ---- Default colour palette (matches web app) ----
 val DEFAULT_PALETTE = listOf("#05004d", "#002e0d", "#2b0026", "#363506", "#3b0000")
@@ -32,6 +32,7 @@ data class LogbookEntry(
     val bgColor: String = "",
     val borderColor: String = "",
     val tags: List<String> = emptyList(),
+    val metrics: Map<String, String> = emptyMap(),
 )
 
 @Serializable

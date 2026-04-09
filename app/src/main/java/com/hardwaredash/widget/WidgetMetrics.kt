@@ -13,6 +13,8 @@ import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
 import android.telephony.TelephonyManager
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.Tasks
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.sqrt
@@ -242,6 +244,23 @@ enum class WidgetMetric(
             )
             "${(cur * 100) / 255}%"
         } catch (_: Exception) { "N/A" }
+    },
+
+    // ── Location ────────────────────────────────────────────────────────────
+    GPS_LOCATION("gps_location", "GPS Location", "Location", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readLastLocation(ctx) { loc ->
+            "${"%.6f".format(loc.latitude)}, ${"%.6f".format(loc.longitude)}"
+        }
+    },
+    GPS_ALTITUDE("gps_altitude", "GPS Altitude", "Location", "m", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readLastLocation(ctx) { loc ->
+            if (loc.hasAltitude()) "${"%.1f".format(loc.altitude)} m" else "N/A"
+        }
+    },
+    GPS_SPEED("gps_speed", "GPS Speed", "Location", "km/h", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readLastLocation(ctx) { loc ->
+            if (loc.hasSpeed()) "${"%.1f".format(loc.speed * 3.6f)} km/h" else "N/A"
+        }
     };
 
     abstract fun fetch(ctx: Context): String
@@ -251,7 +270,39 @@ enum class WidgetMetric(
 
         /** Groups metrics by category for the config picker. */
         fun grouped(): Map<String, List<WidgetMetric>> = entries.groupBy { it.category }
+
+        /** Read enabled metric prefs and snapshot their current values. */
+        fun snapshotEnabled(ctx: Context): Map<String, String> {
+            val prefs = ctx.getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
+            val result = mutableMapOf<String, String>()
+            for (metric in entries) {
+                if (prefs.getBoolean("metric_log_${metric.key}", false)) {
+                    try {
+                        result[metric.key] = metric.fetch(ctx)
+                    } catch (_: Exception) {
+                        result[metric.key] = "N/A"
+                    }
+                }
+            }
+            return result
+        }
     }
+}
+
+/**
+ * Reads the last known location with a 500ms timeout.
+ */
+private fun readLastLocation(
+    ctx: Context,
+    format: (android.location.Location) -> String,
+): String = try {
+    val client = LocationServices.getFusedLocationProviderClient(ctx)
+    val loc = Tasks.await(client.lastLocation, 500, TimeUnit.MILLISECONDS)
+    if (loc != null) format(loc) else "N/A"
+} catch (_: SecurityException) {
+    "No permission"
+} catch (_: Exception) {
+    "N/A"
 }
 
 /**
