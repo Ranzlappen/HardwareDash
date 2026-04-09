@@ -12,10 +12,17 @@ android {
         applicationId "com.hardwaredash"
         minSdk 29            // Android 10 — covers Huawei P30
         targetSdk 35         // Android 15 — targets Xiaomi 14T Pro
-        versionCode 1
-        versionName "1.0"
+        versionCode project.hasProperty('CI_VERSION_CODE') ? project.property('CI_VERSION_CODE').toInteger() : 1
+        versionName project.hasProperty('CI_VERSION_NAME') ? project.property('CI_VERSION_NAME') : "1.0-dev"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary true }
+
+        // Build metadata (injected by CI, defaults for local dev)
+        buildConfigField "String", "BUILD_AUTHOR", "\"${project.findProperty('BUILD_AUTHOR') ?: 'local'}\""
+        buildConfigField "String", "BUILD_DATE", "\"${project.findProperty('BUILD_DATE') ?: 'unknown'}\""
+        buildConfigField "String", "BUILD_COMMIT", "\"${project.findProperty('BUILD_COMMIT') ?: 'unknown'}\""
+        buildConfigField "String", "BUILD_BRANCH", "\"${project.findProperty('BUILD_BRANCH') ?: 'unknown'}\""
+        buildConfigField "String", "APP_DESCRIPTION", "\"${project.findProperty('APP_DESCRIPTION') ?: 'Hardware Dashboard — monitor and control device sensors, camera, audio, and more'}\""
     }
 
     buildTypes {
@@ -30,11 +37,20 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = '17' }
-    buildFeatures { compose true }
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
     composeOptions { kotlinCompilerExtensionVersion '1.5.0' }
 
     packaging {
         resources { excludes += '/META-INF/{AL2.0,LGPL2.1}' }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = "HardwareDash-v${variant.versionName}-release.apk"
+        }
     }
 }
 

@@ -115,4 +115,6 @@ Requires Android Studio with SDK 35 and JDK 17.
 
 ## License
 
-See repository for license details.
+This project is proprietary software. All rights reserved. See [LICENSE](LICENSE) for details.
+
+Redistribution, modification, and reverse-engineering are prohibited without prior written permission.
