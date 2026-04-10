@@ -32,6 +32,49 @@ object S {
         val settings get() = m(l, "Settings", "Einstellungen", "Ajustes", "Paramètres")
         val fileMeta get() = m(l, "Files", "Dateien", "Archivos", "Fichiers")
         val bug get() = m(l, "Bug", "Fehler", "Error", "Bug")
+        // New top-level tab labels
+        val dashboard get() = m(l, "Dashboard", "Dashboard", "Panel", "Tableau de bord")
+        val tools get() = m(l, "Tools", "Werkzeuge", "Herramientas", "Outils")
+        val monitor get() = m(l, "Monitor", "Monitor", "Monitor", "Moniteur")
+        val more get() = m(l, "More", "Mehr", "Más", "Plus")
+    }
+
+    // ── Dashboard ───────────────────────────────────────────────────────
+    val dashboard: Dashboard @Composable get() = Dashboard(lang)
+
+    class Dashboard(private val l: Language) {
+        val title get() = m(l, "Dashboard", "Dashboard", "Panel", "Tableau de bord")
+        val subtitle get() = m(l, "Hardware Toolkit", "Hardware-Toolkit", "Kit de herramientas", "Boîte à outils")
+        val quickActions get() = m(l, "Quick Actions", "Schnellaktionen", "Acciones rápidas", "Actions rapides")
+        val status get() = m(l, "Status", "Status", "Estado", "Statut")
+        val recentLogEntry get() = m(l, "Recent Log Entry", "Letzter Eintrag", "Entrada reciente", "Entrée récente")
+        val noRecentEntries get() = m(l, "No recent entries", "Keine aktuellen Einträge", "Sin entradas recientes", "Aucune entrée récente")
+    }
+
+    // ── Hubs ────────────────────────────────────────────────────────────
+    val hubs: Hubs @Composable get() = Hubs(lang)
+
+    class Hubs(private val l: Language) {
+        // Tools hub
+        val toolsTitle get() = m(l, "Tools", "Werkzeuge", "Herramientas", "Outils")
+        val torchSubtitle get() = m(l, "Flashlight & Strobe", "Taschenlampe & Stroboskop", "Linterna y estrobo", "Lampe & Stroboscope")
+        val cameraSubtitle get() = m(l, "Multi-lens Capture", "Mehrlinsen-Aufnahme", "Captura multilente", "Capture multi-objectifs")
+        val vibrationSubtitle get() = m(l, "Pattern Builder", "Muster-Editor", "Editor de patrones", "Éditeur de motifs")
+        val micSubtitle get() = m(l, "dB Meter & Recorder", "dB-Messgerät & Rekorder", "Medidor dB y grabadora", "Sonomètre & enregistreur")
+        // Monitor hub
+        val monitorTitle get() = m(l, "Monitor", "Monitor", "Monitor", "Moniteur")
+        val sensorsSubtitle get() = m(l, "Live hardware sensor charts", "Live-Hardware-Sensordiagramme", "Gráficos de sensores en vivo", "Graphiques de capteurs en direct")
+        val batterySubtitle get() = m(l, "Level, health & temperature", "Ladezustand, Zustand & Temperatur", "Nivel, salud y temperatura", "Niveau, santé & température")
+        val radiosSubtitle get() = m(l, "WiFi, Bluetooth, NFC, GPS", "WLAN, Bluetooth, NFC, GPS", "WiFi, Bluetooth, NFC, GPS", "WiFi, Bluetooth, NFC, GPS")
+        // More hub
+        val moreTitle get() = m(l, "More", "Mehr", "Más", "Plus")
+        val notifications get() = m(l, "Notifications", "Benachrichtigungen", "Notificaciones", "Notifications")
+        val notificationsSubtitle get() = m(l, "Demos, builder & lock screen", "Demos, Builder & Sperrbildschirm", "Demos, constructor y pantalla de bloqueo", "Démos, constructeur & écran de verrouillage")
+        val automation get() = m(l, "Automation", "Automatisierung", "Automatización", "Automatisation")
+        val automationSubtitle get() = m(l, "IF/THEN metric rules", "WENN/DANN Metrik-Regeln", "Reglas SI/ENTONCES", "Règles SI/ALORS")
+        val fileMetaSubtitle get() = m(l, "EXIF & media metadata", "EXIF- & Medien-Metadaten", "Metadatos EXIF y multimedia", "Métadonnées EXIF & média")
+        val settingsSubtitle get() = m(l, "Language, config & logging", "Sprache, Konfiguration & Protokollierung", "Idioma, configuración y registro", "Langue, configuration & journalisation")
+        val bugReportSubtitle get() = m(l, "Permissions & device info", "Berechtigungen & Geräteinformationen", "Permisos e información del dispositivo", "Permissions & informations appareil")
     }
 
     // ── Logbook (formerly Ticked) ───────────────────────────────────────
