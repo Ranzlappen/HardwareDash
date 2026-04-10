@@ -140,6 +140,40 @@ fun BugReportScreen() {
         }
 
         // ══════════════════════════════════════════════════════════════
+        // DISCLAIMER
+        // ══════════════════════════════════════════════════════════════
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Info, null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        strings.disclaimerTitle,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Text(
+                    strings.disclaimerBody,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════
         // SECTION 1 — Permission Status Table
         // ══════════════════════════════════════════════════════════════
         Text(
@@ -290,7 +324,7 @@ fun BugReportScreen() {
                     // GitHub link
                     OutlinedButton(
                         onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/ranzlappen/hardwaredash/issues/new"))
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Ranzlappen/gadget/issues"))
                             context.startActivity(intent)
                         },
                         modifier = Modifier.fillMaxWidth(),
