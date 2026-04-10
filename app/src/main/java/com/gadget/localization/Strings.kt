@@ -28,6 +28,7 @@ object S {
         val sensors get() = m(l, "Sensors", "Sensoren", "Sensores", "Capteurs")
         val battery get() = m(l, "Battery", "Akku", "Batería", "Batterie")
         val lock get() = m(l, "Lock", "Sperre", "Bloqueo", "Verrou")
+        val link get() = m(l, "Link", "Link", "Enlace", "Lien")
         val settings get() = m(l, "Settings", "Einstellungen", "Ajustes", "Paramètres")
         val fileMeta get() = m(l, "Files", "Dateien", "Archivos", "Fichiers")
         val bug get() = m(l, "Bug", "Fehler", "Error", "Bug")
@@ -221,6 +222,36 @@ object S {
         val determinate get() = m(l, "Determinate", "Bestimmt", "Determinado", "Déterminé")
         val indeterminate get() = m(l, "Indeterminate", "Unbestimmt", "Indeterminado", "Indéterminé")
         val normal get() = m(l, "Normal", "Normal", "Normal", "Normal")
+    }
+
+    // ── Link ────────────────────────────────────────────────────────────
+    val link: Link @Composable get() = Link(lang)
+
+    class Link(private val l: Language) {
+        val title get() = m(l, "Link", "Link", "Enlace", "Lien")
+        val addLink get() = m(l, "Add Link", "Link hinzufügen", "Añadir enlace", "Ajouter un lien")
+        val editLink get() = m(l, "Edit Link", "Link bearbeiten", "Editar enlace", "Modifier le lien")
+        val deleteLink get() = m(l, "Delete Link", "Link löschen", "Eliminar enlace", "Supprimer le lien")
+        val deleteConfirm get() = m(l, "Delete this link rule?", "Diese Link-Regel löschen?", "¿Eliminar esta regla de enlace?", "Supprimer cette règle de lien ?")
+        val ifLabel get() = m(l, "IF", "WENN", "SI", "SI")
+        val thenLabel get() = m(l, "THEN", "DANN", "ENTONCES", "ALORS")
+        val metric get() = m(l, "Metric", "Metrik", "Métrica", "Métrique")
+        val selectMetric get() = m(l, "Select metric\u2026", "Metrik auswählen\u2026", "Seleccionar métrica\u2026", "Sélectionner la métrique\u2026")
+        val operator get() = m(l, "Operator", "Operator", "Operador", "Opérateur")
+        val threshold get() = m(l, "Threshold", "Schwellenwert", "Umbral", "Seuil")
+        val action get() = m(l, "Action", "Aktion", "Acción", "Action")
+        val selectAction get() = m(l, "Select action\u2026", "Aktion auswählen\u2026", "Seleccionar acción\u2026", "Sélectionner l'action\u2026")
+        val cooldown get() = m(l, "Cooldown", "Abklingzeit", "Enfriamiento", "Temps de recharge")
+        val noLinksYet get() = m(l, "No link rules yet", "Noch keine Link-Regeln", "Sin reglas de enlace aún", "Aucune règle de lien")
+        val startMonitoring get() = m(l, "Start Monitoring", "Überwachung starten", "Iniciar monitoreo", "Démarrer la surveillance")
+        val stopMonitoring get() = m(l, "Stop Monitoring", "Überwachung stoppen", "Detener monitoreo", "Arrêter la surveillance")
+        val save get() = m(l, "Save", "Speichern", "Guardar", "Enregistrer")
+        val cancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
+        val delete get() = m(l, "Delete", "Löschen", "Eliminar", "Supprimer")
+        val ruleName get() = m(l, "Rule name\u2026", "Regelname\u2026", "Nombre de regla\u2026", "Nom de la règle\u2026")
+        val notifTitle get() = m(l, "Notification title", "Benachrichtigungstitel", "Título de notificación", "Titre de notification")
+        val notifBody get() = m(l, "Notification body", "Benachrichtigungstext", "Cuerpo de notificación", "Corps de notification")
+        val monitoring get() = m(l, "Monitoring", "Überwachung", "Monitoreo", "Surveillance")
     }
 
     // ── Torch ───────────────────────────────────────────────────────────
@@ -498,6 +529,11 @@ object S {
         // Strobe service
         fun strobeActive(lang: Language) = m(lang, "Strobe Active", "Stroboskop aktiv", "Estrobo activo", "Stroboscope actif")
         fun tapToStop(lang: Language) = m(lang, "Tap to stop", "Tippen zum Stoppen", "Toque para detener", "Appuyez pour arrêter")
+
+        // Link service
+        fun linkMonitoring(lang: Language) = m(lang, "Link Monitoring Active", "Link-Überwachung aktiv", "Monitoreo de enlaces activo", "Surveillance des liens active")
+        fun linkTapToStop(lang: Language) = m(lang, "Evaluating link rules", "Link-Regeln werden ausgewertet", "Evaluando reglas de enlace", "Évaluation des règles de lien")
+        fun linkTriggered(lang: Language, name: String) = m(lang, "Link triggered: $name", "Link ausgelöst: $name", "Enlace activado: $name", "Lien déclenché : $name")
 
         // Voice record service
         fun recordingAudio(lang: Language) = m(lang, "Recording Audio", "Audioaufnahme", "Grabando audio", "Enregistrement audio")

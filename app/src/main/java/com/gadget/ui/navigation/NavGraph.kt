@@ -19,6 +19,7 @@ import androidx.navigation.compose.*
 import com.gadget.localization.S
 import com.gadget.ui.screens.*
 import com.gadget.ui.logbook.LogbookScreen
+import com.gadget.ui.link.LinkScreen
 
 // ─── Route constants ──────────────────────────────────────────────────────────
 object Routes {
@@ -32,6 +33,7 @@ object Routes {
     const val BATTERY      = "battery"
     const val LOGBOOK      = "logbook"
     const val SETTINGS     = "settings"
+    const val LINK         = "link"
     const val FILE_META    = "file_meta"
     const val BUG          = "bug"
 }
@@ -52,6 +54,7 @@ private val bottomNavItems = listOf(
     BottomNavItem(Routes.SENSORS,    Icons.Filled.Analytics,     Icons.Outlined.Analytics),
     BottomNavItem(Routes.BATTERY,    Icons.Filled.BatteryStd,    Icons.Outlined.BatteryStd),
     BottomNavItem(Routes.LOCKSCREEN, Icons.Filled.Lock,          Icons.Outlined.Lock),
+    BottomNavItem(Routes.LINK,       Icons.Filled.Link,          Icons.Outlined.Link),
     BottomNavItem(Routes.FILE_META,  Icons.Filled.InsertDriveFile, Icons.Outlined.InsertDriveFile),
     BottomNavItem(Routes.SETTINGS,   Icons.Filled.Settings,      Icons.Outlined.Settings),
     BottomNavItem(Routes.BUG,        Icons.Filled.BugReport,     Icons.Outlined.BugReport),
@@ -76,6 +79,7 @@ fun NavGraph() {
         Routes.SENSORS    to nav.sensors,
         Routes.BATTERY    to nav.battery,
         Routes.LOCKSCREEN to nav.lock,
+        Routes.LINK       to nav.link,
         Routes.FILE_META  to nav.fileMeta,
         Routes.SETTINGS   to nav.settings,
         Routes.BUG        to nav.bug,
@@ -143,6 +147,7 @@ fun NavGraph() {
             composable(Routes.RADIOS)        { RadiosScreen() }
             composable(Routes.SENSORS)       { SensorsScreen() }
             composable(Routes.LOCKSCREEN)    { LockScreenScreen() }
+            composable(Routes.LINK)          { LinkScreen() }
             composable(Routes.BATTERY)       { BatteryScreen() }
             composable(Routes.FILE_META)     { FileMetadataScreen() }
             composable(Routes.SETTINGS)      { SettingsScreen() }
