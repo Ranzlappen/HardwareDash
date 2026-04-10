@@ -295,6 +295,9 @@ object S {
         val notifTitle get() = m(l, "Notification title", "Benachrichtigungstitel", "Título de notificación", "Titre de notification")
         val notifBody get() = m(l, "Notification body", "Benachrichtigungstext", "Cuerpo de notificación", "Corps de notification")
         val monitoring get() = m(l, "Monitoring", "Überwachung", "Monitoreo", "Surveillance")
+        val thresholdLow get() = m(l, "Lower bound", "Unterer Grenzwert", "Límite inferior", "Limite inférieure")
+        val thresholdHigh get() = m(l, "Upper bound", "Oberer Grenzwert", "Límite superior", "Limite supérieure")
+        val recommended get() = m(l, "Recommended", "Empfohlen", "Recomendado", "Recommandé")
     }
 
     // ── Torch ───────────────────────────────────────────────────────────
