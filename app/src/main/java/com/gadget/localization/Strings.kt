@@ -507,6 +507,13 @@ object S {
         val statusLabel get() = m(l, "Status", "Status", "Estado", "Statut")
         val granted get() = m(l, "Granted", "Erteilt", "Concedido", "Accordé")
         val notGranted get() = m(l, "Not Granted", "Nicht erteilt", "No concedido", "Non accordé")
+        val disclaimerTitle get() = m(l, "Disclaimer", "Haftungsausschluss", "Aviso legal", "Avertissement")
+        val disclaimerBody get() = m(l,
+            "Firmware and hardware device-specific limitations apply. Some features may not be available or function correctly depending on your device type, manufacturer, and Android version. Certain features require specific permissions to be granted in order to operate. Please submit feature requests and bug reports via the Bug Report menu.",
+            "Es gelten firmware- und hardwarespezifische Einschränkungen. Einige Funktionen sind möglicherweise nicht verfügbar oder funktionieren je nach Gerätetyp, Hersteller und Android-Version nicht korrekt. Bestimmte Funktionen erfordern die Erteilung spezifischer Berechtigungen. Bitte reichen Sie Funktionswünsche und Fehlerberichte über das Fehlerbericht-Menü ein.",
+            "Se aplican limitaciones específicas de firmware y hardware del dispositivo. Algunas funciones pueden no estar disponibles o no funcionar correctamente según el tipo de dispositivo, el fabricante y la versión de Android. Ciertas funciones requieren permisos específicos para operar. Envíe solicitudes de funciones e informes de errores a través del menú de informes de errores.",
+            "Des limitations spécifiques au micrologiciel et au matériel de l'appareil s'appliquent. Certaines fonctionnalités peuvent ne pas être disponibles ou ne pas fonctionner correctement selon le type d'appareil, le fabricant et la version Android. Certaines fonctionnalités nécessitent des autorisations spécifiques pour fonctionner. Veuillez soumettre vos demandes de fonctionnalités et rapports de bugs via le menu Rapport de bug.",
+        )
     }
 
     // ── Common / Shared ─────────────────────────────────────────────────
