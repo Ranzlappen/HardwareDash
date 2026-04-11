@@ -230,7 +230,51 @@ fun SettingsScreen() {
         HorizontalDivider()
 
         // ══════════════════════════════════════════════════════════════════
-        // SECTION 3 — Metric Logging
+        // SECTION 3 — DND Bypass
+        // ══════════════════════════════════════════════════════════════════
+        var bypassDnd by remember {
+            mutableStateOf(widgetPrefs.getBoolean("bypass_dnd", false))
+        }
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        strings.bypassDnd,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        strings.bypassDndDesc,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Switch(
+                    checked = bypassDnd,
+                    onCheckedChange = {
+                        bypassDnd = it
+                        widgetPrefs.edit().putBoolean("bypass_dnd", it).apply()
+                    },
+                )
+            }
+        }
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 4 — Metric Logging
         // ══════════════════════════════════════════════════════════════════
         Text(
             strings.metricLogging,

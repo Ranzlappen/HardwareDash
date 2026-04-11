@@ -50,7 +50,7 @@ class ScheduleActionReceiver : BroadcastReceiver() {
 
     private fun fireNotification(context: Context, title: String, body: String, id: Int) {
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        ensureChannel(nm)
+        ensureChannel(nm, context)
         val pi = PendingIntent.getActivity(
             context, 0,
             Intent(context, MainActivity::class.java).apply {
@@ -89,11 +89,15 @@ class ScheduleActionReceiver : BroadcastReceiver() {
         context.startActivity(callerIntent)
     }
 
-    private fun ensureChannel(nm: NotificationManager) {
+    private fun ensureChannel(nm: NotificationManager, context: Context? = null) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val bypassDnd = context?.getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
+            ?.getBoolean("bypass_dnd", false) ?: false
         val channel = NotificationChannel(
             CH_SCHEDULE, "Scheduled Actions", NotificationManager.IMPORTANCE_HIGH
-        )
+        ).apply {
+            setBypassDnd(bypassDnd)
+        }
         nm.createNotificationChannel(channel)
     }
 

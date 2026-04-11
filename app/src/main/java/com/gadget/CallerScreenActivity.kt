@@ -1,5 +1,6 @@
 package com.gadget
 
+import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.RingtoneManager
 import android.os.Build
@@ -63,33 +64,52 @@ class CallerScreenActivity : ComponentActivity() {
     }
 
     private fun startRinging() {
-        val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
-        ringtone = RingtoneManager.getRingtone(this, uri)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            ringtone?.isLooping = true
+        try {
+            val prefs = getSharedPreferences("widget_settings", MODE_PRIVATE)
+            val bypassDnd = prefs.getBoolean("bypass_dnd", false)
+
+            val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+            ringtone = RingtoneManager.getRingtone(this, uri)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                ringtone?.isLooping = true
+            }
+            if (bypassDnd) {
+                ringtone?.audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            }
+
+            audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+            originalVolume = audioManager?.getStreamVolume(AudioManager.STREAM_RING) ?: 0
+            try {
+                val stream = if (bypassDnd) AudioManager.STREAM_ALARM else AudioManager.STREAM_RING
+                audioManager?.setStreamVolume(
+                    stream,
+                    audioManager?.getStreamMaxVolume(stream) ?: 7,
+                    0,
+                )
+            } catch (_: SecurityException) {
+                // DND or policy restriction — continue with current volume
+            }
+            ringtone?.play()
+        } catch (_: Exception) {
+            // Gracefully degrade — Activity still shows UI with stop button
         }
-        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
-        originalVolume = audioManager?.getStreamVolume(AudioManager.STREAM_RING) ?: 0
-        audioManager?.setStreamVolume(
-            AudioManager.STREAM_RING,
-            audioManager?.getStreamMaxVolume(AudioManager.STREAM_RING) ?: 7,
-            0,
-        )
-        ringtone?.play()
     }
 
     private fun stopAndFinish() {
         handler.removeCallbacksAndMessages(null)
-        ringtone?.stop()
-        audioManager?.setStreamVolume(AudioManager.STREAM_RING, originalVolume, 0)
+        try { ringtone?.stop() } catch (_: Exception) {}
+        try { audioManager?.setStreamVolume(AudioManager.STREAM_RING, originalVolume, 0) } catch (_: Exception) {}
         finish()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
-        ringtone?.stop()
-        audioManager?.setStreamVolume(AudioManager.STREAM_RING, originalVolume, 0)
+        try { ringtone?.stop() } catch (_: Exception) {}
+        try { audioManager?.setStreamVolume(AudioManager.STREAM_RING, originalVolume, 0) } catch (_: Exception) {}
     }
 
     companion object {

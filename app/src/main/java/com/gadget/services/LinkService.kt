@@ -11,6 +11,7 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.media.AudioAttributes
 import android.os.Build
 import android.os.IBinder
 import android.os.VibrationEffect
@@ -183,7 +184,18 @@ class LinkService : Service() {
             @Suppress("DEPRECATION")
             getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
-        vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
+        val effect = VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE)
+        val bypassDnd = getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
+            .getBoolean("bypass_dnd", false)
+        if (bypassDnd) {
+            val attrs = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+            vibrator.vibrate(effect, attrs)
+        } else {
+            vibrator.vibrate(effect)
+        }
     }
 
     private fun sendNotification(rule: LinkRule) {
@@ -260,11 +272,15 @@ class LinkService : Service() {
     private fun ensureChannels() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val bypassDnd = getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
+            .getBoolean("bypass_dnd", false)
         nm.createNotificationChannel(
             NotificationChannel(CH_LINK, "Link Service", NotificationManager.IMPORTANCE_LOW)
         )
         nm.createNotificationChannel(
-            NotificationChannel(CH_LINK_ACTION, "Link Actions", NotificationManager.IMPORTANCE_HIGH)
+            NotificationChannel(CH_LINK_ACTION, "Link Actions", NotificationManager.IMPORTANCE_HIGH).apply {
+                setBypassDnd(bypassDnd)
+            }
         )
     }
 
