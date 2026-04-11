@@ -15,6 +15,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import com.gadget.localization.S
 import com.gadget.services.LinkService
 import com.gadget.ui.components.SliderWithInput
@@ -141,6 +144,93 @@ fun LinkScreen() {
                 },
                 onDelete = { deleteTarget = rule },
             )
+        }
+
+        // ── Statistics overview ──────────────────────────────────────────
+        if (rules.isNotEmpty()) {
+            val statsJson = remember { prefs.getString("link_stats", "") ?: "" }
+            val stats = remember(statsJson) { loadLinkStats(statsJson) }
+            val hasAnyStats = stats.values.any { it.triggerCount > 0 || it.cooldownBlockCount > 0 }
+
+            if (hasAnyStats) {
+                Text(
+                    strings.statsTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+
+                rules.forEach { rule ->
+                    val s = stats[rule.id] ?: return@forEach
+                    if (s.triggerCount == 0 && s.cooldownBlockCount == 0) return@forEach
+                    val metricName = WidgetMetric.fromKey(rule.metricKey)?.displayName ?: rule.metricKey
+
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                        ),
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                rule.name.ifBlank { metricName },
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Column {
+                                    Text(
+                                        strings.triggered,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    Text(
+                                        "${s.triggerCount}",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+                                Column {
+                                    Text(
+                                        strings.cooldownBlocked,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    Text(
+                                        "${s.cooldownBlockCount}",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.tertiary,
+                                    )
+                                }
+                            }
+                            if (s.lastTriggeredIso.isNotBlank()) {
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    "${strings.lastTriggered}: ${formatIso(s.lastTriggeredIso)}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Reset stats button
+                OutlinedButton(
+                    onClick = {
+                        prefs.edit().putString("link_stats", "").apply()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Filled.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(strings.resetStats)
+                }
+            }
         }
 
         Spacer(Modifier.height(80.dp))
@@ -302,6 +392,7 @@ private fun LinkEditorDialog(
     var actionType by remember { mutableStateOf(rule.actionType) }
     var notifTitle by remember { mutableStateOf(rule.actionConfig["title"] ?: "") }
     var notifBody by remember { mutableStateOf(rule.actionConfig["body"] ?: "") }
+    var logText by remember { mutableStateOf(rule.actionConfig["logText"] ?: "") }
     var cooldown by remember { mutableFloatStateOf(rule.cooldownSec.toFloat()) }
 
     var metricExpanded by remember { mutableStateOf(false) }
@@ -520,6 +611,18 @@ private fun LinkEditorDialog(
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }
+
+                        // Log entry-specific config
+                        if (actionType == LinkActionType.LOG_ENTRY.key) {
+                            OutlinedTextField(
+                                value = logText,
+                                onValueChange = { logText = it },
+                                label = { Text(strings.logEntryText) },
+                                placeholder = { Text(strings.logEntryPlaceholder) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                     }
                 }
 
@@ -540,6 +643,9 @@ private fun LinkEditorDialog(
                     if (actionType == LinkActionType.NOTIFICATION.key) {
                         config["title"] = notifTitle.ifBlank { "Link Alert" }
                         config["body"] = notifBody
+                    }
+                    if (actionType == LinkActionType.LOG_ENTRY.key) {
+                        config["logText"] = logText
                     }
                     onSave(
                         rule.copy(
@@ -565,4 +671,14 @@ private fun LinkEditorDialog(
             }
         },
     )
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+private val displayFmt = DateTimeFormatter.ofPattern("MMM d, HH:mm")
+
+private fun formatIso(iso: String): String = try {
+    Instant.parse(iso).atZone(ZoneId.systemDefault()).format(displayFmt)
+} catch (_: Exception) {
+    iso
 }

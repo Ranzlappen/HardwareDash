@@ -23,8 +23,12 @@ import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import com.gadget.receivers.AdminReceiver
 import com.gadget.ui.link.*
+import com.gadget.ui.logbook.LogbookEntry
+import com.gadget.ui.logbook.LogbookRepository
 import com.gadget.widget.WidgetMetric
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.firstOrNull
+import java.time.Instant
 
 class LinkService : Service() {
 
@@ -80,33 +84,59 @@ class LinkService : Service() {
         val json = prefs.getString("rules", "") ?: ""
         val rules = loadRules(json)
         val now = System.currentTimeMillis()
+        val isoNow = Instant.now().toString()
         var changed = false
+
+        // Load current stats
+        val statsJson = prefs.getString(KEY_STATS, "") ?: ""
+        val stats = loadLinkStats(statsJson).toMutableMap()
 
         val updatedRules = rules.map { rule ->
             if (!rule.enabled) return@map rule
 
-            // Cooldown check
-            if (now - rule.lastTriggeredMs < rule.cooldownSec * 1000L) return@map rule
-
             val metric = WidgetMetric.fromKey(rule.metricKey) ?: return@map rule
             val value = try { metric.fetch(this) } catch (_: Exception) { return@map rule }
 
-            if (evaluateCondition(value, rule.operator, rule.threshold, rule.thresholdHigh)) {
+            val conditionMet = evaluateCondition(value, rule.operator, rule.threshold, rule.thresholdHigh)
+
+            // Cooldown check
+            if (now - rule.lastTriggeredMs < rule.cooldownSec * 1000L) {
+                if (conditionMet) {
+                    // Condition met but blocked by cooldown — record it
+                    val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
+                    stats[rule.id] = prev.copy(
+                        cooldownBlockCount = prev.cooldownBlockCount + 1,
+                        lastCooldownIso = isoNow,
+                    )
+                }
+                return@map rule
+            }
+
+            if (conditionMet) {
                 executeAction(rule)
                 changed = true
+                // Record trigger
+                val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
+                stats[rule.id] = prev.copy(
+                    triggerCount = prev.triggerCount + 1,
+                    lastTriggeredIso = isoNow,
+                )
                 rule.copy(lastTriggeredMs = now)
             } else {
                 rule
             }
         }
 
+        // Persist rules and stats
+        val editor = prefs.edit()
         if (changed) {
-            prefs.edit().putString("rules", saveRules(updatedRules)).apply()
+            editor.putString("rules", saveRules(updatedRules))
         }
+        editor.putString(KEY_STATS, saveLinkStats(stats))
+        editor.apply()
     }
 
     private fun executeAction(rule: LinkRule) {
-        val lang = LocalizationManager.loadLanguage(this)
         when (LinkActionType.fromKey(rule.actionType)) {
             LinkActionType.TORCH_ON -> setTorch(true)
             LinkActionType.TORCH_OFF -> setTorch(false)
@@ -120,6 +150,7 @@ class LinkService : Service() {
             LinkActionType.NOTIFICATION -> sendNotification(rule)
             LinkActionType.LOCK -> lockScreen()
             LinkActionType.RING -> ringPhone()
+            LinkActionType.LOG_ENTRY -> logToLogbook(rule)
         }
     }
 
@@ -177,6 +208,26 @@ class LinkService : Service() {
         } catch (_: Exception) {}
     }
 
+    private fun logToLogbook(rule: LinkRule) {
+        val text = rule.actionConfig["logText"]?.ifBlank { null }
+            ?: "Link triggered: ${rule.name.ifBlank { "Link Rule" }}"
+        val metrics = WidgetMetric.snapshotEnabled(this)
+        val entry = LogbookEntry(
+            isoDate = Instant.now().toString(),
+            text = text,
+            custom = false,
+            tags = listOf("link"),
+            metrics = metrics,
+        )
+        scope.launch {
+            try {
+                val repo = LogbookRepository(this@LinkService)
+                val store = repo.storeFlow.firstOrNull() ?: return@launch
+                repo.save(store.copy(entries = listOf(entry) + store.entries))
+            } catch (_: Exception) { }
+        }
+    }
+
     private fun ringPhone() {
         val prefs = getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
         val durationSec = prefs.getInt("phone_ring_duration_seconds", 30)
@@ -213,6 +264,7 @@ class LinkService : Service() {
         private const val NOTIF_ID = 7003
         private const val NOTIF_ID_ACTION_BASE = 8000
         private const val POLL_INTERVAL_MS = 3000L
+        private const val KEY_STATS = "link_stats"
 
         var isRunning = false
             private set
