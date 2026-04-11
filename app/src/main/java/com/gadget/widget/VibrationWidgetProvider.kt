@@ -21,6 +21,7 @@ class VibrationWidgetProvider : AppWidgetProvider() {
         // Reset persisted vibrating state on widget update (e.g. after reboot)
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         if (prefs.getBoolean(KEY_VIBRATING, false)) {
+            try { getVibrator(context).cancel() } catch (_: Exception) {}
             prefs.edit().putBoolean(KEY_VIBRATING, false).apply()
         }
         for (id in ids) setupWidget(context, manager, id)
@@ -47,16 +48,20 @@ class VibrationWidgetProvider : AppWidgetProvider() {
                 prefs.edit().putBoolean(KEY_VIBRATING, false).apply()
                 WidgetActionHandler.showToast(context, S.Widget.vibrationOff(lang))
             } else {
-                // Start looping vibration — use persisted drawn pattern, fallback to full-strength
+                // Start vibration — always loop so the toggle stays in sync
+                // Cancel any leftover vibration first to avoid stacking
+                try { vibrator.cancel() } catch (_: Exception) {}
+
                 try {
                     val hasAmplitude = vibrator.hasAmplitudeControl()
                     val effect = try {
                         val activePattern = DrawnPatternUtils.getActiveDrawnPattern(context)
                         if (activePattern != null) {
-                            val (points, loop) = activePattern
+                            val (points, _) = activePattern
                             val (t, a) = DrawnPatternUtils.toWaveformArrays(points, hasAmplitude)
                             if (t.isEmpty()) throw IllegalStateException("empty pattern")
-                            VibrationEffect.createWaveform(t, a, if (loop) 0 else -1)
+                            // Always loop (repeat from index 0) — widget is a toggle, not one-shot
+                            VibrationEffect.createWaveform(t, a, 0)
                         } else {
                             null
                         }
