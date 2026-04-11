@@ -13,7 +13,6 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -330,11 +329,11 @@ private fun MicMeter() {
         ) {
             drawRect(specBgColor, size = size)
 
-            if (!isRecording || spectrum.isEmpty()) return@Canvas
+            if (!isRecording || spectrum.isEmpty()) return@AccessibleCanvas
 
             // Show up to ~10kHz (bin index = freq * fftSize / sampleRate)
             val maxBin = minOf(spectrum.size, (10000 * FFT_SIZE / SAMPLE_RATE))
-            if (maxBin <= 1) return@Canvas
+            if (maxBin <= 1) return@AccessibleCanvas
 
             val barW = size.width / maxBin
             // Convert to dB, clamp range -80..0
