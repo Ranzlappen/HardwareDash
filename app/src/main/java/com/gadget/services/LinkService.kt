@@ -91,7 +91,7 @@ class LinkService : Service() {
             val metric = WidgetMetric.fromKey(rule.metricKey) ?: return@map rule
             val value = try { metric.fetch(this) } catch (_: Exception) { return@map rule }
 
-            if (evaluateCondition(value, rule.operator, rule.threshold, rule.thresholdHigh)) {
+            if (evaluateCondition(value, rule.operator, rule.threshold)) {
                 executeAction(rule)
                 changed = true
                 rule.copy(lastTriggeredMs = now)
