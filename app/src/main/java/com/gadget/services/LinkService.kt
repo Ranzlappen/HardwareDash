@@ -26,6 +26,7 @@ import com.gadget.receivers.AdminReceiver
 import com.gadget.ui.link.*
 import com.gadget.ui.logbook.LogbookEntry
 import com.gadget.ui.logbook.LogbookRepository
+import com.gadget.widget.DrawnPatternUtils
 import com.gadget.widget.WidgetMetric
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.firstOrNull
@@ -184,7 +185,21 @@ class LinkService : Service() {
             @Suppress("DEPRECATION")
             getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
-        val effect = VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE)
+
+        val hasAmplitude = vibrator.hasAmplitudeControl()
+        val effect = try {
+            val activePattern = DrawnPatternUtils.getActiveDrawnPattern(this)
+            if (activePattern != null) {
+                val (points, loop) = activePattern
+                val (t, a) = DrawnPatternUtils.toWaveformArrays(points, hasAmplitude)
+                if (t.isEmpty()) throw IllegalStateException("empty pattern")
+                VibrationEffect.createWaveform(t, a, if (loop) 0 else -1)
+            } else {
+                null
+            }
+        } catch (_: Exception) { null }
+            ?: VibrationEffect.createOneShot(500, 255)
+
         val bypassDnd = getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
             .getBoolean("bypass_dnd", false)
         if (bypassDnd) {

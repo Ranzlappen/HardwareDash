@@ -117,6 +117,7 @@ object DrawnPatternUtils {
         points: List<DrawnPoint>,
         hasAmplitude: Boolean,
     ): Pair<LongArray, IntArray> {
+        if (points.isEmpty()) return Pair(LongArray(0), IntArray(0))
         val sorted = points.sortedBy { it.timeNorm }
         val totalMs = 2000L
         val sampleInterval = 50L
