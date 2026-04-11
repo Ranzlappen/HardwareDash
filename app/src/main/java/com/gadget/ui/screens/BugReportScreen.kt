@@ -8,8 +8,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.horizontalScroll
@@ -26,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.app.NotificationManager
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.gadget.localization.S
@@ -105,6 +108,30 @@ private fun buildDeviceInfo(context: Context): List<Pair<String, String>> {
     )
 }
 
+private fun buildModeStatus(context: Context): List<Pair<String, String>> {
+    val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+    return listOf(
+        "Ringer Mode" to when (am.ringerMode) {
+            AudioManager.RINGER_MODE_NORMAL -> "Normal"
+            AudioManager.RINGER_MODE_VIBRATE -> "Vibrate"
+            AudioManager.RINGER_MODE_SILENT -> "Silent"
+            else -> "Unknown"
+        },
+        "Do Not Disturb" to when (nm.currentInterruptionFilter) {
+            NotificationManager.INTERRUPTION_FILTER_ALL -> "Off"
+            NotificationManager.INTERRUPTION_FILTER_PRIORITY -> "Priority Only"
+            NotificationManager.INTERRUPTION_FILTER_NONE -> "Total Silence"
+            NotificationManager.INTERRUPTION_FILTER_ALARMS -> "Alarms Only"
+            else -> "Unknown"
+        },
+        "DND Policy Access" to if (nm.isNotificationPolicyAccessGranted) "Granted" else "Not Granted",
+        "Battery Saver" to if (pm.isPowerSaveMode) "Active" else "Off",
+        "Music Active" to if (am.isMusicActive) "Yes" else "No",
+    )
+}
+
 @Composable
 fun BugReportScreen() {
     val context = LocalContext.current
@@ -112,6 +139,7 @@ fun BugReportScreen() {
 
     val permissions = remember { buildPermissionList() }
     val permissionStatuses = remember { permissions.map { it.name to it.check(context) } }
+    val modeStatuses = remember { buildModeStatus(context) }
     val deviceInfo = remember { buildDeviceInfo(context) }
 
     var bugDescription by remember { mutableStateOf("") }
@@ -235,7 +263,71 @@ fun BugReportScreen() {
         }
 
         // ══════════════════════════════════════════════════════════════
-        // SECTION 2 — Device Information
+        // SECTION 2 — System Modes
+        // ══════════════════════════════════════════════════════════════
+        Text(
+            strings.systemModesTitle,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        strings.modeLabel,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(0.5f),
+                    )
+                    Text(
+                        strings.statusLabel,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(0.5f),
+                    )
+                }
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+                modeStatuses.forEach { (name, value) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            name,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.weight(0.5f),
+                        )
+                        Text(
+                            value,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = when (value) {
+                                "Off", "Normal", "Granted", "No" -> Color(0xFF4CAF50)
+                                "Active", "Silent", "Total Silence", "Not Granted" -> Color(0xFFF44336)
+                                else -> MaterialTheme.colorScheme.onSurface
+                            },
+                            modifier = Modifier.weight(0.5f),
+                        )
+                    }
+                }
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // SECTION 3 — Device Information
         // ══════════════════════════════════════════════════════════════
         Text(
             strings.deviceInfoTitle,
@@ -309,8 +401,8 @@ fun BugReportScreen() {
 
     // ── Bug Report Modal ─────────────────────────────────────────────
     if (showReportDialog) {
-        val markdownReport = remember(permissionStatuses, deviceInfo, bugDescription) {
-            buildMarkdownReport(permissionStatuses, deviceInfo, bugDescription)
+        val markdownReport = remember(permissionStatuses, modeStatuses, deviceInfo, bugDescription) {
+            buildMarkdownReport(permissionStatuses, modeStatuses, deviceInfo, bugDescription)
         }
 
         AlertDialog(
@@ -369,6 +461,7 @@ fun BugReportScreen() {
 
 private fun buildMarkdownReport(
     permissions: List<Pair<String, Boolean>>,
+    modes: List<Pair<String, String>>,
     deviceInfo: List<Pair<String, String>>,
     description: String,
 ): String = buildString {
@@ -377,6 +470,13 @@ private fun buildMarkdownReport(
     appendLine("|---|---|")
     permissions.forEach { (name, granted) ->
         appendLine("| $name | ${if (granted) "Granted" else "Not Granted"} |")
+    }
+    appendLine()
+    appendLine("## System Modes")
+    appendLine("| Mode | Status |")
+    appendLine("|---|---|")
+    modes.forEach { (name, value) ->
+        appendLine("| $name | $value |")
     }
     appendLine()
     appendLine("## Device Info")
