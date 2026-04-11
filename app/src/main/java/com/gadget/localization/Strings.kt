@@ -590,6 +590,9 @@ object S {
 
     // ── Service notifications (non-Composable context) ─────────────────
     object Services {
+        // Vibration service
+        fun vibrationActive(lang: Language) = m(lang, "Vibration Active", "Vibration aktiv", "Vibración activa", "Vibration active")
+
         // Strobe service
         fun strobeActive(lang: Language) = m(lang, "Strobe Active", "Stroboskop aktiv", "Estrobo activo", "Stroboscope actif")
         fun tapToStop(lang: Language) = m(lang, "Tap to stop", "Tippen zum Stoppen", "Toque para detener", "Appuyez pour arrêter")

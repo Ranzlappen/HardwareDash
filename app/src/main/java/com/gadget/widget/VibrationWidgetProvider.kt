@@ -6,14 +6,11 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.widget.RemoteViews
 import com.gadget.R
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
+import com.gadget.services.VibrationService
 
 class VibrationWidgetProvider : AppWidgetProvider() {
 
@@ -21,6 +18,9 @@ class VibrationWidgetProvider : AppWidgetProvider() {
         // Reset persisted vibrating state on widget update (e.g. after reboot)
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         if (prefs.getBoolean(KEY_VIBRATING, false)) {
+            if (VibrationService.isRunning) {
+                VibrationService.toggle(context)
+            }
             prefs.edit().putBoolean(KEY_VIBRATING, false).apply()
         }
         for (id in ids) setupWidget(context, manager, id)
@@ -32,60 +32,15 @@ class VibrationWidgetProvider : AppWidgetProvider() {
             val lang = LocalizationManager.loadLanguage(context)
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val currentlyVibrating = prefs.getBoolean(KEY_VIBRATING, false)
-            val vibrator = getVibrator(context)
-
-            if (!vibrator.hasVibrator()) {
-                WidgetActionHandler.showToast(context, "No vibrator available on this device")
-                return
-            }
 
             if (currentlyVibrating) {
-                // Stop vibration
-                try {
-                    vibrator.cancel()
-                } catch (_: Exception) {}
+                VibrationService.toggle(context)
                 prefs.edit().putBoolean(KEY_VIBRATING, false).apply()
                 WidgetActionHandler.showToast(context, S.Widget.vibrationOff(lang))
             } else {
-                // Start looping vibration — use persisted drawn pattern, fallback to full-strength
-                try {
-                    val hasAmplitude = vibrator.hasAmplitudeControl()
-                    val effect = try {
-                        val activePattern = DrawnPatternUtils.getActiveDrawnPattern(context)
-                        if (activePattern != null) {
-                            val (points, loop) = activePattern
-                            val (t, a) = DrawnPatternUtils.toWaveformArrays(points, hasAmplitude)
-                            if (t.isEmpty()) throw IllegalStateException("empty pattern")
-                            VibrationEffect.createWaveform(t, a, if (loop) 0 else -1)
-                        } else {
-                            null
-                        }
-                    } catch (_: Exception) { null }
-                        ?: VibrationEffect.createWaveform(
-                            longArrayOf(0, 500, 200, 500),
-                            intArrayOf(0, 255, 0, 255),
-                            0,
-                        )
-
-                    vibrator.vibrate(effect)
-                    prefs.edit().putBoolean(KEY_VIBRATING, true).apply()
-                    WidgetActionHandler.showToast(context, S.Widget.vibrationOn(lang))
-                } catch (_: Exception) {
-                    // Last-resort fallback: simple full-strength vibration
-                    try {
-                        vibrator.vibrate(
-                            VibrationEffect.createWaveform(
-                                longArrayOf(0, 500, 200, 500),
-                                intArrayOf(0, 255, 0, 255),
-                                0,
-                            )
-                        )
-                        prefs.edit().putBoolean(KEY_VIBRATING, true).apply()
-                        WidgetActionHandler.showToast(context, S.Widget.vibrationOn(lang))
-                    } catch (_: Exception) {
-                        prefs.edit().putBoolean(KEY_VIBRATING, false).apply()
-                    }
-                }
+                VibrationService.toggle(context)
+                prefs.edit().putBoolean(KEY_VIBRATING, true).apply()
+                WidgetActionHandler.showToast(context, S.Widget.vibrationOn(lang))
             }
 
             // Update all vibration widgets to reflect state
@@ -99,15 +54,6 @@ class VibrationWidgetProvider : AppWidgetProvider() {
         private const val ACTION_TOGGLE = "com.gadget.widget.ACTION_VIBRATION_TOGGLE"
         private const val PREFS_NAME = "widget_vibration"
         private const val KEY_VIBRATING = "vibrating"
-
-        private fun getVibrator(context: Context): Vibrator =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager)
-                    .defaultVibrator
-            } else {
-                @Suppress("DEPRECATION")
-                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            }
 
         private fun setupWidget(context: Context, manager: AppWidgetManager, id: Int) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
