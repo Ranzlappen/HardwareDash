@@ -31,7 +31,11 @@ import androidx.compose.ui.unit.dp
 import android.app.NotificationManager
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.sectionHeading
 import com.gadget.receivers.AdminReceiver
 
 // ─── Permission descriptor ──────────────────────────────────────────────────
@@ -145,6 +149,8 @@ fun BugReportScreen() {
     var bugDescription by remember { mutableStateOf("") }
     var showReportDialog by remember { mutableStateOf(false) }
 
+    ScreenAnnouncement(S.accessibility.bugReportScreen)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -153,7 +159,10 @@ fun BugReportScreen() {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // ── Title ─────────────────────────────────────────────────────
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.semantics(mergeDescendants = true) { },
+        ) {
             Icon(
                 Icons.Default.BugReport, null,
                 tint = MaterialTheme.colorScheme.primary,
@@ -180,7 +189,10 @@ fun BugReportScreen() {
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.semantics(mergeDescendants = true) { },
+                ) {
                     Icon(
                         Icons.Default.Info, null,
                         tint = MaterialTheme.colorScheme.primary,
@@ -208,6 +220,7 @@ fun BugReportScreen() {
             strings.permissionsTitle,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
         )
 
         Card(
@@ -269,6 +282,7 @@ fun BugReportScreen() {
             strings.systemModesTitle,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
         )
 
         Card(
@@ -333,6 +347,7 @@ fun BugReportScreen() {
             strings.deviceInfoTitle,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
         )
 
         Card(
@@ -374,6 +389,7 @@ fun BugReportScreen() {
             strings.describeBug,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
         )
 
         OutlinedTextField(

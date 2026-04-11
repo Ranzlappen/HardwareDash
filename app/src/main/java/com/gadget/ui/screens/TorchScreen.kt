@@ -14,8 +14,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FlashlightOff
 import androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,14 +26,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.mergeDescendants
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
+import com.gadget.ui.components.sectionHeading
+import com.gadget.ui.theme.LocalAccessibilityPreferences
 import kotlinx.coroutines.delay
 
 @Composable
 fun TorchScreen() {
+    ScreenAnnouncement(S.accessibility.torchScreen)
+    val accessibilityPrefs = LocalAccessibilityPreferences.current
     val context = LocalContext.current
     var torchOn  by remember { mutableStateOf(false) }
     var hasFlash by remember { mutableStateOf(false) }
@@ -126,9 +135,9 @@ fun TorchScreen() {
         onDispose { strobeActive = false }
     }
 
-    // Pulsing glow animation when torch is on
+    // Pulsing glow animation when torch is on (gated by reduced motion)
     val infiniteTransition = rememberInfiniteTransition(label = "glow")
-    val glowScale by infiniteTransition.animateFloat(
+    val animatedGlowScale by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue  = if (torchOn) 1.15f else 1f,
         animationSpec = infiniteRepeatable(
@@ -137,9 +146,10 @@ fun TorchScreen() {
         ),
         label = "glowScale"
     )
+    val glowScale = if (accessibilityPrefs.reducedMotion) 1f else animatedGlowScale
     val glowColor by animateColorAsState(
         targetValue = if (torchOn) Color(0xFFFFEB3B) else Color(0xFF37474F),
-        animationSpec = tween(300),
+        animationSpec = if (accessibilityPrefs.reducedMotion) tween(0) else tween(300),
         label = "glowColor"
     )
 
@@ -154,14 +164,33 @@ fun TorchScreen() {
             strings.title,
             style      = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
+            modifier   = Modifier.sectionHeading(),
         )
         Spacer(Modifier.height(8.dp))
-        Text(
-            if (hasFlash) strings.flashDetected else strings.noFlash,
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (hasFlash) MaterialTheme.colorScheme.secondary
-                    else MaterialTheme.colorScheme.error,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (hasFlash) {
+                Icon(
+                    Icons.Default.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(18.dp),
+                )
+            } else {
+                Icon(
+                    Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
+            Spacer(Modifier.width(4.dp))
+            Text(
+                if (hasFlash) strings.flashDetected else strings.noFlash,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (hasFlash) MaterialTheme.colorScheme.secondary
+                        else MaterialTheme.colorScheme.error,
+            )
+        }
         Spacer(Modifier.height(48.dp))
 
         // ── Animated glow circle ─────────────────────────────────────────────
@@ -183,7 +212,7 @@ fun TorchScreen() {
                 Icon(
                     imageVector        = if (torchOn) Icons.Default.FlashlightOn
                                          else        Icons.Default.FlashlightOff,
-                    contentDescription = "Torch icon",
+                    contentDescription = if (torchOn) S.accessibility.torchOn else S.accessibility.torchOff,
                     tint               = if (torchOn) Color(0xFFFFEB3B) else Color.Gray,
                     modifier           = Modifier.size(64.dp),
                 )
@@ -285,7 +314,7 @@ fun TorchScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // Display Brightness Control
         // ══════════════════════════════════════════════════════════════════════
-        Text(strings.displayBrightness, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(strings.displayBrightness, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.sectionHeading())
         Spacer(Modifier.height(8.dp))
 
         if (!hasWriteSettings) {
@@ -302,7 +331,9 @@ fun TorchScreen() {
             }
         } else {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics(mergeDescendants = true) { },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {

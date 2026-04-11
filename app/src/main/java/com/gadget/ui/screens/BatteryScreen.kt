@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,14 +23,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.mergeDescendants
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
+import com.gadget.ui.components.AccessibleCanvas
+import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.liveUpdate
+import com.gadget.ui.components.sectionHeading
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 
 @Composable
 fun BatteryScreen() {
+    ScreenAnnouncement(S.accessibility.batteryScreen)
     val context = LocalContext.current
     val bm = remember { context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager }
 
@@ -110,14 +116,17 @@ fun BatteryScreen() {
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.semantics(mergeDescendants = true) { },
+        ) {
             Icon(
                 Icons.Default.BatteryStd, null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(28.dp),
             )
             Spacer(Modifier.width(10.dp))
-            Text(S.battery.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(S.battery.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, modifier = Modifier.sectionHeading())
         }
 
         // ── Level + status hero card ──────────────────────────────────────
@@ -126,7 +135,10 @@ fun BatteryScreen() {
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-            )
+            ),
+            modifier = Modifier
+                .semantics(mergeDescendants = true) { }
+                .liveUpdate(S.accessibility.batteryLevelDesc(level, status)),
         ) {
             Column(
                 modifier = Modifier
@@ -134,16 +146,33 @@ fun BatteryScreen() {
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    "$level%",
-                    style = MaterialTheme.typography.displayLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = when {
-                        level > 50 -> MaterialTheme.colorScheme.primary
-                        level > 20 -> Color(0xFFFFC107)
-                        else       -> MaterialTheme.colorScheme.error
-                    },
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = when {
+                            level > 50 -> Icons.Default.BatteryFull
+                            level > 20 -> Icons.Default.Battery5Bar
+                            else       -> Icons.Default.BatteryAlert
+                        },
+                        contentDescription = null,
+                        tint = when {
+                            level > 50 -> MaterialTheme.colorScheme.primary
+                            level > 20 -> Color(0xFFFFC107)
+                            else       -> MaterialTheme.colorScheme.error
+                        },
+                        modifier = Modifier.size(36.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "$level%",
+                        style = MaterialTheme.typography.displayLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = when {
+                            level > 50 -> MaterialTheme.colorScheme.primary
+                            level > 20 -> Color(0xFFFFC107)
+                            else       -> MaterialTheme.colorScheme.error
+                        },
+                    )
+                }
                 Spacer(Modifier.height(4.dp))
                 Text(
                     "$status  ·  $plugType",
@@ -186,12 +215,14 @@ fun BatteryScreen() {
             "Current Draw (mA) — live",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
         )
 
         val lineColor = MaterialTheme.colorScheme.primary
         val chartBg   = MaterialTheme.colorScheme.surfaceVariant
 
-        Canvas(
+        AccessibleCanvas(
+            contentDescription = S.accessibility.batteryChartDesc("${currentNow / 1000}"),
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(2.5f)
@@ -240,7 +271,8 @@ private fun BatteryRow(label: String, value: String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .semantics(mergeDescendants = true) { },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {

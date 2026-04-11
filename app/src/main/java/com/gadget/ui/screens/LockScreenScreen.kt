@@ -44,7 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.core.app.NotificationCompat
 import com.google.accompanist.permissions.*
+import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
 import com.gadget.MainActivity
 import com.gadget.receivers.AdminReceiver
@@ -189,6 +191,8 @@ fun LockScreenScreen() {
     var customDelaySec by remember { mutableFloatStateOf(0f) }
     var customStyleIdx by remember { mutableIntStateOf(0) } // 0=Normal, 1=BigText, 2=Inbox
 
+    ScreenAnnouncement(S.accessibility.lockScreen)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -197,7 +201,10 @@ fun LockScreenScreen() {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // ── Title ─────────────────────────────────────────────────────────────
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.semantics(mergeDescendants = true) { },
+        ) {
             Icon(
                 Icons.Default.Lock, null,
                 tint     = MaterialTheme.colorScheme.primary,
@@ -489,7 +496,7 @@ fun LockScreenScreen() {
 
         // ── Progress Bar ─────────────────────────────────────────────────
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) { },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -534,7 +541,7 @@ fun LockScreenScreen() {
 
         // ── Ongoing & Auto-cancel ────────────────────────────────────────
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) { },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -542,7 +549,7 @@ fun LockScreenScreen() {
             Switch(checked = customOngoing, onCheckedChange = { customOngoing = it })
         }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) { },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -1136,8 +1143,8 @@ fun LockScreenScreen() {
                             }
                             schedPrefs.edit().putString("actions", newArr.toString()).apply()
                             schedList = loadScheduleList(schedPrefs)
-                        }, modifier = Modifier.size(24.dp)) {
-                            Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
+                        }) {
+                            Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(24.dp))
                         }
                     }
                 }

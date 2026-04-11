@@ -32,6 +32,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.*
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -83,6 +84,8 @@ private fun enumerateLenses(context: Context): List<LensInfo> {
 @Composable
 fun CameraScreen() {
     val cameraPermState = rememberPermissionState(android.Manifest.permission.CAMERA)
+
+    ScreenAnnouncement(S.accessibility.cameraScreen)
 
     when {
         cameraPermState.status.isGranted -> CameraPreview()

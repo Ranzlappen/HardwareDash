@@ -1,6 +1,5 @@
 package com.gadget.ui.hubs
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,10 +12,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.accessibleCard
+import com.gadget.ui.components.sectionHeading
 import com.gadget.ui.navigation.Routes
 import com.gadget.ui.screens.*
 import com.gadget.widget.WidgetMetric
@@ -48,6 +52,8 @@ private fun MonitorGridScreen(onItemSelected: (String) -> Unit) {
     val nav = S.nav
     val context = LocalContext.current
 
+    ScreenAnnouncement(S.accessibility.monitorScreen)
+
     // Live metric previews
     var batteryLevel by remember { mutableStateOf("--") }
     var batteryStatus by remember { mutableStateOf("--") }
@@ -69,9 +75,12 @@ private fun MonitorGridScreen(onItemSelected: (String) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         // Header
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.semantics(mergeDescendants = true) { },
+        ) {
             Icon(
-                Icons.Default.MonitorHeart, null,
+                Icons.Default.MonitorHeart, contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(28.dp),
             )
@@ -80,6 +89,7 @@ private fun MonitorGridScreen(onItemSelected: (String) -> Unit) {
                 hubs.monitorTitle,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
+                modifier = Modifier.sectionHeading(),
             )
         }
 
@@ -118,10 +128,11 @@ private fun MonitorCard(
     preview: String? = null,
     onClick: () -> Unit,
 ) {
+    val cardLabel = if (preview != null && preview != "--") "$title, $subtitle, $preview" else "$title, $subtitle"
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .accessibleCard(label = cardLabel, onClick = onClick),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -134,7 +145,7 @@ private fun MonitorCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                icon, contentDescription = title,
+                icon, contentDescription = null,
                 modifier = Modifier.size(40.dp),
                 tint = MaterialTheme.colorScheme.primary,
             )
@@ -164,6 +175,7 @@ private fun MonitorCard(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.clearAndSetSemantics { },
             )
         }
     }

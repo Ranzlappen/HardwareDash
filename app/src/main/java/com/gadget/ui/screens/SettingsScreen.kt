@@ -2,6 +2,12 @@ package com.gadget.ui.screens
 
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,12 +19,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.Language
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
+import com.gadget.ui.components.sectionHeading
+import com.gadget.ui.theme.AccessibilityPreferencesManager
+import com.gadget.ui.theme.LocalAccessibilityPreferences
 import com.gadget.widget.WidgetMetric
 import kotlin.math.roundToInt
 
@@ -34,6 +45,9 @@ const val DEFAULT_NOTIFY_DELAY = 30
 fun SettingsScreen() {
     val context = LocalContext.current
     val strings = S.settings
+    val accessibilityPrefs = LocalAccessibilityPreferences.current
+
+    ScreenAnnouncement(S.accessibility.settingsScreen)
 
     // Language state
     val currentLang by LocalizationManager.currentLanguage
@@ -58,7 +72,10 @@ fun SettingsScreen() {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // ── Title ─────────────────────────────────────────────────────────
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.semantics(mergeDescendants = true) { },
+        ) {
             Icon(
                 Icons.Default.Settings, null,
                 tint = MaterialTheme.colorScheme.primary,
@@ -79,6 +96,7 @@ fun SettingsScreen() {
             strings.language,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
         )
         Text(
             strings.languageDesc,
@@ -139,6 +157,7 @@ fun SettingsScreen() {
             strings.widgetCustomizer,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
         )
 
         // ── Phone Ring Duration ──────────────────────────────────────────
@@ -244,7 +263,8 @@ fun SettingsScreen() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .semantics(mergeDescendants = true) { },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -253,6 +273,7 @@ fun SettingsScreen() {
                         strings.bypassDnd,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.sectionHeading(),
                     )
                     Text(
                         strings.bypassDndDesc,
@@ -274,12 +295,136 @@ fun SettingsScreen() {
         HorizontalDivider()
 
         // ══════════════════════════════════════════════════════════════════
+        // SECTION — Accessibility
+        // ══════════════════════════════════════════════════════════════════
+        Text(
+            S.accessibility.accessibilityTitle,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
+        )
+
+        // High Contrast
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .semantics(mergeDescendants = true) { },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        S.accessibility.highContrast,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        S.accessibility.highContrastDesc,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Switch(
+                    checked = accessibilityPrefs.highContrast,
+                    onCheckedChange = {
+                        AccessibilityPreferencesManager.setHighContrast(context, it)
+                    },
+                )
+            }
+        }
+
+        // Large Text
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .semantics(mergeDescendants = true) { },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        S.accessibility.largeText,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        S.accessibility.largeTextDesc,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Switch(
+                    checked = accessibilityPrefs.largeText,
+                    onCheckedChange = {
+                        AccessibilityPreferencesManager.setLargeText(context, it)
+                    },
+                )
+            }
+        }
+
+        // Reduced Motion
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .semantics(mergeDescendants = true) { },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        S.accessibility.reducedMotion,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        S.accessibility.reducedMotionDesc,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Switch(
+                    checked = accessibilityPrefs.reducedMotion,
+                    onCheckedChange = {
+                        AccessibilityPreferencesManager.setReducedMotion(context, it)
+                    },
+                )
+            }
+        }
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════
         // SECTION 4 — Metric Logging
         // ══════════════════════════════════════════════════════════════════
         Text(
             strings.metricLogging,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
         )
         Text(
             strings.metricLoggingDesc,
@@ -322,7 +467,7 @@ private fun MetricCategoryCard(
             ) {
                 Icon(
                     if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null,
+                    contentDescription = if (expanded) S.accessibility.collapseSection else S.accessibility.expandSection,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp),
                 )
@@ -346,7 +491,12 @@ private fun MetricCategoryCard(
                 }
             }
 
-            AnimatedVisibility(visible = expanded) {
+            val reducedMotion = LocalAccessibilityPreferences.current.reducedMotion
+            AnimatedVisibility(
+                visible = expanded,
+                enter = if (reducedMotion) EnterTransition.None else expandVertically() + fadeIn(),
+                exit = if (reducedMotion) ExitTransition.None else shrinkVertically() + fadeOut(),
+            ) {
                 Column {
                     metrics.forEach { metric ->
                         val prefKey = "metric_log_${metric.key}"
@@ -356,6 +506,7 @@ private fun MetricCategoryCard(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .semantics(mergeDescendants = true) { }
                                 .clickable {
                                     checked = !checked
                                     prefs.edit().putBoolean(prefKey, checked).apply()

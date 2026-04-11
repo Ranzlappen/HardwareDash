@@ -14,6 +14,12 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -34,9 +40,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
+import com.gadget.ui.components.AccessibleCanvas
+import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.sectionHeading
+import com.gadget.ui.theme.LocalAccessibilityPreferences
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 
@@ -98,6 +111,7 @@ private val axisColors = listOf(
 
 @Composable
 fun SensorsScreen() {
+    ScreenAnnouncement(S.accessibility.sensorsScreen)
     val context = LocalContext.current
     val sm      = remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
     val strSensorReadingsCopied = S.sensors.sensorReadingsCopied
@@ -121,13 +135,17 @@ fun SensorsScreen() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.semantics(mergeDescendants = true) { },
+            ) {
                 Icon(Icons.Default.Analytics, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
                 Spacer(Modifier.width(10.dp))
                 Text(
                     "${S.sensors.title}  (${availableTypes.size})",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
+                    modifier = Modifier.sectionHeading(),
                 )
             }
             IconButton(onClick = {
@@ -161,7 +179,7 @@ fun SensorsScreen() {
                 clipboard.setPrimaryClip(ClipData.newPlainText("Sensor Readings", text))
                 Toast.makeText(context, strSensorReadingsCopied, Toast.LENGTH_SHORT).show()
             }) {
-                Icon(Icons.Default.ContentCopy, "Copy sensor readings")
+                Icon(Icons.Default.ContentCopy, S.accessibility.copyReadings)
             }
         }
 
@@ -268,12 +286,17 @@ private fun SensorCard(
                 }
                 Icon(
                     if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = "Expand"
+                    contentDescription = if (expanded) S.accessibility.collapseSection else S.accessibility.expandSection
                 )
             }
 
             // ── Chart (visible when expanded) ─────────────────────────────
-            AnimatedVisibility(visible = expanded) {
+            val reducedMotion = LocalAccessibilityPreferences.current.reducedMotion
+            AnimatedVisibility(
+                visible = expanded,
+                enter = if (reducedMotion) EnterTransition.None else fadeIn() + expandVertically(),
+                exit = if (reducedMotion) ExitTransition.None else fadeOut() + shrinkVertically(),
+            ) {
                 Column {
                     Spacer(Modifier.height(10.dp))
                     Text(
@@ -293,11 +316,19 @@ private fun SensorCard(
                     // Determine how many axes to chart
                     val chartAxes = if (spec.type == Sensor.TYPE_STEP_COUNTER) 1 else axisCount
 
-                    Canvas(
+                    val chartDescription = S.accessibility.sensorChartDesc(
+                        spec.name,
+                        spec.axisLabels.mapIndexed { i, lbl ->
+                            "$lbl=${"%.3f".format(values.getOrElse(i) { 0f })}"
+                        }.joinToString(", ")
+                    )
+
+                    AccessibleCanvas(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(2.5f)
-                            .clip(MaterialTheme.shapes.medium)
+                            .clip(MaterialTheme.shapes.medium),
+                        contentDescription = chartDescription,
                     ) {
                         // Find global min/max across all axes
                         var globalMin = Float.MAX_VALUE
@@ -348,7 +379,7 @@ private fun SensorCard(
                         ) {
                             for (a in 0 until chartAxes) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Canvas(Modifier.size(8.dp)) {
+                                    Canvas(Modifier.size(8.dp).semantics { this.contentDescription = "" }) {
                                         drawCircle(axisColors.getOrElse(a) { Color.White })
                                     }
                                     Spacer(Modifier.width(4.dp))

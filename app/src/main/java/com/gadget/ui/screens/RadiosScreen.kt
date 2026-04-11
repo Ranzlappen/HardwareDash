@@ -46,7 +46,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.permissions.*
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.services.NfcEmulationService
 import com.google.android.gms.location.*
 import org.json.JSONArray
@@ -448,6 +451,8 @@ fun RadiosScreen() {
         }
     }
 
+    ScreenAnnouncement(S.accessibility.radiosScreen)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -459,6 +464,7 @@ fun RadiosScreen() {
             "Radio & Network Status",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
+            modifier = Modifier.semantics { heading() },
         )
         Text(
             "⚠️  Android 10+ prevents apps from toggling WiFi/BT directly.\n" +
@@ -688,10 +694,10 @@ fun RadiosScreen() {
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text("Details", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-                                IconButton(onClick = { showProtectionDetails = !showProtectionDetails }, modifier = Modifier.size(24.dp)) {
+                                IconButton(onClick = { showProtectionDetails = !showProtectionDetails }) {
                                     Icon(
                                         if (showProtectionDetails) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                        "Toggle details",
+                                        S.accessibility.toggleDetails,
                                     )
                                 }
                             }
@@ -1010,10 +1016,10 @@ fun RadiosScreen() {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text("NFC Guide", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                        IconButton(onClick = { showNfcInfo = !showNfcInfo }, modifier = Modifier.size(24.dp)) {
+                        IconButton(onClick = { showNfcInfo = !showNfcInfo }) {
                             Icon(
                                 if (showNfcInfo) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                "Toggle info",
+                                S.accessibility.toggleInfo,
                             )
                         }
                     }
@@ -1228,11 +1234,11 @@ fun RadiosScreen() {
                     ) {
                         Text("GPS Log (${gpsLog.size} entries)", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
                         Row {
-                            IconButton(onClick = { showGpsLog = !showGpsLog }, modifier = Modifier.size(24.dp)) {
-                                Icon(if (showGpsLog) Icons.Default.ExpandLess else Icons.Default.ExpandMore, "Toggle log")
+                            IconButton(onClick = { showGpsLog = !showGpsLog }) {
+                                Icon(if (showGpsLog) Icons.Default.ExpandLess else Icons.Default.ExpandMore, S.accessibility.toggleLog)
                             }
-                            IconButton(onClick = { gpsLog = emptyList() }, modifier = Modifier.size(24.dp)) {
-                                Icon(Icons.Default.Delete, "Clear log", tint = MaterialTheme.colorScheme.error)
+                            IconButton(onClick = { gpsLog = emptyList() }) {
+                                Icon(Icons.Default.Delete, S.accessibility.clearLog, tint = MaterialTheme.colorScheme.error)
                             }
                         }
                     }

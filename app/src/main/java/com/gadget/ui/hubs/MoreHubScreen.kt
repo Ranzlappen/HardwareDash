@@ -12,10 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.sectionHeading
 import com.gadget.ui.navigation.Routes
 import com.gadget.ui.screens.*
 import com.gadget.ui.link.LinkScreen
@@ -46,6 +49,8 @@ private fun MoreGridScreen(onItemSelected: (String) -> Unit) {
     val hubs = S.hubs
     val nav = S.nav
 
+    ScreenAnnouncement(S.accessibility.moreScreen)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -54,9 +59,12 @@ private fun MoreGridScreen(onItemSelected: (String) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         // Header
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.semantics(mergeDescendants = true) { },
+        ) {
             Icon(
-                Icons.Default.Apps, null,
+                Icons.Default.Apps, contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(28.dp),
             )
@@ -65,6 +73,7 @@ private fun MoreGridScreen(onItemSelected: (String) -> Unit) {
                 hubs.moreTitle,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
+                modifier = Modifier.sectionHeading(),
             )
         }
 
@@ -119,7 +128,12 @@ private fun MoreListItem(
     onClick: () -> Unit,
 ) {
     ListItem(
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = Modifier
+            .semantics(mergeDescendants = true) {
+                role = Role.Button
+                contentDescription = "$title, $subtitle"
+            }
+            .clickable(onClick = onClick),
         headlineContent = {
             Text(title, fontWeight = FontWeight.SemiBold)
         },
@@ -133,7 +147,7 @@ private fun MoreListItem(
         leadingContent = {
             Icon(
                 icon,
-                contentDescription = title,
+                contentDescription = null,
                 modifier = Modifier.size(28.dp),
                 tint = MaterialTheme.colorScheme.primary,
             )
@@ -143,6 +157,7 @@ private fun MoreListItem(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.clearAndSetSemantics { },
             )
         },
     )

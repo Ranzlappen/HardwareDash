@@ -556,6 +556,112 @@ object S {
         val clearAll get() = m(l, "Clear all", "Alle löschen", "Borrar todo", "Tout effacer")
     }
 
+    // ── Accessibility ──────────────────────────────────────────────────
+    val accessibility: Accessibility @Composable get() = Accessibility(lang)
+
+    class Accessibility(private val l: Language) {
+        // Screen announcements
+        val dashboardScreen get() = m(l, "Dashboard screen", "Dashboard-Bildschirm", "Pantalla del panel", "Écran du tableau de bord")
+        val toolsScreen get() = m(l, "Tools screen", "Werkzeuge-Bildschirm", "Pantalla de herramientas", "Écran des outils")
+        val monitorScreen get() = m(l, "Monitor screen", "Monitor-Bildschirm", "Pantalla de monitor", "Écran du moniteur")
+        val logbookScreen get() = m(l, "Logbook screen", "Logbuch-Bildschirm", "Pantalla del registro", "Écran du journal")
+        val moreScreen get() = m(l, "More screen", "Mehr-Bildschirm", "Pantalla de más opciones", "Écran plus")
+        val torchScreen get() = m(l, "Torch screen", "Taschenlampe-Bildschirm", "Pantalla de linterna", "Écran lampe torche")
+        val cameraScreen get() = m(l, "Camera screen", "Kamera-Bildschirm", "Pantalla de cámara", "Écran caméra")
+        val vibrationScreen get() = m(l, "Vibration screen", "Vibrations-Bildschirm", "Pantalla de vibración", "Écran vibration")
+        val micScreen get() = m(l, "Microphone screen", "Mikrofon-Bildschirm", "Pantalla de micrófono", "Écran microphone")
+        val sensorsScreen get() = m(l, "Sensors screen", "Sensoren-Bildschirm", "Pantalla de sensores", "Écran capteurs")
+        val batteryScreen get() = m(l, "Battery screen", "Akku-Bildschirm", "Pantalla de batería", "Écran batterie")
+        val radiosScreen get() = m(l, "Radios screen", "Funk-Bildschirm", "Pantalla de radios", "Écran radios")
+        val lockScreen get() = m(l, "Notifications screen", "Benachrichtigungs-Bildschirm", "Pantalla de notificaciones", "Écran notifications")
+        val linkScreen get() = m(l, "Link automation screen", "Link-Automatisierungs-Bildschirm", "Pantalla de automatización", "Écran automatisation")
+        val fileMetaScreen get() = m(l, "File metadata screen", "Datei-Metadaten-Bildschirm", "Pantalla de metadatos", "Écran métadonnées")
+        val settingsScreen get() = m(l, "Settings screen", "Einstellungs-Bildschirm", "Pantalla de ajustes", "Écran paramètres")
+        val bugReportScreen get() = m(l, "Bug report screen", "Fehlerbericht-Bildschirm", "Pantalla de informe de errores", "Écran rapport de bug")
+
+        // Settings section
+        val accessibilityTitle get() = m(l, "Accessibility", "Barrierefreiheit", "Accesibilidad", "Accessibilité")
+        val highContrast get() = m(l, "High contrast mode", "Hochkontrastmodus", "Modo de alto contraste", "Mode contraste élevé")
+        val highContrastDesc get() = m(l, "Increases color contrast for better visibility", "Erhöht den Farbkontrast für bessere Sichtbarkeit", "Aumenta el contraste de color para mejor visibilidad", "Augmente le contraste des couleurs pour une meilleure visibilité")
+        val largeText get() = m(l, "Large text", "Großer Text", "Texto grande", "Grand texte")
+        val largeTextDesc get() = m(l, "Increases text size throughout the app", "Vergrößert die Textgröße in der gesamten App", "Aumenta el tamaño del texto en toda la aplicación", "Augmente la taille du texte dans toute l'application")
+        val reducedMotion get() = m(l, "Reduce motion", "Bewegung reduzieren", "Reducir movimiento", "Réduire les animations")
+        val reducedMotionDesc get() = m(l, "Minimizes animations and motion effects", "Minimiert Animationen und Bewegungseffekte", "Minimiza las animaciones y efectos de movimiento", "Minimise les animations et effets de mouvement")
+
+        // State descriptions
+        val torchOn get() = m(l, "Torch is on", "Taschenlampe ist an", "Linterna encendida", "Lampe allumée")
+        val torchOff get() = m(l, "Torch is off", "Taschenlampe ist aus", "Linterna apagada", "Lampe éteinte")
+        val recording get() = m(l, "Recording", "Aufnahme", "Grabando", "Enregistrement")
+        val notRecording get() = m(l, "Not recording", "Keine Aufnahme", "Sin grabar", "Pas d'enregistrement")
+        val enabled get() = m(l, "Enabled", "Aktiviert", "Activado", "Activé")
+        val disabled get() = m(l, "Disabled", "Deaktiviert", "Desactivado", "Désactivé")
+        val expanded get() = m(l, "Expanded", "Erweitert", "Expandido", "Développé")
+        val collapsed get() = m(l, "Collapsed", "Eingeklappt", "Contraído", "Réduit")
+        val flashAvailable get() = m(l, "Flash available", "Blitz verfügbar", "Flash disponible", "Flash disponible")
+        val flashUnavailable get() = m(l, "Flash unavailable", "Blitz nicht verfügbar", "Flash no disponible", "Flash non disponible")
+
+        // Chart descriptions
+        fun sensorChartDesc(name: String, values: String) = m(l,
+            "Live chart for $name showing $values",
+            "Live-Diagramm für $name zeigt $values",
+            "Gráfico en vivo de $name mostrando $values",
+            "Graphique en direct de $name affichant $values")
+        fun batteryChartDesc(current: String) = m(l,
+            "Battery current draw chart, current value $current milliamps",
+            "Batteriestrom-Diagramm, aktueller Wert $current Milliampere",
+            "Gráfico de corriente de batería, valor actual $current miliamperios",
+            "Graphique de courant de batterie, valeur actuelle $current milliampères")
+        fun spectrumDesc(peakHz: String) = m(l,
+            "Audio spectrum analyzer, peak frequency $peakHz hertz",
+            "Audio-Spektrumanalysator, Spitzenfrequenz $peakHz Hertz",
+            "Analizador de espectro de audio, frecuencia pico $peakHz hercios",
+            "Analyseur de spectre audio, fréquence de pointe $peakHz hertz")
+        fun dbMeterDesc(db: String) = m(l,
+            "Sound level meter reading $db decibels",
+            "Schallpegelmesser zeigt $db Dezibel",
+            "Medidor de nivel sonoro leyendo $db decibelios",
+            "Sonomètre indiquant $db décibels")
+        fun waveformDesc() = m(l,
+            "Audio waveform history visualization",
+            "Audio-Wellenform-Verlaufsvisualisierung",
+            "Visualización del historial de forma de onda de audio",
+            "Visualisation de l'historique de la forme d'onde audio")
+        fun vibrationCanvasDesc() = m(l,
+            "Vibration pattern drawing canvas",
+            "Vibrationsmuster-Zeichnungsfläche",
+            "Lienzo de dibujo de patrón de vibración",
+            "Canevas de dessin de motif de vibration")
+        fun batteryLevelDesc(level: Int, status: String) = m(l,
+            "Battery at $level percent, $status",
+            "Akku bei $level Prozent, $status",
+            "Batería al $level por ciento, $status",
+            "Batterie à $level pour cent, $status")
+
+        // Navigation
+        val skipToContent get() = m(l, "Skip to content", "Zum Inhalt springen", "Saltar al contenido", "Aller au contenu")
+
+        // Actions
+        val expandSection get() = m(l, "Expand section", "Abschnitt erweitern", "Expandir sección", "Développer la section")
+        val collapseSection get() = m(l, "Collapse section", "Abschnitt einklappen", "Contraer sección", "Réduire la section")
+        val playRecording get() = m(l, "Play recording", "Aufnahme abspielen", "Reproducir grabación", "Lire l'enregistrement")
+        val stopPlayback get() = m(l, "Stop playback", "Wiedergabe stoppen", "Detener reproducción", "Arrêter la lecture")
+        val removeStep get() = m(l, "Remove step", "Schritt entfernen", "Eliminar paso", "Supprimer l'étape")
+        val copyReadings get() = m(l, "Copy all sensor readings to clipboard", "Alle Sensorwerte in die Zwischenablage kopieren", "Copiar todas las lecturas del sensor al portapapeles", "Copier toutes les lectures des capteurs dans le presse-papiers")
+        val startRecording get() = m(l, "Start recording", "Aufnahme starten", "Iniciar grabación", "Démarrer l'enregistrement")
+        val stopRecording get() = m(l, "Stop recording", "Aufnahme stoppen", "Detener grabación", "Arrêter l'enregistrement")
+        val loadPattern get() = m(l, "Load pattern", "Muster laden", "Cargar patrón", "Charger le motif")
+        val deletePattern get() = m(l, "Delete pattern", "Muster löschen", "Eliminar patrón", "Supprimer le motif")
+        val permissionGranted get() = m(l, "Granted", "Erteilt", "Concedido", "Accordée")
+        val permissionDenied get() = m(l, "Denied", "Verweigert", "Denegado", "Refusée")
+
+        // Interactive icon labels
+        val toggleDetails get() = m(l, "Toggle details", "Details umschalten", "Alternar detalles", "Basculer les détails")
+        val toggleInfo get() = m(l, "Toggle info", "Info umschalten", "Alternar información", "Basculer les infos")
+        val toggleLog get() = m(l, "Toggle log", "Protokoll umschalten", "Alternar registro", "Basculer le journal")
+        val clearLog get() = m(l, "Clear log", "Protokoll löschen", "Borrar registro", "Effacer le journal")
+        val help get() = m(l, "Help", "Hilfe", "Ayuda", "Aide")
+    }
+
     // ── Widget / Service toasts (non-Composable context) ─────────────────
     object Widget {
         fun phoneRingToast(lang: Language, seconds: Int) = m(lang,
