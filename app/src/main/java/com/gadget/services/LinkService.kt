@@ -66,7 +66,11 @@ class LinkService : Service() {
         job?.cancel()
         job = scope.launch {
             while (isActive) {
-                evaluateRules()
+                try {
+                    evaluateRules()
+                } catch (_: Exception) {
+                    // Never let a rule evaluation crash the service
+                }
                 delay(POLL_INTERVAL_MS)
             }
         }
@@ -84,8 +88,8 @@ class LinkService : Service() {
         val json = prefs.getString("rules", "") ?: ""
         val rules = loadRules(json)
         val now = System.currentTimeMillis()
-        val isoNow = Instant.now().toString()
-        var changed = false
+        var rulesChanged = false
+        var statsChanged = false
 
         // Load current stats
         val statsJson = prefs.getString(KEY_STATS, "") ?: ""
@@ -94,46 +98,52 @@ class LinkService : Service() {
         val updatedRules = rules.map { rule ->
             if (!rule.enabled) return@map rule
 
+            // Cooldown check first (matches original order — avoids unnecessary sensor reads)
+            val inCooldown = now - rule.lastTriggeredMs < rule.cooldownSec * 1000L
+
             val metric = WidgetMetric.fromKey(rule.metricKey) ?: return@map rule
             val value = try { metric.fetch(this) } catch (_: Exception) { return@map rule }
 
             val conditionMet = evaluateCondition(value, rule.operator, rule.threshold, rule.thresholdHigh)
 
-            // Cooldown check
-            if (now - rule.lastTriggeredMs < rule.cooldownSec * 1000L) {
+            if (inCooldown) {
                 if (conditionMet) {
-                    // Condition met but blocked by cooldown — record it
                     val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
                     stats[rule.id] = prev.copy(
                         cooldownBlockCount = prev.cooldownBlockCount + 1,
-                        lastCooldownIso = isoNow,
+                        lastCooldownIso = Instant.now().toString(),
                     )
+                    statsChanged = true
                 }
                 return@map rule
             }
 
             if (conditionMet) {
-                executeAction(rule)
-                changed = true
-                // Record trigger
+                try {
+                    executeAction(rule)
+                } catch (_: Exception) {
+                    // Never let a failing action crash the evaluation loop
+                }
+                rulesChanged = true
                 val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
                 stats[rule.id] = prev.copy(
                     triggerCount = prev.triggerCount + 1,
-                    lastTriggeredIso = isoNow,
+                    lastTriggeredIso = Instant.now().toString(),
                 )
+                statsChanged = true
                 rule.copy(lastTriggeredMs = now)
             } else {
                 rule
             }
         }
 
-        // Persist rules and stats
-        val editor = prefs.edit()
-        if (changed) {
-            editor.putString("rules", saveRules(updatedRules))
+        // Only write to disk when something actually changed
+        if (rulesChanged || statsChanged) {
+            val editor = prefs.edit()
+            if (rulesChanged) editor.putString("rules", saveRules(updatedRules))
+            if (statsChanged) editor.putString(KEY_STATS, saveLinkStats(stats))
+            editor.apply()
         }
-        editor.putString(KEY_STATS, saveLinkStats(stats))
-        editor.apply()
     }
 
     private fun executeAction(rule: LinkRule) {
@@ -209,23 +219,25 @@ class LinkService : Service() {
     }
 
     private fun logToLogbook(rule: LinkRule) {
-        val text = rule.actionConfig["logText"]?.ifBlank { null }
-            ?: "Link triggered: ${rule.name.ifBlank { "Link Rule" }}"
-        val metrics = WidgetMetric.snapshotEnabled(this)
-        val entry = LogbookEntry(
-            isoDate = Instant.now().toString(),
-            text = text,
-            custom = false,
-            tags = listOf("link"),
-            metrics = metrics,
-        )
-        scope.launch {
-            try {
-                val repo = LogbookRepository(this@LinkService)
-                val store = repo.storeFlow.firstOrNull() ?: return@launch
-                repo.save(store.copy(entries = listOf(entry) + store.entries))
-            } catch (_: Exception) { }
-        }
+        try {
+            val text = rule.actionConfig["logText"]?.ifBlank { null }
+                ?: "Link triggered: ${rule.name.ifBlank { "Link Rule" }}"
+            val metrics = try { WidgetMetric.snapshotEnabled(this) } catch (_: Exception) { emptyMap() }
+            val entry = LogbookEntry(
+                isoDate = Instant.now().toString(),
+                text = text,
+                custom = false,
+                tags = listOf("link"),
+                metrics = metrics,
+            )
+            scope.launch {
+                try {
+                    val repo = LogbookRepository(applicationContext)
+                    val store = repo.storeFlow.firstOrNull() ?: return@launch
+                    repo.save(store.copy(entries = listOf(entry) + store.entries))
+                } catch (_: Exception) { }
+            }
+        } catch (_: Exception) { }
     }
 
     private fun ringPhone() {
