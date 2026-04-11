@@ -159,6 +159,16 @@
             android:exported="false"
             android:foregroundServiceType="camera|microphone" />
 
+        <!-- ── Vibration Service ────────────────────────────────────── -->
+        <service
+            android:name=".services.VibrationService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Continuous vibration pattern playback toggled by user" />
+        </service>
+
         <!-- ── Strobe Service ──────────────────────────────────────── -->
         <service
             android:name=".services.StrobeService"
