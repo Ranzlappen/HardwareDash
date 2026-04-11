@@ -33,6 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
 import com.gadget.ui.components.SliderWithInput
+import com.gadget.widget.DrawnPatternUtils
+import com.gadget.widget.DrawnPoint
+import com.gadget.widget.SavedDrawnPattern
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -117,8 +120,7 @@ private data class SavedPattern(
     val loop: Boolean,
 )
 
-// ─── Drawn point for canvas pattern ───────────────────────────────────────────
-private data class DrawnPoint(val timeNorm: Float, val intensity: Float)
+// DrawnPoint is imported from com.gadget.widget.DrawnPatternUtils
 
 @Composable
 fun VibrationScreen() {
@@ -149,6 +151,12 @@ fun VibrationScreen() {
     // Canvas drawing state
     val drawnPoints = remember { mutableStateListOf<DrawnPoint>() }
     var drawLoopEnabled by remember { mutableStateOf(false) }
+
+    // Drawn pattern save/load state
+    var showDrawnSaveDialog by remember { mutableStateOf(false) }
+    var showDrawnLoadDialog by remember { mutableStateOf(false) }
+    var drawnSaveName by remember { mutableStateOf("") }
+    var savedDrawnPatterns by remember { mutableStateOf(DrawnPatternUtils.loadDrawnPatterns(context)) }
 
     Column(
         modifier = Modifier
@@ -410,6 +418,7 @@ fun VibrationScreen() {
                     vibrator.cancel()
                     if (drawnPoints.isNotEmpty()) {
                         playDrawnPattern(vibrator, drawnPoints.toList(), drawLoopEnabled, hasAmplitude)
+                        DrawnPatternUtils.setActiveDrawnPattern(context, drawnPoints.toList(), drawLoopEnabled)
                     }
                 },
                 modifier = Modifier.weight(1f),
@@ -420,6 +429,33 @@ fun VibrationScreen() {
                 onClick = { drawnPoints.clear() },
                 modifier = Modifier.weight(1f),
             ) { Text(S.vibration.clearDrawing, maxLines = 1, softWrap = false) }
+        }
+
+        // ── Save / Load drawn patterns ───────────────────────────────────────
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            OutlinedButton(
+                onClick = { showDrawnSaveDialog = true },
+                modifier = Modifier.weight(1f),
+                enabled = drawnPoints.isNotEmpty(),
+            ) {
+                Icon(Icons.Default.Save, null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(S.vibration.savePattern, maxLines = 1, softWrap = false)
+            }
+            OutlinedButton(
+                onClick = {
+                    savedDrawnPatterns = DrawnPatternUtils.loadDrawnPatterns(context)
+                    showDrawnLoadDialog = true
+                },
+                modifier = Modifier.weight(1f),
+            ) {
+                Icon(Icons.Default.FolderOpen, null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(S.vibration.loadPattern, maxLines = 1, softWrap = false)
+            }
         }
     }
 
@@ -520,6 +556,101 @@ fun VibrationScreen() {
             },
         )
     }
+
+    // ── Save drawn pattern dialog ─────────────────────────────────────────
+    if (showDrawnSaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showDrawnSaveDialog = false },
+            title = { Text(S.vibration.savePattern) },
+            text = {
+                OutlinedTextField(
+                    value = drawnSaveName,
+                    onValueChange = { drawnSaveName = it },
+                    label = { Text(S.vibration.patternName) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (drawnSaveName.isNotBlank()) {
+                            val pattern = SavedDrawnPattern(
+                                name = drawnSaveName.trim(),
+                                points = drawnPoints.toList(),
+                                loop = drawLoopEnabled,
+                            )
+                            savedDrawnPatterns = (listOf(pattern) + savedDrawnPatterns).take(MAX_SAVED)
+                            DrawnPatternUtils.saveDrawnPatterns(context, savedDrawnPatterns)
+                            drawnSaveName = ""
+                            showDrawnSaveDialog = false
+                        }
+                    },
+                    enabled = drawnSaveName.isNotBlank(),
+                ) { Text(S.vibration.save) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDrawnSaveDialog = false }) { Text(S.vibration.cancel) }
+            },
+        )
+    }
+
+    // ── Load drawn pattern dialog ─────────────────────────────────────────
+    if (showDrawnLoadDialog) {
+        AlertDialog(
+            onDismissRequest = { showDrawnLoadDialog = false },
+            title = { Text(S.vibration.loadPattern) },
+            text = {
+                if (savedDrawnPatterns.isEmpty()) {
+                    Text(S.vibration.noSavedPatterns, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        savedDrawnPatterns.forEachIndexed { idx, p ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(p.name, fontWeight = FontWeight.SemiBold)
+                                        Text(
+                                            "${p.points.size} points${if (p.loop) " · loop" else ""}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        )
+                                    }
+                                    Row {
+                                        IconButton(onClick = {
+                                            drawnPoints.clear()
+                                            drawnPoints.addAll(p.points)
+                                            drawLoopEnabled = p.loop
+                                            showDrawnLoadDialog = false
+                                        }) {
+                                            Icon(Icons.Default.FileOpen, "Load")
+                                        }
+                                        IconButton(onClick = {
+                                            savedDrawnPatterns = savedDrawnPatterns.toMutableList().also { it.removeAt(idx) }
+                                            DrawnPatternUtils.saveDrawnPatterns(context, savedDrawnPatterns)
+                                        }) {
+                                            Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDrawnLoadDialog = false }) { Text(S.vibration.close) }
+            },
+        )
+    }
 }
 
 // ─── Play waveform from steps ─────────────────────────────────────────────────
@@ -558,48 +689,9 @@ private fun playDrawnPattern(
     hasAmplitude: Boolean,
 ) {
     if (points.isEmpty()) return
-    val sorted = points.sortedBy { it.timeNorm }
-
-    // Total duration is 2000ms. Sample at 50ms intervals.
-    val totalMs = 2000L
-    val sampleInterval = 50L
-    val numSamples = (totalMs / sampleInterval).toInt()
-
-    val timings = mutableListOf<Long>()
-    val amplitudes = mutableListOf<Int>()
-
-    for (i in 0 until numSamples) {
-        val tNorm = i.toFloat() / numSamples
-        // Find surrounding points and interpolate intensity
-        val intensity = interpolateIntensity(sorted, tNorm)
-        timings.add(sampleInterval)
-        amplitudes.add(if (hasAmplitude) (intensity * 255).toInt().coerceIn(0, 255) else if (intensity > 0.1f) 255 else 0)
-    }
-
+    val (timings, amplitudes) = DrawnPatternUtils.toWaveformArrays(points, hasAmplitude)
     val repeatIdx = if (loop) 0 else -1
-    vibrator.vibrate(
-        VibrationEffect.createWaveform(
-            timings.toLongArray(),
-            amplitudes.toIntArray(),
-            repeatIdx,
-        )
-    )
-}
-
-private fun interpolateIntensity(points: List<DrawnPoint>, tNorm: Float): Float {
-    if (points.isEmpty()) return 0f
-    if (tNorm <= points.first().timeNorm) return points.first().intensity
-    if (tNorm >= points.last().timeNorm) return points.last().intensity
-
-    for (i in 0 until points.size - 1) {
-        val p1 = points[i]
-        val p2 = points[i + 1]
-        if (tNorm in p1.timeNorm..p2.timeNorm) {
-            val frac = if (p2.timeNorm > p1.timeNorm) (tNorm - p1.timeNorm) / (p2.timeNorm - p1.timeNorm) else 0f
-            return p1.intensity + frac * (p2.intensity - p1.intensity)
-        }
-    }
-    return points.last().intensity
+    vibrator.vibrate(VibrationEffect.createWaveform(timings, amplitudes, repeatIdx))
 }
 
 @Composable
