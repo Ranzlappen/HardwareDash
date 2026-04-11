@@ -31,7 +31,11 @@ import androidx.compose.ui.unit.dp
 import android.app.NotificationManager
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.sectionHeading
 import com.gadget.receivers.AdminReceiver
 
 // ─── Permission descriptor ──────────────────────────────────────────────────

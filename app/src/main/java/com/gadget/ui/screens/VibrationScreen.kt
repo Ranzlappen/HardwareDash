@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -29,10 +28,15 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
+import com.gadget.ui.components.AccessibleCanvas
+import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
+import com.gadget.ui.components.minimumTouchTarget
+import com.gadget.ui.components.sectionHeading
 import com.gadget.widget.DrawnPatternUtils
 import com.gadget.widget.DrawnPoint
 import com.gadget.widget.SavedDrawnPattern
@@ -168,6 +172,8 @@ fun VibrationScreen() {
     var drawnSaveName by remember { mutableStateOf("") }
     var savedDrawnPatterns by remember { mutableStateOf(DrawnPatternUtils.loadDrawnPatterns(context)) }
 
+    ScreenAnnouncement(S.accessibility.vibrationScreen)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -175,7 +181,10 @@ fun VibrationScreen() {
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.semantics(mergeDescendants = true) { },
+        ) {
             Icon(Icons.Default.Vibration, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
             Spacer(Modifier.width(10.dp))
             Text(S.vibration.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -193,7 +202,7 @@ fun VibrationScreen() {
 
         // ── Predefined patterns ───────────────────────────────────────────────
         if (patterns.isNotEmpty()) {
-            Text(S.vibration.predefinedEffects, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text(S.vibration.predefinedEffects, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.sectionHeading())
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -210,7 +219,7 @@ fun VibrationScreen() {
         HorizontalDivider()
 
         // ── Custom waveform ───────────────────────────────────────────────────
-        Text(S.vibration.customWaveform, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.vibration.customWaveform, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.sectionHeading())
         Text(
             "Amplitude: 0 = off, 1 = full\nDuration: ms  ·  Gap: pause between steps",
             style = MaterialTheme.typography.bodySmall,
@@ -242,7 +251,9 @@ fun VibrationScreen() {
         // Loop toggle
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics(mergeDescendants = true) { },
         ) {
             Text(
                 S.vibration.loopWaveform,
@@ -323,7 +334,7 @@ fun VibrationScreen() {
         // ══════════════════════════════════════════════════════════════════════
         // ── Visual Pattern Drawing (Canvas) ──────────────────────────────────
         // ══════════════════════════════════════════════════════════════════════
-        Text(S.vibration.drawPattern, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.vibration.drawPattern, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.sectionHeading())
         Text(
             S.vibration.drawInstructions,
             style = MaterialTheme.typography.bodySmall,
@@ -335,7 +346,7 @@ fun VibrationScreen() {
         val fillColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
         val gridColor = Color.Gray.copy(alpha = 0.3f)
 
-        Canvas(
+        AccessibleCanvas(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1.8f)
@@ -358,7 +369,8 @@ fun VibrationScreen() {
                             DrawnPatternUtils.setActiveDrawnPattern(context, drawnPoints.toList(), drawLoopEnabled)
                         },
                     )
-                }
+                },
+            contentDescription = S.accessibility.vibrationCanvasDesc(),
         ) {
             drawRect(canvasBg, size = size)
 
@@ -410,7 +422,9 @@ fun VibrationScreen() {
         // Draw loop toggle
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics(mergeDescendants = true) { },
         ) {
             Text(
                 "Loop drawn pattern",
@@ -557,13 +571,13 @@ fun VibrationScreen() {
                                             loopEnabled = p.loop
                                             showLoadDialog = false
                                         }) {
-                                            Icon(Icons.Default.FileOpen, "Load")
+                                            Icon(Icons.Default.FileOpen, S.accessibility.loadPattern)
                                         }
                                         IconButton(onClick = {
                                             savedPatterns = savedPatterns.toMutableList().also { it.removeAt(idx) }
                                             savePatterns(context, savedPatterns)
                                         }) {
-                                            Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
+                                            Icon(Icons.Default.Delete, S.accessibility.deletePattern, tint = MaterialTheme.colorScheme.error)
                                         }
                                     }
                                 }
@@ -653,13 +667,13 @@ fun VibrationScreen() {
                                             DrawnPatternUtils.setActiveDrawnPattern(context, p.points, p.loop)
                                             showDrawnLoadDialog = false
                                         }) {
-                                            Icon(Icons.Default.FileOpen, "Load")
+                                            Icon(Icons.Default.FileOpen, S.accessibility.loadPattern)
                                         }
                                         IconButton(onClick = {
                                             savedDrawnPatterns = savedDrawnPatterns.toMutableList().also { it.removeAt(idx) }
                                             DrawnPatternUtils.saveDrawnPatterns(context, savedDrawnPatterns)
                                         }) {
-                                            Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
+                                            Icon(Icons.Default.Delete, S.accessibility.deletePattern, tint = MaterialTheme.colorScheme.error)
                                         }
                                     }
                                 }
@@ -737,8 +751,8 @@ private fun WaveformStep(
             ) {
                 Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
                 if (onRemove != null) {
-                    IconButton(onClick = onRemove, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Default.Close, "Remove step", modifier = Modifier.size(16.dp))
+                    IconButton(onClick = onRemove, modifier = Modifier.size(24.dp).minimumTouchTarget()) {
+                        Icon(Icons.Default.Close, S.accessibility.removeStep, modifier = Modifier.size(16.dp))
                     }
                 }
             }

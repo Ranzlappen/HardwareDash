@@ -18,7 +18,9 @@ import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.services.LinkService
 import com.gadget.ui.components.SliderWithInput
 import com.gadget.widget.WidgetMetric
@@ -48,6 +50,8 @@ fun LinkScreen() {
         prefs.edit().putString(KEY_RULES, saveRules(updated)).apply()
     }
 
+    ScreenAnnouncement(S.accessibility.linkScreen)
+
     // ── UI ───────────────────────────────────────────────────────────────
     Column(
         modifier = Modifier
@@ -57,7 +61,10 @@ fun LinkScreen() {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // Header
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.semantics(mergeDescendants = true) { },
+        ) {
             Icon(Icons.Filled.Link, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(12.dp))
             Text(
@@ -75,7 +82,7 @@ fun LinkScreen() {
             ),
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp).semantics(mergeDescendants = true) { },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -302,7 +309,7 @@ private fun LinkRuleCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) { },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {

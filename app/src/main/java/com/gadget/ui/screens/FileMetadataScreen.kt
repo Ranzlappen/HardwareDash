@@ -22,7 +22,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.exifinterface.media.ExifInterface
+import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.sectionHeading
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

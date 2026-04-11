@@ -8,6 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -63,7 +65,9 @@ fun SliderWithInput(
                 },
                 onValueChangeFinished = onValueChangeFinished,
                 valueRange = valueRange,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { stateDescription = "${formatValue(value)} $suffix".trim() },
             )
 
             Spacer(Modifier.width(8.dp))
@@ -96,6 +100,9 @@ fun SliderWithInput(
                         focusManager.clearFocus()
                     },
                 ),
+                label = if (label != null) {
+                    { Text(label, style = MaterialTheme.typography.labelSmall) }
+                } else null,
                 suffix = if (suffix.isNotEmpty()) {
                     { Text(suffix, style = MaterialTheme.typography.bodySmall) }
                 } else null,

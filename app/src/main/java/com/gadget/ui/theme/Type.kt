@@ -85,3 +85,43 @@ val AppTypography = Typography(
         letterSpacing = 0.5.sp,
     ),
 )
+
+/**
+ * Creates a scaled copy of [AppTypography] by multiplying all fontSize and lineHeight
+ * values by the given [scale]. Used for the large-text accessibility setting.
+ */
+fun scaledTypography(scale: Float): Typography = Typography(
+    headlineLarge = AppTypography.headlineLarge.copy(
+        fontSize = (28 * scale).sp, lineHeight = (36 * scale).sp,
+    ),
+    headlineMedium = AppTypography.headlineMedium.copy(
+        fontSize = (24 * scale).sp, lineHeight = (32 * scale).sp,
+    ),
+    titleLarge = AppTypography.titleLarge.copy(
+        fontSize = (20 * scale).sp, lineHeight = (28 * scale).sp,
+    ),
+    titleMedium = AppTypography.titleMedium.copy(
+        fontSize = (16 * scale).sp, lineHeight = (24 * scale).sp,
+    ),
+    titleSmall = AppTypography.titleSmall.copy(
+        fontSize = (14 * scale).sp, lineHeight = (20 * scale).sp,
+    ),
+    bodyLarge = AppTypography.bodyLarge.copy(
+        fontSize = (16 * scale).sp, lineHeight = (24 * scale).sp,
+    ),
+    bodyMedium = AppTypography.bodyMedium.copy(
+        fontSize = (14 * scale).sp, lineHeight = (20 * scale).sp,
+    ),
+    bodySmall = AppTypography.bodySmall.copy(
+        fontSize = (12 * scale).sp, lineHeight = (16 * scale).sp,
+    ),
+    labelLarge = AppTypography.labelLarge.copy(
+        fontSize = (14 * scale).sp, lineHeight = (20 * scale).sp,
+    ),
+    labelMedium = AppTypography.labelMedium.copy(
+        fontSize = (12 * scale).sp, lineHeight = (16 * scale).sp,
+    ),
+    labelSmall = AppTypography.labelSmall.copy(
+        fontSize = (11 * scale).sp, lineHeight = (16 * scale).sp,
+    ),
+)

@@ -33,6 +33,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.*
 import com.gadget.localization.S
+import com.gadget.ui.components.AccessibleCanvas
+import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.minimumTouchTarget
+import com.gadget.ui.components.sectionHeading
+import com.gadget.ui.theme.LocalAccessibilityPreferences
 import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
@@ -96,6 +101,7 @@ private fun fftMagnitude(input: FloatArray): FloatArray {
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MicScreen() {
+    ScreenAnnouncement(S.accessibility.micScreen)
     val perm = rememberPermissionState(android.Manifest.permission.RECORD_AUDIO)
     when {
         perm.status.isGranted -> MicMeter()
@@ -210,11 +216,13 @@ private fun MicMeter() {
     DisposableEffect(Unit) { onDispose { isRecording = false } }
 
     // Animated smooth amplitude for the meter arc
-    val animatedAmp by animateFloatAsState(
+    val reducedMotion = LocalAccessibilityPreferences.current.reducedMotion
+    val animatedAmpState by animateFloatAsState(
         targetValue   = amplitude,
-        animationSpec = tween(80),
+        animationSpec = if (reducedMotion) snap() else tween(80),
         label         = "amp"
     )
+    val animatedAmp = if (reducedMotion) amplitude else animatedAmpState
 
     Column(
         modifier = Modifier
@@ -240,11 +248,12 @@ private fun MicMeter() {
         val peakColor   = MaterialTheme.colorScheme.error
         val trackColor  = MaterialTheme.colorScheme.surfaceVariant
 
-        Canvas(
+        AccessibleCanvas(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(2f)
-                .clip(MaterialTheme.shapes.medium)
+                .clip(MaterialTheme.shapes.medium),
+            contentDescription = S.accessibility.dbMeterDesc("%.1f".format(peakDb)),
         ) {
             val stroke  = 28.dp.toPx()
             val padding = stroke / 2 + 8.dp.toPx()
@@ -278,7 +287,10 @@ private fun MicMeter() {
 
         // ── Waveform history bars ──────────────────────────────────────────
         val barColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-        Canvas(modifier = Modifier.fillMaxWidth().height(80.dp).clip(MaterialTheme.shapes.medium)) {
+        AccessibleCanvas(
+            modifier = Modifier.fillMaxWidth().height(80.dp).clip(MaterialTheme.shapes.medium),
+            contentDescription = S.accessibility.waveformDesc(),
+        ) {
             val barW = size.width / history.size
             history.forEachIndexed { i, v ->
                 val barH = v * size.height
@@ -297,6 +309,7 @@ private fun MicMeter() {
             S.mic.spectrumAnalyzer,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
         )
 
         if (isRecording && peakFreqHz > 0) {
@@ -311,7 +324,10 @@ private fun MicMeter() {
         val specColor   = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)
         val specBgColor = MaterialTheme.colorScheme.surfaceVariant
 
-        Canvas(modifier = Modifier.fillMaxWidth().aspectRatio(2.5f).clip(MaterialTheme.shapes.medium)) {
+        AccessibleCanvas(
+            modifier = Modifier.fillMaxWidth().aspectRatio(2.5f).clip(MaterialTheme.shapes.medium),
+            contentDescription = S.accessibility.spectrumDesc("%.0f".format(peakFreqHz)),
+        ) {
             drawRect(specBgColor, size = size)
 
             if (!isRecording || spectrum.isEmpty()) return@Canvas
@@ -380,7 +396,8 @@ private fun MicMeter() {
         // ══════════════════════════════════════════════════════════════════════
         // Recording Section
         // ══════════════════════════════════════════════════════════════════════
-        Text(S.mic.audioRecording, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.mic.audioRecording, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading())
 
         if (isSaving) {
             val mins = (recElapsed / 60000).toInt()
@@ -438,7 +455,8 @@ private fun MicMeter() {
                 ),
                 modifier = Modifier.weight(1f).height(52.dp),
             ) {
-                Icon(if (isSaving) Icons.Default.Stop else Icons.Default.FiberManualRecord, null)
+                Icon(if (isSaving) Icons.Default.Stop else Icons.Default.FiberManualRecord,
+                    if (isSaving) S.accessibility.stopRecording else S.accessibility.startRecording)
                 Spacer(Modifier.width(6.dp))
                 Text(if (isSaving) "Stop & Save" else "Record")
             }
@@ -484,10 +502,10 @@ private fun MicMeter() {
                             } catch (_: Exception) {
                                 Toast.makeText(context, playbackErrorMsg, Toast.LENGTH_SHORT).show()
                             }
-                        }, modifier = Modifier.size(28.dp)) {
+                        }, modifier = Modifier.size(28.dp).minimumTouchTarget()) {
                             Icon(
                                 if (playingUri == uri) Icons.Default.Stop else Icons.Default.PlayArrow,
-                                "Play/Stop",
+                                if (playingUri == uri) S.accessibility.stopPlayback else S.accessibility.playRecording,
                                 tint = if (playingUri == uri) MaterialTheme.colorScheme.error
                                        else MaterialTheme.colorScheme.primary,
                             )

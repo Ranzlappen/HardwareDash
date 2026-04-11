@@ -1,6 +1,5 @@
 package com.gadget.ui.hubs
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -11,10 +10,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.accessibleCard
+import com.gadget.ui.components.sectionHeading
 import com.gadget.ui.navigation.Routes
 import com.gadget.ui.screens.*
 
@@ -43,6 +48,8 @@ private fun ToolsGridScreen(onToolSelected: (String) -> Unit) {
     val hubs = S.hubs
     val nav = S.nav
 
+    ScreenAnnouncement(S.accessibility.toolsScreen)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -51,9 +58,12 @@ private fun ToolsGridScreen(onToolSelected: (String) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // Header
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.semantics(mergeDescendants = true) { },
+        ) {
             Icon(
-                Icons.Default.Build, null,
+                Icons.Default.Build, contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(28.dp),
             )
@@ -62,6 +72,7 @@ private fun ToolsGridScreen(onToolSelected: (String) -> Unit) {
                 hubs.toolsTitle,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
+                modifier = Modifier.sectionHeading(),
             )
         }
 
@@ -118,7 +129,7 @@ private fun ToolCard(
     ElevatedCard(
         modifier = modifier
             .aspectRatio(1f)
-            .clickable(onClick = onClick),
+            .accessibleCard(label = "$title, $subtitle", onClick = onClick),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -132,7 +143,7 @@ private fun ToolCard(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
-                icon, contentDescription = title,
+                icon, contentDescription = null,
                 modifier = Modifier.size(48.dp),
                 tint = MaterialTheme.colorScheme.primary,
             )

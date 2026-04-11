@@ -14,10 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
+import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.sectionHeading
 import com.gadget.ui.logbook.LogbookRepository
 import com.gadget.ui.logbook.LogbookEntry
 import com.gadget.ui.navigation.Routes
@@ -34,6 +37,8 @@ fun DashboardScreen(onNavigate: (String) -> Unit) {
     val context = LocalContext.current
     val strings = S.dashboard
     val nav = S.nav
+
+    ScreenAnnouncement(S.accessibility.dashboardScreen)
 
     // Live status data
     var batteryLevel by remember { mutableStateOf("--") }
@@ -72,6 +77,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit) {
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.sectionHeading(),
             )
             Text(
                 strings.subtitle,
@@ -85,6 +91,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit) {
             strings.status,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
         )
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -104,6 +111,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit) {
             strings.quickActions,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
         )
 
         // Row 1: Tools
@@ -187,10 +195,15 @@ fun DashboardScreen(onNavigate: (String) -> Unit) {
                 strings.recentLogEntry,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.sectionHeading(),
             )
             ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .semantics(mergeDescendants = true) {
+                        role = Role.Button
+                        contentDescription = "${strings.recentLogEntry}: ${entry.text.ifEmpty { "Log entry" }}"
+                    }
                     .clickable { onNavigate(Routes.LOGBOOK) },
                 shape = MaterialTheme.shapes.medium,
                 colors = CardDefaults.elevatedCardColors(
@@ -219,6 +232,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit) {
                 strings.recentLogEntry,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.sectionHeading(),
             )
             Text(
                 strings.noRecentEntries,
@@ -245,12 +259,16 @@ private fun StatusCard(data: StatusCardData) {
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
         ),
-        modifier = Modifier.width(160.dp),
+        modifier = Modifier
+            .width(160.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "${data.title}: ${data.primary}, ${data.secondary}"
+            },
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Icon(
                 data.icon,
-                contentDescription = data.title,
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp),
             )
@@ -287,7 +305,7 @@ private fun QuickActionChip(
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(icon, contentDescription = label, modifier = Modifier.size(20.dp))
+            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
             Spacer(Modifier.height(2.dp))
             Text(
                 label,
