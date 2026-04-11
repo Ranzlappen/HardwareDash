@@ -148,9 +148,19 @@ fun VibrationScreen() {
     var saveName by remember { mutableStateOf("") }
     var savedPatterns by remember { mutableStateOf(loadPatterns(context)) }
 
-    // Canvas drawing state
-    val drawnPoints = remember { mutableStateListOf<DrawnPoint>() }
-    var drawLoopEnabled by remember { mutableStateOf(false) }
+    // Canvas drawing state — auto-restore from persisted active pattern
+    val drawnPoints = remember {
+        mutableStateListOf<DrawnPoint>().also { list ->
+            DrawnPatternUtils.getActiveDrawnPattern(context)?.let { (pts, _) ->
+                list.addAll(pts)
+            }
+        }
+    }
+    var drawLoopEnabled by remember {
+        mutableStateOf(
+            DrawnPatternUtils.getActiveDrawnPattern(context)?.second ?: false
+        )
+    }
 
     // Drawn pattern save/load state
     var showDrawnSaveDialog by remember { mutableStateOf(false) }
@@ -344,6 +354,9 @@ fun VibrationScreen() {
                             val iNorm = (1f - change.position.y / size.height).coerceIn(0f, 1f)
                             drawnPoints.add(DrawnPoint(tNorm, iNorm))
                         },
+                        onDragEnd = {
+                            DrawnPatternUtils.setActiveDrawnPattern(context, drawnPoints.toList(), drawLoopEnabled)
+                        },
                     )
                 }
         ) {
@@ -405,7 +418,12 @@ fun VibrationScreen() {
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f),
             )
-            Switch(checked = drawLoopEnabled, onCheckedChange = { drawLoopEnabled = it })
+            Switch(checked = drawLoopEnabled, onCheckedChange = {
+                drawLoopEnabled = it
+                if (drawnPoints.isNotEmpty()) {
+                    DrawnPatternUtils.setActiveDrawnPattern(context, drawnPoints.toList(), it)
+                }
+            })
         }
 
         // Draw action buttons
@@ -426,7 +444,10 @@ fun VibrationScreen() {
             ) { Text(S.vibration.playDrawn, maxLines = 1, softWrap = false) }
 
             OutlinedButton(
-                onClick = { drawnPoints.clear() },
+                onClick = {
+                    drawnPoints.clear()
+                    DrawnPatternUtils.clearActiveDrawnPattern(context)
+                },
                 modifier = Modifier.weight(1f),
             ) { Text(S.vibration.clearDrawing, maxLines = 1, softWrap = false) }
         }
@@ -629,6 +650,7 @@ fun VibrationScreen() {
                                             drawnPoints.clear()
                                             drawnPoints.addAll(p.points)
                                             drawLoopEnabled = p.loop
+                                            DrawnPatternUtils.setActiveDrawnPattern(context, p.points, p.loop)
                                             showDrawnLoadDialog = false
                                         }) {
                                             Icon(Icons.Default.FileOpen, "Load")

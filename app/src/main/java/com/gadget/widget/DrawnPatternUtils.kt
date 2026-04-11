@@ -89,6 +89,11 @@ object DrawnPatternUtils {
         } catch (_: Exception) { null }
     }
 
+    fun clearActiveDrawnPattern(context: Context) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().remove(KEY_ACTIVE_DRAWN).apply()
+    }
+
     // ─── Interpolation & waveform conversion ─────────────────────────────────────
 
     fun interpolateIntensity(points: List<DrawnPoint>, tNorm: Float): Float {
@@ -112,6 +117,7 @@ object DrawnPatternUtils {
         points: List<DrawnPoint>,
         hasAmplitude: Boolean,
     ): Pair<LongArray, IntArray> {
+        if (points.isEmpty()) return Pair(LongArray(0), IntArray(0))
         val sorted = points.sortedBy { it.timeNorm }
         val totalMs = 2000L
         val sampleInterval = 50L

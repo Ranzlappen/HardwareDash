@@ -47,34 +47,44 @@ class VibrationWidgetProvider : AppWidgetProvider() {
                 prefs.edit().putBoolean(KEY_VIBRATING, false).apply()
                 WidgetActionHandler.showToast(context, S.Widget.vibrationOff(lang))
             } else {
-                // Start looping vibration — use persisted drawn pattern if available
+                // Start looping vibration — use persisted drawn pattern, fallback to full-strength
                 try {
                     val hasAmplitude = vibrator.hasAmplitudeControl()
-                    val activePattern = DrawnPatternUtils.getActiveDrawnPattern(context)
+                    val effect = try {
+                        val activePattern = DrawnPatternUtils.getActiveDrawnPattern(context)
+                        if (activePattern != null) {
+                            val (points, loop) = activePattern
+                            val (t, a) = DrawnPatternUtils.toWaveformArrays(points, hasAmplitude)
+                            if (t.isEmpty()) throw IllegalStateException("empty pattern")
+                            VibrationEffect.createWaveform(t, a, if (loop) 0 else -1)
+                        } else {
+                            null
+                        }
+                    } catch (_: Exception) { null }
+                        ?: VibrationEffect.createWaveform(
+                            longArrayOf(0, 500, 200, 500),
+                            intArrayOf(0, 255, 0, 255),
+                            0,
+                        )
 
-                    val timings: LongArray
-                    val amplitudes: IntArray
-                    val repeatIdx: Int
-
-                    if (activePattern != null) {
-                        val (points, loop) = activePattern
-                        val (t, a) = DrawnPatternUtils.toWaveformArrays(points, hasAmplitude)
-                        timings = t
-                        amplitudes = a
-                        repeatIdx = if (loop) 0 else -1
-                    } else {
-                        timings = longArrayOf(0, 400, 200, 400)
-                        amplitudes = intArrayOf(0, 200, 0, 200)
-                        repeatIdx = 0
-                    }
-
-                    val effect = VibrationEffect.createWaveform(timings, amplitudes, repeatIdx)
                     vibrator.vibrate(effect)
                     prefs.edit().putBoolean(KEY_VIBRATING, true).apply()
                     WidgetActionHandler.showToast(context, S.Widget.vibrationOn(lang))
-                } catch (e: Exception) {
-                    prefs.edit().putBoolean(KEY_VIBRATING, false).apply()
-                    WidgetActionHandler.showToast(context, "Vibration failed: ${e.message}")
+                } catch (_: Exception) {
+                    // Last-resort fallback: simple full-strength vibration
+                    try {
+                        vibrator.vibrate(
+                            VibrationEffect.createWaveform(
+                                longArrayOf(0, 500, 200, 500),
+                                intArrayOf(0, 255, 0, 255),
+                                0,
+                            )
+                        )
+                        prefs.edit().putBoolean(KEY_VIBRATING, true).apply()
+                        WidgetActionHandler.showToast(context, S.Widget.vibrationOn(lang))
+                    } catch (_: Exception) {
+                        prefs.edit().putBoolean(KEY_VIBRATING, false).apply()
+                    }
                 }
             }
 
