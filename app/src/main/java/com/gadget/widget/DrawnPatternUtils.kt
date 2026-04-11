@@ -89,6 +89,11 @@ object DrawnPatternUtils {
         } catch (_: Exception) { null }
     }
 
+    fun clearActiveDrawnPattern(context: Context) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().remove(KEY_ACTIVE_DRAWN).apply()
+    }
+
     // ─── Interpolation & waveform conversion ─────────────────────────────────────
 
     fun interpolateIntensity(points: List<DrawnPoint>, tNorm: Float): Float {
