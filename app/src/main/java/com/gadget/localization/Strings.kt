@@ -295,6 +295,16 @@ object S {
         val notifTitle get() = m(l, "Notification title", "Benachrichtigungstitel", "Título de notificación", "Titre de notification")
         val notifBody get() = m(l, "Notification body", "Benachrichtigungstext", "Cuerpo de notificación", "Corps de notification")
         val monitoring get() = m(l, "Monitoring", "Überwachung", "Monitoreo", "Surveillance")
+        val thresholdLow get() = m(l, "Lower bound", "Unterer Grenzwert", "Límite inferior", "Limite inférieure")
+        val thresholdHigh get() = m(l, "Upper bound", "Oberer Grenzwert", "Límite superior", "Limite supérieure")
+        val recommended get() = m(l, "Recommended", "Empfohlen", "Recomendado", "Recommandé")
+        val logEntryText get() = m(l, "Log entry text", "Logbuch-Text", "Texto de registro", "Texte du journal")
+        val logEntryPlaceholder get() = m(l, "Leave blank for auto text\u2026", "Leer lassen f\u00FCr Auto-Text\u2026", "Dejar vac\u00EDo para texto autom\u00E1tico\u2026", "Laisser vide pour texte auto\u2026")
+        val statsTitle get() = m(l, "Statistics", "Statistiken", "Estad\u00EDsticas", "Statistiques")
+        val triggered get() = m(l, "Triggered", "Ausgel\u00F6st", "Activado", "D\u00E9clench\u00E9")
+        val cooldownBlocked get() = m(l, "Cooldown blocked", "Abklingzeit blockiert", "Bloqueado por enfriamiento", "Bloqu\u00E9 par recharge")
+        val lastTriggered get() = m(l, "Last triggered", "Zuletzt ausgel\u00F6st", "\u00DAltima activaci\u00F3n", "Dernier d\u00E9clenchement")
+        val resetStats get() = m(l, "Reset statistics", "Statistiken zur\u00FCcksetzen", "Restablecer estad\u00EDsticas", "R\u00E9initialiser les statistiques")
     }
 
     // ── Torch ───────────────────────────────────────────────────────────
