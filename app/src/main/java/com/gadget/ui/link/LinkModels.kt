@@ -32,7 +32,8 @@ enum class LinkActionType(val key: String, val label: String) {
     VIBRATE("vibrate", "Vibrate"),
     NOTIFICATION("notification", "Send Notification"),
     LOCK("lock", "Lock Screen"),
-    RING("ring", "Phone Ring");
+    RING("ring", "Phone Ring"),
+    LOG_ENTRY("log_entry", "Log Entry");
 
     companion object {
         fun fromKey(key: String): LinkActionType = entries.find { it.key == key } ?: NOTIFICATION
@@ -169,4 +170,48 @@ fun recommendedThresholds(metricKey: String): String? = when (metricKey) {
     "gps_lat"             -> "Range: -90.0 to 90.0"
     "gps_lon"             -> "Range: -180.0 to 180.0"
     else                  -> null
+}
+
+// ─── Link statistics ───────────────────────────────────────────────────────
+
+data class LinkRuleStats(
+    val ruleId: String = "",
+    val triggerCount: Int = 0,
+    val cooldownBlockCount: Int = 0,
+    val lastTriggeredIso: String = "",
+    val lastCooldownIso: String = "",
+)
+
+fun LinkRuleStats.toJson(): JSONObject = JSONObject().apply {
+    put("ruleId", ruleId)
+    put("triggerCount", triggerCount)
+    put("cooldownBlockCount", cooldownBlockCount)
+    put("lastTriggeredIso", lastTriggeredIso)
+    put("lastCooldownIso", lastCooldownIso)
+}
+
+fun linkRuleStatsFromJson(json: JSONObject): LinkRuleStats = LinkRuleStats(
+    ruleId = json.optString("ruleId", ""),
+    triggerCount = json.optInt("triggerCount", 0),
+    cooldownBlockCount = json.optInt("cooldownBlockCount", 0),
+    lastTriggeredIso = json.optString("lastTriggeredIso", ""),
+    lastCooldownIso = json.optString("lastCooldownIso", ""),
+)
+
+fun saveLinkStats(stats: Map<String, LinkRuleStats>): String {
+    val obj = JSONObject()
+    stats.forEach { (id, s) -> obj.put(id, s.toJson()) }
+    return obj.toString()
+}
+
+fun loadLinkStats(json: String): Map<String, LinkRuleStats> {
+    if (json.isBlank()) return emptyMap()
+    return try {
+        val obj = JSONObject(json)
+        val map = mutableMapOf<String, LinkRuleStats>()
+        obj.keys().forEach { key -> map[key] = linkRuleStatsFromJson(obj.getJSONObject(key)) }
+        map
+    } catch (_: Exception) {
+        emptyMap()
+    }
 }
