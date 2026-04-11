@@ -653,6 +653,13 @@ object S {
         val deletePattern get() = m(l, "Delete pattern", "Muster löschen", "Eliminar patrón", "Supprimer le motif")
         val permissionGranted get() = m(l, "Granted", "Erteilt", "Concedido", "Accordée")
         val permissionDenied get() = m(l, "Denied", "Verweigert", "Denegado", "Refusée")
+
+        // Interactive icon labels
+        val toggleDetails get() = m(l, "Toggle details", "Details umschalten", "Alternar detalles", "Basculer les détails")
+        val toggleInfo get() = m(l, "Toggle info", "Info umschalten", "Alternar información", "Basculer les infos")
+        val toggleLog get() = m(l, "Toggle log", "Protokoll umschalten", "Alternar registro", "Basculer le journal")
+        val clearLog get() = m(l, "Clear log", "Protokoll löschen", "Borrar registro", "Effacer le journal")
+        val help get() = m(l, "Help", "Hilfe", "Ayuda", "Aide")
     }
 
     // ── Widget / Service toasts (non-Composable context) ─────────────────

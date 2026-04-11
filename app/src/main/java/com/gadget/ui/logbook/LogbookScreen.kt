@@ -106,6 +106,8 @@ fun LogbookScreen(vm: LogbookViewModel = viewModel()) {
         }
     }
 
+    ScreenAnnouncement(S.accessibility.logbookScreen)
+
     // ── Main layout ─────────────────────────────────────────────────
     Column(
         modifier = Modifier
@@ -211,7 +213,8 @@ private fun LogbookHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp),
+            .padding(top = 16.dp)
+            .semantics(mergeDescendants = true) { },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(

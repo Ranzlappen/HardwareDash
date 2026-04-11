@@ -234,6 +234,8 @@ fun FileMetadataScreen() {
         isMedia = result.mimeType.startsWith("audio/") || result.mimeType.startsWith("video/")
     }
 
+    ScreenAnnouncement(S.accessibility.fileMetaScreen)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -242,7 +244,10 @@ fun FileMetadataScreen() {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // ── Title ─────────────────────────────────────────────────────
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.semantics(mergeDescendants = true) { },
+        ) {
             Icon(
                 Icons.Default.InsertDriveFile, null,
                 tint = MaterialTheme.colorScheme.primary,
@@ -315,6 +320,7 @@ fun FileMetadataScreen() {
                     strings.editMetadata,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.sectionHeading(),
                 )
 
                 // Show all EXIF values; editable tags get OutlinedTextField, others get MetaRow
@@ -363,6 +369,7 @@ fun FileMetadataScreen() {
                     strings.editMediaMetadata,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.sectionHeading(),
                 )
 
                 // Show editable media tags
@@ -424,7 +431,7 @@ fun FileMetadataScreen() {
                     }
                     IconButton(onClick = { showHelpDialog = true }) {
                         Icon(
-                            Icons.Default.HelpOutline, null,
+                            Icons.Default.HelpOutline, S.accessibility.help,
                             tint = MaterialTheme.colorScheme.primary,
                         )
                     }
@@ -437,7 +444,7 @@ fun FileMetadataScreen() {
                 ) {
                     IconButton(onClick = { showHelpDialog = true }) {
                         Icon(
-                            Icons.Default.HelpOutline, null,
+                            Icons.Default.HelpOutline, S.accessibility.help,
                             tint = MaterialTheme.colorScheme.primary,
                         )
                     }
