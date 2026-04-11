@@ -12,8 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
 import com.gadget.services.LinkService
@@ -236,10 +234,7 @@ private fun LinkRuleCard(
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Text(
-                    if (op.isRange)
-                        "$metricName ${op.symbol} ${rule.threshold} \u2013 ${rule.thresholdHigh}"
-                    else
-                        "$metricName ${op.symbol} ${rule.threshold}",
+                    "$metricName ${op.symbol} ${rule.threshold}",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -298,7 +293,6 @@ private fun LinkEditorDialog(
     var metricKey by remember { mutableStateOf(rule.metricKey) }
     var operator by remember { mutableStateOf(rule.operator) }
     var threshold by remember { mutableStateOf(rule.threshold) }
-    var thresholdHigh by remember { mutableStateOf(rule.thresholdHigh) }
     var actionType by remember { mutableStateOf(rule.actionType) }
     var notifTitle by remember { mutableStateOf(rule.actionConfig["title"] ?: "") }
     var notifBody by remember { mutableStateOf(rule.actionConfig["body"] ?: "") }
@@ -420,40 +414,10 @@ private fun LinkEditorDialog(
                         OutlinedTextField(
                             value = threshold,
                             onValueChange = { threshold = it },
-                            label = {
-                                Text(
-                                    if (LinkOperator.fromKey(operator).isRange)
-                                        strings.thresholdLow
-                                    else
-                                        strings.threshold,
-                                )
-                            },
+                            label = { Text(strings.threshold) },
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.fillMaxWidth(),
                         )
-
-                        // Upper bound for range operators (between / outside)
-                        if (LinkOperator.fromKey(operator).isRange) {
-                            OutlinedTextField(
-                                value = thresholdHigh,
-                                onValueChange = { thresholdHigh = it },
-                                label = { Text(strings.thresholdHigh) },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
-
-                        // Recommended threshold hint
-                        val hint = recommendedThresholds(metricKey)
-                        if (hint != null) {
-                            Text(
-                                "${strings.recommended}: $hint",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
                     }
                 }
 
@@ -547,7 +511,6 @@ private fun LinkEditorDialog(
                             metricKey = metricKey,
                             operator = operator,
                             threshold = threshold,
-                            thresholdHigh = thresholdHigh,
                             actionType = actionType,
                             actionConfig = config,
                             cooldownSec = cooldown.toInt(),
