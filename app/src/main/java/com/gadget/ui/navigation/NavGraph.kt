@@ -60,6 +60,7 @@ object Routes {
     const val FILE_META    = "file_meta"
     const val SETTINGS     = "settings"
     const val BUG          = "bug"
+    const val MANUAL       = "manual"
 }
 
 data class BottomNavItem(

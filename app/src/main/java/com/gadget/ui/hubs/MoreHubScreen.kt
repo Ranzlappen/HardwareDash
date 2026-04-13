@@ -41,6 +41,7 @@ fun MoreHubScreen() {
         composable(Routes.FILE_META)  { FileMetadataScreen() }
         composable(Routes.SETTINGS)   { SettingsScreen() }
         composable(Routes.BUG)        { BugReportScreen() }
+        composable(Routes.MANUAL)     { ManualScreen() }
     }
 }
 
@@ -78,6 +79,14 @@ private fun MoreGridScreen(onItemSelected: (String) -> Unit) {
         }
 
         Spacer(Modifier.height(8.dp))
+
+        MoreListItem(
+            icon = Icons.Default.MenuBook,
+            title = hubs.userManual,
+            subtitle = hubs.userManualSubtitle,
+            onClick = { onItemSelected(Routes.MANUAL) },
+        )
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
         MoreListItem(
             icon = Icons.Default.Notifications,

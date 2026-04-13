@@ -32,6 +32,7 @@ object S {
         val settings get() = m(l, "Settings", "Einstellungen", "Ajustes", "Paramètres")
         val fileMeta get() = m(l, "Files", "Dateien", "Archivos", "Fichiers")
         val bug get() = m(l, "Bug", "Fehler", "Error", "Bug")
+        val manual get() = m(l, "Manual", "Handbuch", "Manual", "Manuel")
         // New top-level tab labels
         val dashboard get() = m(l, "Dashboard", "Dashboard", "Panel", "Tableau de bord")
         val tools get() = m(l, "Tools", "Werkzeuge", "Herramientas", "Outils")
@@ -75,6 +76,8 @@ object S {
         val fileMetaSubtitle get() = m(l, "EXIF & media metadata", "EXIF- & Medien-Metadaten", "Metadatos EXIF y multimedia", "Métadonnées EXIF & média")
         val settingsSubtitle get() = m(l, "Language, config & logging", "Sprache, Konfiguration & Protokollierung", "Idioma, configuración y registro", "Langue, configuration & journalisation")
         val bugReportSubtitle get() = m(l, "Permissions & device info", "Berechtigungen & Geräteinformationen", "Permisos e información del dispositivo", "Permissions & informations appareil")
+        val userManual get() = m(l, "User Manual", "Benutzerhandbuch", "Manual de usuario", "Manuel utilisateur")
+        val userManualSubtitle get() = m(l, "Features, usage & tips", "Funktionen, Nutzung & Tipps", "Funciones, uso y consejos", "Fonctionnalit\u00E9s, utilisation & conseils")
     }
 
     // ── Logbook (formerly Ticked) ───────────────────────────────────────
@@ -504,6 +507,9 @@ object S {
     // ── Bug Report ──────────────────────────────────────────────────────
     val bug: Bug @Composable get() = Bug(lang)
 
+    // ── User Manual (content in ManualStrings.kt) ──────────────────────
+    val manual: Manual @Composable get() = Manual(lang)
+
     class Bug(private val l: Language) {
         val title get() = m(l, "Bug Report", "Fehlerbericht", "Informe de error", "Rapport de bug")
         val permissionsTitle get() = m(l, "Permission Status", "Berechtigungsstatus", "Estado de permisos", "État des permissions")
@@ -578,6 +584,7 @@ object S {
         val fileMetaScreen get() = m(l, "File metadata screen", "Datei-Metadaten-Bildschirm", "Pantalla de metadatos", "Écran métadonnées")
         val settingsScreen get() = m(l, "Settings screen", "Einstellungs-Bildschirm", "Pantalla de ajustes", "Écran paramètres")
         val bugReportScreen get() = m(l, "Bug report screen", "Fehlerbericht-Bildschirm", "Pantalla de informe de errores", "Écran rapport de bug")
+        val manualScreen get() = m(l, "User manual screen", "Benutzerhandbuch-Bildschirm", "Pantalla del manual de usuario", "\u00C9cran du manuel utilisateur")
 
         // Settings section
         val accessibilityTitle get() = m(l, "Accessibility", "Barrierefreiheit", "Accesibilidad", "Accessibilité")
@@ -744,7 +751,7 @@ object S {
 }
 
 /** Helper: pick the string for the given language. Order: EN, DE, ES, FR. */
-private fun m(lang: Language, en: String, de: String, es: String, fr: String): String =
+internal fun m(lang: Language, en: String, de: String, es: String, fr: String): String =
     when (lang) {
         Language.EN -> en
         Language.DE -> de
