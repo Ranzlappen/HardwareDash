@@ -19,9 +19,11 @@ import com.gadget.R
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import com.gadget.widget.DbMeterWidgetProvider
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlin.math.*
 
+@AndroidEntryPoint
 class DbMeterService : Service() {
 
     private var job: Job? = null

@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.gadget.localization.LocalizationManager
 import com.gadget.ui.theme.AccessibilityPreferencesManager
+import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.config.Configuration
 import java.io.File
 import com.gadget.ui.navigation.NavGraph
@@ -13,6 +14,7 @@ import com.gadget.ui.theme.GadgetTheme
 import com.gadget.ui.logbook.LogbookReminderWorker
 import com.gadget.widget.WidgetUpdateWorker
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

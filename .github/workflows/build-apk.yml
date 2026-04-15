@@ -35,6 +35,14 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
+      - name: Run Detekt
+        run: ./gradlew detekt
+        continue-on-error: true
+
+      - name: Run ktlint
+        run: ./gradlew ktlintCheck
+        continue-on-error: true
+
       - name: Prepare build metadata
         run: |
           echo "VERSION_CODE=${{ github.run_number }}" >> $GITHUB_ENV

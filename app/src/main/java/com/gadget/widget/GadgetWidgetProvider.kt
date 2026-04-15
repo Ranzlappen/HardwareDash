@@ -9,6 +9,7 @@ import android.content.Intent
 import android.widget.RemoteViews
 import com.gadget.MainActivity
 import com.gadget.R
+import timber.log.Timber
 
 class GadgetWidgetProvider : AppWidgetProvider() {
 
@@ -54,7 +55,7 @@ class GadgetWidgetProvider : AppWidgetProvider() {
             val metricKey = prefs.getString(prefKey(appWidgetId), null) ?: return
             val metric = WidgetMetric.fromKey(metricKey) ?: return
 
-            val value = try { metric.fetch(context) } catch (_: Exception) { "Error" }
+            val value = try { metric.fetch(context) } catch (e: Exception) { Timber.e(e, "Failed to fetch widget metric: %s", metricKey); "Error" }
 
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
             views.setTextViewText(R.id.widget_metric_name, metric.displayName)

@@ -2,11 +2,13 @@ package com.gadget.services
 
 import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * HCE service that emulates an NFC Type 4 Tag containing an NDEF message.
  * Responds to ISO 7816-4 SELECT and READ BINARY commands from NFC readers.
  */
+@AndroidEntryPoint
 class NfcEmulationService : HostApduService() {
 
     companion object {

@@ -29,3 +29,16 @@
 # ── OSMDroid ─────────────────────────────────────────────────────────
 -keep class org.osmdroid.** { *; }
 -dontwarn org.osmdroid.**
+
+# ── Hilt ─────────────────────────────────────────────────────────────
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+-dontwarn dagger.hilt.**
+
+# ── Room ─────────────────────────────────────────────────────────────
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keep @androidx.room.Entity class * { *; }
+-dontwarn androidx.room.**
+
+# ── Timber ───────────────────────────────────────────────────────────
+-dontwarn timber.log.**

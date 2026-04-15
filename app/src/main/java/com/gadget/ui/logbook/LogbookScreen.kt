@@ -28,7 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
 import com.gadget.ui.components.ScreenAnnouncement
@@ -46,7 +46,7 @@ import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogbookScreen(vm: LogbookViewModel = viewModel()) {
+fun LogbookScreen(vm: LogbookViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val store      by vm.store.collectAsState()
     val activeTab  by vm.activeTab.collectAsState()

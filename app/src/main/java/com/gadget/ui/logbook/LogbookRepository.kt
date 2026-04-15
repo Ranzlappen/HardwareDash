@@ -6,19 +6,26 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.*
+import timber.log.Timber
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
 // ---- DataStore singleton (keep "ticked_store" name for backwards compatibility) ----
 private val Context.logbookDataStore: DataStore<Preferences> by preferencesDataStore(name = "ticked_store")
 
-class LogbookRepository(private val context: Context) {
+@Singleton
+class LogbookRepository @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
 
     companion object {
         private val KEY_STORE = stringPreferencesKey("ticked_store_json")
@@ -39,7 +46,8 @@ class LogbookRepository(private val context: Context) {
                 val obj = Json.parseToJsonElement(raw).jsonObject
                 val migrated = migrate(obj)
                 json.decodeFromJsonElement<LogbookStore>(migrated)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to parse logbook store")
                 LogbookStore()
             }
         } else {

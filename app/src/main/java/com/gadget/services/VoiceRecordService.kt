@@ -17,11 +17,13 @@ import android.provider.MediaStore
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import com.gadget.widget.WidgetActionHandler
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+@AndroidEntryPoint
 class VoiceRecordService : Service() {
 
     private var job: Job? = null

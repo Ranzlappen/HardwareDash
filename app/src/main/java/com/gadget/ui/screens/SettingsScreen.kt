@@ -1,6 +1,11 @@
 package com.gadget.ui.screens
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -22,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gadget.backup.BackupManager
 import com.gadget.localization.Language
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
@@ -31,7 +37,19 @@ import com.gadget.ui.components.sectionHeading
 import com.gadget.ui.theme.AccessibilityPreferencesManager
 import com.gadget.ui.theme.LocalAccessibilityPreferences
 import com.gadget.widget.WidgetMetric
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface BackupManagerEntryPoint {
+    fun backupManager(): BackupManager
+}
 
 private const val WIDGET_PREFS = "widget_settings"
 private const val KEY_RING_DURATION = "phone_ring_duration_seconds"
@@ -45,9 +63,60 @@ const val DEFAULT_NOTIFY_DELAY = 30
 fun SettingsScreen() {
     val context = LocalContext.current
     val strings = S.settings
+    val backupStrings = S.backup
     val accessibilityPrefs = LocalAccessibilityPreferences.current
+    val coroutineScope = rememberCoroutineScope()
 
     ScreenAnnouncement(S.accessibility.settingsScreen)
+
+    // BackupManager via Hilt entry point
+    val backupManager = remember {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            BackupManagerEntryPoint::class.java,
+        ).backupManager()
+    }
+
+    // SAF launchers for backup/restore
+    val backupLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/zip")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                    backupManager.createBackup(outputStream)
+                }
+                launch(Dispatchers.Main) {
+                    Toast.makeText(context, backupStrings.backupSuccess, Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                launch(Dispatchers.Main) {
+                    Toast.makeText(context, backupStrings.backupFailed, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    val restoreLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    backupManager.restoreBackup(inputStream)
+                }
+                launch(Dispatchers.Main) {
+                    Toast.makeText(context, backupStrings.restoreSuccess, Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                launch(Dispatchers.Main) {
+                    Toast.makeText(context, backupStrings.restoreFailed, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     // Language state
     val currentLang by LocalizationManager.currentLanguage
@@ -88,6 +157,25 @@ fun SettingsScreen() {
                 fontWeight = FontWeight.Bold,
             )
         }
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 0 — Onboarding
+        // ══════════════════════════════════════════════════════════════════
+        OutlinedButton(
+            onClick = {
+                context.getSharedPreferences("gadget_settings", Context.MODE_PRIVATE)
+                    .edit()
+                    .putBoolean("has_seen_onboarding", false)
+                    .apply()
+                Toast.makeText(context, "Restart the app to see onboarding", Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+        ) {
+            Text(S.onboarding.showOnboarding)
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // ══════════════════════════════════════════════════════════════════
         // SECTION 1 — Language
@@ -439,6 +527,104 @@ fun SettingsScreen() {
                 metrics = metrics,
                 prefs = widgetPrefs,
             )
+        }
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 5 — Backup & Restore
+        // ══════════════════════════════════════════════════════════════════
+        Text(
+            backupStrings.backup + " & " + backupStrings.restore,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
+        )
+
+        // Backup button
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.CloudUpload, null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        backupStrings.backup,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Text(
+                    backupStrings.backupDesc,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                )
+                FilledTonalButton(
+                    onClick = {
+                        backupLauncher.launch("gadget_backup.zip")
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Icon(Icons.Default.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(backupStrings.backup)
+                }
+            }
+        }
+
+        // Restore button
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.CloudDownload, null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        backupStrings.restore,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Text(
+                    backupStrings.restoreDesc,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                )
+                OutlinedButton(
+                    onClick = {
+                        restoreLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(backupStrings.restore)
+                }
+            }
         }
     }
 }
