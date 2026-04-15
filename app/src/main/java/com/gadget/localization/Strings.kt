@@ -310,6 +310,21 @@ object S {
         val cooldownBlocked get() = m(l, "Cooldown blocked", "Abklingzeit blockiert", "Bloqueado por enfriamiento", "Bloqu\u00E9 par recharge")
         val lastTriggered get() = m(l, "Last triggered", "Zuletzt ausgel\u00F6st", "\u00DAltima activaci\u00F3n", "Dernier d\u00E9clenchement")
         val resetStats get() = m(l, "Reset statistics", "Statistiken zur\u00FCcksetzen", "Restablecer estad\u00EDsticas", "R\u00E9initialiser les statistiques")
+
+        // ── V2 Advanced Link strings ────────────────────────────────────
+        val andLogic get() = m(l, "AND", "UND", "Y", "ET")
+        val orLogic get() = m(l, "OR", "ODER", "O", "OU")
+        val addCondition get() = m(l, "Add Condition", "Bedingung hinzuf\u00FCgen", "A\u00F1adir condici\u00F3n", "Ajouter une condition")
+        val removeCondition get() = m(l, "Remove Condition", "Bedingung entfernen", "Eliminar condici\u00F3n", "Supprimer la condition")
+        val addAction get() = m(l, "Add Action", "Aktion hinzuf\u00FCgen", "A\u00F1adir acci\u00F3n", "Ajouter une action")
+        val removeAction get() = m(l, "Remove Action", "Aktion entfernen", "Eliminar acci\u00F3n", "Supprimer l'action")
+        val actionDelay get() = m(l, "Action Delay (ms)", "Aktionsverz\u00F6gerung (ms)", "Retraso de acci\u00F3n (ms)", "D\u00E9lai d'action (ms)")
+        val schedule get() = m(l, "Schedule", "Zeitplan", "Horario", "Planification")
+        val daysOfWeek get() = m(l, "Days of Week", "Wochentage", "D\u00EDas de la semana", "Jours de la semaine")
+        val startTime get() = m(l, "Start Time", "Startzeit", "Hora de inicio", "Heure de d\u00E9but")
+        val endTime get() = m(l, "End Time", "Endzeit", "Hora de fin", "Heure de fin")
+        val profile get() = m(l, "Profile", "Profil", "Perfil", "Profil")
+        val createProfile get() = m(l, "Create Profile", "Profil erstellen", "Crear perfil", "Cr\u00E9er un profil")
     }
 
     // ── Torch ───────────────────────────────────────────────────────────
@@ -536,6 +551,33 @@ object S {
         val modeLabel get() = m(l, "Mode", "Modus", "Modo", "Mode")
     }
 
+    // ── Search ──────────────────────────────────────────────────────────
+    val search: Search @Composable get() = Search(lang)
+
+    class Search(private val l: Language) {
+        val search get() = m(l, "Search", "Suche", "Buscar", "Recherche")
+        val searchHint get() = m(l, "Search metrics, logbook, rules, settings\u2026", "Metriken, Logbuch, Regeln, Einstellungen suchen\u2026", "Buscar m\u00E9tricas, registro, reglas, ajustes\u2026", "Rechercher m\u00E9triques, journal, r\u00E8gles, param\u00E8tres\u2026")
+        val noResults get() = m(l, "No results found", "Keine Ergebnisse gefunden", "Sin resultados", "Aucun r\u00E9sultat trouv\u00E9")
+        val metrics get() = m(l, "Metrics", "Metriken", "M\u00E9tricas", "M\u00E9triques")
+        val logbook get() = m(l, "Logbook", "Logbuch", "Registro", "Journal")
+        val linkRules get() = m(l, "Link Rules", "Link-Regeln", "Reglas de enlace", "R\u00E8gles de lien")
+        val settings get() = m(l, "Settings", "Einstellungen", "Ajustes", "Param\u00E8tres")
+    }
+
+    // ── Backup ─────────────────────────────────────────────────────────
+    val backup: Backup @Composable get() = Backup(lang)
+
+    class Backup(private val l: Language) {
+        val backup get() = m(l, "Backup", "Sicherung", "Copia de seguridad", "Sauvegarde")
+        val restore get() = m(l, "Restore", "Wiederherstellen", "Restaurar", "Restaurer")
+        val backupDesc get() = m(l, "Export all app data as a backup file", "Alle App-Daten als Sicherungsdatei exportieren", "Exportar todos los datos de la app como archivo de respaldo", "Exporter toutes les donn\u00E9es de l'app comme fichier de sauvegarde")
+        val restoreDesc get() = m(l, "Import data from a backup file", "Daten aus einer Sicherungsdatei importieren", "Importar datos de un archivo de respaldo", "Importer les donn\u00E9es depuis un fichier de sauvegarde")
+        val backupSuccess get() = m(l, "Backup created successfully", "Sicherung erfolgreich erstellt", "Copia de seguridad creada con \u00E9xito", "Sauvegarde cr\u00E9\u00E9e avec succ\u00E8s")
+        val restoreSuccess get() = m(l, "Restore completed \u2014 restart app to apply", "Wiederherstellung abgeschlossen \u2014 App neu starten", "Restauraci\u00F3n completada \u2014 reinicie la app", "Restauration termin\u00E9e \u2014 red\u00E9marrez l'app")
+        val backupFailed get() = m(l, "Backup failed", "Sicherung fehlgeschlagen", "Error en la copia de seguridad", "\u00C9chec de la sauvegarde")
+        val restoreFailed get() = m(l, "Restore failed", "Wiederherstellung fehlgeschlagen", "Error en la restauraci\u00F3n", "\u00C9chec de la restauration")
+    }
+
     // ── Common / Shared ─────────────────────────────────────────────────
     val common: Common @Composable get() = Common(lang)
 
@@ -560,6 +602,51 @@ object S {
         val selectDate get() = m(l, "Select Date", "Datum auswählen", "Seleccionar fecha", "Sélectionner la date")
         val deleteAll get() = m(l, "Delete all", "Alle löschen", "Eliminar todo", "Tout supprimer")
         val clearAll get() = m(l, "Clear all", "Alle löschen", "Borrar todo", "Tout effacer")
+    }
+
+    // ── Onboarding ──────────────────────────────────────────────────────
+    val onboarding: Onboarding @Composable get() = Onboarding(lang)
+
+    class Onboarding(private val l: Language) {
+        val welcomeTitle get() = m(l, "Welcome to Gadget", "Willkommen bei Gadget", "Bienvenido a Gadget", "Bienvenue sur Gadget")
+        val welcomeDesc get() = m(l,
+            "Your all-in-one hardware toolkit. Monitor sensors, control hardware, and automate your device.",
+            "Ihr All-in-One Hardware-Toolkit. Sensoren überwachen, Hardware steuern und Gerät automatisieren.",
+            "Tu kit de herramientas de hardware todo en uno. Monitorea sensores, controla hardware y automatiza tu dispositivo.",
+            "Votre boîte à outils matérielle tout-en-un. Surveillez les capteurs, contrôlez le matériel et automatisez votre appareil."
+        )
+        val toolsTitle get() = m(l, "Powerful Tools", "Leistungsstarke Werkzeuge", "Herramientas poderosas", "Outils puissants")
+        val toolsDesc get() = m(l,
+            "Torch, camera, vibration patterns, microphone — all with advanced controls and home screen widgets.",
+            "Taschenlampe, Kamera, Vibrationsmuster, Mikrofon — alles mit erweiterten Steuerungen und Startbildschirm-Widgets.",
+            "Linterna, cámara, patrones de vibración, micrófono — todo con controles avanzados y widgets de pantalla de inicio.",
+            "Lampe, caméra, motifs de vibration, microphone — tout avec des contrôles avancés et des widgets d'écran d'accueil."
+        )
+        val monitorTitle get() = m(l, "Live Monitoring", "Live-Überwachung", "Monitoreo en vivo", "Surveillance en direct")
+        val monitorDesc get() = m(l,
+            "Real-time sensor charts, battery analytics, WiFi and Bluetooth status — all at your fingertips.",
+            "Echtzeit-Sensordiagramme, Akku-Analysen, WLAN- und Bluetooth-Status — alles auf einen Blick.",
+            "Gráficos de sensores en tiempo real, análisis de batería, estado WiFi y Bluetooth — todo al alcance de tu mano.",
+            "Graphiques de capteurs en temps réel, analyses de batterie, état WiFi et Bluetooth — tout à portée de main."
+        )
+        val logbookTitle get() = m(l, "Smart Logbook", "Smartes Logbuch", "Registro inteligente", "Journal intelligent")
+        val logbookDesc get() = m(l,
+            "Log events, track processes with checkpoints, attach metric snapshots, and export your data.",
+            "Ereignisse protokollieren, Prozesse mit Prüfpunkten verfolgen, Metrik-Snapshots anhängen und Daten exportieren.",
+            "Registra eventos, rastrea procesos con puntos de control, adjunta instantáneas de métricas y exporta tus datos.",
+            "Enregistrez des événements, suivez des processus avec des points de contrôle, joignez des instantanés de métriques et exportez vos données."
+        )
+        val moreTitle get() = m(l, "And Much More", "Und vieles mehr", "Y mucho más", "Et bien plus encore")
+        val moreDesc get() = m(l,
+            "IF/THEN automation rules, file metadata editing, NFC tools, and 11 home screen widgets.",
+            "WENN/DANN Automatisierungsregeln, Dateimetadaten-Bearbeitung, NFC-Tools und 11 Startbildschirm-Widgets.",
+            "Reglas de automatización SI/ENTONCES, edición de metadatos de archivos, herramientas NFC y 11 widgets de pantalla de inicio.",
+            "Règles d'automatisation SI/ALORS, édition de métadonnées, outils NFC et 11 widgets d'écran d'accueil."
+        )
+        val skip get() = m(l, "Skip", "Überspringen", "Omitir", "Passer")
+        val next get() = m(l, "Next", "Weiter", "Siguiente", "Suivant")
+        val getStarted get() = m(l, "Get Started", "Loslegen", "Comenzar", "Commencer")
+        val showOnboarding get() = m(l, "Show Onboarding", "Einführung anzeigen", "Mostrar introducción", "Afficher l'introduction")
     }
 
     // ── Accessibility ──────────────────────────────────────────────────

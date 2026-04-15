@@ -13,8 +13,11 @@ import android.os.Build
 import android.os.IBinder
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
+import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import kotlinx.coroutines.*
 
+@AndroidEntryPoint
 class StrobeService : Service() {
 
     private var job: Job? = null
@@ -68,7 +71,7 @@ class StrobeService : Service() {
                     delay(halfPeriodMs)
                 }
             } finally {
-                try { cm.setTorchMode(cid, false) } catch (_: Exception) {}
+                try { cm.setTorchMode(cid, false) } catch (e: Exception) { Timber.w(e, "Failed to turn off torch during cleanup") }
             }
         }
     }

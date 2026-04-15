@@ -18,7 +18,10 @@ import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import com.gadget.widget.DrawnPatternUtils
 import com.gadget.widget.VibrationWidgetProvider
+import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
+@AndroidEntryPoint
 class VibrationService : Service() {
 
     private var vibrator: Vibrator? = null
@@ -75,7 +78,7 @@ class VibrationService : Service() {
             } else {
                 null
             }
-        } catch (_: Exception) { null }
+        } catch (e: Exception) { Timber.e(e, "Failed to parse drawn vibration pattern"); null }
             ?: VibrationEffect.createWaveform(
                 longArrayOf(0, 500, 200, 500),
                 intArrayOf(0, 255, 0, 255),
@@ -86,7 +89,7 @@ class VibrationService : Service() {
     }
 
     private fun stopVibration() {
-        try { vibrator?.cancel() } catch (_: Exception) {}
+        try { vibrator?.cancel() } catch (e: Exception) { Timber.w(e, "Failed to cancel vibrator during stop") }
         vibrator = null
         isRunning = false
 
@@ -103,7 +106,7 @@ class VibrationService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        try { vibrator?.cancel() } catch (_: Exception) {}
+        try { vibrator?.cancel() } catch (e: Exception) { Timber.w(e, "Failed to cancel vibrator during destroy") }
         isRunning = false
     }
 

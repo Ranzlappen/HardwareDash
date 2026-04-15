@@ -1,7 +1,11 @@
 package com.gadget.ui.link
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
+import timber.log.Timber
 import java.util.UUID
 
 // ─── Comparison operators ───────────────────────────────────────────────────
@@ -102,7 +106,8 @@ fun loadRules(json: String): List<LinkRule> {
     return try {
         val arr = JSONArray(json)
         (0 until arr.length()).map { linkRuleFromJson(arr.getJSONObject(it)) }
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to load link rules")
         emptyList()
     }
 }
@@ -211,7 +216,112 @@ fun loadLinkStats(json: String): Map<String, LinkRuleStats> {
         val map = mutableMapOf<String, LinkRuleStats>()
         obj.keys().forEach { key -> map[key] = linkRuleStatsFromJson(obj.getJSONObject(key)) }
         map
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to load link stats")
         emptyMap()
+    }
+}
+
+// ─── V2 Advanced Link Models ──────────────────────────────────────────────
+
+private val linkJson = Json {
+    ignoreUnknownKeys = true
+    encodeDefaults = true
+}
+
+@Serializable
+enum class LogicOperator { AND, OR }
+
+@Serializable
+data class SingleCondition(
+    val metricKey: String,
+    val operator: String,
+    val threshold: String,
+    val thresholdHigh: String = "",
+)
+
+@Serializable
+data class CompoundCondition(
+    val conditions: List<SingleCondition>,
+    val logic: LogicOperator = LogicOperator.AND,
+)
+
+@Serializable
+data class ActionStep(
+    val actionType: String,
+    val actionConfig: Map<String, String> = emptyMap(),
+    val delayMs: Long = 0,
+)
+
+@Serializable
+data class TimeSchedule(
+    val daysOfWeek: Set<Int> = emptySet(),
+    val startTime: String = "00:00",
+    val endTime: String = "23:59",
+)
+
+@Serializable
+data class LinkRuleV2(
+    val id: String = UUID.randomUUID().toString(),
+    val name: String = "",
+    val enabled: Boolean = true,
+    val conditions: CompoundCondition,
+    val actions: List<ActionStep>,
+    val cooldownSec: Int = 10,
+    val lastTriggeredMs: Long = 0L,
+    val schedule: TimeSchedule? = null,
+    val profileId: String? = null,
+)
+
+// ─── V1 → V2 migration ───────────────────────────────────────────────────
+
+/** Wraps a single-condition / single-action V1 rule into the V2 format. */
+fun migrateToV2(rule: LinkRule): LinkRuleV2 = LinkRuleV2(
+    id = rule.id,
+    name = rule.name,
+    enabled = rule.enabled,
+    conditions = CompoundCondition(
+        conditions = listOf(
+            SingleCondition(
+                metricKey = rule.metricKey,
+                operator = rule.operator,
+                threshold = rule.threshold,
+                thresholdHigh = rule.thresholdHigh,
+            ),
+        ),
+        logic = LogicOperator.AND,
+    ),
+    actions = listOf(
+        ActionStep(
+            actionType = rule.actionType,
+            actionConfig = rule.actionConfig,
+            delayMs = 0,
+        ),
+    ),
+    cooldownSec = rule.cooldownSec,
+    lastTriggeredMs = rule.lastTriggeredMs,
+)
+
+// ─── V2 JSON serialization ────────────────────────────────────────────────
+
+/** Serialize a list of V2 rules to JSON. */
+fun saveRulesV2(rules: List<LinkRuleV2>): String =
+    linkJson.encodeToString(rules)
+
+/**
+ * Deserialize rules from JSON. Tries V2 format first; if that fails, falls
+ * back to V1 parsing and migrates each rule to V2 automatically.
+ */
+fun loadRulesV2(json: String): List<LinkRuleV2> {
+    if (json.isBlank()) return emptyList()
+    return try {
+        linkJson.decodeFromString<List<LinkRuleV2>>(json)
+    } catch (_: Exception) {
+        try {
+            loadRules(json).map { migrateToV2(it) }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to load V2 link rules (including V1 fallback)")
+            emptyList()
+        }
     }
 }

@@ -18,6 +18,7 @@ import com.google.android.gms.tasks.Tasks
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.sqrt
+import timber.log.Timber
 
 /**
  * Defines every metric that can be shown in a home screen widget.
@@ -152,7 +153,7 @@ enum class WidgetMetric(
             val dbm = tm.signalStrength?.cellSignalStrengths?.firstOrNull()?.dbm ?: 0
             val level = tm.signalStrength?.level ?: 0
             "$dbm dBm ($level/4)"
-        } catch (_: Exception) { "N/A" }
+        } catch (e: Exception) { Timber.e(e, "Metric fetch failed"); "N/A" }
     },
     NETWORK_TYPE("net_type", "Network Type", "Network", "", "ic_cellular") {
         override fun fetch(ctx: Context): String = try {
@@ -168,7 +169,7 @@ enum class WidgetMetric(
                 TelephonyManager.NETWORK_TYPE_GPRS -> "GPRS"
                 else -> "Other"
             }
-        } catch (_: Exception) { "N/A" }
+        } catch (e: Exception) { Timber.e(e, "Metric fetch failed"); "N/A" }
     },
 
     // ── NFC ──────────────────────────────────────────────────────────────────
@@ -243,7 +244,7 @@ enum class WidgetMetric(
                 android.provider.Settings.System.SCREEN_BRIGHTNESS, 128
             )
             "${(cur * 100) / 255}%"
-        } catch (_: Exception) { "N/A" }
+        } catch (e: Exception) { Timber.e(e, "Metric fetch failed"); "N/A" }
     },
 
     // ── Location ────────────────────────────────────────────────────────────
@@ -289,7 +290,8 @@ enum class WidgetMetric(
                 if (prefs.getBoolean("metric_log_${metric.key}", false)) {
                     try {
                         result[metric.key] = metric.fetch(ctx)
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        Timber.e(e, "Snapshot fetch failed for %s", metric.key)
                         result[metric.key] = "N/A"
                     }
                 }

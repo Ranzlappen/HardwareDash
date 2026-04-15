@@ -1,6 +1,11 @@
 package com.gadget.ui.screens
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -22,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gadget.backup.BackupManager
 import com.gadget.localization.Language
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
@@ -31,7 +37,19 @@ import com.gadget.ui.components.sectionHeading
 import com.gadget.ui.theme.AccessibilityPreferencesManager
 import com.gadget.ui.theme.LocalAccessibilityPreferences
 import com.gadget.widget.WidgetMetric
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface BackupManagerEntryPoint {
+    fun backupManager(): BackupManager
+}
 
 private const val WIDGET_PREFS = "widget_settings"
 private const val KEY_RING_DURATION = "phone_ring_duration_seconds"
@@ -88,6 +106,25 @@ fun SettingsScreen() {
                 fontWeight = FontWeight.Bold,
             )
         }
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 0 — Onboarding
+        // ══════════════════════════════════════════════════════════════════
+        OutlinedButton(
+            onClick = {
+                context.getSharedPreferences("gadget_settings", Context.MODE_PRIVATE)
+                    .edit()
+                    .putBoolean("has_seen_onboarding", false)
+                    .apply()
+                Toast.makeText(context, "Restart the app to see onboarding", Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+        ) {
+            Text(S.onboarding.showOnboarding)
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // ══════════════════════════════════════════════════════════════════
         // SECTION 1 — Language

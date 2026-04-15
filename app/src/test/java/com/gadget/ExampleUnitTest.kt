@@ -1,17 +1,15 @@
 package com.gadget
 
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
-import org.junit.Assert.*
-
 /**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
+ * Placeholder replaced by proper unit tests in sub-packages.
+ * See: com.gadget.ui.link.LinkModelsTest, com.gadget.widget.WidgetMetricTest
  */
 class ExampleUnitTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun sanityCheck() {
+        assertTrue("Sanity check", true)
     }
 }

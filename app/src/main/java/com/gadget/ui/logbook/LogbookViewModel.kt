@@ -3,6 +3,7 @@ package com.gadget.ui.logbook
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.gadget.widget.WidgetMetric
@@ -12,10 +13,13 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.util.UUID
+import javax.inject.Inject
 
-class LogbookViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repo = LogbookRepository(application)
+@HiltViewModel
+class LogbookViewModel @Inject constructor(
+    private val repo: LogbookRepository,
+    application: Application,
+) : AndroidViewModel(application) {
 
     // ── Persisted state (from DataStore) ─────────────────────────────
     private val _store = MutableStateFlow(LogbookStore())

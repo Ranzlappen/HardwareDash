@@ -22,11 +22,15 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 import com.gadget.localization.S
+import android.content.Context
 import com.gadget.ui.dashboard.DashboardScreen
 import com.gadget.ui.hubs.ToolsHubScreen
 import com.gadget.ui.hubs.MonitorHubScreen
 import com.gadget.ui.hubs.MoreHubScreen
 import com.gadget.ui.logbook.LogbookScreen
+import com.gadget.ui.charts.MetricHistoryScreen
+import com.gadget.ui.onboarding.OnboardingScreen
+import com.gadget.ui.search.SearchScreen
 import com.gadget.ui.theme.LocalAccessibilityPreferences
 
 // ─── Route constants ──────────────────────────────────────────────────────────
@@ -54,6 +58,9 @@ object Routes {
     const val BATTERY      = "battery"
     const val RADIOS       = "radios"
 
+    // ── Onboarding ──
+    const val ONBOARDING   = "onboarding"
+
     // ── More sub-screens ──
     const val LOCKSCREEN   = "lockscreen"
     const val LINK         = "link"
@@ -61,6 +68,13 @@ object Routes {
     const val SETTINGS     = "settings"
     const val BUG          = "bug"
     const val MANUAL       = "manual"
+
+    // ── Charts ──
+    const val METRIC_HISTORY = "metric_history/{metricKey}"
+    fun metricHistory(metricKey: String) = "metric_history/$metricKey"
+
+    // ── Global Search ──
+    const val SEARCH       = "search"
 }
 
 data class BottomNavItem(
@@ -79,6 +93,13 @@ private val bottomNavItems = listOf(
 
 @Composable
 fun NavGraph() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val hasSeenOnboarding = remember {
+        context.getSharedPreferences("gadget_settings", Context.MODE_PRIVATE)
+            .getBoolean("has_seen_onboarding", false)
+    }
+    val startDest = if (hasSeenOnboarding) Routes.DASHBOARD else Routes.ONBOARDING
+
     val navController = rememberNavController()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -98,8 +119,11 @@ fun NavGraph() {
         Routes.MORE      to nav.more,
     )
 
+    val showBottomBar = currentDestination?.route != Routes.ONBOARDING
+
     Scaffold(
         bottomBar = {
+            if (!showBottomBar) return@Scaffold
             Column {
                 // Skip-to-content button (visually hidden, accessible via TalkBack/keyboard)
                 TextButton(
@@ -155,13 +179,20 @@ fun NavGraph() {
 
         NavHost(
             navController = navController,
-            startDestination = Routes.DASHBOARD,
+            startDestination = startDest,
             modifier = Modifier
                 .padding(innerPadding)
                 .focusRequester(contentFocusRequester),
             enterTransition = { enterTransition },
             exitTransition = { exitTransition },
         ) {
+            composable(Routes.ONBOARDING) {
+                OnboardingScreen(onComplete = {
+                    navController.navigate(Routes.DASHBOARD) {
+                        popUpTo(Routes.ONBOARDING) { inclusive = true }
+                    }
+                })
+            }
             composable(Routes.DASHBOARD) {
                 DashboardScreen(onNavigate = { route ->
                     navController.navigate(route) {
@@ -175,6 +206,21 @@ fun NavGraph() {
             composable(Routes.MONITOR) { MonitorHubScreen() }
             composable(Routes.LOGBOOK) { LogbookScreen() }
             composable(Routes.MORE)    { MoreHubScreen() }
+            composable(Routes.METRIC_HISTORY) {
+                MetricHistoryScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Routes.SEARCH) {
+                SearchScreen(
+                    onNavigate = { route ->
+                        navController.navigate(route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onBack = { navController.popBackStack() },
+                )
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import com.gadget.MainActivity
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * Optional foreground Service for continuous background hardware access.
@@ -37,6 +38,7 @@ import com.gadget.localization.S
  *    Service and the Compose UI observe.
  *  - Or bind to the service and call methods directly.
  */
+@AndroidEntryPoint
 class GadgetService : Service() {
 
     companion object {

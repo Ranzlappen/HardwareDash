@@ -73,6 +73,7 @@
     <uses-feature android:name="android.hardware.sensor.stepcounter"  android:required="false" />
 
     <application
+        android:name=".GadgetApplication"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"

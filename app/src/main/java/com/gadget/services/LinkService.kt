@@ -23,6 +23,8 @@ import com.gadget.MainActivity
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import com.gadget.receivers.AdminReceiver
+import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import com.gadget.ui.link.*
 import com.gadget.ui.logbook.LogbookEntry
 import com.gadget.ui.logbook.LogbookRepository
@@ -31,7 +33,11 @@ import com.gadget.widget.WidgetMetric
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.firstOrNull
 import java.time.Instant
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
 
+@AndroidEntryPoint
 class LinkService : Service() {
 
     private var job: Job? = null
@@ -70,8 +76,8 @@ class LinkService : Service() {
             while (isActive) {
                 try {
                     evaluateRules()
-                } catch (_: Exception) {
-                    // Never let a rule evaluation crash the service
+                } catch (e: Exception) {
+                    Timber.e(e, "Rule evaluation cycle failed")
                 }
                 delay(POLL_INTERVAL_MS)
             }
@@ -104,7 +110,7 @@ class LinkService : Service() {
             val inCooldown = now - rule.lastTriggeredMs < rule.cooldownSec * 1000L
 
             val metric = WidgetMetric.fromKey(rule.metricKey) ?: return@map rule
-            val value = try { metric.fetch(this) } catch (_: Exception) { return@map rule }
+            val value = try { metric.fetch(this) } catch (e: Exception) { Timber.e(e, "Failed to fetch metric %s", rule.metricKey); return@map rule }
 
             val conditionMet = evaluateCondition(value, rule.operator, rule.threshold, rule.thresholdHigh)
 
@@ -123,8 +129,8 @@ class LinkService : Service() {
             if (conditionMet) {
                 try {
                     executeAction(rule)
-                } catch (_: Exception) {
-                    // Never let a failing action crash the evaluation loop
+                } catch (e: Exception) {
+                    Timber.e(e, "Action execution failed for rule: %s", rule.name)
                 }
                 rulesChanged = true
                 val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
@@ -143,6 +149,174 @@ class LinkService : Service() {
         if (rulesChanged || statsChanged) {
             val editor = prefs.edit()
             if (rulesChanged) editor.putString("rules", saveRules(updatedRules))
+            if (statsChanged) editor.putString(KEY_STATS, saveLinkStats(stats))
+            editor.apply()
+        }
+
+        // Also evaluate V2 rules
+        try {
+            evaluateRulesV2()
+        } catch (e: Exception) {
+            Timber.e(e, "V2 rule evaluation cycle failed")
+        }
+    }
+
+    // ─── V2 compound condition evaluation ─────────────────────────────────
+
+    /**
+     * Evaluate a [CompoundCondition] against live sensor data.
+     * AND → all sub-conditions must be true.
+     * OR  → at least one sub-condition must be true.
+     */
+    private fun evaluateCompoundCondition(
+        compound: CompoundCondition,
+        context: Context,
+    ): Boolean {
+        if (compound.conditions.isEmpty()) return false
+        val results = compound.conditions.map { cond ->
+            val metric = WidgetMetric.fromKey(cond.metricKey) ?: return@map false
+            val value = try {
+                metric.fetch(context)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to fetch metric %s", cond.metricKey)
+                return@map false
+            }
+            evaluateCondition(value, cond.operator, cond.threshold, cond.thresholdHigh)
+        }
+        return when (compound.logic) {
+            LogicOperator.AND -> results.all { it }
+            LogicOperator.OR -> results.any { it }
+        }
+    }
+
+    /**
+     * Execute a chain of [ActionStep]s sequentially, respecting per-step delays.
+     * Must be called from a coroutine context.
+     */
+    private suspend fun executeActionChain(actions: List<ActionStep>) {
+        for (step in actions) {
+            if (step.delayMs > 0) {
+                delay(step.delayMs)
+            }
+            try {
+                executeActionStep(step)
+            } catch (e: Exception) {
+                Timber.e(e, "Action step execution failed: %s", step.actionType)
+            }
+        }
+    }
+
+    /**
+     * Execute a single [ActionStep] by delegating to the existing action
+     * infrastructure.
+     */
+    private fun executeActionStep(step: ActionStep) {
+        // Build a lightweight LinkRule so we can reuse executeAction()
+        val syntheticRule = LinkRule(
+            actionType = step.actionType,
+            actionConfig = step.actionConfig,
+        )
+        executeAction(syntheticRule)
+    }
+
+    /**
+     * Check whether the current wall-clock time falls within a [TimeSchedule].
+     * Returns true when no schedule is set (i.e. always active).
+     */
+    private fun isWithinSchedule(schedule: TimeSchedule?): Boolean {
+        if (schedule == null) return true
+
+        // Day-of-week check (Calendar.DAY_OF_WEEK: Sun=1 .. Sat=7)
+        if (schedule.daysOfWeek.isNotEmpty()) {
+            val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
+            if (today !in schedule.daysOfWeek) return false
+        }
+
+        // Time-of-day window check
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        val now = LocalTime.now()
+        val start = try { LocalTime.parse(schedule.startTime, formatter) } catch (_: Exception) { LocalTime.MIN }
+        val end = try { LocalTime.parse(schedule.endTime, formatter) } catch (_: Exception) { LocalTime.MAX }
+
+        return if (start <= end) {
+            // Normal window (e.g. 08:00 – 22:00)
+            now in start..end
+        } else {
+            // Overnight window (e.g. 22:00 – 06:00)
+            now >= start || now <= end
+        }
+    }
+
+    // ─── V2 rule evaluation loop ────────────────────────────────────────────
+
+    private fun evaluateRulesV2() {
+        val prefs = getSharedPreferences("link_rules", Context.MODE_PRIVATE)
+        val json = prefs.getString("rules_v2", "") ?: ""
+
+        // If no V2 rules stored yet, try migrating V1 rules
+        val rules: List<LinkRuleV2> = if (json.isBlank()) {
+            val v1Json = prefs.getString("rules", "") ?: ""
+            val migrated = loadRulesV2(v1Json)
+            if (migrated.isNotEmpty()) {
+                prefs.edit().putString("rules_v2", saveRulesV2(migrated)).apply()
+            }
+            migrated
+        } else {
+            loadRulesV2(json)
+        }
+
+        val now = System.currentTimeMillis()
+        var rulesChanged = false
+        var statsChanged = false
+
+        val statsJson = prefs.getString(KEY_STATS, "") ?: ""
+        val stats = loadLinkStats(statsJson).toMutableMap()
+
+        val updatedRules = rules.map { rule ->
+            if (!rule.enabled) return@map rule
+
+            // Schedule gate
+            if (!isWithinSchedule(rule.schedule)) return@map rule
+
+            // Cooldown check
+            val inCooldown = now - rule.lastTriggeredMs < rule.cooldownSec * 1000L
+
+            // Compound condition evaluation
+            val conditionMet = evaluateCompoundCondition(rule.conditions, this)
+
+            if (inCooldown) {
+                if (conditionMet) {
+                    val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
+                    stats[rule.id] = prev.copy(
+                        cooldownBlockCount = prev.cooldownBlockCount + 1,
+                        lastCooldownIso = Instant.now().toString(),
+                    )
+                    statsChanged = true
+                }
+                return@map rule
+            }
+
+            if (conditionMet) {
+                // Launch action chain in the service coroutine scope
+                scope.launch {
+                    executeActionChain(rule.actions)
+                }
+                rulesChanged = true
+                val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
+                stats[rule.id] = prev.copy(
+                    triggerCount = prev.triggerCount + 1,
+                    lastTriggeredIso = Instant.now().toString(),
+                )
+                statsChanged = true
+                rule.copy(lastTriggeredMs = now)
+            } else {
+                rule
+            }
+        }
+
+        if (rulesChanged || statsChanged) {
+            val editor = prefs.edit()
+            if (rulesChanged) editor.putString("rules_v2", saveRulesV2(updatedRules))
             if (statsChanged) editor.putString(KEY_STATS, saveLinkStats(stats))
             editor.apply()
         }
@@ -174,7 +348,7 @@ class LinkService : Service() {
                     .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
             } ?: return
             cm.setTorchMode(cid, on)
-        } catch (_: Exception) {}
+        } catch (e: Exception) { Timber.e(e, "Torch toggle failed") }
     }
 
     private fun vibrate() {
@@ -197,7 +371,7 @@ class LinkService : Service() {
             } else {
                 null
             }
-        } catch (_: Exception) { null }
+        } catch (e: Exception) { Timber.w(e, "Custom vibration pattern failed, using fallback"); null }
             ?: VibrationEffect.createOneShot(500, 255)
 
         val bypassDnd = getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
@@ -242,14 +416,14 @@ class LinkService : Service() {
             if (dpm.isAdminActive(admin)) {
                 dpm.lockNow()
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) { Timber.e(e, "Lock screen failed") }
     }
 
     private fun logToLogbook(rule: LinkRule) {
         try {
             val text = rule.actionConfig["logText"]?.ifBlank { null }
                 ?: "Link triggered: ${rule.name.ifBlank { "Link Rule" }}"
-            val metrics = try { WidgetMetric.snapshotEnabled(this) } catch (_: Exception) { emptyMap() }
+            val metrics = try { WidgetMetric.snapshotEnabled(this) } catch (e: Exception) { Timber.e(e, "Metric snapshot failed"); emptyMap() }
             val entry = LogbookEntry(
                 isoDate = Instant.now().toString(),
                 text = text,
@@ -262,9 +436,9 @@ class LinkService : Service() {
                     val repo = LogbookRepository(applicationContext)
                     val store = repo.storeFlow.firstOrNull() ?: return@launch
                     repo.save(store.copy(entries = listOf(entry) + store.entries))
-                } catch (_: Exception) { }
+                } catch (e: Exception) { Timber.e(e, "Failed to save logbook entry from Link rule") }
             }
-        } catch (_: Exception) { }
+        } catch (e: Exception) { Timber.e(e, "logToLogbook failed for rule: %s", rule.name) }
     }
 
     private fun ringPhone() {

@@ -22,7 +22,9 @@ import androidx.lifecycle.LifecycleRegistry
 
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class VideoRecordService : Service() {
 
     private var recording: Recording? = null

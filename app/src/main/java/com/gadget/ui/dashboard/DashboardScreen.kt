@@ -13,55 +13,36 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.gadget.localization.S
 import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.SparklineChart
 import com.gadget.ui.components.sectionHeading
-import com.gadget.ui.logbook.LogbookRepository
 import com.gadget.ui.logbook.LogbookEntry
 import com.gadget.ui.navigation.Routes
-import com.gadget.widget.WidgetMetric
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun DashboardScreen(onNavigate: (String) -> Unit) {
-    val context = LocalContext.current
+fun DashboardScreen(
+    onNavigate: (String) -> Unit,
+    viewModel: DashboardViewModel = hiltViewModel(),
+) {
     val strings = S.dashboard
     val nav = S.nav
 
     ScreenAnnouncement(S.accessibility.dashboardScreen)
 
-    // Live status data
-    var batteryLevel by remember { mutableStateOf("--") }
-    var batteryStatus by remember { mutableStateOf("--") }
-    var wifiSsid by remember { mutableStateOf("--") }
-    var wifiSignal by remember { mutableStateOf("--") }
-    var recentEntry by remember { mutableStateOf<LogbookEntry?>(null) }
-
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            batteryLevel = WidgetMetric.BATTERY_LEVEL.fetch(context)
-            batteryStatus = WidgetMetric.BATTERY_STATUS.fetch(context)
-            try { wifiSsid = WidgetMetric.WIFI_SSID.fetch(context) } catch (_: Exception) {}
-            try { wifiSignal = WidgetMetric.WIFI_SIGNAL.fetch(context) } catch (_: Exception) {}
-            try {
-                val repo = LogbookRepository(context)
-                val store = repo.storeFlow.firstOrNull()
-                recentEntry = store?.entries
-                    ?.sortedByDescending { it.isoDate }
-                    ?.firstOrNull()
-            } catch (_: Exception) {}
-        }
-    }
+    // Collect ViewModel state
+    val heroMetrics by viewModel.heroMetrics.collectAsState()
+    val insights by viewModel.insights.collectAsState()
+    val recentEntry by viewModel.recentEntry.collectAsState()
+    val activityFeed by viewModel.activityFeed.collectAsState()
 
     Column(
         modifier = Modifier
@@ -71,38 +52,100 @@ fun DashboardScreen(onNavigate: (String) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         // ── Header ──────────────────────────────────────────────────
-        Column {
-            Text(
-                strings.title,
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.sectionHeading(),
-            )
-            Text(
-                strings.subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    strings.title,
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.sectionHeading(),
+                )
+                Text(
+                    strings.subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            IconButton(onClick = { onNavigate(Routes.SEARCH) }) {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = S.search.search,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
 
-        // ── Status Summary ──────────────────────────────────────────
+        // ── Status Summary with Sparklines ─────────────────────────
         Text(
             strings.status,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.sectionHeading(),
         )
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(
-                listOf(
-                    StatusCardData(Icons.Default.BatteryStd, "Battery", batteryLevel, batteryStatus),
-                    StatusCardData(Icons.Default.Wifi, "WiFi", wifiSsid, wifiSignal),
-                )
-            ) { data ->
-                StatusCard(data)
+
+        if (heroMetrics.isNotEmpty()) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                items(heroMetrics) { hero ->
+                    HeroStatusCard(hero)
+                }
+            }
+        } else {
+            // Fallback: show empty status cards while loading
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                items(
+                    listOf(
+                        StatusCardData(Icons.Default.BatteryStd, "Battery", "--", "--"),
+                        StatusCardData(Icons.Default.Wifi, "WiFi", "--", "--"),
+                    )
+                ) { data ->
+                    StatusCard(data)
+                }
+            }
+        }
+
+        // ── Insights ───────────────────────────────────────────────
+        if (insights.isNotEmpty()) {
+            Text(
+                "Insights",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.sectionHeading(),
+            )
+            insights.forEach { insight ->
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    ),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Icon(
+                            insight.icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(20.dp),
+                        )
+                        Text(
+                            insight.message,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                    }
+                }
             }
         }
 
@@ -251,6 +294,60 @@ private data class StatusCardData(
     val primary: String,
     val secondary: String,
 )
+
+@Composable
+private fun HeroStatusCard(hero: HeroMetric) {
+    ElevatedCard(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+        modifier = Modifier
+            .width(180.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "${hero.label}: ${hero.currentValue}"
+            },
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(
+                    hero.icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp),
+                )
+                if (hero.sparklineData.isNotEmpty()) {
+                    SparklineChart(
+                        data = hero.sparklineData,
+                        modifier = Modifier
+                            .width(60.dp)
+                            .height(24.dp),
+                        lineColor = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                hero.currentValue,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                hero.label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
 
 @Composable
 private fun StatusCard(data: StatusCardData) {
