@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">HardwareDash</string>
-    <string name="admin_description">Allows HardwareDash to lock the screen programmatically.</string>
+    <string name="app_name">Gadget</string>
+    <string name="admin_description">Allows Gadget to lock the screen programmatically.</string>
 
     <!-- Widget labels (shown in widget picker title) -->
-    <string name="widget_label_metric">HardwareDash Metric</string>
+    <string name="widget_label_metric">Gadget Metric</string>
     <string name="widget_label_log_now">Quick Log</string>
     <string name="widget_label_flashlight">Flashlight Toggle</string>
     <string name="widget_label_strobe">Strobe Toggle</string>
@@ -25,4 +25,8 @@
     <string name="widget_desc_phone_ring">Ring your phone after a configurable delay.</string>
     <string name="widget_desc_notify">Send yourself a notification after a configurable delay.</string>
     <string name="widget_desc_db_meter">Monitor ambient noise level from your home screen.</string>
+
+    <!-- Vibration widget -->
+    <string name="widget_label_vibration">Vibration Toggle</string>
+    <string name="widget_desc_vibration">Toggle vibration on or off from your home screen.</string>
 </resources>
