@@ -63,9 +63,60 @@ const val DEFAULT_NOTIFY_DELAY = 30
 fun SettingsScreen() {
     val context = LocalContext.current
     val strings = S.settings
+    val backupStrings = S.backup
     val accessibilityPrefs = LocalAccessibilityPreferences.current
+    val coroutineScope = rememberCoroutineScope()
 
     ScreenAnnouncement(S.accessibility.settingsScreen)
+
+    // BackupManager via Hilt entry point
+    val backupManager = remember {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            BackupManagerEntryPoint::class.java,
+        ).backupManager()
+    }
+
+    // SAF launchers for backup/restore
+    val backupLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/zip")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                    backupManager.createBackup(outputStream)
+                }
+                launch(Dispatchers.Main) {
+                    Toast.makeText(context, backupStrings.backupSuccess, Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                launch(Dispatchers.Main) {
+                    Toast.makeText(context, backupStrings.backupFailed, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    val restoreLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    backupManager.restoreBackup(inputStream)
+                }
+                launch(Dispatchers.Main) {
+                    Toast.makeText(context, backupStrings.restoreSuccess, Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                launch(Dispatchers.Main) {
+                    Toast.makeText(context, backupStrings.restoreFailed, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     // Language state
     val currentLang by LocalizationManager.currentLanguage
@@ -476,6 +527,104 @@ fun SettingsScreen() {
                 metrics = metrics,
                 prefs = widgetPrefs,
             )
+        }
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 5 — Backup & Restore
+        // ══════════════════════════════════════════════════════════════════
+        Text(
+            backupStrings.backup + " & " + backupStrings.restore,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.sectionHeading(),
+        )
+
+        // Backup button
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.CloudUpload, null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        backupStrings.backup,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Text(
+                    backupStrings.backupDesc,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                )
+                FilledTonalButton(
+                    onClick = {
+                        backupLauncher.launch("gadget_backup.zip")
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Icon(Icons.Default.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(backupStrings.backup)
+                }
+            }
+        }
+
+        // Restore button
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.CloudDownload, null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        backupStrings.restore,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Text(
+                    backupStrings.restoreDesc,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                )
+                OutlinedButton(
+                    onClick = {
+                        restoreLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(backupStrings.restore)
+                }
+            }
         }
     }
 }
