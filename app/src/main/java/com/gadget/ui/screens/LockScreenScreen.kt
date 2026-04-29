@@ -55,6 +55,7 @@ import com.gadget.ui.screens.notifications.CH_PROGRESS
 import com.gadget.ui.screens.notifications.NotifActionEntry
 import com.gadget.ui.screens.notifications.NotifSpec
 import com.gadget.ui.screens.notifications.NotifStyle
+import com.gadget.ui.screens.notifications.NotificationPreviewCard
 import com.gadget.ui.screens.notifications.ProgressMode
 import com.gadget.ui.screens.notifications.buildNotification
 import com.gadget.ui.screens.notifications.ensureAllChannels
@@ -442,59 +443,33 @@ fun LockScreenScreen() {
 
         // ── Preview Card ─────────────────────────────────────────────────
         Text(S.lock.preview, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        ) {
-            Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(customTitle, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium)
-                Text(customBody, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                if (customShowProgress) {
-                    if (customProgressIndeterminate) {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    } else {
-                        LinearProgressIndicator(
-                            progress = { customProgressValue / 100f },
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                }
-                if (customActionCount > 0) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
-                        for (i in 0 until customActionCount) {
-                            TextButton(onClick = {}) { Text(customActions[i].label, style = MaterialTheme.typography.labelSmall) }
-                        }
-                    }
-                }
-            }
-        }
+        val previewSpec = NotifSpec(
+            title = customTitle,
+            body = customBody,
+            priority = customPriority,
+            visibility = customVisibility,
+            accentColor = colorOptions[customColorIdx].first.toArgb(),
+            actions = customActions.take(customActionCount),
+            progressMode = when {
+                !customShowProgress -> ProgressMode.OFF
+                customProgressIndeterminate -> ProgressMode.INDETERMINATE
+                else -> ProgressMode.DETERMINATE
+            },
+            progressValue = customProgressValue.toInt(),
+            style = when (customStyleIdx) {
+                1 -> NotifStyle.BIG_TEXT
+                2 -> NotifStyle.INBOX
+                else -> NotifStyle.NORMAL
+            },
+            ongoing = customOngoing,
+            autoCancel = customAutoCancel,
+        )
+        NotificationPreviewCard(previewSpec)
 
         // ── Send Button ──────────────────────────────────────────────────
         Button(
             onClick = {
-                val spec = NotifSpec(
-                    title = customTitle,
-                    body = customBody,
-                    priority = customPriority,
-                    visibility = customVisibility,
-                    accentColor = colorOptions[customColorIdx].first.toArgb(),
-                    actions = customActions.take(customActionCount),
-                    progressMode = when {
-                        !customShowProgress -> ProgressMode.OFF
-                        customProgressIndeterminate -> ProgressMode.INDETERMINATE
-                        else -> ProgressMode.DETERMINATE
-                    },
-                    progressValue = customProgressValue.toInt(),
-                    style = when (customStyleIdx) {
-                        1 -> NotifStyle.BIG_TEXT
-                        2 -> NotifStyle.INBOX
-                        else -> NotifStyle.NORMAL
-                    },
-                    ongoing = customOngoing,
-                    autoCancel = customAutoCancel,
-                )
-
+                val spec = previewSpec
                 val notifId = 2000 + (System.currentTimeMillis() % 1000).toInt()
 
                 if (customDelaySec > 0 && notifGranted) {
