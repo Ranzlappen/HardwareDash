@@ -9,8 +9,8 @@ object IrCodecs {
         data class Error(val message: String) : Result()
     }
 
-    fun encode(protocol: String, payload: String, carrierHz: Int, repeats: Int): Result =
-        try {
+    fun encode(protocol: String, payload: String, carrierHz: Int, repeats: Int): Result {
+        return try {
             val once = when (protocol.uppercase()) {
                 "NEC" -> encodeNec(payload)
                 "PRONTO" -> return encodePronto(payload, repeats)
@@ -24,6 +24,7 @@ object IrCodecs {
         } catch (e: Exception) {
             Result.Error("Encode failed: ${e.message}")
         }
+    }
 
     private fun encodeNec(payload: String): IntArray {
         val hex = payload.trim().removePrefix("0x").removePrefix("0X")
