@@ -90,6 +90,20 @@
         <meta-data android:name="com.gadget.DESCRIPTION"  android:value="Gadget — monitor and control device sensors, camera, audio, and more" />
         <meta-data android:name="com.gadget.REPOSITORY"   android:value="github.com/Ranzlappen/HardwareDash" />
 
+        <!-- ══════════════════════ WORKMANAGER ON-DEMAND INIT ══════════ -->
+        <!-- GadgetApplication implements androidx.work.Configuration.Provider so we
+             must opt out of the default startup initializer. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
         <!-- ── Main Activity ─────────────────────────────────────── -->
         <activity
             android:name=".MainActivity"
