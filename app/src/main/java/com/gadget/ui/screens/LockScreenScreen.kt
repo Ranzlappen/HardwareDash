@@ -50,6 +50,7 @@ import com.gadget.ui.components.LabeledOption
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SectionHeader
 import com.gadget.ui.components.SliderWithInput
+import com.gadget.ui.screens.notifications.BuilderPresetStore
 import com.gadget.ui.screens.notifications.NotifActionEntry
 import com.gadget.ui.screens.notifications.NotifSpec
 import com.gadget.ui.screens.notifications.NotifStyle
@@ -98,9 +99,11 @@ fun LockScreenScreen() {
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
-    // Schedule list
+    // Schedule list + preset list (both backed by "schedule_actions" prefs).
     val schedPrefs = remember { context.getSharedPreferences("schedule_actions", Context.MODE_PRIVATE) }
     var schedList by remember { mutableStateOf(loadScheduleList(schedPrefs)) }
+    var presetName by remember { mutableStateOf("") }
+    var presetList by remember { mutableStateOf(BuilderPresetStore.load(context)) }
 
     // Custom notification builder state
     var customTitle    by remember { mutableStateOf("Gadget") }
@@ -629,6 +632,78 @@ fun LockScreenScreen() {
                             schedList = loadScheduleList(schedPrefs)
                         }) {
                             Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(24.dp))
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Save as Template ─────────────────────────────────────────────────
+        SectionHeader(S.lock.saveAsTemplate)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedTextField(
+                value = presetName,
+                onValueChange = { presetName = it },
+                label = { Text(S.lock.presetName) },
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+            )
+            FilledTonalButton(
+                onClick = {
+                    BuilderPresetStore.save(context, presetName, previewSpec)
+                    presetList = BuilderPresetStore.load(context)
+                    presetName = ""
+                },
+                enabled = presetName.isNotBlank(),
+            ) { Text(S.lock.savePreset) }
+        }
+        if (presetList.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                presetList.forEach { preset ->
+                    Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.small) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(preset.name, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                            TextButton(onClick = {
+                                customTitle = preset.spec.title
+                                customBody = preset.spec.body
+                                customSubtext = preset.spec.subtext
+                                customPriority = preset.spec.priority
+                                customVisibility = preset.spec.visibility
+                                preset.spec.category?.let { customCategory = it }
+                                customColorIdx = preset.spec.accentColor
+                                    ?.let { argb -> colorOptions.indexOfFirst { it.first.toArgb() == argb }.takeIf { it >= 0 } }
+                                    ?: customColorIdx
+                                customActionCount = preset.spec.actions.size.coerceIn(0, 3)
+                                preset.spec.actions.forEachIndexed { i, a -> if (i < customActions.size) customActions[i] = a }
+                                customQuickReply = preset.spec.quickReplyHint
+                                customShowProgress = preset.spec.progressMode != ProgressMode.OFF
+                                customProgressIndeterminate = preset.spec.progressMode == ProgressMode.INDETERMINATE
+                                customProgressValue = preset.spec.progressValue.toFloat()
+                                customStyleIdx = when (preset.spec.style) {
+                                    NotifStyle.NORMAL -> 0
+                                    NotifStyle.BIG_TEXT -> 1
+                                    NotifStyle.INBOX -> 2
+                                }
+                                customOngoing = preset.spec.ongoing
+                                customAutoCancel = preset.spec.autoCancel
+                                customSound = preset.spec.sound
+                                customVibrate = preset.spec.vibrate
+                                customTimeoutSec = preset.spec.timeoutSec.toFloat()
+                                customBadge = preset.spec.badge
+                            }) { Text(S.lock.loadPreset) }
+                            IconButton(onClick = {
+                                BuilderPresetStore.delete(context, preset.name)
+                                presetList = BuilderPresetStore.load(context)
+                            }) {
+                                Icon(Icons.Default.Delete, S.lock.deletePreset, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                            }
                         }
                     }
                 }
