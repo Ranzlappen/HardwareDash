@@ -354,6 +354,41 @@ object MetricMetadataRegistry {
                 ),
             ))
         }
+
+        put("heart_rate", MetricMetadata(
+            key = "heart_rate", unit = "bpm",
+            min = 30.0, max = 220.0,
+            typical = 50.0..120.0,
+            defaultThreshold = 100.0, step = 1.0, isInteger = true,
+            presets = listOf(
+                MetricMetadata.Preset("Resting", LinkOperator.LESS_THAN, 70.0),
+                MetricMetadata.Preset("Active", LinkOperator.BETWEEN, 100.0, 140.0),
+                MetricMetadata.Preset("High", LinkOperator.GREATER_THAN, 150.0),
+            ),
+        ))
+        put("hinge_angle", MetricMetadata(
+            key = "hinge_angle", unit = "°",
+            min = 0.0, max = 360.0,
+            typical = 0.0..180.0,
+            defaultThreshold = 90.0, step = 1.0, isInteger = true,
+            presets = listOf(
+                MetricMetadata.Preset("Closed", LinkOperator.LESS_THAN, 30.0),
+                MetricMetadata.Preset("Half open", LinkOperator.BETWEEN, 80.0, 100.0),
+                MetricMetadata.Preset("Fully open", LinkOperator.GREATER_THAN, 170.0),
+            ),
+        ))
+        put("motion", MetricMetadata(
+            key = "motion", unit = "",
+            min = null, max = null, typical = null,
+            defaultThreshold = 0.0, step = 1.0,
+            isCategorical = true, allowedValues = listOf("Detected", "Idle"),
+        ))
+        put("stationary", MetricMetadata(
+            key = "stationary", unit = "",
+            min = null, max = null, typical = null,
+            defaultThreshold = 0.0, step = 1.0,
+            isCategorical = true, allowedValues = listOf("Detected", "Idle"),
+        ))
         put("light", MetricMetadata(
             key = "light", unit = "lux",
             min = 0.0, max = 120000.0,

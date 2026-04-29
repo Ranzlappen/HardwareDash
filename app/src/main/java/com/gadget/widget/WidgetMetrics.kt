@@ -298,6 +298,27 @@ enum class WidgetMetric(
     GEO_ROT_Z("geo_rot_z", "Geomagnetic Rotation Z", "Sensors", "", "ic_sensors") {
         override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR) { v -> "%.3f".format(v[2]) }
     },
+
+    HEART_RATE("heart_rate", "Heart Rate", "Sensors", "bpm", "ic_sensors") {
+        override fun fetch(ctx: Context): String {
+            if (!hasBodySensorsPermission(ctx)) return "No permission"
+            return readSensor(ctx, Sensor.TYPE_HEART_RATE) { v -> "${v[0].toInt()} bpm" }
+        }
+    },
+    HINGE_ANGLE("hinge_angle", "Hinge Angle", "Sensors", "°", "ic_sensors") {
+        override fun fetch(ctx: Context): String {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return "N/A"
+            return readSensor(ctx, Sensor.TYPE_HINGE_ANGLE) { v -> "${"%.0f".format(v[0])}°" }
+        }
+    },
+    MOTION_DETECT("motion", "Motion Detect", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String =
+            readSensor(ctx, Sensor.TYPE_MOTION_DETECT) { _ -> "Detected" }.takeIf { it != "N/A" } ?: "Idle"
+    },
+    STATIONARY_DETECT("stationary", "Stationary Detect", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String =
+            readSensor(ctx, Sensor.TYPE_STATIONARY_DETECT) { _ -> "Detected" }.takeIf { it != "N/A" } ?: "Idle"
+    },
     LIGHT("light", "Light", "Sensors", "lux", "ic_sensors") {
         override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_LIGHT) { v ->
             "${"%.0f".format(v[0])} lux"
@@ -411,6 +432,11 @@ private fun readLastLocation(
 } catch (_: Exception) {
     "N/A"
 }
+
+private fun hasBodySensorsPermission(ctx: Context): Boolean =
+    androidx.core.content.ContextCompat.checkSelfPermission(
+        ctx, android.Manifest.permission.BODY_SENSORS,
+    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
 
 /**
  * Reads a one-shot sensor value with a 500ms timeout.
