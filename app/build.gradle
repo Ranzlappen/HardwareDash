@@ -134,6 +134,9 @@ dependencies {
     // Vico charts (Compose-native, Material 3)
     implementation 'com.patrykandpatrick.vico:compose-m3:1.13.1'
 
+    // USB serial (CDC-ACM) — Flipper Zero USB transport
+    implementation 'com.github.mik3y:usb-serial-for-android:3.7.0'
+
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     // Test

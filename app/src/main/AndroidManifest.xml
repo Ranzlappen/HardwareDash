@@ -35,6 +35,9 @@
     <!-- ══════════════════════ INFRARED (transmit-only) ═══════════ -->
     <uses-feature android:name="android.hardware.consumerir" android:required="false" />
 
+    <!-- ══════════════════════ USB HOST (Flipper Zero CDC-ACM) ════ -->
+    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
+
     <!-- ══════════════════════ LOCATION (for WiFi scan) ════════════ -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -118,6 +121,14 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- USB device attached (Flipper Zero) -->
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/flipper_usb_filter" />
 
             <!-- NFC tag dispatch -->
             <intent-filter>

@@ -28,6 +28,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.backup.BackupManager
+import com.gadget.flipper.FlipperBleLink
+import com.gadget.flipper.FlipperConnectionManager
 import com.gadget.localization.Language
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
@@ -43,12 +45,19 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import kotlin.math.roundToInt
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
 interface BackupManagerEntryPoint {
     fun backupManager(): BackupManager
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface FlipperManagerEntryPoint {
+    fun flipperManager(): FlipperConnectionManager
 }
 
 private const val WIDGET_PREFS = "widget_settings"
@@ -86,15 +95,17 @@ fun SettingsScreen() {
         uri ?: return@rememberLauncherForActivityResult
         coroutineScope.launch(Dispatchers.IO) {
             try {
-                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                    backupManager.createBackup(outputStream)
-                }
+                val outputStream = context.contentResolver.openOutputStream(uri)
+                    ?: error("Could not open output stream for $uri")
+                outputStream.use { backupManager.createBackup(it) }
                 launch(Dispatchers.Main) {
                     Toast.makeText(context, backupStrings.backupSuccess, Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
+                Timber.e(e, "Backup failed")
+                val detail = e.message ?: e::class.java.simpleName
                 launch(Dispatchers.Main) {
-                    Toast.makeText(context, backupStrings.backupFailed, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "${backupStrings.backupFailed}: $detail", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -106,15 +117,17 @@ fun SettingsScreen() {
         uri ?: return@rememberLauncherForActivityResult
         coroutineScope.launch(Dispatchers.IO) {
             try {
-                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    backupManager.restoreBackup(inputStream)
-                }
+                val inputStream = context.contentResolver.openInputStream(uri)
+                    ?: error("Could not open input stream for $uri")
+                inputStream.use { backupManager.restoreBackup(it) }
                 launch(Dispatchers.Main) {
                     Toast.makeText(context, backupStrings.restoreSuccess, Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
+                Timber.e(e, "Restore failed")
+                val detail = e.message ?: e::class.java.simpleName
                 launch(Dispatchers.Main) {
-                    Toast.makeText(context, backupStrings.restoreFailed, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "${backupStrings.restoreFailed}: $detail", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -671,6 +684,115 @@ fun SettingsScreen() {
                     Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(backupStrings.restore)
+                }
+            }
+        }
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 6 — Flipper Zero
+        // ══════════════════════════════════════════════════════════════════
+        FlipperSection()
+    }
+}
+
+@Composable
+private fun FlipperSection() {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val strings = S.flipper
+
+    val manager = remember {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            FlipperManagerEntryPoint::class.java,
+        ).flipperManager()
+    }
+    val state by manager.state.collectAsState()
+
+    Text(
+        strings.title,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.sectionHeading(),
+    )
+    Text(
+        strings.description,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+    )
+
+    Card(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            val statusLine = when (val s = state) {
+                FlipperConnectionManager.State.Disconnected -> strings.disconnected
+                is FlipperConnectionManager.State.Connecting -> "${strings.connecting} (${s.transport})"
+                is FlipperConnectionManager.State.Connected -> buildString {
+                    append(strings.connected)
+                    append(" · ")
+                    append(s.transport)
+                    s.deviceName?.takeIf { it.isNotBlank() }?.let { append(" · ").append(it) }
+                    s.firmwareVersion?.takeIf { it.isNotBlank() }?.let { append(" · ${strings.firmware} ").append(it) }
+                    s.batteryPercent?.let { append(" · ${strings.battery} ").append(it).append("%") }
+                }
+                is FlipperConnectionManager.State.Failed -> "${strings.connectionFailed}: ${s.reason}"
+            }
+            Text(
+                statusLine,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+            )
+
+            val connecting = state is FlipperConnectionManager.State.Connecting
+            val connected = state is FlipperConnectionManager.State.Connected
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilledTonalButton(
+                    onClick = {
+                        coroutineScope.launch(Dispatchers.IO) { manager.connectUsb() }
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.medium,
+                    enabled = !connecting,
+                ) {
+                    Text(strings.connectUsb)
+                }
+                FilledTonalButton(
+                    onClick = {
+                        coroutineScope.launch(Dispatchers.IO) {
+                            val device = FlipperBleLink.bondedFlippers(context).firstOrNull()
+                            if (device != null) manager.connectBle(device)
+                            else launch(Dispatchers.Main) {
+                                Toast.makeText(context, strings.noDevices, Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.medium,
+                    enabled = !connecting,
+                ) {
+                    Text(strings.connectBle)
+                }
+            }
+
+            if (connected || state is FlipperConnectionManager.State.Failed) {
+                OutlinedButton(
+                    onClick = {
+                        coroutineScope.launch(Dispatchers.IO) { manager.disconnect() }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Text(strings.disconnect)
                 }
             }
         }

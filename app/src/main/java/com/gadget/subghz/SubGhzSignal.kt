@@ -56,4 +56,38 @@ object SubGhzSignal {
         preset.isBlank() -> ""
         else -> preset
     }
+
+    /** Inverse of [modulationFromPreset]: UI label → Flipper preset constant. */
+    fun presetFromModulation(modulation: String): String = when (modulation) {
+        "AM650" -> "FuriHalSubGhzPresetOok650Async"
+        "AM270" -> "FuriHalSubGhzPresetOok270Async"
+        "FM238" -> "FuriHalSubGhzPreset2FSKDev238Async"
+        "FM476" -> "FuriHalSubGhzPreset2FSKDev476Async"
+        else -> modulation.ifBlank { "FuriHalSubGhzPresetOok650Async" }
+    }
+}
+
+/**
+ * Build a Flipper-format `.sub` text body from current Sub-GHz UI state.
+ * Used to hand a transmittable file to a connected Flipper Zero.
+ */
+fun buildFlipperSubFile(
+    frequencyHz: Long,
+    preset: String,
+    protocol: String,
+    bitLength: Int,
+    keyHex: String,
+    rawData: String,
+    te: Int,
+): String = buildString {
+    append("Filetype: Flipper SubGhz Key File\n")
+    append("Version: 1\n")
+    append("Frequency: $frequencyHz\n")
+    append("Preset: ${SubGhzSignal.presetFromModulation(preset)}\n")
+    val proto = protocol.ifBlank { "RAW" }
+    append("Protocol: $proto\n")
+    if (bitLength > 0) append("Bit: $bitLength\n")
+    if (keyHex.isNotBlank()) append("Key: $keyHex\n")
+    if (te > 0) append("TE: $te\n")
+    if (rawData.isNotBlank()) append("RAW_Data: $rawData\n")
 }

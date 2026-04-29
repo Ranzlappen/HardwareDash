@@ -51,9 +51,12 @@ import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.services.NfcEmulationService
+import com.gadget.flipper.FlipperConnectionManager
 import com.gadget.ir.IrCodecs
 import com.gadget.ir.IrTransmitter
 import com.gadget.subghz.SubGhzSignal
+import com.gadget.subghz.buildFlipperSubFile
+import dagger.hilt.android.EntryPointAccessors
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.content.ClipboardManager
@@ -288,6 +291,17 @@ private fun loadSubGhzSignals(context: Context): List<SavedSubGhzSignal> {
 fun RadiosScreen() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
+    // Flipper Zero connection (used for Sub-GHz / IR "Send to Flipper" buttons).
+    val flipperManager = remember {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            FlipperManagerEntryPoint::class.java,
+        ).flipperManager()
+    }
+    val flipperState by flipperManager.state.collectAsState()
+    val flipperConnected = flipperState is FlipperConnectionManager.State.Connected
+    val flipperStrings = S.flipper
 
     // ── Live state, polled every second ───────────────────────────────────────
     var wifiEnabled by remember { mutableStateOf(false) }
@@ -1386,6 +1400,45 @@ fun RadiosScreen() {
                     }
                 }
 
+                if (flipperConnected) {
+                    OutlinedButton(
+                        onClick = {
+                            val carrier = irCarrierText.toIntOrNull() ?: 38000
+                            val repeats = irRepeatsText.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                            val encoded = when (val r = IrCodecs.encode(irProtocol, irPayload, carrier, repeats)) {
+                                is IrCodecs.Result.Error -> { irStatus = r.message; null }
+                                is IrCodecs.Result.Ok -> r.encoded
+                            }
+                            val cmds = flipperManager.infrared
+                            if (encoded != null && cmds != null) {
+                                val irFile = cmds.buildRawIrFile(
+                                    name = "hd_${irProtocol.lowercase()}",
+                                    frequencyHz = encoded.carrierHz,
+                                    dutyCycle = 0.33,
+                                    timingsMicros = encoded.pattern,
+                                )
+                                irStatus = transmittingMsg
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    try {
+                                        cmds.transmitIrFile(irFile)
+                                        irStatus = flipperStrings.transmittedViaFlipper
+                                    } catch (e: Exception) {
+                                        irStatus = "${flipperStrings.sendFailed}: ${e.message ?: e::class.java.simpleName}"
+                                    }
+                                }
+                            } else if (encoded != null) {
+                                irStatus = flipperStrings.disconnected
+                            }
+                        },
+                        enabled = irPayload.isNotBlank(),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(flipperStrings.sendToFlipper)
+                    }
+                }
+
                 OutlinedButton(
                     onClick = { irSaveName = ""; showIrSaveDialog = true },
                     enabled = irPayload.isNotBlank(),
@@ -1610,13 +1663,41 @@ fun RadiosScreen() {
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(
-                        onClick = { subGhzStatus = externalHwMsg },
-                        enabled = false,
+                        onClick = {
+                            val freq = subGhzFreqText.toLongOrNull()
+                            if (freq == null) {
+                                subGhzStatus = parseFailedMsg
+                            } else {
+                                val subFile = buildFlipperSubFile(
+                                    frequencyHz = freq,
+                                    preset = subGhzModulation,
+                                    protocol = subGhzProtocol,
+                                    bitLength = subGhzBitText.toIntOrNull() ?: 0,
+                                    keyHex = subGhzKey,
+                                    rawData = subGhzRaw,
+                                    te = subGhzTeText.toIntOrNull() ?: 0,
+                                )
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    val cmds = flipperManager.subGhz
+                                    if (cmds == null) {
+                                        subGhzStatus = flipperStrings.disconnected
+                                    } else {
+                                        try {
+                                            cmds.transmitSubFile(subFile)
+                                            subGhzStatus = flipperStrings.transmittedViaFlipper
+                                        } catch (e: Exception) {
+                                            subGhzStatus = "${flipperStrings.sendFailed}: ${e.message ?: e::class.java.simpleName}"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        enabled = flipperConnected && subGhzFreqText.isNotBlank(),
                         modifier = Modifier.weight(1f),
                     ) {
                         Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(S.radios.transmit)
+                        Text(if (flipperConnected) flipperStrings.sendToFlipper else S.radios.transmit)
                     }
                     OutlinedButton(
                         onClick = { subGhzSaveName = ""; showSubGhzSaveDialog = true },
@@ -1628,11 +1709,13 @@ fun RadiosScreen() {
                     }
                 }
 
-                Text(
-                    S.radios.externalHardwareRequired,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error,
-                )
+                if (!flipperConnected) {
+                    Text(
+                        S.radios.externalHardwareRequired,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
 
                 if (subGhzStatus.isNotBlank()) {
                     Text(subGhzStatus, style = MaterialTheme.typography.bodySmall,

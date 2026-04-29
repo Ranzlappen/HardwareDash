@@ -653,6 +653,27 @@ object S {
         val restoreFailed get() = m(l, "Restore failed", "Wiederherstellung fehlgeschlagen", "Error en la restauraci\u00F3n", "\u00C9chec de la restauration")
     }
 
+    // \u2500\u2500 Flipper Zero \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    val flipper: Flipper @Composable get() = Flipper(lang)
+
+    class Flipper(private val l: Language) {
+        val title get() = m(l, "Flipper Zero", "Flipper Zero", "Flipper Zero", "Flipper Zero")
+        val description get() = m(l, "Connect a Flipper Zero to transmit Sub-GHz and IR signals from this app.", "Verbinde einen Flipper Zero, um Sub-GHz- und IR-Signale aus dieser App zu senden.", "Conecta un Flipper Zero para transmitir se\u00F1ales Sub-GHz e IR desde esta app.", "Connectez un Flipper Zero pour \u00E9mettre des signaux Sub-GHz et IR depuis cette app.")
+        val disconnected get() = m(l, "Not connected", "Nicht verbunden", "No conectado", "Non connect\u00E9")
+        val connecting get() = m(l, "Connecting\u2026", "Verbinden\u2026", "Conectando\u2026", "Connexion\u2026")
+        val connected get() = m(l, "Connected", "Verbunden", "Conectado", "Connect\u00E9")
+        val connectionFailed get() = m(l, "Connection failed", "Verbindung fehlgeschlagen", "Conexi\u00F3n fallida", "\u00C9chec de la connexion")
+        val connectUsb get() = m(l, "Connect via USB", "Per USB verbinden", "Conectar por USB", "Connecter en USB")
+        val connectBle get() = m(l, "Connect via Bluetooth", "Per Bluetooth verbinden", "Conectar por Bluetooth", "Connecter en Bluetooth")
+        val noDevices get() = m(l, "No paired Flipper found. Pair one in Bluetooth settings first.", "Kein gekoppelter Flipper gefunden. Bitte zuerst in den Bluetooth-Einstellungen koppeln.", "No se encontr\u00F3 ning\u00FAn Flipper emparejado. Empareja uno primero en los ajustes de Bluetooth.", "Aucun Flipper appair\u00E9 trouv\u00E9. Appairez-en un dans les param\u00E8tres Bluetooth.")
+        val disconnect get() = m(l, "Disconnect", "Trennen", "Desconectar", "D\u00E9connecter")
+        val sendToFlipper get() = m(l, "Send to Flipper", "An Flipper senden", "Enviar al Flipper", "Envoyer au Flipper")
+        val transmittedViaFlipper get() = m(l, "Sent to Flipper", "An Flipper gesendet", "Enviado al Flipper", "Envoy\u00E9 au Flipper")
+        val sendFailed get() = m(l, "Send failed", "Senden fehlgeschlagen", "Error al enviar", "\u00C9chec de l'envoi")
+        val firmware get() = m(l, "Firmware", "Firmware", "Firmware", "Micrologiciel")
+        val battery get() = m(l, "Battery", "Akku", "Bater\u00EDa", "Batterie")
+    }
+
     // ── Common / Shared ─────────────────────────────────────────────────
     val common: Common @Composable get() = Common(lang)
 
