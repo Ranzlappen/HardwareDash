@@ -26,6 +26,7 @@ class ScheduleActionReceiver : BroadcastReceiver() {
         const val EXTRA_TITLE = "schedule_title"
         const val EXTRA_BODY = "schedule_body"
         const val EXTRA_ID = "schedule_id"
+        const val EXTRA_DURATION_OVERRIDE = "schedule_duration_seconds"
 
         private const val CH_SCHEDULE = "hwd_schedule"
     }
@@ -41,7 +42,10 @@ class ScheduleActionReceiver : BroadcastReceiver() {
         when (type) {
             "notification" -> fireNotification(context, title, body, id)
             "lock" -> fireLock(context)
-            "ring" -> fireRing(context)
+            "ring" -> {
+                val override = intent.getIntExtra(EXTRA_DURATION_OVERRIDE, -1)
+                fireRing(context, override.takeIf { it > 0 })
+            }
         }
 
         // Mark as fired in SharedPreferences
@@ -77,9 +81,10 @@ class ScheduleActionReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun fireRing(context: Context) {
-        val prefs = context.getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
-        val durationSec = prefs.getInt("phone_ring_duration_seconds", 30)
+    private fun fireRing(context: Context, durationOverrideSec: Int? = null) {
+        val durationSec = durationOverrideSec ?: context
+            .getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
+            .getInt("phone_ring_duration_seconds", 30)
 
         // Launch full-screen caller activity which handles ringing and stop button
         val callerIntent = Intent(context, CallerScreenActivity::class.java).apply {

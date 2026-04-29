@@ -184,10 +184,12 @@ object S {
         val language get() = m(l, "Language", "Sprache", "Idioma", "Langue")
         val languageDesc get() = m(l, "Select your preferred language", "Wählen Sie Ihre bevorzugte Sprache", "Seleccione su idioma preferido", "Sélectionnez votre langue préférée")
         val widgetCustomizer get() = m(l, "Widget Customizer", "Widget-Anpassung", "Personalización de widgets", "Personnalisation des widgets")
+        val phoneRingDelay get() = m(l, "Phone Ring Delay", "Klingelverzögerung", "Retraso del timbre", "Délai de sonnerie")
+        val phoneRingDelayDesc get() = m(l, "Wait time before the phone starts ringing", "Wartezeit, bevor das Telefon zu klingeln beginnt", "Tiempo de espera antes de que el teléfono comience a sonar", "Temps d'attente avant que le téléphone ne commence à sonner")
         val phoneRingDuration get() = m(l, "Phone Ring Duration", "Klingeldauer", "Duración del timbre", "Durée de la sonnerie")
         val notifyDelay get() = m(l, "Notification Delay", "Benachrichtigungsverzögerung", "Retraso de notificación", "Délai de notification")
         val seconds get() = m(l, "seconds", "Sekunden", "segundos", "secondes")
-        val phoneRingDesc get() = m(l, "How long the phone rings when triggered", "Wie lange das Telefon klingelt", "Cuánto tiempo suena el teléfono", "Combien de temps le téléphone sonne")
+        val phoneRingDesc get() = m(l, "How long the phone rings once it starts", "Wie lange das Telefon klingelt, sobald es beginnt", "Cuánto tiempo suena el teléfono una vez que empieza", "Combien de temps le téléphone sonne une fois qu'il commence")
         val notifyDesc get() = m(l, "Delay before notification appears", "Verzögerung vor der Benachrichtigung", "Retraso antes de que aparezca la notificación", "Délai avant l'apparition de la notification")
         val metricLogging get() = m(l, "Metric Logging", "Metrik-Protokollierung", "Registro de métricas", "Journalisation des métriques")
         val metricLoggingDesc get() = m(l, "Select metrics to capture with each log entry", "Metriken auswählen, die bei jedem Logbuch-Eintrag erfasst werden", "Seleccione métricas para capturar con cada entrada del registro", "Sélectionnez les métriques à capturer avec chaque entrée du journal")
@@ -325,6 +327,21 @@ object S {
         val endTime get() = m(l, "End Time", "Endzeit", "Hora de fin", "Heure de fin")
         val profile get() = m(l, "Profile", "Profil", "Perfil", "Profil")
         val createProfile get() = m(l, "Create Profile", "Profil erstellen", "Crear perfil", "Cr\u00E9er un profil")
+
+        // \u2500\u2500 V2 expression-tree extensions \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        val notLabel get() = m(l, "NOT", "NICHT", "NO", "NON")
+        val addSubgroup get() = m(l, "Add Subgroup", "Untergruppe hinzuf\u00FCgen", "A\u00F1adir subgrupo", "Ajouter un sous-groupe")
+        val convertToGroup get() = m(l, "Convert to group", "In Gruppe umwandeln", "Convertir en grupo", "Convertir en groupe")
+        val sustainFor get() = m(l, "Sustain for", "Halten f\u00FCr", "Mantener durante", "Maintenir pendant")
+        val triggerDelay get() = m(l, "Trigger Delay", "Ausl\u00F6severz\u00F6gerung", "Retraso de activaci\u00F3n", "D\u00E9lai de d\u00E9clenchement")
+        val triggerDelayDesc get() = m(l, "Wait this long after the condition becomes true before firing", "Nach Erf\u00FCllung der Bedingung so lange warten, bevor ausgel\u00F6st wird", "Esperar este tiempo despu\u00E9s de que se cumpla la condici\u00F3n antes de activar", "Attendre ce d\u00E9lai apr\u00E8s que la condition soit vraie avant de d\u00E9clencher")
+        val cancelIfFalse get() = m(l, "Cancel if condition no longer true", "Abbrechen, wenn die Bedingung nicht mehr erf\u00FCllt ist", "Cancelar si la condici\u00F3n deja de cumplirse", "Annuler si la condition n'est plus vraie")
+        val applyPreset get() = m(l, "Apply preset", "Vorgabe anwenden", "Aplicar preajuste", "Appliquer le pr\u00E9r\u00E9glage")
+        val ruleSummaryEmpty get() = m(l, "(no conditions yet)", "(noch keine Bedingungen)", "(a\u00FAn sin condiciones)", "(aucune condition pour le moment)")
+        val seconds get() = m(l, "seconds", "Sekunden", "segundos", "secondes")
+        val noActions get() = m(l, "(no actions yet)", "(noch keine Aktionen)", "(a\u00FAn sin acciones)", "(aucune action pour le moment)")
+        val whenLabel get() = m(l, "WHEN", "WANN", "CU\u00C1NDO", "QUAND")
+        val alwaysActive get() = m(l, "Always active", "Immer aktiv", "Siempre activo", "Toujours actif")
     }
 
     // ── Torch ───────────────────────────────────────────────────────────
@@ -758,11 +775,19 @@ object S {
 
     // ── Widget / Service toasts (non-Composable context) ─────────────────
     object Widget {
-        fun phoneRingToast(lang: Language, seconds: Int) = m(lang,
-            "Phone will ring in $seconds seconds",
-            "Telefon klingelt in $seconds Sekunden",
-            "El teléfono sonará en $seconds segundos",
-            "Le téléphone sonnera dans $seconds secondes")
+        fun phoneRingToast(lang: Language, delaySec: Int, durationSec: Int) = if (delaySec > 0) {
+            m(lang,
+                "Phone will ring in $delaySec s for $durationSec s",
+                "Telefon klingelt in $delaySec s für $durationSec s",
+                "El teléfono sonará en $delaySec s durante $durationSec s",
+                "Le téléphone sonnera dans $delaySec s pendant $durationSec s")
+        } else {
+            m(lang,
+                "Phone ringing for $durationSec s",
+                "Telefon klingelt für $durationSec s",
+                "El teléfono suena durante $durationSec s",
+                "Le téléphone sonne pendant $durationSec s")
+        }
 
         fun notifyToast(lang: Language, seconds: Int) = m(lang,
             "Notification in $seconds seconds",

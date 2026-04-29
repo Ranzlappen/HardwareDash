@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import com.gadget.R
+import com.gadget.localization.LocalizationManager
+import com.gadget.localization.S
 import com.gadget.receivers.ScheduleActionReceiver
 
 class PhoneRingWidgetProvider : AppWidgetProvider() {
@@ -20,13 +22,15 @@ class PhoneRingWidgetProvider : AppWidgetProvider() {
         super.onReceive(context, intent)
         if (intent.action == ACTION_RING_30S) {
             val prefs = context.getSharedPreferences("widget_settings", Context.MODE_PRIVATE)
-            val delaySec = prefs.getInt("phone_ring_duration_seconds", 30)
+            val delaySec = prefs.getInt("phone_ring_delay_seconds", 0)
+            val durationSec = prefs.getInt("phone_ring_duration_seconds", 30)
             val id = (System.currentTimeMillis() % Int.MAX_VALUE).toInt()
             val alarmIntent = Intent(context, ScheduleActionReceiver::class.java).apply {
                 action = ScheduleActionReceiver.ACTION_FIRE
                 putExtra(ScheduleActionReceiver.EXTRA_TYPE, "ring")
                 putExtra(ScheduleActionReceiver.EXTRA_TITLE, "Phone Ring")
                 putExtra(ScheduleActionReceiver.EXTRA_ID, id)
+                putExtra(ScheduleActionReceiver.EXTRA_DURATION_OVERRIDE, durationSec)
             }
             val pi = PendingIntent.getBroadcast(
                 context, id, alarmIntent,
@@ -38,7 +42,8 @@ class PhoneRingWidgetProvider : AppWidgetProvider() {
                 System.currentTimeMillis() + delaySec * 1000L,
                 pi,
             )
-            WidgetActionHandler.showToast(context, "Phone will ring in $delaySec seconds")
+            val lang = LocalizationManager.loadLanguage(context)
+            WidgetActionHandler.showToast(context, S.Widget.phoneRingToast(lang, delaySec, durationSec))
         }
     }
 
