@@ -104,6 +104,7 @@ fun LockScreenScreen() {
     var schedList by remember { mutableStateOf(loadScheduleList(schedPrefs)) }
     var presetName by remember { mutableStateOf("") }
     var presetList by remember { mutableStateOf(BuilderPresetStore.load(context)) }
+    var controlsExpanded by remember { mutableStateOf(false) }
 
     // Custom notification builder state
     var customTitle    by remember { mutableStateOf("Gadget") }
@@ -713,6 +714,28 @@ fun LockScreenScreen() {
         HorizontalDivider()
 
         // ══════════════════════════════════════════════════════════════════════
+        // Lock Screen Controls (collapsible)
+        // Cancel All / Capabilities / Device Admin / Overlay / Lock Now /
+        // Emergency Alerts. Default collapsed - these are device-wide
+        // controls separate from the notification builder above.
+        // ══════════════════════════════════════════════════════════════════════
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { controlsExpanded = !controlsExpanded }
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SectionHeader(S.lock.lockScreenControls, modifier = Modifier.weight(1f))
+            Icon(
+                if (controlsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = null,
+            )
+        }
+
+        if (controlsExpanded) { Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+
+        // ══════════════════════════════════════════════════════════════════════
         // SECTION 3 — Emergency Alerts
         // ══════════════════════════════════════════════════════════════════════
         Text(S.lock.emergencyAlerts, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -891,6 +914,8 @@ fun LockScreenScreen() {
                 color = MaterialTheme.colorScheme.error,
             )
         }
+
+        } } // close `if (controlsExpanded) { Column { ... } }`
 
         HorizontalDivider()
 
