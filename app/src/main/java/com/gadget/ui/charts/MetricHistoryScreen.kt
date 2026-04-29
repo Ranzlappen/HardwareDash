@@ -10,11 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.patrykandpatrick.vico.compose.chart.CartesianChartHost
-import com.patrykandpatrick.vico.compose.chart.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.chart.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.model.lineSeries
+import com.patrykandpatrick.vico.compose.chart.Chart
+import com.patrykandpatrick.vico.compose.chart.line.lineChart
+import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
+import com.patrykandpatrick.vico.core.entry.entryOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,15 +22,13 @@ fun MetricHistoryScreen(
     vm: MetricChartViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsState()
-    val modelProducer = remember { CartesianChartModelProducer.build() }
+    val modelProducer = remember { ChartEntryModelProducer() }
 
     LaunchedEffect(state.readings) {
         if (state.readings.isNotEmpty()) {
-            modelProducer.tryRunTransaction {
-                lineSeries {
-                    series(state.readings.map { it.rawValue })
-                }
-            }
+            modelProducer.setEntries(
+                state.readings.mapIndexed { i, r -> entryOf(i.toFloat(), r.rawValue.toFloat()) },
+            )
         }
     }
 
@@ -108,11 +105,9 @@ fun MetricHistoryScreen(
 
         // Chart
         if (state.readings.isNotEmpty()) {
-            CartesianChartHost(
-                chart = rememberCartesianChart(
-                    rememberLineCartesianLayer(),
-                ),
-                modelProducer = modelProducer,
+            Chart(
+                chart = lineChart(),
+                chartModelProducer = modelProducer,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp),
