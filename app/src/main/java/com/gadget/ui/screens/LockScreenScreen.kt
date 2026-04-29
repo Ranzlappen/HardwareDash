@@ -1,7 +1,6 @@
 package com.gadget.ui.screens
 
 import android.app.AlarmManager
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.admin.DevicePolicyManager
@@ -46,75 +45,27 @@ import androidx.core.app.NotificationCompat
 import com.google.accompanist.permissions.*
 import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.ui.components.ActionEntrySelector
+import com.gadget.ui.components.LabeledOption
 import com.gadget.ui.components.ScreenAnnouncement
+import com.gadget.ui.components.SectionHeader
 import com.gadget.ui.components.SliderWithInput
-import com.gadget.MainActivity
+import com.gadget.ui.screens.notifications.BuilderPresetStore
+import com.gadget.ui.screens.notifications.NotifActionEntry
+import com.gadget.ui.screens.notifications.NotifSpec
+import com.gadget.ui.screens.notifications.NotifStyle
+import com.gadget.ui.screens.notifications.NotificationPreviewCard
+import com.gadget.ui.screens.notifications.ProgressMode
+import com.gadget.ui.screens.notifications.buildNotification
+import com.gadget.ui.screens.notifications.ensureAllChannels
 import com.gadget.receivers.AdminReceiver
-import com.gadget.widget.LogNowWidgetProvider
-import com.gadget.widget.FlashlightWidgetProvider
-import com.gadget.widget.StrobeWidgetProvider
-import com.gadget.widget.CameraSnapshotWidgetProvider
-import com.gadget.widget.VideoToggleWidgetProvider
-import com.gadget.widget.VoiceRecordWidgetProvider
-import com.gadget.widget.VibrationWidgetProvider
-import com.gadget.widget.DbMeterWidgetProvider
-import com.gadget.widget.PhoneRingWidgetProvider
-import com.gadget.widget.NotifyWidgetProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// ─── Notification channel IDs ────────────────────────────────────────────────
-private const val CH_LOCKSCREEN = "hwd_lockscreen"
-private const val CH_DEFAULT    = "hwd_default"
-private const val CH_HIGH       = "hwd_high"
-private const val CH_PROGRESS   = "hwd_progress"
-private const val CH_CUSTOM     = "hwd_custom"
+// Channel IDs and ensureAllChannels live in NotificationChannels.kt.
 
-private fun ensureAllChannels(nm: NotificationManager) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-    listOf(
-        NotificationChannel(CH_LOCKSCREEN, "Lock Screen Notifications", NotificationManager.IMPORTANCE_HIGH).apply {
-            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
-        },
-        NotificationChannel(CH_DEFAULT,  "Default",         NotificationManager.IMPORTANCE_DEFAULT),
-        NotificationChannel(CH_HIGH,     "High / Heads-Up", NotificationManager.IMPORTANCE_HIGH),
-        NotificationChannel(CH_PROGRESS, "Progress",        NotificationManager.IMPORTANCE_LOW),
-        NotificationChannel(CH_CUSTOM,   "Custom",          NotificationManager.IMPORTANCE_HIGH),
-    ).forEach { nm.createNotificationChannel(it) }
-}
-
-// ─── Available actions for notification buttons ─────────────────────────────
-private enum class NotifActionEntry(
-    val label: String,
-    val broadcastAction: String?,
-    val receiverClass: Class<*>?,
-) {
-    OPEN_APP("Open App", null, null),
-    LOG_NOW("Log Now", "com.gadget.widget.ACTION_LOG_NOW", LogNowWidgetProvider::class.java),
-    FLASHLIGHT("Flashlight Toggle", "com.gadget.widget.ACTION_FLASHLIGHT_TOGGLE", FlashlightWidgetProvider::class.java),
-    STROBE("Strobe Toggle", "com.gadget.widget.ACTION_STROBE_TOGGLE", StrobeWidgetProvider::class.java),
-    CAMERA_SNAPSHOT("Camera Snapshot", "com.gadget.widget.ACTION_CAMERA_SNAPSHOT", CameraSnapshotWidgetProvider::class.java),
-    VIDEO_TOGGLE("Video Toggle", "com.gadget.widget.ACTION_VIDEO_TOGGLE", VideoToggleWidgetProvider::class.java),
-    VOICE_RECORD("Voice Record Toggle", "com.gadget.widget.ACTION_VOICE_RECORD_TOGGLE", VoiceRecordWidgetProvider::class.java),
-    VIBRATION("Vibration Toggle", "com.gadget.widget.ACTION_VIBRATION_TOGGLE", VibrationWidgetProvider::class.java),
-    DB_METER("dB Meter Toggle", "com.gadget.widget.ACTION_DB_METER_TOGGLE", DbMeterWidgetProvider::class.java),
-    PHONE_RING("Phone Ring", "com.gadget.widget.ACTION_RING_30S", PhoneRingWidgetProvider::class.java),
-    SEND_NOTIFICATION("Send Notification", "com.gadget.widget.ACTION_NOTIFY_30S", NotifyWidgetProvider::class.java),
-    ;
-
-    fun buildPendingIntent(context: Context, requestCode: Int): PendingIntent {
-        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        if (this == OPEN_APP) {
-            return PendingIntent.getActivity(
-                context, requestCode,
-                Intent(context, MainActivity::class.java),
-                flags,
-            )
-        }
-        val intent = Intent(context, receiverClass!!).apply { action = broadcastAction }
-        return PendingIntent.getBroadcast(context, requestCode, intent, flags)
-    }
-}
+// NotifActionEntry, NotifSpec, ProgressMode and buildNotification live in
+// ui/screens/notifications/NotificationModels.kt.
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -123,7 +74,7 @@ fun LockScreenScreen() {
     val dpm     = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val admin   = ComponentName(context, AdminReceiver::class.java)
     val nm      = remember { context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
-    LaunchedEffect(Unit) { ensureAllChannels(nm) }
+    LaunchedEffect(Unit) { ensureAllChannels(context) }
 
     var isAdmin    by remember { mutableStateOf(false) }
     var hasOverlay by remember { mutableStateOf(false) }
@@ -140,32 +91,27 @@ fun LockScreenScreen() {
     else null
     val notifGranted = notifPerm?.status?.isGranted ?: true
 
-    // Lock screen notification designer state
-    var lsTitle     by remember { mutableStateOf("Lock Screen Alert") }
-    var lsBody      by remember { mutableStateOf("Custom lock screen notification") }
-    var lsVisibility by remember { mutableIntStateOf(NotificationCompat.VISIBILITY_PUBLIC) }
-    var lsPriority  by remember { mutableIntStateOf(NotificationCompat.PRIORITY_HIGH) }
-    var lsCategory  by remember { mutableStateOf(NotificationCompat.CATEGORY_MESSAGE) }
-    var lsDelayMin  by remember { mutableFloatStateOf(0f) }
-    var lsScheduleStatus by remember { mutableStateOf("") }
-
-    // Enhanced scheduling state
+    // Delivery / scheduling state for the merged builder.
+    var deliveryStatus by remember { mutableStateOf("") }
     var schedType    by remember { mutableStateOf("notification") } // notification, lock, ring
     var schedDate    by remember { mutableStateOf(LocalDate.now()) }
     var schedTime    by remember { mutableStateOf(LocalTime.now().plusMinutes(5).withSecond(0).withNano(0)) }
-    var schedTitle   by remember { mutableStateOf("Scheduled Alert") }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
-    // Schedule list
+    // Schedule list + preset list (both backed by "schedule_actions" prefs).
     val schedPrefs = remember { context.getSharedPreferences("schedule_actions", Context.MODE_PRIVATE) }
     var schedList by remember { mutableStateOf(loadScheduleList(schedPrefs)) }
+    var presetName by remember { mutableStateOf("") }
+    var presetList by remember { mutableStateOf(BuilderPresetStore.load(context)) }
+    var controlsExpanded by remember { mutableStateOf(false) }
 
     // Custom notification builder state
     var customTitle    by remember { mutableStateOf("Gadget") }
     var customBody     by remember { mutableStateOf("Custom notification") }
     var customPriority by remember { mutableIntStateOf(NotificationCompat.PRIORITY_DEFAULT) }
     var customVisibility by remember { mutableIntStateOf(NotificationCompat.VISIBILITY_PUBLIC) }
+    var customCategory by remember { mutableStateOf(NotificationCompat.CATEGORY_MESSAGE) }
     var customColorIdx by remember { mutableIntStateOf(0) }
     val colorOptions = listOf(
         Color(0xFF2196F3) to "Blue",
@@ -176,18 +122,19 @@ fun LockScreenScreen() {
         Color(0xFF00BCD4) to "Cyan",
     )
     // Enhanced builder state
+    var customSubtext by remember { mutableStateOf("") }
     var customActionCount by remember { mutableIntStateOf(0) }
-    var customAction1 by remember { mutableStateOf(NotifActionEntry.OPEN_APP) }
-    var customAction2 by remember { mutableStateOf(NotifActionEntry.OPEN_APP) }
-    var customAction3 by remember { mutableStateOf(NotifActionEntry.OPEN_APP) }
-    var actionExpanded1 by remember { mutableStateOf(false) }
-    var actionExpanded2 by remember { mutableStateOf(false) }
-    var actionExpanded3 by remember { mutableStateOf(false) }
+    val customActions = remember { mutableStateListOf(NotifActionEntry.OPEN_APP, NotifActionEntry.OPEN_APP, NotifActionEntry.OPEN_APP) }
+    var customQuickReply by remember { mutableStateOf("") }
     var customShowProgress by remember { mutableStateOf(false) }
     var customProgressIndeterminate by remember { mutableStateOf(true) }
     var customProgressValue by remember { mutableFloatStateOf(50f) }
     var customOngoing by remember { mutableStateOf(false) }
     var customAutoCancel by remember { mutableStateOf(true) }
+    var customSound by remember { mutableStateOf(true) }
+    var customVibrate by remember { mutableStateOf(true) }
+    var customTimeoutSec by remember { mutableFloatStateOf(0f) }
+    var customBadge by remember { mutableIntStateOf(0) }
     var customDelaySec by remember { mutableFloatStateOf(0f) }
     var customStyleIdx by remember { mutableIntStateOf(0) } // 0=Normal, 1=BigText, 2=Inbox
 
@@ -232,124 +179,45 @@ fun LockScreenScreen() {
         }
 
         // ══════════════════════════════════════════════════════════════════════
-        // SECTION 1 — Notification Demos
+        // Compose Notification (merged builder + scheduler)
+        // Field-map note: the old Section 9 (Lock Screen Notification Designer)
+        // mapped onto NotifSpec / scheduling state as follows:
+        //   lsTitle/lsBody    → customTitle/customBody
+        //   lsVisibility      → customVisibility (chip-based, same enum)
+        //   lsPriority (3lvl) → customPriority (5lvl, superset)
+        //   lsCategory        → customCategory
+        //   lsDelayMin (0-60) → customDelaySec (now 0-60 minutes)
+        //   schedDate/schedTime/schedType → unchanged, same names
+        //   sendLockScreenNotification(...) → buildNotification(spec) on CH_HIGH
         // ══════════════════════════════════════════════════════════════════════
-        Text(S.lock.notificationDemos, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        SectionHeader(S.lock.composeNotification)
 
-        NotifDemoCard(
-            title    = "1. Simple Notification",
-            subtitle = "Basic icon + text, default priority",
-            icon     = Icons.Default.NotificationsNone,
-        ) {
-            val n = NotificationCompat.Builder(context, CH_DEFAULT)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setContentTitle("Gadget")
-                .setContentText("Simple notification from Gadget!")
-                .setAutoCancel(true)
-                .build()
-            if (notifGranted) nm.notify(1001, n)
-        }
-
-        NotifDemoCard(
-            title    = "2. Heads-Up (High Priority)",
-            subtitle = "Pops up on screen even when app is in background",
-            icon     = Icons.Default.NotificationImportant,
-        ) {
-            val launchIntent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-            val pi = PendingIntent.getActivity(context, 0, launchIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-            val n = NotificationCompat.Builder(context, CH_HIGH)
-                .setSmallIcon(android.R.drawable.ic_dialog_alert)
-                .setContentTitle("Heads-Up Alert")
-                .setContentText("This notification pops over your current screen.")
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setContentIntent(pi)
-                .setAutoCancel(true)
-                .setFullScreenIntent(pi, false)
-                .build()
-            if (notifGranted) nm.notify(1002, n)
-        }
-
-        NotifDemoCard(
-            title    = "3. With Action Buttons",
-            subtitle = "Expandable notification with tappable action buttons",
-            icon     = Icons.Default.TouchApp,
-        ) {
-            val pi = PendingIntent.getActivity(
-                context, 0,
-                Intent(context, MainActivity::class.java),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        LabeledOption(S.lock.titleLabel, S.lock.titleHelp) {
+            OutlinedTextField(
+                value = customTitle,
+                onValueChange = { customTitle = it },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
             )
-            val n = NotificationCompat.Builder(context, CH_DEFAULT)
-                .setSmallIcon(android.R.drawable.ic_menu_compass)
-                .setContentTitle("Gadget Action")
-                .setContentText("Tap an action below.")
-                .setStyle(NotificationCompat.BigTextStyle()
-                    .bigText("This expanded notification shows two action buttons. You can add up to 3 actions per notification using NotificationCompat.Action."))
-                .addAction(android.R.drawable.ic_media_play, "Open App", pi)
-                .addAction(android.R.drawable.ic_delete,     "Dismiss",  pi)
-                .setAutoCancel(true)
-                .build()
-            if (notifGranted) nm.notify(1003, n)
+        }
+        LabeledOption(S.lock.bodyLabel, S.lock.bodyHelp) {
+            OutlinedTextField(
+                value = customBody,
+                onValueChange = { customBody = it },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 3,
+            )
+        }
+        LabeledOption(S.lock.subtextLabel, S.lock.subtextHelp) {
+            OutlinedTextField(
+                value = customSubtext,
+                onValueChange = { customSubtext = it },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
         }
 
-        NotifDemoCard(
-            title    = "4. Progress Bar",
-            subtitle = "Indeterminate progress spinner notification",
-            icon     = Icons.Default.Downloading,
-        ) {
-            val n = NotificationCompat.Builder(context, CH_PROGRESS)
-                .setSmallIcon(android.R.drawable.ic_popup_sync)
-                .setContentTitle("Processing...")
-                .setContentText("Gadget is working")
-                .setProgress(0, 0, true)
-                .setOngoing(true)
-                .build()
-            if (notifGranted) nm.notify(1004, n)
-        }
-
-        NotifDemoCard(
-            title    = "5. Big Picture Style",
-            subtitle = "Expandable notification with an image",
-            icon     = Icons.Default.Image,
-        ) {
-            val bm = android.graphics.BitmapFactory.decodeResource(
-                context.resources, android.R.drawable.ic_menu_gallery)
-            val n = NotificationCompat.Builder(context, CH_DEFAULT)
-                .setSmallIcon(android.R.drawable.ic_menu_gallery)
-                .setContentTitle("Photo Captured!")
-                .setContentText("Expand to see the preview.")
-                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bm))
-                .setAutoCancel(true)
-                .build()
-            if (notifGranted) nm.notify(1005, n)
-        }
-
-        HorizontalDivider()
-
-        // ══════════════════════════════════════════════════════════════════════
-        // SECTION 2 — Custom Notification Builder
-        // ══════════════════════════════════════════════════════════════════════
-        Text(S.lock.customNotifBuilder, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-
-        OutlinedTextField(
-            value = customTitle,
-            onValueChange = { customTitle = it },
-            label = { Text("Title") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-        )
-        OutlinedTextField(
-            value = customBody,
-            onValueChange = { customBody = it },
-            label = { Text("Body") },
-            modifier = Modifier.fillMaxWidth(),
-            maxLines = 3,
-        )
-
-        Text("Priority", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.priority, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
         Row(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -369,22 +237,43 @@ fun LockScreenScreen() {
             }
         }
 
-        Text("Lock Screen Visibility", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf(
-                "Public" to NotificationCompat.VISIBILITY_PUBLIC,
-                "Private" to NotificationCompat.VISIBILITY_PRIVATE,
-                "Secret" to NotificationCompat.VISIBILITY_SECRET,
-            ).forEach { (label, vis) ->
-                FilterChip(
-                    selected = customVisibility == vis,
-                    onClick  = { customVisibility = vis },
-                    label    = { Text(label) },
-                )
+        LabeledOption(S.lock.lockScreenVisibility, S.lock.visibilityHelp) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf(
+                    "Public" to NotificationCompat.VISIBILITY_PUBLIC,
+                    "Private" to NotificationCompat.VISIBILITY_PRIVATE,
+                    "Secret" to NotificationCompat.VISIBILITY_SECRET,
+                ).forEach { (label, vis) ->
+                    FilterChip(
+                        selected = customVisibility == vis,
+                        onClick  = { customVisibility = vis },
+                        label    = { Text(label) },
+                    )
+                }
             }
         }
 
-        Text("Accent Color", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        LabeledOption(S.lock.categoryLabel, S.lock.categoryHelp) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            ) {
+                listOf(
+                    S.lock.message to NotificationCompat.CATEGORY_MESSAGE,
+                    S.lock.alarm to NotificationCompat.CATEGORY_ALARM,
+                    S.lock.reminder to NotificationCompat.CATEGORY_REMINDER,
+                    S.lock.event to NotificationCompat.CATEGORY_EVENT,
+                ).forEach { (label, cat) ->
+                    FilterChip(
+                        selected = customCategory == cat,
+                        onClick = { customCategory = cat },
+                        label = { Text(label, maxLines = 1, style = MaterialTheme.typography.labelSmall) },
+                    )
+                }
+            }
+        }
+
+        Text(S.lock.accentColor, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             colorOptions.forEachIndexed { idx, (color, _) ->
                 Box(
@@ -402,95 +291,32 @@ fun LockScreenScreen() {
         }
 
         // ── Action Buttons ────────────────────────────────────────────────
-        Text(S.lock.actionButtons, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            (0..3).forEach { count ->
-                FilterChip(
-                    selected = customActionCount == count,
-                    onClick = { customActionCount = count },
-                    label = { Text("$count", style = MaterialTheme.typography.labelSmall) },
-                )
+        LabeledOption(S.lock.actionButtons, S.lock.actionsHelp) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                (0..3).forEach { count ->
+                    FilterChip(
+                        selected = customActionCount == count,
+                        onClick = { customActionCount = count },
+                        label = { Text("$count", style = MaterialTheme.typography.labelSmall) },
+                    )
+                }
             }
+        }
+        for (i in 0 until customActionCount) {
+            ActionEntrySelector(
+                label = "Action ${i + 1}",
+                value = customActions[i],
+                onChange = { customActions[i] = it },
+            )
         }
         if (customActionCount >= 1) {
-            ExposedDropdownMenuBox(
-                expanded = actionExpanded1,
-                onExpandedChange = { actionExpanded1 = it },
-            ) {
+            LabeledOption(S.lock.quickReplyLabel, S.lock.quickReplyHelp) {
                 OutlinedTextField(
-                    value = customAction1.label,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Action 1") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actionExpanded1) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    value = customQuickReply,
+                    onValueChange = { customQuickReply = it },
+                    modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                 )
-                ExposedDropdownMenu(
-                    expanded = actionExpanded1,
-                    onDismissRequest = { actionExpanded1 = false },
-                ) {
-                    NotifActionEntry.entries.forEach { entry ->
-                        DropdownMenuItem(
-                            text = { Text(entry.label) },
-                            onClick = { customAction1 = entry; actionExpanded1 = false },
-                        )
-                    }
-                }
-            }
-        }
-        if (customActionCount >= 2) {
-            ExposedDropdownMenuBox(
-                expanded = actionExpanded2,
-                onExpandedChange = { actionExpanded2 = it },
-            ) {
-                OutlinedTextField(
-                    value = customAction2.label,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Action 2") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actionExpanded2) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    singleLine = true,
-                )
-                ExposedDropdownMenu(
-                    expanded = actionExpanded2,
-                    onDismissRequest = { actionExpanded2 = false },
-                ) {
-                    NotifActionEntry.entries.forEach { entry ->
-                        DropdownMenuItem(
-                            text = { Text(entry.label) },
-                            onClick = { customAction2 = entry; actionExpanded2 = false },
-                        )
-                    }
-                }
-            }
-        }
-        if (customActionCount >= 3) {
-            ExposedDropdownMenuBox(
-                expanded = actionExpanded3,
-                onExpandedChange = { actionExpanded3 = it },
-            ) {
-                OutlinedTextField(
-                    value = customAction3.label,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Action 3") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actionExpanded3) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    singleLine = true,
-                )
-                ExposedDropdownMenu(
-                    expanded = actionExpanded3,
-                    onDismissRequest = { actionExpanded3 = false },
-                ) {
-                    NotifActionEntry.entries.forEach { entry ->
-                        DropdownMenuItem(
-                            text = { Text(entry.label) },
-                            onClick = { customAction3 = entry; actionExpanded3 = false },
-                        )
-                    }
-                }
             }
         }
 
@@ -539,139 +365,375 @@ fun LockScreenScreen() {
             }
         }
 
-        // ── Ongoing & Auto-cancel ────────────────────────────────────────
-        Row(
-            modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) { },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(S.lock.ongoing, style = MaterialTheme.typography.labelMedium)
-            Switch(checked = customOngoing, onCheckedChange = { customOngoing = it })
+        // ── Flags & extras ───────────────────────────────────────────────
+        SwitchRow(S.lock.ongoing, S.lock.ongoingHelp, customOngoing) { customOngoing = it }
+        SwitchRow(S.lock.autoCancel, S.lock.autoCancelHelp, customAutoCancel) { customAutoCancel = it }
+        SwitchRow(S.lock.soundLabel, S.lock.soundHelp, customSound) { customSound = it }
+        SwitchRow(S.lock.vibrateLabel, S.lock.vibrateHelp, customVibrate) { customVibrate = it }
+
+        LabeledOption(S.lock.timeoutLabel, S.lock.timeoutHelp) {
+            SliderWithInput(
+                value = customTimeoutSec,
+                onValueChange = { customTimeoutSec = it },
+                valueRange = 0f..120f,
+                formatValue = { "%.0f".format(it) },
+                suffix = "s",
+                label = "${customTimeoutSec.toInt()} s",
+            )
         }
-        Row(
-            modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) { },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(S.lock.autoCancel, style = MaterialTheme.typography.labelMedium)
-            Switch(checked = customAutoCancel, onCheckedChange = { customAutoCancel = it })
+        LabeledOption(S.lock.badgeLabel, S.lock.badgeHelp) {
+            SliderWithInput(
+                value = customBadge.toFloat(),
+                onValueChange = { customBadge = it.toInt() },
+                valueRange = 0f..99f,
+                formatValue = { "%.0f".format(it) },
+                suffix = "",
+                label = "$customBadge",
+            )
         }
 
         // ── Delay ────────────────────────────────────────────────────────
-        SliderWithInput(
-            value = customDelaySec,
-            onValueChange = { customDelaySec = it },
-            valueRange = 0f..30f,
-            formatValue = { "%.1f".format(it) },
-            suffix = "min",
-            label = "${S.lock.delay}: ${if (customDelaySec < 1f) "${(customDelaySec * 60).toInt()} sec" else "${"%.0f".format(customDelaySec)} min"}",
-        )
+        LabeledOption(S.lock.delay, S.lock.delayHelp) {
+            SliderWithInput(
+                value = customDelaySec,
+                onValueChange = { customDelaySec = it },
+                valueRange = 0f..60f,
+                formatValue = { "%.1f".format(it) },
+                suffix = "min",
+                label = if (customDelaySec < 1f) "${(customDelaySec * 60).toInt()} sec" else "${"%.0f".format(customDelaySec)} min",
+            )
+        }
 
         // ── Preview Card ─────────────────────────────────────────────────
         Text(S.lock.preview, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        ) {
-            Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(customTitle, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium)
-                Text(customBody, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                if (customShowProgress) {
-                    if (customProgressIndeterminate) {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    } else {
-                        LinearProgressIndicator(
-                            progress = { customProgressValue / 100f },
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
+        val previewSpec = NotifSpec(
+            title = customTitle,
+            body = customBody,
+            subtext = customSubtext,
+            priority = customPriority,
+            visibility = customVisibility,
+            category = customCategory,
+            accentColor = colorOptions[customColorIdx].first.toArgb(),
+            actions = customActions.take(customActionCount),
+            progressMode = when {
+                !customShowProgress -> ProgressMode.OFF
+                customProgressIndeterminate -> ProgressMode.INDETERMINATE
+                else -> ProgressMode.DETERMINATE
+            },
+            progressValue = customProgressValue.toInt(),
+            style = when (customStyleIdx) {
+                1 -> NotifStyle.BIG_TEXT
+                2 -> NotifStyle.INBOX
+                else -> NotifStyle.NORMAL
+            },
+            ongoing = customOngoing,
+            autoCancel = customAutoCancel,
+            sound = customSound,
+            vibrate = customVibrate,
+            timeoutSec = customTimeoutSec.toInt(),
+            badge = customBadge,
+            quickReplyHint = customQuickReply,
+        )
+        NotificationPreviewCard(previewSpec)
+
+        // ── Delivery: schedule type, exact date/time, Send Now / Schedule ──
+        LabeledOption(S.lock.scheduleTypeLabel, S.lock.scheduleTypeHelp) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf(
+                    "notification" to S.lock.notification,
+                    "lock" to S.lock.lockScreen,
+                    "ring" to S.lock.phoneRing,
+                ).forEach { (type, label) ->
+                    FilterChip(
+                        selected = schedType == type,
+                        onClick = { schedType = type },
+                        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                    )
                 }
-                if (customActionCount > 0) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
-                        if (customActionCount >= 1) TextButton(onClick = {}) { Text(customAction1.label, style = MaterialTheme.typography.labelSmall) }
-                        if (customActionCount >= 2) TextButton(onClick = {}) { Text(customAction2.label, style = MaterialTheme.typography.labelSmall) }
-                        if (customActionCount >= 3) TextButton(onClick = {}) { Text(customAction3.label, style = MaterialTheme.typography.labelSmall) }
+            }
+        }
+
+        LabeledOption(S.lock.scheduleForLabel, S.lock.scheduleForHelp) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = schedDate.toString(),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Date") },
+                    modifier = Modifier.weight(1f).clickable { showDatePicker = true },
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    leadingIcon = { Icon(Icons.Default.CalendarMonth, null, Modifier.size(18.dp)) },
+                    shape = MaterialTheme.shapes.small,
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }.also { source ->
+                        LaunchedEffect(source) {
+                            source.interactions.collect { interaction ->
+                                if (interaction is androidx.compose.foundation.interaction.PressInteraction.Release) {
+                                    showDatePicker = true
+                                }
+                            }
+                        }
+                    },
+                )
+                OutlinedTextField(
+                    value = "%02d:%02d".format(schedTime.hour, schedTime.minute),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Time") },
+                    modifier = Modifier.weight(1f).clickable { showTimePicker = true },
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    leadingIcon = { Icon(Icons.Default.Schedule, null, Modifier.size(18.dp)) },
+                    shape = MaterialTheme.shapes.small,
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }.also { source ->
+                        LaunchedEffect(source) {
+                            source.interactions.collect { interaction ->
+                                if (interaction is androidx.compose.foundation.interaction.PressInteraction.Release) {
+                                    showTimePicker = true
+                                }
+                            }
+                        }
+                    },
+                )
+            }
+        }
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Button(
+                onClick = {
+                    val notifId = 2000 + (System.currentTimeMillis() % 1000).toInt()
+                    if (customDelaySec > 0) {
+                        val delayMs = (customDelaySec * 60 * 1000).toLong()
+                        val schedIntent = Intent(context, ScheduleActionReceiver::class.java).apply {
+                            action = ScheduleActionReceiver.ACTION_FIRE
+                            putExtra(ScheduleActionReceiver.EXTRA_TYPE, "notification")
+                            putExtra(ScheduleActionReceiver.EXTRA_TITLE, customTitle)
+                            putExtra(ScheduleActionReceiver.EXTRA_BODY, customBody)
+                            putExtra(ScheduleActionReceiver.EXTRA_ID, notifId)
+                        }
+                        val schedPi = PendingIntent.getBroadcast(
+                            context, notifId, schedIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                        )
+                        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delayMs, schedPi)
+                        deliveryStatus = "Sent in ${"%.1f".format(customDelaySec)} min"
+                    } else {
+                        nm.notify(notifId, buildNotification(context, previewSpec))
+                        deliveryStatus = "Sent immediately"
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                enabled = notifGranted && customTitle.isNotBlank(),
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Send, null)
+                Spacer(Modifier.width(8.dp))
+                Text(S.lock.sendNow)
+            }
+
+            Button(
+                onClick = {
+                    val scheduledLdt = LocalDateTime.of(schedDate, schedTime)
+                    val triggerMillis = scheduledLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                    if (triggerMillis <= System.currentTimeMillis()) {
+                        deliveryStatus = "Time must be in the future"
+                        return@Button
+                    }
+
+                    val id = (System.currentTimeMillis() % Int.MAX_VALUE).toInt()
+                    val title = if (schedType == "notification") customTitle else schedType.replaceFirstChar { it.uppercase() }
+
+                    val alarmIntent = Intent(context, ScheduleActionReceiver::class.java).apply {
+                        action = ScheduleActionReceiver.ACTION_FIRE
+                        putExtra(ScheduleActionReceiver.EXTRA_TYPE, schedType)
+                        putExtra(ScheduleActionReceiver.EXTRA_TITLE, title)
+                        putExtra(ScheduleActionReceiver.EXTRA_BODY, customBody)
+                        putExtra(ScheduleActionReceiver.EXTRA_ID, id)
+                    }
+                    val pi = PendingIntent.getBroadcast(
+                        context, id, alarmIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                    )
+                    val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pi)
+
+                    val entry = JSONObject().apply {
+                        put("id", id)
+                        put("type", schedType)
+                        put("title", title)
+                        put("scheduledAt", scheduledLdt.toString())
+                        put("status", "pending")
+                    }
+                    val arr = try { JSONArray(schedPrefs.getString("actions", "[]")) } catch (_: Exception) { JSONArray() }
+                    arr.put(entry)
+                    schedPrefs.edit().putString("actions", arr.toString()).apply()
+                    schedList = loadScheduleList(schedPrefs)
+
+                    val formatter = DateTimeFormatter.ofPattern("HH:mm, MMM d")
+                    deliveryStatus = "Scheduled $schedType at ${scheduledLdt.format(formatter)}"
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                enabled = customTitle.isNotBlank(),
+            ) { Text(S.lock.schedule) }
+        }
+
+        if (deliveryStatus.isNotEmpty()) {
+            Text(deliveryStatus, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+        }
+
+        // ── Scheduled Actions list ───────────────────────────────────────────
+        if (schedList.isNotEmpty()) {
+            HorizontalDivider()
+            Text(S.lock.scheduledActions + " (${schedList.size})", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            schedList.forEach { item ->
+                val itemId = item.optInt("id", 0)
+                val itemType = item.optString("type", "notification")
+                val itemTitle = item.optString("title", "")
+                val itemScheduledAt = item.optString("scheduledAt", "")
+                val itemStatus = item.optString("status", "pending")
+                val icon = when (itemType) {
+                    "ring" -> Icons.Default.PhoneInTalk
+                    "lock" -> Icons.Default.Lock
+                    else -> Icons.Default.Notifications
+                }
+                Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.small) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(icon, null, modifier = Modifier.size(20.dp),
+                            tint = if (itemStatus == "fired") Color.Gray else MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(8.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(itemTitle, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                            Text(itemScheduledAt, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Text(
+                            itemStatus.uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (itemStatus == "fired") Color.Gray else MaterialTheme.colorScheme.secondary,
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        IconButton(onClick = {
+                            val cancelIntent = Intent(context, ScheduleActionReceiver::class.java).apply {
+                                action = ScheduleActionReceiver.ACTION_FIRE
+                            }
+                            val cancelPi = PendingIntent.getBroadcast(
+                                context, itemId, cancelIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                            )
+                            val alm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                            alm.cancel(cancelPi)
+                            val arr = try { JSONArray(schedPrefs.getString("actions", "[]")) } catch (_: Exception) { JSONArray() }
+                            val newArr = JSONArray()
+                            for (i in 0 until arr.length()) {
+                                val obj = arr.getJSONObject(i)
+                                if (obj.optInt("id", -1) != itemId) newArr.put(obj)
+                            }
+                            schedPrefs.edit().putString("actions", newArr.toString()).apply()
+                            schedList = loadScheduleList(schedPrefs)
+                        }) {
+                            Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(24.dp))
+                        }
                     }
                 }
             }
         }
 
-        // ── Send Button ──────────────────────────────────────────────────
-        Button(
-            onClick = {
-                val pi = PendingIntent.getActivity(
-                    context, 0,
-                    Intent(context, MainActivity::class.java),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                val channel = if (customPriority >= NotificationCompat.PRIORITY_HIGH) CH_HIGH else CH_CUSTOM
-                val builder = NotificationCompat.Builder(context, channel)
-                    .setSmallIcon(android.R.drawable.ic_dialog_info)
-                    .setContentTitle(customTitle)
-                    .setContentText(customBody)
-                    .setPriority(customPriority)
-                    .setVisibility(customVisibility)
-                    .setColor(colorOptions[customColorIdx].first.toArgb())
-                    .setContentIntent(pi)
-                    .setAutoCancel(customAutoCancel)
-                    .setOngoing(customOngoing)
-
-                // Action buttons
-                if (customActionCount >= 1) builder.addAction(0, customAction1.label, customAction1.buildPendingIntent(context, 3001))
-                if (customActionCount >= 2) builder.addAction(0, customAction2.label, customAction2.buildPendingIntent(context, 3002))
-                if (customActionCount >= 3) builder.addAction(0, customAction3.label, customAction3.buildPendingIntent(context, 3003))
-
-                // Progress bar
-                if (customShowProgress) {
-                    if (customProgressIndeterminate) {
-                        builder.setProgress(0, 0, true)
-                    } else {
-                        builder.setProgress(100, customProgressValue.toInt(), false)
-                    }
-                }
-
-                // Style
-                when (customStyleIdx) {
-                    1 -> builder.setStyle(NotificationCompat.BigTextStyle().bigText(customBody))
-                    2 -> {
-                        val inboxStyle = NotificationCompat.InboxStyle()
-                        customBody.lines().forEach { inboxStyle.addLine(it) }
-                        builder.setStyle(inboxStyle)
-                    }
-                }
-
-                val notifId = 2000 + (System.currentTimeMillis() % 1000).toInt()
-
-                if (customDelaySec > 0 && notifGranted) {
-                    // Schedule with delay
-                    val delayMs = (customDelaySec * 60 * 1000).toLong()
-                    val schedIntent = Intent(context, com.gadget.receivers.ScheduleActionReceiver::class.java).apply {
-                        action = com.gadget.receivers.ScheduleActionReceiver.ACTION_FIRE
-                        putExtra(com.gadget.receivers.ScheduleActionReceiver.EXTRA_TYPE, "notification")
-                        putExtra(com.gadget.receivers.ScheduleActionReceiver.EXTRA_TITLE, customTitle)
-                        putExtra(com.gadget.receivers.ScheduleActionReceiver.EXTRA_BODY, customBody)
-                        putExtra(com.gadget.receivers.ScheduleActionReceiver.EXTRA_ID, notifId)
-                    }
-                    val schedPi = PendingIntent.getBroadcast(
-                        context, notifId, schedIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                    )
-                    val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                    am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delayMs, schedPi)
-                } else if (notifGranted) {
-                    nm.notify(notifId, builder.build())
-                }
-            },
+        // ── Save as Template ─────────────────────────────────────────────────
+        SectionHeader(S.lock.saveAsTemplate)
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            enabled = notifGranted && customTitle.isNotBlank(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.AutoMirrored.Filled.Send, null)
-            Spacer(Modifier.width(8.dp))
-            Text(S.lock.sendCustomNotif)
+            OutlinedTextField(
+                value = presetName,
+                onValueChange = { presetName = it },
+                label = { Text(S.lock.presetName) },
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+            )
+            FilledTonalButton(
+                onClick = {
+                    BuilderPresetStore.save(context, presetName, previewSpec)
+                    presetList = BuilderPresetStore.load(context)
+                    presetName = ""
+                },
+                enabled = presetName.isNotBlank(),
+            ) { Text(S.lock.savePreset) }
+        }
+        if (presetList.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                presetList.forEach { preset ->
+                    Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.small) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(preset.name, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                            TextButton(onClick = {
+                                customTitle = preset.spec.title
+                                customBody = preset.spec.body
+                                customSubtext = preset.spec.subtext
+                                customPriority = preset.spec.priority
+                                customVisibility = preset.spec.visibility
+                                preset.spec.category?.let { customCategory = it }
+                                customColorIdx = preset.spec.accentColor
+                                    ?.let { argb -> colorOptions.indexOfFirst { it.first.toArgb() == argb }.takeIf { it >= 0 } }
+                                    ?: customColorIdx
+                                customActionCount = preset.spec.actions.size.coerceIn(0, 3)
+                                preset.spec.actions.forEachIndexed { i, a -> if (i < customActions.size) customActions[i] = a }
+                                customQuickReply = preset.spec.quickReplyHint
+                                customShowProgress = preset.spec.progressMode != ProgressMode.OFF
+                                customProgressIndeterminate = preset.spec.progressMode == ProgressMode.INDETERMINATE
+                                customProgressValue = preset.spec.progressValue.toFloat()
+                                customStyleIdx = when (preset.spec.style) {
+                                    NotifStyle.NORMAL -> 0
+                                    NotifStyle.BIG_TEXT -> 1
+                                    NotifStyle.INBOX -> 2
+                                }
+                                customOngoing = preset.spec.ongoing
+                                customAutoCancel = preset.spec.autoCancel
+                                customSound = preset.spec.sound
+                                customVibrate = preset.spec.vibrate
+                                customTimeoutSec = preset.spec.timeoutSec.toFloat()
+                                customBadge = preset.spec.badge
+                            }) { Text(S.lock.loadPreset) }
+                            IconButton(onClick = {
+                                BuilderPresetStore.delete(context, preset.name)
+                                presetList = BuilderPresetStore.load(context)
+                            }) {
+                                Icon(Icons.Default.Delete, S.lock.deletePreset, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Lock Screen Controls (collapsible)
+        // Cancel All / Capabilities / Device Admin / Overlay / Lock Now /
+        // Emergency Alerts. Default collapsed - these are device-wide
+        // controls separate from the notification builder above.
+        // ══════════════════════════════════════════════════════════════════════
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { controlsExpanded = !controlsExpanded }
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SectionHeader(S.lock.lockScreenControls, modifier = Modifier.weight(1f))
+            Icon(
+                if (controlsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = null,
+            )
+        }
+
+        if (controlsExpanded) { Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 3 — Emergency Alerts
@@ -853,303 +915,7 @@ fun LockScreenScreen() {
             )
         }
 
-        HorizontalDivider()
-
-        // ══════════════════════════════════════════════════════════════════════
-        // SECTION 9 — Lock Screen Notification Designer
-        // ══════════════════════════════════════════════════════════════════════
-        Text(S.lock.lockScreenDesigner, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Text(
-            "Design notifications that appear on the lock screen. " +
-            "Visibility controls how much content is shown when the device is locked.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
-        )
-
-        OutlinedTextField(
-            value = lsTitle,
-            onValueChange = { lsTitle = it },
-            label = { Text("Notification Title") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-        )
-        OutlinedTextField(
-            value = lsBody,
-            onValueChange = { lsBody = it },
-            label = { Text("Notification Body") },
-            modifier = Modifier.fillMaxWidth(),
-            maxLines = 3,
-        )
-
-        Text("Lock Screen Visibility", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            listOf(
-                "Public -- Full content visible on lock screen" to NotificationCompat.VISIBILITY_PUBLIC,
-                "Private -- Icon only, content hidden" to NotificationCompat.VISIBILITY_PRIVATE,
-                "Secret -- Completely hidden from lock screen" to NotificationCompat.VISIBILITY_SECRET,
-            ).forEach { (label, vis) ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = lsVisibility == vis,
-                        onClick  = { lsVisibility = vis },
-                    )
-                    Text(label, style = MaterialTheme.typography.bodySmall)
-                }
-            }
-        }
-
-        Text("Priority", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf(
-                "Low" to NotificationCompat.PRIORITY_LOW,
-                "Default" to NotificationCompat.PRIORITY_DEFAULT,
-                "High" to NotificationCompat.PRIORITY_HIGH,
-            ).forEach { (label, prio) ->
-                FilterChip(
-                    selected = lsPriority == prio,
-                    onClick  = { lsPriority = prio },
-                    label    = { Text(label) },
-                )
-            }
-        }
-
-        Text("Category", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-        ) {
-            listOf(
-                "Message" to NotificationCompat.CATEGORY_MESSAGE,
-                "Alarm" to NotificationCompat.CATEGORY_ALARM,
-                "Reminder" to NotificationCompat.CATEGORY_REMINDER,
-                "Event" to NotificationCompat.CATEGORY_EVENT,
-            ).forEach { (label, cat) ->
-                FilterChip(
-                    selected = lsCategory == cat,
-                    onClick  = { lsCategory = cat },
-                    label    = { Text(label, maxLines = 1, style = MaterialTheme.typography.labelSmall) },
-                )
-            }
-        }
-
-        // ── Enhanced Scheduling ──────────────────────────────────────────────
-        Text(S.lock.scheduleAction, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-
-        // Schedule type
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf(
-                "notification" to "Notification",
-                "lock" to "Lock Screen",
-                "ring" to "Phone Ring",
-            ).forEach { (type, label) ->
-                FilterChip(
-                    selected = schedType == type,
-                    onClick = { schedType = type },
-                    label = { Text(label, style = MaterialTheme.typography.labelSmall) },
-                )
-            }
-        }
-
-        // Custom text for notification
-        if (schedType == "notification") {
-            OutlinedTextField(
-                value = schedTitle,
-                onValueChange = { schedTitle = it },
-                label = { Text("Alert text") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-            )
-        }
-
-        // Date + Time pickers
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            OutlinedTextField(
-                value = schedDate.toString(),
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Date") },
-                modifier = Modifier.weight(1f).clickable { showDatePicker = true },
-                textStyle = MaterialTheme.typography.bodySmall,
-                leadingIcon = { Icon(Icons.Default.CalendarMonth, null, Modifier.size(18.dp)) },
-                shape = MaterialTheme.shapes.small,
-                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }.also { source ->
-                    LaunchedEffect(source) {
-                        source.interactions.collect { interaction ->
-                            if (interaction is androidx.compose.foundation.interaction.PressInteraction.Release) {
-                                showDatePicker = true
-                            }
-                        }
-                    }
-                },
-            )
-            OutlinedTextField(
-                value = "%02d:%02d".format(schedTime.hour, schedTime.minute),
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Time") },
-                modifier = Modifier.weight(1f).clickable { showTimePicker = true },
-                textStyle = MaterialTheme.typography.bodySmall,
-                leadingIcon = { Icon(Icons.Default.Schedule, null, Modifier.size(18.dp)) },
-                shape = MaterialTheme.shapes.small,
-                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }.also { source ->
-                    LaunchedEffect(source) {
-                        source.interactions.collect { interaction ->
-                            if (interaction is androidx.compose.foundation.interaction.PressInteraction.Release) {
-                                showTimePicker = true
-                            }
-                        }
-                    }
-                },
-            )
-        }
-
-        // Quick delay slider (alternative to exact date/time)
-        SliderWithInput(
-            value = lsDelayMin,
-            onValueChange = { lsDelayMin = it },
-            valueRange = 0f..60f,
-            formatValue = { "%.1f".format(it) },
-            suffix = "min",
-            label = "Or quick delay: ${
-                if (lsDelayMin < 1f) "${(lsDelayMin * 60).toInt()} sec"
-                else "${"%.1f".format(lsDelayMin)} min"
-            }",
-        )
-
-        // Action buttons
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Button(
-                onClick = {
-                    sendLockScreenNotification(context, nm, lsTitle, lsBody, lsVisibility, lsPriority, lsCategory)
-                    lsScheduleStatus = "Sent immediately"
-                },
-                modifier = Modifier.weight(1f),
-                enabled = lsTitle.isNotBlank(),
-            ) { Text(S.lock.sendNow) }
-
-            Button(
-                onClick = {
-                    val scheduledLdt = if (lsDelayMin > 0) {
-                        LocalDateTime.now().plusSeconds((lsDelayMin * 60).toLong())
-                    } else {
-                        LocalDateTime.of(schedDate, schedTime)
-                    }
-                    val triggerMillis = scheduledLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                    if (triggerMillis <= System.currentTimeMillis()) {
-                        lsScheduleStatus = "Time must be in the future"
-                        return@Button
-                    }
-
-                    val id = (System.currentTimeMillis() % Int.MAX_VALUE).toInt()
-                    val title = if (schedType == "notification") schedTitle else schedType.replaceFirstChar { it.uppercase() }
-
-                    // Schedule via AlarmManager
-                    val alarmIntent = Intent(context, ScheduleActionReceiver::class.java).apply {
-                        action = ScheduleActionReceiver.ACTION_FIRE
-                        putExtra(ScheduleActionReceiver.EXTRA_TYPE, schedType)
-                        putExtra(ScheduleActionReceiver.EXTRA_TITLE, title)
-                        putExtra(ScheduleActionReceiver.EXTRA_BODY, lsBody)
-                        putExtra(ScheduleActionReceiver.EXTRA_ID, id)
-                    }
-                    val pi = PendingIntent.getBroadcast(
-                        context, id, alarmIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                    )
-                    val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                    am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pi)
-
-                    // Save to schedule list
-                    val entry = JSONObject().apply {
-                        put("id", id)
-                        put("type", schedType)
-                        put("title", title)
-                        put("scheduledAt", scheduledLdt.toString())
-                        put("status", "pending")
-                    }
-                    val arr = try { JSONArray(schedPrefs.getString("actions", "[]")) } catch (_: Exception) { JSONArray() }
-                    arr.put(entry)
-                    schedPrefs.edit().putString("actions", arr.toString()).apply()
-                    schedList = loadScheduleList(schedPrefs)
-
-                    val formatter = DateTimeFormatter.ofPattern("HH:mm, MMM d")
-                    lsScheduleStatus = "Scheduled ${schedType} at ${scheduledLdt.format(formatter)}"
-                },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-            ) { Text(S.lock.schedule) }
-        }
-
-        if (lsScheduleStatus.isNotEmpty()) {
-            Text(
-                lsScheduleStatus,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
-
-        // ── Schedule List ────────────────────────────────────────────────────
-        if (schedList.isNotEmpty()) {
-            HorizontalDivider()
-            Text("Scheduled Actions (${schedList.size})", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            schedList.forEach { item ->
-                val itemId = item.optInt("id", 0)
-                val itemType = item.optString("type", "notification")
-                val itemTitle = item.optString("title", "")
-                val itemScheduledAt = item.optString("scheduledAt", "")
-                val itemStatus = item.optString("status", "pending")
-                val icon = when (itemType) {
-                    "ring" -> Icons.Default.PhoneInTalk
-                    "lock" -> Icons.Default.Lock
-                    else -> Icons.Default.Notifications
-                }
-                Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.small) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(icon, null, modifier = Modifier.size(20.dp),
-                            tint = if (itemStatus == "fired") Color.Gray else MaterialTheme.colorScheme.primary)
-                        Spacer(Modifier.width(8.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(itemTitle, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
-                            Text(itemScheduledAt, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        Text(
-                            itemStatus.uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (itemStatus == "fired") Color.Gray else MaterialTheme.colorScheme.secondary,
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        IconButton(onClick = {
-                            // Cancel alarm
-                            val cancelIntent = Intent(context, ScheduleActionReceiver::class.java).apply {
-                                action = ScheduleActionReceiver.ACTION_FIRE
-                            }
-                            val cancelPi = PendingIntent.getBroadcast(
-                                context, itemId, cancelIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                            )
-                            val alm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                            alm.cancel(cancelPi)
-                            // Remove from list
-                            val arr = try { JSONArray(schedPrefs.getString("actions", "[]")) } catch (_: Exception) { JSONArray() }
-                            val newArr = JSONArray()
-                            for (i in 0 until arr.length()) {
-                                val obj = arr.getJSONObject(i)
-                                if (obj.optInt("id", -1) != itemId) newArr.put(obj)
-                            }
-                            schedPrefs.edit().putString("actions", newArr.toString()).apply()
-                            schedList = loadScheduleList(schedPrefs)
-                        }) {
-                            Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(24.dp))
-                        }
-                    }
-                }
-            }
-        }
+        } } // close `if (controlsExpanded) { Column { ... } }`
 
         HorizontalDivider()
 
@@ -1221,62 +987,15 @@ fun LockScreenScreen() {
     }
 }
 
-private fun sendLockScreenNotification(
-    context: Context,
-    nm: NotificationManager,
-    title: String,
-    body: String,
-    visibility: Int,
-    priority: Int,
-    category: String,
-) {
-    val pi = PendingIntent.getActivity(
-        context, 0,
-        Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        },
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-    )
-
-    val n = NotificationCompat.Builder(context, CH_LOCKSCREEN)
-        .setSmallIcon(android.R.drawable.ic_dialog_info)
-        .setContentTitle(title)
-        .setContentText(body)
-        .setVisibility(visibility)
-        .setPriority(priority)
-        .setCategory(category)
-        .setContentIntent(pi)
-        .setAutoCancel(true)
-        .build()
-
-    nm.notify(3000 + (System.currentTimeMillis() % 1000).toInt(), n)
-}
-
 @Composable
-private fun NotifDemoCard(
-    title: String, subtitle: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onFire: () -> Unit,
-) {
-    Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+private fun SwitchRow(label: String, description: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    LabeledOption(label, description) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.End,
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f),
-            ) {
-                Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text(title, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium)
-                    Text(subtitle, style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                }
-            }
-            FilledTonalButton(onClick = onFire) { Text(S.lock.send) }
+            Switch(checked = checked, onCheckedChange = onChange)
         }
     }
 }

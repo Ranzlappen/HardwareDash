@@ -255,6 +255,140 @@ object MetricMetadataRegistry {
                 MetricMetadata.Preset("Magnet present", LinkOperator.GREATER_THAN, 100.0),
             ),
         ))
+        listOf("accel_x", "accel_y", "accel_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "m/s²",
+                min = -50.0, max = 50.0,
+                typical = -12.0..12.0,
+                defaultThreshold = 5.0, step = 0.1,
+                presets = listOf(
+                    MetricMetadata.Preset("Negative tilt", LinkOperator.LESS_THAN, -5.0),
+                    MetricMetadata.Preset("Flat / rest", LinkOperator.BETWEEN, -1.0, 1.0),
+                    MetricMetadata.Preset("Positive tilt", LinkOperator.GREATER_THAN, 5.0),
+                ),
+            ))
+        }
+        listOf("gyro_x", "gyro_y", "gyro_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "rad/s",
+                min = -35.0, max = 35.0,
+                typical = -2.0..2.0,
+                defaultThreshold = 0.5, step = 0.05,
+                presets = listOf(
+                    MetricMetadata.Preset("Spin negative", LinkOperator.LESS_THAN, -0.5),
+                    MetricMetadata.Preset("Still", LinkOperator.BETWEEN, -0.05, 0.05),
+                    MetricMetadata.Preset("Spin positive", LinkOperator.GREATER_THAN, 0.5),
+                ),
+            ))
+        }
+        listOf("magneto_x", "magneto_y", "magneto_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "µT",
+                min = -1000.0, max = 1000.0,
+                typical = -65.0..65.0,
+                defaultThreshold = 50.0, step = 1.0,
+                presets = listOf(
+                    MetricMetadata.Preset("South pole", LinkOperator.LESS_THAN, -50.0),
+                    MetricMetadata.Preset("Earth field", LinkOperator.BETWEEN, -65.0, 65.0),
+                    MetricMetadata.Preset("North pole", LinkOperator.GREATER_THAN, 50.0),
+                ),
+            ))
+        }
+
+        put("gravity", MetricMetadata(
+            key = "gravity", unit = "m/s²",
+            min = 0.0, max = 12.0,
+            typical = 9.5..10.0,
+            defaultThreshold = 9.81, step = 0.1,
+            presets = listOf(
+                MetricMetadata.Preset("Earth gravity", LinkOperator.BETWEEN, 9.5, 10.0),
+            ),
+        ))
+        listOf("gravity_x", "gravity_y", "gravity_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "m/s²",
+                min = -12.0, max = 12.0,
+                typical = -10.0..10.0,
+                defaultThreshold = 5.0, step = 0.1,
+                presets = listOf(
+                    MetricMetadata.Preset("Negative axis", LinkOperator.LESS_THAN, -5.0),
+                    MetricMetadata.Preset("Aligned with axis", LinkOperator.GREATER_THAN, 9.0),
+                    MetricMetadata.Preset("Inverted", LinkOperator.LESS_THAN, -9.0),
+                ),
+            ))
+        }
+
+        put("linaccel", MetricMetadata(
+            key = "linaccel", unit = "m/s²",
+            min = 0.0, max = 40.0,
+            typical = 0.0..2.0,
+            defaultThreshold = 5.0, step = 0.1,
+            presets = listOf(
+                MetricMetadata.Preset("Still", LinkOperator.LESS_THAN, 0.5),
+                MetricMetadata.Preset("Walking", LinkOperator.BETWEEN, 1.0, 4.0),
+                MetricMetadata.Preset("Vigorous", LinkOperator.GREATER_THAN, 8.0),
+            ),
+        ))
+        listOf("linaccel_x", "linaccel_y", "linaccel_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "m/s²",
+                min = -40.0, max = 40.0,
+                typical = -5.0..5.0,
+                defaultThreshold = 2.0, step = 0.1,
+                presets = listOf(
+                    MetricMetadata.Preset("Negative", LinkOperator.LESS_THAN, -2.0),
+                    MetricMetadata.Preset("Positive", LinkOperator.GREATER_THAN, 2.0),
+                ),
+            ))
+        }
+
+        listOf("rot_x", "rot_y", "rot_z", "rot_w", "game_rot_x", "game_rot_y", "game_rot_z", "geo_rot_x", "geo_rot_y", "geo_rot_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "",
+                min = -1.0, max = 1.0,
+                typical = -1.0..1.0,
+                defaultThreshold = 0.5, step = 0.05,
+                presets = listOf(
+                    MetricMetadata.Preset("Negative", LinkOperator.LESS_THAN, -0.5),
+                    MetricMetadata.Preset("Positive", LinkOperator.GREATER_THAN, 0.5),
+                ),
+            ))
+        }
+
+        put("heart_rate", MetricMetadata(
+            key = "heart_rate", unit = "bpm",
+            min = 30.0, max = 220.0,
+            typical = 50.0..120.0,
+            defaultThreshold = 100.0, step = 1.0, isInteger = true,
+            presets = listOf(
+                MetricMetadata.Preset("Resting", LinkOperator.LESS_THAN, 70.0),
+                MetricMetadata.Preset("Active", LinkOperator.BETWEEN, 100.0, 140.0),
+                MetricMetadata.Preset("High", LinkOperator.GREATER_THAN, 150.0),
+            ),
+        ))
+        put("hinge_angle", MetricMetadata(
+            key = "hinge_angle", unit = "°",
+            min = 0.0, max = 360.0,
+            typical = 0.0..180.0,
+            defaultThreshold = 90.0, step = 1.0, isInteger = true,
+            presets = listOf(
+                MetricMetadata.Preset("Closed", LinkOperator.LESS_THAN, 30.0),
+                MetricMetadata.Preset("Half open", LinkOperator.BETWEEN, 80.0, 100.0),
+                MetricMetadata.Preset("Fully open", LinkOperator.GREATER_THAN, 170.0),
+            ),
+        ))
+        put("motion", MetricMetadata(
+            key = "motion", unit = "",
+            min = null, max = null, typical = null,
+            defaultThreshold = 0.0, step = 1.0,
+            isCategorical = true, allowedValues = listOf("Detected", "Idle"),
+        ))
+        put("stationary", MetricMetadata(
+            key = "stationary", unit = "",
+            min = null, max = null, typical = null,
+            defaultThreshold = 0.0, step = 1.0,
+            isCategorical = true, allowedValues = listOf("Detected", "Idle"),
+        ))
         put("light", MetricMetadata(
             key = "light", unit = "lux",
             min = 0.0, max = 120000.0,
