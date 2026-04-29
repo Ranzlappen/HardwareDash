@@ -463,6 +463,38 @@ object S {
         val selectTag get() = m(l, "Select a tag…", "Tag auswählen…", "Seleccionar etiqueta…", "Sélectionner un tag…")
         val deleteTag get() = m(l, "Delete", "Löschen", "Eliminar", "Supprimer")
         val cancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
+
+        // ── Infrared ──
+        val infrared get() = m(l, "Infrared", "Infrarot", "Infrarrojos", "Infrarouge")
+        val irNotSupported get() = m(l, "No IR emitter on this device — saved codes can still be stored.", "Kein IR-Sender auf diesem Gerät — gespeicherte Codes können trotzdem abgelegt werden.", "Sin emisor IR en este dispositivo — los códigos guardados aún se pueden almacenar.", "Pas d'émetteur IR sur cet appareil — les codes enregistrés peuvent toujours être conservés.")
+        val protocol get() = m(l, "Protocol", "Protokoll", "Protocolo", "Protocole")
+        val carrierHz get() = m(l, "Carrier (Hz)", "Träger (Hz)", "Portadora (Hz)", "Porteuse (Hz)")
+        val payload get() = m(l, "Payload", "Nutzdaten", "Carga útil", "Charge utile")
+        val repeats get() = m(l, "Repeats", "Wiederholungen", "Repeticiones", "Répétitions")
+        val transmit get() = m(l, "Transmit", "Senden", "Transmitir", "Émettre")
+        val transmitting get() = m(l, "Transmitting…", "Sende…", "Transmitiendo…", "Émission…")
+        val addCode get() = m(l, "Add code", "Code hinzufügen", "Añadir código", "Ajouter un code")
+        val savedIrCodes get() = m(l, "Saved IR Codes", "Gespeicherte IR-Codes", "Códigos IR guardados", "Codes IR enregistrés")
+        val noSavedIrCodes get() = m(l, "No saved IR codes", "Keine gespeicherten IR-Codes", "Sin códigos IR guardados", "Aucun code IR enregistré")
+        val codeName get() = m(l, "Code name", "Code-Name", "Nombre del código", "Nom du code")
+        val saveCode get() = m(l, "Save code", "Code speichern", "Guardar código", "Enregistrer le code")
+        val pasteFromClipboard get() = m(l, "Paste from clipboard", "Aus Zwischenablage einfügen", "Pegar desde portapapeles", "Coller depuis le presse-papiers")
+
+        // ── Sub-GHz ──
+        val subGhz get() = m(l, "Sub-GHz", "Sub-GHz", "Sub-GHz", "Sub-GHz")
+        val subGhzNotSupported get() = m(l, "No Sub-GHz radio on this device. External hardware (e.g. Flipper Zero) is required to transmit. You can still save and curate a library.", "Kein Sub-GHz-Funk auf diesem Gerät. Externe Hardware (z. B. Flipper Zero) ist zum Senden erforderlich. Eine Bibliothek lässt sich trotzdem pflegen.", "Sin radio Sub-GHz en este dispositivo. Se necesita hardware externo (p. ej. Flipper Zero) para transmitir. Aún puedes guardar y gestionar una biblioteca.", "Pas de radio Sub-GHz sur cet appareil. Du matériel externe (p. ex. Flipper Zero) est requis pour émettre. Vous pouvez tout de même enregistrer et organiser une bibliothèque.")
+        val externalHardwareRequired get() = m(l, "External hardware required", "Externe Hardware erforderlich", "Se requiere hardware externo", "Matériel externe requis")
+        val frequency get() = m(l, "Frequency (Hz)", "Frequenz (Hz)", "Frecuencia (Hz)", "Fréquence (Hz)")
+        val modulation get() = m(l, "Modulation", "Modulation", "Modulación", "Modulation")
+        val bitLength get() = m(l, "Bit length", "Bitlänge", "Longitud de bits", "Longueur de bits")
+        val key get() = m(l, "Key (hex)", "Schlüssel (hex)", "Clave (hex)", "Clé (hex)")
+        val rawData get() = m(l, "Raw data", "Rohdaten", "Datos brutos", "Données brutes")
+        val importSubFile get() = m(l, "Import .sub file", "Sub-Datei importieren", "Importar archivo .sub", "Importer un fichier .sub")
+        val savedSubGhzSignals get() = m(l, "Saved Sub-GHz Signals", "Gespeicherte Sub-GHz-Signale", "Señales Sub-GHz guardadas", "Signaux Sub-GHz enregistrés")
+        val noSavedSubGhzSignals get() = m(l, "No saved Sub-GHz signals", "Keine gespeicherten Sub-GHz-Signale", "Sin señales Sub-GHz guardadas", "Aucun signal Sub-GHz enregistré")
+        val signalName get() = m(l, "Signal name", "Signalname", "Nombre de la señal", "Nom du signal")
+        val saveSignal get() = m(l, "Save signal", "Signal speichern", "Guardar señal", "Enregistrer le signal")
+        val parseFailed get() = m(l, "Could not parse .sub file", "Sub-Datei konnte nicht gelesen werden", "No se pudo analizar el archivo .sub", "Impossible de lire le fichier .sub")
     }
 
     // ── Sensors ─────────────────────────────────────────────────────────

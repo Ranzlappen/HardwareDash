@@ -51,6 +51,12 @@ import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.services.NfcEmulationService
+import com.gadget.ir.IrCodecs
+import com.gadget.ir.IrTransmitter
+import com.gadget.subghz.SubGhzSignal
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.content.ClipboardManager
 import com.google.android.gms.location.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -171,6 +177,112 @@ private fun extractWriteParams(ndefBytes: ByteArray): Triple<String, String, Str
     } catch (_: Exception) { null }
 }
 
+// ─── Saved IR Codes: data model & SharedPreferences helpers ────────────────
+
+private data class SavedIrCode(
+    val name: String,
+    val protocol: String,   // "NEC", "Pronto", "Raw"
+    val carrierHz: Int,
+    val payload: String,
+    val repeats: Int,
+)
+
+private const val IR_PREFS_NAME = "ir_saved_codes"
+private const val IR_PREFS_KEY = "saved_codes"
+private const val IR_MAX_SAVED = 50
+
+private fun saveIrCodes(context: Context, codes: List<SavedIrCode>) {
+    val arr = JSONArray()
+    codes.take(IR_MAX_SAVED).forEach { c ->
+        arr.put(JSONObject().apply {
+            put("name", c.name)
+            put("protocol", c.protocol)
+            put("carrierHz", c.carrierHz)
+            put("payload", c.payload)
+            put("repeats", c.repeats)
+        })
+    }
+    context.getSharedPreferences(IR_PREFS_NAME, Context.MODE_PRIVATE)
+        .edit().putString(IR_PREFS_KEY, arr.toString()).apply()
+}
+
+private fun loadIrCodes(context: Context): List<SavedIrCode> {
+    val json = context.getSharedPreferences(IR_PREFS_NAME, Context.MODE_PRIVATE)
+        .getString(IR_PREFS_KEY, null) ?: return emptyList()
+    return try {
+        val arr = JSONArray(json)
+        (0 until arr.length()).map { i ->
+            val o = arr.getJSONObject(i)
+            SavedIrCode(
+                name = o.getString("name"),
+                protocol = o.optString("protocol", "NEC"),
+                carrierHz = o.optInt("carrierHz", 38000),
+                payload = o.optString("payload", ""),
+                repeats = o.optInt("repeats", 1),
+            )
+        }
+    } catch (_: Exception) { emptyList() }
+}
+
+// ─── Saved Sub-GHz Signals: data model & SharedPreferences helpers ─────────
+
+private data class SavedSubGhzSignal(
+    val name: String,
+    val frequencyHz: Long,
+    val modulation: String,
+    val protocol: String,
+    val bitLength: Int,
+    val keyHex: String,
+    val rawData: String,
+    val te: Int,
+    val sourceFile: String?,
+)
+
+private const val SUBGHZ_PREFS_NAME = "subghz_saved_signals"
+private const val SUBGHZ_PREFS_KEY = "saved_signals"
+private const val SUBGHZ_MAX_SAVED = 50
+
+private fun saveSubGhzSignals(context: Context, signals: List<SavedSubGhzSignal>) {
+    val arr = JSONArray()
+    signals.take(SUBGHZ_MAX_SAVED).forEach { s ->
+        arr.put(JSONObject().apply {
+            put("name", s.name)
+            put("frequencyHz", s.frequencyHz)
+            put("modulation", s.modulation)
+            put("protocol", s.protocol)
+            put("bitLength", s.bitLength)
+            put("keyHex", s.keyHex)
+            put("rawData", s.rawData)
+            put("te", s.te)
+            put("sourceFile", s.sourceFile ?: JSONObject.NULL)
+        })
+    }
+    context.getSharedPreferences(SUBGHZ_PREFS_NAME, Context.MODE_PRIVATE)
+        .edit().putString(SUBGHZ_PREFS_KEY, arr.toString()).apply()
+}
+
+private fun loadSubGhzSignals(context: Context): List<SavedSubGhzSignal> {
+    val json = context.getSharedPreferences(SUBGHZ_PREFS_NAME, Context.MODE_PRIVATE)
+        .getString(SUBGHZ_PREFS_KEY, null) ?: return emptyList()
+    return try {
+        val arr = JSONArray(json)
+        (0 until arr.length()).map { i ->
+            val o = arr.getJSONObject(i)
+            SavedSubGhzSignal(
+                name = o.getString("name"),
+                frequencyHz = o.optLong("frequencyHz", 0L),
+                modulation = o.optString("modulation", ""),
+                protocol = o.optString("protocol", ""),
+                bitLength = o.optInt("bitLength", 0),
+                keyHex = o.optString("keyHex", ""),
+                rawData = o.optString("rawData", ""),
+                te = o.optInt("te", 0),
+                sourceFile = if (o.isNull("sourceFile")) null else o.optString("sourceFile", null),
+            )
+        }
+    } catch (_: Exception) { emptyList() }
+}
+
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RadiosScreen() {
@@ -234,6 +346,63 @@ fun RadiosScreen() {
     var nfcEmulating by remember { mutableStateOf(false) }
     var savedTagDropdownExpanded by remember { mutableStateOf(false) }
     var writerSavedTagDropdownExpanded by remember { mutableStateOf(false) }
+
+    // IR state
+    val irHasEmitter = remember { IrTransmitter.hasEmitter(context) }
+    val irCarriers = remember { IrTransmitter.carrierFrequencies(context) }
+    var irProtocol by remember { mutableStateOf("NEC") }
+    var irCarrierText by remember { mutableStateOf("38000") }
+    var irPayload by remember { mutableStateOf("") }
+    var irRepeatsText by remember { mutableStateOf("1") }
+    var irStatus by remember { mutableStateOf("") }
+    var savedIrCodes by remember { mutableStateOf(loadIrCodes(context)) }
+    var selectedIrIndex by remember { mutableIntStateOf(-1) }
+    var irDropdownExpanded by remember { mutableStateOf(false) }
+    var showIrSaveDialog by remember { mutableStateOf(false) }
+    var irSaveName by remember { mutableStateOf("") }
+
+    // Sub-GHz state
+    var subGhzFreqText by remember { mutableStateOf("433920000") }
+    var subGhzModulation by remember { mutableStateOf("AM650") }
+    var subGhzProtocol by remember { mutableStateOf("Princeton") }
+    var subGhzBitText by remember { mutableStateOf("24") }
+    var subGhzKey by remember { mutableStateOf("") }
+    var subGhzRaw by remember { mutableStateOf("") }
+    var subGhzTeText by remember { mutableStateOf("") }
+    var subGhzSourceFile by remember { mutableStateOf<String?>(null) }
+    var subGhzStatus by remember { mutableStateOf("") }
+    var savedSubGhzSignals by remember { mutableStateOf(loadSubGhzSignals(context)) }
+    var selectedSubGhzIndex by remember { mutableIntStateOf(-1) }
+    var subGhzDropdownExpanded by remember { mutableStateOf(false) }
+    var showSubGhzSaveDialog by remember { mutableStateOf(false) }
+    var subGhzSaveName by remember { mutableStateOf("") }
+
+    val parseFailedMsg = S.radios.parseFailed
+    val subFileLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            try {
+                val text = context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                val parsed = text?.let { SubGhzSignal.parseFlipperSub(it) }
+                if (parsed != null) {
+                    subGhzFreqText = parsed.frequencyHz.toString()
+                    subGhzModulation = SubGhzSignal.modulationFromPreset(parsed.preset).ifBlank { subGhzModulation }
+                    subGhzProtocol = parsed.protocol.ifBlank { subGhzProtocol }
+                    subGhzBitText = parsed.bitLength.takeIf { it > 0 }?.toString() ?: subGhzBitText
+                    subGhzKey = parsed.keyHex
+                    subGhzRaw = parsed.rawData
+                    subGhzTeText = parsed.te.takeIf { it > 0 }?.toString() ?: ""
+                    subGhzSourceFile = uri.lastPathSegment
+                    subGhzStatus = ""
+                } else {
+                    subGhzStatus = parseFailedMsg
+                }
+            } catch (e: Exception) {
+                subGhzStatus = "$parseFailedMsg: ${e.message}"
+            }
+        }
+    }
 
     // GPS state
     var gpsActive     by remember { mutableStateOf(false) }
@@ -1106,6 +1275,472 @@ fun RadiosScreen() {
                     },
                 )
             }
+        }
+
+        HorizontalDivider()
+
+        // ── Infrared section ─────────────────────────────────────────────────
+        Text(S.radios.infrared, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+
+        Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (!irHasEmitter) {
+                    Text(
+                        S.radios.irNotSupported,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else if (irCarriers.isNotEmpty()) {
+                    Text(
+                        "Supported carriers: " + irCarriers.joinToString(", ") { "${it.first}-${it.last} Hz" },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Text(S.radios.protocol, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    listOf("NEC", "Pronto", "Raw").forEach { p ->
+                        FilterChip(
+                            selected = irProtocol == p,
+                            onClick = { irProtocol = p },
+                            label = { Text(p) },
+                        )
+                    }
+                }
+
+                if (irProtocol != "Pronto") {
+                    OutlinedTextField(
+                        value = irCarrierText,
+                        onValueChange = { irCarrierText = it.filter { c -> c.isDigit() } },
+                        label = { Text(S.radios.carrierHz) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                    )
+                }
+
+                OutlinedTextField(
+                    value = irPayload,
+                    onValueChange = { irPayload = it },
+                    label = { Text(S.radios.payload) },
+                    placeholder = {
+                        Text(
+                            when (irProtocol) {
+                                "NEC" -> "0xE13DC03F"
+                                "Pronto" -> "0000 006D 0022 0000 …"
+                                else -> "9000, 4500, 560, 1690, …"
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                OutlinedTextField(
+                    value = irRepeatsText,
+                    onValueChange = { irRepeatsText = it.filter { c -> c.isDigit() }.take(2) },
+                    label = { Text(S.radios.repeats) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Button(
+                        onClick = {
+                            val carrier = irCarrierText.toIntOrNull() ?: 38000
+                            val repeats = irRepeatsText.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                            when (val r = IrCodecs.encode(irProtocol, irPayload, carrier, repeats)) {
+                                is IrCodecs.Result.Error -> irStatus = r.message
+                                is IrCodecs.Result.Ok -> {
+                                    irStatus = S.radios.transmitting
+                                    val err = IrTransmitter.transmit(context, r.encoded.carrierHz, r.encoded.pattern)
+                                    irStatus = err ?: "OK (${r.encoded.pattern.size} steps @ ${r.encoded.carrierHz} Hz)"
+                                }
+                            }
+                        },
+                        enabled = irHasEmitter && irPayload.isNotBlank(),
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(S.radios.transmit)
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                            val txt = cm?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()
+                            if (!txt.isNullOrBlank()) irPayload = txt
+                        },
+                    ) {
+                        Icon(Icons.Default.ContentPaste, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(S.radios.pasteFromClipboard)
+                    }
+                }
+
+                OutlinedButton(
+                    onClick = { irSaveName = ""; showIrSaveDialog = true },
+                    enabled = irPayload.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Default.Save, null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(S.radios.saveCode)
+                }
+
+                if (irStatus.isNotBlank()) {
+                    Text(irStatus, style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary)
+                }
+            }
+        }
+
+        // Saved IR codes
+        Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(S.radios.savedIrCodes, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                if (savedIrCodes.isEmpty()) {
+                    Text(S.radios.noSavedIrCodes, style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                } else {
+                    ExposedDropdownMenuBox(
+                        expanded = irDropdownExpanded,
+                        onExpandedChange = { irDropdownExpanded = it },
+                    ) {
+                        OutlinedTextField(
+                            value = if (selectedIrIndex >= 0) savedIrCodes[selectedIrIndex].name else S.radios.selectTag,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(S.radios.loadFromSaved) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = irDropdownExpanded) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = irDropdownExpanded,
+                            onDismissRequest = { irDropdownExpanded = false },
+                        ) {
+                            savedIrCodes.forEachIndexed { i, c ->
+                                DropdownMenuItem(
+                                    text = { Text("${c.name} — ${c.protocol}") },
+                                    onClick = {
+                                        selectedIrIndex = i
+                                        irProtocol = c.protocol
+                                        irCarrierText = c.carrierHz.toString()
+                                        irPayload = c.payload
+                                        irRepeatsText = c.repeats.toString()
+                                        irDropdownExpanded = false
+                                    },
+                                )
+                            }
+                        }
+                    }
+                    if (selectedIrIndex >= 0) {
+                        val sel = savedIrCodes[selectedIrIndex]
+                        Text("${sel.protocol}  ${sel.carrierHz} Hz  x${sel.repeats}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(
+                                onClick = {
+                                    when (val r = IrCodecs.encode(sel.protocol, sel.payload, sel.carrierHz, sel.repeats)) {
+                                        is IrCodecs.Result.Error -> irStatus = r.message
+                                        is IrCodecs.Result.Ok -> {
+                                            val err = IrTransmitter.transmit(context, r.encoded.carrierHz, r.encoded.pattern)
+                                            irStatus = err ?: "OK"
+                                        }
+                                    }
+                                },
+                                enabled = irHasEmitter,
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(S.radios.transmit)
+                            }
+                            OutlinedButton(
+                                onClick = {
+                                    savedIrCodes = savedIrCodes.toMutableList().also { it.removeAt(selectedIrIndex) }
+                                    saveIrCodes(context, savedIrCodes)
+                                    selectedIrIndex = -1
+                                },
+                            ) {
+                                Icon(Icons.Default.Delete, null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(S.radios.deleteTag)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (showIrSaveDialog) {
+            AlertDialog(
+                onDismissRequest = { showIrSaveDialog = false },
+                title = { Text(S.radios.saveCode) },
+                text = {
+                    OutlinedTextField(
+                        value = irSaveName,
+                        onValueChange = { irSaveName = it },
+                        label = { Text(S.radios.codeName) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val saved = SavedIrCode(
+                                name = irSaveName.trim(),
+                                protocol = irProtocol,
+                                carrierHz = irCarrierText.toIntOrNull() ?: 38000,
+                                payload = irPayload,
+                                repeats = irRepeatsText.toIntOrNull()?.coerceAtLeast(1) ?: 1,
+                            )
+                            savedIrCodes = (listOf(saved) + savedIrCodes).take(IR_MAX_SAVED)
+                            saveIrCodes(context, savedIrCodes)
+                            showIrSaveDialog = false
+                        },
+                        enabled = irSaveName.isNotBlank(),
+                    ) { Text(S.radios.saveCode) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showIrSaveDialog = false }) { Text(S.radios.cancel) }
+                },
+            )
+        }
+
+        HorizontalDivider()
+
+        // ── Sub-GHz section ──────────────────────────────────────────────────
+        Text(S.radios.subGhz, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+
+        Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    S.radios.subGhzNotSupported,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                OutlinedButton(
+                    onClick = { subFileLauncher.launch(arrayOf("*/*")) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Default.FileOpen, null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(S.radios.importSubFile)
+                }
+
+                OutlinedTextField(
+                    value = subGhzFreqText,
+                    onValueChange = { subGhzFreqText = it.filter { c -> c.isDigit() } },
+                    label = { Text(S.radios.frequency) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+
+                Text(S.radios.modulation, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    listOf("AM650", "AM270", "FM238", "FM476").forEach { m ->
+                        FilterChip(
+                            selected = subGhzModulation == m,
+                            onClick = { subGhzModulation = m },
+                            label = { Text(m) },
+                        )
+                    }
+                }
+
+                OutlinedTextField(
+                    value = subGhzProtocol,
+                    onValueChange = { subGhzProtocol = it },
+                    label = { Text(S.radios.protocol) },
+                    placeholder = { Text("Princeton, CAME, NICE FLO, Keeloq, RAW…", style = MaterialTheme.typography.bodySmall) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = subGhzBitText,
+                        onValueChange = { subGhzBitText = it.filter { c -> c.isDigit() }.take(4) },
+                        label = { Text(S.radios.bitLength) },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        value = subGhzTeText,
+                        onValueChange = { subGhzTeText = it.filter { c -> c.isDigit() }.take(6) },
+                        label = { Text("TE (µs)") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                    )
+                }
+
+                OutlinedTextField(
+                    value = subGhzKey,
+                    onValueChange = { subGhzKey = it },
+                    label = { Text(S.radios.key) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+
+                OutlinedTextField(
+                    value = subGhzRaw,
+                    onValueChange = { subGhzRaw = it },
+                    label = { Text(S.radios.rawData) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                if (subGhzSourceFile != null) {
+                    Text("Source: ${subGhzSourceFile}", style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { subGhzStatus = S.radios.externalHardwareRequired },
+                        enabled = false,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(S.radios.transmit)
+                    }
+                    OutlinedButton(
+                        onClick = { subGhzSaveName = ""; showSubGhzSaveDialog = true },
+                        enabled = subGhzFreqText.isNotBlank(),
+                    ) {
+                        Icon(Icons.Default.Save, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(S.radios.saveSignal)
+                    }
+                }
+
+                Text(
+                    S.radios.externalHardwareRequired,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+
+                if (subGhzStatus.isNotBlank()) {
+                    Text(subGhzStatus, style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary)
+                }
+            }
+        }
+
+        // Saved Sub-GHz signals
+        Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(S.radios.savedSubGhzSignals, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                if (savedSubGhzSignals.isEmpty()) {
+                    Text(S.radios.noSavedSubGhzSignals, style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                } else {
+                    ExposedDropdownMenuBox(
+                        expanded = subGhzDropdownExpanded,
+                        onExpandedChange = { subGhzDropdownExpanded = it },
+                    ) {
+                        OutlinedTextField(
+                            value = if (selectedSubGhzIndex >= 0) savedSubGhzSignals[selectedSubGhzIndex].name else S.radios.selectTag,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(S.radios.loadFromSaved) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = subGhzDropdownExpanded) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = subGhzDropdownExpanded,
+                            onDismissRequest = { subGhzDropdownExpanded = false },
+                        ) {
+                            savedSubGhzSignals.forEachIndexed { i, s ->
+                                DropdownMenuItem(
+                                    text = { Text("${s.name} — ${s.frequencyHz} Hz") },
+                                    onClick = {
+                                        selectedSubGhzIndex = i
+                                        subGhzFreqText = s.frequencyHz.toString()
+                                        subGhzModulation = s.modulation.ifBlank { subGhzModulation }
+                                        subGhzProtocol = s.protocol
+                                        subGhzBitText = s.bitLength.toString()
+                                        subGhzKey = s.keyHex
+                                        subGhzRaw = s.rawData
+                                        subGhzTeText = s.te.takeIf { it > 0 }?.toString() ?: ""
+                                        subGhzSourceFile = s.sourceFile
+                                        subGhzDropdownExpanded = false
+                                    },
+                                )
+                            }
+                        }
+                    }
+                    if (selectedSubGhzIndex >= 0) {
+                        val sel = savedSubGhzSignals[selectedSubGhzIndex]
+                        Text("${sel.protocol}  ${sel.modulation}  ${sel.bitLength} bit",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary)
+                        OutlinedButton(
+                            onClick = {
+                                savedSubGhzSignals = savedSubGhzSignals.toMutableList().also { it.removeAt(selectedSubGhzIndex) }
+                                saveSubGhzSignals(context, savedSubGhzSignals)
+                                selectedSubGhzIndex = -1
+                            },
+                        ) {
+                            Icon(Icons.Default.Delete, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(S.radios.deleteTag)
+                        }
+                    }
+                }
+            }
+        }
+
+        if (showSubGhzSaveDialog) {
+            AlertDialog(
+                onDismissRequest = { showSubGhzSaveDialog = false },
+                title = { Text(S.radios.saveSignal) },
+                text = {
+                    OutlinedTextField(
+                        value = subGhzSaveName,
+                        onValueChange = { subGhzSaveName = it },
+                        label = { Text(S.radios.signalName) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val saved = SavedSubGhzSignal(
+                                name = subGhzSaveName.trim(),
+                                frequencyHz = subGhzFreqText.toLongOrNull() ?: 0L,
+                                modulation = subGhzModulation,
+                                protocol = subGhzProtocol,
+                                bitLength = subGhzBitText.toIntOrNull() ?: 0,
+                                keyHex = subGhzKey,
+                                rawData = subGhzRaw,
+                                te = subGhzTeText.toIntOrNull() ?: 0,
+                                sourceFile = subGhzSourceFile,
+                            )
+                            savedSubGhzSignals = (listOf(saved) + savedSubGhzSignals).take(SUBGHZ_MAX_SAVED)
+                            saveSubGhzSignals(context, savedSubGhzSignals)
+                            showSubGhzSaveDialog = false
+                        },
+                        enabled = subGhzSaveName.isNotBlank(),
+                    ) { Text(S.radios.saveSignal) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showSubGhzSaveDialog = false }) { Text(S.radios.cancel) }
+                },
+            )
         }
 
         HorizontalDivider()
