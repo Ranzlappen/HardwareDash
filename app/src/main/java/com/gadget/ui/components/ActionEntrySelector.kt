@@ -38,7 +38,7 @@ fun ActionEntrySelector(
             modifier = Modifier.fillMaxWidth().menuAnchor(),
             singleLine = true,
         )
-        androidx.compose.material3.ExposedDropdownMenu(
+        ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
