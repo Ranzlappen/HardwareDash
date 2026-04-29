@@ -32,6 +32,9 @@
     <uses-permission android:name="android.permission.NFC" />
     <uses-feature android:name="android.hardware.nfc" android:required="false" />
 
+    <!-- ══════════════════════ INFRARED (transmit-only) ═══════════ -->
+    <uses-feature android:name="android.hardware.consumerir" android:required="false" />
+
     <!-- ══════════════════════ LOCATION (for WiFi scan) ════════════ -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
