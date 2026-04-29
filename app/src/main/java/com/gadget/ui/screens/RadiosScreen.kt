@@ -378,6 +378,8 @@ fun RadiosScreen() {
     var subGhzSaveName by remember { mutableStateOf("") }
 
     val parseFailedMsg = S.radios.parseFailed
+    val transmittingMsg = S.radios.transmitting
+    val externalHwMsg = S.radios.externalHardwareRequired
     val subFileLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -1358,7 +1360,7 @@ fun RadiosScreen() {
                             when (val r = IrCodecs.encode(irProtocol, irPayload, carrier, repeats)) {
                                 is IrCodecs.Result.Error -> irStatus = r.message
                                 is IrCodecs.Result.Ok -> {
-                                    irStatus = S.radios.transmitting
+                                    irStatus = transmittingMsg
                                     val err = IrTransmitter.transmit(context, r.encoded.carrierHz, r.encoded.pattern)
                                     irStatus = err ?: "OK (${r.encoded.pattern.size} steps @ ${r.encoded.carrierHz} Hz)"
                                 }
@@ -1608,7 +1610,7 @@ fun RadiosScreen() {
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(
-                        onClick = { subGhzStatus = S.radios.externalHardwareRequired },
+                        onClick = { subGhzStatus = externalHwMsg },
                         enabled = false,
                         modifier = Modifier.weight(1f),
                     ) {
