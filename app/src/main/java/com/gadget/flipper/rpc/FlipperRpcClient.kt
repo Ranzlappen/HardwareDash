@@ -78,7 +78,7 @@ class FlipperRpcClient(
     /**
      * Send a request and await the (single, terminal) response.
      */
-    suspend fun call(
+    internal suspend fun call(
         contentField: Int,
         contentBody: ByteArray,
         timeoutMs: Long = 5_000,
@@ -101,7 +101,7 @@ class FlipperRpcClient(
      * Send a streaming request (multiple frames sharing one command_id, all but
      * the last with has_next=true) and wait for the terminal response.
      */
-    suspend fun callStreaming(
+    internal suspend fun callStreaming(
         contentField: Int,
         bodies: Sequence<ByteArray>,
         timeoutMs: Long = 30_000,
