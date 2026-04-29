@@ -45,6 +45,7 @@ import androidx.core.app.NotificationCompat
 import com.google.accompanist.permissions.*
 import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.ui.components.ActionEntrySelector
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
 import com.gadget.ui.screens.notifications.CH_DEFAULT
@@ -128,12 +129,7 @@ fun LockScreenScreen() {
     )
     // Enhanced builder state
     var customActionCount by remember { mutableIntStateOf(0) }
-    var customAction1 by remember { mutableStateOf(NotifActionEntry.OPEN_APP) }
-    var customAction2 by remember { mutableStateOf(NotifActionEntry.OPEN_APP) }
-    var customAction3 by remember { mutableStateOf(NotifActionEntry.OPEN_APP) }
-    var actionExpanded1 by remember { mutableStateOf(false) }
-    var actionExpanded2 by remember { mutableStateOf(false) }
-    var actionExpanded3 by remember { mutableStateOf(false) }
+    val customActions = remember { mutableStateListOf(NotifActionEntry.OPEN_APP, NotifActionEntry.OPEN_APP, NotifActionEntry.OPEN_APP) }
     var customShowProgress by remember { mutableStateOf(false) }
     var customProgressIndeterminate by remember { mutableStateOf(true) }
     var customProgressValue by remember { mutableFloatStateOf(50f) }
@@ -363,86 +359,12 @@ fun LockScreenScreen() {
                 )
             }
         }
-        if (customActionCount >= 1) {
-            ExposedDropdownMenuBox(
-                expanded = actionExpanded1,
-                onExpandedChange = { actionExpanded1 = it },
-            ) {
-                OutlinedTextField(
-                    value = customAction1.label,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Action 1") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actionExpanded1) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    singleLine = true,
-                )
-                ExposedDropdownMenu(
-                    expanded = actionExpanded1,
-                    onDismissRequest = { actionExpanded1 = false },
-                ) {
-                    NotifActionEntry.entries.forEach { entry ->
-                        DropdownMenuItem(
-                            text = { Text(entry.label) },
-                            onClick = { customAction1 = entry; actionExpanded1 = false },
-                        )
-                    }
-                }
-            }
-        }
-        if (customActionCount >= 2) {
-            ExposedDropdownMenuBox(
-                expanded = actionExpanded2,
-                onExpandedChange = { actionExpanded2 = it },
-            ) {
-                OutlinedTextField(
-                    value = customAction2.label,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Action 2") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actionExpanded2) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    singleLine = true,
-                )
-                ExposedDropdownMenu(
-                    expanded = actionExpanded2,
-                    onDismissRequest = { actionExpanded2 = false },
-                ) {
-                    NotifActionEntry.entries.forEach { entry ->
-                        DropdownMenuItem(
-                            text = { Text(entry.label) },
-                            onClick = { customAction2 = entry; actionExpanded2 = false },
-                        )
-                    }
-                }
-            }
-        }
-        if (customActionCount >= 3) {
-            ExposedDropdownMenuBox(
-                expanded = actionExpanded3,
-                onExpandedChange = { actionExpanded3 = it },
-            ) {
-                OutlinedTextField(
-                    value = customAction3.label,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Action 3") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actionExpanded3) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    singleLine = true,
-                )
-                ExposedDropdownMenu(
-                    expanded = actionExpanded3,
-                    onDismissRequest = { actionExpanded3 = false },
-                ) {
-                    NotifActionEntry.entries.forEach { entry ->
-                        DropdownMenuItem(
-                            text = { Text(entry.label) },
-                            onClick = { customAction3 = entry; actionExpanded3 = false },
-                        )
-                    }
-                }
-            }
+        for (i in 0 until customActionCount) {
+            ActionEntrySelector(
+                label = "Action ${i + 1}",
+                value = customActions[i],
+                onChange = { customActions[i] = it },
+            )
         }
 
         // ── Progress Bar ─────────────────────────────────────────────────
@@ -540,9 +462,9 @@ fun LockScreenScreen() {
                 }
                 if (customActionCount > 0) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
-                        if (customActionCount >= 1) TextButton(onClick = {}) { Text(customAction1.label, style = MaterialTheme.typography.labelSmall) }
-                        if (customActionCount >= 2) TextButton(onClick = {}) { Text(customAction2.label, style = MaterialTheme.typography.labelSmall) }
-                        if (customActionCount >= 3) TextButton(onClick = {}) { Text(customAction3.label, style = MaterialTheme.typography.labelSmall) }
+                        for (i in 0 until customActionCount) {
+                            TextButton(onClick = {}) { Text(customActions[i].label, style = MaterialTheme.typography.labelSmall) }
+                        }
                     }
                 }
             }
@@ -557,7 +479,7 @@ fun LockScreenScreen() {
                     priority = customPriority,
                     visibility = customVisibility,
                     accentColor = colorOptions[customColorIdx].first.toArgb(),
-                    actions = listOf(customAction1, customAction2, customAction3).take(customActionCount),
+                    actions = customActions.take(customActionCount),
                     progressMode = when {
                         !customShowProgress -> ProgressMode.OFF
                         customProgressIndeterminate -> ProgressMode.INDETERMINATE
