@@ -108,7 +108,18 @@ fun buildNotification(context: Context, spec: NotifSpec): android.app.Notificati
     if (spec.badge > 0) builder.setNumber(spec.badge)
 
     spec.actions.forEachIndexed { i, entry ->
-        builder.addAction(0, entry.label, entry.buildPendingIntent(context, 3001 + i))
+        val pi = entry.buildPendingIntent(context, 3001 + i)
+        if (i == 0 && spec.quickReplyHint.isNotBlank()) {
+            val remoteInput = androidx.core.app.RemoteInput.Builder("key_quick_reply")
+                .setLabel(spec.quickReplyHint)
+                .build()
+            val action = NotificationCompat.Action.Builder(0, entry.label, pi)
+                .addRemoteInput(remoteInput)
+                .build()
+            builder.addAction(action)
+        } else {
+            builder.addAction(0, entry.label, pi)
+        }
     }
 
     when (spec.progressMode) {

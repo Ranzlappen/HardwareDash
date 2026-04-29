@@ -118,13 +118,19 @@ fun LockScreenScreen() {
         Color(0xFF00BCD4) to "Cyan",
     )
     // Enhanced builder state
+    var customSubtext by remember { mutableStateOf("") }
     var customActionCount by remember { mutableIntStateOf(0) }
     val customActions = remember { mutableStateListOf(NotifActionEntry.OPEN_APP, NotifActionEntry.OPEN_APP, NotifActionEntry.OPEN_APP) }
+    var customQuickReply by remember { mutableStateOf("") }
     var customShowProgress by remember { mutableStateOf(false) }
     var customProgressIndeterminate by remember { mutableStateOf(true) }
     var customProgressValue by remember { mutableFloatStateOf(50f) }
     var customOngoing by remember { mutableStateOf(false) }
     var customAutoCancel by remember { mutableStateOf(true) }
+    var customSound by remember { mutableStateOf(true) }
+    var customVibrate by remember { mutableStateOf(true) }
+    var customTimeoutSec by remember { mutableFloatStateOf(0f) }
+    var customBadge by remember { mutableIntStateOf(0) }
     var customDelaySec by remember { mutableFloatStateOf(0f) }
     var customStyleIdx by remember { mutableIntStateOf(0) } // 0=Normal, 1=BigText, 2=Inbox
 
@@ -182,22 +188,32 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         SectionHeader(S.lock.composeNotification)
 
-        OutlinedTextField(
-            value = customTitle,
-            onValueChange = { customTitle = it },
-            label = { Text("Title") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-        )
-        OutlinedTextField(
-            value = customBody,
-            onValueChange = { customBody = it },
-            label = { Text("Body") },
-            modifier = Modifier.fillMaxWidth(),
-            maxLines = 3,
-        )
+        LabeledOption(S.lock.titleLabel, S.lock.titleHelp) {
+            OutlinedTextField(
+                value = customTitle,
+                onValueChange = { customTitle = it },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+        }
+        LabeledOption(S.lock.bodyLabel, S.lock.bodyHelp) {
+            OutlinedTextField(
+                value = customBody,
+                onValueChange = { customBody = it },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 3,
+            )
+        }
+        LabeledOption(S.lock.subtextLabel, S.lock.subtextHelp) {
+            OutlinedTextField(
+                value = customSubtext,
+                onValueChange = { customSubtext = it },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+        }
 
-        Text("Priority", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+        Text(S.lock.priority, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
         Row(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -271,14 +287,15 @@ fun LockScreenScreen() {
         }
 
         // ── Action Buttons ────────────────────────────────────────────────
-        Text(S.lock.actionButtons, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            (0..3).forEach { count ->
-                FilterChip(
-                    selected = customActionCount == count,
-                    onClick = { customActionCount = count },
-                    label = { Text("$count", style = MaterialTheme.typography.labelSmall) },
-                )
+        LabeledOption(S.lock.actionButtons, S.lock.actionsHelp) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                (0..3).forEach { count ->
+                    FilterChip(
+                        selected = customActionCount == count,
+                        onClick = { customActionCount = count },
+                        label = { Text("$count", style = MaterialTheme.typography.labelSmall) },
+                    )
+                }
             }
         }
         for (i in 0 until customActionCount) {
@@ -287,6 +304,16 @@ fun LockScreenScreen() {
                 value = customActions[i],
                 onChange = { customActions[i] = it },
             )
+        }
+        if (customActionCount >= 1) {
+            LabeledOption(S.lock.quickReplyLabel, S.lock.quickReplyHelp) {
+                OutlinedTextField(
+                    value = customQuickReply,
+                    onValueChange = { customQuickReply = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+            }
         }
 
         // ── Progress Bar ─────────────────────────────────────────────────
@@ -334,39 +361,51 @@ fun LockScreenScreen() {
             }
         }
 
-        // ── Ongoing & Auto-cancel ────────────────────────────────────────
-        Row(
-            modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) { },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(S.lock.ongoing, style = MaterialTheme.typography.labelMedium)
-            Switch(checked = customOngoing, onCheckedChange = { customOngoing = it })
+        // ── Flags & extras ───────────────────────────────────────────────
+        SwitchRow(S.lock.ongoing, S.lock.ongoingHelp, customOngoing) { customOngoing = it }
+        SwitchRow(S.lock.autoCancel, S.lock.autoCancelHelp, customAutoCancel) { customAutoCancel = it }
+        SwitchRow(S.lock.soundLabel, S.lock.soundHelp, customSound) { customSound = it }
+        SwitchRow(S.lock.vibrateLabel, S.lock.vibrateHelp, customVibrate) { customVibrate = it }
+
+        LabeledOption(S.lock.timeoutLabel, S.lock.timeoutHelp) {
+            SliderWithInput(
+                value = customTimeoutSec,
+                onValueChange = { customTimeoutSec = it },
+                valueRange = 0f..120f,
+                formatValue = { "%.0f".format(it) },
+                suffix = "s",
+                label = "${customTimeoutSec.toInt()} s",
+            )
         }
-        Row(
-            modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) { },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(S.lock.autoCancel, style = MaterialTheme.typography.labelMedium)
-            Switch(checked = customAutoCancel, onCheckedChange = { customAutoCancel = it })
+        LabeledOption(S.lock.badgeLabel, S.lock.badgeHelp) {
+            SliderWithInput(
+                value = customBadge.toFloat(),
+                onValueChange = { customBadge = it.toInt() },
+                valueRange = 0f..99f,
+                formatValue = { "%.0f".format(it) },
+                suffix = "",
+                label = "$customBadge",
+            )
         }
 
         // ── Delay ────────────────────────────────────────────────────────
-        SliderWithInput(
-            value = customDelaySec,
-            onValueChange = { customDelaySec = it },
-            valueRange = 0f..30f,
-            formatValue = { "%.1f".format(it) },
-            suffix = "min",
-            label = "${S.lock.delay}: ${if (customDelaySec < 1f) "${(customDelaySec * 60).toInt()} sec" else "${"%.0f".format(customDelaySec)} min"}",
-        )
+        LabeledOption(S.lock.delay, S.lock.delayHelp) {
+            SliderWithInput(
+                value = customDelaySec,
+                onValueChange = { customDelaySec = it },
+                valueRange = 0f..60f,
+                formatValue = { "%.1f".format(it) },
+                suffix = "min",
+                label = if (customDelaySec < 1f) "${(customDelaySec * 60).toInt()} sec" else "${"%.0f".format(customDelaySec)} min",
+            )
+        }
 
         // ── Preview Card ─────────────────────────────────────────────────
         Text(S.lock.preview, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
         val previewSpec = NotifSpec(
             title = customTitle,
             body = customBody,
+            subtext = customSubtext,
             priority = customPriority,
             visibility = customVisibility,
             category = customCategory,
@@ -385,6 +424,11 @@ fun LockScreenScreen() {
             },
             ongoing = customOngoing,
             autoCancel = customAutoCancel,
+            sound = customSound,
+            vibrate = customVibrate,
+            timeoutSec = customTimeoutSec.toInt(),
+            badge = customBadge,
+            quickReplyHint = customQuickReply,
         )
         NotificationPreviewCard(previewSpec)
 
@@ -840,6 +884,19 @@ fun LockScreenScreen() {
                 TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
             },
         )
+    }
+}
+
+@Composable
+private fun SwitchRow(label: String, description: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    LabeledOption(label, description) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End,
+        ) {
+            Switch(checked = checked, onCheckedChange = onChange)
+        }
     }
 }
 
