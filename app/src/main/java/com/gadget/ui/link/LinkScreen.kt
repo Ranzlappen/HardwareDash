@@ -236,9 +236,14 @@ private fun LinkRuleCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val condSummary = remember(rule.root) { summarizeCondition(rule.root) }
-    val actionSummary = remember(rule.actions) {
-        if (rule.actions.isEmpty()) S.link.noActions
+    val labels = SummaryLabels(
+        notLabel = S.link.notLabel,
+        empty = S.link.ruleSummaryEmpty,
+        noActions = S.link.noActions,
+    )
+    val condSummary = remember(rule.root, labels) { summarizeCondition(rule.root, labels) }
+    val actionSummary = remember(rule.actions, labels) {
+        if (rule.actions.isEmpty()) labels.noActions
         else rule.actions.joinToString(" → ") { LinkActionType.fromKey(it.actionType).label }
     }
 
@@ -311,7 +316,13 @@ private fun LinkRuleCard(
     }
 }
 
-private fun summarizeCondition(node: ConditionNode): String {
+private data class SummaryLabels(
+    val notLabel: String,
+    val empty: String,
+    val noActions: String,
+)
+
+private fun summarizeCondition(node: ConditionNode, labels: SummaryLabels): String {
     val text = when (node) {
         is ConditionNode.Leaf -> {
             val name = WidgetMetric.fromKey(node.metricKey)?.displayName ?: node.metricKey.ifBlank { "?" }
@@ -321,12 +332,12 @@ private fun summarizeCondition(node: ConditionNode): String {
             if (node.sustainSec > 0) "$core (${node.sustainSec}s)" else core
         }
         is ConditionNode.Group -> {
-            if (node.children.isEmpty()) S.link.ruleSummaryEmpty
-            else node.children.joinToString(" ${node.logic.name} ") { summarizeCondition(it) }
+            if (node.children.isEmpty()) labels.empty
+            else node.children.joinToString(" ${node.logic.name} ") { summarizeCondition(it, labels) }
                 .let { if (node.children.size > 1) "($it)" else it }
         }
     }
-    return if (node.negate) "${S.link.notLabel} $text" else text
+    return if (node.negate) "${labels.notLabel} $text" else text
 }
 
 // ─── Editor dialog ─────────────────────────────────────────────────────────
