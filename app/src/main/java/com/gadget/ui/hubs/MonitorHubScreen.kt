@@ -26,6 +26,7 @@ import com.gadget.ui.screens.*
 import com.gadget.widget.WidgetMetric
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 @Composable
 fun MonitorHubScreen() {
@@ -63,7 +64,11 @@ private fun MonitorGridScreen(onItemSelected: (String) -> Unit) {
         withContext(Dispatchers.IO) {
             batteryLevel = WidgetMetric.BATTERY_LEVEL.fetch(context)
             batteryStatus = WidgetMetric.BATTERY_STATUS.fetch(context)
-            try { wifiSsid = WidgetMetric.WIFI_SSID.fetch(context) } catch (_: Exception) {}
+            try {
+                wifiSsid = WidgetMetric.WIFI_SSID.fetch(context)
+            } catch (e: Exception) {
+                Timber.w(e, "WIFI_SSID fetch failed (location/permission)")
+            }
         }
     }
 

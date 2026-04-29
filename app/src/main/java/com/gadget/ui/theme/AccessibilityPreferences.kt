@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
+import timber.log.Timber
 
 /**
  * User-configurable accessibility preferences.
@@ -52,7 +53,8 @@ object AccessibilityPreferencesManager {
                 context.contentResolver,
                 Settings.Global.ANIMATOR_DURATION_SCALE,
             ) == 0f
-        } catch (_: Settings.SettingNotFoundException) {
+        } catch (e: Settings.SettingNotFoundException) {
+            Timber.w(e, "ANIMATOR_DURATION_SCALE not exposed; assuming reduced-motion off")
             false
         }
 

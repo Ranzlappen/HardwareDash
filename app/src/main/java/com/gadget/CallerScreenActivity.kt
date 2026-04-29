@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.gadget.ui.theme.GadgetTheme
+import timber.log.Timber
 
 class CallerScreenActivity : ComponentActivity() {
 
@@ -89,19 +90,19 @@ class CallerScreenActivity : ComponentActivity() {
                     audioManager?.getStreamMaxVolume(stream) ?: 7,
                     0,
                 )
-            } catch (_: SecurityException) {
-                // DND or policy restriction — continue with current volume
+            } catch (e: SecurityException) {
+                Timber.w(e, "Setting ring/alarm volume blocked by DND/policy")
             }
             ringtone?.play()
-        } catch (_: Exception) {
-            // Gracefully degrade — Activity still shows UI with stop button
+        } catch (e: Exception) {
+            Timber.w(e, "Ringtone init failed; degrading gracefully")
         }
     }
 
     private fun stopAndFinish() {
         handler.removeCallbacksAndMessages(null)
-        try { ringtone?.stop() } catch (_: Exception) {}
-        try { audioManager?.setStreamVolume(AudioManager.STREAM_RING, originalVolume, 0) } catch (_: Exception) {}
+        try { ringtone?.stop() } catch (e: Exception) { Timber.w(e, "Ringtone stop failed") }
+        try { audioManager?.setStreamVolume(AudioManager.STREAM_RING, originalVolume, 0) } catch (e: Exception) { Timber.w(e, "Restore volume failed") }
         finish()
     }
 

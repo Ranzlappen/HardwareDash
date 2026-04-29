@@ -29,6 +29,7 @@ import com.gadget.ui.components.sectionHeading
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import timber.log.Timber
 
 // All EXIF tags that can be edited (expanded list)
 private val EDITABLE_EXIF_TAGS = listOf(
@@ -212,12 +213,15 @@ fun FileMetadataScreen() {
                 android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Timber.w(e, "RW persistable URI permission denied; falling back to read-only")
             try {
                 context.contentResolver.takePersistableUriPermission(
                     uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-            } catch (_: Exception) {}
+            } catch (e2: Exception) {
+                Timber.w(e2, "Read-only persistable URI permission denied")
+            }
         }
 
         selectedUri = uri
@@ -630,7 +634,7 @@ private fun readFileMetadata(context: Context, uri: Uri): FileMetadataResult {
                     }
                 }
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) { Timber.w(e, "Reading EXIF tags failed") }
     }
 
     // Media metadata for audio/video — split into editable map + read-only list
@@ -650,7 +654,7 @@ private fun readFileMetadata(context: Context, uri: Uri): FileMetadataResult {
                 }
             }
             retriever.release()
-        } catch (_: Exception) {}
+        } catch (e: Exception) { Timber.w(e, "Reading media metadata failed") }
     }
 
     return FileMetadataResult(name, size, mimeTypeStr, lastMod, general, exifMap, mediaMap, mediaReadOnly)
@@ -686,7 +690,8 @@ private fun writeExifData(context: Context, uri: Uri, data: Map<String, String>)
             exif.saveAttributes()
         }
         true
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Timber.w(e, "Writing EXIF metadata failed")
         false
     }
 }
@@ -709,7 +714,8 @@ private fun writeMediaMetadata(
             context.contentResolver.update(uri, values, null, null)
         }
         true
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Timber.w(e, "Writing media metadata failed")
         false
     }
 }
