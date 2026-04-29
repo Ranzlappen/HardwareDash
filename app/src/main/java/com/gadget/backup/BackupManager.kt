@@ -32,8 +32,10 @@ class BackupManager @Inject constructor(
      * - DataStore files
      */
     suspend fun createBackup(outputStream: OutputStream) = withContext(Dispatchers.IO) {
-        // Checkpoint the database to flush WAL
-        database.openHelper.writableDatabase.execSQL("PRAGMA wal_checkpoint(FULL)")
+        // PRAGMA wal_checkpoint returns rows, so it must run as a query, not execSQL.
+        database.openHelper.writableDatabase
+            .query("PRAGMA wal_checkpoint(FULL)")
+            .use { it.moveToFirst() }
 
         ZipOutputStream(outputStream).use { zip ->
             // 1. metadata.json
@@ -94,6 +96,13 @@ class BackupManager @Inject constructor(
 
         // Close the database before restoring
         database.close()
+
+        // Delete stale WAL/SHM so a leftover write-ahead log doesn't shadow the
+        // restored DB on next open. The ZIP may or may not include fresh ones.
+        if (dbPath != null) {
+            File("$dbPath-wal").delete()
+            File("$dbPath-shm").delete()
+        }
 
         try {
             ZipInputStream(inputStream).use { zip ->
