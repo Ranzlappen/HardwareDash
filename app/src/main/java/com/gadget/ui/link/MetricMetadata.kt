@@ -255,6 +255,45 @@ object MetricMetadataRegistry {
                 MetricMetadata.Preset("Magnet present", LinkOperator.GREATER_THAN, 100.0),
             ),
         ))
+        listOf("accel_x", "accel_y", "accel_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "m/s²",
+                min = -50.0, max = 50.0,
+                typical = -12.0..12.0,
+                defaultThreshold = 5.0, step = 0.1,
+                presets = listOf(
+                    MetricMetadata.Preset("Negative tilt", LinkOperator.LESS_THAN, -5.0),
+                    MetricMetadata.Preset("Flat / rest", LinkOperator.BETWEEN, -1.0, 1.0),
+                    MetricMetadata.Preset("Positive tilt", LinkOperator.GREATER_THAN, 5.0),
+                ),
+            ))
+        }
+        listOf("gyro_x", "gyro_y", "gyro_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "rad/s",
+                min = -35.0, max = 35.0,
+                typical = -2.0..2.0,
+                defaultThreshold = 0.5, step = 0.05,
+                presets = listOf(
+                    MetricMetadata.Preset("Spin negative", LinkOperator.LESS_THAN, -0.5),
+                    MetricMetadata.Preset("Still", LinkOperator.BETWEEN, -0.05, 0.05),
+                    MetricMetadata.Preset("Spin positive", LinkOperator.GREATER_THAN, 0.5),
+                ),
+            ))
+        }
+        listOf("magneto_x", "magneto_y", "magneto_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "µT",
+                min = -1000.0, max = 1000.0,
+                typical = -65.0..65.0,
+                defaultThreshold = 50.0, step = 1.0,
+                presets = listOf(
+                    MetricMetadata.Preset("South pole", LinkOperator.LESS_THAN, -50.0),
+                    MetricMetadata.Preset("Earth field", LinkOperator.BETWEEN, -65.0, 65.0),
+                    MetricMetadata.Preset("North pole", LinkOperator.GREATER_THAN, 50.0),
+                ),
+            ))
+        }
         put("light", MetricMetadata(
             key = "light", unit = "lux",
             min = 0.0, max = 120000.0,

@@ -191,17 +191,44 @@ enum class WidgetMetric(
             "${"%.2f".format(mag)} m/s²"
         }
     },
+    ACCELEROMETER_X("accel_x", "Accelerometer X", "Sensors", "m/s²", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_ACCELEROMETER) { v -> "${"%.2f".format(v[0])} m/s²" }
+    },
+    ACCELEROMETER_Y("accel_y", "Accelerometer Y", "Sensors", "m/s²", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_ACCELEROMETER) { v -> "${"%.2f".format(v[1])} m/s²" }
+    },
+    ACCELEROMETER_Z("accel_z", "Accelerometer Z", "Sensors", "m/s²", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_ACCELEROMETER) { v -> "${"%.2f".format(v[2])} m/s²" }
+    },
     GYROSCOPE("gyro", "Gyroscope", "Sensors", "rad/s", "ic_sensors") {
         override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GYROSCOPE) { v ->
             val mag = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
             "${"%.3f".format(mag)} rad/s"
         }
     },
+    GYROSCOPE_X("gyro_x", "Gyroscope X", "Sensors", "rad/s", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GYROSCOPE) { v -> "${"%.3f".format(v[0])} rad/s" }
+    },
+    GYROSCOPE_Y("gyro_y", "Gyroscope Y", "Sensors", "rad/s", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GYROSCOPE) { v -> "${"%.3f".format(v[1])} rad/s" }
+    },
+    GYROSCOPE_Z("gyro_z", "Gyroscope Z", "Sensors", "rad/s", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GYROSCOPE) { v -> "${"%.3f".format(v[2])} rad/s" }
+    },
     MAGNETOMETER("magneto", "Compass", "Sensors", "µT", "ic_sensors") {
         override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_MAGNETIC_FIELD) { v ->
             val mag = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
             "${"%.1f".format(mag)} µT"
         }
+    },
+    MAGNETOMETER_X("magneto_x", "Magnetometer X", "Sensors", "µT", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_MAGNETIC_FIELD) { v -> "${"%.1f".format(v[0])} µT" }
+    },
+    MAGNETOMETER_Y("magneto_y", "Magnetometer Y", "Sensors", "µT", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_MAGNETIC_FIELD) { v -> "${"%.1f".format(v[1])} µT" }
+    },
+    MAGNETOMETER_Z("magneto_z", "Magnetometer Z", "Sensors", "µT", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_MAGNETIC_FIELD) { v -> "${"%.1f".format(v[2])} µT" }
     },
     LIGHT("light", "Light", "Sensors", "lux", "ic_sensors") {
         override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_LIGHT) { v ->
