@@ -1,7 +1,6 @@
 package com.gadget.ui.screens
 
 import android.app.AlarmManager
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.admin.DevicePolicyManager
@@ -48,6 +47,12 @@ import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
+import com.gadget.ui.screens.notifications.CH_CUSTOM
+import com.gadget.ui.screens.notifications.CH_DEFAULT
+import com.gadget.ui.screens.notifications.CH_HIGH
+import com.gadget.ui.screens.notifications.CH_LOCKSCREEN
+import com.gadget.ui.screens.notifications.CH_PROGRESS
+import com.gadget.ui.screens.notifications.ensureAllChannels
 import com.gadget.MainActivity
 import com.gadget.receivers.AdminReceiver
 import com.gadget.widget.LogNowWidgetProvider
@@ -63,25 +68,7 @@ import com.gadget.widget.NotifyWidgetProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// ─── Notification channel IDs ────────────────────────────────────────────────
-private const val CH_LOCKSCREEN = "hwd_lockscreen"
-private const val CH_DEFAULT    = "hwd_default"
-private const val CH_HIGH       = "hwd_high"
-private const val CH_PROGRESS   = "hwd_progress"
-private const val CH_CUSTOM     = "hwd_custom"
-
-private fun ensureAllChannels(nm: NotificationManager) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-    listOf(
-        NotificationChannel(CH_LOCKSCREEN, "Lock Screen Notifications", NotificationManager.IMPORTANCE_HIGH).apply {
-            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
-        },
-        NotificationChannel(CH_DEFAULT,  "Default",         NotificationManager.IMPORTANCE_DEFAULT),
-        NotificationChannel(CH_HIGH,     "High / Heads-Up", NotificationManager.IMPORTANCE_HIGH),
-        NotificationChannel(CH_PROGRESS, "Progress",        NotificationManager.IMPORTANCE_LOW),
-        NotificationChannel(CH_CUSTOM,   "Custom",          NotificationManager.IMPORTANCE_HIGH),
-    ).forEach { nm.createNotificationChannel(it) }
-}
+// Channel IDs and ensureAllChannels live in NotificationChannels.kt.
 
 // ─── Available actions for notification buttons ─────────────────────────────
 private enum class NotifActionEntry(
@@ -123,7 +110,7 @@ fun LockScreenScreen() {
     val dpm     = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
     val admin   = ComponentName(context, AdminReceiver::class.java)
     val nm      = remember { context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
-    LaunchedEffect(Unit) { ensureAllChannels(nm) }
+    LaunchedEffect(Unit) { ensureAllChannels(context) }
 
     var isAdmin    by remember { mutableStateOf(false) }
     var hasOverlay by remember { mutableStateOf(false) }
