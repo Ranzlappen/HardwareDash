@@ -230,6 +230,74 @@ enum class WidgetMetric(
     MAGNETOMETER_Z("magneto_z", "Magnetometer Z", "Sensors", "µT", "ic_sensors") {
         override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_MAGNETIC_FIELD) { v -> "${"%.1f".format(v[2])} µT" }
     },
+
+    GRAVITY("gravity", "Gravity", "Sensors", "m/s²", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GRAVITY) { v ->
+            val mag = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
+            "${"%.2f".format(mag)} m/s²"
+        }
+    },
+    GRAVITY_X("gravity_x", "Gravity X", "Sensors", "m/s²", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GRAVITY) { v -> "${"%.2f".format(v[0])} m/s²" }
+    },
+    GRAVITY_Y("gravity_y", "Gravity Y", "Sensors", "m/s²", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GRAVITY) { v -> "${"%.2f".format(v[1])} m/s²" }
+    },
+    GRAVITY_Z("gravity_z", "Gravity Z", "Sensors", "m/s²", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GRAVITY) { v -> "${"%.2f".format(v[2])} m/s²" }
+    },
+
+    LINEAR_ACCEL("linaccel", "Linear Acceleration", "Sensors", "m/s²", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_LINEAR_ACCELERATION) { v ->
+            val mag = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
+            "${"%.2f".format(mag)} m/s²"
+        }
+    },
+    LINEAR_ACCEL_X("linaccel_x", "Linear Accel X", "Sensors", "m/s²", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_LINEAR_ACCELERATION) { v -> "${"%.2f".format(v[0])} m/s²" }
+    },
+    LINEAR_ACCEL_Y("linaccel_y", "Linear Accel Y", "Sensors", "m/s²", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_LINEAR_ACCELERATION) { v -> "${"%.2f".format(v[1])} m/s²" }
+    },
+    LINEAR_ACCEL_Z("linaccel_z", "Linear Accel Z", "Sensors", "m/s²", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_LINEAR_ACCELERATION) { v -> "${"%.2f".format(v[2])} m/s²" }
+    },
+
+    ROT_X("rot_x", "Rotation Vector X", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_ROTATION_VECTOR) { v -> "%.3f".format(v[0]) }
+    },
+    ROT_Y("rot_y", "Rotation Vector Y", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_ROTATION_VECTOR) { v -> "%.3f".format(v[1]) }
+    },
+    ROT_Z("rot_z", "Rotation Vector Z", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_ROTATION_VECTOR) { v -> "%.3f".format(v[2]) }
+    },
+    ROT_W("rot_w", "Rotation Vector W", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_ROTATION_VECTOR) { v ->
+            val w = if (v.size >= 4) v[3] else sqrt((1.0 - (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).toDouble()).coerceAtLeast(0.0)).toFloat()
+            "%.3f".format(w)
+        }
+    },
+
+    GAME_ROT_X("game_rot_x", "Game Rotation X", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GAME_ROTATION_VECTOR) { v -> "%.3f".format(v[0]) }
+    },
+    GAME_ROT_Y("game_rot_y", "Game Rotation Y", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GAME_ROTATION_VECTOR) { v -> "%.3f".format(v[1]) }
+    },
+    GAME_ROT_Z("game_rot_z", "Game Rotation Z", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GAME_ROTATION_VECTOR) { v -> "%.3f".format(v[2]) }
+    },
+
+    GEO_ROT_X("geo_rot_x", "Geomagnetic Rotation X", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR) { v -> "%.3f".format(v[0]) }
+    },
+    GEO_ROT_Y("geo_rot_y", "Geomagnetic Rotation Y", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR) { v -> "%.3f".format(v[1]) }
+    },
+    GEO_ROT_Z("geo_rot_z", "Geomagnetic Rotation Z", "Sensors", "", "ic_sensors") {
+        override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR) { v -> "%.3f".format(v[2]) }
+    },
     LIGHT("light", "Light", "Sensors", "lux", "ic_sensors") {
         override fun fetch(ctx: Context): String = readSensor(ctx, Sensor.TYPE_LIGHT) { v ->
             "${"%.0f".format(v[0])} lux"

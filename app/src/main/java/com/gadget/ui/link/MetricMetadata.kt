@@ -294,6 +294,66 @@ object MetricMetadataRegistry {
                 ),
             ))
         }
+
+        put("gravity", MetricMetadata(
+            key = "gravity", unit = "m/s²",
+            min = 0.0, max = 12.0,
+            typical = 9.5..10.0,
+            defaultThreshold = 9.81, step = 0.1,
+            presets = listOf(
+                MetricMetadata.Preset("Earth gravity", LinkOperator.BETWEEN, 9.5, 10.0),
+            ),
+        ))
+        listOf("gravity_x", "gravity_y", "gravity_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "m/s²",
+                min = -12.0, max = 12.0,
+                typical = -10.0..10.0,
+                defaultThreshold = 5.0, step = 0.1,
+                presets = listOf(
+                    MetricMetadata.Preset("Negative axis", LinkOperator.LESS_THAN, -5.0),
+                    MetricMetadata.Preset("Aligned with axis", LinkOperator.GREATER_THAN, 9.0),
+                    MetricMetadata.Preset("Inverted", LinkOperator.LESS_THAN, -9.0),
+                ),
+            ))
+        }
+
+        put("linaccel", MetricMetadata(
+            key = "linaccel", unit = "m/s²",
+            min = 0.0, max = 40.0,
+            typical = 0.0..2.0,
+            defaultThreshold = 5.0, step = 0.1,
+            presets = listOf(
+                MetricMetadata.Preset("Still", LinkOperator.LESS_THAN, 0.5),
+                MetricMetadata.Preset("Walking", LinkOperator.BETWEEN, 1.0, 4.0),
+                MetricMetadata.Preset("Vigorous", LinkOperator.GREATER_THAN, 8.0),
+            ),
+        ))
+        listOf("linaccel_x", "linaccel_y", "linaccel_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "m/s²",
+                min = -40.0, max = 40.0,
+                typical = -5.0..5.0,
+                defaultThreshold = 2.0, step = 0.1,
+                presets = listOf(
+                    MetricMetadata.Preset("Negative", LinkOperator.LESS_THAN, -2.0),
+                    MetricMetadata.Preset("Positive", LinkOperator.GREATER_THAN, 2.0),
+                ),
+            ))
+        }
+
+        listOf("rot_x", "rot_y", "rot_z", "rot_w", "game_rot_x", "game_rot_y", "game_rot_z", "geo_rot_x", "geo_rot_y", "geo_rot_z").forEach { key ->
+            put(key, MetricMetadata(
+                key = key, unit = "",
+                min = -1.0, max = 1.0,
+                typical = -1.0..1.0,
+                defaultThreshold = 0.5, step = 0.05,
+                presets = listOf(
+                    MetricMetadata.Preset("Negative", LinkOperator.LESS_THAN, -0.5),
+                    MetricMetadata.Preset("Positive", LinkOperator.GREATER_THAN, 0.5),
+                ),
+            ))
+        }
         put("light", MetricMetadata(
             key = "light", unit = "lux",
             min = 0.0, max = 120000.0,
