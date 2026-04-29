@@ -47,61 +47,25 @@ import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
-import com.gadget.ui.screens.notifications.CH_CUSTOM
 import com.gadget.ui.screens.notifications.CH_DEFAULT
 import com.gadget.ui.screens.notifications.CH_HIGH
 import com.gadget.ui.screens.notifications.CH_LOCKSCREEN
 import com.gadget.ui.screens.notifications.CH_PROGRESS
+import com.gadget.ui.screens.notifications.NotifActionEntry
+import com.gadget.ui.screens.notifications.NotifSpec
+import com.gadget.ui.screens.notifications.NotifStyle
+import com.gadget.ui.screens.notifications.ProgressMode
+import com.gadget.ui.screens.notifications.buildNotification
 import com.gadget.ui.screens.notifications.ensureAllChannels
 import com.gadget.MainActivity
 import com.gadget.receivers.AdminReceiver
-import com.gadget.widget.LogNowWidgetProvider
-import com.gadget.widget.FlashlightWidgetProvider
-import com.gadget.widget.StrobeWidgetProvider
-import com.gadget.widget.CameraSnapshotWidgetProvider
-import com.gadget.widget.VideoToggleWidgetProvider
-import com.gadget.widget.VoiceRecordWidgetProvider
-import com.gadget.widget.VibrationWidgetProvider
-import com.gadget.widget.DbMeterWidgetProvider
-import com.gadget.widget.PhoneRingWidgetProvider
-import com.gadget.widget.NotifyWidgetProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // Channel IDs and ensureAllChannels live in NotificationChannels.kt.
 
-// ─── Available actions for notification buttons ─────────────────────────────
-private enum class NotifActionEntry(
-    val label: String,
-    val broadcastAction: String?,
-    val receiverClass: Class<*>?,
-) {
-    OPEN_APP("Open App", null, null),
-    LOG_NOW("Log Now", "com.gadget.widget.ACTION_LOG_NOW", LogNowWidgetProvider::class.java),
-    FLASHLIGHT("Flashlight Toggle", "com.gadget.widget.ACTION_FLASHLIGHT_TOGGLE", FlashlightWidgetProvider::class.java),
-    STROBE("Strobe Toggle", "com.gadget.widget.ACTION_STROBE_TOGGLE", StrobeWidgetProvider::class.java),
-    CAMERA_SNAPSHOT("Camera Snapshot", "com.gadget.widget.ACTION_CAMERA_SNAPSHOT", CameraSnapshotWidgetProvider::class.java),
-    VIDEO_TOGGLE("Video Toggle", "com.gadget.widget.ACTION_VIDEO_TOGGLE", VideoToggleWidgetProvider::class.java),
-    VOICE_RECORD("Voice Record Toggle", "com.gadget.widget.ACTION_VOICE_RECORD_TOGGLE", VoiceRecordWidgetProvider::class.java),
-    VIBRATION("Vibration Toggle", "com.gadget.widget.ACTION_VIBRATION_TOGGLE", VibrationWidgetProvider::class.java),
-    DB_METER("dB Meter Toggle", "com.gadget.widget.ACTION_DB_METER_TOGGLE", DbMeterWidgetProvider::class.java),
-    PHONE_RING("Phone Ring", "com.gadget.widget.ACTION_RING_30S", PhoneRingWidgetProvider::class.java),
-    SEND_NOTIFICATION("Send Notification", "com.gadget.widget.ACTION_NOTIFY_30S", NotifyWidgetProvider::class.java),
-    ;
-
-    fun buildPendingIntent(context: Context, requestCode: Int): PendingIntent {
-        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        if (this == OPEN_APP) {
-            return PendingIntent.getActivity(
-                context, requestCode,
-                Intent(context, MainActivity::class.java),
-                flags,
-            )
-        }
-        val intent = Intent(context, receiverClass!!).apply { action = broadcastAction }
-        return PendingIntent.getBroadcast(context, requestCode, intent, flags)
-    }
-}
+// NotifActionEntry, NotifSpec, ProgressMode and buildNotification live in
+// ui/screens/notifications/NotificationModels.kt.
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -587,46 +551,27 @@ fun LockScreenScreen() {
         // ── Send Button ──────────────────────────────────────────────────
         Button(
             onClick = {
-                val pi = PendingIntent.getActivity(
-                    context, 0,
-                    Intent(context, MainActivity::class.java),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                val spec = NotifSpec(
+                    title = customTitle,
+                    body = customBody,
+                    priority = customPriority,
+                    visibility = customVisibility,
+                    accentColor = colorOptions[customColorIdx].first.toArgb(),
+                    actions = listOf(customAction1, customAction2, customAction3).take(customActionCount),
+                    progressMode = when {
+                        !customShowProgress -> ProgressMode.OFF
+                        customProgressIndeterminate -> ProgressMode.INDETERMINATE
+                        else -> ProgressMode.DETERMINATE
+                    },
+                    progressValue = customProgressValue.toInt(),
+                    style = when (customStyleIdx) {
+                        1 -> NotifStyle.BIG_TEXT
+                        2 -> NotifStyle.INBOX
+                        else -> NotifStyle.NORMAL
+                    },
+                    ongoing = customOngoing,
+                    autoCancel = customAutoCancel,
                 )
-                val channel = if (customPriority >= NotificationCompat.PRIORITY_HIGH) CH_HIGH else CH_CUSTOM
-                val builder = NotificationCompat.Builder(context, channel)
-                    .setSmallIcon(android.R.drawable.ic_dialog_info)
-                    .setContentTitle(customTitle)
-                    .setContentText(customBody)
-                    .setPriority(customPriority)
-                    .setVisibility(customVisibility)
-                    .setColor(colorOptions[customColorIdx].first.toArgb())
-                    .setContentIntent(pi)
-                    .setAutoCancel(customAutoCancel)
-                    .setOngoing(customOngoing)
-
-                // Action buttons
-                if (customActionCount >= 1) builder.addAction(0, customAction1.label, customAction1.buildPendingIntent(context, 3001))
-                if (customActionCount >= 2) builder.addAction(0, customAction2.label, customAction2.buildPendingIntent(context, 3002))
-                if (customActionCount >= 3) builder.addAction(0, customAction3.label, customAction3.buildPendingIntent(context, 3003))
-
-                // Progress bar
-                if (customShowProgress) {
-                    if (customProgressIndeterminate) {
-                        builder.setProgress(0, 0, true)
-                    } else {
-                        builder.setProgress(100, customProgressValue.toInt(), false)
-                    }
-                }
-
-                // Style
-                when (customStyleIdx) {
-                    1 -> builder.setStyle(NotificationCompat.BigTextStyle().bigText(customBody))
-                    2 -> {
-                        val inboxStyle = NotificationCompat.InboxStyle()
-                        customBody.lines().forEach { inboxStyle.addLine(it) }
-                        builder.setStyle(inboxStyle)
-                    }
-                }
 
                 val notifId = 2000 + (System.currentTimeMillis() % 1000).toInt()
 
@@ -647,7 +592,7 @@ fun LockScreenScreen() {
                     val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
                     am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delayMs, schedPi)
                 } else if (notifGranted) {
-                    nm.notify(notifId, builder.build())
+                    nm.notify(notifId, buildNotification(context, spec))
                 }
             },
             modifier = Modifier.fillMaxWidth(),
