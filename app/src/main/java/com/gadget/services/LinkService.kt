@@ -23,15 +23,33 @@ import com.gadget.MainActivity
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import com.gadget.receivers.AdminReceiver
-import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
-import com.gadget.ui.link.*
+import com.gadget.ui.link.ActionStep
+import com.gadget.ui.link.ConditionNode
+import com.gadget.ui.link.LinkActionType
+import com.gadget.ui.link.LinkRuleStats
+import com.gadget.ui.link.LinkRuleV2
+import com.gadget.ui.link.LogicOperator
+import com.gadget.ui.link.TimeSchedule
+import com.gadget.ui.link.evaluateCondition
+import com.gadget.ui.link.loadLinkStats
+import com.gadget.ui.link.loadRulesV2
+import com.gadget.ui.link.saveLinkStats
+import com.gadget.ui.link.saveRulesV2
 import com.gadget.ui.logbook.LogbookEntry
 import com.gadget.ui.logbook.LogbookRepository
 import com.gadget.widget.DrawnPatternUtils
 import com.gadget.widget.WidgetMetric
-import kotlinx.coroutines.*
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.Instant
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -42,6 +60,12 @@ class LinkService : Service() {
 
     private var job: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
+    /** Per-leaf "condition first became true at" timestamps; keyed by ruleId|tree-path. */
+    private val sustainStartMs = mutableMapOf<String, Long>()
+
+    /** Outstanding trigger-delay coroutines, one per ruleId. */
+    private val pendingFires = mutableMapOf<String, Job>()
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -87,35 +111,57 @@ class LinkService : Service() {
     private fun stopMonitoring() {
         job?.cancel()
         job = null
+        pendingFires.values.forEach { it.cancel() }
+        pendingFires.clear()
+        sustainStartMs.clear()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
+    // ─── Evaluation loop ──────────────────────────────────────────────────
+
     private fun evaluateRules() {
         val prefs = getSharedPreferences("link_rules", Context.MODE_PRIVATE)
-        val json = prefs.getString("rules", "") ?: ""
-        val rules = loadRules(json)
+
+        // Load V2 (kept-on-disk) rules. If absent, fall back to migrating V1.
+        val v2Json = prefs.getString(KEY_RULES_V2, "") ?: ""
+        val rules: List<LinkRuleV2> = if (v2Json.isBlank()) {
+            val v1Json = prefs.getString(KEY_RULES_V1, "") ?: ""
+            val migrated = loadRulesV2(v1Json)
+            if (migrated.isNotEmpty()) {
+                prefs.edit()
+                    .putString(KEY_RULES_V2, saveRulesV2(migrated))
+                    .remove(KEY_RULES_V1)
+                    .apply()
+            }
+            migrated
+        } else {
+            loadRulesV2(v2Json)
+        }
+
+        if (rules.isEmpty()) return
+
         val now = System.currentTimeMillis()
+        val statsJson = prefs.getString(KEY_STATS, "") ?: ""
+        val stats = loadLinkStats(statsJson).toMutableMap()
         var rulesChanged = false
         var statsChanged = false
 
-        // Load current stats
-        val statsJson = prefs.getString(KEY_STATS, "") ?: ""
-        val stats = loadLinkStats(statsJson).toMutableMap()
-
         val updatedRules = rules.map { rule ->
             if (!rule.enabled) return@map rule
+            if (!isWithinSchedule(rule.schedule)) return@map rule
 
-            // Cooldown check first (matches original order — avoids unnecessary sensor reads)
+            val rootTrue = try {
+                evaluateNode(rule.root, rule.id, "0", this, now)
+            } catch (e: Exception) {
+                Timber.e(e, "Tree evaluation failed for rule %s", rule.name)
+                false
+            }
+
             val inCooldown = now - rule.lastTriggeredMs < rule.cooldownSec * 1000L
 
-            val metric = WidgetMetric.fromKey(rule.metricKey) ?: return@map rule
-            val value = try { metric.fetch(this) } catch (e: Exception) { Timber.e(e, "Failed to fetch metric %s", rule.metricKey); return@map rule }
-
-            val conditionMet = evaluateCondition(value, rule.operator, rule.threshold, rule.thresholdHigh)
-
             if (inCooldown) {
-                if (conditionMet) {
+                if (rootTrue) {
                     val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
                     stats[rule.id] = prev.copy(
                         cooldownBlockCount = prev.cooldownBlockCount + 1,
@@ -126,73 +172,151 @@ class LinkService : Service() {
                 return@map rule
             }
 
-            if (conditionMet) {
-                try {
-                    executeAction(rule)
-                } catch (e: Exception) {
-                    Timber.e(e, "Action execution failed for rule: %s", rule.name)
+            if (rootTrue) {
+                if (rule.triggerDelaySec <= 0) {
+                    fireRule(rule)
+                    val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
+                    stats[rule.id] = prev.copy(
+                        triggerCount = prev.triggerCount + 1,
+                        lastTriggeredIso = Instant.now().toString(),
+                    )
+                    statsChanged = true
+                    rulesChanged = true
+                    rule.copy(lastTriggeredMs = now)
+                } else if (pendingFires[rule.id] == null) {
+                    schedulePendingFire(rule, prefs)
+                    rule
+                } else {
+                    rule
                 }
-                rulesChanged = true
-                val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
-                stats[rule.id] = prev.copy(
-                    triggerCount = prev.triggerCount + 1,
-                    lastTriggeredIso = Instant.now().toString(),
-                )
-                statsChanged = true
-                rule.copy(lastTriggeredMs = now)
             } else {
                 rule
             }
         }
 
-        // Only write to disk when something actually changed
         if (rulesChanged || statsChanged) {
             val editor = prefs.edit()
-            if (rulesChanged) editor.putString("rules", saveRules(updatedRules))
+            if (rulesChanged) editor.putString(KEY_RULES_V2, saveRulesV2(updatedRules))
             if (statsChanged) editor.putString(KEY_STATS, saveLinkStats(stats))
             editor.apply()
         }
-
-        // Also evaluate V2 rules
-        try {
-            evaluateRulesV2()
-        } catch (e: Exception) {
-            Timber.e(e, "V2 rule evaluation cycle failed")
-        }
     }
 
-    // ─── V2 compound condition evaluation ─────────────────────────────────
-
     /**
-     * Evaluate a [CompoundCondition] against live sensor data.
-     * AND → all sub-conditions must be true.
-     * OR  → at least one sub-condition must be true.
+     * Schedule a coroutine that waits [LinkRuleV2.triggerDelaySec] seconds and then
+     * fires the action chain. Re-checks the condition at fire time when
+     * [LinkRuleV2.cancelDelayIfFalse] is true. Updates persisted lastTriggeredMs and
+     * stats only if the rule actually fires (so cancelled fires don't burn cooldown).
      */
-    private fun evaluateCompoundCondition(
-        compound: CompoundCondition,
-        context: Context,
-    ): Boolean {
-        if (compound.conditions.isEmpty()) return false
-        val results = compound.conditions.map { cond ->
-            val metric = WidgetMetric.fromKey(cond.metricKey) ?: return@map false
-            val value = try {
-                metric.fetch(context)
+    private fun schedulePendingFire(rule: LinkRuleV2, prefs: android.content.SharedPreferences) {
+        pendingFires[rule.id] = scope.launch {
+            try {
+                delay(rule.triggerDelaySec * 1000L)
+                val fireTime = System.currentTimeMillis()
+                val stillTrue = !rule.cancelDelayIfFalse ||
+                    runCatching { evaluateNode(rule.root, rule.id, "0", this@LinkService, fireTime) }
+                        .getOrDefault(false)
+                if (stillTrue) {
+                    fireRule(rule)
+                    persistFire(prefs, rule.id, fireTime)
+                }
             } catch (e: Exception) {
-                Timber.e(e, "Failed to fetch metric %s", cond.metricKey)
-                return@map false
+                Timber.e(e, "Pending fire failed for rule %s", rule.name)
+            } finally {
+                pendingFires.remove(rule.id)
             }
-            evaluateCondition(value, cond.operator, cond.threshold, cond.thresholdHigh)
-        }
-        return when (compound.logic) {
-            LogicOperator.AND -> results.all { it }
-            LogicOperator.OR -> results.any { it }
         }
     }
 
+    private fun persistFire(prefs: android.content.SharedPreferences, ruleId: String, firedAtMs: Long) {
+        // Re-load to avoid stomping concurrent edits, then write back.
+        val rules = loadRulesV2(prefs.getString(KEY_RULES_V2, "") ?: "")
+        val updated = rules.map { r -> if (r.id == ruleId) r.copy(lastTriggeredMs = firedAtMs) else r }
+        val statsJson = prefs.getString(KEY_STATS, "") ?: ""
+        val stats = loadLinkStats(statsJson).toMutableMap()
+        val prev = stats[ruleId] ?: LinkRuleStats(ruleId = ruleId)
+        stats[ruleId] = prev.copy(
+            triggerCount = prev.triggerCount + 1,
+            lastTriggeredIso = Instant.now().toString(),
+        )
+        prefs.edit()
+            .putString(KEY_RULES_V2, saveRulesV2(updated))
+            .putString(KEY_STATS, saveLinkStats(stats))
+            .apply()
+    }
+
+    private fun fireRule(rule: LinkRuleV2) {
+        scope.launch {
+            try {
+                executeActionChain(rule.actions)
+            } catch (e: Exception) {
+                Timber.e(e, "Action chain failed for rule %s", rule.name)
+            }
+        }
+    }
+
+    // ─── Tree evaluation ───────────────────────────────────────────────────
+
     /**
-     * Execute a chain of [ActionStep]s sequentially, respecting per-step delays.
-     * Must be called from a coroutine context.
+     * Recursively evaluate a [ConditionNode]. The optional [path] tracks the node's
+     * position in the tree so that per-leaf sustain state is keyed uniquely.
      */
+    private fun evaluateNode(
+        node: ConditionNode,
+        ruleId: String,
+        path: String,
+        ctx: Context,
+        now: Long,
+    ): Boolean {
+        val raw = when (node) {
+            is ConditionNode.Leaf -> evaluateLeaf(node, ruleId, path, ctx, now)
+            is ConditionNode.Group -> {
+                if (node.children.isEmpty()) false
+                else {
+                    val childResults = node.children.mapIndexed { i, child ->
+                        evaluateNode(child, ruleId, "$path.$i", ctx, now)
+                    }
+                    when (node.logic) {
+                        LogicOperator.AND -> childResults.all { it }
+                        LogicOperator.OR -> childResults.any { it }
+                    }
+                }
+            }
+        }
+        return if (node.negate) !raw else raw
+    }
+
+    private fun evaluateLeaf(
+        leaf: ConditionNode.Leaf,
+        ruleId: String,
+        path: String,
+        ctx: Context,
+        now: Long,
+    ): Boolean {
+        val metric = WidgetMetric.fromKey(leaf.metricKey) ?: return false
+        val value = try {
+            metric.fetch(ctx)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to fetch metric %s", leaf.metricKey)
+            return false
+        }
+        val instant = evaluateCondition(value, leaf.operator, leaf.threshold, leaf.thresholdHigh)
+        if (leaf.sustainSec <= 0) {
+            return instant
+        }
+        val key = "$ruleId|$path"
+        return if (instant) {
+            val first = sustainStartMs.getOrPut(key) { now }
+            now - first >= leaf.sustainSec * 1000L
+        } else {
+            sustainStartMs.remove(key)
+            false
+        }
+    }
+
+    // ─── Action execution ──────────────────────────────────────────────────
+
+    /** Execute a chain of [ActionStep]s sequentially, respecting per-step delays. */
     private suspend fun executeActionChain(actions: List<ActionStep>) {
         for (step in actions) {
             if (step.delayMs > 0) {
@@ -201,144 +325,49 @@ class LinkService : Service() {
             try {
                 executeActionStep(step)
             } catch (e: Exception) {
-                Timber.e(e, "Action step execution failed: %s", step.actionType)
+                Timber.e(e, "Action step failed: %s", step.actionType)
             }
         }
     }
 
-    /**
-     * Execute a single [ActionStep] by delegating to the existing action
-     * infrastructure.
-     */
     private fun executeActionStep(step: ActionStep) {
-        // Build a lightweight LinkRule so we can reuse executeAction()
-        val syntheticRule = LinkRule(
-            actionType = step.actionType,
-            actionConfig = step.actionConfig,
-        )
-        executeAction(syntheticRule)
+        when (LinkActionType.fromKey(step.actionType)) {
+            LinkActionType.TORCH_ON -> setTorch(true)
+            LinkActionType.TORCH_OFF -> setTorch(false)
+            LinkActionType.STROBE_START -> { if (!StrobeService.isRunning) StrobeService.toggle(this) }
+            LinkActionType.STROBE_STOP -> { if (StrobeService.isRunning) StrobeService.toggle(this) }
+            LinkActionType.VIBRATE -> vibrate()
+            LinkActionType.NOTIFICATION -> sendNotification(step)
+            LinkActionType.LOCK -> lockScreen()
+            LinkActionType.RING -> ringPhone()
+            LinkActionType.LOG_ENTRY -> logToLogbook(step)
+        }
     }
 
-    /**
-     * Check whether the current wall-clock time falls within a [TimeSchedule].
-     * Returns true when no schedule is set (i.e. always active).
-     */
+    // ─── Schedule gate ─────────────────────────────────────────────────────
+
+    /** Returns true when no schedule is set, or current wall-clock time is within it. */
     private fun isWithinSchedule(schedule: TimeSchedule?): Boolean {
         if (schedule == null) return true
 
-        // Day-of-week check (Calendar.DAY_OF_WEEK: Sun=1 .. Sat=7)
         if (schedule.daysOfWeek.isNotEmpty()) {
             val today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
             if (today !in schedule.daysOfWeek) return false
         }
 
-        // Time-of-day window check
         val formatter = DateTimeFormatter.ofPattern("HH:mm")
         val now = LocalTime.now()
         val start = try { LocalTime.parse(schedule.startTime, formatter) } catch (_: Exception) { LocalTime.MIN }
         val end = try { LocalTime.parse(schedule.endTime, formatter) } catch (_: Exception) { LocalTime.MAX }
 
         return if (start <= end) {
-            // Normal window (e.g. 08:00 – 22:00)
             now in start..end
         } else {
-            // Overnight window (e.g. 22:00 – 06:00)
             now >= start || now <= end
         }
     }
 
-    // ─── V2 rule evaluation loop ────────────────────────────────────────────
-
-    private fun evaluateRulesV2() {
-        val prefs = getSharedPreferences("link_rules", Context.MODE_PRIVATE)
-        val json = prefs.getString("rules_v2", "") ?: ""
-
-        // If no V2 rules stored yet, try migrating V1 rules
-        val rules: List<LinkRuleV2> = if (json.isBlank()) {
-            val v1Json = prefs.getString("rules", "") ?: ""
-            val migrated = loadRulesV2(v1Json)
-            if (migrated.isNotEmpty()) {
-                prefs.edit().putString("rules_v2", saveRulesV2(migrated)).apply()
-            }
-            migrated
-        } else {
-            loadRulesV2(json)
-        }
-
-        val now = System.currentTimeMillis()
-        var rulesChanged = false
-        var statsChanged = false
-
-        val statsJson = prefs.getString(KEY_STATS, "") ?: ""
-        val stats = loadLinkStats(statsJson).toMutableMap()
-
-        val updatedRules = rules.map { rule ->
-            if (!rule.enabled) return@map rule
-
-            // Schedule gate
-            if (!isWithinSchedule(rule.schedule)) return@map rule
-
-            // Cooldown check
-            val inCooldown = now - rule.lastTriggeredMs < rule.cooldownSec * 1000L
-
-            // Compound condition evaluation
-            val conditionMet = evaluateCompoundCondition(rule.conditions, this)
-
-            if (inCooldown) {
-                if (conditionMet) {
-                    val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
-                    stats[rule.id] = prev.copy(
-                        cooldownBlockCount = prev.cooldownBlockCount + 1,
-                        lastCooldownIso = Instant.now().toString(),
-                    )
-                    statsChanged = true
-                }
-                return@map rule
-            }
-
-            if (conditionMet) {
-                // Launch action chain in the service coroutine scope
-                scope.launch {
-                    executeActionChain(rule.actions)
-                }
-                rulesChanged = true
-                val prev = stats[rule.id] ?: LinkRuleStats(ruleId = rule.id)
-                stats[rule.id] = prev.copy(
-                    triggerCount = prev.triggerCount + 1,
-                    lastTriggeredIso = Instant.now().toString(),
-                )
-                statsChanged = true
-                rule.copy(lastTriggeredMs = now)
-            } else {
-                rule
-            }
-        }
-
-        if (rulesChanged || statsChanged) {
-            val editor = prefs.edit()
-            if (rulesChanged) editor.putString("rules_v2", saveRulesV2(updatedRules))
-            if (statsChanged) editor.putString(KEY_STATS, saveLinkStats(stats))
-            editor.apply()
-        }
-    }
-
-    private fun executeAction(rule: LinkRule) {
-        when (LinkActionType.fromKey(rule.actionType)) {
-            LinkActionType.TORCH_ON -> setTorch(true)
-            LinkActionType.TORCH_OFF -> setTorch(false)
-            LinkActionType.STROBE_START -> {
-                if (!StrobeService.isRunning) StrobeService.toggle(this)
-            }
-            LinkActionType.STROBE_STOP -> {
-                if (StrobeService.isRunning) StrobeService.toggle(this)
-            }
-            LinkActionType.VIBRATE -> vibrate()
-            LinkActionType.NOTIFICATION -> sendNotification(rule)
-            LinkActionType.LOCK -> lockScreen()
-            LinkActionType.RING -> ringPhone()
-            LinkActionType.LOG_ENTRY -> logToLogbook(rule)
-        }
-    }
+    // ─── Action implementations ───────────────────────────────────────────
 
     private fun setTorch(on: Boolean) {
         try {
@@ -387,10 +416,10 @@ class LinkService : Service() {
         }
     }
 
-    private fun sendNotification(rule: LinkRule) {
+    private fun sendNotification(step: ActionStep) {
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val title = rule.actionConfig["title"] ?: "Link Alert"
-        val body = rule.actionConfig["body"] ?: ""
+        val title = step.actionConfig["title"] ?: "Link Alert"
+        val body = step.actionConfig["body"] ?: ""
         val pi = PendingIntent.getActivity(
             this, 0,
             Intent(this, MainActivity::class.java).apply {
@@ -406,7 +435,8 @@ class LinkService : Service() {
             .setContentIntent(pi)
             .setAutoCancel(true)
             .build()
-        nm.notify(NOTIF_ID_ACTION_BASE + rule.id.hashCode().and(0xFFF), n)
+        // Use a hash of the title so repeated identical alerts collapse.
+        nm.notify(NOTIF_ID_ACTION_BASE + (title.hashCode() and 0xFFF), n)
     }
 
     private fun lockScreen() {
@@ -419,11 +449,12 @@ class LinkService : Service() {
         } catch (e: Exception) { Timber.e(e, "Lock screen failed") }
     }
 
-    private fun logToLogbook(rule: LinkRule) {
+    private fun logToLogbook(step: ActionStep) {
         try {
-            val text = rule.actionConfig["logText"]?.ifBlank { null }
-                ?: "Link triggered: ${rule.name.ifBlank { "Link Rule" }}"
-            val metrics = try { WidgetMetric.snapshotEnabled(this) } catch (e: Exception) { Timber.e(e, "Metric snapshot failed"); emptyMap() }
+            val text = step.actionConfig["logText"]?.ifBlank { null }
+                ?: "Link triggered"
+            val metrics = try { WidgetMetric.snapshotEnabled(this) }
+            catch (e: Exception) { Timber.e(e, "Metric snapshot failed"); emptyMap() }
             val entry = LogbookEntry(
                 isoDate = Instant.now().toString(),
                 text = text,
@@ -438,7 +469,7 @@ class LinkService : Service() {
                     repo.save(store.copy(entries = listOf(entry) + store.entries))
                 } catch (e: Exception) { Timber.e(e, "Failed to save logbook entry from Link rule") }
             }
-        } catch (e: Exception) { Timber.e(e, "logToLogbook failed for rule: %s", rule.name) }
+        } catch (e: Exception) { Timber.e(e, "logToLogbook failed") }
     }
 
     private fun ringPhone() {
@@ -454,6 +485,9 @@ class LinkService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         job?.cancel()
+        pendingFires.values.forEach { it.cancel() }
+        pendingFires.clear()
+        sustainStartMs.clear()
         scope.cancel()
         isRunning = false
     }
@@ -482,6 +516,8 @@ class LinkService : Service() {
         private const val NOTIF_ID_ACTION_BASE = 8000
         private const val POLL_INTERVAL_MS = 3000L
         private const val KEY_STATS = "link_stats"
+        private const val KEY_RULES_V1 = "rules"
+        private const val KEY_RULES_V2 = "rules_v2"
 
         var isRunning = false
             private set

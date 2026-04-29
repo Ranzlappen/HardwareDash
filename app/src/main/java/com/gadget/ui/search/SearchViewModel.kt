@@ -3,8 +3,8 @@ package com.gadget.ui.search
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
-import com.gadget.ui.link.LinkRule
-import com.gadget.ui.link.loadRules
+import com.gadget.ui.link.allLeaves
+import com.gadget.ui.link.loadRulesV2
 import com.gadget.ui.logbook.LogbookRepository
 import com.gadget.ui.logbook.LogbookStore
 import com.gadget.ui.navigation.Routes
@@ -107,16 +107,17 @@ class SearchViewModel @Inject constructor(
         // 3. Search link rules
         try {
             val prefs = context.getSharedPreferences("link_rules", Context.MODE_PRIVATE)
-            val rulesJson = prefs.getString("rules_json", "") ?: ""
-            val rules = loadRules(rulesJson)
+            val rulesJson = prefs.getString("rules_v2", "") ?: ""
+            val rules = loadRulesV2(rulesJson)
             rules.forEach { rule ->
-                if (rule.name.lowercase().contains(lower) ||
-                    rule.metricKey.lowercase().contains(lower)
-                ) {
+                val nameMatch = rule.name.lowercase().contains(lower)
+                val metricMatch = rule.root.allLeaves().any { it.metricKey.lowercase().contains(lower) }
+                if (nameMatch || metricMatch) {
+                    val firstMetric = rule.root.allLeaves().firstOrNull()?.metricKey ?: ""
                     results.add(
                         SearchResult(
                             title = rule.name.ifBlank { "Link Rule" },
-                            subtitle = rule.metricKey,
+                            subtitle = firstMetric,
                             category = SearchCategory.LINK,
                             route = Routes.LINK,
                         )

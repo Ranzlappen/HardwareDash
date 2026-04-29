@@ -52,9 +52,11 @@ interface BackupManagerEntryPoint {
 }
 
 private const val WIDGET_PREFS = "widget_settings"
+private const val KEY_RING_DELAY = "phone_ring_delay_seconds"
 private const val KEY_RING_DURATION = "phone_ring_duration_seconds"
 private const val KEY_NOTIFY_DELAY = "notify_delay_seconds"
 
+const val DEFAULT_RING_DELAY = 0
 const val DEFAULT_RING_DURATION = 30
 const val DEFAULT_NOTIFY_DELAY = 30
 
@@ -123,6 +125,9 @@ fun SettingsScreen() {
 
     // Widget settings from SharedPreferences
     val widgetPrefs = remember { context.getSharedPreferences(WIDGET_PREFS, Context.MODE_PRIVATE) }
+    var ringDelay by remember {
+        mutableFloatStateOf(widgetPrefs.getInt(KEY_RING_DELAY, DEFAULT_RING_DELAY).toFloat())
+    }
     var ringDuration by remember {
         mutableFloatStateOf(widgetPrefs.getInt(KEY_RING_DURATION, DEFAULT_RING_DURATION).toFloat())
     }
@@ -247,6 +252,49 @@ fun SettingsScreen() {
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.sectionHeading(),
         )
+
+        // ── Phone Ring Delay ─────────────────────────────────────────────
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.HourglassBottom, null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        strings.phoneRingDelay,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Text(
+                    strings.phoneRingDelayDesc,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                )
+                SliderWithInput(
+                    value = ringDelay,
+                    onValueChange = { ringDelay = it },
+                    onValueChangeFinished = {
+                        widgetPrefs.edit().putInt(KEY_RING_DELAY, ringDelay.roundToInt()).apply()
+                    },
+                    valueRange = 0f..300f,
+                    formatValue = { "%.0f".format(it) },
+                    suffix = "s",
+                    label = "${ringDelay.roundToInt()} ${strings.seconds}",
+                )
+            }
+        }
 
         // ── Phone Ring Duration ──────────────────────────────────────────
         Card(
