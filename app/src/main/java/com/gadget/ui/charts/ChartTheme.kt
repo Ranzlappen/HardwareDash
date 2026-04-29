@@ -28,7 +28,6 @@ val chartLineColors = listOf(ChartCyan, ChartGreen, ChartAmber, ChartPurple, Cha
 fun gadgetLineSpecs(axisCount: Int = 1) = (0 until axisCount).map { index ->
     lineSpec(
         lineColor = chartLineColors.getOrElse(index) { ChartCyan },
-        lineThicknessDp = 2f,
     )
 }
 

@@ -47,7 +47,7 @@ class MetricChartViewModel @Inject constructor(
     init {
         val metric = WidgetMetric.fromKey(metricKey)
         if (metric != null) {
-            _state.update { it.copy(metricName = metric.label, metricUnit = metric.unit) }
+            _state.update { it.copy(metricName = metric.displayName, metricUnit = metric.unit) }
         }
 
         viewModelScope.launch {
