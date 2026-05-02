@@ -608,7 +608,7 @@ object S {
         val describeBugHint get() = m(l, "Describe the issue you encountered\u2026", "Beschreiben Sie das aufgetretene Problem\u2026", "Describa el problema que encontró\u2026", "Décrivez le problème rencontré\u2026")
         val createBugReport get() = m(l, "Create Bug Report", "Fehlerbericht erstellen", "Crear informe de error", "Créer un rapport de bug")
         val bugReportReady get() = m(l, "Bug Report Ready", "Fehlerbericht bereit", "Informe de error listo", "Rapport de bug prêt")
-        val openGithubIssue get() = m(l, "Open GitHub Issue", "GitHub-Issue öffnen", "Abrir issue en GitHub", "Ouvrir une issue GitHub")
+        val emailBugReport get() = m(l, "Email Bug Report", "Fehlerbericht per E-Mail senden", "Enviar informe por correo", "Envoyer le rapport par e-mail")
         val copyText get() = m(l, "Copy Text", "Text kopieren", "Copiar texto", "Copier le texte")
         val copiedToClipboard get() = m(l, "Copied to clipboard", "In Zwischenablage kopiert", "Copiado al portapapeles", "Copié dans le presse-papiers")
         val permissionLabel get() = m(l, "Permission", "Berechtigung", "Permiso", "Permission")

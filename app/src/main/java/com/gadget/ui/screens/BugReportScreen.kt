@@ -429,17 +429,21 @@ fun BugReportScreen() {
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.verticalScroll(rememberScrollState()),
                 ) {
-                    // GitHub link
                     OutlinedButton(
                         onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Ranzlappen/gadget/issues"))
-                            context.startActivity(intent)
+                            val mailto = Uri.parse(
+                                "mailto:info@ranzlappen.com" +
+                                    "?subject=" + Uri.encode(strings.title) +
+                                    "&body=" + Uri.encode(markdownReport)
+                            )
+                            val intent = Intent(Intent.ACTION_SENDTO, mailto)
+                            context.startActivity(Intent.createChooser(intent, strings.emailBugReport))
                         },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Icon(Icons.Default.OpenInNew, null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Email, null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text(strings.openGithubIssue)
+                        Text(strings.emailBugReport)
                     }
 
                     // Markdown report text field
