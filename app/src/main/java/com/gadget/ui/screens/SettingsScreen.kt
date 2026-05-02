@@ -185,7 +185,7 @@ fun SettingsScreen() {
                     .edit()
                     .putBoolean("has_seen_onboarding", false)
                     .apply()
-                Toast.makeText(context, "Restart the app to see onboarding", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, strings.restartToSeeOnboarding, Toast.LENGTH_SHORT).show()
             },
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,

@@ -1,5 +1,6 @@
 package com.gadget.ui.screens.notifications
 
+import com.gadget.localization.S
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -194,7 +195,7 @@ fun NotificationPreviewCard(spec: NotifSpec, modifier: Modifier = Modifier) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Lock, null)
                     Spacer(Modifier.width(6.dp))
-                    Text("Hidden on lock screen", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                    Text(S.lock.hiddenOnLockScreen, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

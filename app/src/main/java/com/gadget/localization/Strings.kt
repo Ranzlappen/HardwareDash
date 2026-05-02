@@ -997,6 +997,7 @@ object S {
         // Video record service
         fun recordingVideo(lang: Language) = m(lang, "Recording Video", "Video wird aufgenommen", "Grabando video", "Enregistrement vidéo")
         fun cameraError(lang: Language, detail: String) = m(lang, "Camera error: $detail", "Kamerafehler: $detail", "Error de cámara: $detail", "Erreur caméra : $detail")
+        fun videoError(lang: Language, detail: String) = m(lang, "Video error: $detail", "Videofehler: $detail", "Error de vídeo: $detail", "Erreur vidéo : $detail")
 
         // Hardware service
         fun hardwareMonitoring(lang: Language) = m(lang, "Hardware monitoring is running in the background.", "Hardware-Überwachung läuft im Hintergrund.", "La monitorización de hardware se ejecuta en segundo plano.", "La surveillance matérielle fonctionne en arrière-plan.")
