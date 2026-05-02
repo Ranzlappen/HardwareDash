@@ -77,6 +77,11 @@ fun SliderWithInput(
                 },
                 onValueChangeFinished = onValueChangeFinished,
                 valueRange = valueRange,
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
+                ),
                 modifier = Modifier
                     .weight(1f)
                     .semantics { stateDescription = "${formatValue(value)} $suffix".trim() },
