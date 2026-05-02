@@ -92,6 +92,7 @@ private val bottomNavItems = listOf(
     BottomNavItem(Routes.MORE,       Icons.Filled.Apps,        Icons.Outlined.Apps),
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavGraph() {
     val context = androidx.compose.ui.platform.LocalContext.current
