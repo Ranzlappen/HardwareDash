@@ -34,6 +34,7 @@ import androidx.core.content.ContextCompat
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.sectionHeading
 import com.gadget.receivers.AdminReceiver
@@ -411,7 +412,7 @@ fun BugReportScreen() {
         ) {
             Icon(Icons.Default.BugReport, null)
             Spacer(Modifier.width(8.dp))
-            Text(strings.createBugReport)
+            ResponsiveButtonText(strings.createBugReport)
         }
     }
 
@@ -443,7 +444,7 @@ fun BugReportScreen() {
                     ) {
                         Icon(Icons.Default.Email, null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text(strings.emailBugReport)
+                        ResponsiveButtonText(strings.emailBugReport)
                     }
 
                     // Markdown report text field
