@@ -22,7 +22,13 @@ Test predefined haptic effects, build custom waveform patterns with a visual ste
 Live dB meter with real-time spectrum analyzer (FFT visualization), audio recording to WAV files, and playback of saved recordings.
 
 ### Radios & Connectivity
-Wi-Fi signal details, Bluetooth status, NFC tag reader/writer with NDEF support, GPS tracker with live map (OpenStreetMap), cellular signal strength, and network speed monitoring.
+Wi-Fi signal details, Bluetooth status, NFC tag reader/writer with NDEF support, GPS tracker with live map (OpenStreetMap), cellular signal strength, network speed monitoring, **Sub-GHz signal parser/formatter** (Flipper Zero `.sub` file format), and **infrared transmitter** with carrier-frequency control on devices that ship an IR emitter.
+
+### Flipper Zero Integration
+Pair a Flipper Zero over USB CDC-ACM or BLE GATT and send saved IR codes, NFC tags, or Sub-GHz signals straight to the device. Hand-rolled minimal protobuf RPC (field numbers track flipperzero-protobuf ≥ 0.80).
+
+### Backup & Restore
+Export everything to a single ZIP — Room database, SharedPreferences, and DataStore — and restore it later or onto another device. WAL is checkpointed before the snapshot so the dump is consistent.
 
 ### Sensors
 Real-time readings from all available sensors: accelerometer, gyroscope, magnetometer, proximity, light, barometer, step counter, and more. Copy readings to clipboard.
@@ -143,18 +149,44 @@ Detailed battery information including level, status, health, temperature, volta
 
 ### Radios & Connectivity (Monitor > Radios)
 
-Monitor WiFi, Bluetooth, NFC, GPS, cellular signal, and network speed from a single screen.
+Monitor WiFi, Bluetooth, NFC, GPS, cellular signal, network speed, infrared, and Sub-GHz signals from a single screen.
 
 - **WiFi:** SSID, signal strength (dBm/%), link speed, frequency band
 - **Bluetooth:** Status and device name
-- **NFC:** Read NDEF tags (Text/URI/MIME), write custom data, save up to 50 tags, HCE emulation
+- **NFC:** Read NDEF tags (Text/URI/MIME), write custom data, save up to 50 tags, HCE emulation, write-protection analysis with bypass attempts
 - **GPS:** Live OpenStreetMap view with coordinates, altitude, speed, accuracy, bearing, and GPS log
 - **Cellular:** Signal strength, network type (LTE/5G/HSPA)
 - **Network Speed:** Download/upload speed measurement
+- **Infrared:** NEC, Pronto, and Raw payload transmitter with adjustable carrier frequency and repeats; saved IR-code library with paste-from-clipboard
+- **Sub-GHz:** Parse and write Flipper Zero `.sub` files (Princeton, CAME, NICE FLO, Keeloq, RAW), import existing files, save a curated signal library
 
-> **Prerequisites:** ACCESS_WIFI_STATE, BLUETOOTH_CONNECT, NFC, ACCESS_FINE_LOCATION, and INTERNET (for map tiles).
+> **Prerequisites:** ACCESS_WIFI_STATE, BLUETOOTH_CONNECT, NFC, ACCESS_FINE_LOCATION, and INTERNET (for map tiles). IR transmission requires a hardware IR emitter on the device. Sub-GHz transmission requires external hardware (e.g. a paired Flipper Zero).
 >
-> **Limitations:** WiFi SSID may show as unknown on some devices. NFC requires compatible hardware. GPS accuracy depends on environment and device.
+> **Limitations:** WiFi SSID may show as unknown on some devices. NFC requires compatible hardware. GPS accuracy depends on environment and device. The phone itself cannot transmit Sub-GHz — the library can be curated locally and sent to a Flipper Zero.
+
+### Flipper Zero (Radios)
+
+Pair a Flipper Zero device and forward stored signals to it.
+
+- **Transports:** USB CDC-ACM (when the Flipper is plugged in via OTG) or BLE GATT (when wireless mode is enabled on the Flipper)
+- **Send to Flipper buttons** appear next to saved IR codes, saved NFC tags, and saved Sub-GHz signals once a connection is established
+- The connection state lives in Settings under **Flipper Connection**
+
+> **Prerequisites:** USB host support (for CDC-ACM) or BLUETOOTH_CONNECT (for BLE). A Flipper Zero device on firmware that exposes the `flipperzero-protobuf` ≥ 0.80 RPC.
+>
+> **Limitations:** Read-only RPC streaming is supported; advanced subghz playback features depend on the connected firmware version.
+
+### Backup & Restore (Settings)
+
+Snapshot the entire app state to a ZIP file — including the Room database, every `shared_prefs/*.xml`, and every `datastore/*` file — then restore it later or onto another device.
+
+- **Backup** writes a single `gadget_backup.zip` via the system file picker
+- **Restore** reads back any previously written backup and atomically replaces the in-app state
+- The Room database WAL is checkpointed (`PRAGMA wal_checkpoint(FULL)`) before snapshotting so the dump is consistent
+
+> **Prerequisites:** Storage Access Framework — file picker access to a writable location.
+>
+> **Limitations:** Restoring overwrites all app state. Cross-version restore relies on Room migrations being able to upgrade older schemas.
 
 ### Logbook
 
@@ -261,6 +293,17 @@ Gadget includes built-in accessibility features:
 
 Configure these options in Settings > Accessibility.
 
+### Localization architecture
+
+All in-app strings are sourced from a single Kotlin file rather than from `strings.xml`:
+
+- `app/src/main/java/com/gadget/localization/Strings.kt` defines an `S` singleton with feature-grouped accessors (`S.nav`, `S.radios`, `S.backup`, `S.flipper`, `S.lock`, `S.settings`, ...).
+- The active language is read from `LocalizationManager.currentLanguage` and switching it from Settings recomposes every visible string instantly.
+- The `m(lang, en, de, es, fr)` helper picks the right translation per call. Adding a new language means adding one parameter to that helper and one branch to every `m(...)` call.
+- Service notifications and other non-Composable contexts use `S.Services.*` functions that take a `Language` parameter loaded via `LocalizationManager.loadLanguage(context)`.
+
+Widget labels and descriptions live in `app/src/main/res/values/strings.xml` (with mirrors in `values-de/`, `values-es/`, `values-fr/`) so the system widget picker can read them outside any composition.
+
 ## Build
 
 ```bash
@@ -312,6 +355,9 @@ Requires Android Studio with SDK 35 and JDK 17.
 > - Vibration pattern builder with visual waveform editor
 > - Microphone dB meter with FFT spectrum analyzer
 > - WiFi, Bluetooth, NFC reader/writer, GPS tracker with live map
+> - Infrared transmitter (where hardware exists) and Sub-GHz signal library (Flipper Zero `.sub` format)
+> - Flipper Zero integration over USB and BLE
+> - Backup & restore the full app state to a single ZIP file
 > - Full sensor dashboard with real-time readings
 > - Battery monitor with detailed health metrics
 > - Custom notification builder with action buttons and scheduling

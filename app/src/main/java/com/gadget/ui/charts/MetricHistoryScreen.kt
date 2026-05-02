@@ -1,5 +1,6 @@
 package com.gadget.ui.charts
 
+import com.gadget.localization.S
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -43,7 +44,7 @@ fun MetricHistoryScreen(
             modifier = Modifier.fillMaxWidth(),
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                Icon(Icons.Default.ArrowBack, contentDescription = S.common.back)
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(

@@ -89,7 +89,7 @@ class VideoRecordService : Service() {
                         when (event) {
                             is VideoRecordEvent.Finalize -> {
                                 val vLang = LocalizationManager.loadLanguage(this)
-                                val msg = if (event.hasError()) "Video error: ${event.cause?.message}"
+                                val msg = if (event.hasError()) S.Services.videoError(vLang, event.cause?.message ?: "")
                                           else S.Services.savedFile(vLang, filename)
                                 android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_SHORT).show()
                                 isRunning = false
@@ -102,7 +102,8 @@ class VideoRecordService : Service() {
                 val rLang = LocalizationManager.loadLanguage(this)
                 android.widget.Toast.makeText(this, S.Services.recordingVideo(rLang) + "...", android.widget.Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                android.widget.Toast.makeText(this, "Camera error: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
+                val eLang = LocalizationManager.loadLanguage(this)
+                android.widget.Toast.makeText(this, S.Services.cameraError(eLang, e.message ?: ""), android.widget.Toast.LENGTH_SHORT).show()
                 Log.e("VideoRecordService", "Start failed", e)
                 stopSelf()
             }

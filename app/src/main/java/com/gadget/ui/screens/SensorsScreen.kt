@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
 import com.gadget.ui.components.AccessibleCanvas
+import com.gadget.ui.components.DashCard
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.sectionHeading
 import com.gadget.ui.theme.LocalAccessibilityPreferences
@@ -242,14 +243,12 @@ private fun SensorCard(
 
     val chartBg = MaterialTheme.colorScheme.surfaceVariant
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onExpand),
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    DashCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onExpand,
+        contentPadding = 12.dp,
+        verticalArrangement = Arrangement.Top,
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
             // ── Header row ────────────────────────────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -395,5 +394,4 @@ private fun SensorCard(
                 }
             }
         }
-    }
 }

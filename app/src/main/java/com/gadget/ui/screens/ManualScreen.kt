@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
+import com.gadget.ui.components.DashCard
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.sectionHeading
 import com.gadget.ui.theme.LocalAccessibilityPreferences
@@ -312,13 +313,10 @@ private fun ManualSectionCard(
     val expandedLabel = S.accessibility.expanded
     val collapsedLabel = S.accessibility.collapsed
 
-    Card(
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
+    DashCard(
+        contentPadding = 16.dp,
+        verticalArrangement = Arrangement.Top,
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
             // Header row — clickable to expand/collapse
             Row(
                 modifier = Modifier
@@ -368,7 +366,6 @@ private fun ManualSectionCard(
                 }
             }
         }
-    }
 }
 
 // ─── Feature Content Block ──────────────────────────────────────────────────

@@ -33,6 +33,7 @@ import com.gadget.flipper.FlipperConnectionManager
 import com.gadget.localization.Language
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
+import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
 import com.gadget.ui.components.sectionHeading
@@ -185,12 +186,12 @@ fun SettingsScreen() {
                     .edit()
                     .putBoolean("has_seen_onboarding", false)
                     .apply()
-                Toast.makeText(context, "Restart the app to see onboarding", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, strings.restartToSeeOnboarding, Toast.LENGTH_SHORT).show()
             },
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
         ) {
-            Text(S.onboarding.showOnboarding)
+            ResponsiveButtonText(S.onboarding.showOnboarding)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -640,7 +641,7 @@ fun SettingsScreen() {
                 ) {
                     Icon(Icons.Default.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text(backupStrings.backup)
+                    ResponsiveButtonText(backupStrings.backup)
                 }
             }
         }
@@ -683,7 +684,7 @@ fun SettingsScreen() {
                 ) {
                     Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text(backupStrings.restore)
+                    ResponsiveButtonText(backupStrings.restore)
                 }
             }
         }

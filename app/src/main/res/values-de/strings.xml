@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Gadget</string>
+    <string name="admin_description">Erlaubt Gadget, den Bildschirm programmatisch zu sperren.</string>
+
+    <!-- Widget labels (shown in widget picker title) -->
+    <string name="widget_label_metric">Gadget-Metrik</string>
+    <string name="widget_label_log_now">Schnell-Eintrag</string>
+    <string name="widget_label_flashlight">Taschenlampe ein/aus</string>
+    <string name="widget_label_strobe">Stroboskop ein/aus</string>
+    <string name="widget_label_camera_snapshot">Kamera-Schnappschuss</string>
+    <string name="widget_label_video_toggle">Videoaufnahme ein/aus</string>
+    <string name="widget_label_voice_record">Sprachaufnahme</string>
+    <string name="widget_label_phone_ring">Telefon klingeln</string>
+    <string name="widget_label_notify">Schnell-Benachrichtigung</string>
+    <string name="widget_label_db_meter">dB-Messgerät</string>
+
+    <!-- Widget descriptions (shown in widget picker subtitle) -->
+    <string name="widget_desc_metric">Eine Live-Hardware-Metrik auf dem Startbildschirm anzeigen. Wählen Sie aus Akku, Sensoren, WLAN und mehr.</string>
+    <string name="widget_desc_log_now">Tippen, um schnell einen Eintrag im Logbuch zu erfassen.</string>
+    <string name="widget_desc_flashlight">Taschenlampe vom Startbildschirm aus ein- oder ausschalten.</string>
+    <string name="widget_desc_strobe">Stroboskoplicht vom Startbildschirm aus ein- oder ausschalten.</string>
+    <string name="widget_desc_camera_snapshot">Schnell ein Foto vom Startbildschirm aus aufnehmen.</string>
+    <string name="widget_desc_video_toggle">Videoaufnahme vom Startbildschirm aus starten oder stoppen.</string>
+    <string name="widget_desc_voice_record">Sprachaufnahme vom Startbildschirm aus starten oder stoppen.</string>
+    <string name="widget_desc_phone_ring">Telefon nach einer einstellbaren Verzögerung klingeln lassen.</string>
+    <string name="widget_desc_notify">Sich selbst eine Benachrichtigung nach einer einstellbaren Verzögerung senden.</string>
+    <string name="widget_desc_db_meter">Umgebungsgeräuschpegel vom Startbildschirm aus überwachen.</string>
+
+    <!-- Vibration widget -->
+    <string name="widget_label_vibration">Vibration ein/aus</string>
+    <string name="widget_desc_vibration">Vibration vom Startbildschirm aus ein- oder ausschalten.</string>
+</resources>

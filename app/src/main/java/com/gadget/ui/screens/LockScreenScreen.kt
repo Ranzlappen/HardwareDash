@@ -459,7 +459,7 @@ fun LockScreenScreen() {
                     value = schedDate.toString(),
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Date") },
+                    label = { Text(S.lock.dateLabel) },
                     modifier = Modifier.weight(1f).clickable { showDatePicker = true },
                     textStyle = MaterialTheme.typography.bodySmall,
                     leadingIcon = { Icon(Icons.Default.CalendarMonth, null, Modifier.size(18.dp)) },
@@ -478,7 +478,7 @@ fun LockScreenScreen() {
                     value = "%02d:%02d".format(schedTime.hour, schedTime.minute),
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Time") },
+                    label = { Text(S.lock.timeLabel) },
                     modifier = Modifier.weight(1f).clickable { showTimePicker = true },
                     textStyle = MaterialTheme.typography.bodySmall,
                     leadingIcon = { Icon(Icons.Default.Schedule, null, Modifier.size(18.dp)) },
@@ -741,7 +741,7 @@ fun LockScreenScreen() {
         Text(S.lock.emergencyAlerts, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f))) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Wireless Emergency Alerts (WEA)", fontWeight = FontWeight.SemiBold)
+                Text(S.lock.wirelessEmergencyAlerts, fontWeight = FontWeight.SemiBold)
                 Text(
                     "WEA alerts (AMBER, severe weather, presidential) are managed at the system level. " +
                     "Third-party apps cannot read or send emergency alerts without privileged access.",
@@ -789,7 +789,7 @@ fun LockScreenScreen() {
         Text(S.lock.capabilities, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Card(shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text("What is possible without root:", fontWeight = FontWeight.SemiBold)
+                Text(S.lock.whatIsPossibleWithoutRoot, fontWeight = FontWeight.SemiBold)
                 listOf(
                     "OK  Lock the screen (Device Admin)",
                     "OK  Show this Activity over the lock screen",
@@ -924,7 +924,7 @@ fun LockScreenScreen() {
         // ══════════════════════════════════════════════════════════════════════
         Card(shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("How \"show over lock screen\" works", fontWeight = FontWeight.SemiBold)
+                Text(S.lock.howShowOverLockScreenWorks, fontWeight = FontWeight.SemiBold)
                 Text(
                     "MainActivity is declared with android:showWhenLocked=\"true\" and " +
                     "android:turnScreenOn=\"true\" in AndroidManifest.xml. " +
@@ -955,10 +955,10 @@ fun LockScreenScreen() {
                         schedDate = Instant.ofEpochMilli(millis).atZone(ZoneId.of("UTC")).toLocalDate()
                     }
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text(S.lock.ok) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showDatePicker = false }) { Text(S.lock.cancel) }
             },
         ) { DatePicker(state = pickerState) }
     }
@@ -972,16 +972,16 @@ fun LockScreenScreen() {
         )
         AlertDialog(
             onDismissRequest = { showTimePicker = false },
-            title = { Text("Select Time") },
+            title = { Text(S.lock.selectTime) },
             text = { TimePicker(state = timeState) },
             confirmButton = {
                 TextButton(onClick = {
                     schedTime = LocalTime.of(timeState.hour, timeState.minute)
                     showTimePicker = false
-                }) { Text("OK") }
+                }) { Text(S.lock.ok) }
             },
             dismissButton = {
-                TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showTimePicker = false }) { Text(S.lock.cancel) }
             },
         )
     }

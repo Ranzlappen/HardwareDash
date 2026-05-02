@@ -195,6 +195,7 @@ object S {
         val metricLoggingDesc get() = m(l, "Select metrics to capture with each log entry", "Metriken auswählen, die bei jedem Logbuch-Eintrag erfasst werden", "Seleccione métricas para capturar con cada entrada del registro", "Sélectionnez les métriques à capturer avec chaque entrée du journal")
         val bypassDnd get() = m(l, "Bypass Do Not Disturb", "Nicht st\u00F6ren umgehen", "Omitir No molestar", "Contourner Ne pas d\u00E9ranger")
         val bypassDndDesc get() = m(l, "Use alarm audio channel to bypass DND and silent mode for ring, vibration, and notification actions", "Alarm-Audiokanal verwenden, um DND und Lautlos-Modus f\u00FCr Klingeln, Vibration und Benachrichtigungen zu umgehen", "Usar canal de audio de alarma para omitir DND y modo silencioso para acciones de timbre, vibraci\u00F3n y notificaci\u00F3n", "Utiliser le canal audio d'alarme pour contourner NPD et le mode silencieux pour les actions de sonnerie, vibration et notification")
+        val restartToSeeOnboarding get() = m(l, "Restart the app to see onboarding", "Starten Sie die App neu, um das Onboarding zu sehen", "Reinicie la aplicaci\u00F3n para ver la introducci\u00F3n", "Red\u00E9marrez l'application pour voir l'introduction")
     }
 
     // ── Lock Screen & Notifications ─────────────────────────────────────
@@ -298,6 +299,14 @@ object S {
         val delayHelp get() = m(l, "Wait this long before posting the notification.", "So lange warten, bevor die Benachrichtigung gesendet wird.", "Esperar este tiempo antes de publicar la notificación.", "Attendre ce temps avant de publier la notification.")
         val scheduleForHelp get() = m(l, "Pick an exact date and time to post the notification.", "Genaues Datum und Uhrzeit zum Senden der Benachrichtigung wählen.", "Elegir fecha y hora exactas para publicar la notificación.", "Choisir une date et heure exactes pour publier la notification.")
         val scheduleTypeHelp get() = m(l, "What fires at the time: a notification, screen lock, or ring.", "Was zur Zeit ausgelöst wird: Benachrichtigung, Bildschirmsperre oder Klingelton.", "Qué se activa a la hora: notificación, bloqueo de pantalla o timbre.", "Ce qui se déclenche à l'heure : notification, verrouillage d'écran ou sonnerie.")
+
+        // ── Lock screen designer (overhaul) ──
+        val dateLabel get() = m(l, "Date", "Datum", "Fecha", "Date")
+        val timeLabel get() = m(l, "Time", "Uhrzeit", "Hora", "Heure")
+        val wirelessEmergencyAlerts get() = m(l, "Wireless Emergency Alerts (WEA)", "Drahtlose Notfallwarnungen (WEA)", "Alertas inalámbricas de emergencia (WEA)", "Alertes d'urgence sans fil (WEA)")
+        val whatIsPossibleWithoutRoot get() = m(l, "What is possible without root:", "Was ohne Root möglich ist:", "Lo que es posible sin root:", "Ce qui est possible sans root :")
+        val howShowOverLockScreenWorks get() = m(l, "How \"show over lock screen\" works", "Wie \"über Sperrbildschirm anzeigen\" funktioniert", "Cómo funciona \"mostrar sobre pantalla de bloqueo\"", "Comment \"afficher au-dessus de l'écran de verrouillage\" fonctionne")
+        val hiddenOnLockScreen get() = m(l, "Hidden on lock screen", "Auf dem Sperrbildschirm verborgen", "Oculto en pantalla de bloqueo", "Masqué sur l'écran de verrouillage")
     }
 
     // ── Link ────────────────────────────────────────────────────────────
@@ -434,6 +443,10 @@ object S {
         val medium get() = m(l, "Medium", "Mittel", "Medio", "Moyen")
         val fast get() = m(l, "Fast", "Schnell", "Rápido", "Rapide")
         val rapid get() = m(l, "Rapid", "Sehr schnell", "Muy rápido", "Très rapide")
+
+        // Time markers for the draw/waveform canvas (numeric, but rendered via Text)
+        val msZero get() = m(l, "0 ms", "0 ms", "0 ms", "0 ms")
+        val ms2000 get() = m(l, "2000 ms", "2000 ms", "2000 ms", "2000 ms")
     }
 
     // ── Mic ─────────────────────────────────────────────────────────────
@@ -521,6 +534,70 @@ object S {
         val signalName get() = m(l, "Signal name", "Signalname", "Nombre de la señal", "Nom du signal")
         val saveSignal get() = m(l, "Save signal", "Signal speichern", "Guardar señal", "Enregistrer le signal")
         val parseFailed get() = m(l, "Could not parse .sub file", "Sub-Datei konnte nicht gelesen werden", "No se pudo analizar el archivo .sub", "Impossible de lire le fichier .sub")
+
+        // ── Card titles & status (overhaul) ──
+        val wifiSignalDetails get() = m(l, "WiFi Signal Details", "WLAN-Signaldetails", "Detalles de señal WiFi", "Détails du signal Wi-Fi")
+        val cellularSignal get() = m(l, "Cellular Signal", "Mobilfunksignal", "Señal móvil", "Signal cellulaire")
+        val networkSpeed get() = m(l, "Network Speed", "Netzwerkgeschwindigkeit", "Velocidad de red", "Vitesse réseau")
+        val download get() = m(l, "Download", "Download", "Descarga", "Téléchargement")
+        val upload get() = m(l, "Upload", "Upload", "Subida", "Téléversement")
+        val mobileData get() = m(l, "Mobile Data", "Mobile Daten", "Datos móviles", "Données mobiles")
+        val activeTransport get() = m(l, "Active transport", "Aktiver Transport", "Transporte activo", "Transport actif")
+        val notActiveWifiPreferred get() = m(l, "Not active / WiFi preferred", "Nicht aktiv / WLAN bevorzugt", "Inactivo / WiFi preferido", "Inactif / Wi-Fi préféré")
+        val notAvailableOnDevice get() = m(l, "Not available on this device", "Auf diesem Gerät nicht verfügbar", "No disponible en este dispositivo", "Indisponible sur cet appareil")
+        val readyToScan get() = m(l, "Ready to scan", "Bereit zum Scannen", "Listo para escanear", "Prêt à scanner")
+        val statusDisabled get() = m(l, "Disabled", "Deaktiviert", "Desactivado", "Désactivé")
+
+        // ── NFC reader UI ──
+        val nfcTagReader get() = m(l, "NFC Tag Reader", "NFC-Tag-Leser", "Lector de etiquetas NFC", "Lecteur de tags NFC")
+        val ndefRecords get() = m(l, "NDEF Records:", "NDEF-Datensätze:", "Registros NDEF:", "Enregistrements NDEF :")
+        val holdNfcTagNearDevice get() = m(l, "Hold an NFC tag near the device...", "Halten Sie ein NFC-Tag in die Nähe des Geräts...", "Acerque una etiqueta NFC al dispositivo...", "Approchez un tag NFC de l'appareil...")
+        val writeProtectionAnalysis get() = m(l, "Write Protection Analysis", "Schreibschutz-Analyse", "Análisis de protección de escritura", "Analyse de protection en écriture")
+        val detailsLabel get() = m(l, "Details", "Details", "Detalles", "Détails")
+
+        // ── NFC writer UI ──
+        val writeToTag get() = m(l, "Write to Tag", "Auf Tag schreiben", "Escribir en etiqueta", "Écrire sur le tag")
+        val textToWrite get() = m(l, "Text to write", "Zu schreibender Text", "Texto a escribir", "Texte à écrire")
+        val uriPathLabel get() = m(l, "URI path", "URI-Pfad", "Ruta URI", "Chemin URI")
+        val mimeTypeLabel get() = m(l, "MIME type", "MIME-Typ", "Tipo MIME", "Type MIME")
+        val payloadLabel get() = m(l, "Payload", "Nutzdaten", "Carga útil", "Charge utile")
+        val writingStatus get() = m(l, "Writing...", "Schreibe...", "Escribiendo...", "Écriture...")
+        fun writeNdefFor(type: String) = m(l, "Write NDEF $type", "NDEF $type schreiben", "Escribir NDEF $type", "Écrire NDEF $type")
+        val noTagPresent get() = m(l, "No tag present", "Kein Tag vorhanden", "Sin etiqueta presente", "Aucun tag présent")
+        val bypassLogLabel get() = m(l, "Bypass log:", "Umgehungsprotokoll:", "Registro de bypass:", "Journal de contournement :")
+
+        // ── NFC guide ──
+        val nfcGuide get() = m(l, "NFC Guide", "NFC-Leitfaden", "Guía NFC", "Guide NFC")
+        val ndefRecordTypesTitle get() = m(l, "NDEF Record Types:", "NDEF-Datensatztypen:", "Tipos de registro NDEF:", "Types d'enregistrement NDEF :")
+        val ndefRecordTypesBody get() = m(l,
+            "  Text — Plain text with language code\n  URI — URLs, phone numbers, emails (compact encoding)\n  MIME — Any MIME type with custom payload\n  Smart Poster — URI + metadata (title, icon)",
+            "  Text — Klartext mit Sprachcode\n  URI — URLs, Telefonnummern, E-Mails (kompakte Kodierung)\n  MIME — Beliebiger MIME-Typ mit benutzerdefinierten Nutzdaten\n  Smart Poster — URI + Metadaten (Titel, Symbol)",
+            "  Text — Texto sin formato con código de idioma\n  URI — URLs, números de teléfono, correos (codificación compacta)\n  MIME — Cualquier tipo MIME con carga personalizada\n  Smart Poster — URI + metadatos (título, icono)",
+            "  Text — Texte brut avec code de langue\n  URI — URLs, numéros de téléphone, e-mails (encodage compact)\n  MIME — Tout type MIME avec charge personnalisée\n  Smart Poster — URI + métadonnées (titre, icône)")
+        val commonTagTypesTitle get() = m(l, "Common Tag Types:", "Häufige Tag-Typen:", "Tipos de etiqueta comunes:", "Types de tag courants :")
+        val commonTagTypesBody get() = m(l,
+            "  NTAG213 — 144 bytes, most common small tags\n  NTAG215 — 504 bytes, used for Amiibo\n  NTAG216 — 888 bytes, large capacity\n  Mifare Classic 1K — 1024 bytes, proprietary",
+            "  NTAG213 — 144 Bytes, häufigste kleine Tags\n  NTAG215 — 504 Bytes, für Amiibo verwendet\n  NTAG216 — 888 Bytes, große Kapazität\n  Mifare Classic 1K — 1024 Bytes, proprietär",
+            "  NTAG213 — 144 bytes, etiquetas pequeñas más comunes\n  NTAG215 — 504 bytes, usado para Amiibo\n  NTAG216 — 888 bytes, gran capacidad\n  Mifare Classic 1K — 1024 bytes, propietario",
+            "  NTAG213 — 144 octets, petits tags les plus courants\n  NTAG215 — 504 octets, utilisé pour Amiibo\n  NTAG216 — 888 octets, grande capacité\n  Mifare Classic 1K — 1024 octets, propriétaire")
+        val commonUsesTitle get() = m(l, "Common Uses:", "Häufige Verwendungen:", "Usos comunes:", "Utilisations courantes :")
+        val commonUsesBody get() = m(l,
+            "  URLs — Share links by tapping\n  Wi-Fi — Share network credentials\n  vCard — Share contact information\n  App Launch — Open specific apps\n  Smart Home — Trigger automations",
+            "  URLs — Links durch Antippen teilen\n  Wi-Fi — Netzwerkdaten teilen\n  vCard — Kontaktdaten teilen\n  App-Start — Bestimmte Apps öffnen\n  Smart Home — Automationen auslösen",
+            "  URLs — Compartir enlaces tocando\n  Wi-Fi — Compartir credenciales de red\n  vCard — Compartir información de contacto\n  Inicio de app — Abrir apps específicas\n  Smart Home — Activar automatizaciones",
+            "  URLs — Partager des liens en touchant\n  Wi-Fi — Partager les identifiants réseau\n  vCard — Partager des informations de contact\n  Lancement d'app — Ouvrir des apps spécifiques\n  Domotique — Déclencher des automatisations")
+        val bestPracticesTitle get() = m(l, "Best Practices:", "Bewährte Praktiken:", "Mejores prácticas:", "Bonnes pratiques :")
+        val bestPracticesBody get() = m(l,
+            "  - Use URI records for URLs (more compact than text)\n  - Keep payloads small for faster read/write\n  - Test with reader before writing to verify\n  - Lock tags after writing to prevent tampering",
+            "  - URI-Datensätze für URLs verwenden (kompakter als Text)\n  - Nutzdaten klein halten für schnelleres Lesen/Schreiben\n  - Vor dem Schreiben mit Leser testen, um zu verifizieren\n  - Tags nach dem Schreiben sperren, um Manipulation zu verhindern",
+            "  - Use registros URI para URLs (más compactos que texto)\n  - Mantenga las cargas pequeñas para lectura/escritura más rápida\n  - Pruebe con lector antes de escribir para verificar\n  - Bloquee etiquetas después de escribir para evitar manipulaciones",
+            "  - Utilisez des enregistrements URI pour les URLs (plus compacts que le texte)\n  - Gardez les charges petites pour une lecture/écriture plus rapide\n  - Testez avec un lecteur avant d'écrire pour vérifier\n  - Verrouillez les tags après écriture pour empêcher toute altération")
+
+        // ── Quick toggles ──
+        val quickToggles get() = m(l, "Quick Toggles (System Panel)", "Schnellschalter (System-Panel)", "Conmutadores rápidos (panel del sistema)", "Bascules rapides (panneau système)")
+        val wifiPanel get() = m(l, "WiFi Panel", "WLAN-Panel", "Panel WiFi", "Panneau Wi-Fi")
+        val btSettings get() = m(l, "BT Settings", "BT-Einstellungen", "Ajustes BT", "Réglages BT")
+        val internetPanel get() = m(l, "Internet Panel", "Internet-Panel", "Panel de Internet", "Panneau Internet")
     }
 
     // ── Sensors ─────────────────────────────────────────────────────────
@@ -919,6 +996,8 @@ object S {
 
         // Video record service
         fun recordingVideo(lang: Language) = m(lang, "Recording Video", "Video wird aufgenommen", "Grabando video", "Enregistrement vidéo")
+        fun cameraError(lang: Language, detail: String) = m(lang, "Camera error: $detail", "Kamerafehler: $detail", "Error de cámara: $detail", "Erreur caméra : $detail")
+        fun videoError(lang: Language, detail: String) = m(lang, "Video error: $detail", "Videofehler: $detail", "Error de vídeo: $detail", "Erreur vidéo : $detail")
 
         // Hardware service
         fun hardwareMonitoring(lang: Language) = m(lang, "Hardware monitoring is running in the background.", "Hardware-Überwachung läuft im Hintergrund.", "La monitorización de hardware se ejecuta en segundo plano.", "La surveillance matérielle fonctionne en arrière-plan.")

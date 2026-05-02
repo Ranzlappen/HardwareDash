@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
 import com.gadget.ui.components.AccessibleCanvas
+import com.gadget.ui.components.DashCard
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.liveUpdate
 import com.gadget.ui.components.sectionHeading
@@ -262,10 +263,10 @@ fun BatteryScreen() {
 
 @Composable
 private fun BatteryRow(label: String, value: String) {
-    Card(
+    DashCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        contentPadding = 0.dp,
+        verticalArrangement = Arrangement.Top,
     ) {
         Row(
             modifier = Modifier

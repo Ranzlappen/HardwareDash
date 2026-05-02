@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
 import com.gadget.ui.components.AccessibleCanvas
+import com.gadget.ui.components.DashCard
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
 import com.gadget.ui.components.minimumTouchTarget
@@ -415,8 +416,8 @@ fun VibrationScreen() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text("0 ms", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
-            Text("2000 ms", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+            Text(S.vibration.msZero, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+            Text(S.vibration.ms2000, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
         }
 
         // Draw loop toggle
@@ -544,8 +545,10 @@ fun VibrationScreen() {
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         savedPatterns.forEachIndexed { idx, p ->
-                            Card(
+                            DashCard(
                                 modifier = Modifier.fillMaxWidth(),
+                                contentPadding = 0.dp,
+                                verticalArrangement = Arrangement.Top,
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -641,8 +644,10 @@ fun VibrationScreen() {
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         savedDrawnPatterns.forEachIndexed { idx, p ->
-                            Card(
+                            DashCard(
                                 modifier = Modifier.fillMaxWidth(),
+                                contentPadding = 0.dp,
+                                verticalArrangement = Arrangement.Top,
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -738,10 +743,10 @@ private fun WaveformStep(
     onAmpChange: (Float) -> Unit, onDurChange: (Float) -> Unit,
     onRemove: (() -> Unit)?,
 ) {
-    Card(
+    DashCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        contentPadding = 0.dp,
+        verticalArrangement = Arrangement.Top,
     ) {
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(

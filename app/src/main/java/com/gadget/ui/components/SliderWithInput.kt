@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -41,7 +42,18 @@ fun SliderWithInput(
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
-    var textFieldValue by remember(value) { mutableStateOf(formatValue(value)) }
+    var textFieldValue by remember { mutableStateOf(formatValue(value)) }
+    var isFocused by remember { mutableStateOf(false) }
+
+    // Sync the field to external value changes only while it's not being edited.
+    // Keying remember on `value` would reset the field mid-typing because the
+    // field's own onValueChange propagates back through `value`.
+    LaunchedEffect(value, isFocused) {
+        if (!isFocused) {
+            val formatted = formatValue(value)
+            if (formatted != textFieldValue) textFieldValue = formatted
+        }
+    }
 
     Column(modifier = modifier) {
         if (label != null) {
@@ -65,6 +77,11 @@ fun SliderWithInput(
                 },
                 onValueChangeFinished = onValueChangeFinished,
                 valueRange = valueRange,
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f),
+                ),
                 modifier = Modifier
                     .weight(1f)
                     .semantics { stateDescription = "${formatValue(value)} $suffix".trim() },
@@ -108,7 +125,17 @@ fun SliderWithInput(
                 } else null,
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodySmall.copy(textAlign = TextAlign.End),
-                modifier = Modifier.width(90.dp),
+                modifier = Modifier
+                    .width(90.dp)
+                    .onFocusChanged { state ->
+                        val gainedFocus = state.isFocused
+                        if (!gainedFocus && isFocused) {
+                            // Lost focus: snap displayed text back to the canonical value.
+                            textFieldValue = formatValue(value)
+                            onValueChangeFinished?.invoke()
+                        }
+                        isFocused = gainedFocus
+                    },
             )
         }
     }
