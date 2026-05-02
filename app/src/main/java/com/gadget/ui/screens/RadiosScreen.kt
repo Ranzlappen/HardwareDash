@@ -1037,6 +1037,7 @@ fun RadiosScreen() {
 
             // NFC Writer — supports Text, URI, MIME
             if (nfcReaderActive && currentTag != null) {
+                val noTagPresentMsg = S.radios.noTagPresent
                 Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
                     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(S.radios.writeToTag, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -1143,7 +1144,7 @@ fun RadiosScreen() {
                         Button(
                             onClick = {
                                 val tag = currentTag ?: run {
-                                    nfcWriteStatus = S.radios.noTagPresent
+                                    nfcWriteStatus = noTagPresentMsg
                                     return@Button
                                 }
                                 val record = when (nfcWriteType) {
