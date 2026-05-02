@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -120,8 +121,32 @@ fun NavGraph() {
     )
 
     val showBottomBar = currentDestination?.route != Routes.ONBOARDING
+    val showTopBar = showBottomBar
+    val isTopLevelTab = currentDestination?.route in bottomNavItems.map { it.route }
+
+    val topBarTitle = routeTitle(currentDestination?.route)
 
     Scaffold(
+        topBar = {
+            if (showTopBar) {
+                CenterAlignedTopAppBar(
+                    title = { Text(topBarTitle, style = MaterialTheme.typography.titleMedium) },
+                    navigationIcon = {
+                        if (!isTopLevelTab) {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = S.common.back,
+                                )
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                    ),
+                )
+            }
+        },
         bottomBar = {
             if (!showBottomBar) return@Scaffold
             Column {
@@ -223,4 +248,30 @@ fun NavGraph() {
             }
         }
     }
+}
+
+/** Resolves the localized title for the top app bar based on current route. */
+@Composable
+private fun routeTitle(route: String?): String = when (route) {
+    Routes.DASHBOARD     -> S.nav.dashboard
+    Routes.TOOLS         -> S.nav.tools
+    Routes.MONITOR       -> S.nav.monitor
+    Routes.LOGBOOK       -> S.nav.logbook
+    Routes.MORE          -> S.nav.more
+    Routes.TORCH         -> S.nav.torch
+    Routes.CAMERA        -> S.nav.camera
+    Routes.VIBRATION     -> S.nav.vibration
+    Routes.MIC           -> S.nav.mic
+    Routes.SENSORS       -> S.nav.sensors
+    Routes.BATTERY       -> S.nav.battery
+    Routes.RADIOS        -> S.nav.radios
+    Routes.LOCKSCREEN    -> S.lock.title
+    Routes.LINK          -> S.link.title
+    Routes.FILE_META     -> S.nav.fileMeta
+    Routes.SETTINGS      -> S.settings.title
+    Routes.BUG           -> S.bug.title
+    Routes.MANUAL        -> S.manual.title
+    Routes.SEARCH        -> S.common.search
+    Routes.METRIC_HISTORY -> S.nav.dashboard  // parameterized route; reuse Dashboard label
+    else                  -> ""
 }
