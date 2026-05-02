@@ -671,7 +671,7 @@ fun RadiosScreen() {
         if (wifiEnabled) {
             Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("WiFi Signal Details", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+                    Text(S.radios.wifiSignalDetails, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
                     val band = if (wifiFreqMhz > 4900) "5 GHz" else if (wifiFreqMhz > 0) "2.4 GHz" else "—"
                     Text("RSSI: $wifiRssi dBm  ·  Link: $wifiLinkSpeed Mbps  ·  Band: $band ($wifiFreqMhz MHz)",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
@@ -718,7 +718,7 @@ fun RadiosScreen() {
         }
 
         RadioCard(
-            title   = "Bluetooth",
+            title   = S.radios.bluetooth,
             icon    = Icons.Default.Bluetooth,
             enabled = btEnabled,
             detail  = if (btEnabled) "Device: $btName" else "Off",
@@ -726,10 +726,10 @@ fun RadiosScreen() {
         )
 
         RadioCard(
-            title   = "Mobile Data",
+            title   = S.radios.mobileData,
             icon    = Icons.Default.SignalCellularAlt,
             enabled = mobileData,
-            detail  = if (mobileData) "Active transport" else "Not active / WiFi preferred",
+            detail  = if (mobileData) S.radios.activeTransport else S.radios.notActiveWifiPreferred,
             onSettings = { context.startActivity(Intent(Settings.ACTION_DATA_ROAMING_SETTINGS)) },
         )
 
@@ -737,7 +737,7 @@ fun RadiosScreen() {
         if (mobileData || cellSignalDbm != 0) {
             Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Cellular Signal", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+                    Text(S.radios.cellularSignal, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
                     Text("Network: $networkType  ·  Signal: $cellSignalDbm dBm  ·  Level: $cellSignalLevel/4",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                     LinearProgressIndicator(
@@ -751,7 +751,7 @@ fun RadiosScreen() {
         // ── Traffic stats ─────────────────────────────────────────────────────
         Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
             Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Network Speed", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+                Text(S.radios.networkSpeed, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -759,12 +759,12 @@ fun RadiosScreen() {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.ArrowDownward, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                         Text(downloadSpeed, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-                        Text("Download", style = MaterialTheme.typography.labelSmall)
+                        Text(S.radios.download, style = MaterialTheme.typography.labelSmall)
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.ArrowUpward, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                         Text(uploadSpeed, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-                        Text("Upload", style = MaterialTheme.typography.labelSmall)
+                        Text(S.radios.upload, style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }
@@ -774,13 +774,13 @@ fun RadiosScreen() {
 
         // ── NFC section ───────────────────────────────────────────────────────
         RadioCard(
-            title   = "NFC",
+            title   = S.radios.nfc,
             icon    = Icons.Default.Nfc,
             enabled = nfcEnabled,
             detail  = when {
-                !hasNfc     -> "Not available on this device"
-                nfcEnabled  -> "Ready to scan"
-                else        -> "Disabled"
+                !hasNfc     -> S.radios.notAvailableOnDevice
+                nfcEnabled  -> S.radios.readyToScan
+                else        -> S.radios.statusDisabled
             },
             onSettings = {
                 context.startActivity(Intent(Settings.ACTION_NFC_SETTINGS).also {
@@ -798,7 +798,7 @@ fun RadiosScreen() {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text("NFC Tag Reader", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Text(S.radios.nfcTagReader, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                         Switch(checked = nfcReaderActive, onCheckedChange = {
                             nfcReaderActive = it
                             if (!it) {
@@ -830,7 +830,7 @@ fun RadiosScreen() {
                                     color = MaterialTheme.colorScheme.secondary)
                             }
                             if (nfcRecords.isNotEmpty()) {
-                                Text("NDEF Records:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                                Text(S.radios.ndefRecords, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
                                 nfcRecords.forEach { record ->
                                     Text(record, style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.primary)
@@ -845,7 +845,7 @@ fun RadiosScreen() {
                                 Text(S.radios.saveTag)
                             }
                         } else {
-                            Text("Hold an NFC tag near the device...",
+                            Text(S.radios.holdNfcTagNearDevice,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                         }
@@ -857,7 +857,7 @@ fun RadiosScreen() {
             if (nfcReaderActive && nfcTagId != null && nfcProtectionType != null) {
                 Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
                     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("Write Protection Analysis", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Text(S.radios.writeProtectionAnalysis, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                         if (nfcTagType != null) {
                             Text("Tag Type: $nfcTagType", style = MaterialTheme.typography.bodyMedium)
                         }
@@ -878,7 +878,7 @@ fun RadiosScreen() {
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Text("Details", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                                Text(S.radios.detailsLabel, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
                                 IconButton(onClick = { showProtectionDetails = !showProtectionDetails }) {
                                     Icon(
                                         if (showProtectionDetails) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
@@ -948,7 +948,7 @@ fun RadiosScreen() {
                                 Text("Tag Type: ${sel.tagType}", style = MaterialTheme.typography.bodySmall)
                             }
                             if (sel.records.isNotEmpty()) {
-                                Text("NDEF Records:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                                Text(S.radios.ndefRecords, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
                                 sel.records.forEach { r ->
                                     Text(r, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                                 }
@@ -1039,7 +1039,7 @@ fun RadiosScreen() {
             if (nfcReaderActive && currentTag != null) {
                 Card(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
                     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Write to Tag", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Text(S.radios.writeToTag, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
 
                         // Load from saved tag dropdown
                         if (savedNfcTags.isNotEmpty()) {
@@ -1092,7 +1092,7 @@ fun RadiosScreen() {
                                 OutlinedTextField(
                                     value = nfcWriteMsg,
                                     onValueChange = { nfcWriteMsg = it },
-                                    label = { Text("Text to write") },
+                                    label = { Text(S.radios.textToWrite) },
                                     modifier = Modifier.fillMaxWidth(),
                                     singleLine = true,
                                 )
@@ -1115,7 +1115,7 @@ fun RadiosScreen() {
                                 OutlinedTextField(
                                     value = nfcWriteMsg,
                                     onValueChange = { nfcWriteMsg = it },
-                                    label = { Text("URI path") },
+                                    label = { Text(S.radios.uriPathLabel) },
                                     placeholder = { Text(S.radios.exampleDomain) },
                                     modifier = Modifier.fillMaxWidth(),
                                     singleLine = true,
@@ -1125,7 +1125,7 @@ fun RadiosScreen() {
                                 OutlinedTextField(
                                     value = nfcMimeType,
                                     onValueChange = { nfcMimeType = it },
-                                    label = { Text("MIME type") },
+                                    label = { Text(S.radios.mimeTypeLabel) },
                                     placeholder = { Text(S.radios.textPlain) },
                                     modifier = Modifier.fillMaxWidth(),
                                     singleLine = true,
@@ -1133,7 +1133,7 @@ fun RadiosScreen() {
                                 OutlinedTextField(
                                     value = nfcWriteMsg,
                                     onValueChange = { nfcWriteMsg = it },
-                                    label = { Text("Payload") },
+                                    label = { Text(S.radios.payloadLabel) },
                                     modifier = Modifier.fillMaxWidth(),
                                     maxLines = 3,
                                 )
@@ -1143,7 +1143,7 @@ fun RadiosScreen() {
                         Button(
                             onClick = {
                                 val tag = currentTag ?: run {
-                                    nfcWriteStatus = "No tag present"
+                                    nfcWriteStatus = S.radios.noTagPresent
                                     return@Button
                                 }
                                 val record = when (nfcWriteType) {
@@ -1164,7 +1164,7 @@ fun RadiosScreen() {
                             },
                             enabled = nfcWriteMsg.isNotBlank() && !nfcBypassInProgress,
                             modifier = Modifier.fillMaxWidth(),
-                        ) { Text(if (nfcBypassInProgress) "Writing..." else "Write NDEF $nfcWriteType") }
+                        ) { Text(if (nfcBypassInProgress) S.radios.writingStatus else S.radios.writeNdefFor(nfcWriteType)) }
 
                         if (nfcBypassInProgress) {
                             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -1178,7 +1178,7 @@ fun RadiosScreen() {
                         }
 
                         if (nfcBypassLog.isNotEmpty()) {
-                            Text("Bypass log:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                            Text(S.radios.bypassLogLabel, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
                             nfcBypassLog.forEach { line ->
                                 Text(line, style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -1200,7 +1200,7 @@ fun RadiosScreen() {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text("NFC Guide", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                        Text(S.radios.nfcGuide, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                         IconButton(onClick = { showNfcInfo = !showNfcInfo }) {
                             Icon(
                                 if (showNfcInfo) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
@@ -1209,37 +1209,20 @@ fun RadiosScreen() {
                         }
                     }
                     if (showNfcInfo) {
-                        Text("NDEF Record Types:", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
-                        Text("  Text — Plain text with language code\n" +
-                             "  URI — URLs, phone numbers, emails (compact encoding)\n" +
-                             "  MIME — Any MIME type with custom payload\n" +
-                             "  Smart Poster — URI + metadata (title, icon)",
-                            style = MaterialTheme.typography.bodySmall)
+                        Text(S.radios.ndefRecordTypesTitle, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
+                        Text(S.radios.ndefRecordTypesBody, style = MaterialTheme.typography.bodySmall)
 
                         Spacer(Modifier.height(4.dp))
-                        Text("Common Tag Types:", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
-                        Text("  NTAG213 — 144 bytes, most common small tags\n" +
-                             "  NTAG215 — 504 bytes, used for Amiibo\n" +
-                             "  NTAG216 — 888 bytes, large capacity\n" +
-                             "  Mifare Classic 1K — 1024 bytes, proprietary",
-                            style = MaterialTheme.typography.bodySmall)
+                        Text(S.radios.commonTagTypesTitle, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
+                        Text(S.radios.commonTagTypesBody, style = MaterialTheme.typography.bodySmall)
 
                         Spacer(Modifier.height(4.dp))
-                        Text("Common Uses:", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
-                        Text("  URLs — Share links by tapping\n" +
-                             "  Wi-Fi — Share network credentials\n" +
-                             "  vCard — Share contact information\n" +
-                             "  App Launch — Open specific apps\n" +
-                             "  Smart Home — Trigger automations",
-                            style = MaterialTheme.typography.bodySmall)
+                        Text(S.radios.commonUsesTitle, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
+                        Text(S.radios.commonUsesBody, style = MaterialTheme.typography.bodySmall)
 
                         Spacer(Modifier.height(4.dp))
-                        Text("Best Practices:", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
-                        Text("  - Use URI records for URLs (more compact than text)\n" +
-                             "  - Keep payloads small for faster read/write\n" +
-                             "  - Test with reader before writing to verify\n" +
-                             "  - Lock tags after writing to prevent tampering",
-                            style = MaterialTheme.typography.bodySmall)
+                        Text(S.radios.bestPracticesTitle, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
+                        Text(S.radios.bestPracticesBody, style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -1978,20 +1961,20 @@ fun RadiosScreen() {
 
         // ── Quick panel launcher (Android 10+) ────────────────────────────────
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            Text("Quick Toggles (System Panel)", style = MaterialTheme.typography.titleMedium)
+            Text(S.radios.quickToggles, style = MaterialTheme.typography.titleMedium)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
             ) {
                 OutlinedButton(onClick = {
                     context.startActivity(Intent(Settings.Panel.ACTION_WIFI))
-                }) { Text("WiFi Panel", maxLines = 1, softWrap = false) }
+                }) { Text(S.radios.wifiPanel, maxLines = 1, softWrap = false) }
                 OutlinedButton(onClick = {
                     context.startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
-                }) { Text("BT Settings", maxLines = 1, softWrap = false) }
+                }) { Text(S.radios.btSettings, maxLines = 1, softWrap = false) }
                 OutlinedButton(onClick = {
                     context.startActivity(Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY))
-                }) { Text("Internet Panel", maxLines = 1, softWrap = false) }
+                }) { Text(S.radios.internetPanel, maxLines = 1, softWrap = false) }
             }
         }
     }
