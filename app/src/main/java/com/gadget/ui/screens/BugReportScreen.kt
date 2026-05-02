@@ -34,6 +34,7 @@ import androidx.core.content.ContextCompat
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.ui.components.DashCard
 import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.sectionHeading
@@ -180,11 +181,9 @@ fun BugReportScreen() {
         // ══════════════════════════════════════════════════════════════
         // DISCLAIMER
         // ══════════════════════════════════════════════════════════════
-        Card(
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            ),
+        DashCard(
+            contentPadding = 0.dp,
+            verticalArrangement = Arrangement.Top,
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -224,11 +223,9 @@ fun BugReportScreen() {
             modifier = Modifier.sectionHeading(),
         )
 
-        Card(
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            ),
+        DashCard(
+            contentPadding = 0.dp,
+            verticalArrangement = Arrangement.Top,
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
                 // Header row
@@ -286,11 +283,9 @@ fun BugReportScreen() {
             modifier = Modifier.sectionHeading(),
         )
 
-        Card(
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            ),
+        DashCard(
+            contentPadding = 0.dp,
+            verticalArrangement = Arrangement.Top,
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
                 Row(
@@ -351,11 +346,9 @@ fun BugReportScreen() {
             modifier = Modifier.sectionHeading(),
         )
 
-        Card(
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            ),
+        DashCard(
+            contentPadding = 0.dp,
+            verticalArrangement = Arrangement.Top,
         ) {
             Column(
                 modifier = Modifier.padding(12.dp),

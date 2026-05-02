@@ -1,12 +1,14 @@
 package com.gadget.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -36,6 +38,8 @@ fun DashCard(
     tonalElevation: Dp = DashElevation.card,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     contentPadding: Dp = 16.dp,
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = CardDefaults.cardColors(containerColor = containerColor)
@@ -49,8 +53,10 @@ fun DashCard(
             colors = colors,
             elevation = elevation,
         ) {
-            androidx.compose.foundation.layout.Column(
+            Column(
                 modifier = Modifier.padding(contentPadding),
+                verticalArrangement = verticalArrangement,
+                horizontalAlignment = horizontalAlignment,
                 content = content,
             )
         }
@@ -61,8 +67,10 @@ fun DashCard(
             colors = colors,
             elevation = elevation,
         ) {
-            androidx.compose.foundation.layout.Column(
+            Column(
                 modifier = Modifier.padding(contentPadding),
+                verticalArrangement = verticalArrangement,
+                horizontalAlignment = horizontalAlignment,
                 content = content,
             )
         }
