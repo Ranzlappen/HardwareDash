@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Gadget</string>
+    <string name="admin_description">Permite a Gadget bloquear la pantalla de forma programática.</string>
+
+    <!-- Widget labels (shown in widget picker title) -->
+    <string name="widget_label_metric">Métrica de Gadget</string>
+    <string name="widget_label_log_now">Registro rápido</string>
+    <string name="widget_label_flashlight">Activar linterna</string>
+    <string name="widget_label_strobe">Activar estrobo</string>
+    <string name="widget_label_camera_snapshot">Foto rápida</string>
+    <string name="widget_label_video_toggle">Grabación de vídeo</string>
+    <string name="widget_label_voice_record">Grabación de voz</string>
+    <string name="widget_label_phone_ring">Hacer sonar el teléfono</string>
+    <string name="widget_label_notify">Notificación rápida</string>
+    <string name="widget_label_db_meter">Medidor dB</string>
+
+    <!-- Widget descriptions (shown in widget picker subtitle) -->
+    <string name="widget_desc_metric">Mostrar una métrica de hardware en vivo en la pantalla de inicio. Elija entre batería, sensores, WiFi y más.</string>
+    <string name="widget_desc_log_now">Toque para registrar rápidamente una entrada en su Registro.</string>
+    <string name="widget_desc_flashlight">Encender o apagar la linterna desde la pantalla de inicio.</string>
+    <string name="widget_desc_strobe">Encender o apagar la luz estroboscópica desde la pantalla de inicio.</string>
+    <string name="widget_desc_camera_snapshot">Hacer una foto rápida desde la pantalla de inicio.</string>
+    <string name="widget_desc_video_toggle">Iniciar o detener la grabación de vídeo desde la pantalla de inicio.</string>
+    <string name="widget_desc_voice_record">Iniciar o detener la grabación de voz desde la pantalla de inicio.</string>
+    <string name="widget_desc_phone_ring">Hacer sonar el teléfono tras un retraso configurable.</string>
+    <string name="widget_desc_notify">Enviarse una notificación tras un retraso configurable.</string>
+    <string name="widget_desc_db_meter">Monitorizar el nivel de ruido ambiental desde la pantalla de inicio.</string>
+
+    <!-- Vibration widget -->
+    <string name="widget_label_vibration">Activar vibración</string>
+    <string name="widget_desc_vibration">Activar o desactivar la vibración desde la pantalla de inicio.</string>
+</resources>

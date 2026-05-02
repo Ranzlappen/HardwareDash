@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Gadget</string>
+    <string name="admin_description">Permet à Gadget de verrouiller l\'écran de manière programmatique.</string>
+
+    <!-- Widget labels (shown in widget picker title) -->
+    <string name="widget_label_metric">Métrique Gadget</string>
+    <string name="widget_label_log_now">Journal rapide</string>
+    <string name="widget_label_flashlight">Lampe torche on/off</string>
+    <string name="widget_label_strobe">Stroboscope on/off</string>
+    <string name="widget_label_camera_snapshot">Photo rapide</string>
+    <string name="widget_label_video_toggle">Enregistrement vidéo</string>
+    <string name="widget_label_voice_record">Enregistrement vocal</string>
+    <string name="widget_label_phone_ring">Sonnerie du téléphone</string>
+    <string name="widget_label_notify">Notification rapide</string>
+    <string name="widget_label_db_meter">Sonomètre dB</string>
+
+    <!-- Widget descriptions (shown in widget picker subtitle) -->
+    <string name="widget_desc_metric">Afficher une métrique matérielle en direct sur votre écran d\'accueil. Choisissez parmi batterie, capteurs, Wi-Fi et plus.</string>
+    <string name="widget_desc_log_now">Appuyez pour enregistrer rapidement une entrée dans votre Journal.</string>
+    <string name="widget_desc_flashlight">Allumer ou éteindre la lampe torche depuis votre écran d\'accueil.</string>
+    <string name="widget_desc_strobe">Allumer ou éteindre la lumière stroboscopique depuis votre écran d\'accueil.</string>
+    <string name="widget_desc_camera_snapshot">Prendre une photo rapide depuis votre écran d\'accueil.</string>
+    <string name="widget_desc_video_toggle">Démarrer ou arrêter l\'enregistrement vidéo depuis votre écran d\'accueil.</string>
+    <string name="widget_desc_voice_record">Démarrer ou arrêter l\'enregistrement vocal depuis votre écran d\'accueil.</string>
+    <string name="widget_desc_phone_ring">Faire sonner votre téléphone après un délai configurable.</string>
+    <string name="widget_desc_notify">S\'envoyer une notification après un délai configurable.</string>
+    <string name="widget_desc_db_meter">Surveiller le niveau de bruit ambiant depuis votre écran d\'accueil.</string>
+
+    <!-- Vibration widget -->
+    <string name="widget_label_vibration">Vibration on/off</string>
+    <string name="widget_desc_vibration">Activer ou désactiver la vibration depuis votre écran d\'accueil.</string>
+</resources>
