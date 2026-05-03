@@ -34,6 +34,7 @@ import com.gadget.ui.screens.FileMetadataScreen
 import com.gadget.ui.screens.LockScreenScreen
 import com.gadget.ui.screens.ManualScreen
 import com.gadget.ui.screens.MicScreen
+import com.gadget.ui.screens.AppsScreen
 import com.gadget.ui.screens.RadiosScreen
 import com.gadget.ui.screens.SensorsScreen
 import com.gadget.ui.screens.SettingsScreen
@@ -65,6 +66,7 @@ object Routes {
     const val SETTINGS     = "settings"
     const val BUG          = "bug"
     const val MANUAL       = "manual"
+    const val APPS         = "apps"
 
     // ── Onboarding ──
     const val ONBOARDING   = "onboarding"
@@ -161,6 +163,7 @@ fun NavGraph() {
                 composable(Routes.SETTINGS)   { SettingsScreen() }
                 composable(Routes.BUG)        { BugReportScreen() }
                 composable(Routes.MANUAL)     { ManualScreen() }
+                composable(Routes.APPS)       { AppsScreen() }
                 composable(Routes.METRIC_HISTORY) {
                     MetricHistoryScreen(onBack = { navController.popBackStack() })
                 }
