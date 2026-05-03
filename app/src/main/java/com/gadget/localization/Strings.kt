@@ -724,6 +724,9 @@ object S {
         val title get() = m(l, "Apps", "Apps", "Apps", "Applis")
         val description get() = m(l, "Organize installed apps, PWAs, and web links into folders that double as designable home-screen widgets.", "Organisiere installierte Apps, PWAs und Web-Links in Ordnern, die zugleich gestaltbare Widgets für den Startbildschirm sind.", "Organiza apps instaladas, PWAs y enlaces web en carpetas que también funcionan como widgets personalizables para la pantalla de inicio.", "Organisez les applis installées, les PWA et les liens web en dossiers qui font aussi office de widgets personnalisables sur l'écran d'accueil.")
         val createFolder get() = m(l, "Create folder", "Ordner erstellen", "Crear carpeta", "Créer un dossier")
+        val newFolder get() = m(l, "New folder", "Neuer Ordner", "Nueva carpeta", "Nouveau dossier")
+        val folderName get() = m(l, "Folder name", "Ordnername", "Nombre de la carpeta", "Nom du dossier")
+        val deleteFolderConfirm get() = m(l, "Delete this folder?", "Diesen Ordner löschen?", "¿Eliminar esta carpeta?", "Supprimer ce dossier ?")
         val noFolders get() = m(l, "No folders yet — tap +", "Noch keine Ordner — tippe auf +", "Aún no hay carpetas — toca +", "Aucun dossier — appuyez sur +")
     }
 
