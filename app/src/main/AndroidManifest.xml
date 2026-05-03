@@ -78,6 +78,17 @@
     <uses-feature android:name="android.hardware.sensor.barometer"     android:required="false" />
     <uses-feature android:name="android.hardware.sensor.stepcounter"  android:required="false" />
 
+    <!-- ══════════════════════ APP ORGANIZER ══════════════════════ -->
+    <!-- Make every launcher-visible app and WebAPK PWA queryable via
+         LauncherApps / PackageManager so the App-Organizer module can
+         enumerate them. Play-Store-friendly; no QUERY_ALL_PACKAGES. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <application
         android:name=".GadgetApplication"
         android:allowBackup="true"
