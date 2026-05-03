@@ -82,7 +82,7 @@ class SearchViewModel @Inject constructor(
                         title = metric.displayName,
                         subtitle = "${metric.category} \u2022 ${metric.unit.ifBlank { "--" }}",
                         category = SearchCategory.METRIC,
-                        route = Routes.MONITOR,
+                        route = Routes.metricHistory(metric.key),
                     )
                 )
             }

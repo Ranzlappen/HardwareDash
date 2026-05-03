@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.gadget.localization.LocalizationManager
 import com.gadget.ui.theme.AccessibilityPreferencesManager
+import com.gadget.ui.theme.ThemePreferencesManager
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.config.Configuration
 import java.io.File
@@ -25,6 +26,9 @@ class MainActivity : ComponentActivity() {
 
         // Initialize accessibility preferences
         AccessibilityPreferencesManager.init(this)
+
+        // Initialize theme preferences (color preset selection)
+        ThemePreferencesManager.init(this)
 
         // Initialize OSMDroid map tile configuration (cache + user agent)
         Configuration.getInstance().apply {
