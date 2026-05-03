@@ -2,6 +2,8 @@
 // REASON: Persist scanned NFC tags, emulate them via HCE, populate writer from saved tags
 // DATE: 2026-04-09
 
+@file:OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+
 package com.gadget.ui.screens
 
 import android.Manifest

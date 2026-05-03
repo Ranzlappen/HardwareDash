@@ -2,6 +2,8 @@
 // REASON: Persist patterns via SharedPreferences, add finger-draw two-axis vibration interface
 // DATE: 2026-04-06
 
+@file:OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+
 package com.gadget.ui.screens
 
 import android.content.Context
