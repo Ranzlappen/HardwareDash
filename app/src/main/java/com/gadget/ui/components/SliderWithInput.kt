@@ -117,16 +117,13 @@ fun SliderWithInput(
                         focusManager.clearFocus()
                     },
                 ),
-                label = if (label != null) {
-                    { Text(label, style = MaterialTheme.typography.labelSmall) }
-                } else null,
                 suffix = if (suffix.isNotEmpty()) {
                     { Text(suffix, style = MaterialTheme.typography.bodySmall) }
                 } else null,
                 singleLine = true,
-                textStyle = MaterialTheme.typography.bodySmall.copy(textAlign = TextAlign.End),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(textAlign = TextAlign.End),
                 modifier = Modifier
-                    .width(90.dp)
+                    .width(104.dp)
                     .onFocusChanged { state ->
                         val gainedFocus = state.isFocused
                         if (!gainedFocus && isFocused) {
