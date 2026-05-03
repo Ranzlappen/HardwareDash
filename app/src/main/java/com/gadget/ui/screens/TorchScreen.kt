@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
+import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
 import com.gadget.ui.components.sectionHeading
@@ -156,7 +157,7 @@ fun TorchScreen() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+            .padding(horizontal = 12.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -223,7 +224,7 @@ fun TorchScreen() {
         // ── Toggle buttons ───────────────────────────────────────────────────
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxWidth(0.85f),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             // Turn ON/OFF
             Button(
@@ -248,9 +249,8 @@ fun TorchScreen() {
                 ),
                 modifier = Modifier.weight(1f).height(56.dp),
             ) {
-                Text(
+                ResponsiveButtonText(
                     if (torchOn) strings.turnOff else strings.turnOn,
-                    style = MaterialTheme.typography.titleMedium,
                 )
             }
 
@@ -265,9 +265,8 @@ fun TorchScreen() {
                 ),
                 modifier = Modifier.weight(1f).height(56.dp),
             ) {
-                Text(
+                ResponsiveButtonText(
                     if (strobeActive) strings.stop else strings.strobe,
-                    style = MaterialTheme.typography.titleMedium,
                 )
             }
         }

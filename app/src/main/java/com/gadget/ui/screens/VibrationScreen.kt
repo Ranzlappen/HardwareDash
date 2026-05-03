@@ -10,7 +10,6 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -179,8 +178,8 @@ fun VibrationScreen() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+            .padding(horizontal = 12.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -204,9 +203,10 @@ fun VibrationScreen() {
         // ── Predefined patterns ───────────────────────────────────────────────
         if (patterns.isNotEmpty()) {
             Text(S.vibration.predefinedEffects, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.sectionHeading())
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 patterns.forEach { p ->
                     ElevatedButton(onClick = {
@@ -229,12 +229,16 @@ fun VibrationScreen() {
 
         // Speed presets
         Text(S.vibration.speedPresets, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             listOf(S.vibration.slow to 200f, S.vibration.medium to 80f, S.vibration.fast to 30f, S.vibration.rapid to 10f).forEach { (label, gap) ->
                 FilterChip(
                     selected = gapMs == gap,
                     onClick  = { gapMs = gap },
-                    label    = { Text(label) },
+                    label    = { Text(label, maxLines = 1, softWrap = false) },
                 )
             }
         }

@@ -29,7 +29,6 @@ import android.os.Looper
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Base64
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -49,6 +48,7 @@ import com.google.accompanist.permissions.*
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.services.NfcEmulationService
 import com.gadget.flipper.FlipperConnectionManager
@@ -642,7 +642,7 @@ fun RadiosScreen() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(20.dp),
+            .padding(horizontal = 12.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
@@ -1100,9 +1100,10 @@ fun RadiosScreen() {
                             }
                             "URI" -> {
                                 // URI prefix selector
-                                Row(
+                                FlowRow(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.fillMaxWidth(),
                                 ) {
                                     listOf("https://", "http://", "tel:", "mailto:", "geo:", "sms:").forEach { prefix ->
                                         FilterChip(
@@ -1299,15 +1300,16 @@ fun RadiosScreen() {
                 }
 
                 Text(S.radios.protocol, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     listOf("NEC", "Pronto", "Raw").forEach { p ->
                         FilterChip(
                             selected = irProtocol == p,
                             onClick = { irProtocol = p },
-                            label = { Text(p) },
+                            label = { Text(p, maxLines = 1, softWrap = false) },
                         )
                     }
                 }
@@ -1366,10 +1368,11 @@ fun RadiosScreen() {
                         },
                         enabled = irHasEmitter && irPayload.isNotBlank(),
                         modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     ) {
                         Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(S.radios.transmit)
+                        ResponsiveButtonText(S.radios.transmit)
                     }
                     OutlinedButton(
                         onClick = {
@@ -1377,10 +1380,12 @@ fun RadiosScreen() {
                             val txt = cm?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()
                             if (!txt.isNullOrBlank()) irPayload = txt
                         },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     ) {
                         Icon(Icons.Default.ContentPaste, null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(S.radios.pasteFromClipboard)
+                        ResponsiveButtonText(S.radios.pasteFromClipboard)
                     }
                 }
 
@@ -1586,15 +1591,16 @@ fun RadiosScreen() {
                 )
 
                 Text(S.radios.modulation, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     listOf("AM650", "AM270", "FM238", "FM476").forEach { m ->
                         FilterChip(
                             selected = subGhzModulation == m,
                             onClick = { subGhzModulation = m },
-                            label = { Text(m) },
+                            label = { Text(m, maxLines = 1, softWrap = false) },
                         )
                     }
                 }
@@ -1678,18 +1684,21 @@ fun RadiosScreen() {
                         },
                         enabled = flipperConnected && subGhzFreqText.isNotBlank(),
                         modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     ) {
                         Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(if (flipperConnected) flipperStrings.sendToFlipper else S.radios.transmit)
+                        ResponsiveButtonText(if (flipperConnected) flipperStrings.sendToFlipper else S.radios.transmit)
                     }
                     OutlinedButton(
                         onClick = { subGhzSaveName = ""; showSubGhzSaveDialog = true },
                         enabled = subGhzFreqText.isNotBlank(),
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     ) {
                         Icon(Icons.Default.Save, null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(S.radios.saveSignal)
+                        ResponsiveButtonText(S.radios.saveSignal)
                     }
                 }
 
@@ -1963,9 +1972,10 @@ fun RadiosScreen() {
         // ── Quick panel launcher (Android 10+) ────────────────────────────────
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             Text(S.radios.quickToggles, style = MaterialTheme.typography.titleMedium)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 OutlinedButton(onClick = {
                     context.startActivity(Intent(Settings.Panel.ACTION_WIFI))
