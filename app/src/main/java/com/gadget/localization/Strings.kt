@@ -33,6 +33,7 @@ object S {
         val fileMeta get() = m(l, "Files", "Dateien", "Archivos", "Fichiers")
         val bug get() = m(l, "Bug", "Fehler", "Error", "Bug")
         val manual get() = m(l, "Manual", "Handbuch", "Manual", "Manuel")
+        val apps get() = m(l, "Apps", "Apps", "Apps", "Applis")
         // New top-level tab labels
         val dashboard get() = m(l, "Dashboard", "Dashboard", "Panel", "Tableau de bord")
         val tools get() = m(l, "Tools", "Werkzeuge", "Herramientas", "Outils")
@@ -714,6 +715,16 @@ object S {
         val logbook get() = m(l, "Logbook", "Logbuch", "Registro", "Journal")
         val linkRules get() = m(l, "Link Rules", "Link-Regeln", "Reglas de enlace", "R\u00E8gles de lien")
         val settings get() = m(l, "Settings", "Einstellungen", "Ajustes", "Param\u00E8tres")
+    }
+
+    // ── Apps (organizer module) ────────────────────────────────────────
+    val apps: Apps @Composable get() = Apps(lang)
+
+    class Apps(private val l: Language) {
+        val title get() = m(l, "Apps", "Apps", "Apps", "Applis")
+        val description get() = m(l, "Organize installed apps, PWAs, and web links into folders that double as designable home-screen widgets.", "Organisiere installierte Apps, PWAs und Web-Links in Ordnern, die zugleich gestaltbare Widgets für den Startbildschirm sind.", "Organiza apps instaladas, PWAs y enlaces web en carpetas que también funcionan como widgets personalizables para la pantalla de inicio.", "Organisez les applis installées, les PWA et les liens web en dossiers qui font aussi office de widgets personnalisables sur l'écran d'accueil.")
+        val createFolder get() = m(l, "Create folder", "Ordner erstellen", "Crear carpeta", "Créer un dossier")
+        val noFolders get() = m(l, "No folders yet — tap +", "Noch keine Ordner — tippe auf +", "Aún no hay carpetas — toca +", "Aucun dossier — appuyez sur +")
     }
 
     // ── Backup ─────────────────────────────────────────────────────────

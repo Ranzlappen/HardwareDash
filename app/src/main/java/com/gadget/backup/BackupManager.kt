@@ -175,7 +175,7 @@ class BackupManager @Inject constructor(
             put("backupTimestamp", System.currentTimeMillis())
             put("backupDate", java.time.Instant.now().toString())
             put("androidSdk", Build.VERSION.SDK_INT)
-            put("dbSchemaVersion", 1) // Room database version
+            put("dbSchemaVersion", 2) // Room database version
             put("logbookSchemaVersion", 7) // Logbook schema version
         }
     }
