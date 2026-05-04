@@ -1,41 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Layout for the 2x2 folder home-screen widget. Kept intentionally minimal:
-  the folder name centered + a horizontal accent stripe whose color is the
-  folder's baseColorArgb (set at render time via RemoteViews.setInt). Icon-grid
-  preview lives in a future variant once bitmap icon caching lands.
+  2x2 folder widget layout. Two render modes the FolderWidgetRenderer toggles
+  between via setViewVisibility:
+
+  1. Cover-icon mode (batch G): widget_folder_cover is VISIBLE and the grid
+     section is GONE. Used when the folder has a chosen cover image / symbol.
+  2. Preview-grid mode (default, batch D): widget_folder_grid_section is
+     VISIBLE (cover is GONE). The folder name strip sits on top, a nested
+     2x2 LinearLayout grid of ImageViews underneath. Unused tile slots are
+     set to INVISIBLE so the 2x2 alignment is preserved when the folder
+     has fewer than 4 members.
+
+  GridLayout was avoided because its RemoteViews support has gaps around
+  layout_columnWeight; nested LinearLayouts with layout_weight=1 are the
+  bullet-proof way to get a true quartered grid via RemoteViews.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_folder_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
-    android:padding="10dp">
+    android:padding="8dp">
 
-    <TextView
-        android:id="@+id/widget_folder_name"
+    <!-- Mode 1: cover image / symbol — visible only when set by Batch G. -->
+    <ImageView
+        android:id="@+id/widget_folder_cover"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:text="Folder"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:autoSizeTextType="uniform"
-        android:autoSizeMinTextSize="10sp"
-        android:autoSizeMaxTextSize="18sp"
-        android:autoSizeStepGranularity="1sp"
-        android:maxLines="2"
-        android:ellipsize="end"
-        android:fontFamily="sans-serif-medium" />
+        android:layout_height="match_parent"
+        android:contentDescription="@string/widget_folder_label"
+        android:scaleType="fitCenter"
+        android:visibility="gone" />
 
-    <View
-        android:id="@+id/widget_folder_accent"
-        android:layout_width="28dp"
-        android:layout_height="3dp"
-        android:layout_below="@id/widget_folder_name"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="6dp"
-        android:background="#FFFFFF" />
+    <!-- Mode 2: name + 2x2 preview grid (default). -->
+    <LinearLayout
+        android:id="@+id/widget_folder_grid_section"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_folder_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:text="Folder"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/widget_folder_tile_0"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="3dp"
+                android:layout_weight="1"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter" />
+
+            <ImageView
+                android:id="@+id/widget_folder_tile_1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="3dp"
+                android:layout_weight="1"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="6dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/widget_folder_tile_2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="3dp"
+                android:layout_weight="1"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter" />
+
+            <ImageView
+                android:id="@+id/widget_folder_tile_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="3dp"
+                android:layout_weight="1"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter" />
+        </LinearLayout>
+    </LinearLayout>
 
 </RelativeLayout>
