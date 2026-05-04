@@ -3,11 +3,13 @@ package com.gadget.widget.folder
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.view.View
 import android.widget.RemoteViews
 import com.gadget.R
 import com.gadget.apps.AppsEntryPoint
 import com.gadget.apps.icons.AppIconLoader
+import com.gadget.apps.icons.MaterialSymbol
 import com.gadget.data.db.apps.AppRecord
 import com.gadget.data.db.apps.AppsDao
 import com.gadget.data.db.apps.Folder
@@ -54,6 +56,15 @@ internal object FolderWidgetRenderer {
             return
         }
 
+        // Cover-icon mode short-circuits the preview-grid path. Image / symbol
+        // both fill the whole widget; the folder name is conveyed by the
+        // popup that opens on tap.
+        val coverViews = coverViewsOrNull(context, appWidgetId, folder)
+        if (coverViews != null) {
+            appWidgetManager.updateAppWidget(appWidgetId, coverViews)
+            return
+        }
+
         val members = dao.getMembership(folder.id)
             .sortedBy { it.sortOrder }
             .take(tileIds.size)
@@ -67,6 +78,56 @@ internal object FolderWidgetRenderer {
             appWidgetId,
             previewGridViews(context, appWidgetId, folder, records, loader),
         )
+    }
+
+    private fun coverViewsOrNull(
+        context: Context,
+        appWidgetId: Int,
+        folder: Folder,
+    ): RemoteViews? {
+        val cover = folder.coverIcon
+        return when {
+            cover.startsWith("image:") -> {
+                val path = cover.removePrefix("image:")
+                val bmp = runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
+                    ?: return null
+                buildCoverViews(context, appWidgetId, folder) { views ->
+                    views.setImageViewBitmap(R.id.widget_folder_cover, bmp)
+                }
+            }
+            cover.startsWith("symbol:") -> {
+                val sym = MaterialSymbol.fromId(cover.removePrefix("symbol:"))
+                    ?: return null
+                buildCoverViews(context, appWidgetId, folder) { views ->
+                    views.setImageViewResource(R.id.widget_folder_cover, sym.drawableRes)
+                    // ImageView.setColorFilter(int) defaults to SRC_IN, which
+                    // is what we want for the tinted-symbol look.
+                    views.setInt(
+                        R.id.widget_folder_cover,
+                        "setColorFilter",
+                        folder.baseColorArgb,
+                    )
+                }
+            }
+            else -> null
+        }
+    }
+
+    private fun buildCoverViews(
+        context: Context,
+        appWidgetId: Int,
+        folder: Folder,
+        configure: (RemoteViews) -> Unit,
+    ): RemoteViews {
+        val views = RemoteViews(context.packageName, R.layout.widget_folder_2x2)
+        views.setViewVisibility(R.id.widget_folder_cover, View.VISIBLE)
+        views.setViewVisibility(R.id.widget_folder_grid_section, View.GONE)
+        configure(views)
+        views.setOnClickPendingIntent(
+            R.id.widget_folder_root,
+            popupPendingIntent(context, appWidgetId, folder.id),
+        )
+        return views
     }
 
     private suspend fun previewGridViews(

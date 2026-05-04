@@ -1,5 +1,9 @@
 package com.gadget.ui.apps
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,8 +25,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
@@ -59,9 +67,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import android.graphics.BitmapFactory
+import androidx.compose.ui.graphics.asImageBitmap
 import com.gadget.apps.icons.AppIcon
+import com.gadget.apps.icons.MaterialSymbol
 import com.gadget.apps.rules.FolderRule
 import com.gadget.data.db.apps.AppRecord
+import com.gadget.data.db.apps.Folder
 import com.gadget.localization.S
 import com.gadget.ui.folder.FolderPopupActivity
 import kotlinx.coroutines.launch
@@ -91,6 +103,9 @@ fun FolderEditorScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri -> uri?.let { viewModel.setCoverImageFromUri(it) } }
 
     LaunchedEffect(folder?.id, folder?.name) {
         folder?.let { if (nameDraft != it.name) nameDraft = it.name }
@@ -145,6 +160,18 @@ fun FolderEditorScreen(
                 ColorPickerRow(
                     selectedArgb = folder!!.baseColorArgb,
                     onSelect = viewModel::setBaseColor,
+                )
+            }
+            item {
+                CoverIconSection(
+                    folder = folder!!,
+                    onPickImage = {
+                        pickImageLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                        )
+                    },
+                    onPickSymbol = viewModel::setCoverSymbol,
+                    onClear = viewModel::clearCover,
                 )
             }
             item {
@@ -269,6 +296,132 @@ fun FolderEditorScreen(
                 showWebLinkDialog = false
             },
         )
+    }
+}
+
+@Composable
+private fun CoverIconSection(
+    folder: Folder,
+    onPickImage: () -> Unit,
+    onPickSymbol: (String) -> Unit,
+    onClear: () -> Unit,
+) {
+    var showSymbols by remember { mutableStateOf(false) }
+    val accent = Color(folder.baseColorArgb)
+    val cover = folder.coverIcon
+    val hasCustom = cover.startsWith("image:") || cover.startsWith("symbol:")
+    val apps = S.apps
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CoverPreview(coverIcon = cover, accent = accent, sizeDp = 40.dp)
+            Spacer(Modifier.size(12.dp))
+            Text(
+                text = apps.coverIcon,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            IconButton(onClick = onPickImage) {
+                Icon(
+                    imageVector = Icons.Filled.AddPhotoAlternate,
+                    contentDescription = apps.coverPickImage,
+                )
+            }
+            IconButton(onClick = { showSymbols = !showSymbols }) {
+                Icon(
+                    imageVector = Icons.Filled.GridView,
+                    contentDescription = apps.coverPickSymbol,
+                )
+            }
+            if (hasCustom) {
+                IconButton(onClick = onClear) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = apps.coverClear,
+                    )
+                }
+            }
+        }
+        if (showSymbols) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                MaterialSymbol.entries.forEach { sym ->
+                    IconButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            onPickSymbol(sym.id)
+                            showSymbols = false
+                        },
+                    ) {
+                        Icon(
+                            imageVector = sym.icon,
+                            contentDescription = sym.id,
+                            tint = accent,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CoverPreview(
+    coverIcon: String,
+    accent: Color,
+    sizeDp: androidx.compose.ui.unit.Dp,
+) {
+    Box(
+        modifier = Modifier
+            .size(sizeDp)
+            .clip(CircleShape)
+            .background(accent.copy(alpha = 0.18f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        when {
+            coverIcon.startsWith("image:") -> {
+                val path = coverIcon.removePrefix("image:")
+                val bmp = remember(path) {
+                    runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
+                }
+                if (bmp != null) {
+                    Image(
+                        bitmap = bmp.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.size(sizeDp).clip(CircleShape),
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.AddPhotoAlternate,
+                        contentDescription = null,
+                        tint = accent,
+                    )
+                }
+            }
+            coverIcon.startsWith("symbol:") -> {
+                val id = coverIcon.removePrefix("symbol:")
+                val sym = MaterialSymbol.fromId(id)
+                Icon(
+                    imageVector = sym?.icon ?: Icons.Filled.Folder,
+                    contentDescription = null,
+                    tint = accent,
+                    modifier = Modifier.size((sizeDp.value * 0.6f).dp),
+                )
+            }
+            else -> {
+                Icon(
+                    imageVector = Icons.Filled.Folder,
+                    contentDescription = null,
+                    tint = accent.copy(alpha = 0.65f),
+                    modifier = Modifier.size((sizeDp.value * 0.6f).dp),
+                )
+            }
+        }
     }
 }
 

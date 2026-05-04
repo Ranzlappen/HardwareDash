@@ -3,7 +3,9 @@ package com.gadget.ui.apps
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.net.Uri
 import com.gadget.apps.WebLinkRepository
+import com.gadget.apps.icons.CoverImageStore
 import com.gadget.apps.pin.PinFolderHelper
 import com.gadget.apps.rules.FolderRule
 import com.gadget.apps.rules.RuleCodec
@@ -36,6 +38,7 @@ class FolderEditorViewModel @Inject constructor(
     private val dao: AppsDao,
     private val webLinkRepository: WebLinkRepository,
     private val pinFolderHelper: PinFolderHelper,
+    private val coverImageStore: CoverImageStore,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -140,6 +143,34 @@ class FolderEditorViewModel @Inject constructor(
             dao.insertFolderApp(
                 FolderApp(folderId = folderId, appKey = "weblink:$newId", sortOrder = nextOrder),
             )
+        }
+    }
+
+    fun setCoverSymbol(symbolId: String) {
+        val f = folder.value ?: return
+        val newCover = "symbol:$symbolId"
+        if (f.coverIcon == newCover) return
+        viewModelScope.launch {
+            // Old image (if any) is no longer referenced — drop the file.
+            coverImageStore.delete(f.id)
+            dao.updateFolder(f.copy(coverIcon = newCover))
+        }
+    }
+
+    fun clearCover() {
+        val f = folder.value ?: return
+        if (f.coverIcon.isEmpty() || f.coverIcon == "auto") return
+        viewModelScope.launch {
+            coverImageStore.delete(f.id)
+            dao.updateFolder(f.copy(coverIcon = "auto"))
+        }
+    }
+
+    fun setCoverImageFromUri(uri: Uri) {
+        val f = folder.value ?: return
+        viewModelScope.launch {
+            val path = coverImageStore.saveFromUri(f.id, uri) ?: return@launch
+            dao.updateFolder(f.copy(coverIcon = "image:$path"))
         }
     }
 

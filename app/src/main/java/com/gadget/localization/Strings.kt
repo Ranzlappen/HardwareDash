@@ -754,6 +754,11 @@ object S {
         val searchAppsHint get() = m(l, "Search apps", "Apps suchen", "Buscar apps", "Rechercher des applis")
         val noSearchMatches get() = m(l, "No apps match", "Keine Treffer", "Sin coincidencias", "Aucune correspondance")
         val alreadyInFolder get() = m(l, "in:", "in:", "en:", "dans :")
+        val coverIcon get() = m(l, "Cover", "Titelbild", "Portada", "Couverture")
+        val coverPickImage get() = m(l, "Pick image", "Bild wählen", "Elegir imagen", "Choisir image")
+        val coverPickSymbol get() = m(l, "Pick symbol", "Symbol wählen", "Elegir símbolo", "Choisir symbole")
+        val coverClear get() = m(l, "Clear", "Entfernen", "Quitar", "Effacer")
+        val coverNone get() = m(l, "Auto", "Automatisch", "Auto", "Auto")
     }
 
     // ── Backup ─────────────────────────────────────────────────────────
