@@ -95,7 +95,7 @@ fun FolderEditorScreen(
     val folder by viewModel.folder.collectAsState()
     val filteredApps by viewModel.filteredApps.collectAsState()
     val membership by viewModel.membership.collectAsState()
-    val rule by viewModel.rule.collectAsState()
+    val ruleSet by viewModel.ruleSet.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val otherFolderMembership by viewModel.otherFolderMembership.collectAsState()
     val apps = S.apps
@@ -179,8 +179,9 @@ fun FolderEditorScreen(
             }
             item {
                 RuleSection(
-                    rule = rule,
-                    onSetRule = viewModel::setRule,
+                    ruleSet = ruleSet,
+                    onAddOrReplace = viewModel::addOrReplaceRule,
+                    onRemoveKind = viewModel::removeRuleOfKind,
                 )
             }
             item {
@@ -249,43 +250,42 @@ fun FolderEditorScreen(
                     }
                 }
             }
-            if (rule !is FolderRule.Manual) {
-                // Smart rules compute their own membership; manual toggles
-                // would be misleading. Tap "Preview" to see what the rule
-                // currently materializes.
-            } else {
+            // The picker is always visible — manual selections coexist with
+            // any active smart rules (their results are unioned at materialize
+            // time). Search filters the catalog only; checkbox state still
+            // reflects the manual membership row, not whether a rule would
+            // pull the app in.
+            item {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { viewModel.searchQuery.value = it },
+                    singleLine = true,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = null,
+                        )
+                    },
+                    placeholder = { Text(apps.searchAppsHint) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            if (filteredApps.isEmpty()) {
                 item {
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { viewModel.searchQuery.value = it },
-                        singleLine = true,
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Search,
-                                contentDescription = null,
-                            )
-                        },
-                        placeholder = { Text(apps.searchAppsHint) },
-                        modifier = Modifier.fillMaxWidth(),
+                    Text(
+                        text = if (searchQuery.isBlank()) apps.noApps else apps.noSearchMatches,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                if (filteredApps.isEmpty()) {
-                    item {
-                        Text(
-                            text = if (searchQuery.isBlank()) apps.noApps else apps.noSearchMatches,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                } else {
-                    items(filteredApps, key = { it.appKey }) { record ->
-                        AppRow(
-                            record = record,
-                            selected = record.appKey in membership,
-                            otherFolders = otherFolderMembership[record.appKey].orEmpty(),
-                            onToggle = { viewModel.toggleMember(record.appKey) },
-                        )
-                    }
+            } else {
+                items(filteredApps, key = { it.appKey }) { record ->
+                    AppRow(
+                        record = record,
+                        selected = record.appKey in membership,
+                        otherFolders = otherFolderMembership[record.appKey].orEmpty(),
+                        onToggle = { viewModel.toggleMember(record.appKey) },
+                    )
                 }
             }
         }
@@ -430,92 +430,157 @@ private fun CoverPreview(
 
 @Composable
 private fun RuleSection(
-    rule: FolderRule,
-    onSetRule: (FolderRule) -> Unit,
+    ruleSet: com.gadget.apps.rules.FolderRuleSet,
+    onAddOrReplace: (FolderRule) -> Unit,
+    onRemoveKind: ((FolderRule) -> Boolean) -> Unit,
 ) {
     val apps = S.apps
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    val active = ruleSet.rules
+    val packagePrefix = active.firstOrNull { it is FolderRule.PackagePrefix }
+        as? FolderRule.PackagePrefix
+    val recently = active.firstOrNull { it is FolderRule.RecentlyInstalled }
+        as? FolderRule.RecentlyInstalled
+    val unused = active.firstOrNull { it is FolderRule.UnusedSinceDays }
+        as? FolderRule.UnusedSinceDays
+
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = apps.rule,
             style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.padding(bottom = 4.dp),
         )
-        // FlowRow so chips wrap to a second row on narrow screens / when more
-        // rule types ship.
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+
+        RuleCheckRow(
+            checked = packagePrefix != null,
+            label = apps.rulePackagePrefix,
+            onToggle = { on ->
+                if (on) onAddOrReplace(FolderRule.PackagePrefix("com."))
+                else onRemoveKind { it is FolderRule.PackagePrefix }
+            },
         ) {
-            RuleChip(label = apps.ruleManual, selected = rule is FolderRule.Manual,
-                onClick = { onSetRule(FolderRule.Manual) })
-            RuleChip(label = apps.rulePackagePrefix, selected = rule is FolderRule.PackagePrefix,
-                onClick = { onSetRule(FolderRule.PackagePrefix("com.")) })
-            RuleChip(label = apps.ruleRecentlyInstalled, selected = rule is FolderRule.RecentlyInstalled,
-                onClick = { onSetRule(FolderRule.RecentlyInstalled(7)) })
-            RuleChip(label = apps.ruleWebApks, selected = rule is FolderRule.WebApkOnly,
-                onClick = { onSetRule(FolderRule.WebApkOnly) })
-            RuleChip(label = apps.ruleUnused, selected = rule is FolderRule.UnusedSinceDays,
-                onClick = { onSetRule(FolderRule.UnusedSinceDays(30)) })
-        }
-        when (val r = rule) {
-            is FolderRule.PackagePrefix -> {
+            packagePrefix?.let { r ->
                 OutlinedTextField(
                     value = r.prefix,
-                    onValueChange = { onSetRule(FolderRule.PackagePrefix(it)) },
+                    onValueChange = { onAddOrReplace(FolderRule.PackagePrefix(it)) },
                     singleLine = true,
                     label = { Text(apps.rulePackagePrefix) },
                     placeholder = { Text(apps.rulePackagePrefixHint) },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            is FolderRule.RecentlyInstalled -> {
+        }
+        RuleCheckRow(
+            checked = recently != null,
+            label = apps.ruleRecentlyInstalled,
+            onToggle = { on ->
+                if (on) onAddOrReplace(FolderRule.RecentlyInstalled(7))
+                else onRemoveKind { it is FolderRule.RecentlyInstalled }
+            },
+        ) {
+            recently?.let { r ->
                 DaysField(
                     value = r.days,
                     label = "${apps.ruleRecentlyInstalled} (${apps.ruleDays})",
-                    onChange = { onSetRule(FolderRule.RecentlyInstalled(it)) },
+                    onChange = { onAddOrReplace(FolderRule.RecentlyInstalled(it)) },
                 )
             }
-            is FolderRule.UnusedSinceDays -> {
-                DaysField(
-                    value = r.days,
-                    label = "${apps.ruleUnused} (${apps.ruleDays})",
-                    onChange = { onSetRule(FolderRule.UnusedSinceDays(it)) },
-                )
-                Text(
-                    text = apps.ruleUsageHint,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            FolderRule.Manual,
-            FolderRule.WebApkOnly -> Unit
         }
+        RuleCheckRow(
+            checked = active.any { it is FolderRule.WebApkOnly },
+            label = apps.ruleWebApks,
+            onToggle = { on ->
+                if (on) onAddOrReplace(FolderRule.WebApkOnly)
+                else onRemoveKind { it is FolderRule.WebApkOnly }
+            },
+        )
+        RuleCheckRow(
+            checked = unused != null,
+            label = apps.ruleUnused,
+            onToggle = { on ->
+                if (on) onAddOrReplace(FolderRule.UnusedSinceDays(30))
+                else onRemoveKind { it is FolderRule.UnusedSinceDays }
+            },
+        ) {
+            unused?.let { r ->
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    DaysField(
+                        value = r.days,
+                        label = "${apps.ruleUnused} (${apps.ruleDays})",
+                        onChange = { onAddOrReplace(FolderRule.UnusedSinceDays(it)) },
+                    )
+                    Text(
+                        text = apps.ruleUsageHint,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+        RuleCheckRow(
+            checked = active.any { it is FolderRule.OnInternalStorage },
+            label = apps.ruleOnInternalStorage,
+            onToggle = { on ->
+                if (on) onAddOrReplace(FolderRule.OnInternalStorage)
+                else onRemoveKind { it is FolderRule.OnInternalStorage }
+            },
+        )
+        RuleCheckRow(
+            checked = active.any { it is FolderRule.OnExternalStorage },
+            label = apps.ruleOnExternalStorage,
+            onToggle = { on ->
+                if (on) onAddOrReplace(FolderRule.OnExternalStorage)
+                else onRemoveKind { it is FolderRule.OnExternalStorage }
+            },
+        )
+        RuleCheckRow(
+            checked = active.any { it is FolderRule.SystemApps },
+            label = apps.ruleSystemApps,
+            onToggle = { on ->
+                if (on) onAddOrReplace(FolderRule.SystemApps)
+                else onRemoveKind { it is FolderRule.SystemApps }
+            },
+        )
+        RuleCheckRow(
+            checked = active.any { it is FolderRule.UserApps },
+            label = apps.ruleUserApps,
+            onToggle = { on ->
+                if (on) onAddOrReplace(FolderRule.UserApps)
+                else onRemoveKind { it is FolderRule.UserApps }
+            },
+        )
+        Text(
+            text = apps.ruleUnionHint,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
     }
 }
 
 @Composable
-private fun RuleChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    val container = if (selected) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant
-    }
-    val onContainer = if (selected) {
-        MaterialTheme.colorScheme.onPrimaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    Card(
-        modifier = Modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = container),
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.labelMedium,
-            color = onContainer,
-        )
+private fun RuleCheckRow(
+    checked: Boolean,
+    label: String,
+    onToggle: (Boolean) -> Unit,
+    config: @Composable (() -> Unit)? = null,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onToggle(!checked) },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(checked = checked, onCheckedChange = onToggle)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        }
+        if (checked && config != null) {
+            Box(modifier = Modifier.padding(start = 48.dp)) { config() }
+        }
     }
 }
 

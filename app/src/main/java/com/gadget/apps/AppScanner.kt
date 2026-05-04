@@ -1,6 +1,7 @@
 package com.gadget.apps
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.pm.LauncherApps
 import android.os.UserManager
 import com.gadget.data.db.apps.AppRecord
@@ -45,10 +46,14 @@ class AppScanner @Inject constructor(
                 continue
             }
             for (act in activities) {
-                val pkg = act.applicationInfo.packageName
+                val ai = act.applicationInfo
+                val pkg = ai.packageName
                 val cls = act.componentName.className
                 val key = "installed:$serial:$pkg/$cls"
                 val rawLabel = act.label?.toString().orEmpty()
+                val isOnExternal = (ai.flags and ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0
+                val isSystem = (ai.flags and ApplicationInfo.FLAG_SYSTEM) != 0 ||
+                    (ai.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
                 out += AppRecord(
                     appKey = key,
                     packageName = pkg,
@@ -59,6 +64,8 @@ class AppScanner @Inject constructor(
                     isWebLink = false,
                     firstInstallTime = act.firstInstallTime,
                     lastSeen = now,
+                    isOnExternalStorage = isOnExternal,
+                    isSystemApp = isSystem,
                 )
             }
         }

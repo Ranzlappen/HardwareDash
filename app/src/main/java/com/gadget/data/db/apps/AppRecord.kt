@@ -38,4 +38,11 @@ data class AppRecord(
     val firstInstallTime: Long = 0L,
     @ColumnInfo(name = "last_seen")
     val lastSeen: Long,
+    /** Snapshot of `ApplicationInfo.flags & FLAG_EXTERNAL_STORAGE` at scan time. */
+    @ColumnInfo(name = "is_on_external_storage", defaultValue = "0")
+    val isOnExternalStorage: Boolean = false,
+    /** Pre-installed / system app — true if the package has FLAG_SYSTEM or
+     *  FLAG_UPDATED_SYSTEM_APP, mirroring how Settings → Apps surfaces them. */
+    @ColumnInfo(name = "is_system_app", defaultValue = "0")
+    val isSystemApp: Boolean = false,
 )

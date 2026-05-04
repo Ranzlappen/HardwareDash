@@ -3,13 +3,19 @@ package com.gadget.apps.rules
 import kotlinx.serialization.json.Json
 
 /**
- * JSON encode/decode for [FolderRule]. Produces objects shaped like
- * `{"type": "package_prefix", "prefix": "com.google."}` thanks to kotlinx
- * serialization's polymorphic handling of sealed classes.
+ * JSON encode/decode for [FolderRuleSet]. The set wraps a `List<FolderRule>`,
+ * so polymorphic dispatch on the sealed `FolderRule` is handled by kotlinx-
+ * serialization's "type" discriminator under `rules: [{...}, {...}]`.
  *
- * The format is forwards-compatible: unknown keys are ignored on decode, so
- * adding fields to a future rule variant won't break older clients reading
- * the same JSON.
+ * `decode` is forwards-AND-backwards-compatible:
+ *  - New format `{"rules":[...]}` decodes directly.
+ *  - Legacy format from the single-rule era (`{"type":"package_prefix",...}`)
+ *    is wrapped into a one-element set so existing folders keep working.
+ *  - Legacy `{"type":"manual"}` (the dropped Manual rule) decodes to an empty
+ *    rule set — semantically equivalent now that the manual list is always
+ *    union'd in regardless of rules.
+ *  - Garbage input returns an empty set rather than throwing, so corrupted
+ *    DB rows can't crash the rule editor.
  */
 object RuleCodec {
 
@@ -19,9 +25,22 @@ object RuleCodec {
         prettyPrint = false
     }
 
-    fun encode(rule: FolderRule): String =
-        json.encodeToString(FolderRule.serializer(), rule)
+    fun encode(set: FolderRuleSet): String =
+        json.encodeToString(FolderRuleSet.serializer(), set)
 
-    fun decode(jsonString: String): FolderRule? =
-        runCatching { json.decodeFromString(FolderRule.serializer(), jsonString) }.getOrNull()
+    fun decode(jsonString: String): FolderRuleSet {
+        // Try the modern set-shaped format first.
+        runCatching { json.decodeFromString(FolderRuleSet.serializer(), jsonString) }
+            .getOrNull()
+            ?.let { return it }
+
+        // Legacy "manual" tag → empty set.
+        if (jsonString.contains("\"type\":\"manual\"")) return FolderRuleSet(emptyList())
+
+        // Legacy single-rule format → wrap.
+        val singleRule = runCatching {
+            json.decodeFromString(FolderRule.serializer(), jsonString)
+        }.getOrNull()
+        return singleRule?.let { FolderRuleSet(listOf(it)) } ?: FolderRuleSet(emptyList())
+    }
 }

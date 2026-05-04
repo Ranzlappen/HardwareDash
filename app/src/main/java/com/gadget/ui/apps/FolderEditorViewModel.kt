@@ -8,6 +8,7 @@ import com.gadget.apps.WebLinkRepository
 import com.gadget.apps.icons.CoverImageStore
 import com.gadget.apps.pin.PinFolderHelper
 import com.gadget.apps.rules.FolderRule
+import com.gadget.apps.rules.FolderRuleSet
 import com.gadget.apps.rules.RuleCodec
 import com.gadget.data.db.apps.FolderRuleEntity
 import com.gadget.data.db.apps.AppRecord
@@ -89,13 +90,13 @@ class FolderEditorViewModel @Inject constructor(
             .filterValues { it.isNotEmpty() }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    val rule: StateFlow<FolderRule> = dao.observeRules()
+    val ruleSet: StateFlow<FolderRuleSet> = dao.observeRules()
         .map { rows ->
             rows.firstOrNull { it.folderId == folderId }
                 ?.let { RuleCodec.decode(it.ruleJson) }
-                ?: FolderRule.Manual
+                ?: FolderRuleSet()
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FolderRule.Manual)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FolderRuleSet())
 
     fun rename(newName: String) {
         val f = folder.value ?: return
@@ -174,20 +175,35 @@ class FolderEditorViewModel @Inject constructor(
         }
     }
 
-    fun setRule(newRule: FolderRule) {
+    /** Replaces the entire rule set. Empty list deletes the row entirely so
+     *  the apps_folder_rule table stays compact for "manual-only" folders. */
+    private fun persistRuleSet(set: FolderRuleSet) {
         viewModelScope.launch {
-            if (newRule is FolderRule.Manual) {
-                // Manual is the implicit default — clearing the row keeps the
-                // table compact and avoids storing a tautological JSON value.
+            if (set.rules.isEmpty()) {
                 dao.deleteRule(folderId)
             } else {
                 dao.upsertRule(
                     FolderRuleEntity(
                         folderId = folderId,
-                        ruleJson = RuleCodec.encode(newRule),
+                        ruleJson = RuleCodec.encode(set),
                     ),
                 )
             }
         }
     }
+
+    /** Adds [rule]; if a rule of the same kind already exists it's replaced. */
+    fun addOrReplaceRule(rule: FolderRule) {
+        val current = ruleSet.value.rules.filterNot { sameKind(it, rule) }
+        persistRuleSet(FolderRuleSet(current + rule))
+    }
+
+    /** Removes any rule whose kind matches [matcher]. */
+    fun removeRuleOfKind(matcher: (FolderRule) -> Boolean) {
+        val next = ruleSet.value.rules.filterNot(matcher)
+        if (next.size == ruleSet.value.rules.size) return
+        persistRuleSet(FolderRuleSet(next))
+    }
+
+    private fun sameKind(a: FolderRule, b: FolderRule): Boolean = a::class == b::class
 }

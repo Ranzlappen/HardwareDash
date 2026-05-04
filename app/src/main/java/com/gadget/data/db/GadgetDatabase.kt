@@ -23,7 +23,7 @@ import com.gadget.data.db.apps.WebLinkApp
         FolderRuleEntity::class,
         FolderWidgetConfig::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class GadgetDatabase : RoomDatabase() {
@@ -132,6 +132,27 @@ val MIGRATION_2_3: Migration = object : Migration(2, 3) {
         db.execSQL(
             "CREATE INDEX IF NOT EXISTS `index_apps_widget_config_folder_id` " +
                 "ON `apps_widget_config` (`folder_id`)",
+        )
+    }
+}
+
+/**
+ * v3 → v4 enriches `apps_record` with two ApplicationInfo-derived flags so
+ * the new "on internal/external storage" + "system / user-installed" smart
+ * rules can materialize without a PackageManager round-trip per evaluation.
+ * Existing rows default both flags to 0 — accurate for web-link records and
+ * harmless for installed records until the next AppScanner.refresh repaints
+ * them with real values.
+ */
+val MIGRATION_3_4: Migration = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE `apps_record` ADD COLUMN `is_on_external_storage` " +
+                "INTEGER NOT NULL DEFAULT 0",
+        )
+        db.execSQL(
+            "ALTER TABLE `apps_record` ADD COLUMN `is_system_app` " +
+                "INTEGER NOT NULL DEFAULT 0",
         )
     }
 }
