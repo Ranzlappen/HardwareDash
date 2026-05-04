@@ -441,8 +441,22 @@
                 android:resource="@xml/widget_folder_2x2_info" />
         </receiver>
 
-        <!-- Configuration activity invoked by the launcher when a folder
-             widget is dropped on the home screen. -->
+        <!-- ── Folder Widget — Glance "designable" 3x2 ─────────────── -->
+        <receiver
+            android:name=".widget.folder.FolderGlanceReceiver"
+            android:label="@string/widget_folder_glance_label"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_folder_glance_info" />
+        </receiver>
+
+        <!-- Configuration activity invoked by the launcher when EITHER folder
+             widget flavor is dropped on the home screen. Detects which
+             flavor by reading the appWidgetInfo.provider ComponentName. -->
         <activity
             android:name=".widget.folder.FolderWidgetConfigActivity"
             android:exported="true"

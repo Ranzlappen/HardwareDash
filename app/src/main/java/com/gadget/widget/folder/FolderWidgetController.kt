@@ -37,7 +37,10 @@ class FolderWidgetController @Inject constructor(
                 dao.observeRules(),
             ) { folders, records, rules -> Triple(folders, records.size, rules.size) }
                 .distinctUntilChanged()
-                .collect { FolderWidgetProvider.updateAll(context) }
+                .collect {
+                    FolderWidgetProvider.updateAll(context)
+                    FolderGlanceWidget.updateAll(context)
+                }
         }
     }
 }
