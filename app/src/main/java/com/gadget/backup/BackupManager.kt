@@ -18,6 +18,26 @@ import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Whole-app backup / restore. Produces a ZIP that captures every byte of
+ * user state the app has authority over so a restore on a fresh install
+ * reproduces the device's full configuration:
+ *
+ *  - `metadata.json`   — app version, schema versions, timestamp.
+ *  - `gadget_db` (+ `-wal` + `-shm`) — the Room database (every entity).
+ *  - `shared_prefs/*.xml` — every `SharedPreferences` file the app uses.
+ *  - `datastore/*` — every `DataStore<Preferences>` file the app uses.
+ *  - `folder_covers/*` — App-Organizer folder cover photos.
+ *  - `apps_favicons/*` — App-Organizer web-link favicon cache.
+ *
+ * Things deliberately NOT in the ZIP:
+ *  - The OSMDroid map tile cache (regenerates on demand).
+ *  - User exports to MediaStore (camera / voice / video) — those are public
+ *    files the user manages outside the app.
+ *  - Per-`appWidgetId` rows whose ids are system-assigned: the rows ride
+ *    along in the Room DB, but on a new device the user has to re-pin
+ *    widgets so the OS can mint fresh appWidgetIds.
+ */
 @Singleton
 class BackupManager @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -25,12 +45,16 @@ class BackupManager @Inject constructor(
 ) {
 
     /**
-     * Creates a ZIP backup containing:
-     * - metadata.json (app version, timestamp, schema versions)
-     * - Room database file
-     * - SharedPreferences XML files
-     * - DataStore files
+     * (subdir under filesDir, ZIP-entry prefix). Every file directly inside
+     * the subdir is added to the ZIP under the prefix; `restoreBackup`
+     * mirrors the reverse mapping. Keep this list in sync with new asset
+     * directories the app introduces.
      */
+    private val filesDirAssetSweeps: List<Pair<String, String>> = listOf(
+        "folder_covers" to "folder_covers",
+        "apps_favicons" to "apps_favicons",
+    )
+
     suspend fun createBackup(outputStream: OutputStream) = withContext(Dispatchers.IO) {
         // PRAGMA wal_checkpoint returns rows, so it must run as a query, not execSQL.
         database.openHelper.writableDatabase
@@ -51,7 +75,6 @@ class BackupManager @Inject constructor(
                 if (dbFile.exists()) {
                     addFileToZip(zip, dbFile, "gadget_db")
                 }
-                // Also backup WAL and SHM if they exist
                 val walFile = File("$dbPath-wal")
                 if (walFile.exists()) {
                     addFileToZip(zip, walFile, "gadget_db-wal")
@@ -81,16 +104,24 @@ class BackupManager @Inject constructor(
                     }
                 }
             }
+
+            // 5. App-Organizer asset directories (cover photos + favicon cache).
+            //    These live under filesDir but outside `datastore/`, so the
+            //    sweep above doesn't reach them.
+            for ((subDir, prefix) in filesDirAssetSweeps) {
+                val src = File(context.filesDir, subDir)
+                if (src.exists() && src.isDirectory) {
+                    src.listFiles()?.forEach { file ->
+                        if (file.isFile) {
+                            addFileToZip(zip, file, "$prefix/${file.name}")
+                        }
+                    }
+                }
+            }
         }
         Timber.i("Backup created successfully")
     }
 
-    /**
-     * Restores a ZIP backup by:
-     * 1. Closing the database
-     * 2. Restoring all files from the ZIP
-     * 3. Reopening the database
-     */
     suspend fun restoreBackup(inputStream: InputStream) = withContext(Dispatchers.IO) {
         val dbPath = database.openHelper.writableDatabase.path
 
@@ -104,51 +135,65 @@ class BackupManager @Inject constructor(
             File("$dbPath-shm").delete()
         }
 
+        // Pre-resolve asset prefix → target subdir for cheap O(1) restore-side
+        // dispatch matching the createBackup mapping.
+        val assetPrefixToSubdir: Map<String, String> = filesDirAssetSweeps
+            .associate { (subDir, prefix) -> prefix to subDir }
+
         try {
             ZipInputStream(inputStream).use { zip ->
                 var entry: ZipEntry? = zip.nextEntry
                 while (entry != null) {
+                    val name = entry.name
                     when {
-                        entry.name == "metadata.json" -> {
-                            // Read metadata but don't need to store it
+                        name == "metadata.json" -> {
                             zip.readBytes()
                             Timber.i("Backup metadata read")
                         }
 
-                        entry.name.startsWith("gadget_db") -> {
-                            // Restore database file(s)
+                        name.startsWith("gadget_db") -> {
                             if (dbPath != null) {
-                                val suffix = entry.name.removePrefix("gadget_db")
+                                val suffix = name.removePrefix("gadget_db")
                                 val targetFile = File("$dbPath$suffix")
-                                targetFile.outputStream().use { out ->
-                                    zip.copyTo(out)
-                                }
-                                Timber.i("Restored database file: ${entry.name}")
+                                targetFile.outputStream().use { out -> zip.copyTo(out) }
+                                Timber.i("Restored database file: $name")
                             }
                         }
 
-                        entry.name.startsWith("shared_prefs/") -> {
-                            // Restore SharedPreferences
-                            val fileName = entry.name.removePrefix("shared_prefs/")
+                        name.startsWith("shared_prefs/") -> {
+                            val fileName = name.removePrefix("shared_prefs/")
                             val targetDir = File(context.filesDir.parent, "shared_prefs")
                             targetDir.mkdirs()
                             val targetFile = File(targetDir, fileName)
-                            targetFile.outputStream().use { out ->
-                                zip.copyTo(out)
-                            }
+                            targetFile.outputStream().use { out -> zip.copyTo(out) }
                             Timber.i("Restored shared pref: $fileName")
                         }
 
-                        entry.name.startsWith("datastore/") -> {
-                            // Restore DataStore files
-                            val fileName = entry.name.removePrefix("datastore/")
+                        name.startsWith("datastore/") -> {
+                            val fileName = name.removePrefix("datastore/")
                             val targetDir = File(context.filesDir, "datastore")
                             targetDir.mkdirs()
                             val targetFile = File(targetDir, fileName)
-                            targetFile.outputStream().use { out ->
-                                zip.copyTo(out)
-                            }
+                            targetFile.outputStream().use { out -> zip.copyTo(out) }
                             Timber.i("Restored datastore file: $fileName")
+                        }
+
+                        else -> {
+                            // Asset-dir restore: try every registered prefix.
+                            // A single match wins; unknown entries are ignored
+                            // so older clients reading newer ZIPs degrade
+                            // gracefully.
+                            val match = assetPrefixToSubdir.entries.firstOrNull {
+                                name.startsWith(it.key + "/")
+                            }
+                            if (match != null) {
+                                val fileName = name.removePrefix("${match.key}/")
+                                val targetDir = File(context.filesDir, match.value)
+                                targetDir.mkdirs()
+                                val targetFile = File(targetDir, fileName)
+                                targetFile.outputStream().use { out -> zip.copyTo(out) }
+                                Timber.i("Restored ${match.value}: $fileName")
+                            }
                         }
                     }
                     zip.closeEntry()
@@ -170,13 +215,20 @@ class BackupManager @Inject constructor(
             "unknown"
         }
 
+        // Read the live Room version so this stays correct across migrations
+        // without a manual bump every schema change.
+        val dbVersion = runCatching {
+            database.openHelper.readableDatabase.version
+        }.getOrDefault(0)
+
         return JSONObject().apply {
             put("appVersion", versionName)
             put("backupTimestamp", System.currentTimeMillis())
             put("backupDate", java.time.Instant.now().toString())
             put("androidSdk", Build.VERSION.SDK_INT)
-            put("dbSchemaVersion", 4) // Room database version
-            put("logbookSchemaVersion", 7) // Logbook schema version
+            put("dbSchemaVersion", dbVersion)
+            put("logbookSchemaVersion", 7)
+            put("backupFormatVersion", BACKUP_FORMAT_VERSION)
         }
     }
 
@@ -186,5 +238,16 @@ class BackupManager @Inject constructor(
             input.copyTo(zip)
         }
         zip.closeEntry()
+    }
+
+    private companion object {
+        /**
+         * Bumped when the ZIP layout gains new entry kinds. Older clients
+         * silently ignore unknown prefixes during restore, so this is purely
+         * informational — useful when triaging backups from future builds.
+         *  - 1: original (db + shared_prefs + datastore)
+         *  - 2: + folder_covers/ + apps_favicons/ asset sweeps
+         */
+        const val BACKUP_FORMAT_VERSION = 2
     }
 }
