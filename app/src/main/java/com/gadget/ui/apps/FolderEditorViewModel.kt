@@ -3,7 +3,9 @@ package com.gadget.ui.apps
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.net.Uri
 import com.gadget.apps.WebLinkRepository
+import com.gadget.apps.icons.CoverImageStore
 import com.gadget.apps.pin.PinFolderHelper
 import com.gadget.apps.rules.FolderRule
 import com.gadget.apps.rules.RuleCodec
@@ -13,8 +15,10 @@ import com.gadget.data.db.apps.AppsDao
 import com.gadget.data.db.apps.Folder
 import com.gadget.data.db.apps.FolderApp
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -34,6 +38,7 @@ class FolderEditorViewModel @Inject constructor(
     private val dao: AppsDao,
     private val webLinkRepository: WebLinkRepository,
     private val pinFolderHelper: PinFolderHelper,
+    private val coverImageStore: CoverImageStore,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -46,9 +51,43 @@ class FolderEditorViewModel @Inject constructor(
     val allApps: StateFlow<List<AppRecord>> = dao.observeAppRecords()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
+
+    /** Catalog filtered by [searchQuery] (case-insensitive label OR package match). */
+    val filteredApps: StateFlow<List<AppRecord>> = combine(allApps, searchQuery) { records, query ->
+        if (query.isBlank()) {
+            records
+        } else {
+            val needle = query.trim().lowercase()
+            records.filter {
+                it.label.lowercase().contains(needle) ||
+                    it.packageName.lowercase().contains(needle)
+            }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     val membership: StateFlow<Set<String>> = dao.observeMembership(folderId)
         .map { rows -> rows.mapTo(HashSet(rows.size)) { it.appKey } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
+    /**
+     * Map appKey → names of *other* folders that already contain it. Powers
+     * the editor's "in: <folder>" subtitle. The current folder is excluded so
+     * checking an app off in this editor doesn't immediately make the row
+     * look like it's also in itself.
+     */
+    val otherFolderMembership: StateFlow<Map<String, List<String>>> = combine(
+        dao.observeFolders(),
+        dao.observeAllMembership(),
+    ) { folders, allMembership ->
+        val nameById = folders.associate { it.id to it.name }
+        allMembership
+            .asSequence()
+            .filter { it.folderId != folderId }
+            .groupBy({ it.appKey }, { nameById[it.folderId].orEmpty() })
+            .mapValues { (_, names) -> names.filter { it.isNotEmpty() } }
+            .filterValues { it.isNotEmpty() }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     val rule: StateFlow<FolderRule> = dao.observeRules()
         .map { rows ->
@@ -104,6 +143,34 @@ class FolderEditorViewModel @Inject constructor(
             dao.insertFolderApp(
                 FolderApp(folderId = folderId, appKey = "weblink:$newId", sortOrder = nextOrder),
             )
+        }
+    }
+
+    fun setCoverSymbol(symbolId: String) {
+        val f = folder.value ?: return
+        val newCover = "symbol:$symbolId"
+        if (f.coverIcon == newCover) return
+        viewModelScope.launch {
+            // Old image (if any) is no longer referenced — drop the file.
+            coverImageStore.delete(f.id)
+            dao.updateFolder(f.copy(coverIcon = newCover))
+        }
+    }
+
+    fun clearCover() {
+        val f = folder.value ?: return
+        if (f.coverIcon.isEmpty() || f.coverIcon == "auto") return
+        viewModelScope.launch {
+            coverImageStore.delete(f.id)
+            dao.updateFolder(f.copy(coverIcon = "auto"))
+        }
+    }
+
+    fun setCoverImageFromUri(uri: Uri) {
+        val f = folder.value ?: return
+        viewModelScope.launch {
+            val path = coverImageStore.saveFromUri(f.id, uri) ?: return@launch
+            dao.updateFolder(f.copy(coverIcon = "image:$path"))
         }
     }
 

@@ -751,6 +751,14 @@ object S {
         val ruleDays get() = m(l, "days", "Tage", "días", "jours")
         val rulePackagePrefixHint get() = m(l, "e.g. com.google.", "z. B. com.google.", "p. ej. com.google.", "p. ex. com.google.")
         val ruleUsageHint get() = m(l, "Requires \"Usage access\" permission. Grant in Settings → Apps → Special access.", "Benötigt die Berechtigung „Nutzungsdaten\". Gewähre sie unter Einstellungen → Apps → Spezieller Zugriff.", "Requiere el permiso \"Acceso de uso\". Concédelo en Ajustes → Apps → Acceso especial.", "Nécessite l'autorisation « Accès aux données d'utilisation ». Accordez-la dans Paramètres → Applis → Accès spécial.")
+        val searchAppsHint get() = m(l, "Search apps", "Apps suchen", "Buscar apps", "Rechercher des applis")
+        val noSearchMatches get() = m(l, "No apps match", "Keine Treffer", "Sin coincidencias", "Aucune correspondance")
+        val alreadyInFolder get() = m(l, "in:", "in:", "en:", "dans :")
+        val coverIcon get() = m(l, "Cover", "Titelbild", "Portada", "Couverture")
+        val coverPickImage get() = m(l, "Pick image", "Bild wählen", "Elegir imagen", "Choisir image")
+        val coverPickSymbol get() = m(l, "Pick symbol", "Symbol wählen", "Elegir símbolo", "Choisir symbole")
+        val coverClear get() = m(l, "Clear", "Entfernen", "Quitar", "Effacer")
+        val coverNone get() = m(l, "Auto", "Automatisch", "Auto", "Auto")
     }
 
     // ── Backup ─────────────────────────────────────────────────────────

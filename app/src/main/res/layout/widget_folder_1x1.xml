@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  1x1 folder widget. Too tight for a name strip + tile grid, so the layout has
+  just two children stacked at the same position; FolderWidgetRenderer toggles
+  visibility:
+
+    1. Cover-icon mode (folder.coverIcon = image:/symbol:): widget_folder_cover
+       fills the cell.
+    2. Default mode: a tinted folder symbol fills the cell. The folder name
+       appears in the popup that opens on tap; we don't try to fit it here.
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_folder_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:padding="6dp">
+
+    <ImageView
+        android:id="@+id/widget_folder_cover"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/widget_folder_label"
+        android:scaleType="fitCenter"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/widget_folder_default"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:contentDescription="@string/widget_folder_label"
+        android:padding="6dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_symbol_folder" />
+
+</RelativeLayout>

@@ -449,22 +449,21 @@
                 android:resource="@xml/widget_folder_2x2_info" />
         </receiver>
 
-        <!-- ── Folder Widget — Glance "designable" 3x2 ─────────────── -->
+        <!-- ── Folder Widget (App-Organizer) — RemoteViews 1x1 ───── -->
         <receiver
-            android:name=".widget.folder.FolderGlanceReceiver"
-            android:label="@string/widget_folder_glance_label"
+            android:name=".widget.folder.FolderWidget1x1Provider"
+            android:label="@string/widget_folder_1x1_label"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/widget_folder_glance_info" />
+                android:resource="@xml/widget_folder_1x1_info" />
         </receiver>
 
-        <!-- Configuration activity invoked by the launcher when EITHER folder
-             widget flavor is dropped on the home screen. Detects which
-             flavor by reading the appWidgetInfo.provider ComponentName. -->
+        <!-- Configuration activity invoked by the launcher when a folder
+             widget is dropped on the home screen. -->
         <activity
             android:name=".widget.folder.FolderWidgetConfigActivity"
             android:exported="true"

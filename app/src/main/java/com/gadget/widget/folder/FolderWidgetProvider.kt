@@ -18,10 +18,6 @@ import kotlinx.coroutines.launch
  * Classic-RemoteViews `AppWidgetProvider` for the App-Organizer folder widget.
  * Mirrors the shape of the existing 11 providers in this app. Hilt-aware via
  * `EntryPointAccessors` since `AppWidgetProvider` instances aren't injectable.
- *
- * The Glance-flavored variant (added in batch 9) is registered as a separate
- * receiver and reads the same `apps_widget_config` rows, so both variants can
- * coexist without sharing layout code.
  */
 class FolderWidgetProvider : AppWidgetProvider() {
 

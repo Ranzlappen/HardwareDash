@@ -1,5 +1,9 @@
 package com.gadget.ui.apps
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,9 +25,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -58,8 +67,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import android.graphics.BitmapFactory
+import androidx.compose.ui.graphics.asImageBitmap
+import com.gadget.apps.icons.AppIcon
+import com.gadget.apps.icons.MaterialSymbol
 import com.gadget.apps.rules.FolderRule
 import com.gadget.data.db.apps.AppRecord
+import com.gadget.data.db.apps.Folder
 import com.gadget.localization.S
 import com.gadget.ui.folder.FolderPopupActivity
 import kotlinx.coroutines.launch
@@ -76,9 +90,11 @@ fun FolderEditorScreen(
 ) {
     val viewModel = hiltViewModel<FolderEditorViewModel>()
     val folder by viewModel.folder.collectAsState()
-    val allApps by viewModel.allApps.collectAsState()
+    val filteredApps by viewModel.filteredApps.collectAsState()
     val membership by viewModel.membership.collectAsState()
     val rule by viewModel.rule.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val otherFolderMembership by viewModel.otherFolderMembership.collectAsState()
     val apps = S.apps
     val common = S.common
 
@@ -87,6 +103,9 @@ fun FolderEditorScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri -> uri?.let { viewModel.setCoverImageFromUri(it) } }
 
     LaunchedEffect(folder?.id, folder?.name) {
         folder?.let { if (nameDraft != it.name) nameDraft = it.name }
@@ -144,6 +163,18 @@ fun FolderEditorScreen(
                 )
             }
             item {
+                CoverIconSection(
+                    folder = folder!!,
+                    onPickImage = {
+                        pickImageLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                        )
+                    },
+                    onPickSymbol = viewModel::setCoverSymbol,
+                    onClear = viewModel::clearCover,
+                )
+            }
+            item {
                 RuleSection(
                     rule = rule,
                     onSetRule = viewModel::setRule,
@@ -178,25 +209,33 @@ fun FolderEditorScreen(
             }
             item {
                 Spacer(Modifier.height(4.dp))
+                // Section header on its own line — the previous Row collapsed
+                // this Text into a 1-character-wide column when the two
+                // trailing buttons claimed all the horizontal space.
+                Text(
+                    text = apps.appsInFolder,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                )
+                Spacer(Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = apps.appsInFolder,
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                    )
                     OutlinedButton(
+                        modifier = Modifier.weight(1f),
                         onClick = {
                             folder?.let {
                                 context.startActivity(FolderPopupActivity.intent(context, it.id))
                             }
                         },
                     ) { Text(apps.previewFolder) }
-                    Spacer(Modifier.size(8.dp))
-                    OutlinedButton(onClick = { showWebLinkDialog = true }) {
+                    OutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = { showWebLinkDialog = true },
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = null,
@@ -211,21 +250,39 @@ fun FolderEditorScreen(
                 // Smart rules compute their own membership; manual toggles
                 // would be misleading. Tap "Preview" to see what the rule
                 // currently materializes.
-            } else if (allApps.isEmpty()) {
+            } else {
                 item {
-                    Text(
-                        text = apps.noApps,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { viewModel.searchQuery.value = it },
+                        singleLine = true,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = null,
+                            )
+                        },
+                        placeholder = { Text(apps.searchAppsHint) },
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
-            } else {
-                items(allApps, key = { it.appKey }) { record ->
-                    AppRow(
-                        record = record,
-                        selected = record.appKey in membership,
-                        onToggle = { viewModel.toggleMember(record.appKey) },
-                    )
+                if (filteredApps.isEmpty()) {
+                    item {
+                        Text(
+                            text = if (searchQuery.isBlank()) apps.noApps else apps.noSearchMatches,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else {
+                    items(filteredApps, key = { it.appKey }) { record ->
+                        AppRow(
+                            record = record,
+                            selected = record.appKey in membership,
+                            otherFolders = otherFolderMembership[record.appKey].orEmpty(),
+                            onToggle = { viewModel.toggleMember(record.appKey) },
+                        )
+                    }
                 }
             }
         }
@@ -239,6 +296,132 @@ fun FolderEditorScreen(
                 showWebLinkDialog = false
             },
         )
+    }
+}
+
+@Composable
+private fun CoverIconSection(
+    folder: Folder,
+    onPickImage: () -> Unit,
+    onPickSymbol: (String) -> Unit,
+    onClear: () -> Unit,
+) {
+    var showSymbols by remember { mutableStateOf(false) }
+    val accent = Color(folder.baseColorArgb)
+    val cover = folder.coverIcon
+    val hasCustom = cover.startsWith("image:") || cover.startsWith("symbol:")
+    val apps = S.apps
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CoverPreview(coverIcon = cover, accent = accent, sizeDp = 40.dp)
+            Spacer(Modifier.size(12.dp))
+            Text(
+                text = apps.coverIcon,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            IconButton(onClick = onPickImage) {
+                Icon(
+                    imageVector = Icons.Filled.AddPhotoAlternate,
+                    contentDescription = apps.coverPickImage,
+                )
+            }
+            IconButton(onClick = { showSymbols = !showSymbols }) {
+                Icon(
+                    imageVector = Icons.Filled.GridView,
+                    contentDescription = apps.coverPickSymbol,
+                )
+            }
+            if (hasCustom) {
+                IconButton(onClick = onClear) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = apps.coverClear,
+                    )
+                }
+            }
+        }
+        if (showSymbols) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                MaterialSymbol.entries.forEach { sym ->
+                    IconButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            onPickSymbol(sym.id)
+                            showSymbols = false
+                        },
+                    ) {
+                        Icon(
+                            imageVector = sym.icon,
+                            contentDescription = sym.id,
+                            tint = accent,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CoverPreview(
+    coverIcon: String,
+    accent: Color,
+    sizeDp: androidx.compose.ui.unit.Dp,
+) {
+    Box(
+        modifier = Modifier
+            .size(sizeDp)
+            .clip(CircleShape)
+            .background(accent.copy(alpha = 0.18f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        when {
+            coverIcon.startsWith("image:") -> {
+                val path = coverIcon.removePrefix("image:")
+                val bmp = remember(path) {
+                    runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
+                }
+                if (bmp != null) {
+                    Image(
+                        bitmap = bmp.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.size(sizeDp).clip(CircleShape),
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.AddPhotoAlternate,
+                        contentDescription = null,
+                        tint = accent,
+                    )
+                }
+            }
+            coverIcon.startsWith("symbol:") -> {
+                val id = coverIcon.removePrefix("symbol:")
+                val sym = MaterialSymbol.fromId(id)
+                Icon(
+                    imageVector = sym?.icon ?: Icons.Filled.Folder,
+                    contentDescription = null,
+                    tint = accent,
+                    modifier = Modifier.size((sizeDp.value * 0.6f).dp),
+                )
+            }
+            else -> {
+                Icon(
+                    imageVector = Icons.Filled.Folder,
+                    contentDescription = null,
+                    tint = accent.copy(alpha = 0.65f),
+                    modifier = Modifier.size((sizeDp.value * 0.6f).dp),
+                )
+            }
+        }
     }
 }
 
@@ -412,31 +595,27 @@ private fun ColorPickerRow(
 private fun AppRow(
     record: AppRecord,
     selected: Boolean,
+    otherFolders: List<String>,
     onToggle: () -> Unit,
 ) {
+    val inOtherFolder = otherFolders.isNotEmpty()
+    val containerColor = if (inOtherFolder) {
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onToggle() },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = if (record.isWebLink || record.isWebApk) {
-                    Icons.Filled.Public
-                } else {
-                    Icons.Filled.Apps
-                },
-                contentDescription = null,
-                modifier = Modifier.size(28.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            AppIcon(record = record, sizeDp = 36.dp)
             Spacer(Modifier.size(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -454,6 +633,15 @@ private fun AppRow(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (inOtherFolder) {
+                    Text(
+                        text = "${S.apps.alreadyInFolder} ${otherFolders.joinToString(", ")}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                }
             }
             Checkbox(checked = selected, onCheckedChange = { onToggle() })
         }

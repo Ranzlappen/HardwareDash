@@ -92,10 +92,12 @@ class FolderWidgetConfigActivity : ComponentActivity() {
     private fun onFolderPicked(folder: Folder) {
         lifecycleScope.launch {
             val manager = AppWidgetManager.getInstance(this@FolderWidgetConfigActivity)
-            val providerName = manager.getAppWidgetInfo(appWidgetId)?.provider?.className
-            val sizeVariant = when (providerName) {
-                FolderGlanceReceiver::class.java.name -> SIZE_GLANCE
-                else -> SIZE_2X2
+            // Determine which size variant the user dropped by looking up the
+            // bound provider's class name.
+            val providerClassName = manager.getAppWidgetInfo(appWidgetId)?.provider?.className
+            val sizeVariant = when (providerClassName) {
+                FolderWidget1x1Provider::class.java.name -> FolderWidgetRenderer.SIZE_1X1
+                else -> FolderWidgetRenderer.SIZE_2X2
             }
             dao.upsertWidgetConfig(
                 FolderWidgetConfig(
@@ -106,30 +108,19 @@ class FolderWidgetConfigActivity : ComponentActivity() {
                 ),
             )
             // Render immediately so the widget paints before the next periodic
-            // update tick from the launcher. Glance widgets refresh themselves
-            // on the next provideGlance() invocation; a broadcast-style
-            // updateAll triggers that path.
-            if (sizeVariant == SIZE_2X2) {
-                FolderWidgetRenderer.update(
-                    context = this@FolderWidgetConfigActivity,
-                    appWidgetManager = manager,
-                    appWidgetId = appWidgetId,
-                    dao = dao,
-                )
-            } else {
-                FolderGlanceWidget.updateAll(this@FolderWidgetConfigActivity)
-            }
+            // update tick from the launcher.
+            FolderWidgetRenderer.update(
+                context = this@FolderWidgetConfigActivity,
+                appWidgetManager = manager,
+                appWidgetId = appWidgetId,
+                dao = dao,
+            )
             setResult(
                 Activity.RESULT_OK,
                 Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId),
             )
             finish()
         }
-    }
-
-    companion object {
-        const val SIZE_2X2 = "2x2"
-        const val SIZE_GLANCE = "glance_3x2"
     }
 }
 

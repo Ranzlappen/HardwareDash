@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.gadget.apps.icons.AppIcon
 import com.gadget.data.db.apps.AppRecord
 import com.gadget.localization.S
 
@@ -82,7 +83,7 @@ fun FolderPopupContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     items(apps, key = { it.appKey }) { record ->
-                        AppCell(record = record, accent = accent, onClick = { onAppClick(record) })
+                        AppCell(record = record, onClick = { onAppClick(record) })
                     }
                 }
             }
@@ -111,7 +112,6 @@ private fun FolderHeader(name: String, accent: Color) {
 @Composable
 private fun AppCell(
     record: AppRecord,
-    accent: Color,
     onClick: () -> Unit,
 ) {
     Column(
@@ -122,24 +122,7 @@ private fun AppCell(
             .padding(vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(accent.copy(alpha = 0.18f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = if (record.isWebLink || record.isWebApk) {
-                    Icons.Filled.Public
-                } else {
-                    Icons.Filled.Apps
-                },
-                contentDescription = null,
-                tint = accent,
-                modifier = Modifier.size(28.dp),
-            )
-        }
+        AppIcon(record = record, sizeDp = 48.dp)
         Spacer(Modifier.height(4.dp))
         Text(
             text = record.label,
