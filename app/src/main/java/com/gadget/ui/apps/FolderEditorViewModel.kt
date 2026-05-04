@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gadget.apps.WebLinkRepository
+import com.gadget.apps.pin.PinFolderHelper
 import com.gadget.data.db.apps.AppRecord
 import com.gadget.data.db.apps.AppsDao
 import com.gadget.data.db.apps.Folder
@@ -29,6 +30,7 @@ import javax.inject.Inject
 class FolderEditorViewModel @Inject constructor(
     private val dao: AppsDao,
     private val webLinkRepository: WebLinkRepository,
+    private val pinFolderHelper: PinFolderHelper,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -56,6 +58,18 @@ class FolderEditorViewModel @Inject constructor(
         val f = folder.value ?: return
         if (f.baseColorArgb == argb) return
         viewModelScope.launch { dao.updateFolder(f.copy(baseColorArgb = argb)) }
+    }
+
+    fun setLocked(locked: Boolean) {
+        val f = folder.value ?: return
+        if (f.locked == locked) return
+        viewModelScope.launch { dao.updateFolder(f.copy(locked = locked)) }
+    }
+
+    /** Returns true if the launcher accepted the pin request. */
+    fun pinToHome(): Boolean {
+        val f = folder.value ?: return false
+        return pinFolderHelper.requestPin(f.id)
     }
 
     fun toggleMember(appKey: String) {

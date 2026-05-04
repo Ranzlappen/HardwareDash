@@ -4,7 +4,10 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import com.gadget.apps.AppsEntryPoint
+import com.gadget.apps.pin.PinFolderHelper
+import com.gadget.data.db.apps.FolderWidgetConfig
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +38,38 @@ class FolderWidgetProvider : AppWidgetProvider() {
             scope.launch {
                 FolderWidgetRenderer.update(context, appWidgetManager, id, dao)
             }
+        }
+    }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        if (intent.action != PinFolderHelper.ACTION_PIN_CALLBACK) return
+        val appWidgetId = intent.getIntExtra(
+            AppWidgetManager.EXTRA_APPWIDGET_ID,
+            AppWidgetManager.INVALID_APPWIDGET_ID,
+        )
+        val folderId = intent.getLongExtra(PinFolderHelper.EXTRA_FOLDER_ID, -1L)
+        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID || folderId < 0L) return
+
+        val dao = EntryPointAccessors
+            .fromApplication(context.applicationContext, AppsEntryPoint::class.java)
+            .appsDao()
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        scope.launch {
+            dao.upsertWidgetConfig(
+                FolderWidgetConfig(
+                    appWidgetId = appWidgetId,
+                    folderId = folderId,
+                    sizeVariant = "2x2",
+                    createdAt = System.currentTimeMillis(),
+                ),
+            )
+            FolderWidgetRenderer.update(
+                context,
+                AppWidgetManager.getInstance(context),
+                appWidgetId,
+                dao,
+            )
         }
     }
 

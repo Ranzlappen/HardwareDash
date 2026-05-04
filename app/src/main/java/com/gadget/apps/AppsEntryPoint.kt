@@ -1,5 +1,7 @@
 package com.gadget.apps
 
+import com.gadget.apps.pin.PinFolderHelper
+import com.gadget.apps.security.FolderLockManager
 import com.gadget.data.db.apps.AppsDao
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -25,5 +27,7 @@ interface AppsEntryPoint {
     fun webLinkRepository(): WebLinkRepository
     fun webLinkLauncher(): WebLinkLauncher
     fun appLauncher(): AppLauncher
+    fun folderLockManager(): FolderLockManager
+    fun pinFolderHelper(): PinFolderHelper
     fun appsDao(): AppsDao
 }

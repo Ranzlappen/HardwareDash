@@ -737,6 +737,11 @@ object S {
         val pwaBadge get() = m(l, "PWA", "PWA", "PWA", "PWA")
         val webLinkBadge get() = m(l, "Web", "Web", "Web", "Web")
         val previewFolder get() = m(l, "Preview", "Vorschau", "Vista previa", "Aperçu")
+        val lockFolder get() = m(l, "Lock folder", "Ordner sperren", "Bloquear carpeta", "Verrouiller le dossier")
+        val unlockFolder get() = m(l, "Unlock folder", "Ordner entsperren", "Desbloquear carpeta", "Déverrouiller le dossier")
+        val biometricUnavailable get() = m(l, "Biometric unlock isn't set up on this device", "Biometrische Entsperrung ist auf diesem Gerät nicht eingerichtet", "El desbloqueo biométrico no está configurado en este dispositivo", "Le déverrouillage biométrique n'est pas configuré sur cet appareil")
+        val pinToHome get() = m(l, "Pin to home", "An Startbildschirm anheften", "Anclar en inicio", "Épingler à l'accueil")
+        val pinUnsupported get() = m(l, "Your launcher doesn't support one-tap pinning. Long-press your home screen and pick the App Folder widget instead.", "Dein Launcher unterstützt das Anheften mit einem Tippen nicht. Halte stattdessen den Startbildschirm gedrückt und wähle das App-Ordner-Widget.", "Tu launcher no admite el anclaje rápido. Mantén pulsada la pantalla de inicio y elige el widget Carpeta de apps.", "Votre launcher ne prend pas en charge l'épinglage en un tapotement. Appuyez longuement sur l'écran d'accueil et sélectionnez le widget Dossier d'applis.")
     }
 
     // ── Backup ─────────────────────────────────────────────────────────

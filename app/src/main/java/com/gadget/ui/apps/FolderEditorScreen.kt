@@ -35,6 +35,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -44,6 +47,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +61,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.gadget.data.db.apps.AppRecord
 import com.gadget.localization.S
 import com.gadget.ui.folder.FolderPopupActivity
+import kotlinx.coroutines.launch
 
 /**
  * Per-folder editor: rename, recolor, toggle which apps belong, and add
@@ -78,6 +83,8 @@ fun FolderEditorScreen(
     var nameDraft by remember { mutableStateOf("") }
     var showWebLinkDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(folder?.id, folder?.name) {
         folder?.let { if (nameDraft != it.name) nameDraft = it.name }
@@ -97,6 +104,7 @@ fun FolderEditorScreen(
                 },
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { padding ->
         if (folder == null) {
             Box(
@@ -132,6 +140,33 @@ fun FolderEditorScreen(
                     selectedArgb = folder!!.baseColorArgb,
                     onSelect = viewModel::setBaseColor,
                 )
+            }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = apps.lockFolder,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Switch(
+                        checked = folder!!.locked,
+                        onCheckedChange = viewModel::setLocked,
+                    )
+                }
+            }
+            item {
+                OutlinedButton(
+                    onClick = {
+                        if (!viewModel.pinToHome()) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(apps.pinUnsupported)
+                            }
+                        }
+                    },
+                ) { Text(apps.pinToHome) }
             }
             item {
                 Spacer(Modifier.height(4.dp))
