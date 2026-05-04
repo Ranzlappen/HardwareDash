@@ -728,6 +728,14 @@ object S {
         val folderName get() = m(l, "Folder name", "Ordnername", "Nombre de la carpeta", "Nom du dossier")
         val deleteFolderConfirm get() = m(l, "Delete this folder?", "Diesen Ordner löschen?", "¿Eliminar esta carpeta?", "Supprimer ce dossier ?")
         val noFolders get() = m(l, "No folders yet — tap +", "Noch keine Ordner — tippe auf +", "Aún no hay carpetas — toca +", "Aucun dossier — appuyez sur +")
+        val color get() = m(l, "Color", "Farbe", "Color", "Couleur")
+        val appsInFolder get() = m(l, "Apps in this folder", "Apps in diesem Ordner", "Apps en esta carpeta", "Applis dans ce dossier")
+        val addWebLink get() = m(l, "Add web link", "Web-Link hinzufügen", "Añadir enlace web", "Ajouter un lien web")
+        val webLinkUrl get() = m(l, "URL", "URL", "URL", "URL")
+        val webLinkLabel get() = m(l, "Label (optional)", "Bezeichnung (optional)", "Etiqueta (opcional)", "Libellé (facultatif)")
+        val noApps get() = m(l, "No apps detected yet", "Noch keine Apps erkannt", "Aún no se detectaron apps", "Aucune appli détectée pour l'instant")
+        val pwaBadge get() = m(l, "PWA", "PWA", "PWA", "PWA")
+        val webLinkBadge get() = m(l, "Web", "Web", "Web", "Web")
     }
 
     // ── Backup ─────────────────────────────────────────────────────────

@@ -1,0 +1,339 @@
+package com.gadget.ui.apps
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.gadget.data.db.apps.AppRecord
+import com.gadget.localization.S
+
+/**
+ * Per-folder editor: rename, recolor, toggle which apps belong, and add
+ * web-link "apps" inline. All edits persist immediately so back-pressing
+ * never loses work. Rule editor + cover-icon picker land in 6d.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FolderEditorScreen(
+    onBack: () -> Unit,
+) {
+    val viewModel = hiltViewModel<FolderEditorViewModel>()
+    val folder by viewModel.folder.collectAsState()
+    val allApps by viewModel.allApps.collectAsState()
+    val membership by viewModel.membership.collectAsState()
+    val apps = S.apps
+    val common = S.common
+
+    var nameDraft by remember { mutableStateOf("") }
+    var showWebLinkDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(folder?.id, folder?.name) {
+        folder?.let { if (nameDraft != it.name) nameDraft = it.name }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(folder?.name ?: apps.title) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = common.cancel,
+                        )
+                    }
+                },
+            )
+        },
+    ) { padding ->
+        if (folder == null) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(text = apps.title, style = MaterialTheme.typography.bodyLarge)
+            }
+            return@Scaffold
+        }
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item {
+                OutlinedTextField(
+                    value = nameDraft,
+                    onValueChange = {
+                        nameDraft = it
+                        viewModel.rename(it)
+                    },
+                    label = { Text(apps.folderName) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            item {
+                ColorPickerRow(
+                    selectedArgb = folder!!.baseColorArgb,
+                    onSelect = viewModel::setBaseColor,
+                )
+            }
+            item {
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = apps.appsInFolder,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    OutlinedButton(onClick = { showWebLinkDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Spacer(Modifier.size(4.dp))
+                        Text(apps.addWebLink)
+                    }
+                }
+            }
+            if (allApps.isEmpty()) {
+                item {
+                    Text(
+                        text = apps.noApps,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
+                items(allApps, key = { it.appKey }) { record ->
+                    AppRow(
+                        record = record,
+                        selected = record.appKey in membership,
+                        onToggle = { viewModel.toggleMember(record.appKey) },
+                    )
+                }
+            }
+        }
+    }
+
+    if (showWebLinkDialog) {
+        AddWebLinkDialog(
+            onDismiss = { showWebLinkDialog = false },
+            onConfirm = { url, label ->
+                viewModel.addWebLink(url, label)
+                showWebLinkDialog = false
+            },
+        )
+    }
+}
+
+@Composable
+private fun ColorPickerRow(
+    selectedArgb: Int,
+    onSelect: (Int) -> Unit,
+) {
+    val swatches = remember {
+        listOf(
+            Color(0xFF6750A4), // Material primary purple
+            Color(0xFF1E88E5), // Blue
+            Color(0xFF43A047), // Green
+            Color(0xFFEF6C00), // Orange
+            Color(0xFFE53935), // Red
+            Color(0xFF8E24AA), // Magenta
+            Color(0xFF00897B), // Teal
+            Color(0xFF546E7A), // Slate
+        )
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = S.apps.color,
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .align(Alignment.CenterVertically),
+        )
+        swatches.forEach { swatch ->
+            val argb = swatch.toArgb()
+            val isSelected = argb == selectedArgb
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(swatch)
+                    .border(
+                        width = if (isSelected) 3.dp else 1.dp,
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.onBackground
+                        } else {
+                            MaterialTheme.colorScheme.outline
+                        },
+                        shape = CircleShape,
+                    )
+                    .clickable { onSelect(argb) },
+                contentAlignment = Alignment.Center,
+            ) {
+                if (isSelected) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AppRow(
+    record: AppRecord,
+    selected: Boolean,
+    onToggle: () -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onToggle() },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = if (record.isWebLink || record.isWebApk) {
+                    Icons.Filled.Public
+                } else {
+                    Icons.Filled.Apps
+                },
+                contentDescription = null,
+                modifier = Modifier.size(28.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.size(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = record.label,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                val badge = when {
+                    record.isWebLink -> S.apps.webLinkBadge
+                    record.isWebApk -> S.apps.pwaBadge
+                    else -> record.packageName
+                }
+                Text(
+                    text = badge,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Checkbox(checked = selected, onCheckedChange = { onToggle() })
+        }
+    }
+}
+
+@Composable
+private fun AddWebLinkDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String, String) -> Unit,
+) {
+    var url by remember { mutableStateOf("") }
+    var label by remember { mutableStateOf("") }
+    val apps = S.apps
+    val common = S.common
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(apps.addWebLink) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = { url = it },
+                    singleLine = true,
+                    label = { Text(apps.webLinkUrl) },
+                )
+                OutlinedTextField(
+                    value = label,
+                    onValueChange = { label = it },
+                    singleLine = true,
+                    label = { Text(apps.webLinkLabel) },
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = url.isNotBlank(),
+                onClick = { onConfirm(url, label) },
+            ) { Text(common.save) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(common.cancel) }
+        },
+    )
+}

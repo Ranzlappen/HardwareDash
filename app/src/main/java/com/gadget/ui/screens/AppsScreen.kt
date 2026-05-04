@@ -1,5 +1,6 @@
 package com.gadget.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,7 +58,9 @@ import com.gadget.ui.apps.AppsViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppsScreen() {
+fun AppsScreen(
+    onFolderClick: (Long) -> Unit = {},
+) {
     val viewModel = hiltViewModel<AppsViewModel>()
     val folders by viewModel.folders.collectAsState()
     val apps = S.apps
@@ -113,6 +116,7 @@ fun AppsScreen() {
                     items(folders, key = { it.id }) { folder ->
                         FolderListRow(
                             folder = folder,
+                            onClick = { onFolderClick(folder.id) },
                             onDeleteClick = { pendingDelete = folder },
                         )
                     }
@@ -152,10 +156,13 @@ fun AppsScreen() {
 @Composable
 private fun FolderListRow(
     folder: Folder,
+    onClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,

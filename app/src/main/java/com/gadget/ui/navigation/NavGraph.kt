@@ -19,10 +19,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.gadget.ui.apps.FolderEditorScreen
 import com.gadget.ui.charts.MetricHistoryScreen
 import com.gadget.ui.link.LinkScreen
 import com.gadget.ui.logbook.LogbookScreen
@@ -67,6 +70,8 @@ object Routes {
     const val BUG          = "bug"
     const val MANUAL       = "manual"
     const val APPS         = "apps"
+    const val APPS_FOLDER_EDIT = "apps/folder/{folderId}"
+    fun appsFolderEdit(id: Long) = "apps/folder/$id"
 
     // ── Onboarding ──
     const val ONBOARDING   = "onboarding"
@@ -163,7 +168,19 @@ fun NavGraph() {
                 composable(Routes.SETTINGS)   { SettingsScreen() }
                 composable(Routes.BUG)        { BugReportScreen() }
                 composable(Routes.MANUAL)     { ManualScreen() }
-                composable(Routes.APPS)       { AppsScreen() }
+                composable(Routes.APPS) {
+                    AppsScreen(
+                        onFolderClick = { id ->
+                            navController.navigate(Routes.appsFolderEdit(id))
+                        },
+                    )
+                }
+                composable(
+                    route = Routes.APPS_FOLDER_EDIT,
+                    arguments = listOf(navArgument("folderId") { type = NavType.LongType }),
+                ) {
+                    FolderEditorScreen(onBack = { navController.popBackStack() })
+                }
                 composable(Routes.METRIC_HISTORY) {
                     MetricHistoryScreen(onBack = { navController.popBackStack() })
                 }
