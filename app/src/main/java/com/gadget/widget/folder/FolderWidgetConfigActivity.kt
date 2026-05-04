@@ -92,33 +92,22 @@ class FolderWidgetConfigActivity : ComponentActivity() {
     private fun onFolderPicked(folder: Folder) {
         lifecycleScope.launch {
             val manager = AppWidgetManager.getInstance(this@FolderWidgetConfigActivity)
-            val providerName = manager.getAppWidgetInfo(appWidgetId)?.provider?.className
-            val sizeVariant = when (providerName) {
-                FolderGlanceReceiver::class.java.name -> SIZE_GLANCE
-                else -> SIZE_2X2
-            }
             dao.upsertWidgetConfig(
                 FolderWidgetConfig(
                     appWidgetId = appWidgetId,
                     folderId = folder.id,
-                    sizeVariant = sizeVariant,
+                    sizeVariant = SIZE_2X2,
                     createdAt = System.currentTimeMillis(),
                 ),
             )
             // Render immediately so the widget paints before the next periodic
-            // update tick from the launcher. Glance widgets refresh themselves
-            // on the next provideGlance() invocation; a broadcast-style
-            // updateAll triggers that path.
-            if (sizeVariant == SIZE_2X2) {
-                FolderWidgetRenderer.update(
-                    context = this@FolderWidgetConfigActivity,
-                    appWidgetManager = manager,
-                    appWidgetId = appWidgetId,
-                    dao = dao,
-                )
-            } else {
-                FolderGlanceWidget.updateAll(this@FolderWidgetConfigActivity)
-            }
+            // update tick from the launcher.
+            FolderWidgetRenderer.update(
+                context = this@FolderWidgetConfigActivity,
+                appWidgetManager = manager,
+                appWidgetId = appWidgetId,
+                dao = dao,
+            )
             setResult(
                 Activity.RESULT_OK,
                 Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId),
@@ -129,7 +118,6 @@ class FolderWidgetConfigActivity : ComponentActivity() {
 
     companion object {
         const val SIZE_2X2 = "2x2"
-        const val SIZE_GLANCE = "glance_3x2"
     }
 }
 

@@ -178,25 +178,33 @@ fun FolderEditorScreen(
             }
             item {
                 Spacer(Modifier.height(4.dp))
+                // Section header on its own line — the previous Row collapsed
+                // this Text into a 1-character-wide column when the two
+                // trailing buttons claimed all the horizontal space.
+                Text(
+                    text = apps.appsInFolder,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                )
+                Spacer(Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = apps.appsInFolder,
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                    )
                     OutlinedButton(
+                        modifier = Modifier.weight(1f),
                         onClick = {
                             folder?.let {
                                 context.startActivity(FolderPopupActivity.intent(context, it.id))
                             }
                         },
                     ) { Text(apps.previewFolder) }
-                    Spacer(Modifier.size(8.dp))
-                    OutlinedButton(onClick = { showWebLinkDialog = true }) {
+                    OutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = { showWebLinkDialog = true },
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = null,
