@@ -23,12 +23,12 @@ import javax.inject.Singleton
  * user state the app has authority over so a restore on a fresh install
  * reproduces the device's full configuration:
  *
- *  - `metadata.json`   — app version, schema versions, timestamp.
+ *  - `metadata.json` — app version, schema versions, timestamp.
  *  - `gadget_db` (+ `-wal` + `-shm`) — the Room database (every entity).
- *  - `shared_prefs/*.xml` — every `SharedPreferences` file the app uses.
- *  - `datastore/*` — every `DataStore<Preferences>` file the app uses.
- *  - `folder_covers/*` — App-Organizer folder cover photos.
- *  - `apps_favicons/*` — App-Organizer web-link favicon cache.
+ *  - `shared_prefs/<name>.xml` — every `SharedPreferences` file the app uses.
+ *  - `datastore/<name>` — every `DataStore<Preferences>` file the app uses.
+ *  - `folder_covers/<id>.png` — App-Organizer folder cover photos.
+ *  - `apps_favicons/<sha1>` — App-Organizer web-link favicon cache.
  *
  * Things deliberately NOT in the ZIP:
  *  - The OSMDroid map tile cache (regenerates on demand).
