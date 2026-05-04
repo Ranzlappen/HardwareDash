@@ -33,4 +33,6 @@
     <!-- Folder widget (App-Organizer module) -->
     <string name="widget_folder_label">App Folder</string>
     <string name="widget_folder_desc">A customizable home-screen folder of installed apps, PWAs, and web links.</string>
+    <string name="widget_folder_1x1_label">App Folder (small)</string>
+    <string name="widget_folder_1x1_desc">A 1x1 cell version of the App Folder widget — handy when you want a single tap target for a folder.</string>
 </resources>

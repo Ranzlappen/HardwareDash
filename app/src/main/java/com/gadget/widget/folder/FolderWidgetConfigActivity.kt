@@ -92,11 +92,18 @@ class FolderWidgetConfigActivity : ComponentActivity() {
     private fun onFolderPicked(folder: Folder) {
         lifecycleScope.launch {
             val manager = AppWidgetManager.getInstance(this@FolderWidgetConfigActivity)
+            // Determine which size variant the user dropped by looking up the
+            // bound provider's class name.
+            val providerClassName = manager.getAppWidgetInfo(appWidgetId)?.provider?.className
+            val sizeVariant = when (providerClassName) {
+                FolderWidget1x1Provider::class.java.name -> FolderWidgetRenderer.SIZE_1X1
+                else -> FolderWidgetRenderer.SIZE_2X2
+            }
             dao.upsertWidgetConfig(
                 FolderWidgetConfig(
                     appWidgetId = appWidgetId,
                     folderId = folder.id,
-                    sizeVariant = SIZE_2X2,
+                    sizeVariant = sizeVariant,
                     createdAt = System.currentTimeMillis(),
                 ),
             )
@@ -114,10 +121,6 @@ class FolderWidgetConfigActivity : ComponentActivity() {
             )
             finish()
         }
-    }
-
-    companion object {
-        const val SIZE_2X2 = "2x2"
     }
 }
 

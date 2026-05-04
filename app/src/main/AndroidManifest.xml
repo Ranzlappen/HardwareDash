@@ -449,6 +449,19 @@
                 android:resource="@xml/widget_folder_2x2_info" />
         </receiver>
 
+        <!-- ── Folder Widget (App-Organizer) — RemoteViews 1x1 ───── -->
+        <receiver
+            android:name=".widget.folder.FolderWidget1x1Provider"
+            android:label="@string/widget_folder_1x1_label"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_folder_1x1_info" />
+        </receiver>
+
         <!-- Configuration activity invoked by the launcher when a folder
              widget is dropped on the home screen. -->
         <activity

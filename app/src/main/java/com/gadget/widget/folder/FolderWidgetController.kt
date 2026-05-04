@@ -39,6 +39,7 @@ class FolderWidgetController @Inject constructor(
                 .distinctUntilChanged()
                 .collect {
                     FolderWidgetProvider.updateAll(context)
+                    FolderWidget1x1Provider.updateAll(context)
                 }
         }
     }
