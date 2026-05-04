@@ -1,5 +1,6 @@
 package com.gadget.apps
 
+import com.gadget.apps.icons.AppIconLoader
 import com.gadget.apps.pin.PinFolderHelper
 import com.gadget.apps.security.FolderLockManager
 import com.gadget.data.db.apps.AppsDao
@@ -29,5 +30,6 @@ interface AppsEntryPoint {
     fun appLauncher(): AppLauncher
     fun folderLockManager(): FolderLockManager
     fun pinFolderHelper(): PinFolderHelper
+    fun appIconLoader(): AppIconLoader
     fun appsDao(): AppsDao
 }
