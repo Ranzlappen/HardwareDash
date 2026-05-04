@@ -24,5 +24,6 @@ interface AppsEntryPoint {
     fun appRepository(): AppRepository
     fun webLinkRepository(): WebLinkRepository
     fun webLinkLauncher(): WebLinkLauncher
+    fun appLauncher(): AppLauncher
     fun appsDao(): AppsDao
 }

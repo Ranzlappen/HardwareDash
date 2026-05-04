@@ -417,5 +417,16 @@
             </intent-filter>
         </activity>
 
+        <!-- ── Folder Popup (App-Organizer) ──────────────────────── -->
+        <!-- Translucent floating activity launched on widget short-tap.
+             Closes itself when the user taps outside the floating Card. -->
+        <activity
+            android:name=".ui.folder.FolderPopupActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Gadget.Translucent"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:taskAffinity="" />
+
     </application>
 </manifest>

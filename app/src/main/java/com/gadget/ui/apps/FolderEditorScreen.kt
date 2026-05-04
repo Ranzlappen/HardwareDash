@@ -50,11 +50,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gadget.data.db.apps.AppRecord
 import com.gadget.localization.S
+import com.gadget.ui.folder.FolderPopupActivity
 
 /**
  * Per-folder editor: rename, recolor, toggle which apps belong, and add
@@ -75,6 +77,7 @@ fun FolderEditorScreen(
 
     var nameDraft by remember { mutableStateOf("") }
     var showWebLinkDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     LaunchedEffect(folder?.id, folder?.name) {
         folder?.let { if (nameDraft != it.name) nameDraft = it.name }
@@ -142,6 +145,14 @@ fun FolderEditorScreen(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                     )
+                    OutlinedButton(
+                        onClick = {
+                            folder?.let {
+                                context.startActivity(FolderPopupActivity.intent(context, it.id))
+                            }
+                        },
+                    ) { Text(apps.previewFolder) }
+                    Spacer(Modifier.size(8.dp))
                     OutlinedButton(onClick = { showWebLinkDialog = true }) {
                         Icon(
                             imageVector = Icons.Filled.Add,

@@ -736,6 +736,7 @@ object S {
         val noApps get() = m(l, "No apps detected yet", "Noch keine Apps erkannt", "Aún no se detectaron apps", "Aucune appli détectée pour l'instant")
         val pwaBadge get() = m(l, "PWA", "PWA", "PWA", "PWA")
         val webLinkBadge get() = m(l, "Web", "Web", "Web", "Web")
+        val previewFolder get() = m(l, "Preview", "Vorschau", "Vista previa", "Aperçu")
     }
 
     // ── Backup ─────────────────────────────────────────────────────────
