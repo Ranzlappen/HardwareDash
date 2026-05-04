@@ -20,10 +20,15 @@ import dagger.hilt.android.EntryPointAccessors
  * Builds [RemoteViews] for one placed folder widget.
  *
  * Picks the layout based on the per-`appWidgetId` config row's `sizeVariant`:
- *  - [SIZE_1X1] → `widget_folder_1x1`: cover icon when set, else a tinted
- *                 folder symbol filling the cell. No name, no tile grid.
+ *  - [SIZE_1X1] → `widget_folder_1x1`: cover icon when set, else a 2×2
+ *                 mini-tile grid of preview app icons (no name strip).
  *  - [SIZE_2X2] (default) → `widget_folder_2x2`: cover icon when set, else
  *                 the folder name + a 2×2 grid of preview app icons.
+ *
+ * Both layouts share the same view IDs (cover_image / cover_symbol /
+ * grid_section / tile_0..3), so the renderer treats them uniformly. The 2×2
+ * adds a `widget_folder_name` TextView the 1×1 doesn't have; renderers gate
+ * setting that text on whether the layout includes it.
  *
  * Suspend because [AppIconLoader] does I/O. Callers (the providers' onUpdate,
  * `FolderWidgetController`, the config Activity's post-pick paint) are
@@ -48,8 +53,6 @@ internal object FolderWidgetRenderer {
         dao: AppsDao,
     ) {
         val config = dao.getWidgetConfig(appWidgetId) ?: run {
-            // Orphaned widget (config Activity was cancelled) — paint a
-            // neutral placeholder so the user can long-press → reconfigure.
             appWidgetManager.updateAppWidget(appWidgetId, neutralViews(context, SIZE_2X2))
             return
         }
@@ -60,53 +63,45 @@ internal object FolderWidgetRenderer {
             )
             return
         }
-
-        val views = when (config.sizeVariant) {
-            SIZE_1X1 -> render1x1(context, appWidgetId, folder)
-            else -> render2x2(context, appWidgetId, folder, dao)
-        }
-        appWidgetManager.updateAppWidget(appWidgetId, views)
+        appWidgetManager.updateAppWidget(
+            appWidgetId,
+            renderFor(context, appWidgetId, folder, dao, config.sizeVariant),
+        )
     }
 
-    // ── 1x1 ─────────────────────────────────────────────────────────────────
-
-    private fun render1x1(
+    private suspend fun renderFor(
         context: Context,
         appWidgetId: Int,
         folder: Folder,
+        dao: AppsDao,
+        sizeVariant: String,
     ): RemoteViews {
-        val views = RemoteViews(context.packageName, R.layout.widget_folder_1x1)
+        val layoutRes = layoutFor(sizeVariant)
         val cover = folder.coverIcon
-        when {
-            cover.startsWith("image:") -> {
-                val bmp = runCatching {
-                    BitmapFactory.decodeFile(cover.removePrefix("image:"))
-                }.getOrNull()
-                if (bmp != null) {
-                    views.setViewVisibility(R.id.widget_folder_cover, View.VISIBLE)
-                    views.setViewVisibility(R.id.widget_folder_default, View.GONE)
-                    views.setImageViewBitmap(R.id.widget_folder_cover, bmp)
-                } else {
-                    show1x1Default(views, folder)
-                }
-            }
-            cover.startsWith("symbol:") -> {
-                val sym = MaterialSymbol.fromId(cover.removePrefix("symbol:"))
-                if (sym != null) {
-                    views.setViewVisibility(R.id.widget_folder_cover, View.VISIBLE)
-                    views.setViewVisibility(R.id.widget_folder_default, View.GONE)
-                    views.setImageViewResource(R.id.widget_folder_cover, sym.drawableRes)
-                    views.setInt(
-                        R.id.widget_folder_cover,
-                        "setColorFilter",
-                        folder.baseColorArgb,
-                    )
-                } else {
-                    show1x1Default(views, folder)
-                }
-            }
-            else -> show1x1Default(views, folder)
+        return when {
+            cover.startsWith("image:") -> renderCoverImage(context, appWidgetId, folder, layoutRes)
+                ?: renderPreviewGrid(context, appWidgetId, folder, dao, sizeVariant)
+            cover.startsWith("symbol:") -> renderCoverSymbol(context, appWidgetId, folder, layoutRes)
+                ?: renderPreviewGrid(context, appWidgetId, folder, dao, sizeVariant)
+            else -> renderPreviewGrid(context, appWidgetId, folder, dao, sizeVariant)
         }
+    }
+
+    // ── Cover (image / symbol) — shared between 1x1 and 2x2 ─────────────────
+
+    private fun renderCoverImage(
+        context: Context,
+        appWidgetId: Int,
+        folder: Folder,
+        layoutRes: Int,
+    ): RemoteViews? {
+        val path = folder.coverIcon.removePrefix("image:")
+        val bmp = runCatching { BitmapFactory.decodeFile(path) }.getOrNull() ?: return null
+        val views = RemoteViews(context.packageName, layoutRes)
+        views.setViewVisibility(R.id.widget_folder_cover_image, View.VISIBLE)
+        views.setViewVisibility(R.id.widget_folder_cover_symbol, View.GONE)
+        views.setViewVisibility(R.id.widget_folder_grid_section, View.GONE)
+        views.setImageViewBitmap(R.id.widget_folder_cover_image, bmp)
         views.setOnClickPendingIntent(
             R.id.widget_folder_root,
             popupPendingIntent(context, appWidgetId, folder.id),
@@ -114,96 +109,61 @@ internal object FolderWidgetRenderer {
         return views
     }
 
-    private fun show1x1Default(views: RemoteViews, folder: Folder) {
-        views.setViewVisibility(R.id.widget_folder_cover, View.GONE)
-        views.setViewVisibility(R.id.widget_folder_default, View.VISIBLE)
-        views.setInt(R.id.widget_folder_default, "setColorFilter", folder.baseColorArgb)
+    private fun renderCoverSymbol(
+        context: Context,
+        appWidgetId: Int,
+        folder: Folder,
+        layoutRes: Int,
+    ): RemoteViews? {
+        val sym = MaterialSymbol.fromId(folder.coverIcon.removePrefix("symbol:")) ?: return null
+        val views = RemoteViews(context.packageName, layoutRes)
+        views.setViewVisibility(R.id.widget_folder_cover_image, View.GONE)
+        views.setViewVisibility(R.id.widget_folder_cover_symbol, View.VISIBLE)
+        views.setViewVisibility(R.id.widget_folder_grid_section, View.GONE)
+        views.setImageViewResource(R.id.widget_folder_cover_symbol, sym.drawableRes)
+        // ImageView.setColorFilter(int) defaults to SRC_IN, the right mode for
+        // a flat symbol tint. The image-cover view above never gets this so
+        // user-uploaded photos render at their original colors.
+        views.setInt(
+            R.id.widget_folder_cover_symbol,
+            "setColorFilter",
+            folder.baseColorArgb,
+        )
+        views.setOnClickPendingIntent(
+            R.id.widget_folder_root,
+            popupPendingIntent(context, appWidgetId, folder.id),
+        )
+        return views
     }
 
-    // ── 2x2 ─────────────────────────────────────────────────────────────────
+    // ── Preview-tile grid (default mode for both 1x1 and 2x2) ───────────────
 
-    private suspend fun render2x2(
+    private suspend fun renderPreviewGrid(
         context: Context,
         appWidgetId: Int,
         folder: Folder,
         dao: AppsDao,
+        sizeVariant: String,
     ): RemoteViews {
-        val coverViews = coverViews2x2OrNull(context, appWidgetId, folder)
-        if (coverViews != null) return coverViews
+        val views = RemoteViews(context.packageName, layoutFor(sizeVariant))
+        views.setViewVisibility(R.id.widget_folder_cover_image, View.GONE)
+        views.setViewVisibility(R.id.widget_folder_cover_symbol, View.GONE)
+        views.setViewVisibility(R.id.widget_folder_grid_section, View.VISIBLE)
+
+        // 2×2 has a name strip; 1×1 doesn't. Setting text on a missing view is
+        // a no-op on RemoteViews but we guard anyway for clarity.
+        if (sizeVariant != SIZE_1X1) {
+            views.setTextViewText(R.id.widget_folder_name, folder.name)
+            views.setTextColor(R.id.widget_folder_name, folder.baseColorArgb)
+        }
 
         val members = dao.getMembership(folder.id)
             .sortedBy { it.sortOrder }
             .take(tileIds.size)
         val records = members.mapNotNull { dao.getAppRecord(it.appKey) }
-
         val loader = EntryPointAccessors
             .fromApplication(context.applicationContext, AppsEntryPoint::class.java)
             .appIconLoader()
-
-        return previewGridViews(context, appWidgetId, folder, records, loader)
-    }
-
-    private fun coverViews2x2OrNull(
-        context: Context,
-        appWidgetId: Int,
-        folder: Folder,
-    ): RemoteViews? {
-        val cover = folder.coverIcon
-        return when {
-            cover.startsWith("image:") -> {
-                val path = cover.removePrefix("image:")
-                val bmp = runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
-                    ?: return null
-                build2x2CoverViews(context, appWidgetId, folder) { views ->
-                    views.setImageViewBitmap(R.id.widget_folder_cover, bmp)
-                }
-            }
-            cover.startsWith("symbol:") -> {
-                val sym = MaterialSymbol.fromId(cover.removePrefix("symbol:"))
-                    ?: return null
-                build2x2CoverViews(context, appWidgetId, folder) { views ->
-                    views.setImageViewResource(R.id.widget_folder_cover, sym.drawableRes)
-                    views.setInt(
-                        R.id.widget_folder_cover,
-                        "setColorFilter",
-                        folder.baseColorArgb,
-                    )
-                }
-            }
-            else -> null
-        }
-    }
-
-    private fun build2x2CoverViews(
-        context: Context,
-        appWidgetId: Int,
-        folder: Folder,
-        configure: (RemoteViews) -> Unit,
-    ): RemoteViews {
-        val views = RemoteViews(context.packageName, R.layout.widget_folder_2x2)
-        views.setViewVisibility(R.id.widget_folder_cover, View.VISIBLE)
-        views.setViewVisibility(R.id.widget_folder_grid_section, View.GONE)
-        configure(views)
-        views.setOnClickPendingIntent(
-            R.id.widget_folder_root,
-            popupPendingIntent(context, appWidgetId, folder.id),
-        )
-        return views
-    }
-
-    private suspend fun previewGridViews(
-        context: Context,
-        appWidgetId: Int,
-        folder: Folder,
-        records: List<AppRecord>,
-        loader: AppIconLoader,
-    ): RemoteViews {
-        val views = RemoteViews(context.packageName, R.layout.widget_folder_2x2)
-        views.setViewVisibility(R.id.widget_folder_cover, View.GONE)
-        views.setViewVisibility(R.id.widget_folder_grid_section, View.VISIBLE)
-
-        views.setTextViewText(R.id.widget_folder_name, folder.name)
-        views.setTextColor(R.id.widget_folder_name, folder.baseColorArgb)
 
         for ((index, tileId) in tileIds.withIndex()) {
             val record = records.getOrNull(index)
@@ -225,22 +185,25 @@ internal object FolderWidgetRenderer {
 
     // ── Shared ──────────────────────────────────────────────────────────────
 
-    private fun neutralViews(context: Context, sizeVariant: String): RemoteViews =
-        when (sizeVariant) {
-            SIZE_1X1 -> RemoteViews(context.packageName, R.layout.widget_folder_1x1).also {
-                it.setViewVisibility(R.id.widget_folder_cover, View.GONE)
-                it.setViewVisibility(R.id.widget_folder_default, View.VISIBLE)
-            }
-            else -> RemoteViews(context.packageName, R.layout.widget_folder_2x2).also {
-                it.setViewVisibility(R.id.widget_folder_cover, View.GONE)
-                it.setViewVisibility(R.id.widget_folder_grid_section, View.VISIBLE)
-                it.setTextViewText(
-                    R.id.widget_folder_name,
-                    context.getString(R.string.widget_folder_label),
-                )
-                for (id in tileIds) it.setViewVisibility(id, View.INVISIBLE)
-            }
+    private fun neutralViews(context: Context, sizeVariant: String): RemoteViews {
+        val views = RemoteViews(context.packageName, layoutFor(sizeVariant))
+        views.setViewVisibility(R.id.widget_folder_cover_image, View.GONE)
+        views.setViewVisibility(R.id.widget_folder_cover_symbol, View.GONE)
+        views.setViewVisibility(R.id.widget_folder_grid_section, View.VISIBLE)
+        if (sizeVariant != SIZE_1X1) {
+            views.setTextViewText(
+                R.id.widget_folder_name,
+                context.getString(R.string.widget_folder_label),
+            )
         }
+        for (id in tileIds) views.setViewVisibility(id, View.INVISIBLE)
+        return views
+    }
+
+    private fun layoutFor(sizeVariant: String): Int = when (sizeVariant) {
+        SIZE_1X1 -> R.layout.widget_folder_1x1
+        else -> R.layout.widget_folder_2x2
+    }
 
     private fun popupPendingIntent(
         context: Context,
