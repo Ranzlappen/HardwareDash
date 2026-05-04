@@ -95,4 +95,20 @@ interface AppsDao {
 
     @Query("SELECT * FROM apps_folder_rule")
     fun observeRules(): Flow<List<FolderRuleEntity>>
+
+    // ── Folder widget config (per-appWidgetId) ──────────────────────────
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertWidgetConfig(config: FolderWidgetConfig)
+
+    @Query("DELETE FROM apps_widget_config WHERE app_widget_id = :appWidgetId")
+    suspend fun deleteWidgetConfig(appWidgetId: Int)
+
+    @Query("SELECT * FROM apps_widget_config WHERE app_widget_id = :appWidgetId")
+    suspend fun getWidgetConfig(appWidgetId: Int): FolderWidgetConfig?
+
+    @Query("SELECT * FROM apps_widget_config")
+    suspend fun getAllWidgetConfigs(): List<FolderWidgetConfig>
+
+    @Query("SELECT * FROM apps_widget_config WHERE folder_id = :folderId")
+    suspend fun getWidgetConfigsForFolder(folderId: Long): List<FolderWidgetConfig>
 }

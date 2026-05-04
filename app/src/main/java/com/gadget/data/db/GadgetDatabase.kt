@@ -9,6 +9,7 @@ import com.gadget.data.db.apps.AppsDao
 import com.gadget.data.db.apps.Folder
 import com.gadget.data.db.apps.FolderApp
 import com.gadget.data.db.apps.FolderRuleEntity
+import com.gadget.data.db.apps.FolderWidgetConfig
 import com.gadget.data.db.apps.WebLinkApp
 
 @Database(
@@ -20,8 +21,9 @@ import com.gadget.data.db.apps.WebLinkApp
         AppRecord::class,
         WebLinkApp::class,
         FolderRuleEntity::class,
+        FolderWidgetConfig::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class GadgetDatabase : RoomDatabase() {
@@ -105,6 +107,31 @@ val MIGRATION_1_2: Migration = object : Migration(1, 2) {
                 PRIMARY KEY(`folder_id`)
             )
             """.trimIndent(),
+        )
+    }
+}
+
+/**
+ * v2 → v3 adds the per-`appWidgetId` folder-widget config table. Purely
+ * additive; populated v2 databases pick up the new table without touching
+ * any existing data.
+ */
+val MIGRATION_2_3: Migration = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `apps_widget_config` (
+                `app_widget_id` INTEGER NOT NULL,
+                `folder_id` INTEGER NOT NULL,
+                `size_variant` TEXT NOT NULL,
+                `created_at` INTEGER NOT NULL,
+                PRIMARY KEY(`app_widget_id`)
+            )
+            """.trimIndent(),
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_apps_widget_config_folder_id` " +
+                "ON `apps_widget_config` (`folder_id`)",
         )
     }
 }

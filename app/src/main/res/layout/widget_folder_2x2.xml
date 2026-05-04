@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Layout for the 2x2 folder home-screen widget. Kept intentionally minimal:
+  the folder name centered + a horizontal accent stripe whose color is the
+  folder's baseColorArgb (set at render time via RemoteViews.setInt). Icon-grid
+  preview lives in a future variant once bitmap icon caching lands.
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_folder_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/widget_folder_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:text="Folder"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeMaxTextSize="18sp"
+        android:autoSizeStepGranularity="1sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium" />
+
+    <View
+        android:id="@+id/widget_folder_accent"
+        android:layout_width="28dp"
+        android:layout_height="3dp"
+        android:layout_below="@id/widget_folder_name"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="6dp"
+        android:background="#FFFFFF" />
+
+</RelativeLayout>

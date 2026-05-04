@@ -428,5 +428,29 @@
             android:launchMode="singleTop"
             android:taskAffinity="" />
 
+        <!-- ── Folder Widget (App-Organizer) — RemoteViews 2x2 ───── -->
+        <receiver
+            android:name=".widget.folder.FolderWidgetProvider"
+            android:label="@string/widget_folder_label"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_folder_2x2_info" />
+        </receiver>
+
+        <!-- Configuration activity invoked by the launcher when a folder
+             widget is dropped on the home screen. -->
+        <activity
+            android:name=".widget.folder.FolderWidgetConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Gadget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
     </application>
 </manifest>

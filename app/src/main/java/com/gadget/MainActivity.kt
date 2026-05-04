@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.gadget.apps.AppRepository
+import com.gadget.widget.folder.FolderWidgetController
 import com.gadget.localization.LocalizationManager
 import com.gadget.ui.theme.AccessibilityPreferencesManager
 import com.gadget.ui.theme.ThemePreferencesManager
@@ -21,6 +22,10 @@ import com.gadget.widget.WidgetUpdateWorker
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var appRepository: AppRepository
+
+    // Eager-injected so its init { } collects Room flows and re-renders folder
+    // widgets reactively for the lifetime of the process.
+    @Inject lateinit var folderWidgetController: FolderWidgetController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
