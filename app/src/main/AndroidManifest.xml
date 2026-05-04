@@ -89,6 +89,13 @@
         </intent>
     </queries>
 
+    <!-- Optional usage-stats access for the "Unused" smart-folder rule.
+         The user must explicitly grant this in Settings → Apps →
+         Special access → Usage access. The rule degrades to an empty
+         folder if not granted, never crashes. -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
     <application
         android:name=".GadgetApplication"
         android:allowBackup="true"

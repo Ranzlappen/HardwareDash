@@ -742,6 +742,15 @@ object S {
         val biometricUnavailable get() = m(l, "Biometric unlock isn't set up on this device", "Biometrische Entsperrung ist auf diesem Gerät nicht eingerichtet", "El desbloqueo biométrico no está configurado en este dispositivo", "Le déverrouillage biométrique n'est pas configuré sur cet appareil")
         val pinToHome get() = m(l, "Pin to home", "An Startbildschirm anheften", "Anclar en inicio", "Épingler à l'accueil")
         val pinUnsupported get() = m(l, "Your launcher doesn't support one-tap pinning. Long-press your home screen and pick the App Folder widget instead.", "Dein Launcher unterstützt das Anheften mit einem Tippen nicht. Halte stattdessen den Startbildschirm gedrückt und wähle das App-Ordner-Widget.", "Tu launcher no admite el anclaje rápido. Mantén pulsada la pantalla de inicio y elige el widget Carpeta de apps.", "Votre launcher ne prend pas en charge l'épinglage en un tapotement. Appuyez longuement sur l'écran d'accueil et sélectionnez le widget Dossier d'applis.")
+        val rule get() = m(l, "Rule", "Regel", "Regla", "Règle")
+        val ruleManual get() = m(l, "Manual", "Manuell", "Manual", "Manuel")
+        val rulePackagePrefix get() = m(l, "Package", "Paket", "Paquete", "Paquet")
+        val ruleRecentlyInstalled get() = m(l, "Recent", "Neu", "Recientes", "Récentes")
+        val ruleWebApks get() = m(l, "PWAs", "PWAs", "PWAs", "PWAs")
+        val ruleUnused get() = m(l, "Unused", "Ungenutzt", "Sin uso", "Inutilisées")
+        val ruleDays get() = m(l, "days", "Tage", "días", "jours")
+        val rulePackagePrefixHint get() = m(l, "e.g. com.google.", "z. B. com.google.", "p. ej. com.google.", "p. ex. com.google.")
+        val ruleUsageHint get() = m(l, "Requires \"Usage access\" permission. Grant in Settings → Apps → Special access.", "Benötigt die Berechtigung „Nutzungsdaten\". Gewähre sie unter Einstellungen → Apps → Spezieller Zugriff.", "Requiere el permiso \"Acceso de uso\". Concédelo en Ajustes → Apps → Acceso especial.", "Nécessite l'autorisation « Accès aux données d'utilisation ». Accordez-la dans Paramètres → Applis → Accès spécial.")
     }
 
     // ── Backup ─────────────────────────────────────────────────────────

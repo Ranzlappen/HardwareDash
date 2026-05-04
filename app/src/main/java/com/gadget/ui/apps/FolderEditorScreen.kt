@@ -58,6 +58,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.gadget.apps.rules.FolderRule
 import com.gadget.data.db.apps.AppRecord
 import com.gadget.localization.S
 import com.gadget.ui.folder.FolderPopupActivity
@@ -77,6 +78,7 @@ fun FolderEditorScreen(
     val folder by viewModel.folder.collectAsState()
     val allApps by viewModel.allApps.collectAsState()
     val membership by viewModel.membership.collectAsState()
+    val rule by viewModel.rule.collectAsState()
     val apps = S.apps
     val common = S.common
 
@@ -142,6 +144,12 @@ fun FolderEditorScreen(
                 )
             }
             item {
+                RuleSection(
+                    rule = rule,
+                    onSetRule = viewModel::setRule,
+                )
+            }
+            item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -199,7 +207,11 @@ fun FolderEditorScreen(
                     }
                 }
             }
-            if (allApps.isEmpty()) {
+            if (rule !is FolderRule.Manual) {
+                // Smart rules compute their own membership; manual toggles
+                // would be misleading. Tap "Preview" to see what the rule
+                // currently materializes.
+            } else if (allApps.isEmpty()) {
                 item {
                     Text(
                         text = apps.noApps,
@@ -228,6 +240,111 @@ fun FolderEditorScreen(
             },
         )
     }
+}
+
+@Composable
+private fun RuleSection(
+    rule: FolderRule,
+    onSetRule: (FolderRule) -> Unit,
+) {
+    val apps = S.apps
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = apps.rule,
+            style = MaterialTheme.typography.titleSmall,
+        )
+        // 5-way segmented selector. Use a Row of OutlinedButton "chips" since
+        // SegmentedButton requires width constraints and overflows on phones.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            RuleChip(label = apps.ruleManual, selected = rule is FolderRule.Manual,
+                onClick = { onSetRule(FolderRule.Manual) })
+            RuleChip(label = apps.rulePackagePrefix, selected = rule is FolderRule.PackagePrefix,
+                onClick = { onSetRule(FolderRule.PackagePrefix("com.")) })
+            RuleChip(label = apps.ruleRecentlyInstalled, selected = rule is FolderRule.RecentlyInstalled,
+                onClick = { onSetRule(FolderRule.RecentlyInstalled(7)) })
+            RuleChip(label = apps.ruleWebApks, selected = rule is FolderRule.WebApkOnly,
+                onClick = { onSetRule(FolderRule.WebApkOnly) })
+            RuleChip(label = apps.ruleUnused, selected = rule is FolderRule.UnusedSinceDays,
+                onClick = { onSetRule(FolderRule.UnusedSinceDays(30)) })
+        }
+        when (val r = rule) {
+            is FolderRule.PackagePrefix -> {
+                OutlinedTextField(
+                    value = r.prefix,
+                    onValueChange = { onSetRule(FolderRule.PackagePrefix(it)) },
+                    singleLine = true,
+                    label = { Text(apps.rulePackagePrefix) },
+                    placeholder = { Text(apps.rulePackagePrefixHint) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            is FolderRule.RecentlyInstalled -> {
+                DaysField(
+                    value = r.days,
+                    label = "${apps.ruleRecentlyInstalled} (${apps.ruleDays})",
+                    onChange = { onSetRule(FolderRule.RecentlyInstalled(it)) },
+                )
+            }
+            is FolderRule.UnusedSinceDays -> {
+                DaysField(
+                    value = r.days,
+                    label = "${apps.ruleUnused} (${apps.ruleDays})",
+                    onChange = { onSetRule(FolderRule.UnusedSinceDays(it)) },
+                )
+                Text(
+                    text = apps.ruleUsageHint,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            FolderRule.Manual,
+            FolderRule.WebApkOnly -> Unit
+        }
+    }
+}
+
+@Composable
+private fun RuleChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val container = if (selected) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+    val onContainer = if (selected) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Card(
+        modifier = Modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = container),
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.labelMedium,
+            color = onContainer,
+        )
+    }
+}
+
+@Composable
+private fun DaysField(value: Int, label: String, onChange: (Int) -> Unit) {
+    var draft by remember(value) { mutableStateOf(value.toString()) }
+    OutlinedTextField(
+        value = draft,
+        onValueChange = {
+            draft = it.filter { ch -> ch.isDigit() }.take(4)
+            draft.toIntOrNull()?.let(onChange)
+        },
+        singleLine = true,
+        label = { Text(label) },
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable

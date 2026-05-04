@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gadget.apps.WebLinkRepository
 import com.gadget.apps.pin.PinFolderHelper
+import com.gadget.apps.rules.FolderRule
+import com.gadget.apps.rules.RuleCodec
+import com.gadget.data.db.apps.FolderRuleEntity
 import com.gadget.data.db.apps.AppRecord
 import com.gadget.data.db.apps.AppsDao
 import com.gadget.data.db.apps.Folder
@@ -46,6 +49,14 @@ class FolderEditorViewModel @Inject constructor(
     val membership: StateFlow<Set<String>> = dao.observeMembership(folderId)
         .map { rows -> rows.mapTo(HashSet(rows.size)) { it.appKey } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
+    val rule: StateFlow<FolderRule> = dao.observeRules()
+        .map { rows ->
+            rows.firstOrNull { it.folderId == folderId }
+                ?.let { RuleCodec.decode(it.ruleJson) }
+                ?: FolderRule.Manual
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FolderRule.Manual)
 
     fun rename(newName: String) {
         val f = folder.value ?: return
@@ -93,6 +104,23 @@ class FolderEditorViewModel @Inject constructor(
             dao.insertFolderApp(
                 FolderApp(folderId = folderId, appKey = "weblink:$newId", sortOrder = nextOrder),
             )
+        }
+    }
+
+    fun setRule(newRule: FolderRule) {
+        viewModelScope.launch {
+            if (newRule is FolderRule.Manual) {
+                // Manual is the implicit default — clearing the row keeps the
+                // table compact and avoids storing a tautological JSON value.
+                dao.deleteRule(folderId)
+            } else {
+                dao.upsertRule(
+                    FolderRuleEntity(
+                        folderId = folderId,
+                        ruleJson = RuleCodec.encode(newRule),
+                    ),
+                )
+            }
         }
     }
 }
