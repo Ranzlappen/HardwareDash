@@ -67,6 +67,25 @@ class FolderEditorViewModel @Inject constructor(
         .map { rows -> rows.mapTo(HashSet(rows.size)) { it.appKey } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
+    /**
+     * Map appKey → names of *other* folders that already contain it. Powers
+     * the editor's "in: <folder>" subtitle. The current folder is excluded so
+     * checking an app off in this editor doesn't immediately make the row
+     * look like it's also in itself.
+     */
+    val otherFolderMembership: StateFlow<Map<String, List<String>>> = combine(
+        dao.observeFolders(),
+        dao.observeAllMembership(),
+    ) { folders, allMembership ->
+        val nameById = folders.associate { it.id to it.name }
+        allMembership
+            .asSequence()
+            .filter { it.folderId != folderId }
+            .groupBy({ it.appKey }, { nameById[it.folderId].orEmpty() })
+            .mapValues { (_, names) -> names.filter { it.isNotEmpty() } }
+            .filterValues { it.isNotEmpty() }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
     val rule: StateFlow<FolderRule> = dao.observeRules()
         .map { rows ->
             rows.firstOrNull { it.folderId == folderId }

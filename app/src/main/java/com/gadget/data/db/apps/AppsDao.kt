@@ -45,6 +45,11 @@ interface AppsDao {
     @Query("SELECT * FROM apps_folder_app WHERE folder_id = :folderId ORDER BY sort_order ASC")
     suspend fun getMembership(folderId: Long): List<FolderApp>
 
+    /** Every folder ↔ app row across every folder. Used by the editor's
+     *  "this app is also in folder X" hint. */
+    @Query("SELECT * FROM apps_folder_app")
+    fun observeAllMembership(): Flow<List<FolderApp>>
+
     // ── App records (materialized cache) ────────────────────────────────
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAppRecord(record: AppRecord)

@@ -82,6 +82,7 @@ fun FolderEditorScreen(
     val membership by viewModel.membership.collectAsState()
     val rule by viewModel.rule.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val otherFolderMembership by viewModel.otherFolderMembership.collectAsState()
     val apps = S.apps
     val common = S.common
 
@@ -251,6 +252,7 @@ fun FolderEditorScreen(
                         AppRow(
                             record = record,
                             selected = record.appKey in membership,
+                            otherFolders = otherFolderMembership[record.appKey].orEmpty(),
                             onToggle = { viewModel.toggleMember(record.appKey) },
                         )
                     }
@@ -440,16 +442,21 @@ private fun ColorPickerRow(
 private fun AppRow(
     record: AppRecord,
     selected: Boolean,
+    otherFolders: List<String>,
     onToggle: () -> Unit,
 ) {
+    val inOtherFolder = otherFolders.isNotEmpty()
+    val containerColor = if (inOtherFolder) {
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onToggle() },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -473,6 +480,15 @@ private fun AppRow(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (inOtherFolder) {
+                    Text(
+                        text = "${S.apps.alreadyInFolder} ${otherFolders.joinToString(", ")}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                }
             }
             Checkbox(checked = selected, onCheckedChange = { onToggle() })
         }

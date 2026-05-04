@@ -753,6 +753,7 @@ object S {
         val ruleUsageHint get() = m(l, "Requires \"Usage access\" permission. Grant in Settings → Apps → Special access.", "Benötigt die Berechtigung „Nutzungsdaten\". Gewähre sie unter Einstellungen → Apps → Spezieller Zugriff.", "Requiere el permiso \"Acceso de uso\". Concédelo en Ajustes → Apps → Acceso especial.", "Nécessite l'autorisation « Accès aux données d'utilisation ». Accordez-la dans Paramètres → Applis → Accès spécial.")
         val searchAppsHint get() = m(l, "Search apps", "Apps suchen", "Buscar apps", "Rechercher des applis")
         val noSearchMatches get() = m(l, "No apps match", "Keine Treffer", "Sin coincidencias", "Aucune correspondance")
+        val alreadyInFolder get() = m(l, "in:", "in:", "en:", "dans :")
     }
 
     // ── Backup ─────────────────────────────────────────────────────────
