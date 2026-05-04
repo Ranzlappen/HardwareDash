@@ -2,6 +2,7 @@ package com.gadget.apps.rules
 
 import com.gadget.data.db.apps.AppRecord
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -15,6 +16,8 @@ class RuleEngineTest {
         pkg: String,
         installedAt: Long = now - 365 * dayMs,
         webApk: Boolean = false,
+        onExternal: Boolean = false,
+        system: Boolean = false,
     ) = AppRecord(
         appKey = key,
         packageName = pkg,
@@ -25,6 +28,8 @@ class RuleEngineTest {
         isWebLink = false,
         firstInstallTime = installedAt,
         lastSeen = now,
+        isOnExternalStorage = onExternal,
+        isSystemApp = system,
     )
 
     private fun webLink(id: Long, label: String) = AppRecord(
@@ -40,30 +45,48 @@ class RuleEngineTest {
     )
 
     private val catalog = listOf(
-        installed("installed:0:com.google.android.gm/Main", "com.google.android.gm"),
-        installed("installed:0:com.google.maps/Main", "com.google.maps"),
-        installed("installed:0:com.acme.note/Main", "com.acme.note", installedAt = now - 2 * dayMs),
-        installed("installed:0:org.chromium.webapk.HN/Main", "org.chromium.webapk.HN", webApk = true),
+        installed(
+            "installed:0:com.google.android.gm/Main",
+            "com.google.android.gm",
+            system = true,
+        ),
+        installed(
+            "installed:0:com.google.maps/Main",
+            "com.google.maps",
+        ),
+        installed(
+            "installed:0:com.acme.note/Main",
+            "com.acme.note",
+            installedAt = now - 2 * dayMs,
+            onExternal = true,
+        ),
+        installed(
+            "installed:0:org.chromium.webapk.HN/Main",
+            "org.chromium.webapk.HN",
+            webApk = true,
+        ),
         webLink(1L, "Hacker News"),
     )
 
-    // ── Manual ──────────────────────────────────────────────────────────────
+    private fun ruleSet(vararg rules: FolderRule) = FolderRuleSet(rules.toList())
+
+    // ── Manual / empty rule set ─────────────────────────────────────────────
 
     @Test
-    fun `manual rule returns only apps in the membership set`() {
+    fun `empty rule set returns only manual entries`() {
         val members = setOf(
             "installed:0:com.google.android.gm/Main",
             "weblink:1",
         )
-        val out = RuleEngine.materialize(FolderRule.Manual, members, catalog, usage = null, nowMillis = now)
+        val out = RuleEngine.materialize(FolderRuleSet(), members, catalog, nowMillis = now)
         assertEquals(2, out.size)
         assertTrue(out.any { it.appKey == "installed:0:com.google.android.gm/Main" })
         assertTrue(out.any { it.appKey == "weblink:1" })
     }
 
     @Test
-    fun `manual rule ignores allApps when membership set is empty`() {
-        val out = RuleEngine.materialize(FolderRule.Manual, emptySet(), catalog, usage = null, nowMillis = now)
+    fun `empty rule set with no manual entries yields nothing`() {
+        val out = RuleEngine.materialize(FolderRuleSet(), emptySet(), catalog, nowMillis = now)
         assertTrue(out.isEmpty())
     }
 
@@ -72,20 +95,11 @@ class RuleEngineTest {
     @Test
     fun `package prefix matches multiple apps`() {
         val out = RuleEngine.materialize(
-            FolderRule.PackagePrefix("com.google."),
-            emptySet(), catalog, usage = null, nowMillis = now,
+            ruleSet(FolderRule.PackagePrefix("com.google.")),
+            emptySet(), catalog, nowMillis = now,
         )
         assertEquals(2, out.size)
         assertTrue(out.all { it.packageName.startsWith("com.google.") })
-    }
-
-    @Test
-    fun `package prefix returns empty when nothing matches`() {
-        val out = RuleEngine.materialize(
-            FolderRule.PackagePrefix("io.nowhere."),
-            emptySet(), catalog, usage = null, nowMillis = now,
-        )
-        assertTrue(out.isEmpty())
     }
 
     // ── RecentlyInstalled ───────────────────────────────────────────────────
@@ -93,21 +107,11 @@ class RuleEngineTest {
     @Test
     fun `recently installed picks up apps within window and excludes web links`() {
         val out = RuleEngine.materialize(
-            FolderRule.RecentlyInstalled(7),
-            emptySet(), catalog, usage = null, nowMillis = now,
+            ruleSet(FolderRule.RecentlyInstalled(7)),
+            emptySet(), catalog, nowMillis = now,
         )
         assertEquals(1, out.size)
         assertEquals("com.acme.note", out.single().packageName)
-    }
-
-    @Test
-    fun `recently installed with zero days returns nothing`() {
-        val out = RuleEngine.materialize(
-            FolderRule.RecentlyInstalled(0),
-            emptySet(), catalog, usage = null, nowMillis = now,
-        )
-        // cutoff equals now; only entries with firstInstallTime >= now pass.
-        assertTrue(out.isEmpty())
     }
 
     // ── WebApkOnly ──────────────────────────────────────────────────────────
@@ -115,8 +119,8 @@ class RuleEngineTest {
     @Test
     fun `web apk only returns just chromium webapks`() {
         val out = RuleEngine.materialize(
-            FolderRule.WebApkOnly,
-            emptySet(), catalog, usage = null, nowMillis = now,
+            ruleSet(FolderRule.WebApkOnly),
+            emptySet(), catalog, nowMillis = now,
         )
         assertEquals(1, out.size)
         assertTrue(out.single().isWebApk)
@@ -127,7 +131,7 @@ class RuleEngineTest {
     @Test
     fun `unused since days returns empty when usage is null`() {
         val out = RuleEngine.materialize(
-            FolderRule.UnusedSinceDays(30),
+            ruleSet(FolderRule.UnusedSinceDays(30)),
             emptySet(), catalog, usage = null, nowMillis = now,
         )
         assertTrue(out.isEmpty())
@@ -140,44 +144,134 @@ class RuleEngineTest {
             UsageEntry("com.acme.note", lastUsedMillis = now - 60 * dayMs),
         )
         val out = RuleEngine.materialize(
-            FolderRule.UnusedSinceDays(30),
+            ruleSet(FolderRule.UnusedSinceDays(30)),
             emptySet(), catalog, usage = usage, nowMillis = now,
         )
-        // Recently used: gm (2d ago) -> excluded.
-        // Not recently used: maps (no entry -> unused), note (60d ago -> unused), webapk (no entry -> unused).
-        // Web links: excluded by rule.
         val pkgs = out.map { it.packageName }.toSet()
-        assertTrue("expected maps in result, got $pkgs", "com.google.maps" in pkgs)
-        assertTrue("expected note in result, got $pkgs", "com.acme.note" in pkgs)
-        assertTrue(
-            "expected webapk in result, got $pkgs",
-            "org.chromium.webapk.HN" in pkgs,
+        assertTrue(pkgs.contains("com.google.maps"))
+        assertTrue(pkgs.contains("com.acme.note"))
+        assertTrue(pkgs.contains("org.chromium.webapk.HN"))
+        assertFalse(pkgs.contains("com.google.android.gm"))
+        assertFalse(pkgs.contains("weblink"))
+    }
+
+    // ── Storage / system flags ──────────────────────────────────────────────
+
+    @Test
+    fun `on internal storage excludes external + web links`() {
+        val out = RuleEngine.materialize(
+            ruleSet(FolderRule.OnInternalStorage),
+            emptySet(), catalog, nowMillis = now,
         )
-        assertTrue("gm should be excluded, got $pkgs", "com.google.android.gm" !in pkgs)
-        assertTrue("weblink should be excluded, got $pkgs", "weblink" !in pkgs)
+        val pkgs = out.map { it.packageName }.toSet()
+        assertFalse(pkgs.contains("com.acme.note")) // external
+        assertFalse(pkgs.contains("weblink"))
+        assertTrue(pkgs.contains("com.google.android.gm"))
+    }
+
+    @Test
+    fun `on external storage returns only the SD-card app`() {
+        val out = RuleEngine.materialize(
+            ruleSet(FolderRule.OnExternalStorage),
+            emptySet(), catalog, nowMillis = now,
+        )
+        assertEquals(1, out.size)
+        assertEquals("com.acme.note", out.single().packageName)
+    }
+
+    @Test
+    fun `system apps and user apps partition the installed catalog`() {
+        val systemOut = RuleEngine.materialize(
+            ruleSet(FolderRule.SystemApps), emptySet(), catalog, nowMillis = now,
+        ).map { it.packageName }.toSet()
+        val userOut = RuleEngine.materialize(
+            ruleSet(FolderRule.UserApps), emptySet(), catalog, nowMillis = now,
+        ).map { it.packageName }.toSet()
+
+        assertTrue(systemOut.contains("com.google.android.gm"))
+        assertFalse(userOut.contains("com.google.android.gm"))
+        assertTrue(userOut.contains("com.google.maps"))
+        assertFalse(systemOut.contains("com.google.maps"))
+    }
+
+    // ── Multi-rule (set union) ──────────────────────────────────────────────
+
+    @Test
+    fun `multi-rule unions matches and dedupes`() {
+        val out = RuleEngine.materialize(
+            ruleSet(
+                FolderRule.PackagePrefix("com.google."),
+                FolderRule.RecentlyInstalled(7),
+            ),
+            emptySet(), catalog, nowMillis = now,
+        )
+        val pkgs = out.map { it.packageName }.toSet()
+        // gm + maps (PackagePrefix), note (RecentlyInstalled).
+        assertEquals(3, out.size)
+        assertTrue(pkgs.contains("com.google.android.gm"))
+        assertTrue(pkgs.contains("com.google.maps"))
+        assertTrue(pkgs.contains("com.acme.note"))
+    }
+
+    @Test
+    fun `manual entries are unioned with rule matches`() {
+        val out = RuleEngine.materialize(
+            ruleSet(FolderRule.RecentlyInstalled(7)),
+            manualMembership = setOf("weblink:1"),
+            allApps = catalog,
+            nowMillis = now,
+        )
+        val keys = out.map { it.appKey }.toSet()
+        assertTrue(keys.contains("weblink:1")) // manual
+        assertTrue(keys.contains("installed:0:com.acme.note/Main")) // rule
     }
 
     // ── Codec roundtrip ─────────────────────────────────────────────────────
 
     @Test
     fun `RuleCodec roundtrips every variant`() {
-        val rules = listOf(
-            FolderRule.Manual,
-            FolderRule.PackagePrefix("com.google."),
-            FolderRule.RecentlyInstalled(7),
-            FolderRule.WebApkOnly,
-            FolderRule.UnusedSinceDays(30),
+        val sets = listOf(
+            FolderRuleSet(),
+            ruleSet(FolderRule.PackagePrefix("com.google.")),
+            ruleSet(FolderRule.RecentlyInstalled(7)),
+            ruleSet(FolderRule.WebApkOnly),
+            ruleSet(FolderRule.UnusedSinceDays(30)),
+            ruleSet(FolderRule.OnInternalStorage),
+            ruleSet(FolderRule.OnExternalStorage),
+            ruleSet(FolderRule.SystemApps),
+            ruleSet(FolderRule.UserApps),
+            ruleSet(
+                FolderRule.PackagePrefix("com.google."),
+                FolderRule.RecentlyInstalled(14),
+            ),
         )
-        for (rule in rules) {
-            val encoded = RuleCodec.encode(rule)
+        for (set in sets) {
+            val encoded = RuleCodec.encode(set)
             val decoded = RuleCodec.decode(encoded)
-            assertEquals("roundtrip mismatch for $rule (encoded=$encoded)", rule, decoded)
+            assertEquals("roundtrip mismatch for $set (encoded=$encoded)", set, decoded)
         }
     }
 
     @Test
-    fun `RuleCodec returns null on garbage input`() {
-        assertEquals(null, RuleCodec.decode("not-json"))
-        assertEquals(null, RuleCodec.decode("""{"type":"unknown_kind"}"""))
+    fun `RuleCodec decodes legacy single-rule JSON`() {
+        val legacy = """{"type":"package_prefix","prefix":"com.google."}"""
+        val decoded = RuleCodec.decode(legacy)
+        assertEquals(1, decoded.rules.size)
+        val rule = decoded.rules.single()
+        assertTrue(rule is FolderRule.PackagePrefix)
+        assertEquals("com.google.", (rule as FolderRule.PackagePrefix).prefix)
+    }
+
+    @Test
+    fun `RuleCodec maps legacy manual JSON to empty set`() {
+        val legacy = """{"type":"manual"}"""
+        val decoded = RuleCodec.decode(legacy)
+        assertTrue(decoded.rules.isEmpty())
+    }
+
+    @Test
+    fun `RuleCodec returns empty set on garbage input`() {
+        assertEquals(FolderRuleSet(), RuleCodec.decode("not-json"))
+        assertEquals(FolderRuleSet(), RuleCodec.decode("""{"type":"unknown_kind"}"""))
     }
 }

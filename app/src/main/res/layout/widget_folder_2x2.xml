@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  2x2 folder widget layout. Two render modes the FolderWidgetRenderer toggles
-  between via setViewVisibility:
+  2x2 folder widget. Three render modes (FolderWidgetRenderer toggles
+  visibility):
 
-  1. Cover-icon mode (batch G): widget_folder_cover is VISIBLE and the grid
-     section is GONE. Used when the folder has a chosen cover image / symbol.
-  2. Preview-grid mode (default, batch D): widget_folder_grid_section is
-     VISIBLE (cover is GONE). The folder name strip sits on top, a nested
-     2x2 LinearLayout grid of ImageViews underneath. Unused tile slots are
-     set to INVISIBLE so the 2x2 alignment is preserved when the folder
-     has fewer than 4 members.
-
-  GridLayout was avoided because its RemoteViews support has gaps around
-  layout_columnWeight; nested LinearLayouts with layout_weight=1 are the
-  bullet-proof way to get a true quartered grid via RemoteViews.
+    1. Cover IMAGE (gallery photo) — widget_folder_cover_image is VISIBLE.
+       Never tinted; rendered as-is via setImageViewBitmap.
+    2. Cover SYMBOL (Material symbol) — widget_folder_cover_symbol is VISIBLE.
+       Tinted to folder.baseColorArgb via setColorFilter. Distinct from the
+       photo view so the SRC_IN tint of one mode never bleeds into the other.
+    3. Default (no cover) — widget_folder_grid_section VISIBLE: folder name
+       strip on top, 2x2 LinearLayout grid of preview tiles below. Empty tile
+       slots set INVISIBLE so the 2x2 alignment stays stable.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_folder_root"
@@ -22,16 +19,22 @@
     android:background="@drawable/widget_background"
     android:padding="8dp">
 
-    <!-- Mode 1: cover image / symbol — visible only when set by Batch G. -->
     <ImageView
-        android:id="@+id/widget_folder_cover"
+        android:id="@+id/widget_folder_cover_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/widget_folder_label"
         android:scaleType="fitCenter"
         android:visibility="gone" />
 
-    <!-- Mode 2: name + 2x2 preview grid (default). -->
+    <ImageView
+        android:id="@+id/widget_folder_cover_symbol"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/widget_folder_label"
+        android:scaleType="fitCenter"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/widget_folder_grid_section"
         android:layout_width="match_parent"
