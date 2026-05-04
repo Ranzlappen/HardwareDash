@@ -103,6 +103,14 @@ dependencies {
     // WorkManager (widget periodic updates + Ticked reminders)
     implementation 'androidx.work:work-runtime-ktx:2.9.0'
 
+    // Glance (Compose-flavored AppWidgets — used by the App-Organizer module's
+    // designable folder widget alongside the existing RemoteViews providers).
+    implementation 'androidx.glance:glance-appwidget:1.0.0'
+    implementation 'androidx.glance:glance-material3:1.0.0'
+
+    // Biometric / device-credential auth for the App-Organizer's locked folders.
+    implementation 'androidx.biometric:biometric:1.1.0'
+
     // Ticked: serialization + DataStore
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0'
     implementation 'androidx.datastore:datastore-preferences:1.0.0'

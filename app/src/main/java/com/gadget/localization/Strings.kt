@@ -33,6 +33,7 @@ object S {
         val fileMeta get() = m(l, "Files", "Dateien", "Archivos", "Fichiers")
         val bug get() = m(l, "Bug", "Fehler", "Error", "Bug")
         val manual get() = m(l, "Manual", "Handbuch", "Manual", "Manuel")
+        val apps get() = m(l, "Apps", "Apps", "Apps", "Applis")
         // New top-level tab labels
         val dashboard get() = m(l, "Dashboard", "Dashboard", "Panel", "Tableau de bord")
         val tools get() = m(l, "Tools", "Werkzeuge", "Herramientas", "Outils")
@@ -714,6 +715,42 @@ object S {
         val logbook get() = m(l, "Logbook", "Logbuch", "Registro", "Journal")
         val linkRules get() = m(l, "Link Rules", "Link-Regeln", "Reglas de enlace", "R\u00E8gles de lien")
         val settings get() = m(l, "Settings", "Einstellungen", "Ajustes", "Param\u00E8tres")
+    }
+
+    // ── Apps (organizer module) ────────────────────────────────────────
+    val apps: Apps @Composable get() = Apps(lang)
+
+    class Apps(private val l: Language) {
+        val title get() = m(l, "Apps", "Apps", "Apps", "Applis")
+        val description get() = m(l, "Organize installed apps, PWAs, and web links into folders that double as designable home-screen widgets.", "Organisiere installierte Apps, PWAs und Web-Links in Ordnern, die zugleich gestaltbare Widgets für den Startbildschirm sind.", "Organiza apps instaladas, PWAs y enlaces web en carpetas que también funcionan como widgets personalizables para la pantalla de inicio.", "Organisez les applis installées, les PWA et les liens web en dossiers qui font aussi office de widgets personnalisables sur l'écran d'accueil.")
+        val createFolder get() = m(l, "Create folder", "Ordner erstellen", "Crear carpeta", "Créer un dossier")
+        val newFolder get() = m(l, "New folder", "Neuer Ordner", "Nueva carpeta", "Nouveau dossier")
+        val folderName get() = m(l, "Folder name", "Ordnername", "Nombre de la carpeta", "Nom du dossier")
+        val deleteFolderConfirm get() = m(l, "Delete this folder?", "Diesen Ordner löschen?", "¿Eliminar esta carpeta?", "Supprimer ce dossier ?")
+        val noFolders get() = m(l, "No folders yet — tap +", "Noch keine Ordner — tippe auf +", "Aún no hay carpetas — toca +", "Aucun dossier — appuyez sur +")
+        val color get() = m(l, "Color", "Farbe", "Color", "Couleur")
+        val appsInFolder get() = m(l, "Apps in this folder", "Apps in diesem Ordner", "Apps en esta carpeta", "Applis dans ce dossier")
+        val addWebLink get() = m(l, "Add web link", "Web-Link hinzufügen", "Añadir enlace web", "Ajouter un lien web")
+        val webLinkUrl get() = m(l, "URL", "URL", "URL", "URL")
+        val webLinkLabel get() = m(l, "Label (optional)", "Bezeichnung (optional)", "Etiqueta (opcional)", "Libellé (facultatif)")
+        val noApps get() = m(l, "No apps detected yet", "Noch keine Apps erkannt", "Aún no se detectaron apps", "Aucune appli détectée pour l'instant")
+        val pwaBadge get() = m(l, "PWA", "PWA", "PWA", "PWA")
+        val webLinkBadge get() = m(l, "Web", "Web", "Web", "Web")
+        val previewFolder get() = m(l, "Preview", "Vorschau", "Vista previa", "Aperçu")
+        val lockFolder get() = m(l, "Lock folder", "Ordner sperren", "Bloquear carpeta", "Verrouiller le dossier")
+        val unlockFolder get() = m(l, "Unlock folder", "Ordner entsperren", "Desbloquear carpeta", "Déverrouiller le dossier")
+        val biometricUnavailable get() = m(l, "Biometric unlock isn't set up on this device", "Biometrische Entsperrung ist auf diesem Gerät nicht eingerichtet", "El desbloqueo biométrico no está configurado en este dispositivo", "Le déverrouillage biométrique n'est pas configuré sur cet appareil")
+        val pinToHome get() = m(l, "Pin to home", "An Startbildschirm anheften", "Anclar en inicio", "Épingler à l'accueil")
+        val pinUnsupported get() = m(l, "Your launcher doesn't support one-tap pinning. Long-press your home screen and pick the App Folder widget instead.", "Dein Launcher unterstützt das Anheften mit einem Tippen nicht. Halte stattdessen den Startbildschirm gedrückt und wähle das App-Ordner-Widget.", "Tu launcher no admite el anclaje rápido. Mantén pulsada la pantalla de inicio y elige el widget Carpeta de apps.", "Votre launcher ne prend pas en charge l'épinglage en un tapotement. Appuyez longuement sur l'écran d'accueil et sélectionnez le widget Dossier d'applis.")
+        val rule get() = m(l, "Rule", "Regel", "Regla", "Règle")
+        val ruleManual get() = m(l, "Manual", "Manuell", "Manual", "Manuel")
+        val rulePackagePrefix get() = m(l, "Package", "Paket", "Paquete", "Paquet")
+        val ruleRecentlyInstalled get() = m(l, "Recent", "Neu", "Recientes", "Récentes")
+        val ruleWebApks get() = m(l, "PWAs", "PWAs", "PWAs", "PWAs")
+        val ruleUnused get() = m(l, "Unused", "Ungenutzt", "Sin uso", "Inutilisées")
+        val ruleDays get() = m(l, "days", "Tage", "días", "jours")
+        val rulePackagePrefixHint get() = m(l, "e.g. com.google.", "z. B. com.google.", "p. ej. com.google.", "p. ex. com.google.")
+        val ruleUsageHint get() = m(l, "Requires \"Usage access\" permission. Grant in Settings → Apps → Special access.", "Benötigt die Berechtigung „Nutzungsdaten\". Gewähre sie unter Einstellungen → Apps → Spezieller Zugriff.", "Requiere el permiso \"Acceso de uso\". Concédelo en Ajustes → Apps → Acceso especial.", "Nécessite l'autorisation « Accès aux données d'utilisation ». Accordez-la dans Paramètres → Applis → Accès spécial.")
     }
 
     // ── Backup ─────────────────────────────────────────────────────────

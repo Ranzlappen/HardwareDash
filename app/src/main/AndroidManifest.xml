@@ -78,6 +78,24 @@
     <uses-feature android:name="android.hardware.sensor.barometer"     android:required="false" />
     <uses-feature android:name="android.hardware.sensor.stepcounter"  android:required="false" />
 
+    <!-- ══════════════════════ APP ORGANIZER ══════════════════════ -->
+    <!-- Make every launcher-visible app and WebAPK PWA queryable via
+         LauncherApps / PackageManager so the App-Organizer module can
+         enumerate them. Play-Store-friendly; no QUERY_ALL_PACKAGES. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
+    <!-- Optional usage-stats access for the "Unused" smart-folder rule.
+         The user must explicitly grant this in Settings → Apps →
+         Special access → Usage access. The rule degrades to an empty
+         folder if not granted, never crashes. -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
     <application
         android:name=".GadgetApplication"
         android:allowBackup="true"
@@ -401,6 +419,56 @@
         <activity
             android:name=".widget.WidgetConfigActivity"
             android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <!-- ── Folder Popup (App-Organizer) ──────────────────────── -->
+        <!-- Translucent floating activity launched on widget short-tap.
+             Closes itself when the user taps outside the floating Card. -->
+        <activity
+            android:name=".ui.folder.FolderPopupActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Gadget.Translucent"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:taskAffinity="" />
+
+        <!-- ── Folder Widget (App-Organizer) — RemoteViews 2x2 ───── -->
+        <receiver
+            android:name=".widget.folder.FolderWidgetProvider"
+            android:label="@string/widget_folder_label"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.gadget.apps.PIN_CALLBACK" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_folder_2x2_info" />
+        </receiver>
+
+        <!-- ── Folder Widget — Glance "designable" 3x2 ─────────────── -->
+        <receiver
+            android:name=".widget.folder.FolderGlanceReceiver"
+            android:label="@string/widget_folder_glance_label"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_folder_glance_info" />
+        </receiver>
+
+        <!-- Configuration activity invoked by the launcher when EITHER folder
+             widget flavor is dropped on the home screen. Detects which
+             flavor by reading the appWidgetInfo.provider ComponentName. -->
+        <activity
+            android:name=".widget.folder.FolderWidgetConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Gadget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>

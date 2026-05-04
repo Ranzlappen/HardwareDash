@@ -29,4 +29,10 @@
     <!-- Vibration widget -->
     <string name="widget_label_vibration">Vibration Toggle</string>
     <string name="widget_desc_vibration">Toggle vibration on or off from your home screen.</string>
+
+    <!-- Folder widget (App-Organizer module) -->
+    <string name="widget_folder_label">App Folder</string>
+    <string name="widget_folder_desc">A customizable home-screen folder of installed apps, PWAs, and web links.</string>
+    <string name="widget_folder_glance_label">App Folder (Designable)</string>
+    <string name="widget_folder_glance_desc">A folder-color-tinted variant of the App Folder widget rendered with Jetpack Glance.</string>
 </resources>

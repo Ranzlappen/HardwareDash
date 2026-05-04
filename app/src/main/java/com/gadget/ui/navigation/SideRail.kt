@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.BatteryStd
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CameraAlt
@@ -82,6 +83,7 @@ fun rememberSideRailItems(): Pair<List<SideRailItem>, SideRailItem> {
         SideRailItem(Routes.LOCKSCREEN,    Icons.Filled.Notifications,  hubs.notifications),
         SideRailItem(Routes.FILE_META,     Icons.Filled.InsertDriveFile, nav.fileMeta),
         SideRailItem(Routes.LINK,          Icons.Filled.Link,           hubs.automation),
+        SideRailItem(Routes.APPS,          Icons.Filled.Apps,           nav.apps),
         SideRailItem(Routes.SETTINGS,      Icons.Filled.Settings,       nav.settings),
         SideRailItem(Routes.MANUAL,        Icons.Filled.MenuBook,       nav.manual),
         SideRailItem(Routes.BUG,           Icons.Filled.BugReport,      nav.bug),
