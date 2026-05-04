@@ -58,6 +58,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.gadget.apps.icons.AppIcon
 import com.gadget.apps.rules.FolderRule
 import com.gadget.data.db.apps.AppRecord
 import com.gadget.localization.S
@@ -435,16 +436,7 @@ private fun AppRow(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = if (record.isWebLink || record.isWebApk) {
-                    Icons.Filled.Public
-                } else {
-                    Icons.Filled.Apps
-                },
-                contentDescription = null,
-                modifier = Modifier.size(28.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            AppIcon(record = record, sizeDp = 36.dp)
             Spacer(Modifier.size(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
