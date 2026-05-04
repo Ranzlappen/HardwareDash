@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -77,9 +78,10 @@ fun FolderEditorScreen(
 ) {
     val viewModel = hiltViewModel<FolderEditorViewModel>()
     val folder by viewModel.folder.collectAsState()
-    val allApps by viewModel.allApps.collectAsState()
+    val filteredApps by viewModel.filteredApps.collectAsState()
     val membership by viewModel.membership.collectAsState()
     val rule by viewModel.rule.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
     val apps = S.apps
     val common = S.common
 
@@ -220,21 +222,38 @@ fun FolderEditorScreen(
                 // Smart rules compute their own membership; manual toggles
                 // would be misleading. Tap "Preview" to see what the rule
                 // currently materializes.
-            } else if (allApps.isEmpty()) {
+            } else {
                 item {
-                    Text(
-                        text = apps.noApps,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { viewModel.searchQuery.value = it },
+                        singleLine = true,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = null,
+                            )
+                        },
+                        placeholder = { Text(apps.searchAppsHint) },
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
-            } else {
-                items(allApps, key = { it.appKey }) { record ->
-                    AppRow(
-                        record = record,
-                        selected = record.appKey in membership,
-                        onToggle = { viewModel.toggleMember(record.appKey) },
-                    )
+                if (filteredApps.isEmpty()) {
+                    item {
+                        Text(
+                            text = if (searchQuery.isBlank()) apps.noApps else apps.noSearchMatches,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else {
+                    items(filteredApps, key = { it.appKey }) { record ->
+                        AppRow(
+                            record = record,
+                            selected = record.appKey in membership,
+                            onToggle = { viewModel.toggleMember(record.appKey) },
+                        )
+                    }
                 }
             }
         }

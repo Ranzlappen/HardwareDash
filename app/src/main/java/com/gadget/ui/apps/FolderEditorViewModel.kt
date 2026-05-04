@@ -13,8 +13,10 @@ import com.gadget.data.db.apps.AppsDao
 import com.gadget.data.db.apps.Folder
 import com.gadget.data.db.apps.FolderApp
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -45,6 +47,21 @@ class FolderEditorViewModel @Inject constructor(
 
     val allApps: StateFlow<List<AppRecord>> = dao.observeAppRecords()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
+
+    /** Catalog filtered by [searchQuery] (case-insensitive label OR package match). */
+    val filteredApps: StateFlow<List<AppRecord>> = combine(allApps, searchQuery) { records, query ->
+        if (query.isBlank()) {
+            records
+        } else {
+            val needle = query.trim().lowercase()
+            records.filter {
+                it.label.lowercase().contains(needle) ||
+                    it.packageName.lowercase().contains(needle)
+            }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val membership: StateFlow<Set<String>> = dao.observeMembership(folderId)
         .map { rows -> rows.mapTo(HashSet(rows.size)) { it.appKey } }
