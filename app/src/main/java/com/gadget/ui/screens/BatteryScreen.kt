@@ -54,6 +54,10 @@ fun BatteryScreen() {
     var energyCounter by remember { mutableLongStateOf(0L) }
     var chargeTimeRemaining by remember { mutableLongStateOf(-1L) }
     var currentHistory by remember { mutableStateOf(List(80) { 0f }) }
+    // Some OEMs (e.g. Pixel) report BATTERY_PROPERTY_CURRENT_NOW with the opposite
+    // sign convention from Android's documentation: negative while charging.
+    // Detect once from a large reading taken while status == Charging, then lock in.
+    var invertedCurrentSign by remember { mutableStateOf<Boolean?>(null) }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -95,13 +99,37 @@ fun BatteryScreen() {
             }
 
             // BatteryManager properties
-            currentNow    = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
-            currentAvg    = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE)
+            val rawCurrentNow = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+            val rawCurrentAvg = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE)
             chargeCounter = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
             energyCounter = bm.getLongProperty(BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER)
-            chargeTimeRemaining = bm.computeChargeTimeRemaining()
 
-            // Track current draw for chart (convert µA to mA)
+            // Lock in the device's sign convention from the first large reading taken
+            // while Charging. Threshold of 100 mA avoids latching onto idle noise.
+            val isCharging = status == "Charging"
+            if (invertedCurrentSign == null && isCharging && abs(rawCurrentNow) > 100_000) {
+                invertedCurrentSign = rawCurrentNow < 0
+            }
+            val sign = if (invertedCurrentSign == true) -1 else 1
+            currentNow = rawCurrentNow * sign
+            currentAvg = rawCurrentAvg * sign
+
+            // Prefer a self-computed estimate (remaining capacity ÷ charging current);
+            // computeChargeTimeRemaining() is unreliable on many devices and can
+            // return wildly inflated values shortly after plug-in.
+            val chargingMa = (currentNow / 1000f).takeIf { it > 100f }
+            chargeTimeRemaining = if (
+                isCharging && level in 1..99 && chargeCounter > 0 && chargingMa != null
+            ) {
+                val totalCapacityUah = (chargeCounter.toLong() * 100L) / level
+                val remainingUah = totalCapacityUah - chargeCounter
+                val hours = remainingUah.toFloat() / 1000f / chargingMa
+                (hours * 3_600_000f).toLong()
+            } else {
+                bm.computeChargeTimeRemaining()
+            }
+
+            // Track current draw for chart (convert µA to mA, sign-corrected)
             val mA = currentNow / 1000f
             currentHistory = (currentHistory.drop(1) + mA)
 
