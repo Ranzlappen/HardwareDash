@@ -2089,6 +2089,198 @@ object S {
                 "n'assume aucune responsabilite.",
         )
     }
+
+    // Batch-12: Onboarding extras (Background Behavior, Permissions, Rooted Legal)
+    object OnboardingExtras {
+        fun backgroundBehaviorTitle(lang: Language) = m(
+            lang,
+            "Background behavior",
+            "Hintergrund-Verhalten",
+            "Comportamiento en segundo plano",
+            "Comportement en arriere-plan",
+        )
+        fun backgroundBehaviorBody(lang: Language) = m(
+            lang,
+            "HardwareDash can run a sticky foreground service so automation rules, " +
+                "widget pollers, and persistent notifications keep working even when " +
+                "Android Doze tries to pause the app. The service shows a permanent " +
+                "notification with a Stop button. You can toggle it any time in " +
+                "Settings; you may also be asked to grant a battery-optimization " +
+                "exemption so the system doesn't kill the service.",
+            "HardwareDash kann einen permanenten Vordergrunddienst ausfuehren, damit " +
+                "Automatisierungsregeln, Widget-Aktualisierungen und persistente " +
+                "Benachrichtigungen auch bei Doze weiterlaufen. Der Dienst zeigt eine " +
+                "dauerhafte Benachrichtigung mit Stopp-Schaltflaeche. Umschaltbar in den " +
+                "Einstellungen; eine Akku-Optimierungsausnahme kann angefordert werden.",
+            "HardwareDash puede ejecutar un servicio en primer plano persistente para " +
+                "que las reglas de automatizacion, las actualizaciones de widgets y las " +
+                "notificaciones persistentes sigan funcionando incluso cuando Android " +
+                "Doze intenta pausar la app. Muestra una notificacion permanente con un " +
+                "boton Detener. Se puede alternar en Ajustes; tambien puede solicitar " +
+                "una exencion de optimizacion de bateria.",
+            "HardwareDash peut executer un service de premier plan persistant pour que " +
+                "les regles d'automatisation, les mises a jour de widgets et les " +
+                "notifications persistantes continuent meme avec Doze. Affiche une " +
+                "notification permanente avec un bouton Arreter. Modifiable dans les " +
+                "Reglages ; une exemption d'optimisation de batterie peut etre demandee.",
+        )
+        fun privacyNote(lang: Language) = m(
+            lang,
+            "This app never sends data off-device. All diagnostics stay on your phone.",
+            "Diese App sendet niemals Daten nach aussen. Alle Diagnosedaten bleiben auf " +
+                "Ihrem Geraet.",
+            "Esta app nunca envia datos fuera del dispositivo. Todas las diagnosticas " +
+                "se quedan en tu telefono.",
+            "Cette app n'envoie jamais de donnees hors de l'appareil. Toutes les " +
+                "diagnostics restent sur votre telephone.",
+        )
+        fun permissionsTitle(lang: Language) = m(
+            lang,
+            "Permissions",
+            "Berechtigungen",
+            "Permisos",
+            "Autorisations",
+        )
+        fun permissionsBody(lang: Language) = m(
+            lang,
+            "HardwareDash needs runtime permissions to read sensors, the camera, the " +
+                "microphone, location, and other hardware. Tap the button below to " +
+                "grant them all in one flow. You can revoke any of them later in " +
+                "Android Settings.",
+            "HardwareDash benoetigt Laufzeit-Berechtigungen fuer Sensoren, Kamera, " +
+                "Mikrofon, Standort und andere Hardware. Mit der Schaltflaeche unten " +
+                "alles in einem Ablauf erteilen. Jederzeit in den Android-Einstellungen " +
+                "widerrufbar.",
+            "HardwareDash necesita permisos de tiempo de ejecucion para leer sensores, " +
+                "la camara, el microfono, la ubicacion y otro hardware. Pulsa el boton " +
+                "para concederlos todos en un solo flujo. Revocables en Ajustes de " +
+                "Android.",
+            "HardwareDash a besoin d'autorisations d'execution pour lire les capteurs, " +
+                "la camera, le microphone, la localisation et d'autres materiels. " +
+                "Touchez le bouton pour les accorder en une fois. Revocables dans les " +
+                "Reglages Android.",
+        )
+        fun permissionsGrantAll(lang: Language) = m(
+            lang,
+            "Grant all recommended permissions",
+            "Alle empfohlenen Berechtigungen erteilen",
+            "Conceder todos los permisos recomendados",
+            "Accorder toutes les autorisations recommandees",
+        )
+
+        // Rooted-only first onboarding page
+        fun rootedLegalPageTitle(lang: Language) = m(
+            lang,
+            "Rooted mode — read this first",
+            "Root-Modus — zuerst lesen",
+            "Modo root — lee esto primero",
+            "Mode root — a lire en premier",
+        )
+        fun rootedLegalRisksHeader(lang: Language) = m(
+            lang,
+            "What you're enabling",
+            "Was Sie aktivieren",
+            "Lo que estas activando",
+            "Ce que vous activez",
+        )
+        fun rootedLegalRiskThermal(lang: Language) = m(
+            lang,
+            "Thermal damage to LEDs, panels, motors, and the battery from " +
+                "sustained over-cap operation.",
+            "Thermische Schaeden an LEDs, Panels, Motoren und Akku durch " +
+                "anhaltenden Betrieb ueber den Werks-Limits.",
+            "Danos termicos a LEDs, paneles, motores y bateria por funcionamiento " +
+                "sostenido sobre los limites.",
+            "Dommages thermiques aux LEDs, ecrans, moteurs et batterie par " +
+                "fonctionnement soutenu au-dessus des limites.",
+        )
+        fun rootedLegalRiskRegulatory(lang: Language) = m(
+            lang,
+            "Regulatory violations from TX-power, channel, frequency, and rfkill " +
+                "changes (FCC / ETSI / MIC).",
+            "Regulatorische Verstoesse durch Aenderungen an Sendeleistung, Kanal, " +
+                "Frequenz und rfkill (FCC / ETSI / MIC).",
+            "Violaciones regulatorias por cambios de potencia TX, canal, frecuencia " +
+                "y rfkill (FCC / ETSI / MIC).",
+            "Violations reglementaires par changements de puissance TX, canal, " +
+                "frequence et rfkill (FCC / ETSI / MIC).",
+        )
+        fun rootedLegalRiskBattery(lang: Language) = m(
+            lang,
+            "Battery cell damage, swelling, or thermal runaway from direct " +
+                "charging-IC writes.",
+            "Akku-Zellschaeden, Aufblaehen oder thermisches Durchgehen durch " +
+                "direkte Charging-IC-Schreibvorgaenge.",
+            "Danos a celdas de bateria, hinchazon o fuga termica por escrituras " +
+                "directas al IC de carga.",
+            "Dommages aux cellules de batterie, gonflement ou emballement " +
+                "thermique par ecritures directes a l'IC de charge.",
+        )
+        fun rootedLegalRiskHearing(lang: Language) = m(
+            lang,
+            "Permanent hearing loss within minutes from bypassing safe-listening " +
+                "volume caps and microphone gain limits.",
+            "Dauerhafte Hoerschaeden innerhalb von Minuten durch Umgehung von " +
+                "Lautstaerke- und Mikrofonverstaerkungsgrenzen.",
+            "Perdida auditiva permanente en minutos por saltarse limites de " +
+                "volumen y ganancia del microfono.",
+            "Perte auditive permanente en minutes par contournement des limites " +
+                "de volume et de gain du microphone.",
+        )
+        fun rootedLegalRiskUx(lang: Language) = m(
+            lang,
+            "UI deadlocks, rapid battery drain, attack-surface exposure (ADB, " +
+                "USB), and information disclosure (logcat radio buffer).",
+            "UI-Sperren, schneller Akkuverbrauch, Angriffsflaechen-Aussetzung " +
+                "(ADB, USB) und Informations-Offenlegung (logcat-Funkpuffer).",
+            "Bloqueos de UI, consumo rapido de bateria, exposicion de superficie " +
+                "de ataque (ADB, USB) y divulgacion de informacion (buffer radio " +
+                "logcat).",
+            "Blocages d'UI, decharge rapide de la batterie, exposition de la " +
+                "surface d'attaque (ADB, USB) et divulgation d'informations " +
+                "(buffer radio logcat).",
+        )
+        fun rootedLegalRiskOther(lang: Language) = m(
+            lang,
+            "Sensor calibration corruption, non-reversible storage operations, " +
+                "and any other privileged side-effects of the rooted features.",
+            "Sensor-Kalibrierungs-Schaeden, nicht-umkehrbare Speicheroperationen " +
+                "und andere privilegierte Nebenwirkungen der Root-Features.",
+            "Corrupcion de calibracion de sensores, operaciones de almacenamiento " +
+                "irreversibles y otros efectos secundarios privilegiados.",
+            "Corruption d'etalonnage de capteurs, operations de stockage " +
+                "irreversibles et autres effets privilegies.",
+        )
+        fun rootedLegalEmergencyResetReminder(lang: Language) = m(
+            lang,
+            "If anything goes wrong, use the Emergency Reset button at the top of " +
+                "Settings — it reverts every tracked privileged write but cannot " +
+                "undo physical hardware damage.",
+            "Bei Problemen: Notfall-Reset-Schaltflaeche oben in den Einstellungen " +
+                "verwenden — sie setzt verfolgte privilegierte Schreibvorgaenge " +
+                "zurueck, kann aber keine physischen Schaeden rueckgaengig machen.",
+            "Si algo sale mal, usa el boton de Reset de Emergencia arriba en " +
+                "Ajustes — revierte cada escritura privilegiada registrada pero no " +
+                "puede deshacer danos fisicos.",
+            "En cas de probleme, utilisez le bouton de Reinitialisation d'urgence " +
+                "en haut des Reglages — il revoque toutes les ecritures privilegiees " +
+                "enregistrees mais ne peut pas annuler les dommages physiques.",
+        )
+        fun rootedLegalAcknowledgeCheckbox(lang: Language) = m(
+            lang,
+            "I understand the risks and accept full responsibility",
+            "Ich verstehe die Risiken und uebernehme die volle Verantwortung",
+            "Entiendo los riesgos y acepto la responsabilidad completa",
+            "Je comprends les risques et accepte l'entiere responsabilite",
+        )
+        fun rootedLegalGetStartedDisabledHint(lang: Language) = m(
+            lang,
+            "Tick the box on the first page to continue.",
+            "Markieren Sie das Kaestchen auf der ersten Seite, um fortzufahren.",
+            "Marca la casilla en la primera pagina para continuar.",
+            "Cochez la case sur la premiere page pour continuer.",
+        )
+    }
 }
 
 /** Helper: pick the string for the given language. Order: EN, DE, ES, FR. */
