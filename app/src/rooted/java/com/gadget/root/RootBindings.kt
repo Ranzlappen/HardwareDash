@@ -10,6 +10,8 @@ import com.gadget.root.core.RootedRootService
 import com.gadget.root.core.RootedRootShell
 import com.gadget.root.launch.LaunchGate
 import com.gadget.root.launch.RootedLaunchGate
+import com.gadget.audio.AudioRoutingController
+import com.gadget.audio.RootedAudioRoutingController
 import com.gadget.automation.AutomationController
 import com.gadget.automation.RootedAutomationController
 import com.gadget.battery.BatteryController
@@ -20,6 +22,8 @@ import com.gadget.camera.CameraController
 import com.gadget.camera.RootedCameraController
 import com.gadget.cell.CellController
 import com.gadget.cell.RootedCellController
+import com.gadget.display.DisplayController
+import com.gadget.display.RootedDisplayController
 import com.gadget.gps.GpsController
 import com.gadget.gps.RootedGpsController
 import com.gadget.ir.IrController
@@ -36,6 +40,8 @@ import com.gadget.root.sysfs.RootedSysfsMutationLog
 import com.gadget.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.RootedSensorsController
 import com.gadget.sensors.SensorsController
+import com.gadget.storage.RootedStorageController
+import com.gadget.storage.StorageController
 import com.gadget.wifi.RootedWifiController
 import com.gadget.wifi.WifiController
 import com.gadget.torch.RootedTorchController
@@ -145,4 +151,17 @@ abstract class RootBindings {
 
     @Binds @Singleton
     abstract fun bindKeepAliveController(impl: RootedKeepAliveController): KeepAliveController
+
+    // ──── Batch 8: storage + display + audio routing controllers ────
+
+    @Binds @Singleton
+    abstract fun bindStorageController(impl: RootedStorageController): StorageController
+
+    @Binds @Singleton
+    abstract fun bindDisplayController(impl: RootedDisplayController): DisplayController
+
+    @Binds @Singleton
+    abstract fun bindAudioRoutingController(
+        impl: RootedAudioRoutingController,
+    ): AudioRoutingController
 }

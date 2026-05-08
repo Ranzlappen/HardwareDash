@@ -31,6 +31,16 @@ private const val AUTOMATION_DUMPSYS_WINDOW_SECONDS = 60
 private const val NOTIFICATION_OVERLAY_WINDOW_SECONDS = 30
 private const val KEEPALIVE_PRIVILEGED_WINDOW_MINUTES = 5
 
+private const val STORAGE_TRIM_WINDOW_MINUTES = 5
+private const val STORAGE_DUMP_WINDOW_SECONDS = 60
+private const val DISPLAY_BRIGHTNESS_WINDOW_SECONDS = 60
+private const val DISPLAY_OVERRIDE_WINDOW_SECONDS = 30
+private const val DISPLAY_DENSITY_WINDOW_MINUTES = 5
+private const val AUDIO_VOLUME_BYPASS_WINDOW_SECONDS = 60
+private const val AUDIO_ROUTING_WINDOW_SECONDS = 30
+private const val AUDIO_MUTE_WINDOW_MINUTES = 5
+private const val AUDIO_DUMP_WINDOW_SECONDS = 60
+
 /**
  * Single source of truth mapping every [RootFeatureKey] to its
  * [RootFeatureDescriptor]. Both flavors read this; the standard flavor's
@@ -525,6 +535,132 @@ class RootFeatureRegistry @Inject constructor() {
             ),
             requiresExplicitConfirm = true,
             isWriteCapable = true,
+        ),
+
+        // ──── Batch-8 Storage features ────
+        RootFeatureKey.StorageDumpDiskstats to RootFeatureDescriptor(
+            key = RootFeatureKey.StorageDumpDiskstats,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = STORAGE_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.StorageEnumerateMounts to RootFeatureDescriptor(
+            key = RootFeatureKey.StorageEnumerateMounts,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = STORAGE_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_HIGH_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.StorageFstrim to RootFeatureDescriptor(
+            key = RootFeatureKey.StorageFstrim,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = STORAGE_TRIM_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.StorageDropCaches to RootFeatureDescriptor(
+            key = RootFeatureKey.StorageDropCaches,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = STORAGE_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+
+        // ──── Batch-8 Display features ────
+        RootFeatureKey.DisplayBrightnessOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.DisplayBrightnessOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = DISPLAY_BRIGHTNESS_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.DisplayRefreshRateOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.DisplayRefreshRateOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = DISPLAY_OVERRIDE_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.DisplayDensityOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.DisplayDensityOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = DISPLAY_DENSITY_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.DisplaySurfaceFlingerSnapshot to RootFeatureDescriptor(
+            key = RootFeatureKey.DisplaySurfaceFlingerSnapshot,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = DISPLAY_BRIGHTNESS_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+
+        // ──── Batch-8 Audio routing features ────
+        RootFeatureKey.AudioStreamVolumeBypass to RootFeatureDescriptor(
+            key = RootFeatureKey.AudioStreamVolumeBypass,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = AUDIO_VOLUME_BYPASS_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.AudioForceRouting to RootFeatureDescriptor(
+            key = RootFeatureKey.AudioForceRouting,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = AUDIO_ROUTING_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.AudioMuteAllStreams to RootFeatureDescriptor(
+            key = RootFeatureKey.AudioMuteAllStreams,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = AUDIO_MUTE_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.AudioDumpAudioPolicy to RootFeatureDescriptor(
+            key = RootFeatureKey.AudioDumpAudioPolicy,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = AUDIO_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
         ),
     )
 

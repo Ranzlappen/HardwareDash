@@ -96,4 +96,22 @@ sealed class RootFeatureKey(val id: String) {
     // ──── Batch-7 Keep-Alive features ────
     data object KeepAliveDozeBypass : RootFeatureKey("keep_alive_doze_bypass")
     data object KeepAlivePmGrant : RootFeatureKey("keep_alive_pm_grant")
+
+    // ──── Batch-8 Storage features ────
+    data object StorageDumpDiskstats : RootFeatureKey("storage_dump_diskstats")
+    data object StorageEnumerateMounts : RootFeatureKey("storage_enumerate_mounts")
+    data object StorageFstrim : RootFeatureKey("storage_fstrim")
+    data object StorageDropCaches : RootFeatureKey("storage_drop_caches")
+
+    // ──── Batch-8 Display features ────
+    data object DisplayBrightnessOverride : RootFeatureKey("display_brightness_override")
+    data object DisplayRefreshRateOverride : RootFeatureKey("display_refresh_rate_override")
+    data object DisplayDensityOverride : RootFeatureKey("display_density_override")
+    data object DisplaySurfaceFlingerSnapshot : RootFeatureKey("display_surface_flinger_snapshot")
+
+    // ──── Batch-8 Audio routing features ────
+    data object AudioStreamVolumeBypass : RootFeatureKey("audio_stream_volume_bypass")
+    data object AudioForceRouting : RootFeatureKey("audio_force_routing")
+    data object AudioMuteAllStreams : RootFeatureKey("audio_mute_all_streams")
+    data object AudioDumpAudioPolicy : RootFeatureKey("audio_dump_audio_policy")
 }

@@ -5,6 +5,8 @@ import com.gadget.root.core.RootDetector
 import com.gadget.root.core.RootService
 import com.gadget.root.core.RootShell
 import com.gadget.root.launch.LaunchGate
+import com.gadget.audio.AudioRoutingController
+import com.gadget.audio.StandardAudioRoutingController
 import com.gadget.automation.AutomationController
 import com.gadget.automation.StandardAutomationController
 import com.gadget.battery.BatteryController
@@ -15,6 +17,8 @@ import com.gadget.camera.CameraController
 import com.gadget.camera.StandardCameraController
 import com.gadget.cell.CellController
 import com.gadget.cell.StandardCellController
+import com.gadget.display.DisplayController
+import com.gadget.display.StandardDisplayController
 import com.gadget.gps.GpsController
 import com.gadget.gps.StandardGpsController
 import com.gadget.ir.IrController
@@ -31,6 +35,8 @@ import com.gadget.root.sysfs.StandardSysfsMutationLog
 import com.gadget.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.SensorsController
 import com.gadget.sensors.StandardSensorsController
+import com.gadget.storage.StandardStorageController
+import com.gadget.storage.StorageController
 import com.gadget.wifi.StandardWifiController
 import com.gadget.wifi.WifiController
 import com.gadget.torch.StandardTorchController
@@ -169,4 +175,20 @@ object RootBindings {
     @Provides
     @Singleton
     fun provideKeepAliveController(impl: StandardKeepAliveController): KeepAliveController = impl
+
+    // ──── Batch 8: storage + display + audio routing controllers ────
+
+    @Provides
+    @Singleton
+    fun provideStorageController(impl: StandardStorageController): StorageController = impl
+
+    @Provides
+    @Singleton
+    fun provideDisplayController(impl: StandardDisplayController): DisplayController = impl
+
+    @Provides
+    @Singleton
+    fun provideAudioRoutingController(
+        impl: StandardAudioRoutingController,
+    ): AudioRoutingController = impl
 }

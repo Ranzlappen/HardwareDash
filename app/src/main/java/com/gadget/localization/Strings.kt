@@ -1265,6 +1265,222 @@ object S {
                 "Auto-revoques a la sortie.",
         )
     }
+
+    // Batch-8: Storage root extras
+    object StorageRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Storage)",
+            "Root-Erweiterungen (Speicher)",
+            "Extras root (Almacenamiento)",
+            "Extras root (Stockage)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Privileged disk diagnostics, mount enumeration, fstrim against " +
+                "an allow-list, and kernel page-cache drop. fstrim and drop_caches " +
+                "are non-reversible.",
+            "Privilegierte Diagnose, Mount-Enumeration, fstrim gegen eine Allow-Liste " +
+                "und Kernel-Cache-Drop. fstrim und drop_caches sind nicht umkehrbar.",
+            "Diagnostico privilegiado, enumeracion de montajes, fstrim contra una " +
+                "lista permitida y drop_caches del kernel. No reversibles.",
+            "Diagnostic privilegie, enumeration de montages, fstrim contre une liste " +
+                "autorisee et drop_caches du noyau. Non reversibles.",
+        )
+        fun dumpDiskstats(lang: Language) = m(
+            lang,
+            "Dump diskstats snapshot",
+            "Diskstats-Snapshot speichern",
+            "Capturar snapshot de diskstats",
+            "Capturer snapshot diskstats",
+        )
+        fun enumerateMounts(lang: Language) = m(
+            lang,
+            "Enumerate mountinfo",
+            "Mountinfo aufzaehlen",
+            "Enumerar mountinfo",
+            "Enumerer mountinfo",
+        )
+        fun fstrim(lang: Language) = m(
+            lang,
+            "fstrim /data /cache (non-reversible)",
+            "fstrim /data /cache (nicht umkehrbar)",
+            "fstrim /data /cache (no reversible)",
+            "fstrim /data /cache (non reversible)",
+        )
+        fun dropCaches(lang: Language) = m(
+            lang,
+            "Drop kernel caches (page+dentry+inode)",
+            "Kernel-Caches leeren (page+dentry+inode)",
+            "Vaciar caches del kernel (page+dentry+inode)",
+            "Vider caches du noyau (page+dentry+inode)",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all storage mutations",
+            "Alle Speicher-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de almacenamiento",
+            "Reinitialiser toutes les mutations de stockage",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "fstrim and drop_caches are intrinsically non-reversible. fstrim is " +
+                "filtered to /data and /cache only.",
+            "fstrim und drop_caches sind nicht umkehrbar. fstrim ist auf " +
+                "/data und /cache beschraenkt.",
+            "fstrim y drop_caches son no reversibles. fstrim solo se permite en " +
+                "/data y /cache.",
+            "fstrim et drop_caches sont non reversibles. fstrim limite a " +
+                "/data et /cache.",
+        )
+    }
+
+    // Batch-8: Display root extras
+    object DisplayRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Display)",
+            "Root-Erweiterungen (Anzeige)",
+            "Extras root (Pantalla)",
+            "Extras root (Affichage)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Direct backlight write past framework cap (130 % clamp), refresh-rate " +
+                "override (165 Hz cap), runtime DPI (120-560), SurfaceFlinger snapshot.",
+            "Direkter Backlight-Write ueber Framework-Cap (130 %), " +
+                "Bildwiederholrate (165 Hz), DPI (120-560), SurfaceFlinger-Snapshot.",
+            "Escritura directa del backlight (limite 130 %), frecuencia (165 Hz), " +
+                "DPI (120-560), snapshot de SurfaceFlinger.",
+            "Ecriture directe du backlight (clamp 130 %), rafraichissement (165 Hz), " +
+                "DPI (120-560), snapshot SurfaceFlinger.",
+        )
+        fun overrideBrightness(lang: Language) = m(
+            lang,
+            "Override backlight (130% cap)",
+            "Backlight ueberschreiben (130%-Klemmung)",
+            "Anular backlight (limite 130%)",
+            "Remplacer backlight (clamp 130%)",
+        )
+        fun overrideRefreshRate(lang: Language) = m(
+            lang,
+            "Override refresh rate (165 Hz cap)",
+            "Bildwiederholrate ueberschreiben (165 Hz Cap)",
+            "Anular frecuencia (cap 165 Hz)",
+            "Remplacer rafraichissement (plafond 165 Hz)",
+        )
+        fun overrideDensity(lang: Language) = m(
+            lang,
+            "Override DPI (120-560 clamp)",
+            "DPI ueberschreiben (120-560 geklemmt)",
+            "Anular DPI (limite 120-560)",
+            "Remplacer DPI (clamp 120-560)",
+        )
+        fun surfaceFlingerSnapshot(lang: Language) = m(
+            lang,
+            "SurfaceFlinger snapshot",
+            "SurfaceFlinger-Snapshot",
+            "Snapshot de SurfaceFlinger",
+            "Snapshot SurfaceFlinger",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all display mutations",
+            "Alle Display-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de pantalla",
+            "Reinitialiser toutes les mutations d'affichage",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Sustained brightness above OEM cap stresses the panel; refresh-rate " +
+                "and DPI overrides may break apps. Auto-revert on exit.",
+            "Anhaltende Helligkeit ueber OEM-Cap belastet das Panel; Bildwiederhol" +
+                "rate und DPI koennen Apps brechen. Auto-Revert beim Verlassen.",
+            "El brillo sostenido sobre el cap del OEM estresa el panel; frecuencia " +
+                "y DPI pueden romper apps. Auto-revertido al salir.",
+            "Une luminosite soutenue au-dessus du plafond OEM stresse l'ecran; " +
+                "frequence et DPI peuvent casser des applis. Auto-revoque a la sortie.",
+        )
+    }
+
+    // Batch-8: Audio routing root extras
+    object AudioRoutingRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Audio routing)",
+            "Root-Erweiterungen (Audio-Routing)",
+            "Extras root (Enrutamiento audio)",
+            "Extras root (Routage audio)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Stream-volume cap bypass (130 % clamp), forced routing, mute-all " +
+                "(allow-listed), audio policy dump. STREAM_VOICE_CALL refused.",
+            "Stream-Volume-Bypass (130 %), erzwungenes Routing, Mute-All " +
+                "(Allow-List), Audio-Policy-Dump. STREAM_VOICE_CALL gesperrt.",
+            "Bypass del cap de volumen (130 %), enrutamiento forzado, mute-all, " +
+                "volcado de policy. STREAM_VOICE_CALL rechazado.",
+            "Bypass plafond volume (130 %), routage force, mute-all, dump policy. " +
+                "STREAM_VOICE_CALL refuse.",
+        )
+        fun bypassVolume(lang: Language) = m(
+            lang,
+            "Bypass safe-listening cap (60 s)",
+            "Safe-Listening-Cap umgehen (60 s)",
+            "Bypass del limite de escucha segura (60 s)",
+            "Bypass plafond ecoute sure (60 s)",
+        )
+        fun forceRouting(lang: Language) = m(
+            lang,
+            "Force speaker output",
+            "Lautsprecher erzwingen",
+            "Forzar altavoz",
+            "Forcer haut-parleur",
+        )
+        fun muteAll(lang: Language) = m(
+            lang,
+            "Mute streams (60 s, except A11y/DTMF/Call)",
+            "Streams stumm (60 s, ausser A11y/DTMF/Anruf)",
+            "Silenciar streams (60 s, excepto A11y/DTMF/Llamada)",
+            "Couper flux (60 s, sauf A11y/DTMF/Appel)",
+        )
+        fun dumpAudioPolicy(lang: Language) = m(
+            lang,
+            "Audio policy snapshot",
+            "Audio-Policy-Snapshot",
+            "Snapshot de la audio policy",
+            "Snapshot audio policy",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all audio routing mutations",
+            "Alle Audio-Routing-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de audio",
+            "Reinitialiser toutes les mutations audio",
+        )
+        fun hearingSafetyWarning(lang: Language) = m(
+            lang,
+            "WARNING: Bypassing the volume cap can cause permanent hearing loss. " +
+                "STREAM_VOICE_CALL is always refused.",
+            "WARNUNG: Das Umgehen des Lautstaerke-Caps kann dauerhafte Hoerschaeden " +
+                "verursachen. STREAM_VOICE_CALL stets abgelehnt.",
+            "ADVERTENCIA: Bypassear el limite de volumen puede causar perdida " +
+                "auditiva permanente. STREAM_VOICE_CALL siempre rechazado.",
+            "AVERTISSEMENT: Contourner le plafond peut causer une perte auditive " +
+                "permanente. STREAM_VOICE_CALL toujours refuse.",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Volume bypass and forced routing carry hearing-safety risk. Auto-revert " +
+                "on exit; ACCESSIBILITY/DTMF/Call always preserved.",
+            "Volume-Bypass und erzwungenes Routing bergen Hoerschutzrisiken. " +
+                "Auto-Revert beim Verlassen; ACCESSIBILITY/DTMF/Anruf erhalten.",
+            "El bypass de volumen y enrutamiento conllevan riesgo auditivo. " +
+                "Auto-revertido al salir; ACCESSIBILITY/DTMF/Llamada preservados.",
+            "Le bypass de volume et le routage comportent des risques auditifs. " +
+                "Auto-revoque a la sortie; ACCESSIBILITY/DTMF/Appel preserves.",
+        )
+    }
 }
 
 /** Helper: pick the string for the given language. Order: EN, DE, ES, FR. */
