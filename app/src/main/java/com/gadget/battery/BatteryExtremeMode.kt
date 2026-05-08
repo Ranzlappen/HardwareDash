@@ -15,7 +15,7 @@ data class ChargingProfileConfig(
 
 /**
  * Disables charger / battery / USB thermal throttling by writing
- * `disabled` to each matching `thermal_zone*/mode` node. Same severity
+ * `disabled` to each matching `thermal_zone<N>/mode` node. Same severity
  * as charging-profile override; hard 60-second active window; aborts on
  * any zone breaching its `trip_point_0_temp`.
  */
