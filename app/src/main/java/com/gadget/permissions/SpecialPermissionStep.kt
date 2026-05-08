@@ -44,16 +44,22 @@ data class SpecialPermissionStep(
             SpecialPermissionStep(
                 id = "battery_optimizations",
                 needsRequest = { ctx ->
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return@SpecialPermissionStep false
-                    val pm = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
-                    !pm.isIgnoringBatteryOptimizations(ctx.packageName)
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                        false
+                    } else {
+                        val pm = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
+                        !pm.isIgnoringBatteryOptimizations(ctx.packageName)
+                    }
                 },
                 buildIntent = { ctx ->
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return@SpecialPermissionStep null
-                    @Suppress("BatteryLife")
-                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                        .setData(Uri.parse("package:${ctx.packageName}"))
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                        null
+                    } else {
+                        @Suppress("BatteryLife")
+                        Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                            .setData(Uri.parse("package:${ctx.packageName}"))
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
                 },
             ),
             SpecialPermissionStep(
@@ -91,15 +97,21 @@ data class SpecialPermissionStep(
             SpecialPermissionStep(
                 id = "schedule_exact_alarm",
                 needsRequest = { ctx ->
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return@SpecialPermissionStep false
-                    val am = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                    !am.canScheduleExactAlarms()
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                        false
+                    } else {
+                        val am = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                        !am.canScheduleExactAlarms()
+                    }
                 },
                 buildIntent = { ctx ->
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return@SpecialPermissionStep null
-                    Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                        .setData(Uri.parse("package:${ctx.packageName}"))
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                        null
+                    } else {
+                        Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                            .setData(Uri.parse("package:${ctx.packageName}"))
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
                 },
             ),
         )
