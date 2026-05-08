@@ -82,4 +82,18 @@ sealed class RootFeatureKey(val id: String) {
     // ──── Batch-6 GPS features ────
     data object GpsNmeaRawTap : RootFeatureKey("gps_nmea_raw_tap")
     data object GpsConstellationDump : RootFeatureKey("gps_constellation_dump")
+
+    // ──── Batch-7 Automation features ────
+    data object AutomationPrivilegedIntent : RootFeatureKey("automation_privileged_intent")
+    data object AutomationSystemSettingsOverride : RootFeatureKey("automation_system_settings_override")
+    data object AutomationDumpsysSnapshot : RootFeatureKey("automation_dumpsys_snapshot")
+
+    // ──── Batch-7 Notification features ────
+    data object NotificationStickyOverride : RootFeatureKey("notification_sticky_override")
+    data object NotificationListenerAccess : RootFeatureKey("notification_listener_access")
+    data object NotificationLockScreenOverlay : RootFeatureKey("notification_lock_screen_overlay")
+
+    // ──── Batch-7 Keep-Alive features ────
+    data object KeepAliveDozeBypass : RootFeatureKey("keep_alive_doze_bypass")
+    data object KeepAlivePmGrant : RootFeatureKey("keep_alive_pm_grant")
 }

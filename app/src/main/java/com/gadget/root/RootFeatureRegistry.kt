@@ -25,6 +25,12 @@ private const val BT_REGULATORY_WINDOW_MINUTES = 5
 private const val IR_BURST_WINDOW_SECONDS = 60
 private const val NFC_NCI_WINDOW_SECONDS = 60
 
+private const val AUTOMATION_DESTRUCTIVE_WINDOW_MINUTES = 5
+private const val AUTOMATION_INTENT_WINDOW_SECONDS = 60
+private const val AUTOMATION_DUMPSYS_WINDOW_SECONDS = 60
+private const val NOTIFICATION_OVERLAY_WINDOW_SECONDS = 30
+private const val KEEPALIVE_PRIVILEGED_WINDOW_MINUTES = 5
+
 /**
  * Single source of truth mapping every [RootFeatureKey] to its
  * [RootFeatureDescriptor]. Both flavors read this; the standard flavor's
@@ -436,6 +442,89 @@ class RootFeatureRegistry @Inject constructor() {
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
             requiresExplicitConfirm = false,
             isWriteCapable = false,
+        ),
+
+        // ──── Batch-7 Automation features ────
+        RootFeatureKey.AutomationPrivilegedIntent to RootFeatureDescriptor(
+            key = RootFeatureKey.AutomationPrivilegedIntent,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = AUTOMATION_INTENT_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.AutomationSystemSettingsOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.AutomationSystemSettingsOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = AUTOMATION_DESTRUCTIVE_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.AutomationDumpsysSnapshot to RootFeatureDescriptor(
+            key = RootFeatureKey.AutomationDumpsysSnapshot,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = AUTOMATION_DUMPSYS_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_HIGH_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+
+        // ──── Batch-7 Notification features ────
+        RootFeatureKey.NotificationStickyOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.NotificationStickyOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.NotificationListenerAccess to RootFeatureDescriptor(
+            key = RootFeatureKey.NotificationListenerAccess,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = AUTOMATION_DESTRUCTIVE_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.NotificationLockScreenOverlay to RootFeatureDescriptor(
+            key = RootFeatureKey.NotificationLockScreenOverlay,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = NOTIFICATION_OVERLAY_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+
+        // ──── Batch-7 Keep-Alive features ────
+        RootFeatureKey.KeepAliveDozeBypass to RootFeatureDescriptor(
+            key = RootFeatureKey.KeepAliveDozeBypass,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = KEEPALIVE_PRIVILEGED_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.KeepAlivePmGrant to RootFeatureDescriptor(
+            key = RootFeatureKey.KeepAlivePmGrant,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = KEEPALIVE_PRIVILEGED_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
         ),
     )
 

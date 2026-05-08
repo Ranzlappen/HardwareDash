@@ -66,26 +66,11 @@ private const val DEMO_GPS_NMEA_DURATION_MS = 10_000L
  */
 @Composable
 private fun RadiosRootDisclaimerCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer,
-        ),
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(
-                text = "⚠ Regulatory & safety notice",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = "TX power overrides and raw commands may violate local " +
-                    "regulations (FCC/ETSI). Use at your own risk. The developer " +
-                    "assumes no liability.",
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
-    }
+    RootExtrasDisclaimerCard(
+        text = "TX power overrides and raw commands may violate local " +
+            "regulations (FCC/ETSI). Use at your own risk. The developer " +
+            "assumes no liability.",
+    )
 }
 
 /**

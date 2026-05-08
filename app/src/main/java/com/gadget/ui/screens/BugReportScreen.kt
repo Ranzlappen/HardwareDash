@@ -2,6 +2,7 @@ package com.gadget.ui.screens
 
 import android.Manifest
 import android.app.admin.DevicePolicyManager
+import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ComponentName
@@ -14,6 +15,10 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.gadget.localization.LocalizationManager
+import com.gadget.permissions.PermissionsOnboardingCoordinator
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -212,6 +218,11 @@ fun BugReportScreen() {
                 )
             }
         }
+
+        // ══════════════════════════════════════════════════════════════
+        // SECTION 0.5 — Request all missing permissions (Batch 7)
+        // ══════════════════════════════════════════════════════════════
+        RequestAllMissingPermissionsButton()
 
         // ══════════════════════════════════════════════════════════════
         // SECTION 1 — Permission Status Table
@@ -471,6 +482,86 @@ fun BugReportScreen() {
             },
         )
     }
+}
+
+@Composable
+private fun RequestAllMissingPermissionsButton() {
+    val context = LocalContext.current
+    val lang = LocalizationManager.loadLanguage(context)
+    var pendingSpecial by remember { mutableStateOf<List<com.gadget.permissions.SpecialPermissionStep>>(emptyList()) }
+    var stepIndex by rememberSaveable { mutableStateOf(0) }
+    var status by remember { mutableStateOf<String?>(null) }
+
+    val runtimeLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+    ) { _ ->
+        pendingSpecial = PermissionsOnboardingCoordinator.pendingSpecialSteps(context)
+        stepIndex = 0
+        status = if (pendingSpecial.isEmpty()) {
+            S.PermissionsOnboarding.complete(lang)
+        } else {
+            S.PermissionsOnboarding.progress(lang, 1, pendingSpecial.size)
+        }
+        launchNextSpecialStep(context, pendingSpecial, stepIndex)
+    }
+
+    Card(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    val missing = PermissionsOnboardingCoordinator.missingRuntimePermissions(context)
+                    if (missing.isEmpty()) {
+                        pendingSpecial = PermissionsOnboardingCoordinator.pendingSpecialSteps(context)
+                        stepIndex = 0
+                        status = if (pendingSpecial.isEmpty()) {
+                            S.PermissionsOnboarding.complete(lang)
+                        } else {
+                            S.PermissionsOnboarding.progress(lang, 1, pendingSpecial.size)
+                        }
+                        launchNextSpecialStep(context, pendingSpecial, stepIndex)
+                    } else {
+                        runtimeLauncher.launch(missing.toTypedArray())
+                    }
+                },
+            ) {
+                Text(S.PermissionsOnboarding.requestAllButton(lang))
+            }
+            status?.let { statusText ->
+                Text(
+                    text = statusText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(stepIndex, pendingSpecial.size) {
+        if (pendingSpecial.isNotEmpty() && stepIndex >= pendingSpecial.size) {
+            status = S.PermissionsOnboarding.complete(lang)
+        }
+    }
+}
+
+private fun launchNextSpecialStep(
+    context: Context,
+    steps: List<com.gadget.permissions.SpecialPermissionStep>,
+    index: Int,
+) {
+    if (index !in steps.indices) return
+    val intent = steps[index].buildIntent(context) ?: return
+    runCatching { context.startActivity(intent) }
+        .onFailure {
+            if (it is ActivityNotFoundException) {
+                Toast.makeText(context, "Settings activity not found for ${steps[index].id}", Toast.LENGTH_SHORT).show()
+            }
+        }
 }
 
 private fun buildMarkdownReport(

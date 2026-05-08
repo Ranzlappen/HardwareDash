@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
+import com.gadget.root.ui.AutomationRootExtrasSection
 import com.gadget.services.LinkService
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
@@ -93,6 +94,8 @@ fun LinkScreen() {
                 )
             }
         }
+
+        AutomationRootExtrasSection()
 
         OutlinedButton(
             onClick = { editingRule = newBlankRule() },

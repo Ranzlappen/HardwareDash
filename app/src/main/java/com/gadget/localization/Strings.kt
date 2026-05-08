@@ -1066,6 +1066,75 @@ object S {
             "Prozess \"$procName\" \u2014 $cpName ist jetzt fällig.",
             "Proceso \"$procName\" \u2014 $cpName vence ahora.",
             "Processus \"$procName\" \u2014 $cpName est dû maintenant.")
+
+        // Persistent keep-alive service
+        fun keepAliveTitle(lang: Language) = m(lang, "Gadget keep-alive", "Gadget Keep-Alive", "Gadget keep-alive", "Gadget keep-alive")
+        fun keepAliveBody(lang: Language) = m(lang, "Background tasks running", "Hintergrundaufgaben aktiv", "Tareas en segundo plano activas", "Taches en arriere-plan actives")
+    }
+
+    // Batch-7: Keep Alive setting
+    object KeepAlive {
+        fun title(lang: Language) = m(lang, "Keep Alive", "Aktiv halten", "Mantener activo", "Maintenir actif")
+        fun body(lang: Language) = m(lang,
+            "Run a sticky foreground service so automation rules and pollers survive Doze.",
+            "Persistenten Vordergrund-Dienst ausfuehren, damit Automatisierungsregeln und Polling den Doze-Modus ueberleben.",
+            "Ejecutar un servicio en primer plano persistente para que las reglas de automatizacion y sondeos sobrevivan al modo Doze.",
+            "Executer un service de premier plan persistant pour que les regles d'automatisation et les sondages survivent au mode Doze.")
+        fun rootedFootnote(lang: Language) = m(lang,
+            "Rooted: Doze whitelist + pm grant applied automatically.",
+            "Rooted: Doze-Whitelist + pm grant werden automatisch angewendet.",
+            "Con root: lista blanca Doze + pm grant aplicados automaticamente.",
+            "Avec root : liste blanche Doze + pm grant appliques automatiquement.")
+        fun standardFootnote(lang: Language) = m(lang,
+            "Standard: tapping on opens battery-optimization exemption settings.",
+            "Standard: Antippen oeffnet die Akku-Ausnahme-Einstellungen.",
+            "Estandar: tocar abre los ajustes de excepcion de optimizacion de bateria.",
+            "Standard : appuyer ouvre les parametres d'exception d'optimisation de batterie.")
+    }
+
+    // Batch-7: Permissions onboarding
+    object PermissionsOnboarding {
+        fun requestAllButton(lang: Language) = m(lang, "Request all missing permissions", "Alle fehlenden Berechtigungen anfordern", "Solicitar todos los permisos faltantes", "Demander toutes les autorisations manquantes")
+        fun progress(lang: Language, current: Int, total: Int) = m(lang, "Step $current of $total", "Schritt $current von $total", "Paso $current de $total", "Etape $current sur $total")
+        fun complete(lang: Language) = m(lang, "All permission flows finished", "Alle Berechtigungs-Ablaeufe abgeschlossen", "Todos los flujos de permisos completados", "Tous les flux d'autorisation termines")
+    }
+
+    // Batch-7: Automation root extras
+    object AutomationRootExtras {
+        fun cardTitle(lang: Language) = m(lang, "Root extras (Automation)", "Root-Erweiterungen (Automatisierung)", "Extras root (Automatizacion)", "Extras root (Automatisation)")
+        fun body(lang: Language) = m(lang,
+            "Privileged intent fire (deny-listed actions), settings put against an allow-list, dumpsys snapshot. All writes snapshot+restore.",
+            "Privilegierte Intents (gesperrte Aktionen), Settings put gegen eine Allow-Liste, dumpsys-Snapshot. Alle Schreibvorgaenge mit Snapshot+Restore.",
+            "Disparo de intent privilegiado (acciones en lista de denegacion), settings put contra lista permitida, instantanea de dumpsys. Todas las escrituras con snapshot+restore.",
+            "Tir d'intent privilegie (actions sur liste de refus), settings put contre une liste autorisee, capture dumpsys. Toutes les ecritures avec snapshot+restore.")
+        fun firePrivilegedIntent(lang: Language) = m(lang, "Fire privileged intent (demo)", "Privilegierten Intent feuern (Demo)", "Disparar intent privilegiado (demo)", "Tirer un intent privilegie (demo)")
+        fun overrideSetting(lang: Language) = m(lang, "Override system setting (demo)", "Systemeinstellung ueberschreiben (Demo)", "Anular ajuste del sistema (demo)", "Remplacer un parametre systeme (demo)")
+        fun dumpsysSnapshot(lang: Language) = m(lang, "Dumpsys snapshot", "Dumpsys-Snapshot", "Instantanea de dumpsys", "Capture dumpsys")
+        fun resetAll(lang: Language) = m(lang, "Reset all automation mutations", "Alle Automatisierungs-Mutationen zuruecksetzen", "Restablecer todas las mutaciones de automatizacion", "Reinitialiser toutes les mutations d'automatisation")
+        fun disclaimer(lang: Language) = m(lang,
+            "Privileged intents and settings overrides may alter system behaviour. Use at your own risk.",
+            "Privilegierte Intents und Einstellungen koennen das Systemverhalten aendern. Verwendung auf eigene Gefahr.",
+            "Los intents privilegiados y anulaciones de ajustes pueden alterar el comportamiento del sistema. Uselo bajo su propia responsabilidad.",
+            "Les intents privilegies et les remplacements de parametres peuvent alterer le comportement du systeme. Utilisation a vos risques.")
+    }
+
+    // Batch-7: Notification root extras
+    object NotificationRootExtras {
+        fun cardTitle(lang: Language) = m(lang, "Root extras (Notifications)", "Root-Erweiterungen (Benachrichtigungen)", "Extras root (Notificaciones)", "Extras root (Notifications)")
+        fun body(lang: Language) = m(lang,
+            "Sticky channel-importance override (raise only), one-shot notification-listener access, and a 60 s lock-screen overlay.",
+            "Sticky-Kanal-Wichtigkeitsueberschreibung (nur erhoehen), Einmal-Listener-Zugriff und 60 s-Sperrbildschirm-Overlay.",
+            "Anulacion de importancia de canal sticky (solo elevar), acceso unico al listener de notificaciones y overlay de pantalla de bloqueo de 60 s.",
+            "Remplacement d'importance de canal sticky (elever uniquement), acces unique au listener de notification, et overlay verrouille 60 s.")
+        fun stickyOverride(lang: Language) = m(lang, "Raise channel importance (demo)", "Kanal-Wichtigkeit erhoehen (Demo)", "Elevar importancia del canal (demo)", "Elever l'importance du canal (demo)")
+        fun listenerAccess(lang: Language) = m(lang, "Grant listener access (auto-revert on exit)", "Listener-Zugriff erteilen (Auto-Revert beim Verlassen)", "Conceder acceso al listener (auto-revertir al salir)", "Accorder l'acces listener (auto-revocation a la sortie)")
+        fun overlay(lang: Language) = m(lang, "Show lock-screen overlay (10 s)", "Sperrbildschirm-Overlay zeigen (10 s)", "Mostrar overlay de bloqueo (10 s)", "Afficher overlay de verrouillage (10 s)")
+        fun resetAll(lang: Language) = m(lang, "Reset all notification mutations", "Alle Benachrichtigungs-Mutationen zuruecksetzen", "Restablecer todas las mutaciones de notificaciones", "Reinitialiser toutes les mutations de notifications")
+        fun disclaimer(lang: Language) = m(lang,
+            "Listener access and lock-screen overlays carry phishing risk. Auto-reverted on screen exit.",
+            "Listener-Zugriff und Sperrbildschirm-Overlays bergen Phishing-Risiken. Auto-Revert beim Verlassen.",
+            "El acceso al listener y los overlays conllevan riesgo de phishing. Revertidos automaticamente al salir.",
+            "L'acces listener et les overlays comportent un risque de phishing. Auto-revoques a la sortie.")
     }
 }
 

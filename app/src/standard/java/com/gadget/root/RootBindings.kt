@@ -5,6 +5,8 @@ import com.gadget.root.core.RootDetector
 import com.gadget.root.core.RootService
 import com.gadget.root.core.RootShell
 import com.gadget.root.launch.LaunchGate
+import com.gadget.automation.AutomationController
+import com.gadget.automation.StandardAutomationController
 import com.gadget.battery.BatteryController
 import com.gadget.battery.StandardBatteryController
 import com.gadget.bluetooth.BluetoothController
@@ -17,10 +19,14 @@ import com.gadget.gps.GpsController
 import com.gadget.gps.StandardGpsController
 import com.gadget.ir.IrController
 import com.gadget.ir.StandardIrController
+import com.gadget.keepalive.KeepAliveController
+import com.gadget.keepalive.StandardKeepAliveController
 import com.gadget.microphone.MicrophoneController
 import com.gadget.microphone.StandardMicrophoneController
 import com.gadget.nfc.NfcController
 import com.gadget.nfc.StandardNfcController
+import com.gadget.notification.NotificationController
+import com.gadget.notification.StandardNotificationController
 import com.gadget.root.sysfs.StandardSysfsMutationLog
 import com.gadget.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.SensorsController
@@ -149,4 +155,18 @@ object RootBindings {
     @Provides
     @Singleton
     fun provideGpsController(impl: StandardGpsController): GpsController = impl
+
+    // ──── Batch 7: automation + notifications + keep-alive controllers ────
+
+    @Provides
+    @Singleton
+    fun provideAutomationController(impl: StandardAutomationController): AutomationController = impl
+
+    @Provides
+    @Singleton
+    fun provideNotificationController(impl: StandardNotificationController): NotificationController = impl
+
+    @Provides
+    @Singleton
+    fun provideKeepAliveController(impl: StandardKeepAliveController): KeepAliveController = impl
 }

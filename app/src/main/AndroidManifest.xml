@@ -48,6 +48,12 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"     />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <!-- ══════════════════════ KEEP-ALIVE / DOZE ══════════════════ -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- ══════════════════════ OVERLAY (lock-screen widget) ════════ -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -472,6 +478,12 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
+        <!-- ── Batch-7: Persistent keep-alive foreground service ─────── -->
+        <service
+            android:name=".services.PersistentKeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
     </application>
 </manifest>

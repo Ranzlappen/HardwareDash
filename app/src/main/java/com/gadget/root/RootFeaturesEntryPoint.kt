@@ -1,13 +1,16 @@
 package com.gadget.root
 
+import com.gadget.automation.AutomationController
 import com.gadget.battery.BatteryController
 import com.gadget.bluetooth.BluetoothController
 import com.gadget.camera.CameraController
 import com.gadget.cell.CellController
 import com.gadget.gps.GpsController
 import com.gadget.ir.IrController
+import com.gadget.keepalive.KeepAliveController
 import com.gadget.microphone.MicrophoneController
 import com.gadget.nfc.NfcController
+import com.gadget.notification.NotificationController
 import com.gadget.sensors.SensorsController
 import com.gadget.torch.TorchController
 import com.gadget.vibration.VibrationController
@@ -42,4 +45,7 @@ interface RootFeaturesEntryPoint {
     fun irController(): IrController
     fun cellController(): CellController
     fun gpsController(): GpsController
+    fun automationController(): AutomationController
+    fun notificationController(): NotificationController
+    fun keepAliveController(): KeepAliveController
 }

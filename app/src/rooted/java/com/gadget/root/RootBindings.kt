@@ -10,6 +10,8 @@ import com.gadget.root.core.RootedRootService
 import com.gadget.root.core.RootedRootShell
 import com.gadget.root.launch.LaunchGate
 import com.gadget.root.launch.RootedLaunchGate
+import com.gadget.automation.AutomationController
+import com.gadget.automation.RootedAutomationController
 import com.gadget.battery.BatteryController
 import com.gadget.battery.RootedBatteryController
 import com.gadget.bluetooth.BluetoothController
@@ -22,10 +24,14 @@ import com.gadget.gps.GpsController
 import com.gadget.gps.RootedGpsController
 import com.gadget.ir.IrController
 import com.gadget.ir.RootedIrController
+import com.gadget.keepalive.KeepAliveController
+import com.gadget.keepalive.RootedKeepAliveController
 import com.gadget.microphone.MicrophoneController
 import com.gadget.microphone.RootedMicrophoneController
 import com.gadget.nfc.NfcController
 import com.gadget.nfc.RootedNfcController
+import com.gadget.notification.NotificationController
+import com.gadget.notification.RootedNotificationController
 import com.gadget.root.sysfs.RootedSysfsMutationLog
 import com.gadget.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.RootedSensorsController
@@ -128,4 +134,15 @@ abstract class RootBindings {
 
     @Binds @Singleton
     abstract fun bindGpsController(impl: RootedGpsController): GpsController
+
+    // ──── Batch 7: automation + notifications + keep-alive controllers ────
+
+    @Binds @Singleton
+    abstract fun bindAutomationController(impl: RootedAutomationController): AutomationController
+
+    @Binds @Singleton
+    abstract fun bindNotificationController(impl: RootedNotificationController): NotificationController
+
+    @Binds @Singleton
+    abstract fun bindKeepAliveController(impl: RootedKeepAliveController): KeepAliveController
 }
