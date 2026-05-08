@@ -18,4 +18,13 @@ import kotlinx.coroutines.flow.Flow
 interface RootFeatureToggles {
     fun isEnabled(feature: RootFeatureKey): Flow<Boolean>
     suspend fun setEnabled(feature: RootFeatureKey, enabled: Boolean)
+
+    /**
+     * Single master switch for the rooted-monitor surface. When ON, the
+     * safety gate short-circuits every descriptor flagged `isWriteCapable`,
+     * leaving read-only diagnostics (sysfs reads, sensor enumeration, fuel
+     * gauge dumps) fully usable. Default OFF.
+     */
+    fun isMonitorSafetyMode(): Flow<Boolean>
+    suspend fun setMonitorSafetyMode(enabled: Boolean)
 }

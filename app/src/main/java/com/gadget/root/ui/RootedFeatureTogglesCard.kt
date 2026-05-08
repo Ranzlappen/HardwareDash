@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -47,6 +48,7 @@ fun RootedFeatureTogglesCard(modifier: Modifier = Modifier) {
         entryPoint.featureRegistry().allDescriptors().toList()
     }
     val scope = rememberCoroutineScope()
+    val safetyMode by toggles.isMonitorSafetyMode().collectAsState(initial = false)
 
     Card(
         modifier = modifier.fillMaxWidth().padding(8.dp),
@@ -65,9 +67,35 @@ fun RootedFeatureTogglesCard(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Safety mode",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = "Blocks every write-capable feature; read-only diagnostics stay on.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = safetyMode,
+                    onCheckedChange = { newValue ->
+                        scope.launch { toggles.setMonitorSafetyMode(newValue) }
+                    },
+                )
+            }
+            HorizontalDivider()
             descriptors.forEach { descriptor ->
                 val enabled by toggles.isEnabled(descriptor.key)
                     .collectAsState(initial = false)
+                val gatedBySafetyMode = safetyMode && descriptor.isWriteCapable
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -85,9 +113,17 @@ fun RootedFeatureTogglesCard(modifier: Modifier = Modifier) {
                                 color = MaterialTheme.colorScheme.error,
                             )
                         }
+                        if (gatedBySafetyMode) {
+                            Text(
+                                text = "Disabled by Safety mode",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                     Switch(
-                        checked = enabled,
+                        checked = enabled && !gatedBySafetyMode,
+                        enabled = !gatedBySafetyMode,
                         onCheckedChange = { newValue ->
                             scope.launch { toggles.setEnabled(descriptor.key, newValue) }
                         },

@@ -10,10 +10,16 @@ import com.gadget.root.core.RootedRootService
 import com.gadget.root.core.RootedRootShell
 import com.gadget.root.launch.LaunchGate
 import com.gadget.root.launch.RootedLaunchGate
+import com.gadget.battery.BatteryController
+import com.gadget.battery.RootedBatteryController
 import com.gadget.camera.CameraController
 import com.gadget.camera.RootedCameraController
 import com.gadget.microphone.MicrophoneController
 import com.gadget.microphone.RootedMicrophoneController
+import com.gadget.root.sysfs.RootedSysfsMutationLog
+import com.gadget.root.sysfs.SysfsMutationLog
+import com.gadget.sensors.RootedSensorsController
+import com.gadget.sensors.SensorsController
 import com.gadget.torch.RootedTorchController
 import com.gadget.torch.TorchController
 import com.gadget.vibration.RootedVibrationController
@@ -79,4 +85,15 @@ abstract class RootBindings {
 
     @Binds @Singleton
     abstract fun bindMicrophoneController(impl: RootedMicrophoneController): MicrophoneController
+
+    // ──── Batch 5: sensors + battery + sysfs mutation log ────
+
+    @Binds @Singleton
+    abstract fun bindSysfsMutationLog(impl: RootedSysfsMutationLog): SysfsMutationLog
+
+    @Binds @Singleton
+    abstract fun bindSensorsController(impl: RootedSensorsController): SensorsController
+
+    @Binds @Singleton
+    abstract fun bindBatteryController(impl: RootedBatteryController): BatteryController
 }

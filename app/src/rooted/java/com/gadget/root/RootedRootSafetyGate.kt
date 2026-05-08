@@ -33,8 +33,13 @@ class RootedRootSafetyGate @Inject constructor(
         if (!capabilityRegistry.hasRootAccess()) return RootGateDecision.Unsupported
 
         val descriptor = featureRegistry.descriptor(feature)
+        val prefs = dataStore.data.first()
 
-        if (!isFeatureEnabled(feature, descriptor)) return RootGateDecision.BlockedByUser
+        if (descriptor.isWriteCapable && (prefs[RootPrefKeys.MonitorSafetyMode] == true)) {
+            return RootGateDecision.BlockedByUser
+        }
+
+        if (!isFeatureEnabled(prefs, feature, descriptor)) return RootGateDecision.BlockedByUser
 
         val limit = descriptor.limit ?: return RootGateDecision.Allowed
         return when (val outcome = limiter.tryAcquire(feature, limit)) {
@@ -48,11 +53,9 @@ class RootedRootSafetyGate @Inject constructor(
         Timber.d("Root feature invoked: %s", feature.id)
     }
 
-    private suspend fun isFeatureEnabled(
+    private fun isFeatureEnabled(
+        prefs: Preferences,
         feature: RootFeatureKey,
         descriptor: RootFeatureDescriptor,
-    ): Boolean {
-        val prefs = dataStore.data.first()
-        return prefs[RootPrefKeys.featureEnabledKey(feature)] ?: descriptor.defaultOn
-    }
+    ): Boolean = prefs[RootPrefKeys.featureEnabledKey(feature)] ?: descriptor.defaultOn
 }

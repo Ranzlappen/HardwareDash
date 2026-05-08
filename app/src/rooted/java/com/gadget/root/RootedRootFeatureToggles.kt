@@ -31,4 +31,13 @@ class RootedRootFeatureToggles @Inject constructor(
             mutable[RootPrefKeys.featureEnabledKey(feature)] = enabled
         }
     }
+
+    override fun isMonitorSafetyMode(): Flow<Boolean> =
+        dataStore.data.map { prefs -> prefs[RootPrefKeys.MonitorSafetyMode] ?: false }
+
+    override suspend fun setMonitorSafetyMode(enabled: Boolean) {
+        dataStore.edit { mutable ->
+            mutable[RootPrefKeys.MonitorSafetyMode] = enabled
+        }
+    }
 }

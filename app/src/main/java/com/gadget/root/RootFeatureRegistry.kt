@@ -15,6 +15,11 @@ private const val CAMERA_RAW_WINDOW_SECONDS = 30
 private const val CAMERA_SHUTTER_SOUND_WINDOW_SECONDS = 300
 private const val MIC_SYSTEM_AUDIO_WINDOW_SECONDS = 120
 
+private const val SENSORS_OVERCLOCK_WINDOW_MINUTES = 5
+private const val SENSORS_EXPERT_POLL_WINDOW_MINUTES = 5
+private const val BATTERY_DANGEROUS_OPS_WINDOW_MINUTES = 10
+private const val BATTERY_FULL_DUMP_WINDOW_SECONDS = 60
+
 /**
  * Single source of truth mapping every [RootFeatureKey] to its
  * [RootFeatureDescriptor]. Both flavors read this; the standard flavor's
@@ -46,48 +51,56 @@ class RootFeatureRegistry @Inject constructor() {
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
             requiresExplicitConfirm = true,
+            isWriteCapable = true,
         ),
         RootFeatureKey.TorchHighFrequencyStrobe to RootFeatureDescriptor(
             key = RootFeatureKey.TorchHighFrequencyStrobe,
             defaultOn = false,
             limit = RootLimitPolicy(window = 30.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
             requiresExplicitConfirm = true,
+            isWriteCapable = true,
         ),
         RootFeatureKey.TorchMultiLed to RootFeatureDescriptor(
             key = RootFeatureKey.TorchMultiLed,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
             requiresExplicitConfirm = false,
+            isWriteCapable = true,
         ),
         RootFeatureKey.TorchThermalOverride to RootFeatureDescriptor(
             key = RootFeatureKey.TorchThermalOverride,
             defaultOn = false,
             limit = RootLimitPolicy(window = 5.minutes, maxInvocations = SINGLE_INVOCATION_CAP),
             requiresExplicitConfirm = true,
+            isWriteCapable = true,
         ),
         RootFeatureKey.VibrationExtremeAmplitude to RootFeatureDescriptor(
             key = RootFeatureKey.VibrationExtremeAmplitude,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
             requiresExplicitConfirm = false,
+            isWriteCapable = true,
         ),
         RootFeatureKey.VibrationDirectPwm to RootFeatureDescriptor(
             key = RootFeatureKey.VibrationDirectPwm,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
             requiresExplicitConfirm = false,
+            isWriteCapable = true,
         ),
         RootFeatureKey.VibrationDualActuator to RootFeatureDescriptor(
             key = RootFeatureKey.VibrationDualActuator,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
             requiresExplicitConfirm = false,
+            isWriteCapable = true,
         ),
         RootFeatureKey.VibrationSustainedRumble to RootFeatureDescriptor(
             key = RootFeatureKey.VibrationSustainedRumble,
             defaultOn = false,
             limit = RootLimitPolicy(window = 5.minutes, maxInvocations = SINGLE_INVOCATION_CAP),
             requiresExplicitConfirm = true,
+            isWriteCapable = true,
         ),
 
         // ──── Batch-4 Camera features ────
@@ -138,6 +151,7 @@ class RootFeatureRegistry @Inject constructor() {
                 maxInvocations = SINGLE_INVOCATION_CAP,
             ),
             requiresExplicitConfirm = true,
+            isWriteCapable = true,
         ),
 
         // ──── Batch-4 Microphone features ────
@@ -146,6 +160,7 @@ class RootFeatureRegistry @Inject constructor() {
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
             requiresExplicitConfirm = false,
+            isWriteCapable = true,
         ),
         RootFeatureKey.MicDirectPcm to RootFeatureDescriptor(
             key = RootFeatureKey.MicDirectPcm,
@@ -170,6 +185,7 @@ class RootFeatureRegistry @Inject constructor() {
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
             requiresExplicitConfirm = false,
+            isWriteCapable = true,
         ),
         RootFeatureKey.MicSystemAudioCapture to RootFeatureDescriptor(
             key = RootFeatureKey.MicSystemAudioCapture,
@@ -179,6 +195,117 @@ class RootFeatureRegistry @Inject constructor() {
                 maxInvocations = EXTREME_OPS_LOW_CAP,
             ),
             requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+
+        // ──── Batch-5 Sensors features ────
+        RootFeatureKey.SensorsHighPolling to RootFeatureDescriptor(
+            key = RootFeatureKey.SensorsHighPolling,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.SensorsHighPollingExpert to RootFeatureDescriptor(
+            key = RootFeatureKey.SensorsHighPollingExpert,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = SENSORS_EXPERT_POLL_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.SensorsRawUnfiltered to RootFeatureDescriptor(
+            key = RootFeatureKey.SensorsRawUnfiltered,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.SensorsSysfsRead to RootFeatureDescriptor(
+            key = RootFeatureKey.SensorsSysfsRead,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.SensorsOverclock to RootFeatureDescriptor(
+            key = RootFeatureKey.SensorsOverclock,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = SENSORS_OVERCLOCK_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.SensorsFusionOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.SensorsFusionOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.SensorsHiddenEnumeration to RootFeatureDescriptor(
+            key = RootFeatureKey.SensorsHiddenEnumeration,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+
+        // ──── Batch-5 Battery features ────
+        RootFeatureKey.BatteryFuelGaugeRaw to RootFeatureDescriptor(
+            key = RootFeatureKey.BatteryFuelGaugeRaw,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.BatteryCellMonitor to RootFeatureDescriptor(
+            key = RootFeatureKey.BatteryCellMonitor,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.BatteryChargingProfile to RootFeatureDescriptor(
+            key = RootFeatureKey.BatteryChargingProfile,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = BATTERY_DANGEROUS_OPS_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.BatteryThermalBypass to RootFeatureDescriptor(
+            key = RootFeatureKey.BatteryThermalBypass,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = BATTERY_DANGEROUS_OPS_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.BatteryChargingTypeOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.BatteryChargingTypeOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.BatteryFullDump to RootFeatureDescriptor(
+            key = RootFeatureKey.BatteryFullDump,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = BATTERY_FULL_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
         ),
     )
 

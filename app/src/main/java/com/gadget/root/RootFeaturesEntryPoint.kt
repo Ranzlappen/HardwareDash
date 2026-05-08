@@ -1,7 +1,9 @@
 package com.gadget.root
 
+import com.gadget.battery.BatteryController
 import com.gadget.camera.CameraController
 import com.gadget.microphone.MicrophoneController
+import com.gadget.sensors.SensorsController
 import com.gadget.torch.TorchController
 import com.gadget.vibration.VibrationController
 import dagger.hilt.EntryPoint
@@ -26,4 +28,6 @@ interface RootFeaturesEntryPoint {
     fun vibrationController(): VibrationController
     fun cameraController(): CameraController
     fun microphoneController(): MicrophoneController
+    fun sensorsController(): SensorsController
+    fun batteryController(): BatteryController
 }

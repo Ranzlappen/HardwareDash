@@ -11,4 +11,6 @@ import kotlinx.coroutines.flow.flowOf
 class NoOpRootFeatureToggles : RootFeatureToggles {
     override fun isEnabled(feature: RootFeatureKey): Flow<Boolean> = flowOf(false)
     override suspend fun setEnabled(feature: RootFeatureKey, enabled: Boolean) = Unit
+    override fun isMonitorSafetyMode(): Flow<Boolean> = flowOf(false)
+    override suspend fun setMonitorSafetyMode(enabled: Boolean) = Unit
 }
