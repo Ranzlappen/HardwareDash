@@ -48,7 +48,7 @@ class RumbleMonitor @Inject constructor(
 
             val currentMicroAmps = batteryManager
                 .getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
-            readings.addLast(BatteryReading(now, currentMicroAmps))
+            readings.add(BatteryReading(now, currentMicroAmps))
             while (readings.isNotEmpty() && readings.first().timestampMs < now - RUMBLE_ROLLING_WINDOW_MS) {
                 readings.removeFirst()
             }
