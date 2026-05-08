@@ -1,6 +1,8 @@
 package com.gadget.root.core
 
 import android.content.Context
+import android.content.pm.PackageInfo
+import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,8 +32,8 @@ class MagiskProviderProbe @Inject constructor(
     }.getOrNull()
 }
 
-fun android.content.pm.PackageInfo.longVersionCodeCompat(): Long =
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+fun PackageInfo.longVersionCodeCompat(): Long =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         longVersionCode
     } else {
         @Suppress("DEPRECATION") versionCode.toLong()
