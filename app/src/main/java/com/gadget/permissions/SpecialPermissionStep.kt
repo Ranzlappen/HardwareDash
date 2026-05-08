@@ -34,7 +34,7 @@ data class SpecialPermissionStep(
                 id = "dnd_policy_access",
                 needsRequest = { ctx ->
                     val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    !nm.isNotificationPolicyAccessGranted
+                    nm.isNotificationPolicyAccessGranted.not()
                 },
                 buildIntent = {
                     Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
@@ -48,7 +48,7 @@ data class SpecialPermissionStep(
                         false
                     } else {
                         val pm = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
-                        !pm.isIgnoringBatteryOptimizations(ctx.packageName)
+                        pm.isIgnoringBatteryOptimizations(ctx.packageName).not()
                     }
                 },
                 buildIntent = { ctx ->
@@ -76,7 +76,7 @@ data class SpecialPermissionStep(
                 needsRequest = { ctx ->
                     val dpm = ctx.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
                     val component = ComponentName(ctx, "com.gadget.receivers.AdminReceiver")
-                    !dpm.isAdminActive(component)
+                    dpm.isAdminActive(component).not()
                 },
                 buildIntent = { ctx ->
                     val component = ComponentName(ctx, "com.gadget.receivers.AdminReceiver")
@@ -101,7 +101,7 @@ data class SpecialPermissionStep(
                         false
                     } else {
                         val am = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                        !am.canScheduleExactAlarms()
+                        am.canScheduleExactAlarms().not()
                     }
                 },
                 buildIntent = { ctx ->
