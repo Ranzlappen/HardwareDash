@@ -56,4 +56,30 @@ sealed class RootFeatureKey(val id: String) {
     data object BatteryThermalBypass : RootFeatureKey("battery_thermal_bypass")
     data object BatteryChargingTypeOverride : RootFeatureKey("battery_charging_type_override")
     data object BatteryFullDump : RootFeatureKey("battery_full_dump")
+
+    // ──── Batch-6 Wi-Fi features ────
+    data object WifiRfkillToggle : RootFeatureKey("wifi_rfkill_toggle")
+    data object WifiTxPowerOverride : RootFeatureKey("wifi_tx_power_override")
+    data object WifiChannelOverride : RootFeatureKey("wifi_channel_override")
+    data object WifiInjectionProbe : RootFeatureKey("wifi_injection_probe")
+
+    // ──── Batch-6 Bluetooth features ────
+    data object BluetoothRfkillToggle : RootFeatureKey("bluetooth_rfkill_toggle")
+    data object BluetoothTxPowerOverride : RootFeatureKey("bluetooth_tx_power_override")
+    data object BluetoothHciSnoopDump : RootFeatureKey("bluetooth_hci_snoop_dump")
+
+    // ──── Batch-6 NFC features ────
+    data object NfcRawNciCommand : RootFeatureKey("nfc_raw_nci_command")
+
+    // ──── Batch-6 IR features ────
+    data object IrCustomCarrier : RootFeatureKey("ir_custom_carrier")
+    data object IrRawGpioPattern : RootFeatureKey("ir_raw_gpio_pattern")
+
+    // ──── Batch-6 Cellular features ────
+    data object CellRawModemDump : RootFeatureKey("cell_raw_modem_dump")
+    data object CellSignalDeepDump : RootFeatureKey("cell_signal_deep_dump")
+
+    // ──── Batch-6 GPS features ────
+    data object GpsNmeaRawTap : RootFeatureKey("gps_nmea_raw_tap")
+    data object GpsConstellationDump : RootFeatureKey("gps_constellation_dump")
 }

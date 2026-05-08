@@ -20,6 +20,11 @@ private const val SENSORS_EXPERT_POLL_WINDOW_MINUTES = 5
 private const val BATTERY_DANGEROUS_OPS_WINDOW_MINUTES = 10
 private const val BATTERY_FULL_DUMP_WINDOW_SECONDS = 60
 
+private const val WIFI_REGULATORY_WINDOW_MINUTES = 5
+private const val BT_REGULATORY_WINDOW_MINUTES = 5
+private const val IR_BURST_WINDOW_SECONDS = 60
+private const val NFC_NCI_WINDOW_SECONDS = 60
+
 /**
  * Single source of truth mapping every [RootFeatureKey] to its
  * [RootFeatureDescriptor]. Both flavors read this; the standard flavor's
@@ -304,6 +309,131 @@ class RootFeatureRegistry @Inject constructor() {
                 window = BATTERY_FULL_DUMP_WINDOW_SECONDS.seconds,
                 maxInvocations = EXTREME_OPS_MED_CAP,
             ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+
+        // ──── Batch-6 Wi-Fi features ────
+        RootFeatureKey.WifiRfkillToggle to RootFeatureDescriptor(
+            key = RootFeatureKey.WifiRfkillToggle,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.WifiTxPowerOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.WifiTxPowerOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = WIFI_REGULATORY_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.WifiChannelOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.WifiChannelOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.WifiInjectionProbe to RootFeatureDescriptor(
+            key = RootFeatureKey.WifiInjectionProbe,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+
+        // ──── Batch-6 Bluetooth features ────
+        RootFeatureKey.BluetoothRfkillToggle to RootFeatureDescriptor(
+            key = RootFeatureKey.BluetoothRfkillToggle,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.BluetoothTxPowerOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.BluetoothTxPowerOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = BT_REGULATORY_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.BluetoothHciSnoopDump to RootFeatureDescriptor(
+            key = RootFeatureKey.BluetoothHciSnoopDump,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+
+        // ──── Batch-6 NFC features ────
+        RootFeatureKey.NfcRawNciCommand to RootFeatureDescriptor(
+            key = RootFeatureKey.NfcRawNciCommand,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = NFC_NCI_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+
+        // ──── Batch-6 IR features ────
+        RootFeatureKey.IrCustomCarrier to RootFeatureDescriptor(
+            key = RootFeatureKey.IrCustomCarrier,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = IR_BURST_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.IrRawGpioPattern to RootFeatureDescriptor(
+            key = RootFeatureKey.IrRawGpioPattern,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = IR_BURST_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+
+        // ──── Batch-6 Cellular features ────
+        RootFeatureKey.CellRawModemDump to RootFeatureDescriptor(
+            key = RootFeatureKey.CellRawModemDump,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.CellSignalDeepDump to RootFeatureDescriptor(
+            key = RootFeatureKey.CellSignalDeepDump,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+
+        // ──── Batch-6 GPS features ────
+        RootFeatureKey.GpsNmeaRawTap to RootFeatureDescriptor(
+            key = RootFeatureKey.GpsNmeaRawTap,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.GpsConstellationDump to RootFeatureDescriptor(
+            key = RootFeatureKey.GpsConstellationDump,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
             requiresExplicitConfirm = false,
             isWriteCapable = false,
         ),

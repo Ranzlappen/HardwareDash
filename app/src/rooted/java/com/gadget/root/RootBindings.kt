@@ -12,14 +12,26 @@ import com.gadget.root.launch.LaunchGate
 import com.gadget.root.launch.RootedLaunchGate
 import com.gadget.battery.BatteryController
 import com.gadget.battery.RootedBatteryController
+import com.gadget.bluetooth.BluetoothController
+import com.gadget.bluetooth.RootedBluetoothController
 import com.gadget.camera.CameraController
 import com.gadget.camera.RootedCameraController
+import com.gadget.cell.CellController
+import com.gadget.cell.RootedCellController
+import com.gadget.gps.GpsController
+import com.gadget.gps.RootedGpsController
+import com.gadget.ir.IrController
+import com.gadget.ir.RootedIrController
 import com.gadget.microphone.MicrophoneController
 import com.gadget.microphone.RootedMicrophoneController
+import com.gadget.nfc.NfcController
+import com.gadget.nfc.RootedNfcController
 import com.gadget.root.sysfs.RootedSysfsMutationLog
 import com.gadget.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.RootedSensorsController
 import com.gadget.sensors.SensorsController
+import com.gadget.wifi.RootedWifiController
+import com.gadget.wifi.WifiController
 import com.gadget.torch.RootedTorchController
 import com.gadget.torch.TorchController
 import com.gadget.vibration.RootedVibrationController
@@ -96,4 +108,24 @@ abstract class RootBindings {
 
     @Binds @Singleton
     abstract fun bindBatteryController(impl: RootedBatteryController): BatteryController
+
+    // ──── Batch 6: radios + connectivity controllers ────
+
+    @Binds @Singleton
+    abstract fun bindWifiController(impl: RootedWifiController): WifiController
+
+    @Binds @Singleton
+    abstract fun bindBluetoothController(impl: RootedBluetoothController): BluetoothController
+
+    @Binds @Singleton
+    abstract fun bindNfcController(impl: RootedNfcController): NfcController
+
+    @Binds @Singleton
+    abstract fun bindIrController(impl: RootedIrController): IrController
+
+    @Binds @Singleton
+    abstract fun bindCellController(impl: RootedCellController): CellController
+
+    @Binds @Singleton
+    abstract fun bindGpsController(impl: RootedGpsController): GpsController
 }

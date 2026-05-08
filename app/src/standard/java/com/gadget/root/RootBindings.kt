@@ -7,14 +7,26 @@ import com.gadget.root.core.RootShell
 import com.gadget.root.launch.LaunchGate
 import com.gadget.battery.BatteryController
 import com.gadget.battery.StandardBatteryController
+import com.gadget.bluetooth.BluetoothController
+import com.gadget.bluetooth.StandardBluetoothController
 import com.gadget.camera.CameraController
 import com.gadget.camera.StandardCameraController
+import com.gadget.cell.CellController
+import com.gadget.cell.StandardCellController
+import com.gadget.gps.GpsController
+import com.gadget.gps.StandardGpsController
+import com.gadget.ir.IrController
+import com.gadget.ir.StandardIrController
 import com.gadget.microphone.MicrophoneController
 import com.gadget.microphone.StandardMicrophoneController
+import com.gadget.nfc.NfcController
+import com.gadget.nfc.StandardNfcController
 import com.gadget.root.sysfs.StandardSysfsMutationLog
 import com.gadget.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.SensorsController
 import com.gadget.sensors.StandardSensorsController
+import com.gadget.wifi.StandardWifiController
+import com.gadget.wifi.WifiController
 import com.gadget.torch.StandardTorchController
 import com.gadget.torch.TorchController
 import com.gadget.vibration.StandardVibrationController
@@ -111,4 +123,30 @@ object RootBindings {
     @Provides
     @Singleton
     fun provideBatteryController(impl: StandardBatteryController): BatteryController = impl
+
+    // ──── Batch 6: radios + connectivity controllers ────
+
+    @Provides
+    @Singleton
+    fun provideWifiController(impl: StandardWifiController): WifiController = impl
+
+    @Provides
+    @Singleton
+    fun provideBluetoothController(impl: StandardBluetoothController): BluetoothController = impl
+
+    @Provides
+    @Singleton
+    fun provideNfcController(impl: StandardNfcController): NfcController = impl
+
+    @Provides
+    @Singleton
+    fun provideIrController(impl: StandardIrController): IrController = impl
+
+    @Provides
+    @Singleton
+    fun provideCellController(impl: StandardCellController): CellController = impl
+
+    @Provides
+    @Singleton
+    fun provideGpsController(impl: StandardGpsController): GpsController = impl
 }

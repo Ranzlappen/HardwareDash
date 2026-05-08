@@ -50,6 +50,12 @@ import com.google.accompanist.permissions.*
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.root.ui.BluetoothRootExtrasSection
+import com.gadget.root.ui.CellRootExtrasSection
+import com.gadget.root.ui.GpsRootExtrasSection
+import com.gadget.root.ui.IrRootExtrasSection
+import com.gadget.root.ui.NfcRootExtrasSection
+import com.gadget.root.ui.WifiRootExtrasSection
 import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.services.NfcEmulationService
@@ -772,6 +778,10 @@ fun RadiosScreen() {
             }
         }
 
+        WifiRootExtrasSection()
+        BluetoothRootExtrasSection()
+        CellRootExtrasSection()
+
         HorizontalDivider()
 
         // ── NFC section ───────────────────────────────────────────────────────
@@ -1280,6 +1290,8 @@ fun RadiosScreen() {
             }
         }
 
+        NfcRootExtrasSection()
+
         HorizontalDivider()
 
         // ── Infrared section ─────────────────────────────────────────────────
@@ -1561,6 +1573,8 @@ fun RadiosScreen() {
                 },
             )
         }
+
+        IrRootExtrasSection()
 
         HorizontalDivider()
 
@@ -1968,6 +1982,8 @@ fun RadiosScreen() {
                 }
             }
         }
+
+        GpsRootExtrasSection()
 
         HorizontalDivider()
 
