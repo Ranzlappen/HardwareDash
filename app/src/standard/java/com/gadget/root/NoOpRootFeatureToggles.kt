@@ -14,4 +14,6 @@ class NoOpRootFeatureToggles : RootFeatureToggles {
     override fun isMonitorSafetyMode(): Flow<Boolean> = flowOf(false)
     override suspend fun setMonitorSafetyMode(enabled: Boolean) = Unit
     override suspend fun resetAllToDefault(): Int = 0
+    override fun isRootedAcknowledged(): Flow<Boolean> = flowOf(true)
+    override suspend fun setRootedAcknowledged(acknowledged: Boolean) = Unit
 }

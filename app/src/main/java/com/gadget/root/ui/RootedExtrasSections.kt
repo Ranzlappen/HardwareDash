@@ -17,8 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gadget.localization.LocalizationManager
+import com.gadget.localization.S
 import com.gadget.torch.TorchControllerResult
 import com.gadget.vibration.PwmPulse
 import com.gadget.vibration.VibrationControllerResult
@@ -59,8 +62,11 @@ fun TorchRootExtrasSection(modifier: Modifier = Modifier) {
 
     val torch = entryPoint.torchController()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val lang = LocalizationManager.loadLanguage(context)
     var status by remember { mutableStateOf<String?>(null) }
 
+    RootExtrasDisclaimerCard(text = S.RootExtrasGenericDisclaimer.text(lang))
     Card(
         modifier = modifier.fillMaxWidth().padding(8.dp),
         colors = CardDefaults.cardColors(
@@ -141,6 +147,8 @@ fun VibrationRootExtrasSection(modifier: Modifier = Modifier) {
 
     val vibration = entryPoint.vibrationController()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val lang = LocalizationManager.loadLanguage(context)
     var status by remember { mutableStateOf<String?>(null) }
 
     val pwmPattern = remember {
@@ -153,6 +161,7 @@ fun VibrationRootExtrasSection(modifier: Modifier = Modifier) {
         List(DEMO_DUAL_PULSE_COUNT) { PwmPulse(DEMO_DUAL_PULSE_ON_US * 2, DEMO_DUAL_PULSE_OFF_US * 2) }
     }
 
+    RootExtrasDisclaimerCard(text = S.RootExtrasGenericDisclaimer.text(lang))
     Card(
         modifier = modifier.fillMaxWidth().padding(8.dp),
         colors = CardDefaults.cardColors(

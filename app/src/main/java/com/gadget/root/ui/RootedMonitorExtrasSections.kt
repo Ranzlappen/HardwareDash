@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.battery.BatteryControllerResult
@@ -26,6 +27,8 @@ import com.gadget.battery.ChargingTypeOverrideConfig
 import com.gadget.battery.HoldSocConfig
 import com.gadget.battery.ThermalBypassConfig
 import com.gadget.battery.WirelessCoilCurrentConfig
+import com.gadget.localization.LocalizationManager
+import com.gadget.localization.S
 import com.gadget.sensors.FusionOverrideConfig
 import com.gadget.sensors.HighPollingConfig
 import com.gadget.sensors.OverclockConfig
@@ -44,8 +47,8 @@ private const val DEMO_SENSOR_OVERCLOCK_REG = 0x19
 private const val DEMO_SENSOR_OVERCLOCK_VALUE = 0x07
 private const val DEMO_SENSOR_OVERCLOCK_DURATION_MS = 8_000L
 
-private const val DEMO_BATTERY_CHARGING_CURRENT_MICROAMPS = 2_000_000L
-private const val DEMO_BATTERY_CHARGING_VOLTAGE_MICROVOLTS = 4_400_000L
+private const val DEMO_BATTERY_CHARGING_CURRENT_MICROAMPS = 1_500_000L
+private const val DEMO_BATTERY_CHARGING_VOLTAGE_MICROVOLTS = 4_200_000L
 private const val DEMO_BATTERY_CHARGING_DURATION_MS = 10_000L
 private const val DEMO_BATTERY_THERMAL_DURATION_MS = 10_000L
 private const val DEMO_BATTERY_USB_TYPE = "USB_DCP"
@@ -72,8 +75,11 @@ fun SensorsRootExtrasSection(modifier: Modifier = Modifier) {
 
     val sensors = entryPoint.sensorsController()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val lang = LocalizationManager.loadLanguage(context)
     var status by remember { mutableStateOf<String?>(null) }
 
+    RootExtrasDisclaimerCard(text = S.RootExtrasGenericDisclaimer.text(lang))
     Card(
         modifier = modifier.fillMaxWidth().padding(8.dp),
         colors = CardDefaults.cardColors(
@@ -191,8 +197,11 @@ fun BatteryRootExtrasSection(modifier: Modifier = Modifier) {
 
     val battery = entryPoint.batteryController()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val lang = LocalizationManager.loadLanguage(context)
     var status by remember { mutableStateOf<String?>(null) }
 
+    RootExtrasDisclaimerCard(text = S.RootExtrasGenericDisclaimer.text(lang))
     Card(
         modifier = modifier.fillMaxWidth().padding(8.dp),
         colors = CardDefaults.cardColors(

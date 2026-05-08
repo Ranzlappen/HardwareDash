@@ -15,6 +15,8 @@ import androidx.datastore.preferences.core.longPreferencesKey
 object RootPrefKeys {
     val MasterEnabled = booleanPreferencesKey("root_master_enabled")
     val MonitorSafetyMode = booleanPreferencesKey("root_monitor_safety_mode")
+    val MasterSafetyInitialized = booleanPreferencesKey("root_master_safety_initialized")
+    val RootedAcknowledged = booleanPreferencesKey("root_rooted_acknowledged")
 
     fun featureEnabledKey(feature: RootFeatureKey) =
         booleanPreferencesKey("root_feat_enabled_${feature.id}")

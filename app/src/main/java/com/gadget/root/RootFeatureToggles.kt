@@ -23,7 +23,9 @@ interface RootFeatureToggles {
      * Single master switch for the rooted-monitor surface. When ON, the
      * safety gate short-circuits every descriptor flagged `isWriteCapable`,
      * leaving read-only diagnostics (sysfs reads, sensor enumeration, fuel
-     * gauge dumps) fully usable. Default OFF.
+     * gauge dumps) fully usable. Defaults ON for new rooted installs; the
+     * standard flavor's no-op impl keeps this `false` so standard APK
+     * behaviour is unchanged.
      */
     fun isMonitorSafetyMode(): Flow<Boolean>
     suspend fun setMonitorSafetyMode(enabled: Boolean)
@@ -37,4 +39,13 @@ interface RootFeatureToggles {
      * 0).
      */
     suspend fun resetAllToDefault(): Int
+
+    /**
+     * One-shot acknowledgement of the rooted-mode legal notice. Read
+     * once when SettingsScreen mounts; the first-launch overlay blocks
+     * interaction until the user taps "I understand". Standard flavor
+     * always reports `true` so no overlay is ever shown there.
+     */
+    fun isRootedAcknowledged(): Flow<Boolean>
+    suspend fun setRootedAcknowledged(acknowledged: Boolean)
 }

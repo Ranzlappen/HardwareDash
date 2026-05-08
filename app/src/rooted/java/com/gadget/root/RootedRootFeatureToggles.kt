@@ -34,7 +34,7 @@ class RootedRootFeatureToggles @Inject constructor(
     }
 
     override fun isMonitorSafetyMode(): Flow<Boolean> =
-        dataStore.data.map { prefs -> prefs[RootPrefKeys.MonitorSafetyMode] ?: false }
+        dataStore.data.map { prefs -> prefs[RootPrefKeys.MonitorSafetyMode] ?: true }
 
     override suspend fun setMonitorSafetyMode(enabled: Boolean) {
         dataStore.edit { mutable ->
@@ -57,5 +57,14 @@ class RootedRootFeatureToggles @Inject constructor(
             }
         }
         return cleared
+    }
+
+    override fun isRootedAcknowledged(): Flow<Boolean> =
+        dataStore.data.map { prefs -> prefs[RootPrefKeys.RootedAcknowledged] ?: false }
+
+    override suspend fun setRootedAcknowledged(acknowledged: Boolean) {
+        dataStore.edit { mutable ->
+            mutable[RootPrefKeys.RootedAcknowledged] = acknowledged
+        }
     }
 }

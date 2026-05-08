@@ -1781,13 +1781,312 @@ object S {
             lang,
             "This is the safety net for the rooted-features split. Use it whenever " +
                 "you suspect a privileged operation has left the device in a weird " +
-                "state.",
+                "state. Use at your own risk; the developer assumes no liability for " +
+                "any hardware, software, data, or regulatory damage.",
             "Dies ist das Sicherheitsnetz fuer den Root-Features-Split. Bei verdaechtigem " +
-                "Geraetezustand nach privilegierten Operationen anwenden.",
+                "Geraetezustand nach privilegierten Operationen anwenden. Nutzung auf " +
+                "eigene Gefahr; der Entwickler uebernimmt keine Haftung fuer Hardware-, " +
+                "Software-, Daten- oder regulatorische Schaeden.",
             "Esta es la red de seguridad para la separacion de funciones root. Usalo si " +
-                "una operacion privilegiada deja el dispositivo en un estado raro.",
+                "una operacion privilegiada deja el dispositivo en un estado raro. Uso " +
+                "bajo tu propio riesgo; el desarrollador no asume responsabilidad por " +
+                "danos de hardware, software, datos o regulatorios.",
             "C'est le filet de securite pour la separation des fonctions root. A utiliser " +
-                "si une operation privilegiee laisse l'appareil dans un etat bizarre.",
+                "si une operation privilegiee laisse l'appareil dans un etat bizarre. " +
+                "Utilisation a vos propres risques ; le developpeur n'assume aucune " +
+                "responsabilite pour les dommages materiels, logiciels, de donnees ou " +
+                "reglementaires.",
+        )
+    }
+
+    // Batch-11: Rooted-mode permanent legal notice (Card on SettingsScreen)
+    object RootedLegalNotice {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Rooted mode — legal notice",
+            "Root-Modus — rechtlicher Hinweis",
+            "Modo root — aviso legal",
+            "Mode root — avis legal",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "The privileged operations exposed by this app can damage your device " +
+                "hardware or OS, void your warranty, and may violate radio regulations " +
+                "in your jurisdiction. Use at your own risk. The developer assumes no " +
+                "liability for any hardware, software, data, or regulatory damage " +
+                "resulting from use of these features. The Emergency Reset above " +
+                "reverts every tracked privileged write but cannot undo physical " +
+                "hardware damage.",
+            "Die privilegierten Operationen dieser App koennen Hardware oder OS " +
+                "beschaedigen, die Garantie aufheben und gegen Funkregulierungen in " +
+                "Ihrer Region verstossen. Nutzung auf eigene Gefahr. Der Entwickler " +
+                "uebernimmt keine Haftung fuer Hardware-, Software-, Daten- oder " +
+                "regulatorische Schaeden. Der Notfall-Reset oben setzt verfolgte " +
+                "Schreibzugriffe zurueck, kann aber keine physischen Schaeden " +
+                "rueckgaengig machen.",
+            "Las operaciones privilegiadas que expone esta app pueden danar el hardware " +
+                "o el OS, anular la garantia y violar las regulaciones de radio en tu " +
+                "jurisdiccion. Uso bajo tu propio riesgo. El desarrollador no asume " +
+                "responsabilidad por danos de hardware, software, datos o regulatorios. " +
+                "El Reset de emergencia revierte cada escritura registrada pero no puede " +
+                "deshacer danos fisicos.",
+            "Les operations privilegiees exposees par cette app peuvent endommager le " +
+                "materiel ou l'OS, annuler la garantie et violer les regulations radio " +
+                "de votre juridiction. Utilisation a vos propres risques. Le developpeur " +
+                "n'assume aucune responsabilite pour les dommages materiels, logiciels, " +
+                "de donnees ou reglementaires. La Reinitialisation d'urgence revoque " +
+                "toutes les ecritures enregistrees mais ne peut pas annuler les dommages " +
+                "physiques.",
+        )
+    }
+
+    // Batch-11: First-launch acknowledgement modal (one-shot, persisted)
+    object RootedFirstAck {
+        fun dialogTitle(lang: Language) = m(
+            lang,
+            "Acknowledge rooted-mode risks",
+            "Root-Modus-Risiken bestaetigen",
+            "Confirmar riesgos del modo root",
+            "Reconnaitre les risques du mode root",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Before using any rooted feature, confirm that you understand: " +
+                "(1) privileged writes can damage hardware, the OS, and your data; " +
+                "(2) some operations may violate FCC/ETSI/MIC radio regulations in " +
+                "your jurisdiction; (3) use of these features may void your warranty; " +
+                "(4) the developer assumes no liability for any damage resulting from " +
+                "use of these features. Tap I understand to continue.",
+            "Vor der Nutzung einer Root-Funktion bestaetigen Sie: " +
+                "(1) privilegierte Schreibvorgaenge koennen Hardware, OS und Daten " +
+                "beschaedigen; (2) einige Operationen verstossen moeglicherweise gegen " +
+                "FCC/ETSI/MIC-Funkregulierungen Ihrer Region; (3) die Nutzung kann die " +
+                "Garantie aufheben; (4) der Entwickler uebernimmt keine Haftung. " +
+                "Tippen Sie auf 'Verstanden' zum Fortfahren.",
+            "Antes de usar funciones root, confirma que entiendes: " +
+                "(1) las escrituras privilegiadas pueden danar hardware, OS y datos; " +
+                "(2) algunas operaciones pueden violar regulaciones FCC/ETSI/MIC; " +
+                "(3) el uso puede anular la garantia; (4) el desarrollador no asume " +
+                "responsabilidad. Pulsa Entendido para continuar.",
+            "Avant d'utiliser une fonction root, confirmez que vous comprenez : " +
+                "(1) les ecritures privilegiees peuvent endommager le materiel, l'OS " +
+                "et les donnees ; (2) certaines operations peuvent violer les " +
+                "regulations FCC/ETSI/MIC ; (3) l'usage peut annuler la garantie ; " +
+                "(4) le developpeur n'assume aucune responsabilite. Touchez 'Compris' " +
+                "pour continuer.",
+        )
+        fun acknowledge(lang: Language) = m(
+            lang,
+            "I understand",
+            "Verstanden",
+            "Entendido",
+            "Compris",
+        )
+    }
+
+    // Batch-11: Per-toggle risk dialog when requiresExplicitConfirm = true
+    object RootFeatureRisk {
+        fun dialogTitle(lang: Language) = m(
+            lang,
+            "Confirm hardware risk",
+            "Hardware-Risiko bestaetigen",
+            "Confirmar riesgo de hardware",
+            "Confirmer le risque materiel",
+        )
+        fun confirmEnable(lang: Language) = m(
+            lang,
+            "Enable",
+            "Aktivieren",
+            "Activar",
+            "Activer",
+        )
+        fun cancel(lang: Language) = m(
+            lang,
+            "Cancel",
+            "Abbrechen",
+            "Cancelar",
+            "Annuler",
+        )
+
+        fun thermal(lang: Language) = m(
+            lang,
+            "Sustained over-cap operation can damage LEDs, panels, motors, or the " +
+                "battery, and trigger thermal runaway. Use only briefly and watch " +
+                "device temperature.",
+            "Anhaltender Betrieb ueber den Werks-Limits kann LEDs, Panels, Motoren " +
+                "oder den Akku beschaedigen und thermisches Durchgehen ausloesen. Nur " +
+                "kurz benutzen und Geraetetemperatur beobachten.",
+            "El funcionamiento sostenido sobre los limites puede danar LEDs, paneles, " +
+                "motores o la bateria, y causar fuga termica. Usalo brevemente y " +
+                "vigila la temperatura del dispositivo.",
+            "Un fonctionnement soutenu au-dessus des limites peut endommager LEDs, " +
+                "ecrans, moteurs ou la batterie et provoquer un emballement thermique. " +
+                "A utiliser brievement en surveillant la temperature.",
+        )
+        fun batteryCell(lang: Language) = m(
+            lang,
+            "Direct charging-IC and fuel-gauge writes can damage cells, cause " +
+                "swelling or thermal runaway, and void the warranty. The chosen " +
+                "values may exceed OEM-validated limits.",
+            "Direkte Schreibvorgaenge auf Charging-IC und Fuel-Gauge koennen Zellen " +
+                "beschaedigen, Aufblaehung oder thermisches Durchgehen verursachen und " +
+                "die Garantie aufheben. Die Werte koennen OEM-Limits ueberschreiten.",
+            "Las escrituras directas al IC de carga y al fuel-gauge pueden danar " +
+                "celdas, causar hinchazon o fuga termica, y anular la garantia. Los " +
+                "valores pueden exceder los limites validados por el OEM.",
+            "Les ecritures directes sur l'IC de charge et le fuel-gauge peuvent " +
+                "endommager les cellules, causer un gonflement ou un emballement " +
+                "thermique et annuler la garantie. Les valeurs peuvent depasser les " +
+                "limites validees par l'OEM.",
+        )
+        fun hearing(lang: Language) = m(
+            lang,
+            "Bypassing safe-listening volume caps and microphone gain limits can " +
+                "cause permanent hearing loss within minutes. Remove headphones " +
+                "before enabling.",
+            "Das Umgehen von Lautstaerke- und Mikrofonverstaerkungsgrenzen kann " +
+                "innerhalb von Minuten dauerhafte Hoerschaeden verursachen. Vor " +
+                "dem Aktivieren Kopfhoerer abnehmen.",
+            "Saltarse los limites de volumen y de ganancia del microfono puede " +
+                "causar perdida auditiva permanente en minutos. Quitate los " +
+                "auriculares antes de activarlo.",
+            "Le contournement des limites de volume et de gain du microphone peut " +
+                "causer une perte auditive permanente en quelques minutes. Retirez " +
+                "les ecouteurs avant d'activer.",
+        )
+        fun sensorIntegrity(lang: Language) = m(
+            lang,
+            "Direct IIO/i2c writes and fusion-override may corrupt sensor " +
+                "calibration data and the readings of every other app on the " +
+                "device until reboot.",
+            "Direkte IIO/i2c-Schreibvorgaenge und Fusion-Override koennen die " +
+                "Sensor-Kalibrierung und die Werte aller anderen Apps bis zum " +
+                "Neustart beschaedigen.",
+            "Las escrituras directas IIO/i2c y la sobrescritura de fusion pueden " +
+                "corromper la calibracion de sensores y las lecturas de las demas " +
+                "apps hasta reiniciar.",
+            "Les ecritures directes IIO/i2c et la surcharge de fusion peuvent " +
+                "corrompre l'etalonnage des capteurs et les lectures des autres " +
+                "applications jusqu'au redemarrage.",
+        )
+        fun radioRegulatory(lang: Language) = m(
+            lang,
+            "TX-power, channel, frequency, and rfkill changes may violate FCC, " +
+                "ETSI, or MIC regulations. Use only on hardware you own and outside " +
+                "protected radio bands.",
+            "Aenderungen an Sendeleistung, Kanal, Frequenz und rfkill koennen gegen " +
+                "FCC, ETSI oder MIC verstossen. Nur auf eigener Hardware und " +
+                "ausserhalb geschuetzter Baender verwenden.",
+            "Los cambios de potencia TX, canal, frecuencia y rfkill pueden violar " +
+                "FCC, ETSI o MIC. Usalos solo en tu propio hardware y fuera de " +
+                "bandas protegidas.",
+            "Les modifications de puissance TX, canal, frequence et rfkill peuvent " +
+                "violer la FCC, l'ETSI ou la MIC. A utiliser uniquement sur du " +
+                "materiel vous appartenant, hors des bandes protegees.",
+        )
+        fun storageNonReversible(lang: Language) = m(
+            lang,
+            "fstrim and drop_caches are intrinsically non-reversible. Active I/O " +
+                "may stall briefly; data loss is unlikely but possible if storage " +
+                "is failing.",
+            "fstrim und drop_caches sind nicht rueckgaengig zu machen. Aktive I/O " +
+                "kann kurz blockieren; Datenverlust ist unwahrscheinlich, aber " +
+                "moeglich bei defektem Speicher.",
+            "fstrim y drop_caches son intrinsecamente irreversibles. La E/S activa " +
+                "puede pausarse brevemente; la perdida de datos es improbable pero " +
+                "posible si el almacenamiento falla.",
+            "fstrim et drop_caches sont intrinsequement irreversibles. Les E/S " +
+                "actives peuvent se bloquer brievement ; la perte de donnees est " +
+                "peu probable mais possible si le stockage est defaillant.",
+        )
+        fun uxDeadlock(lang: Language) = m(
+            lang,
+            "Doze-bypass, sticky overlays, and lock-screen overrides can lock the " +
+                "UI, drain the battery quickly, or block notification dismissal " +
+                "until reboot.",
+            "Doze-Bypass, persistente Overlays und Lock-Screen-Overrides koennen " +
+                "die UI sperren, den Akku schnell entladen oder das Schliessen von " +
+                "Benachrichtigungen bis zum Neustart blockieren.",
+            "El bypass de doze, los overlays fijos y la sobrescritura del lock " +
+                "screen pueden bloquear la UI, descargar la bateria rapido, o " +
+                "impedir descartar notificaciones hasta reiniciar.",
+            "Le contournement de doze, les overlays persistants et les surcharges " +
+                "de l'ecran de verrouillage peuvent bloquer l'UI, vider la batterie " +
+                "rapidement ou empecher de fermer les notifications jusqu'au " +
+                "redemarrage.",
+        )
+        fun attackSurface(lang: Language) = m(
+            lang,
+            "Enabling ADB, ADB-over-network, USB role switches, or setprop " +
+                "overrides exposes the device to USB and Wi-Fi attackers and may " +
+                "break MTP transfer.",
+            "ADB, ADB-uebers-Netzwerk, USB-Rollenwechsel und setprop-Overrides " +
+                "setzen das Geraet USB- und Wi-Fi-Angreifern aus und koennen MTP " +
+                "stoeren.",
+            "Activar ADB, ADB-por-red, cambios de funcion USB o overrides setprop " +
+                "expone el dispositivo a atacantes USB y Wi-Fi y puede romper la " +
+                "transferencia MTP.",
+            "Activer ADB, ADB-sur-reseau, le changement de role USB ou les " +
+                "surcharges setprop expose l'appareil aux attaquants USB et Wi-Fi " +
+                "et peut casser le transfert MTP.",
+        )
+        fun infoDisclosure(lang: Language) = m(
+            lang,
+            "The logcat radio buffer can include IMSI fragments, cell-tower IDs, " +
+                "and other privacy-sensitive data. Snapshots land in the Logbook " +
+                "if you opt in.",
+            "Der logcat-Radio-Puffer kann IMSI-Fragmente, Funkzellen-IDs und " +
+                "andere datenschutzrelevante Daten enthalten. Snapshots landen im " +
+                "Logbuch, wenn aktiviert.",
+            "El buffer radio de logcat puede contener fragmentos IMSI, IDs de " +
+                "antenas y otros datos sensibles. Los snapshots se guardan en " +
+                "Logbook si se opta.",
+            "Le buffer radio de logcat peut contenir des fragments IMSI, des IDs " +
+                "d'antennes et d'autres donnees sensibles. Les snapshots sont " +
+                "enregistres dans Logbook si opt-in.",
+        )
+        fun generic(lang: Language) = m(
+            lang,
+            "Privileged operation. May cause hardware or OS damage, void the " +
+                "warranty, or violate local regulations. Read the feature " +
+                "description before enabling.",
+            "Privilegierte Operation. Kann Hardware oder OS beschaedigen, die " +
+                "Garantie aufheben oder lokale Vorschriften verletzen. Vor dem " +
+                "Aktivieren die Feature-Beschreibung lesen.",
+            "Operacion privilegiada. Puede danar hardware u OS, anular la " +
+                "garantia o violar regulaciones locales. Lee la descripcion del " +
+                "feature antes de activarlo.",
+            "Operation privilegiee. Peut endommager le materiel ou l'OS, annuler " +
+                "la garantie ou violer les regulations locales. Lisez la " +
+                "description avant d'activer.",
+        )
+    }
+
+    // Batch-11: Generic disclaimer Card text shared by Torch / Vibration /
+    // Sensors / Battery / Camera / Microphone rooted extras Cards.
+    object RootExtrasGenericDisclaimer {
+        fun text(lang: Language) = m(
+            lang,
+            "Direct privileged hardware access. Each call is rate-limited and " +
+                "requires the matching feature to be enabled in Settings, which " +
+                "in turn requires the Master Safety Mode to be off and a per-feature " +
+                "confirmation. Use at your own risk; the developer assumes no " +
+                "liability.",
+            "Direkter privilegierter Hardware-Zugriff. Jeder Aufruf ist " +
+                "ratenbegrenzt und setzt voraus, dass das Feature in den Einstellungen " +
+                "aktiviert ist; das wiederum setzt voraus, dass der Master-Safety-Modus " +
+                "aus ist und eine Pro-Feature-Bestaetigung vorliegt. Nutzung auf " +
+                "eigene Gefahr; der Entwickler uebernimmt keine Haftung.",
+            "Acceso directo privilegiado al hardware. Cada llamada esta limitada y " +
+                "requiere que el feature este activado en Settings, lo cual a su vez " +
+                "requiere que el Modo Master de Seguridad este OFF y una confirmacion " +
+                "por feature. Uso bajo tu propio riesgo; sin responsabilidad del " +
+                "desarrollador.",
+            "Acces materiel privilegie direct. Chaque appel est limite et necessite " +
+                "que la fonctionnalite soit activee dans les Reglages, ce qui necessite " +
+                "que le Mode Securite Maitre soit desactive et une confirmation par " +
+                "fonctionnalite. Utilisation a vos propres risques ; le developpeur " +
+                "n'assume aucune responsabilite.",
         )
     }
 }

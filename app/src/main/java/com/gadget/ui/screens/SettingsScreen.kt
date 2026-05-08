@@ -38,6 +38,8 @@ import com.gadget.root.RootFeaturesEntryPoint
 import com.gadget.root.ui.AdbDebuggingRootExtrasSection
 import com.gadget.root.ui.EmergencyResetCard
 import com.gadget.root.ui.RootedFeatureTogglesCard
+import com.gadget.root.ui.RootedFirstAckDialog
+import com.gadget.root.ui.RootedLegalNoticeCard
 import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
@@ -85,6 +87,11 @@ fun SettingsScreen() {
     val coroutineScope = rememberCoroutineScope()
 
     ScreenAnnouncement(S.accessibility.settingsScreen)
+
+    // First-launch rooted-mode acknowledgement overlay. No-op on standard
+    // (NoOpRootFeatureToggles reports acknowledged = true); fires once on
+    // rooted+root-granted+!ack and persists the flag on confirm.
+    RootedFirstAckDialog()
 
     // BackupManager via Hilt entry point
     val backupManager = remember {
@@ -711,6 +718,19 @@ fun SettingsScreen() {
         HorizontalDivider()
 
         // ══════════════════════════════════════════════════════════════════
+        // SECTION 6.6 — Batch-10 global Emergency Reset (rooted-only).
+        //             Promoted to top of rooted area in Batch 11 so the
+        //             safety net is the first thing visible when scrolling
+        //             into rooted territory.
+        // ══════════════════════════════════════════════════════════════════
+        EmergencyResetCard()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 6.7 — Permanent rooted-mode legal notice (Batch 11).
+        // ══════════════════════════════════════════════════════════════════
+        RootedLegalNoticeCard()
+
+        // ══════════════════════════════════════════════════════════════════
         // SECTION 7 — Rooted feature toggles (rendered only on rooted flavor
         //             with root granted; otherwise the composable is empty)
         // ══════════════════════════════════════════════════════════════════
@@ -720,13 +740,6 @@ fun SettingsScreen() {
         // SECTION 8 — Batch-9 ADB Debugging root extras (rooted-only)
         // ══════════════════════════════════════════════════════════════════
         AdbDebuggingRootExtrasSection()
-
-        // ══════════════════════════════════════════════════════════════════
-        // SECTION 9 — Batch-10 global Emergency Reset (rooted-only). Sits
-        //             at the bottom so it's the last thing the user can
-        //             reach when scrolling to recover from a bad state.
-        // ══════════════════════════════════════════════════════════════════
-        EmergencyResetCard()
     }
 }
 

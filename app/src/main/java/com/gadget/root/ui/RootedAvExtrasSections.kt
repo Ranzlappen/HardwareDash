@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.camera.CameraControllerResult
@@ -27,6 +28,8 @@ import com.gadget.camera.HighFpsConfig
 import com.gadget.camera.ManualExposureConfig
 import com.gadget.camera.MultiCameraConfig
 import com.gadget.camera.RawCaptureConfig
+import com.gadget.localization.LocalizationManager
+import com.gadget.localization.S
 import com.gadget.microphone.DirectPcmConfig
 import com.gadget.microphone.GainBoostConfig
 import com.gadget.microphone.MicrophoneControllerResult
@@ -79,6 +82,8 @@ private fun CameraExtrasDialog(onDismiss: () -> Unit) {
     val entryPoint = rememberRootFeatures()
     val camera = entryPoint.cameraController()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val lang = LocalizationManager.loadLanguage(context)
     var status by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
@@ -90,6 +95,11 @@ private fun CameraExtrasDialog(onDismiss: () -> Unit) {
                     text = "Direct Camera2 / HAL access. Each call is rate-limited and " +
                         "requires the matching feature to be enabled in Settings.",
                     style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    text = S.RootExtrasGenericDisclaimer.text(lang),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
                 )
                 Button(
                     modifier = Modifier.fillMaxWidth(),
@@ -189,8 +199,11 @@ fun MicrophoneRootExtrasSection(modifier: Modifier = Modifier) {
 
     val mic = entryPoint.microphoneController()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val lang = LocalizationManager.loadLanguage(context)
     var status by remember { mutableStateOf<String?>(null) }
 
+    RootExtrasDisclaimerCard(text = S.RootExtrasGenericDisclaimer.text(lang))
     Card(
         modifier = modifier.fillMaxWidth().padding(8.dp),
         colors = CardDefaults.cardColors(

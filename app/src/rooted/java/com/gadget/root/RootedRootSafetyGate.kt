@@ -35,7 +35,7 @@ class RootedRootSafetyGate @Inject constructor(
         val descriptor = featureRegistry.descriptor(feature)
         val prefs = dataStore.data.first()
 
-        if (descriptor.isWriteCapable && (prefs[RootPrefKeys.MonitorSafetyMode] == true)) {
+        if (descriptor.isWriteCapable && (prefs[RootPrefKeys.MonitorSafetyMode] ?: true)) {
             return RootGateDecision.BlockedByUser
         }
 

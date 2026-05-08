@@ -96,7 +96,7 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.TorchMultiLed,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.TorchThermalOverride to RootFeatureDescriptor(
@@ -110,21 +110,21 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.VibrationExtremeAmplitude,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.VibrationDirectPwm to RootFeatureDescriptor(
             key = RootFeatureKey.VibrationDirectPwm,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.VibrationDualActuator to RootFeatureDescriptor(
             key = RootFeatureKey.VibrationDualActuator,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.VibrationSustainedRumble to RootFeatureDescriptor(
@@ -191,7 +191,7 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.MicGainBoost,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.MicDirectPcm to RootFeatureDescriptor(
@@ -216,7 +216,7 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.MicNoiseFloorOverride,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.MicSystemAudioCapture to RootFeatureDescriptor(
@@ -235,7 +235,7 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.SensorsHighPolling,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.SensorsHighPollingExpert to RootFeatureDescriptor(
@@ -252,7 +252,7 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.SensorsRawUnfiltered,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.SensorsSysfsRead to RootFeatureDescriptor(
@@ -276,7 +276,7 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.SensorsFusionOverride,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.SensorsHiddenEnumeration to RootFeatureDescriptor(
@@ -326,7 +326,7 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.BatteryChargingTypeOverride,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.BatteryFullDump to RootFeatureDescriptor(
@@ -345,7 +345,7 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.WifiRfkillToggle,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.WifiTxPowerOverride to RootFeatureDescriptor(
@@ -378,7 +378,7 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.BluetoothRfkillToggle,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.BluetoothTxPowerOverride to RootFeatureDescriptor(
@@ -502,7 +502,7 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.NotificationStickyOverride,
             defaultOn = false,
             limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.NotificationListenerAccess to RootFeatureDescriptor(
@@ -534,7 +534,7 @@ class RootFeatureRegistry @Inject constructor() {
                 window = KEEPALIVE_PRIVILEGED_WINDOW_MINUTES.minutes,
                 maxInvocations = SINGLE_INVOCATION_CAP,
             ),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.KeepAlivePmGrant to RootFeatureDescriptor(
@@ -608,7 +608,7 @@ class RootFeatureRegistry @Inject constructor() {
                 window = DISPLAY_OVERRIDE_WINDOW_SECONDS.seconds,
                 maxInvocations = EXTREME_OPS_LOW_CAP,
             ),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.DisplayDensityOverride to RootFeatureDescriptor(
@@ -650,7 +650,7 @@ class RootFeatureRegistry @Inject constructor() {
                 window = AUDIO_ROUTING_WINDOW_SECONDS.seconds,
                 maxInvocations = EXTREME_OPS_LOW_CAP,
             ),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.AudioMuteAllStreams to RootFeatureDescriptor(
@@ -714,7 +714,7 @@ class RootFeatureRegistry @Inject constructor() {
                 window = ADB_TOGGLE_WINDOW_SECONDS.seconds,
                 maxInvocations = EXTREME_OPS_LOW_CAP,
             ),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.AdbOverNetwork to RootFeatureDescriptor(
@@ -756,7 +756,7 @@ class RootFeatureRegistry @Inject constructor() {
                 window = USB_FUNCTION_WINDOW_SECONDS.seconds,
                 maxInvocations = EXTREME_OPS_LOW_CAP,
             ),
-            requiresExplicitConfirm = false,
+            requiresExplicitConfirm = true,
             isWriteCapable = true,
         ),
         RootFeatureKey.UsbDumpUsb to RootFeatureDescriptor(
