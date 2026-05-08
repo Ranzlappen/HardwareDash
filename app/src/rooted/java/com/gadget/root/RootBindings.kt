@@ -24,6 +24,8 @@ import com.gadget.camera.CameraController
 import com.gadget.camera.RootedCameraController
 import com.gadget.cell.CellController
 import com.gadget.cell.RootedCellController
+import com.gadget.diagnostics.DiagnosticsController
+import com.gadget.diagnostics.RootedDiagnosticsController
 import com.gadget.display.DisplayController
 import com.gadget.display.RootedDisplayController
 import com.gadget.gps.GpsController
@@ -38,6 +40,8 @@ import com.gadget.nfc.NfcController
 import com.gadget.nfc.RootedNfcController
 import com.gadget.notification.NotificationController
 import com.gadget.notification.RootedNotificationController
+import com.gadget.root.emergency.EmergencyResetCoordinator
+import com.gadget.root.emergency.RootedEmergencyResetCoordinator
 import com.gadget.root.sysfs.RootedSysfsMutationLog
 import com.gadget.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.RootedSensorsController
@@ -180,4 +184,16 @@ abstract class RootBindings {
     abstract fun bindUsbDebuggingController(
         impl: RootedUsbDebuggingController,
     ): UsbDebuggingController
+
+    // ──── Batch 10: Diagnostics + Emergency Reset ────
+
+    @Binds @Singleton
+    abstract fun bindDiagnosticsController(
+        impl: RootedDiagnosticsController,
+    ): DiagnosticsController
+
+    @Binds @Singleton
+    abstract fun bindEmergencyResetCoordinator(
+        impl: RootedEmergencyResetCoordinator,
+    ): EmergencyResetCoordinator
 }

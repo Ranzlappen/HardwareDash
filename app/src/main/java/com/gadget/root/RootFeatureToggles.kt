@@ -27,4 +27,14 @@ interface RootFeatureToggles {
      */
     fun isMonitorSafetyMode(): Flow<Boolean>
     suspend fun setMonitorSafetyMode(enabled: Boolean)
+
+    /**
+     * Clears every per-feature opt-in entry from the backing store so
+     * the next read falls back to each descriptor's `defaultOn`. Called
+     * by `EmergencyResetCoordinator` when the user explicitly opts in
+     * via the Emergency Reset confirmation dialog. Returns the number
+     * of entries that were cleared. Standard impl is a no-op (returns
+     * 0).
+     */
+    suspend fun resetAllToDefault(): Int
 }

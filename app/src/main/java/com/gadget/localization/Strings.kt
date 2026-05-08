@@ -1617,6 +1617,179 @@ object S {
                 "Auto-revoque a la sortie. Diagnostic limite a 8 KB.",
         )
     }
+
+    // Batch-10: Diagnostics root extras
+    object DiagnosticsRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Diagnostics)",
+            "Root-Erweiterungen (Diagnose)",
+            "Extras root (Diagnostico)",
+            "Extras root (Diagnostic)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Privileged diagnostic snapshots: logcat tails (per-buffer), dumpsys meminfo, " +
+                "cpuinfo, and 3-hour procstats. All read-only and tail-capped.",
+            "Privilegierte Diagnose-Snapshots: logcat-Tails (pro Buffer), dumpsys meminfo, " +
+                "cpuinfo und 3-Stunden-procstats. Read-only und gekappt.",
+            "Snapshots de diagnostico privilegiado: tails de logcat (por buffer), " +
+                "dumpsys meminfo, cpuinfo y procstats de 3 horas. Solo lectura.",
+            "Snapshots de diagnostic privilegies: queues logcat (par buffer), dumpsys " +
+                "meminfo, cpuinfo et procstats sur 3 heures. Lecture seule.",
+        )
+        fun tailLogcatMain(lang: Language) = m(
+            lang,
+            "logcat tail (main buffer)",
+            "logcat-Tail (Main-Buffer)",
+            "Tail de logcat (buffer main)",
+            "Queue logcat (buffer main)",
+        )
+        fun tailLogcatRadio(lang: Language) = m(
+            lang,
+            "logcat tail (radio buffer)",
+            "logcat-Tail (Radio-Buffer)",
+            "Tail de logcat (buffer radio)",
+            "Queue logcat (buffer radio)",
+        )
+        fun dumpMemInfo(lang: Language) = m(
+            lang,
+            "dumpsys meminfo snapshot",
+            "dumpsys-meminfo-Snapshot",
+            "Snapshot de dumpsys meminfo",
+            "Snapshot dumpsys meminfo",
+        )
+        fun dumpCpuInfo(lang: Language) = m(
+            lang,
+            "dumpsys cpuinfo snapshot",
+            "dumpsys-cpuinfo-Snapshot",
+            "Snapshot de dumpsys cpuinfo",
+            "Snapshot dumpsys cpuinfo",
+        )
+        fun dumpProcstats(lang: Language) = m(
+            lang,
+            "dumpsys procstats (3 hours)",
+            "dumpsys-procstats (3 Stunden)",
+            "dumpsys procstats (3 horas)",
+            "dumpsys procstats (3 heures)",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all diagnostics state",
+            "Alle Diagnose-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de diagnostico",
+            "Reinitialiser toutes les mutations de diagnostic",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Logcat radio buffer can include IMSI fragments and tower IDs. Captured " +
+                "snapshots are written to the Logbook directory if you opt in.",
+            "Der logcat-Radio-Buffer kann IMSI-Fragmente und Funkmast-IDs enthalten. " +
+                "Snapshots werden bei Opt-in im Logbook-Ordner gespeichert.",
+            "El buffer radio de logcat puede contener fragmentos de IMSI e IDs de antena. " +
+                "Los snapshots se guardan en Logbook si se opta.",
+            "Le buffer radio de logcat peut contenir des fragments IMSI et des IDs " +
+                "d'antennes. Les snapshots sont enregistres dans Logbook si opt-in.",
+        )
+    }
+
+    // Batch-10: Emergency Reset card + dialog
+    object EmergencyReset {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Emergency: Reset all root mutations",
+            "Notfall: Alle Root-Mutationen zuruecksetzen",
+            "Emergencia: Restablecer todas las mutaciones root",
+            "Urgence: Reinitialiser toutes les mutations root",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "One-tap safety net. Reverts every tracked sysfs / setprop / cmd-* / " +
+                "adb-toggle / cmd-usb mutation; stops the keep-alive service; resets " +
+                "the battery-optimization app-op. Does NOT touch your per-feature " +
+                "opt-outs unless you explicitly check that box.",
+            "Ein-Tap-Sicherheitsnetz. Setzt jede sysfs/setprop/cmd-*-Mutation zurueck, " +
+                "stoppt den Keep-Alive-Service und setzt das Battery-Optimization-App-Op " +
+                "zurueck. Beruehrt NICHT die Pro-Feature-Opt-outs, ausser explizit " +
+                "angekreuzt.",
+            "Red de seguridad de un toque. Revierte todas las mutaciones registradas, " +
+                "detiene el servicio keep-alive y restablece el app-op de bateria. NO " +
+                "toca los opt-outs por feature a menos que lo marques.",
+            "Filet de securite en un tap. Revoque toutes les mutations enregistrees, " +
+                "arrete le service keep-alive et reinitialise l'app-op de batterie. NE " +
+                "touche PAS les opt-outs par fonctionnalite sauf si coche.",
+        )
+        fun trigger(lang: Language) = m(
+            lang,
+            "Reset all root mutations",
+            "Alle Root-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones root",
+            "Reinitialiser toutes les mutations root",
+        )
+        fun dialogTitle(lang: Language) = m(
+            lang,
+            "Confirm emergency reset",
+            "Notfall-Reset bestaetigen",
+            "Confirmar reset de emergencia",
+            "Confirmer la reinitialisation d'urgence",
+        )
+        fun dialogBody(lang: Language) = m(
+            lang,
+            "This will revert every privileged write the app has tracked, stop the " +
+                "keep-alive foreground service, and reset the battery-optimization " +
+                "app-op. Currently active timed-window operations (charge profiles, " +
+                "audio routing, etc.) will be cancelled and restored.",
+            "Dies setzt jeden privilegierten Schreibzugriff zurueck, stoppt den " +
+                "Keep-Alive-Vordergrunddienst und setzt das Battery-Optimization-App-Op " +
+                "zurueck. Aktive Zeitfenster-Operationen werden abgebrochen.",
+            "Esto revertira cada escritura privilegiada registrada, detendra el servicio " +
+                "keep-alive y restablecera el app-op de bateria. Las operaciones temporizadas " +
+                "activas se cancelaran.",
+            "Cela revoquera toutes les ecritures privilegiees enregistrees, arretera le " +
+                "service keep-alive et reinitialisera l'app-op de batterie. Les operations " +
+                "temporisees actives seront annulees.",
+        )
+        fun checkboxStopKeepAlive(lang: Language) = m(
+            lang,
+            "Also stop keep-alive service",
+            "Auch Keep-Alive-Service stoppen",
+            "Tambien detener el servicio keep-alive",
+            "Aussi arreter le service keep-alive",
+        )
+        fun checkboxResetOptOuts(lang: Language) = m(
+            lang,
+            "Also reset every per-feature opt-in to default OFF",
+            "Auch jede Pro-Feature-Aktivierung auf Standard zuruecksetzen (AUS)",
+            "Tambien restablecer cada opt-in por feature al valor por defecto (OFF)",
+            "Aussi reinitialiser chaque opt-in par fonctionnalite a la valeur par defaut",
+        )
+        fun confirmButton(lang: Language) = m(
+            lang,
+            "Confirm reset",
+            "Reset bestaetigen",
+            "Confirmar reset",
+            "Confirmer reset",
+        )
+        fun cancelButton(lang: Language) = m(
+            lang,
+            "Cancel",
+            "Abbrechen",
+            "Cancelar",
+            "Annuler",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "This is the safety net for the rooted-features split. Use it whenever " +
+                "you suspect a privileged operation has left the device in a weird " +
+                "state.",
+            "Dies ist das Sicherheitsnetz fuer den Root-Features-Split. Bei verdaechtigem " +
+                "Geraetezustand nach privilegierten Operationen anwenden.",
+            "Esta es la red de seguridad para la separacion de funciones root. Usalo si " +
+                "una operacion privilegiada deja el dispositivo en un estado raro.",
+            "C'est le filet de securite pour la separation des fonctions root. A utiliser " +
+                "si une operation privilegiee laisse l'appareil dans un etat bizarre.",
+        )
+    }
 }
 
 /** Helper: pick the string for the given language. Order: EN, DE, ES, FR. */

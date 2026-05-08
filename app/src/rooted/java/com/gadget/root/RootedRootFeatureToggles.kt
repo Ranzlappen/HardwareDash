@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -39,5 +40,22 @@ class RootedRootFeatureToggles @Inject constructor(
         dataStore.edit { mutable ->
             mutable[RootPrefKeys.MonitorSafetyMode] = enabled
         }
+    }
+
+    override suspend fun resetAllToDefault(): Int {
+        val featureKeys = featureRegistry.allDescriptors().map {
+            RootPrefKeys.featureEnabledKey(it.key)
+        }
+        val before = dataStore.data.first()
+        var cleared = 0
+        dataStore.edit { mutable ->
+            for (key in featureKeys) {
+                if (key in before) {
+                    mutable.remove(key)
+                    cleared++
+                }
+            }
+        }
+        return cleared
     }
 }

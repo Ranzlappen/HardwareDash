@@ -19,6 +19,8 @@ import com.gadget.camera.CameraController
 import com.gadget.camera.StandardCameraController
 import com.gadget.cell.CellController
 import com.gadget.cell.StandardCellController
+import com.gadget.diagnostics.DiagnosticsController
+import com.gadget.diagnostics.StandardDiagnosticsController
 import com.gadget.display.DisplayController
 import com.gadget.display.StandardDisplayController
 import com.gadget.gps.GpsController
@@ -33,6 +35,8 @@ import com.gadget.nfc.NfcController
 import com.gadget.nfc.StandardNfcController
 import com.gadget.notification.NotificationController
 import com.gadget.notification.StandardNotificationController
+import com.gadget.root.emergency.EmergencyResetCoordinator
+import com.gadget.root.emergency.StandardEmergencyResetCoordinator
 import com.gadget.root.sysfs.StandardSysfsMutationLog
 import com.gadget.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.SensorsController
@@ -209,4 +213,18 @@ object RootBindings {
     fun provideUsbDebuggingController(
         impl: StandardUsbDebuggingController,
     ): UsbDebuggingController = impl
+
+    // ──── Batch 10: Diagnostics + Emergency Reset ────
+
+    @Provides
+    @Singleton
+    fun provideDiagnosticsController(
+        impl: StandardDiagnosticsController,
+    ): DiagnosticsController = impl
+
+    @Provides
+    @Singleton
+    fun provideEmergencyResetCoordinator(
+        impl: StandardEmergencyResetCoordinator,
+    ): EmergencyResetCoordinator = impl
 }

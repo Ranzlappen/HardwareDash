@@ -36,6 +36,7 @@ import com.gadget.localization.S
 import com.gadget.keepalive.KeepAliveControllerResult
 import com.gadget.root.RootFeaturesEntryPoint
 import com.gadget.root.ui.AdbDebuggingRootExtrasSection
+import com.gadget.root.ui.EmergencyResetCard
 import com.gadget.root.ui.RootedFeatureTogglesCard
 import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
@@ -719,6 +720,13 @@ fun SettingsScreen() {
         // SECTION 8 — Batch-9 ADB Debugging root extras (rooted-only)
         // ══════════════════════════════════════════════════════════════════
         AdbDebuggingRootExtrasSection()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 9 — Batch-10 global Emergency Reset (rooted-only). Sits
+        //             at the bottom so it's the last thing the user can
+        //             reach when scrolling to recover from a bad state.
+        // ══════════════════════════════════════════════════════════════════
+        EmergencyResetCard()
     }
 }
 

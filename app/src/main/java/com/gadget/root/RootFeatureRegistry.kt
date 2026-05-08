@@ -50,6 +50,7 @@ private const val ADB_DUMP_WINDOW_SECONDS = 60
 private const val ADB_SETPROP_WINDOW_SECONDS = 60
 private const val USB_FUNCTION_WINDOW_SECONDS = 60
 private const val USB_DUMP_WINDOW_SECONDS = 60
+private const val DIAGNOSTICS_DUMP_WINDOW_SECONDS = 60
 
 /**
  * Single source of truth mapping every [RootFeatureKey] to its
@@ -783,6 +784,48 @@ class RootFeatureRegistry @Inject constructor() {
             defaultOn = false,
             limit = RootLimitPolicy(
                 window = USB_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+
+        // ──── Batch-10 Diagnostics features ────
+        RootFeatureKey.DiagnosticsTailLogcat to RootFeatureDescriptor(
+            key = RootFeatureKey.DiagnosticsTailLogcat,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = DIAGNOSTICS_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_HIGH_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.DiagnosticsDumpMemInfo to RootFeatureDescriptor(
+            key = RootFeatureKey.DiagnosticsDumpMemInfo,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = DIAGNOSTICS_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_HIGH_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.DiagnosticsDumpCpuInfo to RootFeatureDescriptor(
+            key = RootFeatureKey.DiagnosticsDumpCpuInfo,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = DIAGNOSTICS_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_HIGH_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.DiagnosticsDumpProcstats to RootFeatureDescriptor(
+            key = RootFeatureKey.DiagnosticsDumpProcstats,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = DIAGNOSTICS_DUMP_WINDOW_SECONDS.seconds,
                 maxInvocations = EXTREME_OPS_MED_CAP,
             ),
             requiresExplicitConfirm = false,

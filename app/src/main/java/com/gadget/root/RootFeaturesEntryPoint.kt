@@ -7,6 +7,7 @@ import com.gadget.battery.BatteryController
 import com.gadget.bluetooth.BluetoothController
 import com.gadget.camera.CameraController
 import com.gadget.cell.CellController
+import com.gadget.diagnostics.DiagnosticsController
 import com.gadget.display.DisplayController
 import com.gadget.gps.GpsController
 import com.gadget.ir.IrController
@@ -14,6 +15,7 @@ import com.gadget.keepalive.KeepAliveController
 import com.gadget.microphone.MicrophoneController
 import com.gadget.nfc.NfcController
 import com.gadget.notification.NotificationController
+import com.gadget.root.emergency.EmergencyResetCoordinator
 import com.gadget.sensors.SensorsController
 import com.gadget.storage.StorageController
 import com.gadget.torch.TorchController
@@ -58,4 +60,6 @@ interface RootFeaturesEntryPoint {
     fun audioRoutingController(): AudioRoutingController
     fun adbDebuggingController(): AdbDebuggingController
     fun usbDebuggingController(): UsbDebuggingController
+    fun diagnosticsController(): DiagnosticsController
+    fun emergencyResetCoordinator(): EmergencyResetCoordinator
 }

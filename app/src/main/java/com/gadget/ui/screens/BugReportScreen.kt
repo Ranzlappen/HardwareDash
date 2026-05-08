@@ -40,6 +40,7 @@ import androidx.core.content.ContextCompat
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.root.ui.DiagnosticsRootExtrasSection
 import com.gadget.root.ui.UsbDebuggingRootExtrasSection
 import com.gadget.ui.components.DashCard
 import com.gadget.ui.components.ResponsiveButtonText
@@ -424,6 +425,11 @@ fun BugReportScreen() {
         // SECTION 5 — Batch-9 USB Debugging root extras (rooted-only)
         // ══════════════════════════════════════════════════════════════
         UsbDebuggingRootExtrasSection()
+
+        // ══════════════════════════════════════════════════════════════
+        // SECTION 6 — Batch-10 Diagnostics root extras (rooted-only)
+        // ══════════════════════════════════════════════════════════════
+        DiagnosticsRootExtrasSection()
     }
 
     // ── Bug Report Modal ─────────────────────────────────────────────

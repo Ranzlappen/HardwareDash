@@ -131,4 +131,10 @@ sealed class RootFeatureKey(val id: String) {
     data object UsbDumpUsb : RootFeatureKey("usb_dump_usb")
     data object UsbDumpSerialService : RootFeatureKey("usb_dump_serial_service")
     data object UsbDumpUsbDevicesDebug : RootFeatureKey("usb_dump_usb_devices_debug")
+
+    // ──── Batch-10 Diagnostics features ────
+    data object DiagnosticsTailLogcat : RootFeatureKey("diagnostics_tail_logcat")
+    data object DiagnosticsDumpMemInfo : RootFeatureKey("diagnostics_dump_mem_info")
+    data object DiagnosticsDumpCpuInfo : RootFeatureKey("diagnostics_dump_cpu_info")
+    data object DiagnosticsDumpProcstats : RootFeatureKey("diagnostics_dump_procstats")
 }
