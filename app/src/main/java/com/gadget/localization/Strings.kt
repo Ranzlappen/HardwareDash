@@ -1066,6 +1066,1220 @@ object S {
             "Prozess \"$procName\" \u2014 $cpName ist jetzt fällig.",
             "Proceso \"$procName\" \u2014 $cpName vence ahora.",
             "Processus \"$procName\" \u2014 $cpName est dû maintenant.")
+
+        // Persistent keep-alive service
+        fun keepAliveTitle(lang: Language) = m(
+            lang,
+            "Gadget keep-alive",
+            "Gadget Keep-Alive",
+            "Gadget keep-alive",
+            "Gadget keep-alive",
+        )
+        fun keepAliveBody(lang: Language) = m(
+            lang,
+            "Background tasks running",
+            "Hintergrundaufgaben aktiv",
+            "Tareas en segundo plano activas",
+            "Taches en arriere-plan actives",
+        )
+    }
+
+    // Batch-7: Keep Alive setting
+    object KeepAlive {
+        fun title(lang: Language) = m(
+            lang,
+            "Keep Alive",
+            "Aktiv halten",
+            "Mantener activo",
+            "Maintenir actif",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Run a sticky foreground service so automation rules and pollers survive Doze.",
+            "Persistenten Vordergrund-Dienst ausfuehren, damit Automatisierungsregeln und " +
+                "Polling den Doze-Modus ueberleben.",
+            "Ejecutar un servicio en primer plano persistente para que las reglas de " +
+                "automatizacion y sondeos sobrevivan al modo Doze.",
+            "Executer un service de premier plan persistant pour que les regles " +
+                "d'automatisation et les sondages survivent au mode Doze.",
+        )
+        fun rootedFootnote(lang: Language) = m(
+            lang,
+            "Rooted: Doze whitelist + pm grant applied automatically.",
+            "Rooted: Doze-Whitelist + pm grant werden automatisch angewendet.",
+            "Con root: lista blanca Doze + pm grant aplicados automaticamente.",
+            "Avec root : liste blanche Doze + pm grant appliques automatiquement.",
+        )
+        fun standardFootnote(lang: Language) = m(
+            lang,
+            "Standard: tapping on opens battery-optimization exemption settings.",
+            "Standard: Antippen oeffnet die Akku-Ausnahme-Einstellungen.",
+            "Estandar: tocar abre los ajustes de excepcion de optimizacion de bateria.",
+            "Standard : appuyer ouvre les parametres d'exception d'optimisation de batterie.",
+        )
+    }
+
+    // Batch-7: Permissions onboarding
+    object PermissionsOnboarding {
+        fun requestAllButton(lang: Language) = m(
+            lang,
+            "Request all missing permissions",
+            "Alle fehlenden Berechtigungen anfordern",
+            "Solicitar todos los permisos faltantes",
+            "Demander toutes les autorisations manquantes",
+        )
+        fun progress(lang: Language, current: Int, total: Int) = m(
+            lang,
+            "Step $current of $total",
+            "Schritt $current von $total",
+            "Paso $current de $total",
+            "Etape $current sur $total",
+        )
+        fun complete(lang: Language) = m(
+            lang,
+            "All permission flows finished",
+            "Alle Berechtigungs-Ablaeufe abgeschlossen",
+            "Todos los flujos de permisos completados",
+            "Tous les flux d'autorisation termines",
+        )
+    }
+
+    // Batch-7: Automation root extras
+    object AutomationRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Automation)",
+            "Root-Erweiterungen (Automatisierung)",
+            "Extras root (Automatizacion)",
+            "Extras root (Automatisation)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Privileged intent fire (deny-listed actions), settings put against an " +
+                "allow-list, dumpsys snapshot. All writes snapshot+restore.",
+            "Privilegierte Intents (gesperrte Aktionen), Settings put gegen eine " +
+                "Allow-Liste, dumpsys-Snapshot. Alle Schreibvorgaenge mit Snapshot+Restore.",
+            "Disparo de intent privilegiado (acciones en lista de denegacion), settings put " +
+                "contra lista permitida, instantanea de dumpsys. Todas las escrituras con snapshot+restore.",
+            "Tir d'intent privilegie (actions sur liste de refus), settings put contre une " +
+                "liste autorisee, capture dumpsys. Toutes les ecritures avec snapshot+restore.",
+        )
+        fun firePrivilegedIntent(lang: Language) = m(
+            lang,
+            "Fire privileged intent (demo)",
+            "Privilegierten Intent feuern (Demo)",
+            "Disparar intent privilegiado (demo)",
+            "Tirer un intent privilegie (demo)",
+        )
+        fun overrideSetting(lang: Language) = m(
+            lang,
+            "Override system setting (demo)",
+            "Systemeinstellung ueberschreiben (Demo)",
+            "Anular ajuste del sistema (demo)",
+            "Remplacer un parametre systeme (demo)",
+        )
+        fun dumpsysSnapshot(lang: Language) = m(
+            lang,
+            "Dumpsys snapshot",
+            "Dumpsys-Snapshot",
+            "Instantanea de dumpsys",
+            "Capture dumpsys",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all automation mutations",
+            "Alle Automatisierungs-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de automatizacion",
+            "Reinitialiser toutes les mutations d'automatisation",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Privileged intents and settings overrides may alter system behaviour. " +
+                "Use at your own risk.",
+            "Privilegierte Intents und Einstellungen koennen das Systemverhalten aendern. " +
+                "Verwendung auf eigene Gefahr.",
+            "Los intents privilegiados y anulaciones de ajustes pueden alterar el " +
+                "comportamiento del sistema. Uselo bajo su propia responsabilidad.",
+            "Les intents privilegies et les remplacements de parametres peuvent alterer " +
+                "le comportement du systeme. Utilisation a vos risques.",
+        )
+    }
+
+    // Batch-7: Notification root extras
+    object NotificationRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Notifications)",
+            "Root-Erweiterungen (Benachrichtigungen)",
+            "Extras root (Notificaciones)",
+            "Extras root (Notifications)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Sticky channel-importance override (raise only), one-shot " +
+                "notification-listener access, and a 60 s lock-screen overlay.",
+            "Sticky-Kanal-Wichtigkeitsueberschreibung (nur erhoehen), Einmal-" +
+                "Listener-Zugriff und 60 s-Sperrbildschirm-Overlay.",
+            "Anulacion de importancia de canal sticky (solo elevar), acceso unico al " +
+                "listener de notificaciones y overlay de pantalla de bloqueo de 60 s.",
+            "Remplacement d'importance de canal sticky (elever uniquement), acces unique " +
+                "au listener de notification, et overlay verrouille 60 s.",
+        )
+        fun stickyOverride(lang: Language) = m(
+            lang,
+            "Raise channel importance (demo)",
+            "Kanal-Wichtigkeit erhoehen (Demo)",
+            "Elevar importancia del canal (demo)",
+            "Elever l'importance du canal (demo)",
+        )
+        fun listenerAccess(lang: Language) = m(
+            lang,
+            "Grant listener access (auto-revert on exit)",
+            "Listener-Zugriff erteilen (Auto-Revert beim Verlassen)",
+            "Conceder acceso al listener (auto-revertir al salir)",
+            "Accorder l'acces listener (auto-revocation a la sortie)",
+        )
+        fun overlay(lang: Language) = m(
+            lang,
+            "Show lock-screen overlay (10 s)",
+            "Sperrbildschirm-Overlay zeigen (10 s)",
+            "Mostrar overlay de bloqueo (10 s)",
+            "Afficher overlay de verrouillage (10 s)",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all notification mutations",
+            "Alle Benachrichtigungs-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de notificaciones",
+            "Reinitialiser toutes les mutations de notifications",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Listener access and lock-screen overlays carry phishing risk. " +
+                "Auto-reverted on screen exit.",
+            "Listener-Zugriff und Sperrbildschirm-Overlays bergen Phishing-Risiken. " +
+                "Auto-Revert beim Verlassen.",
+            "El acceso al listener y los overlays conllevan riesgo de phishing. " +
+                "Revertidos automaticamente al salir.",
+            "L'acces listener et les overlays comportent un risque de phishing. " +
+                "Auto-revoques a la sortie.",
+        )
+    }
+
+    // Batch-8: Storage root extras
+    object StorageRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Storage)",
+            "Root-Erweiterungen (Speicher)",
+            "Extras root (Almacenamiento)",
+            "Extras root (Stockage)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Privileged disk diagnostics, mount enumeration, fstrim against " +
+                "an allow-list, and kernel page-cache drop. fstrim and drop_caches " +
+                "are non-reversible.",
+            "Privilegierte Diagnose, Mount-Enumeration, fstrim gegen eine Allow-Liste " +
+                "und Kernel-Cache-Drop. fstrim und drop_caches sind nicht umkehrbar.",
+            "Diagnostico privilegiado, enumeracion de montajes, fstrim contra una " +
+                "lista permitida y drop_caches del kernel. No reversibles.",
+            "Diagnostic privilegie, enumeration de montages, fstrim contre une liste " +
+                "autorisee et drop_caches du noyau. Non reversibles.",
+        )
+        fun dumpDiskstats(lang: Language) = m(
+            lang,
+            "Dump diskstats snapshot",
+            "Diskstats-Snapshot speichern",
+            "Capturar snapshot de diskstats",
+            "Capturer snapshot diskstats",
+        )
+        fun enumerateMounts(lang: Language) = m(
+            lang,
+            "Enumerate mountinfo",
+            "Mountinfo aufzaehlen",
+            "Enumerar mountinfo",
+            "Enumerer mountinfo",
+        )
+        fun fstrim(lang: Language) = m(
+            lang,
+            "fstrim /data /cache (non-reversible)",
+            "fstrim /data /cache (nicht umkehrbar)",
+            "fstrim /data /cache (no reversible)",
+            "fstrim /data /cache (non reversible)",
+        )
+        fun dropCaches(lang: Language) = m(
+            lang,
+            "Drop kernel caches (page+dentry+inode)",
+            "Kernel-Caches leeren (page+dentry+inode)",
+            "Vaciar caches del kernel (page+dentry+inode)",
+            "Vider caches du noyau (page+dentry+inode)",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all storage mutations",
+            "Alle Speicher-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de almacenamiento",
+            "Reinitialiser toutes les mutations de stockage",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "fstrim and drop_caches are intrinsically non-reversible. fstrim is " +
+                "filtered to /data and /cache only.",
+            "fstrim und drop_caches sind nicht umkehrbar. fstrim ist auf " +
+                "/data und /cache beschraenkt.",
+            "fstrim y drop_caches son no reversibles. fstrim solo se permite en " +
+                "/data y /cache.",
+            "fstrim et drop_caches sont non reversibles. fstrim limite a " +
+                "/data et /cache.",
+        )
+    }
+
+    // Batch-8: Display root extras
+    object DisplayRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Display)",
+            "Root-Erweiterungen (Anzeige)",
+            "Extras root (Pantalla)",
+            "Extras root (Affichage)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Direct backlight write past framework cap (130 % clamp), refresh-rate " +
+                "override (165 Hz cap), runtime DPI (120-560), SurfaceFlinger snapshot.",
+            "Direkter Backlight-Write ueber Framework-Cap (130 %), " +
+                "Bildwiederholrate (165 Hz), DPI (120-560), SurfaceFlinger-Snapshot.",
+            "Escritura directa del backlight (limite 130 %), frecuencia (165 Hz), " +
+                "DPI (120-560), snapshot de SurfaceFlinger.",
+            "Ecriture directe du backlight (clamp 130 %), rafraichissement (165 Hz), " +
+                "DPI (120-560), snapshot SurfaceFlinger.",
+        )
+        fun overrideBrightness(lang: Language) = m(
+            lang,
+            "Override backlight (130% cap)",
+            "Backlight ueberschreiben (130%-Klemmung)",
+            "Anular backlight (limite 130%)",
+            "Remplacer backlight (clamp 130%)",
+        )
+        fun overrideRefreshRate(lang: Language) = m(
+            lang,
+            "Override refresh rate (165 Hz cap)",
+            "Bildwiederholrate ueberschreiben (165 Hz Cap)",
+            "Anular frecuencia (cap 165 Hz)",
+            "Remplacer rafraichissement (plafond 165 Hz)",
+        )
+        fun overrideDensity(lang: Language) = m(
+            lang,
+            "Override DPI (120-560 clamp)",
+            "DPI ueberschreiben (120-560 geklemmt)",
+            "Anular DPI (limite 120-560)",
+            "Remplacer DPI (clamp 120-560)",
+        )
+        fun surfaceFlingerSnapshot(lang: Language) = m(
+            lang,
+            "SurfaceFlinger snapshot",
+            "SurfaceFlinger-Snapshot",
+            "Snapshot de SurfaceFlinger",
+            "Snapshot SurfaceFlinger",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all display mutations",
+            "Alle Display-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de pantalla",
+            "Reinitialiser toutes les mutations d'affichage",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Sustained brightness above OEM cap stresses the panel; refresh-rate " +
+                "and DPI overrides may break apps. Auto-revert on exit.",
+            "Anhaltende Helligkeit ueber OEM-Cap belastet das Panel; Bildwiederhol" +
+                "rate und DPI koennen Apps brechen. Auto-Revert beim Verlassen.",
+            "El brillo sostenido sobre el cap del OEM estresa el panel; frecuencia " +
+                "y DPI pueden romper apps. Auto-revertido al salir.",
+            "Une luminosite soutenue au-dessus du plafond OEM stresse l'ecran; " +
+                "frequence et DPI peuvent casser des applis. Auto-revoque a la sortie.",
+        )
+    }
+
+    // Batch-8: Audio routing root extras
+    object AudioRoutingRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Audio routing)",
+            "Root-Erweiterungen (Audio-Routing)",
+            "Extras root (Enrutamiento audio)",
+            "Extras root (Routage audio)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Stream-volume cap bypass (130 % clamp), forced routing, mute-all " +
+                "(allow-listed), audio policy dump. STREAM_VOICE_CALL refused.",
+            "Stream-Volume-Bypass (130 %), erzwungenes Routing, Mute-All " +
+                "(Allow-List), Audio-Policy-Dump. STREAM_VOICE_CALL gesperrt.",
+            "Bypass del cap de volumen (130 %), enrutamiento forzado, mute-all, " +
+                "volcado de policy. STREAM_VOICE_CALL rechazado.",
+            "Bypass plafond volume (130 %), routage force, mute-all, dump policy. " +
+                "STREAM_VOICE_CALL refuse.",
+        )
+        fun bypassVolume(lang: Language) = m(
+            lang,
+            "Bypass safe-listening cap (60 s)",
+            "Safe-Listening-Cap umgehen (60 s)",
+            "Bypass del limite de escucha segura (60 s)",
+            "Bypass plafond ecoute sure (60 s)",
+        )
+        fun forceRouting(lang: Language) = m(
+            lang,
+            "Force speaker output",
+            "Lautsprecher erzwingen",
+            "Forzar altavoz",
+            "Forcer haut-parleur",
+        )
+        fun muteAll(lang: Language) = m(
+            lang,
+            "Mute streams (60 s, except A11y/DTMF/Call)",
+            "Streams stumm (60 s, ausser A11y/DTMF/Anruf)",
+            "Silenciar streams (60 s, excepto A11y/DTMF/Llamada)",
+            "Couper flux (60 s, sauf A11y/DTMF/Appel)",
+        )
+        fun dumpAudioPolicy(lang: Language) = m(
+            lang,
+            "Audio policy snapshot",
+            "Audio-Policy-Snapshot",
+            "Snapshot de la audio policy",
+            "Snapshot audio policy",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all audio routing mutations",
+            "Alle Audio-Routing-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de audio",
+            "Reinitialiser toutes les mutations audio",
+        )
+        fun hearingSafetyWarning(lang: Language) = m(
+            lang,
+            "WARNING: Bypassing the volume cap can cause permanent hearing loss. " +
+                "STREAM_VOICE_CALL is always refused.",
+            "WARNUNG: Das Umgehen des Lautstaerke-Caps kann dauerhafte Hoerschaeden " +
+                "verursachen. STREAM_VOICE_CALL stets abgelehnt.",
+            "ADVERTENCIA: Bypassear el limite de volumen puede causar perdida " +
+                "auditiva permanente. STREAM_VOICE_CALL siempre rechazado.",
+            "AVERTISSEMENT: Contourner le plafond peut causer une perte auditive " +
+                "permanente. STREAM_VOICE_CALL toujours refuse.",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Volume bypass and forced routing carry hearing-safety risk. Auto-revert " +
+                "on exit; ACCESSIBILITY/DTMF/Call always preserved.",
+            "Volume-Bypass und erzwungenes Routing bergen Hoerschutzrisiken. " +
+                "Auto-Revert beim Verlassen; ACCESSIBILITY/DTMF/Anruf erhalten.",
+            "El bypass de volumen y enrutamiento conllevan riesgo auditivo. " +
+                "Auto-revertido al salir; ACCESSIBILITY/DTMF/Llamada preservados.",
+            "Le bypass de volume et le routage comportent des risques auditifs. " +
+                "Auto-revoque a la sortie; ACCESSIBILITY/DTMF/Appel preserves.",
+        )
+    }
+
+    // Batch-9: ADB Debugging root extras
+    object AdbDebuggingRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (ADB Debugging)",
+            "Root-Erweiterungen (ADB-Debug)",
+            "Extras root (Depuracion ADB)",
+            "Extras root (Debogage ADB)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Toggle ADB enabled, ADB-over-network on an allow-listed port (5555-5599), " +
+                "getprop snapshot, and allow-listed setprop override. Auto-revert on exit.",
+            "ADB-Schalter, ADB-ueber-Netzwerk auf zugelassenem Port (5555-5599), " +
+                "getprop-Snapshot und allow-listete setprop-Ueberschreibung. Auto-Revert.",
+            "Cambiar ADB, ADB por red en puerto permitido (5555-5599), snapshot " +
+                "de getprop y override de setprop con allow-list. Auto-revertido al salir.",
+            "Bascule ADB, ADB-reseau sur port autorise (5555-5599), snapshot getprop, " +
+                "override setprop avec allow-list. Auto-revoque a la sortie.",
+        )
+        fun toggleAdb(lang: Language) = m(
+            lang,
+            "Toggle ADB enabled",
+            "ADB-Schalter umschalten",
+            "Cambiar ADB activado",
+            "Basculer ADB active",
+        )
+        fun toggleNetwork(lang: Language) = m(
+            lang,
+            "Enable ADB-over-network @ 5555",
+            "ADB-ueber-Netzwerk @ 5555 aktivieren",
+            "Activar ADB por red @ 5555",
+            "Activer ADB-reseau @ 5555",
+        )
+        fun dumpProperties(lang: Language) = m(
+            lang,
+            "Dump getprop snapshot",
+            "getprop-Snapshot speichern",
+            "Capturar snapshot de getprop",
+            "Capturer snapshot getprop",
+        )
+        fun setpropOverride(lang: Language) = m(
+            lang,
+            "Override allow-listed property",
+            "Erlaubte Property ueberschreiben",
+            "Anular property con allow-list",
+            "Remplacer propriete allow-list",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all ADB mutations",
+            "Alle ADB-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de ADB",
+            "Reinitialiser toutes les mutations ADB",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Enabling ADB exposes the device to USB / Wi-Fi attackers. setprop allow-list " +
+                "refuses ro.* keys; ADB-over-network port allow-list 5555-5599.",
+            "ADB-Aktivierung setzt das Geraet USB-/Wi-Fi-Angriffen aus. setprop-Allow-List " +
+                "lehnt ro.* ab; ADB-Netzwerk-Allow-Liste 5555-5599.",
+            "Activar ADB expone el dispositivo a atacantes USB/Wi-Fi. setprop rechaza " +
+                "ro.*; allow-list de ADB por red 5555-5599.",
+            "Activer ADB expose l'appareil a des attaquants USB/Wi-Fi. setprop refuse " +
+                "ro.*; allow-list ADB-reseau 5555-5599.",
+        )
+    }
+
+    // Batch-9: USB Debugging root extras
+    object UsbDebuggingRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (USB Debugging)",
+            "Root-Erweiterungen (USB-Debug)",
+            "Extras root (Depuracion USB)",
+            "Extras root (Debogage USB)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Switch USB function (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+), and /sys/kernel/debug/usb/devices probe.",
+            "USB-Funktion umschalten (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+) und debugfs-USB-Devices-Probe.",
+            "Cambiar funcion USB (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+) y sondeo de /sys/kernel/debug/usb/devices.",
+            "Changer fonction USB (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+) et sonde /sys/kernel/debug/usb/devices.",
+        )
+        fun switchFunction(lang: Language) = m(
+            lang,
+            "Switch USB function -> MTP",
+            "USB-Funktion -> MTP",
+            "Cambiar funcion USB -> MTP",
+            "Changer fonction USB -> MTP",
+        )
+        fun dumpUsb(lang: Language) = m(
+            lang,
+            "dumpsys usb snapshot",
+            "dumpsys-usb-Snapshot",
+            "Snapshot de dumpsys usb",
+            "Snapshot dumpsys usb",
+        )
+        fun dumpSerialService(lang: Language) = m(
+            lang,
+            "dumpsys SerialService (API 30+)",
+            "dumpsys SerialService (API 30+)",
+            "dumpsys SerialService (API 30+)",
+            "dumpsys SerialService (API 30+)",
+        )
+        fun dumpDevicesDebug(lang: Language) = m(
+            lang,
+            "debugfs USB devices probe",
+            "debugfs-USB-Devices-Probe",
+            "Sondeo debugfs de USB devices",
+            "Sonde debugfs USB devices",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all USB mutations",
+            "Alle USB-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de USB",
+            "Reinitialiser toutes les mutations USB",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Switching the USB function role can break MTP file transfer or charging. " +
+                "Auto-revert on screen exit. Diagnostics tail-capped to 8 KB.",
+            "Wechsel der USB-Funktion kann MTP-Uebertragung oder Laden brechen. " +
+                "Auto-Revert beim Verlassen. Diagnose auf 8 KB gekappt.",
+            "Cambiar la funcion USB puede romper la transferencia MTP o la carga. " +
+                "Auto-revertido al salir. Diagnostico limitado a 8 KB.",
+            "Changer la fonction USB peut casser le transfert MTP ou la charge. " +
+                "Auto-revoque a la sortie. Diagnostic limite a 8 KB.",
+        )
+    }
+
+    // Batch-10: Diagnostics root extras
+    object DiagnosticsRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Diagnostics)",
+            "Root-Erweiterungen (Diagnose)",
+            "Extras root (Diagnostico)",
+            "Extras root (Diagnostic)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Privileged diagnostic snapshots: logcat tails (per-buffer), dumpsys meminfo, " +
+                "cpuinfo, and 3-hour procstats. All read-only and tail-capped.",
+            "Privilegierte Diagnose-Snapshots: logcat-Tails (pro Buffer), dumpsys meminfo, " +
+                "cpuinfo und 3-Stunden-procstats. Read-only und gekappt.",
+            "Snapshots de diagnostico privilegiado: tails de logcat (por buffer), " +
+                "dumpsys meminfo, cpuinfo y procstats de 3 horas. Solo lectura.",
+            "Snapshots de diagnostic privilegies: queues logcat (par buffer), dumpsys " +
+                "meminfo, cpuinfo et procstats sur 3 heures. Lecture seule.",
+        )
+        fun tailLogcatMain(lang: Language) = m(
+            lang,
+            "logcat tail (main buffer)",
+            "logcat-Tail (Main-Buffer)",
+            "Tail de logcat (buffer main)",
+            "Queue logcat (buffer main)",
+        )
+        fun tailLogcatRadio(lang: Language) = m(
+            lang,
+            "logcat tail (radio buffer)",
+            "logcat-Tail (Radio-Buffer)",
+            "Tail de logcat (buffer radio)",
+            "Queue logcat (buffer radio)",
+        )
+        fun dumpMemInfo(lang: Language) = m(
+            lang,
+            "dumpsys meminfo snapshot",
+            "dumpsys-meminfo-Snapshot",
+            "Snapshot de dumpsys meminfo",
+            "Snapshot dumpsys meminfo",
+        )
+        fun dumpCpuInfo(lang: Language) = m(
+            lang,
+            "dumpsys cpuinfo snapshot",
+            "dumpsys-cpuinfo-Snapshot",
+            "Snapshot de dumpsys cpuinfo",
+            "Snapshot dumpsys cpuinfo",
+        )
+        fun dumpProcstats(lang: Language) = m(
+            lang,
+            "dumpsys procstats (3 hours)",
+            "dumpsys-procstats (3 Stunden)",
+            "dumpsys procstats (3 horas)",
+            "dumpsys procstats (3 heures)",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all diagnostics state",
+            "Alle Diagnose-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de diagnostico",
+            "Reinitialiser toutes les mutations de diagnostic",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Logcat radio buffer can include IMSI fragments and tower IDs. Captured " +
+                "snapshots are written to the Logbook directory if you opt in.",
+            "Der logcat-Radio-Buffer kann IMSI-Fragmente und Funkmast-IDs enthalten. " +
+                "Snapshots werden bei Opt-in im Logbook-Ordner gespeichert.",
+            "El buffer radio de logcat puede contener fragmentos de IMSI e IDs de antena. " +
+                "Los snapshots se guardan en Logbook si se opta.",
+            "Le buffer radio de logcat peut contenir des fragments IMSI et des IDs " +
+                "d'antennes. Les snapshots sont enregistres dans Logbook si opt-in.",
+        )
+    }
+
+    // Batch-10: Emergency Reset card + dialog
+    object EmergencyReset {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Emergency: Reset all root mutations",
+            "Notfall: Alle Root-Mutationen zuruecksetzen",
+            "Emergencia: Restablecer todas las mutaciones root",
+            "Urgence: Reinitialiser toutes les mutations root",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "One-tap safety net. Reverts every tracked sysfs / setprop / cmd-* / " +
+                "adb-toggle / cmd-usb mutation; stops the keep-alive service; resets " +
+                "the battery-optimization app-op. Does NOT touch your per-feature " +
+                "opt-outs unless you explicitly check that box.",
+            "Ein-Tap-Sicherheitsnetz. Setzt jede sysfs/setprop/cmd-*-Mutation zurueck, " +
+                "stoppt den Keep-Alive-Service und setzt das Battery-Optimization-App-Op " +
+                "zurueck. Beruehrt NICHT die Pro-Feature-Opt-outs, ausser explizit " +
+                "angekreuzt.",
+            "Red de seguridad de un toque. Revierte todas las mutaciones registradas, " +
+                "detiene el servicio keep-alive y restablece el app-op de bateria. NO " +
+                "toca los opt-outs por feature a menos que lo marques.",
+            "Filet de securite en un tap. Revoque toutes les mutations enregistrees, " +
+                "arrete le service keep-alive et reinitialise l'app-op de batterie. NE " +
+                "touche PAS les opt-outs par fonctionnalite sauf si coche.",
+        )
+        fun trigger(lang: Language) = m(
+            lang,
+            "Reset all root mutations",
+            "Alle Root-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones root",
+            "Reinitialiser toutes les mutations root",
+        )
+        fun dialogTitle(lang: Language) = m(
+            lang,
+            "Confirm emergency reset",
+            "Notfall-Reset bestaetigen",
+            "Confirmar reset de emergencia",
+            "Confirmer la reinitialisation d'urgence",
+        )
+        fun dialogBody(lang: Language) = m(
+            lang,
+            "This will revert every privileged write the app has tracked, stop the " +
+                "keep-alive foreground service, and reset the battery-optimization " +
+                "app-op. Currently active timed-window operations (charge profiles, " +
+                "audio routing, etc.) will be cancelled and restored.",
+            "Dies setzt jeden privilegierten Schreibzugriff zurueck, stoppt den " +
+                "Keep-Alive-Vordergrunddienst und setzt das Battery-Optimization-App-Op " +
+                "zurueck. Aktive Zeitfenster-Operationen werden abgebrochen.",
+            "Esto revertira cada escritura privilegiada registrada, detendra el servicio " +
+                "keep-alive y restablecera el app-op de bateria. Las operaciones temporizadas " +
+                "activas se cancelaran.",
+            "Cela revoquera toutes les ecritures privilegiees enregistrees, arretera le " +
+                "service keep-alive et reinitialisera l'app-op de batterie. Les operations " +
+                "temporisees actives seront annulees.",
+        )
+        fun checkboxStopKeepAlive(lang: Language) = m(
+            lang,
+            "Also stop keep-alive service",
+            "Auch Keep-Alive-Service stoppen",
+            "Tambien detener el servicio keep-alive",
+            "Aussi arreter le service keep-alive",
+        )
+        fun checkboxResetOptOuts(lang: Language) = m(
+            lang,
+            "Also reset every per-feature opt-in to default OFF",
+            "Auch jede Pro-Feature-Aktivierung auf Standard zuruecksetzen (AUS)",
+            "Tambien restablecer cada opt-in por feature al valor por defecto (OFF)",
+            "Aussi reinitialiser chaque opt-in par fonctionnalite a la valeur par defaut",
+        )
+        fun confirmButton(lang: Language) = m(
+            lang,
+            "Confirm reset",
+            "Reset bestaetigen",
+            "Confirmar reset",
+            "Confirmer reset",
+        )
+        fun cancelButton(lang: Language) = m(
+            lang,
+            "Cancel",
+            "Abbrechen",
+            "Cancelar",
+            "Annuler",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "This is the safety net for the rooted-features split. Use it whenever " +
+                "you suspect a privileged operation has left the device in a weird " +
+                "state. Use at your own risk; the developer assumes no liability for " +
+                "any hardware, software, data, or regulatory damage.",
+            "Dies ist das Sicherheitsnetz fuer den Root-Features-Split. Bei verdaechtigem " +
+                "Geraetezustand nach privilegierten Operationen anwenden. Nutzung auf " +
+                "eigene Gefahr; der Entwickler uebernimmt keine Haftung fuer Hardware-, " +
+                "Software-, Daten- oder regulatorische Schaeden.",
+            "Esta es la red de seguridad para la separacion de funciones root. Usalo si " +
+                "una operacion privilegiada deja el dispositivo en un estado raro. Uso " +
+                "bajo tu propio riesgo; el desarrollador no asume responsabilidad por " +
+                "danos de hardware, software, datos o regulatorios.",
+            "C'est le filet de securite pour la separation des fonctions root. A utiliser " +
+                "si une operation privilegiee laisse l'appareil dans un etat bizarre. " +
+                "Utilisation a vos propres risques ; le developpeur n'assume aucune " +
+                "responsabilite pour les dommages materiels, logiciels, de donnees ou " +
+                "reglementaires.",
+        )
+    }
+
+    // Batch-11: Rooted-mode permanent legal notice (Card on SettingsScreen)
+    object RootedLegalNotice {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Rooted mode — legal notice",
+            "Root-Modus — rechtlicher Hinweis",
+            "Modo root — aviso legal",
+            "Mode root — avis legal",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "The privileged operations exposed by this app can damage your device " +
+                "hardware or OS, void your warranty, and may violate radio regulations " +
+                "in your jurisdiction. Use at your own risk. The developer assumes no " +
+                "liability for any hardware, software, data, or regulatory damage " +
+                "resulting from use of these features. The Emergency Reset above " +
+                "reverts every tracked privileged write but cannot undo physical " +
+                "hardware damage.",
+            "Die privilegierten Operationen dieser App koennen Hardware oder OS " +
+                "beschaedigen, die Garantie aufheben und gegen Funkregulierungen in " +
+                "Ihrer Region verstossen. Nutzung auf eigene Gefahr. Der Entwickler " +
+                "uebernimmt keine Haftung fuer Hardware-, Software-, Daten- oder " +
+                "regulatorische Schaeden. Der Notfall-Reset oben setzt verfolgte " +
+                "Schreibzugriffe zurueck, kann aber keine physischen Schaeden " +
+                "rueckgaengig machen.",
+            "Las operaciones privilegiadas que expone esta app pueden danar el hardware " +
+                "o el OS, anular la garantia y violar las regulaciones de radio en tu " +
+                "jurisdiccion. Uso bajo tu propio riesgo. El desarrollador no asume " +
+                "responsabilidad por danos de hardware, software, datos o regulatorios. " +
+                "El Reset de emergencia revierte cada escritura registrada pero no puede " +
+                "deshacer danos fisicos.",
+            "Les operations privilegiees exposees par cette app peuvent endommager le " +
+                "materiel ou l'OS, annuler la garantie et violer les regulations radio " +
+                "de votre juridiction. Utilisation a vos propres risques. Le developpeur " +
+                "n'assume aucune responsabilite pour les dommages materiels, logiciels, " +
+                "de donnees ou reglementaires. La Reinitialisation d'urgence revoque " +
+                "toutes les ecritures enregistrees mais ne peut pas annuler les dommages " +
+                "physiques.",
+        )
+    }
+
+    // Batch-11: First-launch acknowledgement modal (one-shot, persisted)
+    object RootedFirstAck {
+        fun dialogTitle(lang: Language) = m(
+            lang,
+            "Acknowledge rooted-mode risks",
+            "Root-Modus-Risiken bestaetigen",
+            "Confirmar riesgos del modo root",
+            "Reconnaitre les risques du mode root",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Before using any rooted feature, confirm that you understand: " +
+                "(1) privileged writes can damage hardware, the OS, and your data; " +
+                "(2) some operations may violate FCC/ETSI/MIC radio regulations in " +
+                "your jurisdiction; (3) use of these features may void your warranty; " +
+                "(4) the developer assumes no liability for any damage resulting from " +
+                "use of these features. Tap I understand to continue.",
+            "Vor der Nutzung einer Root-Funktion bestaetigen Sie: " +
+                "(1) privilegierte Schreibvorgaenge koennen Hardware, OS und Daten " +
+                "beschaedigen; (2) einige Operationen verstossen moeglicherweise gegen " +
+                "FCC/ETSI/MIC-Funkregulierungen Ihrer Region; (3) die Nutzung kann die " +
+                "Garantie aufheben; (4) der Entwickler uebernimmt keine Haftung. " +
+                "Tippen Sie auf 'Verstanden' zum Fortfahren.",
+            "Antes de usar funciones root, confirma que entiendes: " +
+                "(1) las escrituras privilegiadas pueden danar hardware, OS y datos; " +
+                "(2) algunas operaciones pueden violar regulaciones FCC/ETSI/MIC; " +
+                "(3) el uso puede anular la garantia; (4) el desarrollador no asume " +
+                "responsabilidad. Pulsa Entendido para continuar.",
+            "Avant d'utiliser une fonction root, confirmez que vous comprenez : " +
+                "(1) les ecritures privilegiees peuvent endommager le materiel, l'OS " +
+                "et les donnees ; (2) certaines operations peuvent violer les " +
+                "regulations FCC/ETSI/MIC ; (3) l'usage peut annuler la garantie ; " +
+                "(4) le developpeur n'assume aucune responsabilite. Touchez 'Compris' " +
+                "pour continuer.",
+        )
+        fun acknowledge(lang: Language) = m(
+            lang,
+            "I understand",
+            "Verstanden",
+            "Entendido",
+            "Compris",
+        )
+    }
+
+    // Batch-11: Per-toggle risk dialog when requiresExplicitConfirm = true
+    object RootFeatureRisk {
+        fun dialogTitle(lang: Language) = m(
+            lang,
+            "Confirm hardware risk",
+            "Hardware-Risiko bestaetigen",
+            "Confirmar riesgo de hardware",
+            "Confirmer le risque materiel",
+        )
+        fun confirmEnable(lang: Language) = m(
+            lang,
+            "Enable",
+            "Aktivieren",
+            "Activar",
+            "Activer",
+        )
+        fun cancel(lang: Language) = m(
+            lang,
+            "Cancel",
+            "Abbrechen",
+            "Cancelar",
+            "Annuler",
+        )
+
+        fun thermal(lang: Language) = m(
+            lang,
+            "Sustained over-cap operation can damage LEDs, panels, motors, or the " +
+                "battery, and trigger thermal runaway. Use only briefly and watch " +
+                "device temperature.",
+            "Anhaltender Betrieb ueber den Werks-Limits kann LEDs, Panels, Motoren " +
+                "oder den Akku beschaedigen und thermisches Durchgehen ausloesen. Nur " +
+                "kurz benutzen und Geraetetemperatur beobachten.",
+            "El funcionamiento sostenido sobre los limites puede danar LEDs, paneles, " +
+                "motores o la bateria, y causar fuga termica. Usalo brevemente y " +
+                "vigila la temperatura del dispositivo.",
+            "Un fonctionnement soutenu au-dessus des limites peut endommager LEDs, " +
+                "ecrans, moteurs ou la batterie et provoquer un emballement thermique. " +
+                "A utiliser brievement en surveillant la temperature.",
+        )
+        fun batteryCell(lang: Language) = m(
+            lang,
+            "Direct charging-IC and fuel-gauge writes can damage cells, cause " +
+                "swelling or thermal runaway, and void the warranty. The chosen " +
+                "values may exceed OEM-validated limits.",
+            "Direkte Schreibvorgaenge auf Charging-IC und Fuel-Gauge koennen Zellen " +
+                "beschaedigen, Aufblaehung oder thermisches Durchgehen verursachen und " +
+                "die Garantie aufheben. Die Werte koennen OEM-Limits ueberschreiten.",
+            "Las escrituras directas al IC de carga y al fuel-gauge pueden danar " +
+                "celdas, causar hinchazon o fuga termica, y anular la garantia. Los " +
+                "valores pueden exceder los limites validados por el OEM.",
+            "Les ecritures directes sur l'IC de charge et le fuel-gauge peuvent " +
+                "endommager les cellules, causer un gonflement ou un emballement " +
+                "thermique et annuler la garantie. Les valeurs peuvent depasser les " +
+                "limites validees par l'OEM.",
+        )
+        fun hearing(lang: Language) = m(
+            lang,
+            "Bypassing safe-listening volume caps and microphone gain limits can " +
+                "cause permanent hearing loss within minutes. Remove headphones " +
+                "before enabling.",
+            "Das Umgehen von Lautstaerke- und Mikrofonverstaerkungsgrenzen kann " +
+                "innerhalb von Minuten dauerhafte Hoerschaeden verursachen. Vor " +
+                "dem Aktivieren Kopfhoerer abnehmen.",
+            "Saltarse los limites de volumen y de ganancia del microfono puede " +
+                "causar perdida auditiva permanente en minutos. Quitate los " +
+                "auriculares antes de activarlo.",
+            "Le contournement des limites de volume et de gain du microphone peut " +
+                "causer une perte auditive permanente en quelques minutes. Retirez " +
+                "les ecouteurs avant d'activer.",
+        )
+        fun sensorIntegrity(lang: Language) = m(
+            lang,
+            "Direct IIO/i2c writes and fusion-override may corrupt sensor " +
+                "calibration data and the readings of every other app on the " +
+                "device until reboot.",
+            "Direkte IIO/i2c-Schreibvorgaenge und Fusion-Override koennen die " +
+                "Sensor-Kalibrierung und die Werte aller anderen Apps bis zum " +
+                "Neustart beschaedigen.",
+            "Las escrituras directas IIO/i2c y la sobrescritura de fusion pueden " +
+                "corromper la calibracion de sensores y las lecturas de las demas " +
+                "apps hasta reiniciar.",
+            "Les ecritures directes IIO/i2c et la surcharge de fusion peuvent " +
+                "corrompre l'etalonnage des capteurs et les lectures des autres " +
+                "applications jusqu'au redemarrage.",
+        )
+        fun radioRegulatory(lang: Language) = m(
+            lang,
+            "TX-power, channel, frequency, and rfkill changes may violate FCC, " +
+                "ETSI, or MIC regulations. Use only on hardware you own and outside " +
+                "protected radio bands.",
+            "Aenderungen an Sendeleistung, Kanal, Frequenz und rfkill koennen gegen " +
+                "FCC, ETSI oder MIC verstossen. Nur auf eigener Hardware und " +
+                "ausserhalb geschuetzter Baender verwenden.",
+            "Los cambios de potencia TX, canal, frecuencia y rfkill pueden violar " +
+                "FCC, ETSI o MIC. Usalos solo en tu propio hardware y fuera de " +
+                "bandas protegidas.",
+            "Les modifications de puissance TX, canal, frequence et rfkill peuvent " +
+                "violer la FCC, l'ETSI ou la MIC. A utiliser uniquement sur du " +
+                "materiel vous appartenant, hors des bandes protegees.",
+        )
+        fun storageNonReversible(lang: Language) = m(
+            lang,
+            "fstrim and drop_caches are intrinsically non-reversible. Active I/O " +
+                "may stall briefly; data loss is unlikely but possible if storage " +
+                "is failing.",
+            "fstrim und drop_caches sind nicht rueckgaengig zu machen. Aktive I/O " +
+                "kann kurz blockieren; Datenverlust ist unwahrscheinlich, aber " +
+                "moeglich bei defektem Speicher.",
+            "fstrim y drop_caches son intrinsecamente irreversibles. La E/S activa " +
+                "puede pausarse brevemente; la perdida de datos es improbable pero " +
+                "posible si el almacenamiento falla.",
+            "fstrim et drop_caches sont intrinsequement irreversibles. Les E/S " +
+                "actives peuvent se bloquer brievement ; la perte de donnees est " +
+                "peu probable mais possible si le stockage est defaillant.",
+        )
+        fun uxDeadlock(lang: Language) = m(
+            lang,
+            "Doze-bypass, sticky overlays, and lock-screen overrides can lock the " +
+                "UI, drain the battery quickly, or block notification dismissal " +
+                "until reboot.",
+            "Doze-Bypass, persistente Overlays und Lock-Screen-Overrides koennen " +
+                "die UI sperren, den Akku schnell entladen oder das Schliessen von " +
+                "Benachrichtigungen bis zum Neustart blockieren.",
+            "El bypass de doze, los overlays fijos y la sobrescritura del lock " +
+                "screen pueden bloquear la UI, descargar la bateria rapido, o " +
+                "impedir descartar notificaciones hasta reiniciar.",
+            "Le contournement de doze, les overlays persistants et les surcharges " +
+                "de l'ecran de verrouillage peuvent bloquer l'UI, vider la batterie " +
+                "rapidement ou empecher de fermer les notifications jusqu'au " +
+                "redemarrage.",
+        )
+        fun attackSurface(lang: Language) = m(
+            lang,
+            "Enabling ADB, ADB-over-network, USB role switches, or setprop " +
+                "overrides exposes the device to USB and Wi-Fi attackers and may " +
+                "break MTP transfer.",
+            "ADB, ADB-uebers-Netzwerk, USB-Rollenwechsel und setprop-Overrides " +
+                "setzen das Geraet USB- und Wi-Fi-Angreifern aus und koennen MTP " +
+                "stoeren.",
+            "Activar ADB, ADB-por-red, cambios de funcion USB o overrides setprop " +
+                "expone el dispositivo a atacantes USB y Wi-Fi y puede romper la " +
+                "transferencia MTP.",
+            "Activer ADB, ADB-sur-reseau, le changement de role USB ou les " +
+                "surcharges setprop expose l'appareil aux attaquants USB et Wi-Fi " +
+                "et peut casser le transfert MTP.",
+        )
+        fun infoDisclosure(lang: Language) = m(
+            lang,
+            "The logcat radio buffer can include IMSI fragments, cell-tower IDs, " +
+                "and other privacy-sensitive data. Snapshots land in the Logbook " +
+                "if you opt in.",
+            "Der logcat-Radio-Puffer kann IMSI-Fragmente, Funkzellen-IDs und " +
+                "andere datenschutzrelevante Daten enthalten. Snapshots landen im " +
+                "Logbuch, wenn aktiviert.",
+            "El buffer radio de logcat puede contener fragmentos IMSI, IDs de " +
+                "antenas y otros datos sensibles. Los snapshots se guardan en " +
+                "Logbook si se opta.",
+            "Le buffer radio de logcat peut contenir des fragments IMSI, des IDs " +
+                "d'antennes et d'autres donnees sensibles. Les snapshots sont " +
+                "enregistres dans Logbook si opt-in.",
+        )
+        fun generic(lang: Language) = m(
+            lang,
+            "Privileged operation. May cause hardware or OS damage, void the " +
+                "warranty, or violate local regulations. Read the feature " +
+                "description before enabling.",
+            "Privilegierte Operation. Kann Hardware oder OS beschaedigen, die " +
+                "Garantie aufheben oder lokale Vorschriften verletzen. Vor dem " +
+                "Aktivieren die Feature-Beschreibung lesen.",
+            "Operacion privilegiada. Puede danar hardware u OS, anular la " +
+                "garantia o violar regulaciones locales. Lee la descripcion del " +
+                "feature antes de activarlo.",
+            "Operation privilegiee. Peut endommager le materiel ou l'OS, annuler " +
+                "la garantie ou violer les regulations locales. Lisez la " +
+                "description avant d'activer.",
+        )
+    }
+
+    // Batch-11: Generic disclaimer Card text shared by Torch / Vibration /
+    // Sensors / Battery / Camera / Microphone rooted extras Cards.
+    object RootExtrasGenericDisclaimer {
+        fun text(lang: Language) = m(
+            lang,
+            "Direct privileged hardware access. Each call is rate-limited and " +
+                "requires the matching feature to be enabled in Settings, which " +
+                "in turn requires the Master Safety Mode to be off and a per-feature " +
+                "confirmation. Use at your own risk; the developer assumes no " +
+                "liability.",
+            "Direkter privilegierter Hardware-Zugriff. Jeder Aufruf ist " +
+                "ratenbegrenzt und setzt voraus, dass das Feature in den Einstellungen " +
+                "aktiviert ist; das wiederum setzt voraus, dass der Master-Safety-Modus " +
+                "aus ist und eine Pro-Feature-Bestaetigung vorliegt. Nutzung auf " +
+                "eigene Gefahr; der Entwickler uebernimmt keine Haftung.",
+            "Acceso directo privilegiado al hardware. Cada llamada esta limitada y " +
+                "requiere que el feature este activado en Settings, lo cual a su vez " +
+                "requiere que el Modo Master de Seguridad este OFF y una confirmacion " +
+                "por feature. Uso bajo tu propio riesgo; sin responsabilidad del " +
+                "desarrollador.",
+            "Acces materiel privilegie direct. Chaque appel est limite et necessite " +
+                "que la fonctionnalite soit activee dans les Reglages, ce qui necessite " +
+                "que le Mode Securite Maitre soit desactive et une confirmation par " +
+                "fonctionnalite. Utilisation a vos propres risques ; le developpeur " +
+                "n'assume aucune responsabilite.",
+        )
+    }
+
+    // Batch-12: Onboarding extras (Background Behavior, Permissions, Rooted Legal)
+    object OnboardingExtras {
+        fun backgroundBehaviorTitle(lang: Language) = m(
+            lang,
+            "Background behavior",
+            "Hintergrund-Verhalten",
+            "Comportamiento en segundo plano",
+            "Comportement en arriere-plan",
+        )
+        fun backgroundBehaviorBody(lang: Language) = m(
+            lang,
+            "HardwareDash can run a sticky foreground service so automation rules, " +
+                "widget pollers, and persistent notifications keep working even when " +
+                "Android Doze tries to pause the app. The service shows a permanent " +
+                "notification with a Stop button. You can toggle it any time in " +
+                "Settings; you may also be asked to grant a battery-optimization " +
+                "exemption so the system doesn't kill the service.",
+            "HardwareDash kann einen permanenten Vordergrunddienst ausfuehren, damit " +
+                "Automatisierungsregeln, Widget-Aktualisierungen und persistente " +
+                "Benachrichtigungen auch bei Doze weiterlaufen. Der Dienst zeigt eine " +
+                "dauerhafte Benachrichtigung mit Stopp-Schaltflaeche. Umschaltbar in den " +
+                "Einstellungen; eine Akku-Optimierungsausnahme kann angefordert werden.",
+            "HardwareDash puede ejecutar un servicio en primer plano persistente para " +
+                "que las reglas de automatizacion, las actualizaciones de widgets y las " +
+                "notificaciones persistentes sigan funcionando incluso cuando Android " +
+                "Doze intenta pausar la app. Muestra una notificacion permanente con un " +
+                "boton Detener. Se puede alternar en Ajustes; tambien puede solicitar " +
+                "una exencion de optimizacion de bateria.",
+            "HardwareDash peut executer un service de premier plan persistant pour que " +
+                "les regles d'automatisation, les mises a jour de widgets et les " +
+                "notifications persistantes continuent meme avec Doze. Affiche une " +
+                "notification permanente avec un bouton Arreter. Modifiable dans les " +
+                "Reglages ; une exemption d'optimisation de batterie peut etre demandee.",
+        )
+        fun privacyNote(lang: Language) = m(
+            lang,
+            "This app never sends data off-device. All diagnostics stay on your phone.",
+            "Diese App sendet niemals Daten nach aussen. Alle Diagnosedaten bleiben auf " +
+                "Ihrem Geraet.",
+            "Esta app nunca envia datos fuera del dispositivo. Todas las diagnosticas " +
+                "se quedan en tu telefono.",
+            "Cette app n'envoie jamais de donnees hors de l'appareil. Toutes les " +
+                "diagnostics restent sur votre telephone.",
+        )
+        fun permissionsTitle(lang: Language) = m(
+            lang,
+            "Permissions",
+            "Berechtigungen",
+            "Permisos",
+            "Autorisations",
+        )
+        fun permissionsBody(lang: Language) = m(
+            lang,
+            "HardwareDash needs runtime permissions to read sensors, the camera, the " +
+                "microphone, location, and other hardware. Tap the button below to " +
+                "grant them all in one flow. You can revoke any of them later in " +
+                "Android Settings.",
+            "HardwareDash benoetigt Laufzeit-Berechtigungen fuer Sensoren, Kamera, " +
+                "Mikrofon, Standort und andere Hardware. Mit der Schaltflaeche unten " +
+                "alles in einem Ablauf erteilen. Jederzeit in den Android-Einstellungen " +
+                "widerrufbar.",
+            "HardwareDash necesita permisos de tiempo de ejecucion para leer sensores, " +
+                "la camara, el microfono, la ubicacion y otro hardware. Pulsa el boton " +
+                "para concederlos todos en un solo flujo. Revocables en Ajustes de " +
+                "Android.",
+            "HardwareDash a besoin d'autorisations d'execution pour lire les capteurs, " +
+                "la camera, le microphone, la localisation et d'autres materiels. " +
+                "Touchez le bouton pour les accorder en une fois. Revocables dans les " +
+                "Reglages Android.",
+        )
+        fun permissionsGrantAll(lang: Language) = m(
+            lang,
+            "Grant all recommended permissions",
+            "Alle empfohlenen Berechtigungen erteilen",
+            "Conceder todos los permisos recomendados",
+            "Accorder toutes les autorisations recommandees",
+        )
+
+        // Rooted-only first onboarding page
+        fun rootedLegalPageTitle(lang: Language) = m(
+            lang,
+            "Rooted mode — read this first",
+            "Root-Modus — zuerst lesen",
+            "Modo root — lee esto primero",
+            "Mode root — a lire en premier",
+        )
+        fun rootedLegalRisksHeader(lang: Language) = m(
+            lang,
+            "What you're enabling",
+            "Was Sie aktivieren",
+            "Lo que estas activando",
+            "Ce que vous activez",
+        )
+        fun rootedLegalRiskThermal(lang: Language) = m(
+            lang,
+            "Thermal damage to LEDs, panels, motors, and the battery from " +
+                "sustained over-cap operation.",
+            "Thermische Schaeden an LEDs, Panels, Motoren und Akku durch " +
+                "anhaltenden Betrieb ueber den Werks-Limits.",
+            "Danos termicos a LEDs, paneles, motores y bateria por funcionamiento " +
+                "sostenido sobre los limites.",
+            "Dommages thermiques aux LEDs, ecrans, moteurs et batterie par " +
+                "fonctionnement soutenu au-dessus des limites.",
+        )
+        fun rootedLegalRiskRegulatory(lang: Language) = m(
+            lang,
+            "Regulatory violations from TX-power, channel, frequency, and rfkill " +
+                "changes (FCC / ETSI / MIC).",
+            "Regulatorische Verstoesse durch Aenderungen an Sendeleistung, Kanal, " +
+                "Frequenz und rfkill (FCC / ETSI / MIC).",
+            "Violaciones regulatorias por cambios de potencia TX, canal, frecuencia " +
+                "y rfkill (FCC / ETSI / MIC).",
+            "Violations reglementaires par changements de puissance TX, canal, " +
+                "frequence et rfkill (FCC / ETSI / MIC).",
+        )
+        fun rootedLegalRiskBattery(lang: Language) = m(
+            lang,
+            "Battery cell damage, swelling, or thermal runaway from direct " +
+                "charging-IC writes.",
+            "Akku-Zellschaeden, Aufblaehen oder thermisches Durchgehen durch " +
+                "direkte Charging-IC-Schreibvorgaenge.",
+            "Danos a celdas de bateria, hinchazon o fuga termica por escrituras " +
+                "directas al IC de carga.",
+            "Dommages aux cellules de batterie, gonflement ou emballement " +
+                "thermique par ecritures directes a l'IC de charge.",
+        )
+        fun rootedLegalRiskHearing(lang: Language) = m(
+            lang,
+            "Permanent hearing loss within minutes from bypassing safe-listening " +
+                "volume caps and microphone gain limits.",
+            "Dauerhafte Hoerschaeden innerhalb von Minuten durch Umgehung von " +
+                "Lautstaerke- und Mikrofonverstaerkungsgrenzen.",
+            "Perdida auditiva permanente en minutos por saltarse limites de " +
+                "volumen y ganancia del microfono.",
+            "Perte auditive permanente en minutes par contournement des limites " +
+                "de volume et de gain du microphone.",
+        )
+        fun rootedLegalRiskUx(lang: Language) = m(
+            lang,
+            "UI deadlocks, rapid battery drain, attack-surface exposure (ADB, " +
+                "USB), and information disclosure (logcat radio buffer).",
+            "UI-Sperren, schneller Akkuverbrauch, Angriffsflaechen-Aussetzung " +
+                "(ADB, USB) und Informations-Offenlegung (logcat-Funkpuffer).",
+            "Bloqueos de UI, consumo rapido de bateria, exposicion de superficie " +
+                "de ataque (ADB, USB) y divulgacion de informacion (buffer radio " +
+                "logcat).",
+            "Blocages d'UI, decharge rapide de la batterie, exposition de la " +
+                "surface d'attaque (ADB, USB) et divulgation d'informations " +
+                "(buffer radio logcat).",
+        )
+        fun rootedLegalRiskOther(lang: Language) = m(
+            lang,
+            "Sensor calibration corruption, non-reversible storage operations, " +
+                "and any other privileged side-effects of the rooted features.",
+            "Sensor-Kalibrierungs-Schaeden, nicht-umkehrbare Speicheroperationen " +
+                "und andere privilegierte Nebenwirkungen der Root-Features.",
+            "Corrupcion de calibracion de sensores, operaciones de almacenamiento " +
+                "irreversibles y otros efectos secundarios privilegiados.",
+            "Corruption d'etalonnage de capteurs, operations de stockage " +
+                "irreversibles et autres effets privilegies.",
+        )
+        fun rootedLegalEmergencyResetReminder(lang: Language) = m(
+            lang,
+            "If anything goes wrong, use the Emergency Reset button at the top of " +
+                "Settings — it reverts every tracked privileged write but cannot " +
+                "undo physical hardware damage.",
+            "Bei Problemen: Notfall-Reset-Schaltflaeche oben in den Einstellungen " +
+                "verwenden — sie setzt verfolgte privilegierte Schreibvorgaenge " +
+                "zurueck, kann aber keine physischen Schaeden rueckgaengig machen.",
+            "Si algo sale mal, usa el boton de Reset de Emergencia arriba en " +
+                "Ajustes — revierte cada escritura privilegiada registrada pero no " +
+                "puede deshacer danos fisicos.",
+            "En cas de probleme, utilisez le bouton de Reinitialisation d'urgence " +
+                "en haut des Reglages — il revoque toutes les ecritures privilegiees " +
+                "enregistrees mais ne peut pas annuler les dommages physiques.",
+        )
+        fun rootedLegalAcknowledgeCheckbox(lang: Language) = m(
+            lang,
+            "I understand the risks and accept full responsibility",
+            "Ich verstehe die Risiken und uebernehme die volle Verantwortung",
+            "Entiendo los riesgos y acepto la responsabilidad completa",
+            "Je comprends les risques et accepte l'entiere responsabilite",
+        )
+        fun rootedLegalGetStartedDisabledHint(lang: Language) = m(
+            lang,
+            "Tick the box on the first page to continue.",
+            "Markieren Sie das Kaestchen auf der ersten Seite, um fortzufahren.",
+            "Marca la casilla en la primera pagina para continuar.",
+            "Cochez la case sur la premiere page pour continuer.",
+        )
     }
 }
 

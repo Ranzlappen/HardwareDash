@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Rooted-flavor manifest fragment. Merged on top of src/main/AndroidManifest.xml
+    only when building the rooted variant — never reaches the standard APK.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+        Android 11+ package-visibility restrictions: querying for the Magisk /
+        KernelSU / APatch package via PackageManager fails silently unless we
+        list them here. Used by the per-provider probes in
+        com.gadget.root.core.* to identify which root manager is installed.
+    -->
+    <queries>
+        <package android:name="com.topjohnwu.magisk" />
+        <package android:name="me.weishu.kernelsu" />
+        <package android:name="me.bmax.apatch" />
+    </queries>
+
+    <application>
+        <!--
+            libsu RootService skeleton. Declared now so future batches can
+            bind privileged operations into the :root process without a
+            manifest change. Empty onBind() in Batch 2.
+        -->
+        <service
+            android:name="com.gadget.root.core.GadgetRootService"
+            android:exported="false"
+            tools:ignore="MissingClass" />
+    </application>
+</manifest>

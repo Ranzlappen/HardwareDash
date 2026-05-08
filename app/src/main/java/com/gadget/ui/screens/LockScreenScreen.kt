@@ -45,6 +45,7 @@ import androidx.core.app.NotificationCompat
 import com.google.accompanist.permissions.*
 import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.root.ui.NotificationRootExtrasSection
 import com.gadget.ui.components.ActionEntrySelector
 import com.gadget.ui.components.LabeledOption
 import com.gadget.ui.components.ScreenAnnouncement
@@ -768,6 +769,8 @@ fun LockScreenScreen() {
         }
 
         HorizontalDivider()
+
+        NotificationRootExtrasSection()
 
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 4 — Cancel All Notifications

@@ -27,6 +27,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
+import com.gadget.root.ui.BatteryRootExtrasSection
 import com.gadget.ui.components.AccessibleCanvas
 import com.gadget.ui.components.DashCard
 import com.gadget.ui.components.ScreenAnnouncement
@@ -286,6 +287,8 @@ fun BatteryScreen() {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
         )
+
+        BatteryRootExtrasSection()
     }
 }
 

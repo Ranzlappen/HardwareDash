@@ -33,6 +33,13 @@ import com.gadget.flipper.FlipperConnectionManager
 import com.gadget.localization.Language
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
+import com.gadget.keepalive.KeepAliveControllerResult
+import com.gadget.root.RootFeaturesEntryPoint
+import com.gadget.root.ui.AdbDebuggingRootExtrasSection
+import com.gadget.root.ui.EmergencyResetCard
+import com.gadget.root.ui.RootedFeatureTogglesCard
+import com.gadget.root.ui.RootedFirstAckDialog
+import com.gadget.root.ui.RootedLegalNoticeCard
 import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
@@ -80,6 +87,11 @@ fun SettingsScreen() {
     val coroutineScope = rememberCoroutineScope()
 
     ScreenAnnouncement(S.accessibility.settingsScreen)
+
+    // First-launch rooted-mode acknowledgement overlay. No-op on standard
+    // (NoOpRootFeatureToggles reports acknowledged = true); fires once on
+    // rooted+root-granted+!ack and persists the flag on confirm.
+    RootedFirstAckDialog()
 
     // BackupManager via Hilt entry point
     val backupManager = remember {
@@ -695,7 +707,121 @@ fun SettingsScreen() {
         // SECTION 6 — Flipper Zero
         // ══════════════════════════════════════════════════════════════════
         FlipperSection()
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 6.5 — Persistent keep-alive (Batch 7) — both flavors
+        // ══════════════════════════════════════════════════════════════════
+        KeepAliveSection()
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 6.6 — Batch-10 global Emergency Reset (rooted-only).
+        //             Promoted to top of rooted area in Batch 11 so the
+        //             safety net is the first thing visible when scrolling
+        //             into rooted territory.
+        // ══════════════════════════════════════════════════════════════════
+        EmergencyResetCard()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 6.7 — Permanent rooted-mode legal notice (Batch 11).
+        // ══════════════════════════════════════════════════════════════════
+        RootedLegalNoticeCard()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 7 — Rooted feature toggles (rendered only on rooted flavor
+        //             with root granted; otherwise the composable is empty)
+        // ══════════════════════════════════════════════════════════════════
+        RootedFeatureTogglesCard()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 8 — Batch-9 ADB Debugging root extras (rooted-only)
+        // ══════════════════════════════════════════════════════════════════
+        AdbDebuggingRootExtrasSection()
     }
+}
+
+private const val KEEP_ALIVE_PREFS = "gadget_keep_alive"
+private const val KEY_KEEP_ALIVE_ENABLED = "keep_alive_enabled"
+
+@Composable
+private fun KeepAliveSection() {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val prefs = remember { context.getSharedPreferences(KEEP_ALIVE_PREFS, Context.MODE_PRIVATE) }
+    var enabled by remember { mutableStateOf(prefs.getBoolean(KEY_KEEP_ALIVE_ENABLED, false)) }
+    val lang = LocalizationManager.loadLanguage(context)
+    val keepAlive = remember {
+        EntryPointAccessors
+            .fromApplication(context.applicationContext, RootFeaturesEntryPoint::class.java)
+            .keepAliveController()
+    }
+
+    Card(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .semantics(mergeDescendants = true) { },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    S.KeepAlive.title(lang),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.sectionHeading(),
+                )
+                Text(
+                    S.KeepAlive.body(lang),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    S.KeepAlive.standardFootnote(lang),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    S.KeepAlive.rootedFootnote(lang),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Switch(
+                checked = enabled,
+                onCheckedChange = { newValue ->
+                    enabled = newValue
+                    prefs.edit().putBoolean(KEY_KEEP_ALIVE_ENABLED, newValue).apply()
+                    coroutineScope.launch(Dispatchers.IO) {
+                        val result = if (newValue) keepAlive.enable() else keepAlive.disable()
+                        if (result is KeepAliveControllerResult.UserBatteryOptExemptionRequested) {
+                            launchBatteryOptExemption(context)
+                        }
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Suppress("BatteryLife")
+private fun launchBatteryOptExemption(context: Context) {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M) return
+    val intent = Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+        .setData(android.net.Uri.parse("package:${context.packageName}"))
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    runCatching { context.startActivity(intent) }
+        .onFailure { Timber.w(it, "Could not open battery-opt exemption settings") }
 }
 
 @Composable

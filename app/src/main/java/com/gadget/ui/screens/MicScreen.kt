@@ -32,6 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.*
 import com.gadget.localization.S
+import com.gadget.root.ui.AudioRoutingRootExtrasSection
+import com.gadget.root.ui.MicrophoneRootExtrasSection
 import com.gadget.ui.components.AccessibleCanvas
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.minimumTouchTarget
@@ -513,6 +515,11 @@ private fun MicMeter() {
                 }
             }
         }
+
+        Spacer(Modifier.height(16.dp))
+        MicrophoneRootExtrasSection()
+        Spacer(Modifier.height(16.dp))
+        AudioRoutingRootExtrasSection()
     }
 
     // Cleanup media player

@@ -16,7 +16,9 @@ android {
         applicationId "com.gadget"
         minSdk 29            // Android 10 — covers Huawei P30
         targetSdk 35         // Android 15 — targets Xiaomi 14T Pro
-        versionCode project.hasProperty('CI_VERSION_CODE') ? project.property('CI_VERSION_CODE').toInteger() : 1
+        // Per-flavor offset is added below (standard=+0, rooted=+1) so the two
+        // APKs can ship side-by-side without ever colliding on Play.
+        versionCode project.hasProperty('CI_VERSION_CODE') ? project.property('CI_VERSION_CODE').toInteger() * 10 : 10
         versionName project.hasProperty('CI_VERSION_NAME') ? project.property('CI_VERSION_NAME') : "1.0-dev"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary true }
@@ -29,7 +31,39 @@ android {
         buildConfigField "String", "APP_DESCRIPTION", "\"${project.findProperty('APP_DESCRIPTION') ?: 'Gadget — monitor and control device sensors, camera, audio, and more'}\""
     }
 
+    // ════════════════════ PRODUCT FLAVORS ════════════════════
+    // Two flavors on a single dimension. Shared code stays in src/main/.
+    // Flavor-specific code lives in src/standard/ and src/rooted/ — AGP
+    // automatically scopes those source sets to their flavor's variants, so
+    // the standard APK is physically incapable of containing anything from
+    // src/rooted/ (and vice versa).
+    flavorDimensions "capability"
+    productFlavors {
+        standard {
+            dimension "capability"
+            // Keeps the existing applicationId "com.gadget" — preserves install
+            // signature for users already on the standard APK. Inherits
+            // versionCode from defaultConfig (offset = +0).
+            buildConfigField "boolean", "IS_ROOTED", "false"
+            buildConfigField "String", "FLAVOR_NAME", "\"standard\""
+        }
+        rooted {
+            dimension "capability"
+            applicationIdSuffix ".root"          // -> com.gadget.root
+            versionNameSuffix "-root"
+            // Offset = +1 keeps the rooted APK monotonic alongside standard.
+            versionCode (defaultConfig.versionCode + 1)
+            buildConfigField "boolean", "IS_ROOTED", "true"
+            buildConfigField "String", "FLAVOR_NAME", "\"rooted\""
+        }
+    }
+
     buildTypes {
+        debug {
+            // Explicit empty debug block so assemble<Flavor>Debug tasks exist
+            // with predictable output names. Debug variants use the AGP-managed
+            // debug keystore by default — no extra configuration needed.
+        }
         release {
             minifyEnabled true
             shrinkResources true
@@ -62,7 +96,8 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
-            outputFileName = "Gadget-v${variant.versionName}-release.apk"
+            // e.g. "Gadget-standard-v1.0.42-release.apk", "Gadget-rooted-v1.0.42-root-debug.apk"
+            outputFileName = "Gadget-${variant.flavorName}-v${variant.versionName}-${variant.buildType.name}.apk"
         }
     }
 }
@@ -139,6 +174,13 @@ dependencies {
 
     // USB serial (CDC-ACM) — Flipper Zero USB transport
     implementation 'com.github.mik3y:usb-serial-for-android:3.7.0'
+
+    // ════════════════════ ROOTED-ONLY DEPENDENCIES ════════════════════
+    // libsu is the privileged-shell + RootService backend used by the
+    // rooted flavor. NEVER promote these to plain `implementation` — the
+    // standard APK must ship without libsu in its classpath.
+    rootedImplementation 'com.github.topjohnwu.libsu:core:5.2.2'
+    rootedImplementation 'com.github.topjohnwu.libsu:service:5.2.2'
 
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'

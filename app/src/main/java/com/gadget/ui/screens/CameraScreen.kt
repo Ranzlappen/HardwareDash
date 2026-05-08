@@ -32,6 +32,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.*
 import com.gadget.localization.S
+import com.gadget.root.ui.CameraRootExtrasButton
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
 import kotlin.coroutines.resume
@@ -377,6 +378,12 @@ private fun CameraPreview() {
                 }
             }
         }
+
+        CameraRootExtrasButton(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp),
+        )
     }
 }
 

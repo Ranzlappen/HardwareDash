@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rooted flavor display name. Overrides @string/app_name from src/main. -->
+    <string name="flavor_label" translatable="false">Gadget Root</string>
+    <string name="app_name" translatable="false">Gadget Root</string>
+</resources>

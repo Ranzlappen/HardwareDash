@@ -48,6 +48,46 @@ Rules of thumb when writing new code:
   evaluated inside a `@Composable` function. Capture the resolved object into a
   local once and read its plain `val`s from non-composable callbacks.
 
+## Plan-mode file hygiene
+
+The plan file at `/root/.claude/plans/<name>.md` is a **per-task scratchpad,
+not a historical log**. Apply these rules in every plan-mode session on this
+repo (or any repo following these standards):
+
+1. Each new plan-mode session must **replace** the file's contents with the
+   current task's plan — never append.
+2. Prior batch plans live in git commits, the PR description, and this
+   `CLAUDE.md` — not in the plan file.
+3. Git is the source of truth for shipped work. The plan file's job is to
+   describe what's about to happen *now*, not what already happened.
+4. If the same plan file balloons past ~500 lines after a session, it has
+   accumulated stale content; truncate it at the start of the next session.
+
+Rationale: incremental appends caused the plan file to balloon to 1,849 lines
+after Batch 7, obscuring the current plan during review.
+
+## Flavors (standard vs rooted)
+
+The app ships as two product flavors built from one repo:
+
+- `standard` (applicationId `com.gadget`) — existing non-rooted behavior.
+- `rooted` (applicationId `com.gadget.root`) — adds root-only capabilities.
+
+Rules (full details in `docs/flavors.md`):
+
+1. Shared code lives in `app/src/main/`. New features default here.
+2. Standard-only stubs live in `app/src/standard/`. Rooted-only code lives in
+   `app/src/rooted/`. Files in those two directories MUST share fully-qualified
+   class names — Gradle picks one at build time based on the active flavor.
+3. Never branch on `BuildConfig.IS_ROOTED`. Inject `RootCapabilityRegistry` /
+   `RootSafetyGate` (in `com.gadget.root`) and let the Hilt seam pick the
+   right implementation per flavor.
+4. Never put rooted-specific imports (e.g. anything that talks to su) under
+   `src/main/`. They belong in `src/rooted/` with a no-op twin in `src/standard/`.
+5. CI produces `standard-debug.apk`, `standard-release.apk` + `.aab`, and
+   `rooted-debug.apk`. `versionCode = CI_VERSION_CODE * 10 + flavor_offset`
+   (standard=+0, rooted=+1).
+
 ## Layout
 
 - Settings: `app/src/main/java/com/gadget/ui/screens/SettingsScreen.kt`

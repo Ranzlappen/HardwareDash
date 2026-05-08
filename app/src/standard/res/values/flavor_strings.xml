@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Standard flavor keeps the same display name as the existing release. -->
+    <string name="flavor_label" translatable="false">Gadget</string>
+</resources>

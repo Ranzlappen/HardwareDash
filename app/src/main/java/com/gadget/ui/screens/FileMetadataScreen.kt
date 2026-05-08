@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.exifinterface.media.ExifInterface
 import androidx.compose.ui.semantics.semantics
 import com.gadget.localization.S
+import com.gadget.root.ui.StorageRootExtrasSection
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.sectionHeading
 import java.text.SimpleDateFormat
@@ -455,6 +456,9 @@ fun FileMetadataScreen() {
                 }
             }
         }
+
+        Spacer(Modifier.height(16.dp))
+        StorageRootExtrasSection()
     }
 
     // ── Help Dialog ───────────────────────────────────────────────────
