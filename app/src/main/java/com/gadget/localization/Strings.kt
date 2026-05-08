@@ -1481,6 +1481,142 @@ object S {
                 "Auto-revoque a la sortie; ACCESSIBILITY/DTMF/Appel preserves.",
         )
     }
+
+    // Batch-9: ADB Debugging root extras
+    object AdbDebuggingRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (ADB Debugging)",
+            "Root-Erweiterungen (ADB-Debug)",
+            "Extras root (Depuracion ADB)",
+            "Extras root (Debogage ADB)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Toggle ADB enabled, ADB-over-network on an allow-listed port (5555-5599), " +
+                "getprop snapshot, and allow-listed setprop override. Auto-revert on exit.",
+            "ADB-Schalter, ADB-ueber-Netzwerk auf zugelassenem Port (5555-5599), " +
+                "getprop-Snapshot und allow-listete setprop-Ueberschreibung. Auto-Revert.",
+            "Cambiar ADB, ADB por red en puerto permitido (5555-5599), snapshot " +
+                "de getprop y override de setprop con allow-list. Auto-revertido al salir.",
+            "Bascule ADB, ADB-reseau sur port autorise (5555-5599), snapshot getprop, " +
+                "override setprop avec allow-list. Auto-revoque a la sortie.",
+        )
+        fun toggleAdb(lang: Language) = m(
+            lang,
+            "Toggle ADB enabled",
+            "ADB-Schalter umschalten",
+            "Cambiar ADB activado",
+            "Basculer ADB active",
+        )
+        fun toggleNetwork(lang: Language) = m(
+            lang,
+            "Enable ADB-over-network @ 5555",
+            "ADB-ueber-Netzwerk @ 5555 aktivieren",
+            "Activar ADB por red @ 5555",
+            "Activer ADB-reseau @ 5555",
+        )
+        fun dumpProperties(lang: Language) = m(
+            lang,
+            "Dump getprop snapshot",
+            "getprop-Snapshot speichern",
+            "Capturar snapshot de getprop",
+            "Capturer snapshot getprop",
+        )
+        fun setpropOverride(lang: Language) = m(
+            lang,
+            "Override allow-listed property",
+            "Erlaubte Property ueberschreiben",
+            "Anular property con allow-list",
+            "Remplacer propriete allow-list",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all ADB mutations",
+            "Alle ADB-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de ADB",
+            "Reinitialiser toutes les mutations ADB",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Enabling ADB exposes the device to USB / Wi-Fi attackers. setprop allow-list " +
+                "refuses ro.* keys; ADB-over-network port allow-list 5555-5599.",
+            "ADB-Aktivierung setzt das Geraet USB-/Wi-Fi-Angriffen aus. setprop-Allow-List " +
+                "lehnt ro.* ab; ADB-Netzwerk-Allow-Liste 5555-5599.",
+            "Activar ADB expone el dispositivo a atacantes USB/Wi-Fi. setprop rechaza " +
+                "ro.*; allow-list de ADB por red 5555-5599.",
+            "Activer ADB expose l'appareil a des attaquants USB/Wi-Fi. setprop refuse " +
+                "ro.*; allow-list ADB-reseau 5555-5599.",
+        )
+    }
+
+    // Batch-9: USB Debugging root extras
+    object UsbDebuggingRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (USB Debugging)",
+            "Root-Erweiterungen (USB-Debug)",
+            "Extras root (Depuracion USB)",
+            "Extras root (Debogage USB)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Switch USB function (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+), and /sys/kernel/debug/usb/devices probe.",
+            "USB-Funktion umschalten (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+) und debugfs-USB-Devices-Probe.",
+            "Cambiar funcion USB (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+) y sondeo de /sys/kernel/debug/usb/devices.",
+            "Changer fonction USB (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+) et sonde /sys/kernel/debug/usb/devices.",
+        )
+        fun switchFunction(lang: Language) = m(
+            lang,
+            "Switch USB function -> MTP",
+            "USB-Funktion -> MTP",
+            "Cambiar funcion USB -> MTP",
+            "Changer fonction USB -> MTP",
+        )
+        fun dumpUsb(lang: Language) = m(
+            lang,
+            "dumpsys usb snapshot",
+            "dumpsys-usb-Snapshot",
+            "Snapshot de dumpsys usb",
+            "Snapshot dumpsys usb",
+        )
+        fun dumpSerialService(lang: Language) = m(
+            lang,
+            "dumpsys SerialService (API 30+)",
+            "dumpsys SerialService (API 30+)",
+            "dumpsys SerialService (API 30+)",
+            "dumpsys SerialService (API 30+)",
+        )
+        fun dumpDevicesDebug(lang: Language) = m(
+            lang,
+            "debugfs USB devices probe",
+            "debugfs-USB-Devices-Probe",
+            "Sondeo debugfs de USB devices",
+            "Sonde debugfs USB devices",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all USB mutations",
+            "Alle USB-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de USB",
+            "Reinitialiser toutes les mutations USB",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Switching the USB function role can break MTP file transfer or charging. " +
+                "Auto-revert on screen exit. Diagnostics tail-capped to 8 KB.",
+            "Wechsel der USB-Funktion kann MTP-Uebertragung oder Laden brechen. " +
+                "Auto-Revert beim Verlassen. Diagnose auf 8 KB gekappt.",
+            "Cambiar la funcion USB puede romper la transferencia MTP o la carga. " +
+                "Auto-revertido al salir. Diagnostico limitado a 8 KB.",
+            "Changer la fonction USB peut casser le transfert MTP ou la charge. " +
+                "Auto-revoque a la sortie. Diagnostic limite a 8 KB.",
+        )
+    }
 }
 
 /** Helper: pick the string for the given language. Order: EN, DE, ES, FR. */

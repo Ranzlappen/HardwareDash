@@ -61,4 +61,27 @@ interface BatteryController {
      * prefixes. Standard-flavor returns `ResetCompleted(0, 0)`.
      */
     suspend fun resetAllBatteryMutations(): BatteryControllerResult
+
+    /**
+     * Holds the pack at a target SOC by toggling `input_suspend` /
+     * `charge_disable` while polling `capacity` at 1 Hz. Hard ceiling
+     * 600 s; target SOC clamped to 20–90 inside the helper. Snapshot+restore
+     * via `power_supply://battery/hold_soc`.
+     */
+    suspend fun holdStateOfCharge(config: HoldSocConfig): BatteryControllerResult
+
+    /**
+     * Reads cycle-count / design-capacity / full-charge-capacity / fuel-gauge
+     * IC nodes (MAX1720x, qpnp-fg, etc.) and returns them as a
+     * [BatteryControllerResult.BatteryHealthReading]. Read-only.
+     */
+    suspend fun batteryHealthDeepDump(): BatteryControllerResult
+
+    /**
+     * Caps the wireless-charging coil current. Hard ceiling 1 500 000 µA
+     * and a 30-second active window enforced inside the helper, regardless
+     * of caller-supplied values. Snapshot+restore via
+     * `power_supply://wireless/coil_current`.
+     */
+    suspend fun wirelessCoilCurrent(config: WirelessCoilCurrentConfig): BatteryControllerResult
 }

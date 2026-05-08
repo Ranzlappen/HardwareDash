@@ -15,6 +15,7 @@ internal const val CHARGING_TYPE_OVERRIDE_HARD_CEILING_MILLIS = 30_000L
 private val BATTERY_RESET_PREFIXES = listOf(
     "/sys/class/power_supply/",
     "/sys/class/thermal/",
+    "power_supply://",
 )
 private val PSU_USB_TYPE_NODES = listOf(
     "/sys/class/power_supply/usb/type",
@@ -35,6 +36,9 @@ class RootedBatteryController @Inject constructor(
     private val chargingProfile: ChargingProfileOverride,
     private val thermalBypass: ThermalThrottleBypass,
     private val mutationLog: SysfsMutationLog,
+    private val holdSocLoop: HoldSocLoop,
+    private val healthReader: BatteryHealthReader,
+    private val wirelessCoilWriter: WirelessCoilWriter,
 ) : BatteryController {
 
     override suspend fun fuelGaugeRaw(): BatteryControllerResult =
@@ -140,6 +144,17 @@ class RootedBatteryController @Inject constructor(
             failed = outcome.failed,
         )
     }
+
+    override suspend fun holdStateOfCharge(config: HoldSocConfig): BatteryControllerResult =
+        runGated(RootFeatureKey.BatteryHoldSoc) { holdSocLoop.run(config) }
+
+    override suspend fun batteryHealthDeepDump(): BatteryControllerResult =
+        runGated(RootFeatureKey.BatteryHealthDeepDump) { healthReader.read(persist = true) }
+
+    override suspend fun wirelessCoilCurrent(
+        config: WirelessCoilCurrentConfig,
+    ): BatteryControllerResult =
+        runGated(RootFeatureKey.BatteryWirelessCoilCurrent) { wirelessCoilWriter.apply(config) }
 
     private suspend inline fun runGated(
         feature: RootFeatureKey,

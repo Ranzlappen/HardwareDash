@@ -35,6 +35,7 @@ import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import com.gadget.keepalive.KeepAliveControllerResult
 import com.gadget.root.RootFeaturesEntryPoint
+import com.gadget.root.ui.AdbDebuggingRootExtrasSection
 import com.gadget.root.ui.RootedFeatureTogglesCard
 import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
@@ -713,6 +714,11 @@ fun SettingsScreen() {
         //             with root granted; otherwise the composable is empty)
         // ══════════════════════════════════════════════════════════════════
         RootedFeatureTogglesCard()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 8 — Batch-9 ADB Debugging root extras (rooted-only)
+        // ══════════════════════════════════════════════════════════════════
+        AdbDebuggingRootExtrasSection()
     }
 }
 

@@ -41,6 +41,16 @@ private const val AUDIO_ROUTING_WINDOW_SECONDS = 30
 private const val AUDIO_MUTE_WINDOW_MINUTES = 5
 private const val AUDIO_DUMP_WINDOW_SECONDS = 60
 
+private const val BATTERY_HOLD_SOC_WINDOW_MINUTES = 5
+private const val BATTERY_HEALTH_DEEP_DUMP_WINDOW_SECONDS = 60
+private const val BATTERY_WIRELESS_COIL_WINDOW_MINUTES = 5
+private const val ADB_TOGGLE_WINDOW_SECONDS = 60
+private const val ADB_NETWORK_WINDOW_MINUTES = 5
+private const val ADB_DUMP_WINDOW_SECONDS = 60
+private const val ADB_SETPROP_WINDOW_SECONDS = 60
+private const val USB_FUNCTION_WINDOW_SECONDS = 60
+private const val USB_DUMP_WINDOW_SECONDS = 60
+
 /**
  * Single source of truth mapping every [RootFeatureKey] to its
  * [RootFeatureDescriptor]. Both flavors read this; the standard flavor's
@@ -657,6 +667,122 @@ class RootFeatureRegistry @Inject constructor() {
             defaultOn = false,
             limit = RootLimitPolicy(
                 window = AUDIO_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+
+        // ──── Batch-9 Battery deep-dive features ────
+        RootFeatureKey.BatteryHoldSoc to RootFeatureDescriptor(
+            key = RootFeatureKey.BatteryHoldSoc,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = BATTERY_HOLD_SOC_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.BatteryHealthDeepDump to RootFeatureDescriptor(
+            key = RootFeatureKey.BatteryHealthDeepDump,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = BATTERY_HEALTH_DEEP_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.BatteryWirelessCoilCurrent to RootFeatureDescriptor(
+            key = RootFeatureKey.BatteryWirelessCoilCurrent,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = BATTERY_WIRELESS_COIL_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+
+        // ──── Batch-9 ADB Debugging features ────
+        RootFeatureKey.AdbToggleEnabled to RootFeatureDescriptor(
+            key = RootFeatureKey.AdbToggleEnabled,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = ADB_TOGGLE_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.AdbOverNetwork to RootFeatureDescriptor(
+            key = RootFeatureKey.AdbOverNetwork,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = ADB_NETWORK_WINDOW_MINUTES.minutes,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.AdbDumpProperties to RootFeatureDescriptor(
+            key = RootFeatureKey.AdbDumpProperties,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = ADB_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_HIGH_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.AdbSetpropOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.AdbSetpropOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = ADB_SETPROP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+
+        // ──── Batch-9 USB Debugging features ────
+        RootFeatureKey.UsbSwitchFunction to RootFeatureDescriptor(
+            key = RootFeatureKey.UsbSwitchFunction,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = USB_FUNCTION_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.UsbDumpUsb to RootFeatureDescriptor(
+            key = RootFeatureKey.UsbDumpUsb,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = USB_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_HIGH_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.UsbDumpSerialService to RootFeatureDescriptor(
+            key = RootFeatureKey.UsbDumpSerialService,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = USB_DUMP_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_HIGH_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.UsbDumpUsbDevicesDebug to RootFeatureDescriptor(
+            key = RootFeatureKey.UsbDumpUsbDevicesDebug,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = USB_DUMP_WINDOW_SECONDS.seconds,
                 maxInvocations = EXTREME_OPS_MED_CAP,
             ),
             requiresExplicitConfirm = false,

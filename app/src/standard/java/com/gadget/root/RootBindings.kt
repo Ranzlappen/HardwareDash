@@ -5,6 +5,8 @@ import com.gadget.root.core.RootDetector
 import com.gadget.root.core.RootService
 import com.gadget.root.core.RootShell
 import com.gadget.root.launch.LaunchGate
+import com.gadget.adbdebug.AdbDebuggingController
+import com.gadget.adbdebug.StandardAdbDebuggingController
 import com.gadget.audio.AudioRoutingController
 import com.gadget.audio.StandardAudioRoutingController
 import com.gadget.automation.AutomationController
@@ -41,6 +43,8 @@ import com.gadget.wifi.StandardWifiController
 import com.gadget.wifi.WifiController
 import com.gadget.torch.StandardTorchController
 import com.gadget.torch.TorchController
+import com.gadget.usbdebug.StandardUsbDebuggingController
+import com.gadget.usbdebug.UsbDebuggingController
 import com.gadget.vibration.StandardVibrationController
 import com.gadget.vibration.VibrationController
 import dagger.Module
@@ -191,4 +195,18 @@ object RootBindings {
     fun provideAudioRoutingController(
         impl: StandardAudioRoutingController,
     ): AudioRoutingController = impl
+
+    // ──── Batch 9: ADB + USB Debugging controllers ────
+
+    @Provides
+    @Singleton
+    fun provideAdbDebuggingController(
+        impl: StandardAdbDebuggingController,
+    ): AdbDebuggingController = impl
+
+    @Provides
+    @Singleton
+    fun provideUsbDebuggingController(
+        impl: StandardUsbDebuggingController,
+    ): UsbDebuggingController = impl
 }

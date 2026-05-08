@@ -114,4 +114,21 @@ sealed class RootFeatureKey(val id: String) {
     data object AudioForceRouting : RootFeatureKey("audio_force_routing")
     data object AudioMuteAllStreams : RootFeatureKey("audio_mute_all_streams")
     data object AudioDumpAudioPolicy : RootFeatureKey("audio_dump_audio_policy")
+
+    // ──── Batch-9 Battery deep-dive features ────
+    data object BatteryHoldSoc : RootFeatureKey("battery_hold_soc")
+    data object BatteryHealthDeepDump : RootFeatureKey("battery_health_deep_dump")
+    data object BatteryWirelessCoilCurrent : RootFeatureKey("battery_wireless_coil_current")
+
+    // ──── Batch-9 ADB Debugging features ────
+    data object AdbToggleEnabled : RootFeatureKey("adb_toggle_enabled")
+    data object AdbOverNetwork : RootFeatureKey("adb_over_network")
+    data object AdbDumpProperties : RootFeatureKey("adb_dump_properties")
+    data object AdbSetpropOverride : RootFeatureKey("adb_setprop_override")
+
+    // ──── Batch-9 USB Debugging features ────
+    data object UsbSwitchFunction : RootFeatureKey("usb_switch_function")
+    data object UsbDumpUsb : RootFeatureKey("usb_dump_usb")
+    data object UsbDumpSerialService : RootFeatureKey("usb_dump_serial_service")
+    data object UsbDumpUsbDevicesDebug : RootFeatureKey("usb_dump_usb_devices_debug")
 }

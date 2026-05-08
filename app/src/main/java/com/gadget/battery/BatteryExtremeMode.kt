@@ -32,3 +32,26 @@ data class ChargingTypeOverrideConfig(
     val type: String,
     val durationMillis: Long,
 )
+
+/**
+ * Battery longevity hold. The helper polls `capacity` at 1 Hz and toggles
+ * `input_suspend` / `charge_disable` to keep the pack near
+ * [targetSocPercent]. The helper clamps the target to 20–90 internally and
+ * caps the duration at 600 s — caller-supplied values outside those ranges
+ * are silently coerced.
+ */
+data class HoldSocConfig(
+    val targetSocPercent: Int,
+    val durationMillis: Long,
+)
+
+/**
+ * Wireless-charging coil-current cap. Writes to
+ * `/sys/class/power_supply/wireless/current_max` (or the qcom-pmic-wireless
+ * driver path). The helper clamps [maxCurrentMicroAmps] to 1 500 000 (1.5 A)
+ * and caps [durationMillis] at 30 s regardless of caller intent.
+ */
+data class WirelessCoilCurrentConfig(
+    val maxCurrentMicroAmps: Long,
+    val durationMillis: Long,
+)

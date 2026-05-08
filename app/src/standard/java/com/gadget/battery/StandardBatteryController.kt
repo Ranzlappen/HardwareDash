@@ -32,4 +32,14 @@ class StandardBatteryController @Inject constructor() : BatteryController {
 
     override suspend fun resetAllBatteryMutations(): BatteryControllerResult =
         BatteryControllerResult.ResetCompleted(restored = 0, failed = 0)
+
+    override suspend fun holdStateOfCharge(config: HoldSocConfig): BatteryControllerResult =
+        BatteryControllerResult.Unsupported
+
+    override suspend fun batteryHealthDeepDump(): BatteryControllerResult =
+        BatteryControllerResult.Unsupported
+
+    override suspend fun wirelessCoilCurrent(
+        config: WirelessCoilCurrentConfig,
+    ): BatteryControllerResult = BatteryControllerResult.Unsupported
 }

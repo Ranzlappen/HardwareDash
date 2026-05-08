@@ -23,7 +23,9 @@ import androidx.compose.ui.unit.dp
 import com.gadget.battery.BatteryControllerResult
 import com.gadget.battery.ChargingProfileConfig
 import com.gadget.battery.ChargingTypeOverrideConfig
+import com.gadget.battery.HoldSocConfig
 import com.gadget.battery.ThermalBypassConfig
+import com.gadget.battery.WirelessCoilCurrentConfig
 import com.gadget.sensors.FusionOverrideConfig
 import com.gadget.sensors.HighPollingConfig
 import com.gadget.sensors.OverclockConfig
@@ -48,6 +50,11 @@ private const val DEMO_BATTERY_CHARGING_DURATION_MS = 10_000L
 private const val DEMO_BATTERY_THERMAL_DURATION_MS = 10_000L
 private const val DEMO_BATTERY_USB_TYPE = "USB_DCP"
 private const val DEMO_BATTERY_USB_DURATION_MS = 5_000L
+
+private const val DEMO_BATTERY_HOLD_SOC_PERCENT = 80
+private const val DEMO_BATTERY_HOLD_SOC_DURATION_MS = 60_000L
+private const val DEMO_BATTERY_WIRELESS_COIL_UA = 1_000_000L
+private const val DEMO_BATTERY_WIRELESS_COIL_DURATION_MS = 15_000L
 
 /**
  * Card for the Sensors "Root extras" surface. Fits inside SensorsScreen's
@@ -260,6 +267,42 @@ fun BatteryRootExtrasSection(modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { scope.launch { status = describeBatteryResult(battery.fullDump()) } },
             ) { Text("Full diagnostic dump → logbook") }
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    scope.launch {
+                        status = describeBatteryResult(
+                            battery.holdStateOfCharge(
+                                HoldSocConfig(
+                                    targetSocPercent = DEMO_BATTERY_HOLD_SOC_PERCENT,
+                                    durationMillis = DEMO_BATTERY_HOLD_SOC_DURATION_MS,
+                                ),
+                            ),
+                        )
+                    }
+                },
+            ) { Text("Hold SOC at ${DEMO_BATTERY_HOLD_SOC_PERCENT}% (60s)") }
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    scope.launch { status = describeBatteryResult(battery.batteryHealthDeepDump()) }
+                },
+            ) { Text("Battery health deep-dump → logbook") }
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    scope.launch {
+                        status = describeBatteryResult(
+                            battery.wirelessCoilCurrent(
+                                WirelessCoilCurrentConfig(
+                                    maxCurrentMicroAmps = DEMO_BATTERY_WIRELESS_COIL_UA,
+                                    durationMillis = DEMO_BATTERY_WIRELESS_COIL_DURATION_MS,
+                                ),
+                            ),
+                        )
+                    }
+                },
+            ) { Text("Wireless coil cap @ 1.0 A (15s)") }
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
@@ -301,4 +344,13 @@ private fun describeBatteryResult(result: BatteryControllerResult): String = whe
         "Read ${result.cells.size} cells"
     is BatteryControllerResult.DumpWritten -> "Dump written → ${result.absolutePath}"
     is BatteryControllerResult.DangerousAborted -> "Aborted: ${result.reason}"
+    is BatteryControllerResult.HoldSocSnapshot ->
+        "Held SOC at ${result.appliedTargetSocPercent}% for " +
+            "${result.appliedDurationMillis / 1000}s (start=${result.initialSocPercent ?: "?"}%)"
+    is BatteryControllerResult.BatteryHealthReading ->
+        "Health: cycles=${result.cycleCount ?: "?"} " +
+            "design=${result.designCapacityUah ?: "?"}uAh full=${result.fullChargeCapacityUah ?: "?"}uAh"
+    is BatteryControllerResult.WirelessCoilSnapshot ->
+        "Coil cap applied: ${result.appliedCoilCurrentMicroAmps}uA " +
+            "(prior=${result.priorCoilCurrentMicroAmps ?: "?"}uA)"
 }

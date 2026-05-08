@@ -1,5 +1,6 @@
 package com.gadget.root
 
+import com.gadget.adbdebug.AdbDebuggingController
 import com.gadget.audio.AudioRoutingController
 import com.gadget.automation.AutomationController
 import com.gadget.battery.BatteryController
@@ -16,6 +17,7 @@ import com.gadget.notification.NotificationController
 import com.gadget.sensors.SensorsController
 import com.gadget.storage.StorageController
 import com.gadget.torch.TorchController
+import com.gadget.usbdebug.UsbDebuggingController
 import com.gadget.vibration.VibrationController
 import com.gadget.wifi.WifiController
 import dagger.hilt.EntryPoint
@@ -54,4 +56,6 @@ interface RootFeaturesEntryPoint {
     fun storageController(): StorageController
     fun displayController(): DisplayController
     fun audioRoutingController(): AudioRoutingController
+    fun adbDebuggingController(): AdbDebuggingController
+    fun usbDebuggingController(): UsbDebuggingController
 }
