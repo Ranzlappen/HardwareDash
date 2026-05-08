@@ -48,6 +48,28 @@ Rules of thumb when writing new code:
   evaluated inside a `@Composable` function. Capture the resolved object into a
   local once and read its plain `val`s from non-composable callbacks.
 
+## Flavors (standard vs rooted)
+
+The app ships as two product flavors built from one repo:
+
+- `standard` (applicationId `com.gadget`) — existing non-rooted behavior.
+- `rooted` (applicationId `com.gadget.root`) — adds root-only capabilities.
+
+Rules (full details in `docs/flavors.md`):
+
+1. Shared code lives in `app/src/main/`. New features default here.
+2. Standard-only stubs live in `app/src/standard/`. Rooted-only code lives in
+   `app/src/rooted/`. Files in those two directories MUST share fully-qualified
+   class names — Gradle picks one at build time based on the active flavor.
+3. Never branch on `BuildConfig.IS_ROOTED`. Inject `RootCapabilityRegistry` /
+   `RootSafetyGate` (in `com.gadget.root`) and let the Hilt seam pick the
+   right implementation per flavor.
+4. Never put rooted-specific imports (e.g. anything that talks to su) under
+   `src/main/`. They belong in `src/rooted/` with a no-op twin in `src/standard/`.
+5. CI produces `standard-debug.apk`, `standard-release.apk` + `.aab`, and
+   `rooted-debug.apk`. `versionCode = CI_VERSION_CODE * 10 + flavor_offset`
+   (standard=+0, rooted=+1).
+
 ## Layout
 
 - Settings: `app/src/main/java/com/gadget/ui/screens/SettingsScreen.kt`

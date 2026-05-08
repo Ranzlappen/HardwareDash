@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Rooted flavor manifest fragment. Empty for Batch 1 — exists so the source
+    set is registered and so future batches can drop in root-only <queries>,
+    services, providers, or permissions WITHOUT touching src/main/.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" />
