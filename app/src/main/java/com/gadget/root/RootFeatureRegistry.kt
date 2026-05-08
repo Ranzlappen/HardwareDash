@@ -10,6 +10,11 @@ private const val EXTREME_OPS_MED_CAP = 5
 private const val EXTREME_OPS_HIGH_CAP = 10
 private const val SINGLE_INVOCATION_CAP = 1
 
+private const val CAMERA_HEAVY_WINDOW_SECONDS = 120
+private const val CAMERA_RAW_WINDOW_SECONDS = 30
+private const val CAMERA_SHUTTER_SOUND_WINDOW_SECONDS = 300
+private const val MIC_SYSTEM_AUDIO_WINDOW_SECONDS = 120
+
 /**
  * Single source of truth mapping every [RootFeatureKey] to its
  * [RootFeatureDescriptor]. Both flavors read this; the standard flavor's
@@ -82,6 +87,97 @@ class RootFeatureRegistry @Inject constructor() {
             key = RootFeatureKey.VibrationSustainedRumble,
             defaultOn = false,
             limit = RootLimitPolicy(window = 5.minutes, maxInvocations = SINGLE_INVOCATION_CAP),
+            requiresExplicitConfirm = true,
+        ),
+
+        // ──── Batch-4 Camera features ────
+        RootFeatureKey.CameraHighFps to RootFeatureDescriptor(
+            key = RootFeatureKey.CameraHighFps,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
+            requiresExplicitConfirm = false,
+        ),
+        RootFeatureKey.CameraManualOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.CameraManualOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
+            requiresExplicitConfirm = false,
+        ),
+        RootFeatureKey.CameraRawCapture to RootFeatureDescriptor(
+            key = RootFeatureKey.CameraRawCapture,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = CAMERA_RAW_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = false,
+        ),
+        RootFeatureKey.CameraMultiSimultaneous to RootFeatureDescriptor(
+            key = RootFeatureKey.CameraMultiSimultaneous,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = CAMERA_HEAVY_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+        ),
+        RootFeatureKey.CameraHalBypass to RootFeatureDescriptor(
+            key = RootFeatureKey.CameraHalBypass,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = CAMERA_HEAVY_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+        ),
+        RootFeatureKey.CameraShutterSoundOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.CameraShutterSoundOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = CAMERA_SHUTTER_SOUND_WINDOW_SECONDS.seconds,
+                maxInvocations = SINGLE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+        ),
+
+        // ──── Batch-4 Microphone features ────
+        RootFeatureKey.MicGainBoost to RootFeatureDescriptor(
+            key = RootFeatureKey.MicGainBoost,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
+            requiresExplicitConfirm = false,
+        ),
+        RootFeatureKey.MicDirectPcm to RootFeatureDescriptor(
+            key = RootFeatureKey.MicDirectPcm,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
+            requiresExplicitConfirm = false,
+        ),
+        RootFeatureKey.MicCustomSampleRate to RootFeatureDescriptor(
+            key = RootFeatureKey.MicCustomSampleRate,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
+            requiresExplicitConfirm = true,
+        ),
+        RootFeatureKey.MicMultiMicRaw to RootFeatureDescriptor(
+            key = RootFeatureKey.MicMultiMicRaw,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_LOW_CAP),
+            requiresExplicitConfirm = false,
+        ),
+        RootFeatureKey.MicNoiseFloorOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.MicNoiseFloorOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_MED_CAP),
+            requiresExplicitConfirm = false,
+        ),
+        RootFeatureKey.MicSystemAudioCapture to RootFeatureDescriptor(
+            key = RootFeatureKey.MicSystemAudioCapture,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = MIC_SYSTEM_AUDIO_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
             requiresExplicitConfirm = true,
         ),
     )

@@ -5,6 +5,10 @@ import com.gadget.root.core.RootDetector
 import com.gadget.root.core.RootService
 import com.gadget.root.core.RootShell
 import com.gadget.root.launch.LaunchGate
+import com.gadget.camera.CameraController
+import com.gadget.camera.StandardCameraController
+import com.gadget.microphone.MicrophoneController
+import com.gadget.microphone.StandardMicrophoneController
 import com.gadget.torch.StandardTorchController
 import com.gadget.torch.TorchController
 import com.gadget.vibration.StandardVibrationController
@@ -79,4 +83,12 @@ object RootBindings {
     @Provides
     @Singleton
     fun provideVibrationController(impl: StandardVibrationController): VibrationController = impl
+
+    @Provides
+    @Singleton
+    fun provideCameraController(impl: StandardCameraController): CameraController = impl
+
+    @Provides
+    @Singleton
+    fun provideMicrophoneController(impl: StandardMicrophoneController): MicrophoneController = impl
 }

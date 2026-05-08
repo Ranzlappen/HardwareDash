@@ -23,4 +23,20 @@ sealed class RootFeatureKey(val id: String) {
     data object VibrationDirectPwm : RootFeatureKey("vibration_direct_pwm")
     data object VibrationDualActuator : RootFeatureKey("vibration_dual_actuator")
     data object VibrationSustainedRumble : RootFeatureKey("vibration_sustained_rumble")
+
+    // ──── Batch-4 Camera features ────
+    data object CameraHighFps : RootFeatureKey("camera_high_fps")
+    data object CameraManualOverride : RootFeatureKey("camera_manual_override")
+    data object CameraRawCapture : RootFeatureKey("camera_raw_capture")
+    data object CameraMultiSimultaneous : RootFeatureKey("camera_multi_simultaneous")
+    data object CameraHalBypass : RootFeatureKey("camera_hal_bypass")
+    data object CameraShutterSoundOverride : RootFeatureKey("camera_shutter_sound_override")
+
+    // ──── Batch-4 Microphone features ────
+    data object MicGainBoost : RootFeatureKey("mic_gain_boost")
+    data object MicDirectPcm : RootFeatureKey("mic_direct_pcm")
+    data object MicCustomSampleRate : RootFeatureKey("mic_custom_sample_rate")
+    data object MicMultiMicRaw : RootFeatureKey("mic_multi_mic_raw")
+    data object MicNoiseFloorOverride : RootFeatureKey("mic_noise_floor_override")
+    data object MicSystemAudioCapture : RootFeatureKey("mic_system_audio_capture")
 }
