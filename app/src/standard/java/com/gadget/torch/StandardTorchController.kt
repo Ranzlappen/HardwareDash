@@ -6,7 +6,7 @@ import javax.inject.Singleton
 /**
  * Standard-flavor Torch controller. Every extreme-tier method returns
  * [TorchControllerResult.Unsupported] — the standard APK has no privileged
- * shell, so there is no way to write to `/sys/class/leds/*` no matter how
+ * shell, so there is no way to write to `/sys/class/leds/...` no matter how
  * hard the user tries.
  *
  * Shared UI checks the result and hides the corresponding control. Compose

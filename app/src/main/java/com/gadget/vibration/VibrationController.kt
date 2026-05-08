@@ -3,8 +3,8 @@ package com.gadget.vibration
 /**
  * Rooted-only Vibration capability surface. Bypasses `android.os.Vibrator`
  * entirely on the rooted flavor — writes are direct to
- * `/sys/class/timed_output/vibrator/*` (legacy) or
- * `/sys/class/leds/vibrator/*` (modern Qualcomm DRV2624).
+ * `/sys/class/timed_output/vibrator/` (legacy) or
+ * `/sys/class/leds/vibrator/` (modern Qualcomm DRV2624).
  *
  * Standard flavor returns [VibrationControllerResult.Unsupported] for every
  * call so shared UI uses one code path.

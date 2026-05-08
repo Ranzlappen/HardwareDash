@@ -27,7 +27,7 @@ private const val RUMBLE_POLL_INTERVAL_MS = 250L
 
 /**
  * Rooted-flavor Vibration controller. Direct sysfs PWM via legacy
- * `timed_output` or modern `/sys/class/leds/vibrator/*`, with phased
+ * `timed_output` or modern `/sys/class/leds/vibrator/`, with phased
  * dual-actuator drive and sustained-rumble mode backed by [RumbleMonitor]
  * for battery + temp thresholds.
  */
