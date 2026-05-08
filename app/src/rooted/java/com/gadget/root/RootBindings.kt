@@ -10,6 +10,10 @@ import com.gadget.root.core.RootedRootService
 import com.gadget.root.core.RootedRootShell
 import com.gadget.root.launch.LaunchGate
 import com.gadget.root.launch.RootedLaunchGate
+import com.gadget.torch.RootedTorchController
+import com.gadget.torch.TorchController
+import com.gadget.vibration.RootedVibrationController
+import com.gadget.vibration.VibrationController
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -38,6 +42,9 @@ abstract class RootBindings {
     @Binds @Singleton
     abstract fun bindRootSoftLimiter(impl: RootedRootSoftLimiter): RootSoftLimiter
 
+    @Binds @Singleton
+    abstract fun bindRootFeatureToggles(impl: RootedRootFeatureToggles): RootFeatureToggles
+
     // ──── Batch 2: root core layer ────
 
     @Binds @Singleton
@@ -54,4 +61,12 @@ abstract class RootBindings {
 
     @Binds @Singleton
     abstract fun bindCompanionModuleDetector(impl: RootedCompanionModuleDetector): CompanionModuleDetector
+
+    // ──── Batch 3: feature controllers ────
+
+    @Binds @Singleton
+    abstract fun bindTorchController(impl: RootedTorchController): TorchController
+
+    @Binds @Singleton
+    abstract fun bindVibrationController(impl: RootedVibrationController): VibrationController
 }

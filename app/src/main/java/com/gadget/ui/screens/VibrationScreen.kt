@@ -33,6 +33,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
+import com.gadget.root.ui.VibrationRootExtrasSection
 import com.gadget.ui.components.AccessibleCanvas
 import com.gadget.ui.components.DashCard
 import com.gadget.ui.components.ScreenAnnouncement
@@ -499,6 +500,9 @@ fun VibrationScreen() {
                 Text(S.vibration.loadPattern, maxLines = 1, softWrap = false)
             }
         }
+
+        Spacer(Modifier.height(16.dp))
+        VibrationRootExtrasSection()
     }
 
     // ── Save dialog ───────────────────────────────────────────────────────────

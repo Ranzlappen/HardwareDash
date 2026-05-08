@@ -1,0 +1,34 @@
+package com.gadget.root
+
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * DataStore-backed per-feature opt-in toggles. The default for every feature
+ * is OFF — `RootFeatureDescriptor.defaultOn` is consulted via
+ * [RootFeatureRegistry] when the prefs entry hasn't been written yet.
+ */
+@Singleton
+class RootedRootFeatureToggles @Inject constructor(
+    @RootSafetyPrefs private val dataStore: DataStore<Preferences>,
+    private val featureRegistry: RootFeatureRegistry,
+) : RootFeatureToggles {
+
+    override fun isEnabled(feature: RootFeatureKey): Flow<Boolean> {
+        val descriptor = featureRegistry.descriptor(feature)
+        return dataStore.data.map { prefs ->
+            prefs[RootPrefKeys.featureEnabledKey(feature)] ?: descriptor.defaultOn
+        }
+    }
+
+    override suspend fun setEnabled(feature: RootFeatureKey, enabled: Boolean) {
+        dataStore.edit { mutable ->
+            mutable[RootPrefKeys.featureEnabledKey(feature)] = enabled
+        }
+    }
+}

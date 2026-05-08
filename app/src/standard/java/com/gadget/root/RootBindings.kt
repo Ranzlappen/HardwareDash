@@ -5,6 +5,10 @@ import com.gadget.root.core.RootDetector
 import com.gadget.root.core.RootService
 import com.gadget.root.core.RootShell
 import com.gadget.root.launch.LaunchGate
+import com.gadget.torch.StandardTorchController
+import com.gadget.torch.TorchController
+import com.gadget.vibration.StandardVibrationController
+import com.gadget.vibration.VibrationController
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,6 +43,10 @@ object RootBindings {
     @Singleton
     fun provideRootSoftLimiter(): RootSoftLimiter = NoOpRootSoftLimiter()
 
+    @Provides
+    @Singleton
+    fun provideRootFeatureToggles(): RootFeatureToggles = NoOpRootFeatureToggles()
+
     // ──── Batch 2: root core layer ────
 
     @Provides
@@ -61,4 +69,14 @@ object RootBindings {
     @Singleton
     fun provideCompanionModuleDetector(): CompanionModuleDetector =
         NoOpCompanionModuleDetector()
+
+    // ──── Batch 3: feature controllers ────
+
+    @Provides
+    @Singleton
+    fun provideTorchController(impl: StandardTorchController): TorchController = impl
+
+    @Provides
+    @Singleton
+    fun provideVibrationController(impl: StandardVibrationController): VibrationController = impl
 }

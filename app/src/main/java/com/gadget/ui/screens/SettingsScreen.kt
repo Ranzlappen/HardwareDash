@@ -33,6 +33,7 @@ import com.gadget.flipper.FlipperConnectionManager
 import com.gadget.localization.Language
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
+import com.gadget.root.ui.RootedFeatureTogglesCard
 import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
@@ -695,6 +696,14 @@ fun SettingsScreen() {
         // SECTION 6 — Flipper Zero
         // ══════════════════════════════════════════════════════════════════
         FlipperSection()
+
+        HorizontalDivider()
+
+        // ══════════════════════════════════════════════════════════════════
+        // SECTION 7 — Rooted feature toggles (rendered only on rooted flavor
+        //             with root granted; otherwise the composable is empty)
+        // ══════════════════════════════════════════════════════════════════
+        RootedFeatureTogglesCard()
     }
 }
 

@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.S
+import com.gadget.root.ui.TorchRootExtrasSection
 import com.gadget.ui.components.ResponsiveButtonText
 import com.gadget.ui.components.ScreenAnnouncement
 import com.gadget.ui.components.SliderWithInput
@@ -364,5 +365,8 @@ fun TorchScreen() {
                 label = "Brightness: ${"%.0f".format(brightness * 100)}%",
             )
         }
+
+        Spacer(Modifier.height(16.dp))
+        TorchRootExtrasSection()
     }
 }
