@@ -1,12 +1,16 @@
 package com.gadget.root
 
+import javax.inject.Inject
+import javax.inject.Singleton
+
 /**
- * Rooted-flavor [RootSafetyGate]. Batch 1 placeholder: returns `Unsupported`
- * so no rooted-only code path can yet execute even on the rooted APK. Batch 2
+ * Rooted-flavor [RootSafetyGate]. Batch 2 placeholder: returns `Unsupported`
+ * so no rooted-only feature can yet execute even on the rooted APK. Batch 3
  * replaces this with the real implementation backed by [RootSafetyPreferences]
- * and [RootSoftLimiter].
+ * and [RootSoftLimiter] now that the root core layer (detector / shell) exists.
  */
-class RootedRootSafetyGate : RootSafetyGate {
+@Singleton
+class RootedRootSafetyGate @Inject constructor() : RootSafetyGate {
     override suspend fun check(feature: RootFeatureKey): RootGateDecision =
         RootGateDecision.Unsupported
 

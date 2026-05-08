@@ -1,5 +1,10 @@
 package com.gadget.root
 
+import com.gadget.root.companion.CompanionModuleDetector
+import com.gadget.root.core.RootDetector
+import com.gadget.root.core.RootService
+import com.gadget.root.core.RootShell
+import com.gadget.root.launch.LaunchGate
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -7,9 +12,10 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Standard-flavor Hilt bindings for the rooted-features safety framework.
- * Every binding resolves to a no-op so shared code can inject the same
- * interfaces in both flavors without branching on `BuildConfig.IS_ROOTED`.
+ * Standard-flavor Hilt bindings for the rooted-features safety framework and
+ * root core layer. Every binding resolves to a no-op so shared code can
+ * inject the same interfaces in both flavors without branching on
+ * `BuildConfig.IS_ROOTED`.
  *
  * The fully-qualified class name MUST match the rooted flavor's binding file
  * (`com.gadget.root.RootBindings`) — Gradle source-set merging picks one of
@@ -32,4 +38,27 @@ object RootBindings {
     @Provides
     @Singleton
     fun provideRootSoftLimiter(): RootSoftLimiter = NoOpRootSoftLimiter()
+
+    // ──── Batch 2: root core layer ────
+
+    @Provides
+    @Singleton
+    fun provideRootDetector(): RootDetector = NoOpRootDetector()
+
+    @Provides
+    @Singleton
+    fun provideRootShell(): RootShell = NoOpRootShell()
+
+    @Provides
+    @Singleton
+    fun provideRootService(): RootService = NoOpRootService()
+
+    @Provides
+    @Singleton
+    fun provideLaunchGate(): LaunchGate = NoOpLaunchGate()
+
+    @Provides
+    @Singleton
+    fun provideCompanionModuleDetector(): CompanionModuleDetector =
+        NoOpCompanionModuleDetector()
 }

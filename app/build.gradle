@@ -175,6 +175,13 @@ dependencies {
     // USB serial (CDC-ACM) — Flipper Zero USB transport
     implementation 'com.github.mik3y:usb-serial-for-android:3.7.0'
 
+    // ════════════════════ ROOTED-ONLY DEPENDENCIES ════════════════════
+    // libsu is the privileged-shell + RootService backend used by the
+    // rooted flavor. NEVER promote these to plain `implementation` — the
+    // standard APK must ship without libsu in its classpath.
+    rootedImplementation 'com.github.topjohnwu.libsu:core:5.2.2'
+    rootedImplementation 'com.github.topjohnwu.libsu:service:5.2.2'
+
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     // Test

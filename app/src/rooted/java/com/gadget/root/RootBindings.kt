@@ -1,7 +1,17 @@
 package com.gadget.root
 
+import com.gadget.root.companion.CompanionModuleDetector
+import com.gadget.root.companion.RootedCompanionModuleDetector
+import com.gadget.root.core.RootDetector
+import com.gadget.root.core.RootService
+import com.gadget.root.core.RootShell
+import com.gadget.root.core.RootedRootDetector
+import com.gadget.root.core.RootedRootService
+import com.gadget.root.core.RootedRootShell
+import com.gadget.root.launch.LaunchGate
+import com.gadget.root.launch.RootedLaunchGate
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -10,21 +20,38 @@ import javax.inject.Singleton
  * Rooted-flavor Hilt bindings. Same fully-qualified name as the standard
  * flavor's binding file; Gradle picks one based on the active product flavor
  * so the two never collide in a single APK.
+ *
+ * Uses `@Binds` instead of `@Provides` because each implementation is itself
+ * `@Singleton` and constructor-injected — Hilt builds them, this module
+ * just wires the interface → impl mapping.
  */
 @Module
 @InstallIn(SingletonComponent::class)
-object RootBindings {
+abstract class RootBindings {
 
-    @Provides
-    @Singleton
-    fun provideRootCapabilityRegistry(): RootCapabilityRegistry =
-        RootedRootCapabilityRegistry()
+    @Binds @Singleton
+    abstract fun bindRootCapabilityRegistry(impl: RootedRootCapabilityRegistry): RootCapabilityRegistry
 
-    @Provides
-    @Singleton
-    fun provideRootSafetyGate(): RootSafetyGate = RootedRootSafetyGate()
+    @Binds @Singleton
+    abstract fun bindRootSafetyGate(impl: RootedRootSafetyGate): RootSafetyGate
 
-    @Provides
-    @Singleton
-    fun provideRootSoftLimiter(): RootSoftLimiter = RootedRootSoftLimiter()
+    @Binds @Singleton
+    abstract fun bindRootSoftLimiter(impl: RootedRootSoftLimiter): RootSoftLimiter
+
+    // ──── Batch 2: root core layer ────
+
+    @Binds @Singleton
+    abstract fun bindRootDetector(impl: RootedRootDetector): RootDetector
+
+    @Binds @Singleton
+    abstract fun bindRootShell(impl: RootedRootShell): RootShell
+
+    @Binds @Singleton
+    abstract fun bindRootService(impl: RootedRootService): RootService
+
+    @Binds @Singleton
+    abstract fun bindLaunchGate(impl: RootedLaunchGate): LaunchGate
+
+    @Binds @Singleton
+    abstract fun bindCompanionModuleDetector(impl: RootedCompanionModuleDetector): CompanionModuleDetector
 }

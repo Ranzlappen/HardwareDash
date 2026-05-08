@@ -1,17 +1,35 @@
 package com.gadget.root
 
+import com.gadget.root.core.RootDetection
+import com.gadget.root.core.RootDetector
+import javax.inject.Inject
+import javax.inject.Singleton
+
 /**
- * Rooted-flavor [RootCapabilityRegistry]. For Batch 1 this is intentionally a
- * pass-through stub that mirrors the standard flavor — the rooted APK
- * compiles, runs, and behaves identically to standard until Batch 2 wires up
- * the real su-probe and per-feature availability table.
+ * Rooted-flavor [RootCapabilityRegistry]. Delegates to the libsu-backed
+ * [RootDetector] and caches the result. The non-suspend [hasRootAccess]
+ * reads from the cached detection so it's safe to call from any thread —
+ * but it returns false until [probe] has resolved at least once
+ * (LaunchGate is responsible for that single startup call).
  */
-class RootedRootCapabilityRegistry : RootCapabilityRegistry {
+@Singleton
+class RootedRootCapabilityRegistry @Inject constructor(
+    private val detector: RootDetector,
+) : RootCapabilityRegistry {
+
+    @Volatile private var cached: RootDetection = RootDetection.None
+
     override val isRootedFlavor: Boolean = true
 
-    // TODO(batch-2): probe for su via Shell.SU.available() (or libsu) and cache.
-    override fun hasRootAccess(): Boolean = false
+    override suspend fun probe(): RootDetection {
+        val detection = detector.detect()
+        cached = detection
+        return detection
+    }
 
-    // TODO(batch-2): consult RootFeatureDescriptor table once features land.
-    override fun isFeatureAvailable(feature: RootFeatureKey): Boolean = false
+    override fun hasRootAccess(): Boolean = cached is RootDetection.Available
+
+    // TODO(batch-3): consult RootFeatureDescriptor table once features land.
+    override fun isFeatureAvailable(feature: RootFeatureKey): Boolean =
+        cached is RootDetection.Available
 }
