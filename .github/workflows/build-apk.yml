@@ -173,11 +173,23 @@ jobs:
             fail "Standard APK contains rooted assets (see above)"
           fi
 
-          # 3. No root-tier permissions. The binary AndroidManifest.xml stores
-          #    permission names as plain UTF-8 strings in its string-pool; a
-          #    single `strings | grep` reliably surfaces them.
-          PERMS=$(strings -a -n 8 "$WORK/manifest.bin" \
-            | grep -iE 'WRITE_SECURE_SETTINGS|MOUNT_UNMOUNT|INSTALL_PACKAGES|DELETE_PACKAGES|READ_LOGS|MANAGE_USERS|CHANGE_CONFIGURATION|MASTER_CLEAR|REBOOT|ACCESS_SUPERUSER' \
+          # 3. No root-tier permissions. The binary AndroidManifest.xml may
+          #    store its string pool as either UTF-8 or UTF-16 LE depending
+          #    on AAPT2's encoding choice. Default `strings` only catches
+          #    contiguous 7-bit / UTF-8 runs, so we additionally pipe the
+          #    blob through `tr -d '\0' | strings` (which collapses any
+          #    UTF-16-style nulls and surfaces the underlying ASCII chars)
+          #    and run a native UTF-16-LE extraction. Combined, these three
+          #    passes catch the permission name regardless of how AAPT2
+          #    chose to encode the pool.
+          {
+            strings -a -n 8 "$WORK/manifest.bin"
+            tr -d '\0' < "$WORK/manifest.bin" | strings -a -n 8
+            strings -a -e l -n 8 "$WORK/manifest.bin"
+          } > "$WORK/manifest.txt"
+          echo "Manifest text extraction: $(wc -l < "$WORK/manifest.txt") lines"
+
+          PERMS=$(grep -iE 'WRITE_SECURE_SETTINGS|MOUNT_UNMOUNT|INSTALL_PACKAGES|DELETE_PACKAGES|READ_LOGS|MANAGE_USERS|CHANGE_CONFIGURATION|MASTER_CLEAR|REBOOT|ACCESS_SUPERUSER' "$WORK/manifest.txt" \
             | sort -u || true)
           if [ -n "$PERMS" ]; then
             echo "Standard APK declares root-tier permissions:"
