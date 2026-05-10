@@ -25,6 +25,8 @@ import com.gadget.display.DisplayController
 import com.gadget.display.StandardDisplayController
 import com.gadget.gps.GpsController
 import com.gadget.gps.StandardGpsController
+import com.gadget.gps.spoof.GpsSpoofController
+import com.gadget.gps.spoof.StandardGpsSpoofController
 import com.gadget.ir.IrController
 import com.gadget.ir.StandardIrController
 import com.gadget.keepalive.KeepAliveController
@@ -169,6 +171,12 @@ object RootBindings {
     @Provides
     @Singleton
     fun provideGpsController(impl: StandardGpsController): GpsController = impl
+
+    // ──── Batch 13: GPS spoofing ────
+
+    @Provides
+    @Singleton
+    fun provideGpsSpoofController(impl: StandardGpsSpoofController): GpsSpoofController = impl
 
     // ──── Batch 7: automation + notifications + keep-alive controllers ────
 

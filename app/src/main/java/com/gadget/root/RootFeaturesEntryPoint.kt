@@ -10,6 +10,7 @@ import com.gadget.cell.CellController
 import com.gadget.diagnostics.DiagnosticsController
 import com.gadget.display.DisplayController
 import com.gadget.gps.GpsController
+import com.gadget.gps.spoof.GpsSpoofController
 import com.gadget.ir.IrController
 import com.gadget.keepalive.KeepAliveController
 import com.gadget.microphone.MicrophoneController
@@ -52,6 +53,7 @@ interface RootFeaturesEntryPoint {
     fun irController(): IrController
     fun cellController(): CellController
     fun gpsController(): GpsController
+    fun gpsSpoofController(): GpsSpoofController
     fun automationController(): AutomationController
     fun notificationController(): NotificationController
     fun keepAliveController(): KeepAliveController

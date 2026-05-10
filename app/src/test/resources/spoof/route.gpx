@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="HardwareDash test fixture">
+  <rte>
+    <name>Untimed route</name>
+    <rtept lat="40.7128" lon="-74.0060" />
+    <rtept lat="40.7228" lon="-74.0160" />
+    <rtept lat="40.7328" lon="-74.0260" />
+  </rte>
+</gpx>

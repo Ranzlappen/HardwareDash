@@ -30,6 +30,8 @@ import com.gadget.display.DisplayController
 import com.gadget.display.RootedDisplayController
 import com.gadget.gps.GpsController
 import com.gadget.gps.RootedGpsController
+import com.gadget.gps.spoof.GpsSpoofController
+import com.gadget.gps.spoof.RootedGpsSpoofController
 import com.gadget.ir.IrController
 import com.gadget.ir.RootedIrController
 import com.gadget.keepalive.KeepAliveController
@@ -148,6 +150,11 @@ abstract class RootBindings {
 
     @Binds @Singleton
     abstract fun bindGpsController(impl: RootedGpsController): GpsController
+
+    // ──── Batch 13: GPS spoofing ────
+
+    @Binds @Singleton
+    abstract fun bindGpsSpoofController(impl: RootedGpsSpoofController): GpsSpoofController
 
     // ──── Batch 7: automation + notifications + keep-alive controllers ────
 

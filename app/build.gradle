@@ -194,6 +194,34 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
 
+// ═══════════════════ LSPosed module asset wiring (Batch 13) ════════════
+//
+// When `-PenableLsposedModule=true` is passed to Gradle, the :lsposed-module
+// project is included via settings.gradle.kts and its release APK is copied
+// into app/src/rooted/assets/lsposed-spoofer.apk so the rooted flavor can
+// stage + `pm install` it via libsu at runtime.
+//
+// CRITICAL: this hook MUST only run for the rooted variant. The standard
+// APK must never bundle the LSPosed module asset. CI's standard-flavor job
+// asserts this via a strings-check on the assembled APK.
+if (project.hasProperty('enableLsposedModule') && project.property('enableLsposedModule') == 'true') {
+    def assetTarget = file('src/rooted/assets/lsposed-spoofer.apk')
+    def copyLsposedAsset = tasks.register('copyLsposedAsset', Copy) {
+        from { project(':lsposed-module').file('build/outputs/apk/release/lsposed-module-release.apk') }
+        into assetTarget.parentFile
+        rename '.*', 'lsposed-spoofer.apk'
+        dependsOn ':lsposed-module:assembleRelease'
+    }
+
+    afterEvaluate {
+        android.applicationVariants.all { variant ->
+            if (variant.flavorName == 'rooted') {
+                variant.preBuildProvider.configure { dependsOn copyLsposedAsset }
+            }
+        }
+    }
+}
+
 detekt {
     config.setFrom("$rootDir/config/detekt/detekt.yml")
     buildUponDefaultConfig = true

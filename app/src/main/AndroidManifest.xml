@@ -38,9 +38,17 @@
     <!-- ══════════════════════ USB HOST (Flipper Zero CDC-ACM) ════ -->
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
 
-    <!-- ══════════════════════ LOCATION (for WiFi scan) ════════════ -->
+    <!-- ══════════════════════ LOCATION (for WiFi scan + GPS spoofing) ════════════ -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Required for spoofing playback to remain active when the app is backgrounded. -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!-- Signature-only permission. Declaring it makes HardwareDash appear in
+         Developer Options' "Mock Location App" picker; the standard flavor
+         needs the user to select us there. The rooted flavor toggles the
+         android:mock_location AppOp via libsu instead. -->
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"
+        tools:ignore="MockLocation,ProtectedPermissions" />
 
     <!-- ══════════════════════ NOTIFICATIONS / SERVICES ════════════ -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -49,6 +57,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <!-- ══════════════════════ KEEP-ALIVE / DOZE ══════════════════ -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -484,6 +493,12 @@
             android:name=".services.PersistentKeepAliveService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <!-- ── Batch-13: GPS spoofing playback foreground service ───── -->
+        <service
+            android:name=".gps.spoof.LocationSpoofService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
 
     </application>
 </manifest>

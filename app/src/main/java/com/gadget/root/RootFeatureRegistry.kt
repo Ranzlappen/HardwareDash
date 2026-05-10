@@ -52,6 +52,13 @@ private const val USB_FUNCTION_WINDOW_SECONDS = 60
 private const val USB_DUMP_WINDOW_SECONDS = 60
 private const val DIAGNOSTICS_DUMP_WINDOW_SECONDS = 60
 
+private const val GPS_OVERRIDE_WINDOW_SECONDS = 60
+private const val GPS_OVERRIDE_INVOCATION_CAP = 60
+private const val GPS_ROUTE_WINDOW_SECONDS = 60
+private const val GPS_ROUTE_INVOCATION_CAP = 30
+private const val GPS_LSPOSED_INSTALL_WINDOW_MINUTES = 5
+private const val GPS_LSPOSED_INSTALL_CAP = 1
+
 /**
  * Single source of truth mapping every [RootFeatureKey] to its
  * [RootFeatureDescriptor]. Both flavors read this; the standard flavor's
@@ -830,6 +837,38 @@ class RootFeatureRegistry @Inject constructor() {
             ),
             requiresExplicitConfirm = false,
             isWriteCapable = false,
+        ),
+
+        // ──── Batch-13 GPS spoofing features ────
+        RootFeatureKey.GpsLocationOverride to RootFeatureDescriptor(
+            key = RootFeatureKey.GpsLocationOverride,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = GPS_OVERRIDE_WINDOW_SECONDS.seconds,
+                maxInvocations = GPS_OVERRIDE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.GpsRouteSimulation to RootFeatureDescriptor(
+            key = RootFeatureKey.GpsRouteSimulation,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = GPS_ROUTE_WINDOW_SECONDS.seconds,
+                maxInvocations = GPS_ROUTE_INVOCATION_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.GpsLsposedHookInstall to RootFeatureDescriptor(
+            key = RootFeatureKey.GpsLsposedHookInstall,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = GPS_LSPOSED_INSTALL_WINDOW_MINUTES.minutes,
+                maxInvocations = GPS_LSPOSED_INSTALL_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
         ),
     )
 

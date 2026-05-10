@@ -13,6 +13,7 @@ const val CH_DEFAULT    = "hwd_default"
 const val CH_HIGH       = "hwd_high"
 const val CH_PROGRESS   = "hwd_progress"
 const val CH_CUSTOM     = "hwd_custom"
+const val CH_GPS_SPOOF  = "hwd_gps_spoof"
 
 fun ensureAllChannels(context: Context) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -25,5 +26,9 @@ fun ensureAllChannels(context: Context) {
         NotificationChannel(CH_HIGH,     "High / Heads-Up", NotificationManager.IMPORTANCE_HIGH),
         NotificationChannel(CH_PROGRESS, "Progress",        NotificationManager.IMPORTANCE_LOW),
         NotificationChannel(CH_CUSTOM,   "Custom",          NotificationManager.IMPORTANCE_HIGH),
+        NotificationChannel(CH_GPS_SPOOF, "GPS Spoofing",   NotificationManager.IMPORTANCE_LOW).apply {
+            description = "Active when GPS spoofing playback (GPX, KML, route) is running"
+            setShowBadge(false)
+        },
     ).forEach { nm.createNotificationChannel(it) }
 }

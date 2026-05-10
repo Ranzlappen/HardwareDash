@@ -49,6 +49,7 @@ jobs:
             outputDir: app/build/outputs/apk/rooted/debug
             artifactName: rooted-debug
             needsSigning: false
+            extraGradleProps: "-PenableLsposedModule=true"
 
     steps:
       - uses: actions/checkout@v4
@@ -105,7 +106,47 @@ jobs:
             -PBUILD_DATE="${{ env.BUILD_DATE }}" \
             -PBUILD_COMMIT=${{ env.BUILD_COMMIT }} \
             -PBUILD_BRANCH=${{ env.BUILD_BRANCH }} \
-            -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}"
+            -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}" \
+            ${{ matrix.extraGradleProps }}
+
+      # ─── Standard-APK leakage assertion (Batch 13) ───────────────────────
+      # Belt-and-suspenders check that the standard APK does not bundle any
+      # rooted assets, libsu strings, the LSPosed module, or root-tier
+      # permissions. Source-set scoping in AGP makes this impossible by
+      # construction, but this step catches accidents (e.g. someone moves
+      # a file from src/rooted/ to src/main/).
+      - name: Assert standard APK is clean
+        if: matrix.flavor == 'standard'
+        run: |
+          set -euo pipefail
+          APK=$(find ${{ matrix.outputDir }} -name "*.apk" | head -n1)
+          echo "Inspecting $APK"
+
+          # 1. Source-string check — libsu and friends should never appear
+          #    in the standard APK's dex.
+          if unzip -p "$APK" classes.dex classes2.dex classes3.dex 2>/dev/null \
+              | strings -a \
+              | grep -iE 'topjohnwu|libsu|/system/(bin|xbin)/su|magisk|superuser|chainfire'; then
+            echo "❌ Standard APK contains rooted strings"
+            exit 1
+          fi
+
+          # 2. Asset-presence check — the LSPosed module APK and any spoofer
+          #    asset must not be present in the bundled assets/.
+          if unzip -l "$APK" | grep -iE 'lsposed|magisk|spoofer'; then
+            echo "❌ Standard APK contains rooted/lsposed assets"
+            exit 1
+          fi
+
+          # 3. Permission check — the standard APK must not request any
+          #    signature-only / privileged permissions beyond the
+          #    sanctioned set already declared in the main manifest.
+          if "$ANDROID_HOME"/build-tools/*/aapt dump permissions "$APK" 2>/dev/null \
+              | grep -iE 'WRITE_SECURE_SETTINGS|MOUNT_UNMOUNT|INSTALL_PACKAGES|READ_LOGS|MANAGE_USERS|CHANGE_CONFIGURATION'; then
+            echo "❌ Standard APK requests root-tier permissions"
+            exit 1
+          fi
+          echo "✅ Standard APK clean"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

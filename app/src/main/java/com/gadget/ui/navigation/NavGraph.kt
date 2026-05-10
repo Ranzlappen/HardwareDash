@@ -38,6 +38,7 @@ import com.gadget.ui.screens.LockScreenScreen
 import com.gadget.ui.screens.ManualScreen
 import com.gadget.ui.screens.MicScreen
 import com.gadget.ui.screens.AppsScreen
+import com.gadget.ui.screens.GpsSpoofingScreen
 import com.gadget.ui.screens.RadiosScreen
 import com.gadget.ui.screens.SensorsScreen
 import com.gadget.ui.screens.SettingsScreen
@@ -58,6 +59,7 @@ object Routes {
     const val SENSORS      = "sensors"
     const val BATTERY      = "battery"
     const val RADIOS       = "radios"
+    const val GPS_SPOOFING = "gps_spoofing"
 
     // ── Logs ──
     const val LOGBOOK      = "logbook"
@@ -160,7 +162,12 @@ fun NavGraph() {
                 composable(Routes.MIC)        { MicScreen() }
                 composable(Routes.SENSORS)    { SensorsScreen() }
                 composable(Routes.BATTERY)    { BatteryScreen() }
-                composable(Routes.RADIOS)     { RadiosScreen() }
+                composable(Routes.RADIOS)     {
+                    RadiosScreen(onNavigateToSpoof = { navController.navigate(Routes.GPS_SPOOFING) })
+                }
+                composable(Routes.GPS_SPOOFING) {
+                    GpsSpoofingScreen(onBack = { navController.popBackStack() })
+                }
                 composable(Routes.LOGBOOK)    { LogbookScreen() }
                 composable(Routes.LOCKSCREEN) { LockScreenScreen() }
                 composable(Routes.LINK)       { LinkScreen() }
