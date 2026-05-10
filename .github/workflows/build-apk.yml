@@ -117,6 +117,12 @@ jobs:
       # a file from src/rooted/ to src/main/). On hit, the offending
       # strings/assets/permissions are printed and the step emits a
       # ::error:: annotation so the failure surfaces inline on the PR diff.
+      #
+      # Implementation note: dex and AndroidManifest.xml are extracted via
+      # `unzip -p` and inspected with `strings`. We deliberately AVOID
+      # `aapt dump permissions` here — its path is not stable across
+      # GitHub-hosted runner images and silent fail-open was the bug that
+      # an earlier version of this gate shipped with.
       - name: Assert standard APK has no rooted leakage
         if: matrix.flavor == 'standard'
         run: |
@@ -127,10 +133,21 @@ jobs:
 
           fail() { echo "::error::$1"; exit 1; }
 
-          # 1. No su-related strings in any dex. classes4.dex is included in
-          #    case a future dependency push us over the dex-method threshold.
-          HITS=$(unzip -p "$APK" classes.dex classes2.dex classes3.dex classes4.dex 2>/dev/null \
-            | strings -a -n 6 \
+          WORK=$(mktemp -d)
+          trap 'rm -rf "$WORK"' EXIT
+
+          # Extract every dex (matched by archive-internal glob) plus the
+          # binary AndroidManifest.xml. If either comes back empty, the APK
+          # is malformed or unzip is not behaving — bail loudly rather than
+          # passing the gate by accident.
+          unzip -p "$APK" '*.dex' > "$WORK/dexes.bin" 2>/dev/null || true
+          test -s "$WORK/dexes.bin" || fail "Could not extract any dex from $APK"
+
+          unzip -p "$APK" AndroidManifest.xml > "$WORK/manifest.bin" 2>/dev/null || true
+          test -s "$WORK/manifest.bin" || fail "Could not extract AndroidManifest.xml from $APK"
+
+          # 1. No su-related strings in any dex.
+          HITS=$(strings -a -n 6 "$WORK/dexes.bin" \
             | grep -iE 'topjohnwu|libsu|/system/(bin|xbin)/su|chainfire|magisk|superuser|hiddenapibypass' \
             | sort -u || true)
           if [ -n "$HITS" ]; then
@@ -148,11 +165,12 @@ jobs:
             fail "Standard APK contains rooted assets (see above)"
           fi
 
-          # 3. No root-tier permissions. aapt is staged by AGP under
-          #    $ANDROID_HOME/build-tools/<ver>/ during the assemble step.
-          PERMS=$("$ANDROID_HOME"/build-tools/*/aapt dump permissions "$APK" 2>/dev/null \
+          # 3. No root-tier permissions. The binary AndroidManifest.xml stores
+          #    permission names as plain UTF-8 strings in its string-pool; a
+          #    single `strings | grep` reliably surfaces them.
+          PERMS=$(strings -a -n 8 "$WORK/manifest.bin" \
             | grep -iE 'WRITE_SECURE_SETTINGS|MOUNT_UNMOUNT|INSTALL_PACKAGES|DELETE_PACKAGES|READ_LOGS|MANAGE_USERS|CHANGE_CONFIGURATION|MASTER_CLEAR|REBOOT|ACCESS_SUPERUSER' \
-            || true)
+            | sort -u || true)
           if [ -n "$PERMS" ]; then
             echo "Standard APK declares root-tier permissions:"
             echo "$PERMS"
