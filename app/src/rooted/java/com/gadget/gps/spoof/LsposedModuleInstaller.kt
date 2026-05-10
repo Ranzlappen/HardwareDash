@@ -21,7 +21,7 @@ import javax.inject.Singleton
  * [installLsposedModule] returns Unsupported.
  */
 @Singleton
-internal class LsposedModuleInstaller @Inject constructor(
+class LsposedModuleInstaller @Inject constructor(
     @ApplicationContext private val context: Context,
     private val shell: RootShell,
 ) {

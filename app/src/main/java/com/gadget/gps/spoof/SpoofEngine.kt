@@ -35,7 +35,7 @@ import javax.inject.Singleton
  *     [LocationSpoofService.start] for non-Static configs).
  */
 @Singleton
-internal class SpoofEngine @Inject constructor(
+class SpoofEngine @Inject constructor(
     @ApplicationContext private val context: Context,
     private val testProviders: TestProviderManager,
 ) {

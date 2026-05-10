@@ -24,7 +24,7 @@ import kotlin.math.sqrt
  *  - Otherwise it derives per-leg duration from [defaultSpeedMps] and the
  *    great-circle distance between adjacent points.
  */
-internal class RouteEngine(
+class RouteEngine(
     private val waypoints: List<Waypoint>,
     private val interpolation: SpoofConfig.Route.Interpolation = SpoofConfig.Route.Interpolation.Linear,
     private val defaultSpeedMps: Float = 5f,
