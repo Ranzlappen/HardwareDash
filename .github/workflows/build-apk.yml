@@ -199,6 +199,26 @@ jobs:
 
           echo "✅ Standard APK clean — no rooted leakage detected"
 
+      # ─── Rooted-APK asset inventory (positive verification) ─────────────
+      # The leak gate above is a *negative* check: it asserts the standard
+      # APK does NOT contain rooted assets. The rooted leg deserves the
+      # *positive* counterpart — assert that `assets/lsposed-spoofer.apk`
+      # IS present, proving the conditional Gradle wiring at
+      # `app/build.gradle:217-235` actually copied the LSPosed module's
+      # release APK in. Output is short and lives in the GitHub Actions
+      # log so it's mobile-readable on the phone you're testing on.
+      - name: Inventory rooted APK assets
+        if: matrix.flavor == 'rooted'
+        run: |
+          set -euo pipefail
+          APK=$(find ${{ matrix.outputDir }} -name "*.apk" -print -quit)
+          test -n "$APK" || { echo "::error::No rooted APK produced in ${{ matrix.outputDir }}"; exit 1; }
+          echo "Rooted APK: $APK"
+          echo "Bundled asset/*.apk and lsposed-related entries:"
+          unzip -l "$APK" \
+            | awk '$NF ~ /^assets\/.*\.apk$/ || tolower($NF) ~ /lsposed|spoofer/ {print "  "$NF" ("$1" bytes)"}' \
+            || true
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
