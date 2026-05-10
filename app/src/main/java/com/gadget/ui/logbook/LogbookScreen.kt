@@ -77,7 +77,6 @@ fun LogbookScreen(vm: LogbookViewModel = hiltViewModel()) {
 
     // Capture composable string accessors for use inside non-composable callbacks
     val logbookStrings = S.logbook
-    val commonStrings = S.common
 
     // ── Import / Export launchers ────────────────────────────────────
     val exportLauncher = rememberLauncherForActivityResult(

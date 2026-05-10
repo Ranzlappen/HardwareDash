@@ -401,7 +401,6 @@ fun RadiosScreen(onNavigateToSpoof: () -> Unit = {}) {
 
     val parseFailedMsg = S.radios.parseFailed
     val transmittingMsg = S.radios.transmitting
-    val externalHwMsg = S.radios.externalHardwareRequired
     val subFileLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->

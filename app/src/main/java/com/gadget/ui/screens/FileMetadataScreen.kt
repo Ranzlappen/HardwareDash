@@ -700,6 +700,7 @@ private fun writeExifData(context: Context, uri: Uri, data: Map<String, String>)
     }
 }
 
+@Suppress("UnusedParameter")
 private fun writeMediaMetadata(
     context: Context,
     uri: Uri,

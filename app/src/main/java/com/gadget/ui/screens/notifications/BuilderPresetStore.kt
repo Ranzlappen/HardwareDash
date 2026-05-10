@@ -39,13 +39,13 @@ object BuilderPresetStore {
     private fun read(prefs: SharedPreferences): List<Preset> {
         val json = prefs.getString(KEY, "[]") ?: "[]"
         val arr = try { JSONArray(json) } catch (_: Exception) { JSONArray() }
-        val out = mutableListOf<Preset>()
-        for (i in 0 until arr.length()) {
-            val obj = arr.optJSONObject(i) ?: continue
-            val name = obj.optString("name").takeIf { it.isNotBlank() } ?: continue
-            out.add(Preset(name, obj.toSpec()))
-        }
-        return out.sortedBy { it.name.lowercase() }
+        return (0 until arr.length())
+            .mapNotNull { i ->
+                val obj = arr.optJSONObject(i) ?: return@mapNotNull null
+                val name = obj.optString("name").takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                Preset(name, obj.toSpec())
+            }
+            .sortedBy { it.name.lowercase() }
     }
 
     private fun write(prefs: SharedPreferences, presets: List<Preset>) {

@@ -95,7 +95,7 @@ private fun SensorManager.flowFor(type: Int): Flow<FloatArray> = callbackFlow {
     val sensor = getDefaultSensor(type) ?: run { close(); return@callbackFlow }
     val listener = object : SensorEventListener {
         override fun onSensorChanged(e: SensorEvent) { trySend(e.values.clone()) }
-        override fun onAccuracyChanged(s: Sensor, a: Int) {}
+        override fun onAccuracyChanged(s: Sensor, a: Int) = Unit
     }
     registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
     awaitClose { unregisterListener(listener) }
