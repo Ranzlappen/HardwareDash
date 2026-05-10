@@ -225,6 +225,21 @@ jobs:
           name: ${{ matrix.artifactName }}-apk
           path: ${{ matrix.outputDir }}/*.apk
 
+      # AGP names AAB outputs `app-{flavor}-{buildType}.aab` and the
+      # `applicationVariants.all { variant.outputs ... }` rename in
+      # app/build.gradle only affects APKs, not bundles. Rename here so
+      # the file matches the `Gadget-{flavor}-v{version}-{buildType}` style
+      # the release body advertises.
+      - name: Rename AAB to Gadget-standard naming
+        if: matrix.flavor == 'standard' && matrix.buildType == 'release'
+        run: |
+          set -euo pipefail
+          SRC=$(find ${{ matrix.bundleDir }} -name "*.aab" -print -quit)
+          test -n "$SRC" || { echo "::error::No AAB found in ${{ matrix.bundleDir }}"; exit 1; }
+          DEST="${{ matrix.bundleDir }}/Gadget-standard-v${VERSION_NAME}-release.aab"
+          mv "$SRC" "$DEST"
+          echo "Renamed: $SRC -> $DEST"
+
       - name: Upload AAB artifact (Play Store)
         if: matrix.flavor == 'standard' && matrix.buildType == 'release'
         uses: actions/upload-artifact@v4
