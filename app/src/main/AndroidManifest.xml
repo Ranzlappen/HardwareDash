@@ -84,12 +84,6 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
 
-    <!-- TEMPORARY-LEAK-GATE-VERIFY-2: deliberate root-tier perm in shared
-         manifest to prove the fixed CI gate fires. Reverted in the next
-         commit; do NOT merge while it is present. -->
-    <uses-permission android:name="android.permission.INSTALL_PACKAGES"
-        tools:ignore="ProtectedPermissions" />
-
     <!-- ══════════════════════ SENSORS ════════════════════════════ -->
     <uses-feature android:name="android.hardware.sensor.gyroscope"     android:required="false" />
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
