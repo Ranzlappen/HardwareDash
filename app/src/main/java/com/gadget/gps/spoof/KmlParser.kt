@@ -44,7 +44,7 @@ internal object KmlParser {
         var inGxTrack = false
 
         // Buffer of pending <when> values, drained 1:1 against gx:coord in order.
-        val pendingTimes = ArrayDeque<Long?>()
+        val pendingTimes: MutableList<Long?> = mutableListOf()
 
         try {
             var event = parser.eventType
@@ -87,14 +87,14 @@ internal object KmlParser {
                             }
                             "coord", "gx:coord" -> {
                                 if (inGxCoord && inGxTrack) {
-                                    val whenMs = if (pendingTimes.isNotEmpty()) pendingTimes.removeFirst() else null
+                                    val whenMs = if (pendingTimes.isNotEmpty()) pendingTimes.removeAt(0) else null
                                     parseGxCoord(textBuffer.toString(), whenMs, out)
                                     inGxCoord = false
                                 }
                             }
                             "when" -> {
                                 if (inWhen) {
-                                    pendingTimes.addLast(parseIso8601(textBuffer.toString().trim()))
+                                    pendingTimes.add(parseIso8601(textBuffer.toString().trim()))
                                     inWhen = false
                                 }
                             }
