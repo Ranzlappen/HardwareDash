@@ -94,12 +94,16 @@ CI's `Assert standard APK has no rooted leakage` step in
 `.github/workflows/build-apk.yml` runs on both `assembleStandardDebug` and
 `assembleStandardRelease` and hard-fails the matrix leg if the assembled APK
 contains su-related strings (`topjohnwu`, `libsu`, `/system/bin/su`,
-`chainfire`, `magisk`, `superuser`, `hiddenapibypass`), rooted assets
+`/system/xbin/su`, `chainfire`, `hiddenapibypass`), rooted assets
 (`lsposed`, `magisk`, `spoofer`, `.magisk.`, `/su/`), or root-tier permissions
 (`WRITE_SECURE_SETTINGS`, `MOUNT_UNMOUNT*`, `INSTALL_PACKAGES`,
 `DELETE_PACKAGES`, `READ_LOGS`, `MANAGE_USERS`, `CHANGE_CONFIGURATION`,
-`MASTER_CLEAR`, `REBOOT`, `ACCESS_SUPERUSER`). If you add a new rooted-only
-library, asset, or permission, scope it to `rootedImplementation` /
+`MASTER_CLEAR`, `REBOOT`, `ACCESS_SUPERUSER`). The dex pattern is
+deliberately precise — bare `magisk`/`superuser` would trip on the shared
+`RootProvider` sealed-class variant names and on cosmetic localization
+strings; the libsu/topjohnwu/chainfire/hiddenapibypass markers cover the
+real-leak case without that noise. If you add a new rooted-only library,
+asset, or permission, scope it to `rootedImplementation` /
 `app/src/rooted/assets/` / `app/src/rooted/AndroidManifest.xml` — the gate
 will catch the mistake on PR.
 

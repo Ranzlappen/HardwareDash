@@ -147,8 +147,16 @@ jobs:
           test -s "$WORK/manifest.bin" || fail "Could not extract AndroidManifest.xml from $APK"
 
           # 1. No su-related strings in any dex.
+          #
+          # Pattern is intentionally PRECISE: bare `magisk` and `superuser`
+          # would false-positive on the shared `RootProvider$Magisk` sealed-
+          # class variant (whose abstraction lives in src/main/ with no
+          # behavior in the standard flavor) and on cosmetic localization
+          # strings that name Magisk/KernelSU as root managers. The actual
+          # libsu/superuser integration always carries one of these
+          # unambiguous markers in its class signatures or strings.
           HITS=$(strings -a -n 6 "$WORK/dexes.bin" \
-            | grep -iE 'topjohnwu|libsu|/system/(bin|xbin)/su|chainfire|magisk|superuser|hiddenapibypass' \
+            | grep -iE 'topjohnwu|libsu|/system/(bin|xbin)/su|chainfire|hiddenapibypass' \
             | sort -u || true)
           if [ -n "$HITS" ]; then
             echo "Standard APK contains rooted strings:"
