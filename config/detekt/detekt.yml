@@ -82,6 +82,8 @@ style:
     # readability win. ktlint enforces no-wildcards on a separate path; this
     # keeps detekt's strict-zero-issues mode usable.
     active: false
+
+performance:
   ForEachOnRange:
     # Project-wide convention is `(0 until n).forEach { … }` for short
     # range iterations; the perf delta is negligible at our scales.
