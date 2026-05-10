@@ -19,16 +19,16 @@ class MetricMetadataRegistryTest {
     }
 
     @Test fun `numeric metadata defaultThreshold sits within min-max bounds`() {
-        val all = MetricMetadataRegistry.all()
-        for ((key, meta) in all) {
-            if (meta.isCategorical) continue
-            val min = meta.min ?: continue
-            val max = meta.max ?: continue
-            assertTrue(
-                "$key: defaultThreshold ${meta.defaultThreshold} outside [$min, $max]",
-                meta.defaultThreshold in min..max,
-            )
-        }
+        MetricMetadataRegistry.all()
+            .filterValues { !it.isCategorical && it.min != null && it.max != null }
+            .forEach { (key, meta) ->
+                val min = meta.min!!
+                val max = meta.max!!
+                assertTrue(
+                    "$key: defaultThreshold ${meta.defaultThreshold} outside [$min, $max]",
+                    meta.defaultThreshold in min..max,
+                )
+            }
     }
 
     @Test fun `categorical metadata has no presets`() {

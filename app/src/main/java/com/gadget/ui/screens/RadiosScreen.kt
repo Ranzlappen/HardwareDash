@@ -481,7 +481,15 @@ fun RadiosScreen(onNavigateToSpoof: () -> Unit = {}) {
                                     // URI record: first byte is prefix code
                                     if (payload.isNotEmpty()) {
                                         val prefixByte = payload[0].toInt()
-                                        val uriPrefixes = arrayOf("", "http://www.", "https://www.", "http://", "https://", "tel:", "mailto:", "ftp://anonymous:anonymous@", "ftp://ftp.", "ftps://", "sftp://", "smb://", "nfs://", "ftp://", "dav://", "news:", "telnet://", "imap:", "rtsp://", "urn:", "pop:", "sip:", "sips:", "tftp:", "btspp://", "btl2cap://", "btgoep://", "tcpobex://", "irdaobex://", "file://", "urn:epc:id:", "urn:epc:tag:", "urn:epc:pat:", "urn:epc:raw:", "urn:epc:", "urn:nfc:")
+                                        val uriPrefixes = arrayOf(
+                                            "", "http://www.", "https://www.", "http://", "https://",
+                                            "tel:", "mailto:", "ftp://anonymous:anonymous@", "ftp://ftp.",
+                                            "ftps://", "sftp://", "smb://", "nfs://", "ftp://", "dav://",
+                                            "news:", "telnet://", "imap:", "rtsp://", "urn:", "pop:",
+                                            "sip:", "sips:", "tftp:", "btspp://", "btl2cap://", "btgoep://",
+                                            "tcpobex://", "irdaobex://", "file://", "urn:epc:id:",
+                                            "urn:epc:tag:", "urn:epc:pat:", "urn:epc:raw:", "urn:epc:", "urn:nfc:",
+                                        )
                                         val prefix = if (prefixByte < uriPrefixes.size) uriPrefixes[prefixByte] else ""
                                         prefix + String(payload, 1, payload.size - 1, Charsets.UTF_8)
                                     } else ""

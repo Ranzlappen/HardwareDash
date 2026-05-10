@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -46,7 +47,7 @@ class AppRepository @Inject constructor(
 
     init {
         scope.launch {
-            for (event in refreshTrigger) {
+            refreshTrigger.consumeEach {
                 try {
                     refresh()
                 } catch (t: Throwable) {

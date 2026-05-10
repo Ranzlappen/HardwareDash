@@ -31,7 +31,6 @@ import java.util.UUID
 @SuppressLint("MissingPermission")
 class FlipperBleLink private constructor(
     private val gatt: BluetoothGatt,
-    private val rxCharacteristic: BluetoothGattCharacteristic,
     private val txCharacteristic: BluetoothGattCharacteristic,
     private val callbacks: Callbacks,
 ) : FlipperLink {
@@ -168,7 +167,7 @@ class FlipperBleLink private constructor(
                     @Suppress("DEPRECATION")
                     g.writeDescriptor(it)
                 }
-                return FlipperBleLink(g, rx, tx, cb)
+                return FlipperBleLink(g, tx, cb)
             } catch (t: Throwable) {
                 runCatching { gatt.close() }
                 throw t

@@ -38,13 +38,6 @@ class PdfExporter {
             isAntiAlias = true
         }
 
-        val headerPaint = Paint().apply {
-            color = Color.DKGRAY
-            textSize = 10f
-            isFakeBoldText = true
-            isAntiAlias = true
-        }
-
         val bodyPaint = Paint().apply {
             color = Color.BLACK
             textSize = 11f
