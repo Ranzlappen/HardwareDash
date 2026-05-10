@@ -109,44 +109,115 @@ jobs:
             -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}" \
             ${{ matrix.extraGradleProps }}
 
-      # ─── Standard-APK leakage assertion (Batch 13) ───────────────────────
+      # ─── Standard-APK leakage assertion ──────────────────────────────────
       # Belt-and-suspenders check that the standard APK does not bundle any
       # rooted assets, libsu strings, the LSPosed module, or root-tier
       # permissions. Source-set scoping in AGP makes this impossible by
       # construction, but this step catches accidents (e.g. someone moves
-      # a file from src/rooted/ to src/main/).
-      - name: Assert standard APK is clean
+      # a file from src/rooted/ to src/main/). On hit, the offending
+      # strings/assets/permissions are printed and the step emits a
+      # ::error:: annotation so the failure surfaces inline on the PR diff.
+      #
+      # Implementation note: dex and AndroidManifest.xml are extracted via
+      # `unzip -p` and inspected with `strings`. We deliberately AVOID
+      # `aapt dump permissions` here — its path is not stable across
+      # GitHub-hosted runner images and silent fail-open was the bug that
+      # an earlier version of this gate shipped with.
+      - name: Assert standard APK has no rooted leakage
         if: matrix.flavor == 'standard'
         run: |
           set -euo pipefail
-          APK=$(find ${{ matrix.outputDir }} -name "*.apk" | head -n1)
-          echo "Inspecting $APK"
+          APK=$(find ${{ matrix.outputDir }} -name "*.apk" -print -quit)
+          test -n "$APK" || { echo "::error::No standard APK produced in ${{ matrix.outputDir }}"; exit 1; }
+          echo "Inspecting: $APK"
 
-          # 1. Source-string check — libsu and friends should never appear
-          #    in the standard APK's dex.
-          if unzip -p "$APK" classes.dex classes2.dex classes3.dex 2>/dev/null \
-              | strings -a \
-              | grep -iE 'topjohnwu|libsu|/system/(bin|xbin)/su|magisk|superuser|chainfire'; then
-            echo "❌ Standard APK contains rooted strings"
-            exit 1
+          fail() { echo "::error::$1"; exit 1; }
+
+          WORK=$(mktemp -d)
+          trap 'rm -rf "$WORK"' EXIT
+
+          # Extract every dex (matched by archive-internal glob) plus the
+          # binary AndroidManifest.xml. If either comes back empty, the APK
+          # is malformed or unzip is not behaving — bail loudly rather than
+          # passing the gate by accident.
+          unzip -p "$APK" '*.dex' > "$WORK/dexes.bin" 2>/dev/null || true
+          test -s "$WORK/dexes.bin" || fail "Could not extract any dex from $APK"
+
+          unzip -p "$APK" AndroidManifest.xml > "$WORK/manifest.bin" 2>/dev/null || true
+          test -s "$WORK/manifest.bin" || fail "Could not extract AndroidManifest.xml from $APK"
+
+          # 1. No su-related strings in any dex.
+          #
+          # Pattern is intentionally PRECISE: bare `magisk` and `superuser`
+          # would false-positive on the shared `RootProvider$Magisk` sealed-
+          # class variant (whose abstraction lives in src/main/ with no
+          # behavior in the standard flavor) and on cosmetic localization
+          # strings that name Magisk/KernelSU as root managers. The actual
+          # libsu/superuser integration always carries one of these
+          # unambiguous markers in its class signatures or strings.
+          HITS=$(strings -a -n 6 "$WORK/dexes.bin" \
+            | grep -iE 'topjohnwu|libsu|/system/(bin|xbin)/su|chainfire|hiddenapibypass' \
+            | sort -u || true)
+          if [ -n "$HITS" ]; then
+            echo "Standard APK contains rooted strings:"
+            echo "$HITS"
+            fail "Standard APK contains rooted strings (see above)"
           fi
 
-          # 2. Asset-presence check — the LSPosed module APK and any spoofer
-          #    asset must not be present in the bundled assets/.
-          if unzip -l "$APK" | grep -iE 'lsposed|magisk|spoofer'; then
-            echo "❌ Standard APK contains rooted/lsposed assets"
-            exit 1
+          # 2. No rooted asset filenames bundled inside the APK.
+          ASSETS=$(unzip -l "$APK" | awk '{print $NF}' \
+            | grep -iE 'lsposed|magisk|spoofer|\.magisk\.|/su/' || true)
+          if [ -n "$ASSETS" ]; then
+            echo "Standard APK contains rooted assets:"
+            echo "$ASSETS"
+            fail "Standard APK contains rooted assets (see above)"
           fi
 
-          # 3. Permission check — the standard APK must not request any
-          #    signature-only / privileged permissions beyond the
-          #    sanctioned set already declared in the main manifest.
-          if "$ANDROID_HOME"/build-tools/*/aapt dump permissions "$APK" 2>/dev/null \
-              | grep -iE 'WRITE_SECURE_SETTINGS|MOUNT_UNMOUNT|INSTALL_PACKAGES|READ_LOGS|MANAGE_USERS|CHANGE_CONFIGURATION'; then
-            echo "❌ Standard APK requests root-tier permissions"
-            exit 1
+          # 3. No root-tier permissions. The binary AndroidManifest.xml may
+          #    store its string pool as either UTF-8 or UTF-16 LE depending
+          #    on AAPT2's encoding choice. Default `strings` only catches
+          #    contiguous 7-bit / UTF-8 runs, so we additionally pipe the
+          #    blob through `tr -d '\0' | strings` (which collapses any
+          #    UTF-16-style nulls and surfaces the underlying ASCII chars)
+          #    and run a native UTF-16-LE extraction. Combined, these three
+          #    passes catch the permission name regardless of how AAPT2
+          #    chose to encode the pool.
+          {
+            strings -a -n 8 "$WORK/manifest.bin"
+            tr -d '\0' < "$WORK/manifest.bin" | strings -a -n 8
+            strings -a -e l -n 8 "$WORK/manifest.bin"
+          } > "$WORK/manifest.txt"
+          echo "Manifest text extraction: $(wc -l < "$WORK/manifest.txt") lines"
+
+          PERMS=$(grep -iE 'WRITE_SECURE_SETTINGS|MOUNT_UNMOUNT|INSTALL_PACKAGES|DELETE_PACKAGES|READ_LOGS|MANAGE_USERS|CHANGE_CONFIGURATION|MASTER_CLEAR|REBOOT|ACCESS_SUPERUSER' "$WORK/manifest.txt" \
+            | sort -u || true)
+          if [ -n "$PERMS" ]; then
+            echo "Standard APK declares root-tier permissions:"
+            echo "$PERMS"
+            fail "Standard APK declares root-tier permissions (see above)"
           fi
-          echo "✅ Standard APK clean"
+
+          echo "✅ Standard APK clean — no rooted leakage detected"
+
+      # ─── Rooted-APK asset inventory (positive verification) ─────────────
+      # The leak gate above is a *negative* check: it asserts the standard
+      # APK does NOT contain rooted assets. The rooted leg deserves the
+      # *positive* counterpart — assert that `assets/lsposed-spoofer.apk`
+      # IS present, proving the conditional Gradle wiring at
+      # `app/build.gradle:217-235` actually copied the LSPosed module's
+      # release APK in. Output is short and lives in the GitHub Actions
+      # log so it's mobile-readable on the phone you're testing on.
+      - name: Inventory rooted APK assets
+        if: matrix.flavor == 'rooted'
+        run: |
+          set -euo pipefail
+          APK=$(find ${{ matrix.outputDir }} -name "*.apk" -print -quit)
+          test -n "$APK" || { echo "::error::No rooted APK produced in ${{ matrix.outputDir }}"; exit 1; }
+          echo "Rooted APK: $APK"
+          echo "Bundled asset/*.apk and lsposed-related entries:"
+          unzip -l "$APK" \
+            | awk '$NF ~ /^assets\/.*\.apk$/ || tolower($NF) ~ /lsposed|spoofer/ {print "  "$NF" ("$1" bytes)"}' \
+            || true
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

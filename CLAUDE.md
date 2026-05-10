@@ -88,6 +88,25 @@ Rules (full details in `docs/flavors.md`):
    `rooted-debug.apk`. `versionCode = CI_VERSION_CODE * 10 + flavor_offset`
    (standard=+0, rooted=+1).
 
+### Standard-APK leak gate
+
+CI's `Assert standard APK has no rooted leakage` step in
+`.github/workflows/build-apk.yml` runs on both `assembleStandardDebug` and
+`assembleStandardRelease` and hard-fails the matrix leg if the assembled APK
+contains su-related strings (`topjohnwu`, `libsu`, `/system/bin/su`,
+`/system/xbin/su`, `chainfire`, `hiddenapibypass`), rooted assets
+(`lsposed`, `magisk`, `spoofer`, `.magisk.`, `/su/`), or root-tier permissions
+(`WRITE_SECURE_SETTINGS`, `MOUNT_UNMOUNT*`, `INSTALL_PACKAGES`,
+`DELETE_PACKAGES`, `READ_LOGS`, `MANAGE_USERS`, `CHANGE_CONFIGURATION`,
+`MASTER_CLEAR`, `REBOOT`, `ACCESS_SUPERUSER`). The dex pattern is
+deliberately precise — bare `magisk`/`superuser` would trip on the shared
+`RootProvider` sealed-class variant names and on cosmetic localization
+strings; the libsu/topjohnwu/chainfire/hiddenapibypass markers cover the
+real-leak case without that noise. If you add a new rooted-only library,
+asset, or permission, scope it to `rootedImplementation` /
+`app/src/rooted/assets/` / `app/src/rooted/AndroidManifest.xml` — the gate
+will catch the mistake on PR.
+
 ## Layout
 
 - Settings: `app/src/main/java/com/gadget/ui/screens/SettingsScreen.kt`
