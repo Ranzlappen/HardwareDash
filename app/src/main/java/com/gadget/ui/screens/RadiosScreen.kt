@@ -296,7 +296,7 @@ private fun loadSubGhzSignals(context: Context): List<SavedSubGhzSignal> {
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun RadiosScreen() {
+fun RadiosScreen(onNavigateToSpoof: () -> Unit = {}) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -1984,6 +1984,13 @@ fun RadiosScreen() {
         }
 
         GpsRootExtrasSection()
+
+        OutlinedButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onNavigateToSpoof,
+        ) {
+            Text(S.spoof.navButton)
+        }
 
         HorizontalDivider()
 

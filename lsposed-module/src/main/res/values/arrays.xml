@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Default LSPosed scope. "android" hooks the system framework so
+        Location.isFromMockProvider() returns false to every caller. Users
+        can narrow the scope in LSPosed Manager after install — e.g. add
+        Pokémon GO, Snapchat, banking app — to limit exposure.
+    -->
+    <array name="xposedscope">
+        <item>android</item>
+    </array>
+</resources>

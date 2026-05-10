@@ -2281,6 +2281,115 @@ object S {
             "Cochez la case sur la premiere page pour continuer.",
         )
     }
+
+    // ── GPS Spoofing (Batch 13) ────────────────────────────────────────
+    val spoof: Spoof @Composable get() = Spoof(lang)
+
+    class Spoof(private val l: Language) {
+        val title get() = m(l, "GPS Spoofing", "GPS-Spoofing", "Suplantar GPS", "Usurpation GPS")
+        val navButton get() = m(l, "GPS Spoofing", "GPS-Spoofing", "Suplantar GPS", "Usurpation GPS")
+        val capabilities get() = m(l, "Capabilities", "Funktionen", "Capacidades", "Capacités")
+        val rootRow get() = m(l, "Root", "Root", "Root", "Root")
+        val mockLocationAppRow get() = m(l, "Mock Location App", "Mock-Standort-App", "App de ubicación simulada", "App de localisation factice")
+        val competingMockApp get() = m(l, "Another Mock-Location app holds the slot", "Eine andere Mock-Standort-App belegt den Platz", "Otra app de ubicación simulada ocupa el espacio", "Une autre app détient le créneau de localisation factice")
+        val lsposedFrameworkRow get() = m(l, "LSPosed framework", "LSPosed-Framework", "Marco LSPosed", "Cadre LSPosed")
+        val lsposedModuleRow get() = m(l, "LSPosed module", "LSPosed-Modul", "Módulo LSPosed", "Module LSPosed")
+        val lsposedNotInstalled get() = m(l, "Not installed", "Nicht installiert", "No instalado", "Non installé")
+        val lsposedInstalledNotLoaded get() = m(l, "Installed (reboot to activate)", "Installiert (Neustart zum Aktivieren)", "Instalado (reinicia para activar)", "Installé (redémarrer pour activer)")
+        val lsposedLoaded get() = m(l, "Loaded", "Geladen", "Cargado", "Chargé")
+        val installLsposed get() = m(l, "Install LSPosed module", "LSPosed-Modul installieren", "Instalar módulo LSPosed", "Installer le module LSPosed")
+        val uninstallLsposed get() = m(l, "Uninstall LSPosed module", "LSPosed-Modul deinstallieren", "Desinstalar módulo LSPosed", "Désinstaller le module LSPosed")
+        val lsposedAfterInstall get() = m(
+            l,
+            "Now open LSPosed Manager: enable HardwareDash Spoofer, set scope to System Framework + your target apps, then reboot.",
+            "Jetzt LSPosed Manager öffnen: HardwareDash Spoofer aktivieren, Bereich auf System Framework + Ziel-Apps setzen, dann Neustart.",
+            "Abre LSPosed Manager: activa HardwareDash Spoofer, define el alcance a System Framework + tus apps objetivo, y reinicia.",
+            "Ouvrez LSPosed Manager: activez HardwareDash Spoofer, définissez la portée sur System Framework + vos apps cibles, puis redémarrez.",
+        )
+        val tabStatic get() = m(l, "Static", "Statisch", "Estático", "Statique")
+        val tabGpx get() = m(l, "GPX", "GPX", "GPX", "GPX")
+        val tabKml get() = m(l, "KML", "KML", "KML", "KML")
+        val tabRoute get() = m(l, "Route", "Route", "Ruta", "Itinéraire")
+        val latitude get() = m(l, "Latitude", "Breitengrad", "Latitud", "Latitude")
+        val longitude get() = m(l, "Longitude", "Längengrad", "Longitud", "Longitude")
+        val altitude get() = m(l, "Altitude (m)", "Höhe (m)", "Altitud (m)", "Altitude (m)")
+        val accuracy get() = m(l, "Accuracy (m)", "Genauigkeit (m)", "Precisión (m)", "Précision (m)")
+        val bearing get() = m(l, "Bearing (°)", "Kurs (°)", "Rumbo (°)", "Cap (°)")
+        val speed get() = m(l, "Speed (m/s)", "Geschwindigkeit (m/s)", "Velocidad (m/s)", "Vitesse (m/s)")
+        val pickFile get() = m(l, "Pick file", "Datei wählen", "Elegir archivo", "Choisir un fichier")
+        val speedMultiplier get() = m(l, "Speed multiplier", "Geschwindigkeitsfaktor", "Multiplicador de velocidad", "Multiplicateur de vitesse")
+        val loop get() = m(l, "Loop", "Schleife", "Repetir", "Boucler")
+        val start get() = m(l, "Start", "Start", "Iniciar", "Démarrer")
+        val stop get() = m(l, "Stop", "Stopp", "Detener", "Arrêter")
+        val running get() = m(l, "Running", "Läuft", "En ejecución", "En cours")
+        val idle get() = m(l, "Idle", "Im Leerlauf", "Inactivo", "Inactif")
+        val activeMode get() = m(l, "Active mode", "Aktiver Modus", "Modo activo", "Mode actif")
+        val sessionLimit get() = m(l, "Session limit", "Sitzungslimit", "Límite de sesión", "Limite de session")
+        val openDevOptions get() = m(l, "Open Developer Options", "Entwickleroptionen öffnen", "Abrir opciones de desarrollador", "Ouvrir les options de développeur")
+        val needsMockApp get() = m(
+            l,
+            "Enable HardwareDash as Mock Location App in Developer Options.",
+            "HardwareDash als Mock-Standort-App in den Entwickleroptionen aktivieren.",
+            "Activa HardwareDash como App de ubicación simulada en Opciones de desarrollador.",
+            "Activez HardwareDash comme App de localisation factice dans les options de développeur.",
+        )
+        val notificationActive get() = m(l, "GPS Spoofing active", "GPS-Spoofing aktiv", "Suplantación GPS activa", "Usurpation GPS active")
+        val matrixHeader get() = m(l, "Anti-detection coverage", "Anti-Erkennung", "Cobertura anti-detección", "Couverture anti-détection")
+        val matrixDetected get() = m(l, "Detected", "Erkannt", "Detectado", "Détecté")
+        val matrixBypassed get() = m(l, "Bypassed", "Umgangen", "Eludido", "Contourné")
+        val matrixNotApplicable get() = m(l, "n/a", "n/a", "n/a", "n/a")
+        val matrixIsFromMock get() = m(l, "Location.isFromMockProvider()", "Location.isFromMockProvider()", "Location.isFromMockProvider()", "Location.isFromMockProvider()")
+        val matrixIsMock get() = m(l, "Location.isMock() (API 31+)", "Location.isMock() (API 31+)", "Location.isMock() (API 31+)", "Location.isMock() (API 31+)")
+        val matrixAppOps get() = m(l, "AppOpsManager.checkOp(MOCK_LOCATION)", "AppOpsManager.checkOp(MOCK_LOCATION)", "AppOpsManager.checkOp(MOCK_LOCATION)", "AppOpsManager.checkOp(MOCK_LOCATION)")
+        val matrixSettingsSecure get() = m(l, "Settings.Secure.mock_location (legacy)", "Settings.Secure.mock_location (Legacy)", "Settings.Secure.mock_location (heredado)", "Settings.Secure.mock_location (hérité)")
+        val matrixGnssStatus get() = m(l, "GnssStatus.Callback satellites", "GnssStatus.Callback Satelliten", "Satélites GnssStatus.Callback", "Satellites GnssStatus.Callback")
+        val matrixFused get() = m(l, "FusedLocationProvider mock bit", "FusedLocationProvider Mock-Bit", "Bit mock FusedLocationProvider", "Bit factice FusedLocationProvider")
+        val matrixSensorFusion get() = m(l, "Sensor fusion (gyro/accel)", "Sensor-Fusion (Gyro/Beschl.)", "Fusión de sensores (giro/acel)", "Fusion de capteurs (gyro/accel)")
+        val matrixWifiBssid get() = m(l, "WiFi BSSID correlation", "WiFi-BSSID-Korrelation", "Correlación BSSID WiFi", "Corrélation BSSID WiFi")
+        val matrixCellTower get() = m(l, "Cell tower correlation", "Mobilfunkmast-Korrelation", "Correlación de torres celulares", "Corrélation cellules mobiles")
+        val legalTitle get() = m(l, "Geolocation spoofing — read first", "Geolokations-Spoofing — zuerst lesen", "Suplantación de geolocalización — leer primero", "Usurpation de géolocalisation — lire d'abord")
+        val legalBody get() = m(
+            l,
+            "Spoofing your location can violate the terms of service of many apps " +
+                "(games, ride-share, dating, social, navigation, banking) and may " +
+                "be illegal in your jurisdiction when used to impersonate, defraud, " +
+                "or evade legal obligations. Banking, anti-fraud, and game-integrity " +
+                "systems often detect spoofing despite our anti-detection layer. " +
+                "By acknowledging you accept full responsibility.",
+            "Standort-Spoofing kann gegen die Nutzungsbedingungen vieler Apps " +
+                "verstossen (Spiele, Mitfahrgelegenheiten, Dating, Soziales, " +
+                "Navigation, Banking) und ist je nach Rechtsraum illegal, wenn es " +
+                "zur Täuschung, zum Betrug oder zur Umgehung gesetzlicher Pflichten " +
+                "verwendet wird. Banking-, Anti-Betrugs- und Spielintegritätssysteme " +
+                "erkennen Spoofing oft trotz unserer Anti-Erkennungsschicht. " +
+                "Mit der Bestätigung übernehmen Sie die volle Verantwortung.",
+            "Suplantar tu ubicación puede infringir las condiciones de servicio " +
+                "de muchas apps (juegos, transporte, citas, redes sociales, " +
+                "navegación, banca) y puede ser ilegal en tu jurisdicción si se " +
+                "usa para suplantar, defraudar o eludir obligaciones legales. Los " +
+                "sistemas bancarios, antifraude y de integridad de juegos suelen " +
+                "detectar la suplantación a pesar de nuestra capa anti-detección. " +
+                "Al confirmar, aceptas la responsabilidad completa.",
+            "L'usurpation de votre localisation peut violer les conditions " +
+                "d'utilisation de nombreuses applications (jeux, VTC, rencontres, " +
+                "réseaux sociaux, navigation, banque) et peut être illégale dans " +
+                "votre juridiction si elle est utilisée pour usurper, frauder ou " +
+                "échapper à des obligations légales. Les systèmes bancaires, " +
+                "anti-fraude et d'intégrité de jeu détectent souvent l'usurpation " +
+                "malgré notre couche anti-détection. En confirmant vous acceptez " +
+                "l'entière responsabilité.",
+        )
+        val legalAccept get() = m(l, "I understand and accept", "Ich verstehe und akzeptiere", "Entiendo y acepto", "Je comprends et accepte")
+        val legalCancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
+        val routeWaypointsLabel get() = m(l, "Waypoints (lat,lon per line)", "Wegpunkte (Breit,Läng pro Zeile)", "Puntos (lat,lon por línea)", "Points (lat,lon par ligne)")
+        val routeAddWaypoint get() = m(l, "Add waypoint at center", "Wegpunkt am Zentrum hinzufügen", "Añadir punto en el centro", "Ajouter un point au centre")
+        val routeClearWaypoints get() = m(l, "Clear waypoints", "Wegpunkte löschen", "Borrar puntos", "Effacer les points")
+        val needsAtLeastTwo get() = m(l, "Need at least 2 waypoints", "Mindestens 2 Wegpunkte erforderlich", "Se requieren al menos 2 puntos", "Au moins 2 points requis")
+        val statusLegalNotAcknowledged get() = m(l, "Legal disclaimer not acknowledged", "Rechtlicher Hinweis nicht bestätigt", "Aviso legal no confirmado", "Avis légal non confirmé")
+        val statusBlocked get() = m(l, "Blocked by safety gate (toggle, rate limit)", "Durch Safety Gate blockiert (Schalter, Ratenlimit)", "Bloqueado por la puerta de seguridad (interruptor, límite de tasa)", "Bloqué par la barrière de sécurité (bascule, limite de débit)")
+        val statusFailed get() = m(l, "Failed", "Fehlgeschlagen", "Falló", "Échec")
+        val installSucceeded get() = m(l, "Install succeeded", "Installation erfolgreich", "Instalación exitosa", "Installation réussie")
+    }
 }
 
 /** Helper: pick the string for the given language. Order: EN, DE, ES, FR. */

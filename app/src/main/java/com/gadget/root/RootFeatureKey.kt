@@ -137,4 +137,13 @@ sealed class RootFeatureKey(val id: String) {
     data object DiagnosticsDumpMemInfo : RootFeatureKey("diagnostics_dump_mem_info")
     data object DiagnosticsDumpCpuInfo : RootFeatureKey("diagnostics_dump_cpu_info")
     data object DiagnosticsDumpProcstats : RootFeatureKey("diagnostics_dump_procstats")
+
+    // ──── Batch-13 GPS spoofing features ────
+    // Test-provider-driven mock location with rooted permission grant.
+    data object GpsLocationOverride : RootFeatureKey("gps_location_override")
+    // GPX/KML/route playback driving the override.
+    data object GpsRouteSimulation : RootFeatureKey("gps_route_simulation")
+    // One-shot installer for the bundled LSPosed module that hides
+    // isFromMockProvider()/isMock() from third-party apps.
+    data object GpsLsposedHookInstall : RootFeatureKey("gps_lsposed_hook_install")
 }
