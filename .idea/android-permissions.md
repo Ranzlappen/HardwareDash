@@ -1230,3 +1230,268 @@ Any app can declare its own permissions in its manifest with `<permission>`. Oth
 **For your devices specifically:**
 - **Xiaomi 14T Pro** (HyperOS 2 / Android 15): full §2 + §3 AOSP + §8.2 MIUI/HyperOS toggles + §10 GMS. Watch the MIUI Other-permissions section — autostart, background pop-up, lock-screen display, and "read installed apps list" are killers for app behavior and aren't in any standard permissions library.
 - **Huawei P30** (EMUI 12 / Android 10 base): full §2 + §3 AOSP at API-29 level + §8.3 Huawei + HMS Core. No GMS unless you sideloaded it. The `com.huawei.permission.external_app_settings.USE_COMPONENT` is what you'll hit if you try to open the protected-apps screen programmatically — it's signature-protected, so on a stock P30 you can only deeplink the user there via intent, not toggle it for them.
+
+---
+
+## 12. HARDWAREDASH APP — PERMISSIONS AUDIT
+
+This section maps the catalog above to the **`HardwareDash` app shipped from this repository**, broken down per build flavor. The app produces two flavors from one Gradle module (see `CLAUDE.md` → *Flavors*):
+
+- **`standard`** (`applicationId = com.gadget`) — Play-store-safe build, no root capabilities.
+- **`rooted`** (`applicationId = com.gadget.root`) — adds root-only behaviors implemented through `libsu`.
+
+CI hard-fails any standard APK that contains root-tier strings — see §12.6.
+
+**Legend**
+- ✅ declared in manifest & used
+- ⚠️ declared & used but degrades gracefully when not granted (or referenced in code but missing from manifest — flagged in §12.5)
+- 🔒 not declared, granted at runtime via `su` / `pm grant` / `cmd appops` (rooted flavor only)
+- ❌ not declared, not used
+
+### 12.1 Declared permissions across the three manifests
+
+**`app/src/main/AndroidManifest.xml`** — shared by both flavors, 33 `<uses-permission>` entries:
+
+`CAMERA`, `RECORD_AUDIO`, `VIBRATE`, `INTERNET`, `ACCESS_WIFI_STATE`, `CHANGE_WIFI_STATE`, `ACCESS_NETWORK_STATE`, `BLUETOOTH` (`maxSdkVersion=30`), `BLUETOOTH_ADMIN` (`maxSdkVersion=30`), `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN` (`usesPermissionFlags="neverForLocation"`), `NFC`, `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `ACCESS_BACKGROUND_LOCATION`, `ACCESS_MOCK_LOCATION` (`tools:ignore="MockLocation,ProtectedPermissions"`), `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_CAMERA`, `FOREGROUND_SERVICE_MICROPHONE`, `FOREGROUND_SERVICE_SPECIAL_USE`, `FOREGROUND_SERVICE_DATA_SYNC`, `FOREGROUND_SERVICE_LOCATION`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `WAKE_LOCK`, `RECEIVE_BOOT_COMPLETED`, `SYSTEM_ALERT_WINDOW`, `DISABLE_KEYGUARD`, `ACTIVITY_RECOGNITION`, `READ_PHONE_STATE`, `SCHEDULE_EXACT_ALARM`, `WRITE_SETTINGS` (`tools:ignore="ProtectedPermissions"`), `PACKAGE_USAGE_STATS` (`tools:ignore="ProtectedPermissions"`).
+
+`<uses-feature>` (all `android:required="false"`): `camera`, `camera.flash`, `camera.autofocus`, `nfc`, `consumerir`, `usb.host`, `sensor.gyroscope`, `sensor.accelerometer`, `sensor.compass`, `sensor.proximity`, `sensor.light`, `sensor.barometer`, `sensor.stepcounter`.
+
+`<queries>` (Android 11+ visibility): launcher-discovery intent for the App-Organizer widget module.
+
+**`app/src/standard/AndroidManifest.xml`** — intentionally empty fragment. Inherits everything from the shared manifest.
+
+**`app/src/rooted/AndroidManifest.xml`** — no extra `<uses-permission>` (declarations would trip the leak gate via the merged manifest). Adds only:
+- `<queries>` for `com.topjohnwu.magisk`, `me.weishu.kernelsu`, `me.bmax.apatch` so `PackageManager` can detect installed root managers.
+- A `<service>` declaration for `com.gadget.root.core.GadgetRootService` (libsu `RootService` skeleton, `exported="false"`).
+
+The separate `lsposed-module/src/main/AndroidManifest.xml` (rooted-only Xposed module) declares no permissions; it's metadata-only and hides `isFromMockProvider()` / `isMock()` / `android:mock_location` AppOp from third-party apps that try to detect GPS spoofing.
+
+### 12.2 Runtime-prompt batch and special-permission onboarding
+
+**Runtime (`§2.2 dangerous`) batch** — `app/src/main/java/com/gadget/permissions/RequiredPermissions.kt` requests via `ActivityResultContracts.RequestMultiplePermissions()`:
+`CAMERA`, `RECORD_AUDIO`, `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `READ_PHONE_STATE`, `ACTIVITY_RECOGNITION`, `POST_NOTIFICATIONS` (API 33+), `BLUETOOTH_CONNECT` (API 31+), `BLUETOOTH_SCAN` (API 31+).
+
+**Special-permission (`§2.3 appop`) onboarding sequence** — `app/src/main/java/com/gadget/permissions/SpecialPermissionStep.kt`, ordered:
+1. **DND policy** via `ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS` — checked with `NotificationManager.isNotificationPolicyAccessGranted`.
+2. **Battery-optimization exemption** via `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` — checked with `PowerManager.isIgnoringBatteryOptimizations()`.
+3. **Draw over apps** via `ACTION_MANAGE_OVERLAY_PERMISSION` — checked with `Settings.canDrawOverlays()`.
+4. **Device admin** via `DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN` — checked with `DevicePolicyManager.isAdminActive(component)`.
+5. **Write settings** via `ACTION_MANAGE_WRITE_SETTINGS` — checked with `Settings.System.canWrite()`.
+6. **Schedule exact alarm** via `ACTION_REQUEST_SCHEDULE_EXACT_ALARM` (API 33+ only) — checked with `AlarmManager.canScheduleExactAlarms()`.
+
+### 12.3 Rooted-flavor runtime grants (root-only side-effects)
+
+The rooted manifest deliberately doesn't declare signature permissions. Instead, root-only capabilities are granted at runtime through `libsu` so the standard APK stays clean:
+
+| Capability | Shell invocation | Why | Source |
+|---|---|---|---|
+| `android:mock_location` AppOp | `appops set <pkg> android:mock_location allow` | Skip the manual Dev Options "select mock location app" picker before GPS spoofing | `app/src/rooted/java/com/gadget/gps/spoof/RootedGpsSpoofController.kt` |
+| `CAPTURE_AUDIO_OUTPUT` (signature) | `pm grant <pkg> android.permission.CAPTURE_AUDIO_OUTPUT` | System-audio loopback capture for MicScreen (5-minute hard ceiling per call to limit blast radius) | `app/src/rooted/java/com/gadget/microphone/SystemAudioCapture.kt` |
+| `RUN_ANY_IN_BACKGROUND` AppOp | `cmd appops set <pkg> RUN_ANY_IN_BACKGROUND default` | Emergency reset to recover the app's background-execution allowance after testing | `app/src/rooted/java/com/gadget/.../RootedEmergencyResetCoordinator.kt` |
+
+A mutation log under `app/src/rooted/` records each su-driven change so the rooted flavor can revert on crash or reboot.
+
+### 12.4 Cross-reference: every permission, per flavor, with feature & rationale
+
+#### Location (§2.2 dangerous + §2.3 appop + signature)
+
+| Permission | Std | Root | Feature / why |
+|---|---|---|---|
+| `ACCESS_FINE_LOCATION` | ✅ | ✅ | GPS spoofing playback (`LocationSpoofService`); WiFi-scan context on `RadiosScreen`. |
+| `ACCESS_COARSE_LOCATION` | ✅ | ✅ | Cell-based fallback for spoofing routes; partial-grant path on the runtime prompt. |
+| `ACCESS_BACKGROUND_LOCATION` *("Allow all the time")* | ✅ | ✅ | Lets `LocationSpoofService` keep emitting fixes when the app is backgrounded. This is the user-facing "Allow all the time" radio described in §4.2. |
+| `ACCESS_MOCK_LOCATION` (signature) | ✅ | ✅ | Declared so the app appears in Dev Options → *Mock location app* on standard. Rooted bypasses the picker via AppOp grant (see §12.3). |
+| `android:mock_location` AppOp | — | 🔒 | Granted by `RootedGpsSpoofController`. |
+| `ACCESS_LOCATION_EXTRA_COMMANDS`, `LOCATION_HARDWARE`, `INSTALL_LOCATION_PROVIDER`, `CONTROL_LOCATION_UPDATES` | ❌ | ❌ | Not needed; uses standard `LocationManager.addTestProvider()`. |
+
+#### Camera, microphone, audio (§2.2 + signature)
+
+| Permission | Std | Root | Feature / why |
+|---|---|---|---|
+| `CAMERA` | ✅ | ✅ | `CameraScreen`, `TorchScreen`, `StrobeService`, `VideoRecordService`, `CameraSnapshotWidget`. |
+| `RECORD_AUDIO` | ✅ | ✅ | `MicScreen` FFT spectrum, `VoiceRecordService`, `DbMeterService`, `GadgetService`. |
+| `CAPTURE_AUDIO_OUTPUT` (signature) | ❌ | 🔒 | `SystemAudioCapture` grants via `pm grant` for system-audio loopback (5-min ceiling). Never available to standard. |
+| `MODIFY_AUDIO_SETTINGS`, `CAPTURE_AUDIO_HOTWORD`, `CAPTURE_MEDIA_OUTPUT`, `CAPTURE_VOICE_COMMUNICATION_OUTPUT` | ❌ | ❌ | Not needed; rooted mixer work happens via direct ALSA, not via these. |
+
+#### Bluetooth, Nearby Devices, UWB (§2.2 + §2.1)
+
+| Permission | Std | Root | Feature / why |
+|---|---|---|---|
+| `BLUETOOTH` (≤30), `BLUETOOTH_ADMIN` (≤30) | ✅ | ✅ | Legacy stack for API-29/30 devices (minSdk=29). |
+| `BLUETOOTH_CONNECT` (API 31+) | ✅ | ✅ | `FlipperBleLink` GATT, `BluetoothExtremeMode`, `RadiosScreen`. |
+| `BLUETOOTH_SCAN` (API 31+, `neverForLocation`) | ✅ | ✅ | Flipper discovery; flag declared so the scan isn't treated as a location-derivation feature. |
+| `BLUETOOTH_ADVERTISE` | ❌ | ❌ | We're a central, not a peripheral. |
+| `NEARBY_WIFI_DEVICES` (API 33+) | ❌ | ❌ | No WifiAware / WifiDirect / WifiRtt usage. |
+| `UWB_RANGING`, `BLUETOOTH_PRIVILEGED` | ❌ | ❌ | – |
+
+#### WiFi & networking (§2.1)
+
+| Permission | Std | Root | Feature / why |
+|---|---|---|---|
+| `INTERNET`, `ACCESS_NETWORK_STATE` | ✅ | ✅ | App HTTP and connectivity-type detection. |
+| `ACCESS_WIFI_STATE`, `CHANGE_WIFI_STATE` | ✅ | ✅ | `RadiosScreen` WiFi card (SSID, RSSI, toggle radio). |
+| `CHANGE_WIFI_MULTICAST_STATE`, `CHANGE_NETWORK_STATE` | ❌ | ❌ | No mDNS / no `ConnectivityManager.requestNetwork`. |
+
+#### NFC, USB, IR (§2.1 + features)
+
+| Permission | Std | Root | Feature / why |
+|---|---|---|---|
+| `NFC` | ✅ | ✅ | Reader / writer + `NfcEmulationService` HCE (`BIND_NFC_SERVICE` set on the `<service>` element with intent filter `android.nfc.cardemulation.action.HOST_APDU_SERVICE` and metadata `@xml/nfc_hce_aid`). |
+| `NFC_TRANSACTION_EVENT`, `NFC_PREFERRED_PAYMENT_INFO` | ❌ | ❌ | Not a payment app. |
+| `TRANSMIT_IR` | ❌ | ❌ | `ConsumerIrManager` doesn't require it post-API 19; `android.hardware.consumerir` feature is declared. |
+| USB host | (feature) | (feature) | `android.hardware.usb.host` declared optional; per-attach grants come from the system attach dialog driven by `@xml/flipper_usb_filter` — there's no `<uses-permission>` for USB host. |
+
+#### Phone & telephony (§2.2 dangerous)
+
+| Permission | Std | Root | Feature / why |
+|---|---|---|---|
+| `READ_PHONE_STATE` | ✅ | ✅ | `RadiosScreen` — carrier name, signal strength, SIM info. |
+| `READ_PHONE_NUMBERS`, `READ_BASIC_PHONE_STATE`, `CALL_PHONE`, `ANSWER_PHONE_CALLS` | ❌ | ❌ | No outbound dialing; `CallerScreenActivity` is display-only. |
+| `READ_CALL_LOG`, `WRITE_CALL_LOG`, `ADD_VOICEMAIL`, `USE_SIP`, `MANAGE_OWN_CALLS`, `ACCEPT_HANDOVER` | ❌ | ❌ | No call-log / voicemail / SIP / self-managed-connection features. |
+| `READ_PRECISE_PHONE_STATE`, `MODIFY_PHONE_STATE` | ❌ | ❌ | Carrier-only signature permissions. |
+
+#### Contacts, calendar, SMS — entire groups absent
+
+| Permission group | Std | Root | Why |
+|---|---|---|---|
+| `READ/WRITE_CONTACTS`, `GET_ACCOUNTS` | ❌ | ❌ | No contact integration. |
+| `READ/WRITE_CALENDAR` | ❌ | ❌ | No calendar integration. |
+| `SEND_SMS`, `RECEIVE_SMS`, `READ_SMS`, `RECEIVE_WAP_PUSH`, `RECEIVE_MMS`, `READ_CELL_BROADCASTS` | ❌ | ❌ | No SMS/MMS feature. |
+
+#### Sensors, activity, body, health — entire Health Connect family absent
+
+| Permission | Std | Root | Why |
+|---|---|---|---|
+| `ACTIVITY_RECOGNITION` | ✅ | ✅ | `SensorsScreen` step-counter / activity sensor monitoring. |
+| `BODY_SENSORS` (deprecated API 35) | ⚠️ | ⚠️ | **Referenced** in `WidgetMetrics.kt`'s permission check but **never declared** in any manifest — see §12.5 issue #1. |
+| `BODY_SENSORS_BACKGROUND` (API 33+) | ❌ | ❌ | – |
+| `HIGH_SAMPLING_RATE_SENSORS` | ❌ | ❌ | Default sample rates suffice. |
+| `health.*` (entire Health Connect family: `READ/WRITE_HEART_RATE`, `READ/WRITE_STEPS`, `READ/WRITE_SLEEP`, blood pressure, blood glucose, body temperature, skin temperature, basal metabolic rate, body composition, exercise, hydration, nutrition, menstrual cycle, mindfulness, planned exercise, oxygen saturation, respiratory rate, VO2 max, etc. — see §2.2 Health Connect) | ❌ | ❌ | No Health Connect integration anywhere in the app. `SensorsScreen` reads raw `Sensor` framework values directly. |
+| `FOREGROUND_SERVICE_HEALTH` | ❌ | ❌ | No Health-Connect-bound FGS. |
+
+#### Files, storage, media — entire group absent (by design)
+
+| Permission | Std | Root | Why |
+|---|---|---|---|
+| `READ_EXTERNAL_STORAGE` (≤32, deprecated), `WRITE_EXTERNAL_STORAGE` (≤28, no-op) | ❌ | ❌ | `BackupManager` writes to app-private `filesDir`; ZIP export uses SAF (`ACTION_CREATE_DOCUMENT`) — no shared-storage read needed. |
+| `MANAGE_EXTERNAL_STORAGE` (special) | ❌ | ❌ | No global file enumeration; declaring it would also trigger Play-policy review. |
+| `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_AUDIO` (API 33+) | ❌ | ❌ | No library browsing; `VideoRecordService` writes to its own scoped MediaStore namespace. |
+| `READ_MEDIA_VISUAL_USER_SELECTED` (API 34+) | ❌ | ❌ | We use ACTION_GET_CONTENT / SAF instead — no permission required. |
+| `ACCESS_MEDIA_LOCATION`, `MANAGE_MEDIA` | ❌ | ❌ | Don't read shared-photo EXIF GPS; no bulk media editing. |
+| `WRITE_MEDIA_STORAGE`, `MOUNT_UNMOUNT_FILESYSTEMS`, `MOUNT_FORMAT_FILESYSTEMS`, `ACCESS_CACHE_FILESYSTEM` | ❌ | ❌ | Signature-only; rooted operations happen via `su` shell, not via these. Most are explicitly blocked by the leak gate (§12.6). |
+| `FOREGROUND_SERVICE_FILE_MANAGEMENT` | ❌ | ❌ | No file-manager service. |
+
+#### Notifications, DND, alarms (§2.2 + §2.3)
+
+| Permission | Std | Root | Feature / why |
+|---|---|---|---|
+| `POST_NOTIFICATIONS` (API 33+) | ✅ | ✅ | All foreground services + `LockScreenScreen` widgets. |
+| `ACCESS_NOTIFICATION_POLICY` (special) | ⚠️ | ⚠️ | Onboarding step #1 navigates to the toggle and queries `isNotificationPolicyAccessGranted`, **but the `<uses-permission>` is missing from the shared manifest** — see §12.5 issue #2. |
+| `BIND_NOTIFICATION_LISTENER_SERVICE` | ❌ | ❌ | Don't read other apps' notifications. |
+| `BIND_CONDITION_PROVIDER_SERVICE` | ❌ | ❌ | – |
+| `SCHEDULE_EXACT_ALARM` (special, API 31+) | ✅ | ✅ | `LockScreenScreen` scheduled actions, logbook reminders. |
+| `USE_EXACT_ALARM` (normal, API 33+) | ❌ | ❌ | Play forbids this for non-calendar/clock categories; we use the user-grant path. |
+| `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` | ✅ | ✅ | Standard flavor's `PersistentKeepAliveService`; rooted has it for parity. |
+| `TURN_SCREEN_ON` (API 26+, normal) | ❌ | ❌ | We use `FLAG_KEEP_SCREEN_ON` inside activities, not `Activity.setTurnScreenOn()`. |
+
+#### Foreground service types (Android 14+ — §2.1)
+
+| Permission | Std | Root | Service(s) declaring this type |
+|---|---|---|---|
+| `FOREGROUND_SERVICE` | ✅ | ✅ | All 9 services below. |
+| `FOREGROUND_SERVICE_CAMERA` | ✅ | ✅ | `GadgetService`, `StrobeService`, `VideoRecordService`. |
+| `FOREGROUND_SERVICE_MICROPHONE` | ✅ | ✅ | `GadgetService`, `VoiceRecordService`, `DbMeterService`. |
+| `FOREGROUND_SERVICE_LOCATION` | ✅ | ✅ | `LocationSpoofService`. |
+| `FOREGROUND_SERVICE_SPECIAL_USE` | ✅ | ✅ | `VibrationService`, `LinkService` (both declare `PROPERTY_SPECIAL_USE_FGS_SUBTYPE`). |
+| `FOREGROUND_SERVICE_DATA_SYNC` | ✅ | ✅ | `PersistentKeepAliveService`. |
+| `FOREGROUND_SERVICE_CONNECTED_DEVICE` | ❌ | ❌ | Flipper sessions are on-screen, not headless. |
+| `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `_MEDIA_PROJECTION`, `_MEDIA_PROCESSING`, `_PHONE_CALL`, `_REMOTE_MESSAGING`, `_SHORT_SERVICE`, `_SYSTEM_EXEMPTED`, `_HEALTH`, `_FILE_MANAGEMENT` | ❌ | ❌ | No matching service kind. |
+
+Service-level mapping (all `exported="false"` unless noted):
+
+| Service | `foregroundServiceType` | Purpose |
+|---|---|---|
+| `GadgetService` | `camera\|microphone` | Continuous hardware polling. |
+| `VibrationService` | `specialUse` | Vibration-pattern playback. |
+| `StrobeService` | `camera` | Strobe / flashlight via camera LED. |
+| `LinkService` | `specialUse` | Sensor-driven link rules. |
+| `VideoRecordService` | `camera` | Video recording. |
+| `VoiceRecordService` | `microphone` | Voice recording. |
+| `DbMeterService` | `microphone` | Real-time dB / FFT meter. |
+| `NfcEmulationService` | (none) | NFC HCE; `exported="true"`, guarded by `android:permission="android.permission.BIND_NFC_SERVICE"`. |
+| `PersistentKeepAliveService` | `dataSync` | Persistent keep-alive (wake-lock). |
+| `LocationSpoofService` | `location` | GPS spoofing playback. |
+
+#### Special / mode / appop permissions in use
+
+| Permission | Std | Root | Feature / why |
+|---|---|---|---|
+| `SYSTEM_ALERT_WINDOW` (Display over other apps) | ✅ | ✅ | Lock-screen overlay widget; `CallerScreenActivity` overlay. |
+| `WRITE_SETTINGS` (Modify system settings) | ✅ | ✅ | Brightness control on `LockScreenScreen` / Settings widget. |
+| `PACKAGE_USAGE_STATS` (Usage access) | ⚠️ | ⚠️ | `AppsScreen` "Unused" smart-folder rule. Degrades to an empty folder if not granted — never crashes. |
+| `BIND_DEVICE_ADMIN` | ✅ | ✅ | Set on `AdminReceiver` `<receiver>` for `DISABLE_KEYGUARD` / `lockNow()`. |
+| `BIND_NFC_SERVICE` | ✅ | ✅ | Set on `NfcEmulationService` `<service>` element (not in `<uses-permission>`). |
+
+#### Wake, boot, vibrate, misc normal (§2.1)
+
+| Permission | Std | Root | Feature / why |
+|---|---|---|---|
+| `VIBRATE` | ✅ | ✅ | `VibrationService` and pattern playback. |
+| `WAKE_LOCK` | ✅ | ✅ | `LocationSpoofService` + `PersistentKeepAliveService`. |
+| `RECEIVE_BOOT_COMPLETED` | ✅ | ✅ | Auto-restart keep-alive on boot. |
+| `DISABLE_KEYGUARD` | ✅ | ✅ | Lock-screen flow alongside `BIND_DEVICE_ADMIN`. |
+| `EXPAND_STATUS_BAR`, `BROADCAST_STICKY`, `SET_WALLPAPER`, `SET_TIME_ZONE`, `KILL_BACKGROUND_PROCESSES`, `REORDER_TASKS`, `READ/WRITE_SYNC_SETTINGS`, `QUERY_ALL_PACKAGES` | ❌ | ❌ | Not used. `QUERY_ALL_PACKAGES` deliberately avoided — App-Organizer uses `<queries>` instead. |
+
+#### Car / Auto / Automotive (§9.2–9.3) — entire family absent
+
+No Auto / Automotive module exists in the repo. None of the following are declared:
+
+| Family | Std | Root | Why |
+|---|---|---|---|
+| `androidx.car.app.ACCESS_SURFACE`, `androidx.car.app.MAP_TEMPLATES` | ❌ | ❌ | No Car-App templating app. |
+| `com.google.android.gms.permission.CAR_INFORMATION`, `CAR_SPEED`, `CAR_FUEL`, `CAR_MILEAGE`, `CAR_VENDOR_EXTENSION` (Android Auto projection) | ❌ | ❌ | No Auto module. |
+| `android.car.permission.CAR_INFO`, `CAR_ENERGY`, `CAR_ENERGY_PORTS`, `CAR_SPEED`, `CAR_MILEAGE`, `CAR_TIRES`, `CAR_DYNAMICS_STATE`, `CAR_DRIVING_STATE`, `CAR_DIAGNOSTICS` (OBD-II), `CAR_IDENTIFICATION` (VIN), `CAR_NAVIGATION_MANAGER`, `CAR_PROJECTION`, `CAR_POWER`, `CAR_POWERTRAIN`, `CAR_EXTERIOR_ENVIRONMENT`, `CAR_VENDOR_EXTENSION`, `CAR_INSTRUMENT_CLUSTER_CONTROL`, `CAR_UX_RESTRICTIONS_CONFIGURATION`, `STORAGE_MONITORING` (AAOS) | ❌ | ❌ | No Automotive (AAOS) build flavor. |
+| `android.car.permission.CONTROL_CAR_CLIMATE`, `CONTROL_CAR_DOORS`, `CONTROL_CAR_WINDOWS`, `CONTROL_CAR_MIRRORS`, `CONTROL_CAR_SEATS`, `CONTROL_CAR_DISPLAY_UNITS`, `READ_CAR_STEERING`, `READ_CAR_DISPLAY_UNITS` | ❌ | ❌ | – |
+
+#### Wear OS, TV, XR (§9.1, 9.4, 9.5) — entire families absent
+
+No Wear / TV / XR modules. `wearable.RECEIVE_*`, `BIND_TILE_PROVIDER_SERVICE`, `BIND_TV_INPUT`, `BIND_TV_REMOTE_SERVICE`, `HEAD_TRACKING`, `EYE_TRACKING`, `HAND_TRACKING`, `FACE_TRACKING`, `SCENE_UNDERSTANDING` — all ❌ / ❌.
+
+#### Credentials, biometrics, payments (§2.1 + §3.10)
+
+| Permission | Std | Root | Why |
+|---|---|---|---|
+| `USE_BIOMETRIC`, `USE_FINGERPRINT` (deprecated) | ❌ | ❌ | No biometric gate (a sensible future add for the lock-screen feature). |
+| `CREDENTIAL_MANAGER_*`, `BIND_CREDENTIAL_PROVIDER_SERVICE` | ❌ | ❌ | No CredentialManager flow. |
+
+#### Signature / privileged / system permissions — leak-gate-blocked or unused
+
+These can never be granted by an end user. The standard flavor must not declare them (the gate in §12.6 would fail the build). The rooted flavor either grants them at runtime (§12.3) or does its system-level work via `su` shell rather than via the permission.
+
+| Permission | Std | Root | Note |
+|---|---|---|---|
+| `CAPTURE_AUDIO_OUTPUT` | ❌ | 🔒 | Granted at runtime (§12.3). |
+| `WRITE_SECURE_SETTINGS`, `INSTALL_PACKAGES`, `DELETE_PACKAGES`, `READ_LOGS`, `MANAGE_USERS`, `CHANGE_CONFIGURATION`, `MASTER_CLEAR`, `REBOOT`, `ACCESS_SUPERUSER`, `MOUNT_UNMOUNT_FILESYSTEMS`, `MOUNT_FORMAT_FILESYSTEMS` | ❌ | ❌ | Banned by the leak gate (§12.6). |
+| All other §3 entries (`SHUTDOWN`, `FORCE_STOP_PACKAGES`, `CLEAR_APP_USER_DATA`, `STATUS_BAR`, `INJECT_EVENTS`, `READ_FRAME_BUFFER`, `MODIFY_PHONE_STATE`, `BATTERY_STATS`, etc.) | ❌ | ❌ | Not applicable; all reserved for system / privileged / signature-holding apps. |
+
+### 12.5 Latent issues surfaced by this audit
+
+1. **`BODY_SENSORS` referenced but never declared.** `app/src/main/java/com/gadget/widgets/.../WidgetMetrics.kt` calls `ContextCompat.checkSelfPermission(ctx, Manifest.permission.BODY_SENSORS)` but no manifest declares `<uses-permission android:name="android.permission.BODY_SENSORS"/>`. The check always evaluates to "denied" — effectively dead code. Either declare the permission (and route through `RequiredPermissions.kt`) or remove the check. Note that `BODY_SENSORS` was deprecated in API 35 in favor of Health Connect's `health.READ_HEART_RATE`, so the cleanup may want to go the Health Connect route instead.
+
+2. **`ACCESS_NOTIFICATION_POLICY` runtime-used but not declared.** `SpecialPermissionStep.kt` walks the user through `ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS` and reads `NotificationManager.isNotificationPolicyAccessGranted`, but the manifest is missing `<uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>`. The grant intent still works on most OEMs without the declaration, but Lint will flag it and a few OEMs (notably MIUI / HyperOS) hide the toggle entirely when the declaration is absent. Add it to the shared manifest.
+
+### 12.6 Standard-APK leak gate (CI enforcement)
+
+`.github/workflows/build-apk.yml` runs an `Assert standard APK has no rooted leakage` step against both `assembleStandardDebug` and `assembleStandardRelease`. The matrix leg hard-fails if the assembled standard APK contains any of these markers:
+
+- **Su / root markers in dex:** `topjohnwu`, `libsu`, `/system/bin/su`, `/system/xbin/su`, `chainfire`, `hiddenapibypass`
+- **Rooted assets:** `lsposed`, `magisk`, `spoofer`, `.magisk.`, `/su/`
+- **Root-tier permissions in the merged manifest:** `WRITE_SECURE_SETTINGS`, `MOUNT_UNMOUNT*`, `INSTALL_PACKAGES`, `DELETE_PACKAGES`, `READ_LOGS`, `MANAGE_USERS`, `CHANGE_CONFIGURATION`, `MASTER_CLEAR`, `REBOOT`, `ACCESS_SUPERUSER`
+
+The dex pattern is deliberately precise — bare `magisk` / `superuser` would trip on the shared `RootProvider` sealed-class variant names and on cosmetic localization strings, so it uses the more specific markers above. Practical effect: any rooted-only library, asset, or permission must be scoped to `rootedImplementation` / `app/src/rooted/assets/` / `app/src/rooted/AndroidManifest.xml`. Adding any of these markers to `app/src/main/` will break the standard build on PR before it can be uploaded to Play.
+
+### 12.7 Flavor summary
+
+**`standard` (`com.gadget`):** declares the 33 permissions in §12.1, requests 9 at runtime, walks the user through 6 special-permission grants, never touches signature/system permissions. GPS spoofing requires the user to manually pick the app in Developer Options → *Mock location app*.
+
+**`rooted` (`com.gadget.root`):** identical declared-permission set plus root-manager `<queries>`. At runtime it additionally su-grants `android:mock_location` (AppOp — bypasses Dev Options), `pm grant`s `CAPTURE_AUDIO_OUTPUT` for system-audio loopback (5-min ceiling per call), and toggles `RUN_ANY_IN_BACKGROUND` via `cmd appops` for emergency reset. None of these grants ever appear in the standard APK — the leak gate (§12.6) enforces that on every PR.
