@@ -18,7 +18,13 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.gadget.localization.LocalizationManager
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.gadget.permissions.PermissionsOnboardingCoordinator
+import com.gadget.permissions.SpecialPermissionStep
+import com.gadget.permissions.rememberPermissionsResumeAdvancer
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -49,54 +55,190 @@ import com.gadget.ui.components.sectionHeading
 import com.gadget.receivers.AdminReceiver
 
 // ─── Permission descriptor ──────────────────────────────────────────────────
-private data class PermissionEntry(
-    val name: String,
-    val check: (Context) -> Boolean,
+//
+// Each row knows how to (1) check its own grant state and (2) build an Intent
+// that takes the user to the matching Android Settings page. `openSettings`
+// returns null for normal (auto-granted) permissions where there is nothing
+// for the user to toggle — those rows render without a button.
+private data class PermissionRow(
+    val displayName: String,
+    val isGranted: (Context) -> Boolean,
+    val openSettings: (Context) -> Intent?,
 )
 
-private fun buildPermissionList(): List<PermissionEntry> = listOf(
-    // Runtime permissions
-    PermissionEntry("CAMERA") { ContextCompat.checkSelfPermission(it, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("RECORD_AUDIO") { ContextCompat.checkSelfPermission(it, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("ACCESS_FINE_LOCATION") { ContextCompat.checkSelfPermission(it, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("ACCESS_COARSE_LOCATION") { ContextCompat.checkSelfPermission(it, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("POST_NOTIFICATIONS") {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-            ContextCompat.checkSelfPermission(it, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        else true
+private fun appDetailsIntent(ctx: Context): Intent =
+    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        .setData(Uri.parse("package:${ctx.packageName}"))
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+private fun runtimeRow(
+    displayName: String,
+    permission: String,
+    minSdk: Int? = null,
+): PermissionRow = PermissionRow(
+    displayName = displayName,
+    isGranted = { ctx ->
+        if (minSdk != null && Build.VERSION.SDK_INT < minSdk) {
+            true
+        } else {
+            ContextCompat.checkSelfPermission(ctx, permission) == PackageManager.PERMISSION_GRANTED
+        }
     },
-    PermissionEntry("BLUETOOTH_CONNECT") {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            ContextCompat.checkSelfPermission(it, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
-        else true
+    openSettings = { ctx ->
+        if (minSdk != null && Build.VERSION.SDK_INT < minSdk) null else appDetailsIntent(ctx)
     },
-    PermissionEntry("BLUETOOTH_SCAN") {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            ContextCompat.checkSelfPermission(it, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
-        else true
+)
+
+private fun normalRow(displayName: String, permission: String): PermissionRow = PermissionRow(
+    displayName = displayName,
+    isGranted = { ctx ->
+        ContextCompat.checkSelfPermission(ctx, permission) == PackageManager.PERMISSION_GRANTED
     },
-    PermissionEntry("READ_PHONE_STATE") { ContextCompat.checkSelfPermission(it, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("ACTIVITY_RECOGNITION") { ContextCompat.checkSelfPermission(it, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("VIBRATE") { ContextCompat.checkSelfPermission(it, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("INTERNET") { ContextCompat.checkSelfPermission(it, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("ACCESS_WIFI_STATE") { ContextCompat.checkSelfPermission(it, Manifest.permission.ACCESS_WIFI_STATE) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("ACCESS_NETWORK_STATE") { ContextCompat.checkSelfPermission(it, Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("NFC") { ContextCompat.checkSelfPermission(it, Manifest.permission.NFC) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("FOREGROUND_SERVICE") { ContextCompat.checkSelfPermission(it, Manifest.permission.FOREGROUND_SERVICE) == PackageManager.PERMISSION_GRANTED },
-    PermissionEntry("SCHEDULE_EXACT_ALARM") {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val am = it.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-            am.canScheduleExactAlarms()
-        } else true
-    },
-    // Special permissions
-    PermissionEntry("Draw Over Apps (SYSTEM_ALERT_WINDOW)") { Settings.canDrawOverlays(it) },
-    PermissionEntry("Device Admin") {
-        val dpm = it.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        dpm.isAdminActive(ComponentName(it, AdminReceiver::class.java))
-    },
-    PermissionEntry("Write Settings") { Settings.System.canWrite(it) },
-    PermissionEntry("Notifications Enabled") { NotificationManagerCompat.from(it).areNotificationsEnabled() },
+    openSettings = { null }, // normal perms are auto-granted; nothing to open
+)
+
+private fun buildPermissionList(): List<PermissionRow> = listOf(
+    // ── Runtime / dangerous permissions ─────────────────────────────────
+    runtimeRow("CAMERA", Manifest.permission.CAMERA),
+    runtimeRow("RECORD_AUDIO", Manifest.permission.RECORD_AUDIO),
+    runtimeRow("ACCESS_FINE_LOCATION", Manifest.permission.ACCESS_FINE_LOCATION),
+    runtimeRow("ACCESS_COARSE_LOCATION", Manifest.permission.ACCESS_COARSE_LOCATION),
+    runtimeRow("ACCESS_BACKGROUND_LOCATION", Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+    runtimeRow("POST_NOTIFICATIONS", Manifest.permission.POST_NOTIFICATIONS, Build.VERSION_CODES.TIRAMISU),
+    runtimeRow("BLUETOOTH_CONNECT", Manifest.permission.BLUETOOTH_CONNECT, Build.VERSION_CODES.S),
+    runtimeRow("BLUETOOTH_SCAN", Manifest.permission.BLUETOOTH_SCAN, Build.VERSION_CODES.S),
+    runtimeRow("READ_PHONE_STATE", Manifest.permission.READ_PHONE_STATE),
+    runtimeRow("ACTIVITY_RECOGNITION", Manifest.permission.ACTIVITY_RECOGNITION),
+    runtimeRow("CHANGE_WIFI_STATE", Manifest.permission.CHANGE_WIFI_STATE),
+
+    // ── Special-access permissions (per-row Settings page) ──────────────
+    PermissionRow(
+        displayName = "DND Policy Access",
+        isGranted = { ctx ->
+            val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+            nm.isNotificationPolicyAccessGranted
+        },
+        openSettings = { _ ->
+            Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        },
+    ),
+    PermissionRow(
+        displayName = "Battery Optimizations Ignored",
+        isGranted = { ctx ->
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                true
+            } else {
+                val pm = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
+                pm.isIgnoringBatteryOptimizations(ctx.packageName)
+            }
+        },
+        openSettings = { ctx ->
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                null
+            } else {
+                @Suppress("BatteryLife")
+                Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                    .setData(Uri.parse("package:${ctx.packageName}"))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        },
+    ),
+    PermissionRow(
+        displayName = "Draw Over Apps",
+        isGranted = { ctx -> Settings.canDrawOverlays(ctx) },
+        openSettings = { ctx ->
+            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                .setData(Uri.parse("package:${ctx.packageName}"))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        },
+    ),
+    PermissionRow(
+        displayName = "Device Admin",
+        isGranted = { ctx ->
+            val dpm = ctx.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            dpm.isAdminActive(ComponentName(ctx, AdminReceiver::class.java))
+        },
+        openSettings = { ctx ->
+            Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+                .putExtra(
+                    DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+                    ComponentName(ctx, AdminReceiver::class.java),
+                )
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        },
+    ),
+    PermissionRow(
+        displayName = "Write Settings",
+        isGranted = { ctx -> Settings.System.canWrite(ctx) },
+        openSettings = { ctx ->
+            Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
+                .setData(Uri.parse("package:${ctx.packageName}"))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        },
+    ),
+    PermissionRow(
+        displayName = "Schedule Exact Alarm",
+        isGranted = { ctx ->
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                true
+            } else {
+                val am = ctx.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+                am.canScheduleExactAlarms()
+            }
+        },
+        openSettings = { ctx ->
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                null
+            } else {
+                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                    .setData(Uri.parse("package:${ctx.packageName}"))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        },
+    ),
+    PermissionRow(
+        displayName = "Usage Access",
+        isGranted = { ctx -> SpecialPermissionStep.hasUsageAccess(ctx) },
+        openSettings = { ctx ->
+            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                .setData(Uri.parse("package:${ctx.packageName}"))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        },
+    ),
+    PermissionRow(
+        displayName = "Mock Location (Dev Options)",
+        isGranted = { ctx -> SpecialPermissionStep.hasMockLocationAccess(ctx) },
+        openSettings = { _ ->
+            // Mock Location app is selected in Developer Options. Opening
+            // dev options directly fails if Dev Options is disabled — the
+            // ActivityNotFoundException branch in the row's onClick surfaces
+            // a toast in that case.
+            Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        },
+    ),
+    PermissionRow(
+        displayName = "Notifications Enabled",
+        isGranted = { ctx -> NotificationManagerCompat.from(ctx).areNotificationsEnabled() },
+        openSettings = { ctx ->
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, ctx.packageName)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        },
+    ),
+
+    // ── Normal / auto-granted permissions (status only; no button) ──────
+    normalRow("VIBRATE", Manifest.permission.VIBRATE),
+    normalRow("INTERNET", Manifest.permission.INTERNET),
+    normalRow("ACCESS_WIFI_STATE", Manifest.permission.ACCESS_WIFI_STATE),
+    normalRow("ACCESS_NETWORK_STATE", Manifest.permission.ACCESS_NETWORK_STATE),
+    normalRow("NFC", Manifest.permission.NFC),
+    normalRow("FOREGROUND_SERVICE", Manifest.permission.FOREGROUND_SERVICE),
+    normalRow("WAKE_LOCK", Manifest.permission.WAKE_LOCK),
+    normalRow("RECEIVE_BOOT_COMPLETED", Manifest.permission.RECEIVE_BOOT_COMPLETED),
+    normalRow("DISABLE_KEYGUARD", Manifest.permission.DISABLE_KEYGUARD),
+    normalRow("ACCESS_NOTIFICATION_POLICY", Manifest.permission.ACCESS_NOTIFICATION_POLICY),
 )
 
 // ─── Device info descriptor ─────────────────────────────────────────────────
@@ -140,7 +282,6 @@ private fun buildModeStatus(context: Context): List<Pair<String, String>> {
             NotificationManager.INTERRUPTION_FILTER_ALARMS -> "Alarms Only"
             else -> "Unknown"
         },
-        "DND Policy Access" to if (nm.isNotificationPolicyAccessGranted) "Granted" else "Not Granted",
         "Battery Saver" to if (pm.isPowerSaveMode) "Active" else "Off",
         "Music Active" to if (am.isMusicActive) "Yes" else "No",
     )
@@ -152,7 +293,21 @@ fun BugReportScreen() {
     val strings = S.bug
 
     val permissions = remember { buildPermissionList() }
-    val permissionStatuses = remember { permissions.map { it.name to it.check(context) } }
+    // Live status snapshot — refreshed on every ON_RESUME so toggling a
+    // permission in Settings and returning flips the green/red badge.
+    var permissionStatuses by remember {
+        mutableStateOf(permissions.map { it.displayName to it.isGranted(context) })
+    }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                permissionStatuses = permissions.map { it.displayName to it.isGranted(context) }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     val modeStatuses = remember { buildModeStatus(context) }
     val deviceInfo = remember { buildDeviceInfo(context) }
 
@@ -244,43 +399,71 @@ fun BugReportScreen() {
                 // Header row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
                         strings.permissionLabel,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(0.65f),
+                        modifier = Modifier.weight(0.55f),
                     )
                     Text(
                         strings.statusLabel,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(0.35f),
+                        modifier = Modifier.weight(0.25f),
                     )
+                    Spacer(Modifier.weight(0.20f))
                 }
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
-                permissionStatuses.forEach { (name, granted) ->
+                permissions.forEachIndexed { index, row ->
+                    val granted = permissionStatuses.getOrNull(index)?.second ?: row.isGranted(context)
+                    val intent = remember(row) { row.openSettings(context) }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 2.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            name,
+                            row.displayName,
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.weight(0.65f),
+                            modifier = Modifier.weight(0.55f),
                         )
                         Text(
                             if (granted) strings.granted else strings.notGranted,
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.SemiBold,
                             color = if (granted) Color(0xFF4CAF50) else Color(0xFFF44336),
-                            modifier = Modifier.weight(0.35f),
+                            modifier = Modifier.weight(0.25f),
                         )
+                        if (intent != null) {
+                            TextButton(
+                                onClick = {
+                                    runCatching { context.startActivity(intent) }
+                                        .onFailure {
+                                            if (it is ActivityNotFoundException) {
+                                                Toast.makeText(
+                                                    context,
+                                                    strings.settingsPageUnavailable,
+                                                    Toast.LENGTH_SHORT,
+                                                ).show()
+                                            }
+                                        }
+                                },
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+                                modifier = Modifier.weight(0.20f),
+                            ) {
+                                Text(
+                                    strings.openSettings,
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                        } else {
+                            Spacer(Modifier.weight(0.20f))
+                        }
                     }
                 }
             }
@@ -500,9 +683,21 @@ fun BugReportScreen() {
 private fun RequestAllMissingPermissionsButton() {
     val context = LocalContext.current
     val lang = LocalizationManager.loadLanguage(context)
-    var pendingSpecial by remember { mutableStateOf<List<com.gadget.permissions.SpecialPermissionStep>>(emptyList()) }
+    var pendingSpecial by remember { mutableStateOf<List<SpecialPermissionStep>>(emptyList()) }
     var stepIndex by rememberSaveable { mutableStateOf(0) }
     var status by remember { mutableStateOf<String?>(null) }
+
+    val awaitingResume = rememberPermissionsResumeAdvancer(onResume = {
+        val refreshed = PermissionsOnboardingCoordinator.pendingSpecialSteps(context)
+        pendingSpecial = refreshed
+        if (refreshed.isEmpty()) {
+            status = S.PermissionsOnboarding.complete(lang)
+        } else {
+            stepIndex = 0
+            status = S.PermissionsOnboarding.progress(lang, 1, refreshed.size)
+            launchNextSpecialStep(context, refreshed, 0)
+        }
+    })
 
     val runtimeLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -514,7 +709,10 @@ private fun RequestAllMissingPermissionsButton() {
         } else {
             S.PermissionsOnboarding.progress(lang, 1, pendingSpecial.size)
         }
-        launchNextSpecialStep(context, pendingSpecial, stepIndex)
+        if (pendingSpecial.isNotEmpty()) {
+            launchNextSpecialStep(context, pendingSpecial, stepIndex)
+            awaitingResume.value = true
+        }
     }
 
     Card(
@@ -536,7 +734,10 @@ private fun RequestAllMissingPermissionsButton() {
                         } else {
                             S.PermissionsOnboarding.progress(lang, 1, pendingSpecial.size)
                         }
-                        launchNextSpecialStep(context, pendingSpecial, stepIndex)
+                        if (pendingSpecial.isNotEmpty()) {
+                            launchNextSpecialStep(context, pendingSpecial, stepIndex)
+                            awaitingResume.value = true
+                        }
                     } else {
                         runtimeLauncher.launch(missing.toTypedArray())
                     }
@@ -563,7 +764,7 @@ private fun RequestAllMissingPermissionsButton() {
 
 private fun launchNextSpecialStep(
     context: Context,
-    steps: List<com.gadget.permissions.SpecialPermissionStep>,
+    steps: List<SpecialPermissionStep>,
     index: Int,
 ) {
     if (index !in steps.indices) return

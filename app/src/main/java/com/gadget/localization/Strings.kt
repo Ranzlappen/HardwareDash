@@ -702,6 +702,8 @@ object S {
         )
         val systemModesTitle get() = m(l, "System Modes", "Systemmodi", "Modos del sistema", "Modes syst\u00E8me")
         val modeLabel get() = m(l, "Mode", "Modus", "Modo", "Mode")
+        val openSettings get() = m(l, "Open", "\u00D6ffnen", "Abrir", "Ouvrir")
+        val settingsPageUnavailable get() = m(l, "Settings page unavailable on this device", "Einstellungsseite auf diesem Ger\u00E4t nicht verf\u00FCgbar", "P\u00E1gina de ajustes no disponible en este dispositivo", "Page des param\u00E8tres indisponible sur cet appareil")
     }
 
     // ── Search ──────────────────────────────────────────────────────────
