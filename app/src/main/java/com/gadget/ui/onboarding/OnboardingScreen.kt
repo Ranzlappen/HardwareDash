@@ -32,6 +32,7 @@ import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import com.gadget.permissions.PermissionsOnboardingCoordinator
 import com.gadget.permissions.SpecialPermissionStep
+import com.gadget.permissions.rememberPermissionsResumeAdvancer
 import com.gadget.root.RootFeaturesEntryPoint
 import com.gadget.root.ui.RootedFirstAckDialog
 import dagger.hilt.android.EntryPointAccessors
@@ -437,6 +438,18 @@ private fun PermissionsPage(lang: Language) {
     var stepIndex by rememberSaveable { mutableIntStateOf(0) }
     var status by remember { mutableStateOf<String?>(null) }
 
+    val awaitingResume = rememberPermissionsResumeAdvancer(onResume = {
+        val refreshed = PermissionsOnboardingCoordinator.pendingSpecialSteps(context)
+        pendingSpecial = refreshed
+        if (refreshed.isEmpty()) {
+            status = S.PermissionsOnboarding.complete(lang)
+        } else {
+            stepIndex = 0
+            status = S.PermissionsOnboarding.progress(lang, 1, refreshed.size)
+            launchNextSpecialStep(context, refreshed, 0)
+        }
+    })
+
     val runtimeLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { _ ->
@@ -447,7 +460,10 @@ private fun PermissionsPage(lang: Language) {
         } else {
             S.PermissionsOnboarding.progress(lang, 1, pendingSpecial.size)
         }
-        launchNextSpecialStep(context, pendingSpecial, stepIndex)
+        if (pendingSpecial.isNotEmpty()) {
+            launchNextSpecialStep(context, pendingSpecial, stepIndex)
+            awaitingResume.value = true
+        }
     }
 
     Column(
@@ -491,7 +507,10 @@ private fun PermissionsPage(lang: Language) {
                     } else {
                         S.PermissionsOnboarding.progress(lang, 1, pendingSpecial.size)
                     }
-                    launchNextSpecialStep(context, pendingSpecial, stepIndex)
+                    if (pendingSpecial.isNotEmpty()) {
+                        launchNextSpecialStep(context, pendingSpecial, stepIndex)
+                        awaitingResume.value = true
+                    }
                 } else {
                     runtimeLauncher.launch(missing.toTypedArray())
                 }

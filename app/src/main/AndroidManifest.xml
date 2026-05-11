@@ -52,6 +52,10 @@
 
     <!-- ══════════════════════ NOTIFICATIONS / SERVICES ════════════ -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Lets HardwareDash appear in Settings → Notifications → Do Not Disturb
+         access. Without this declaration the DND-access page opens a global
+         app list that omits us, so the user can never grant the toggle. -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"     />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />

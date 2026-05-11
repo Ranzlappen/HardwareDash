@@ -1,6 +1,7 @@
 package com.gadget.permissions
 
 import android.app.AlarmManager
+import android.app.AppOpsManager
 import android.app.NotificationManager
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
@@ -9,6 +10,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
+import android.os.Process
 import android.provider.Settings
 
 /**
@@ -114,6 +116,55 @@ data class SpecialPermissionStep(
                     }
                 },
             ),
+            SpecialPermissionStep(
+                id = "usage_access",
+                needsRequest = { ctx -> hasUsageAccess(ctx).not() },
+                buildIntent = { ctx ->
+                    Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                        .setData(Uri.parse("package:${ctx.packageName}"))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                },
+            ),
         )
+
+        /** True if the user has granted PACKAGE_USAGE_STATS via the AppOp. */
+        fun hasUsageAccess(ctx: Context): Boolean {
+            val appOps = ctx.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+            val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                appOps.unsafeCheckOpNoThrow(
+                    AppOpsManager.OPSTR_GET_USAGE_STATS,
+                    Process.myUid(),
+                    ctx.packageName,
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                appOps.checkOpNoThrow(
+                    AppOpsManager.OPSTR_GET_USAGE_STATS,
+                    Process.myUid(),
+                    ctx.packageName,
+                )
+            }
+            return mode == AppOpsManager.MODE_ALLOWED
+        }
+
+        /** True if the user has granted the AppOp behind ACCESS_MOCK_LOCATION. */
+        fun hasMockLocationAccess(ctx: Context): Boolean {
+            val appOps = ctx.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+            val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                appOps.unsafeCheckOpNoThrow(
+                    AppOpsManager.OPSTR_MOCK_LOCATION,
+                    Process.myUid(),
+                    ctx.packageName,
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                appOps.checkOpNoThrow(
+                    AppOpsManager.OPSTR_MOCK_LOCATION,
+                    Process.myUid(),
+                    ctx.packageName,
+                )
+            }
+            return mode == AppOpsManager.MODE_ALLOWED
+        }
     }
 }
