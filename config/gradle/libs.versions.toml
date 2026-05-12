@@ -1,0 +1,7 @@
+[versions]
+# Add your versions here later
+kotlin = "2.0.0"
+compose = "1.7.0"
+
+[libraries]
+# TODO: migrate current dependencies
