@@ -21,14 +21,19 @@ import com.gadget.root.companion.CompanionModuleDetector
 import com.gadget.root.launch.LaunchGate
 import com.gadget.root.launch.LaunchGateOutcome
 import com.gadget.root.ui.FatalLaunchScreen
+import androidx.navigation.compose.rememberNavController
 import com.gadget.ui.logbook.LogbookReminderWorker
-import com.gadget.ui.navigation.NavGraph
 import com.gadget.ui.theme.AccessibilityPreferencesManager
 import com.gadget.ui.theme.GadgetTheme
 import com.gadget.ui.theme.ThemePreferencesManager
 import com.gadget.widget.WidgetUpdateWorker
 import com.gadget.widget.folder.FolderWidgetController
 import dagger.hilt.android.AndroidEntryPoint
+import dev.ranzlappen.gadget.core.navigation.GadgetAppShell
+import dev.ranzlappen.gadget.core.navigation.GadgetDestination
+import dev.ranzlappen.gadget.core.navigation.navigateTopLevel
+import dev.ranzlappen.gadget.core.navigation.placeholderScreen
+import dev.ranzlappen.gadget.feature.dashboard.dashboardScreen
 import org.osmdroid.config.Configuration
 import java.io.File
 import javax.inject.Inject
@@ -57,7 +62,20 @@ class MainActivity : ComponentActivity() {
                 }
                 when (val resolved = outcome) {
                     null -> LaunchSplash()
-                    LaunchGateOutcome.Allowed -> NavGraph()
+                    LaunchGateOutcome.Allowed -> {
+                        val navController = rememberNavController()
+                        GadgetAppShell(navController = navController) {
+                            dashboardScreen(
+                                onNavigate = { destination ->
+                                    navController.navigateTopLevel(destination)
+                                },
+                            )
+                            placeholderScreen(GadgetDestination.Sensors)
+                            placeholderScreen(GadgetDestination.Actuators)
+                            placeholderScreen(GadgetDestination.Automation)
+                            placeholderScreen(GadgetDestination.Settings)
+                        }
+                    }
                     is LaunchGateOutcome.DeniedFatal -> FatalLaunchScreen(
                         reason = resolved.reason,
                         onExit = { finishAffinity() },

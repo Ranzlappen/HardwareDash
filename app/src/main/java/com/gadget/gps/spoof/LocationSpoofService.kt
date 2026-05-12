@@ -13,7 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.gadget.MainActivity
 import com.gadget.R
-import com.gadget.ui.screens.notifications.CH_GPS_SPOOF
+import com.gadget.notifications.CH_GPS_SPOOF
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

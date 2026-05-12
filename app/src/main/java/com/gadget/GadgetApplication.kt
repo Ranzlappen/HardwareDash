@@ -3,7 +3,7 @@ package com.gadget
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
-import com.gadget.ui.screens.notifications.ensureAllChannels
+import com.gadget.notifications.ensureAllChannels
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 import javax.inject.Inject
