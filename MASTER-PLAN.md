@@ -4,7 +4,7 @@
 HardwareDash (app name: Gadget) will become the definitive Android app for exploring every sensor and actuator, with sophisticated cross-automation, widgets, notification panels, granular permission management, and hardware-safety guardrails. The rooted version safely extends functionality while the standard version remains fully functional and safe.
 
 **Current State**
-- Branch `refactor-2026`: New modular monorepo (Phase 0 in progress)
+- Branch `claude/refactor-2026`: New modular monorepo (Phase 0 in progress)
 - Branch `legacy-main`: Full archive of the old single-module codebase
 
 **Phase 0: Future-Proof Repo Structure & Foundation** (In Progress)
@@ -32,7 +32,7 @@ HardwareDash (app name: Gadget) will become the definitive Android app for explo
 **AI Collaboration Workflow**
 - Claude handles detailed code planning and implementation (Code Planning Mode)
 - Grok (this team) reviews plans, enforces architecture/safety/consistency, and pushes approved code
-- Work exclusively on named branch (`refactor-2026`)
+- Work exclusively on named branch (`claude/refactor-2026`)
 - Small atomic batches with pause after each commit for review
 
 **Deprecation & Stale Code Policy**
