@@ -1,11 +1,12 @@
-name: CI (refactor-2026)
+name: CI (claude/refactor-2026)
 
-# Fast-feedback CI for the refactor-2026 branch. Lightweight companion to
-# the full Build Variants matrix in build-apk.yml — this workflow skips
-# signing, AAB bundling, and release uploads, and just exercises both APK
-# flavors in debug so a Kotlin/Gradle regression surfaces quickly.
+# Fast-feedback CI for the claude/refactor-2026 branch. Lightweight
+# companion to the full Build Variants matrix in build-apk.yml — this
+# workflow skips signing, AAB bundling, and release uploads, and just
+# exercises both APK flavors in debug so a Kotlin/Gradle regression
+# surfaces quickly.
 #
-# Why both workflows on refactor-2026?
+# Why both workflows on claude/refactor-2026 (and main)?
 #   * build-apk.yml is the production matrix: signed standard-release APK,
 #     standard-release AAB, leak gate, rooted libsu assertion. Slow but
 #     comprehensive.
@@ -18,7 +19,8 @@ name: CI (refactor-2026)
 on:
   push:
     branches:
-      - refactor-2026
+      - main
+      - claude/refactor-2026
     paths-ignore:
       - '*.md'
       - 'docs/**'
@@ -27,7 +29,8 @@ on:
       - '.idea/**'
   pull_request:
     branches:
-      - refactor-2026
+      - main
+      - claude/refactor-2026
     paths-ignore:
       - '*.md'
       - 'docs/**'
@@ -81,7 +84,7 @@ jobs:
         if: always()
         run: |
           {
-            echo "## CI (refactor-2026)"
+            echo "## CI (claude/refactor-2026)"
             echo ""
             if [ "${{ job.status }}" = "success" ]; then
               echo "✅ **Both flavors built successfully.**"

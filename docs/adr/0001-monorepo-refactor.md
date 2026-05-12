@@ -1,6 +1,6 @@
 # ADR-0001: Monorepo refactor onto module-per-feature layout
 
-- **Status:** Accepted (branch `refactor-2026`)
+- **Status:** Accepted (branch `claude/refactor-2026`)
 - **Date:** 2026-05-12
 - **Deciders:** project owner, Claude (implementer), Grok (reviewer)
 

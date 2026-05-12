@@ -6,7 +6,7 @@ surfaces.
 
 > **Status (May 2026):** mid-refactor. The legacy `com.gadget.*` codebase
 > in `app/src/main/` is being migrated onto a modular monorepo layout on
-> branch `refactor-2026`. See [`MASTER-PLAN.md`](MASTER-PLAN.md),
+> branch `claude/refactor-2026`. See [`MASTER-PLAN.md`](MASTER-PLAN.md),
 > [`AI-COLLABORATION.md`](AI-COLLABORATION.md), and
 > [`docs/adr/0001-monorepo-refactor.md`](docs/adr/0001-monorepo-refactor.md).
 
@@ -120,5 +120,5 @@ up in local syntax checks (Kotlin visibility, SDK guards, Compose
    single-screen capabilities go in `feature/<name>/`. Root-only surface
    lives in `feature/<name>-rooted/`.
 2. Run `scripts/new-feature.sh <name>` (lands Batch 1) to scaffold.
-3. Open a PR against `refactor-2026`. Do **not** target `main` until the
+3. Open a PR against `claude/refactor-2026`. Do **not** target `main` until the
    refactor is complete.

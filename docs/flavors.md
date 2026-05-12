@@ -16,7 +16,7 @@ Both APKs install side-by-side on the same device because the
 > `dev.ranzlappen.gadget.rooted` lands in **Batch 2** alongside the
 > `app/build.gradle` → Kotlin DSL conversion. Until that batch lands,
 > the table above describes the target — not the live install on a
-> phone built from `main` or from intermediate `refactor-2026` revisions.
+> phone built from `main` or from intermediate `claude/refactor-2026` revisions.
 
 ## Namespaces (per module)
 

@@ -5,8 +5,7 @@ on:
   push:
     branches:
       - main
-      - refactor-2026
-      - 'claude/**'
+      - claude/refactor-2026
     paths-ignore:
       - '*.md'
       - '.gitignore'
@@ -18,7 +17,7 @@ on:
   pull_request:
     branches:
       - main
-      - refactor-2026
+      - claude/refactor-2026
     paths-ignore:
       - '*.md'
       - '.gitignore'
