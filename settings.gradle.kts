@@ -1,4 +1,36 @@
+// =========================================================================
+// HardwareDash (Gadget) — Gradle settings
+// =========================================================================
+//
+// Phase 0 / Batch 0: module graph for the modular monorepo refactor.
+//
+// Layout invariants enforced here:
+//   * `:app` is the single application module that aggregates feature/*.
+//     It still uses the legacy Groovy `app/build.gradle` — migration to
+//     Kotlin DSL + the new applicationId (dev.ranzlappen.gadget[.rooted])
+//     happens in a later Phase-0 batch.
+//   * `core/*` holds reusable infrastructure (data, ui, domain, hardware …).
+//   * `feature/*` holds one user-facing capability per module. Rooted-only
+//     capability surface lives in a sibling `feature/<name>-rooted/` module
+//     that only the rooted flavor of `:app` pulls in (via
+//     `rootedImplementation` in a later batch). `:app`'s own dependency list
+//     never names a `*-rooted` module, so the standard APK is physically
+//     incapable of compiling against root code.
+//   * `:benchmark` is the macrobenchmark host. Wired up properly in a later
+//     batch; Batch 0 ships only the skeleton.
+//   * `:lsposed-module` (existing) is only included when
+//     `-PenableLsposedModule=true` is set. Standard CI does not; rooted CI
+//     does.
+//   * `build-logic/` (composite build) lands in Batch 1 with the first
+//     convention plugin (`gadget.android.library`). Until then every
+//     skeleton module applies plugins inline via `libs.plugins.*` aliases.
+
 pluginManagement {
+    // Composite-build hook for build-logic/. Commented out until Batch 1
+    // ships the first convention plugin — including an empty composite
+    // build would fail Gradle configuration.
+    //
+    // includeBuild("build-logic")
     repositories {
         google {
             content {
@@ -11,13 +43,20 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://jitpack.io") } // usb-serial-for-android
-        // Xposed-API maven (only resolved when the LSPosed sub-module is included).
+        // usb-serial-for-android is published only on JitPack. The
+        // includeGroup lockdown keeps every other transitive dep going
+        // through Maven Central.
+        maven {
+            url = uri("https://jitpack.io")
+            content { includeGroupByRegex("com\\.github\\..*") }
+        }
+        // Xposed-API maven (only when the LSPosed sub-module is opted in).
         if (providers.gradleProperty("enableLsposedModule").orNull == "true") {
             maven { url = uri("https://api.xposed.info/") }
         }
@@ -25,11 +64,82 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Gadget"
+
+// -------------------------------------------------------------------------
+// :app — application module (still uses legacy app/build.gradle Groovy
+// script; migration to Kotlin DSL is a later batch).
+// -------------------------------------------------------------------------
 include(":app")
 
-// Bundled LSPosed module — built only when explicitly opted in via Gradle
-// property. Standard CI does not set this; rooted CI does. The asset-copy
-// task in app/build.gradle is similarly gated on the same property.
+// -------------------------------------------------------------------------
+// :core — reusable infrastructure
+// -------------------------------------------------------------------------
+include(
+    ":core:common",
+    ":core:designsystem",
+    ":core:ui",
+    ":core:model",
+    ":core:data",
+    ":core:datastore",
+    ":core:domain",
+    ":core:navigation",
+    ":core:permissions",
+    ":core:surfaces",
+    ":core:automation",
+    ":core:hardware",
+    ":core:testing",
+)
+
+// -------------------------------------------------------------------------
+// :feature — one user-facing capability per module.
+//
+// `<name>-rooted` modules are sibling modules carrying root-only capability
+// surface for the same feature. They are pulled in by the rooted flavor of
+// `:app` only — see `rootedImplementation` wiring in a later batch.
+// -------------------------------------------------------------------------
+include(
+    ":feature:automation-ui",
+    ":feature:settings",
+    ":feature:diagnostics",
+    ":feature:diagnostics-rooted",
+    ":feature:manual",
+    ":feature:sensors",
+    ":feature:actuators",
+    ":feature:battery",
+    ":feature:audio",
+    ":feature:camera",
+    ":feature:torch",
+    ":feature:vibration",
+    ":feature:gps",
+    ":feature:motion",
+    ":feature:ambient",
+    ":feature:radios-wifi",
+    ":feature:radios-bt",
+    ":feature:radios-nfc",
+    ":feature:radios-subghz",
+    ":feature:radios-ir",
+    ":feature:flipper",
+    ":feature:flipper-rooted",
+    ":feature:storage",
+    ":feature:storage-rooted",
+    ":feature:apps",
+    ":feature:apps-rooted",
+    ":feature:lock",
+    ":feature:lock-rooted",
+    ":feature:bugreport",
+    ":feature:bugreport-rooted",
+)
+
+// -------------------------------------------------------------------------
+// :benchmark — macrobenchmark host (skeleton only in Batch 0).
+// -------------------------------------------------------------------------
+include(":benchmark")
+
+// -------------------------------------------------------------------------
+// :lsposed-module — bundled Xposed module. Excluded unless the build
+// explicitly opts in via -PenableLsposedModule=true. Standard CI does not
+// set this; rooted CI does.
+// -------------------------------------------------------------------------
 if (providers.gradleProperty("enableLsposedModule").orNull == "true") {
     include(":lsposed-module")
 }
