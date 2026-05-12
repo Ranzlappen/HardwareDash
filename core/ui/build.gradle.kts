@@ -1,4 +1,4 @@
-// :core:ui — skeleton; gadget.android.library + gadget.android.library.compose.
+// :core:ui — higher-level reusable composables built on :core:designsystem.
 
 plugins {
     id("gadget.android.library")
@@ -7,4 +7,11 @@ plugins {
 
 android {
     namespace = "dev.ranzlappen.gadget.core.ui"
+}
+
+dependencies {
+    // `api` so feature modules can `implementation(project(":core:ui"))`
+    // and reach designsystem types (GadgetTheme, GlassIntensity, …)
+    // without an extra dependency line.
+    api(project(":core:designsystem"))
 }
