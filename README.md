@@ -40,6 +40,7 @@ HardwareDash/
 │   ├── hardware/            # Sensor / Actuator registries
 │   └── testing/             # Hilt-aware test helpers, fakes
 ├── feature/                 # one user-facing capability per module
+│   ├── dashboard/           # home screen — adaptive grid of sensor tiles
 │   ├── automation-ui/
 │   ├── settings/
 │   ├── diagnostics/

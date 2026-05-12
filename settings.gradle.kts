@@ -130,6 +130,7 @@ include(
     ":feature:lock-rooted",
     ":feature:bugreport",
     ":feature:bugreport-rooted",
+    ":feature:dashboard",
 )
 
 // -------------------------------------------------------------------------
