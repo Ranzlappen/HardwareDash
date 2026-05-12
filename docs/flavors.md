@@ -10,13 +10,12 @@ HardwareDash ships as two product flavors from a single repo:
 Both APKs install side-by-side on the same device because the
 `applicationId` differs.
 
-> **Migration state.** The legacy `app/build.gradle` (Groovy) still ships
-> `com.gadget` / `com.gadget.root` from before the refactor. The
-> applicationId migration to `dev.ranzlappen.gadget` /
-> `dev.ranzlappen.gadget.rooted` lands in **Batch 2** alongside the
-> `app/build.gradle` → Kotlin DSL conversion. Until that batch lands,
-> the table above describes the target — not the live install on a
-> phone built from `main` or from intermediate `claude/refactor-2026` revisions.
+> **Side-by-side install.** The new `dev.ranzlappen.gadget` /
+> `dev.ranzlappen.gadget.rooted` IDs landed in Batch 2 of the Phase-0
+> refactor (commit `3d6cbd3`). Both APKs install alongside any legacy
+> `com.gadget` / `com.gadget.root` build that's still on the device —
+> from Android's perspective the four applicationIds are entirely
+> separate apps.
 
 ## Namespaces (per module)
 

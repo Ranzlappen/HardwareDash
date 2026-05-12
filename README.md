@@ -4,9 +4,13 @@ A modular Android app for monitoring and controlling device sensors,
 radios, cameras, audio, storage, and (on the rooted flavor) deeper system
 surfaces.
 
-> **Status (May 2026):** mid-refactor. The legacy `com.gadget.*` codebase
-> in `app/src/main/` is being migrated onto a modular monorepo layout on
-> branch `claude/refactor-2026`. See [`MASTER-PLAN.md`](MASTER-PLAN.md),
+> **Status (May 2026):** Phase 0 of the modular refactor is **complete**
+> on branch `claude/refactor-2026`. The repo now has the full
+> `build-logic/` convention-plugin layer (8 plugins), 44 `core/*` /
+> `feature/*` / `benchmark` module skeletons, and the `:app` migration to
+> Kotlin DSL + new applicationIds (`dev.ranzlappen.gadget` / `.rooted`).
+> Phase 1 (light-preview skeleton app) is up next. See
+> [`MASTER-PLAN.md`](MASTER-PLAN.md),
 > [`AI-COLLABORATION.md`](AI-COLLABORATION.md), and
 > [`docs/adr/0001-monorepo-refactor.md`](docs/adr/0001-monorepo-refactor.md).
 
@@ -14,10 +18,13 @@ surfaces.
 
 ```
 HardwareDash/
-├── app/                     # single application module
-│                            # (still uses legacy Groovy build script —
-│                            #  migration is a later Phase-0 batch)
-├── build-logic/convention/  # Gradle convention plugins (Batch 1+)
+├── app/                     # single application module (Kotlin DSL;
+│                            # applies gadget.android.application +
+│                            # .application.compose + gadget.android.hilt)
+├── build-logic/convention/  # Gradle convention plugins
+│                            # (gadget.android.{application[.compose],
+│                            #  library[.compose],feature,hilt,room} +
+│                            #  gadget.jvm.library)
 ├── core/                    # reusable infrastructure (no UI features)
 │   ├── common/              # pure-Kotlin utilities
 │   ├── model/               # cross-feature data classes
@@ -77,11 +84,6 @@ The app ships as two product flavors built from one repo:
 |------------|--------------------------------|---------------------------------|
 | `standard` | `dev.ranzlappen.gadget`        | Non-rooted; ships on Play.      |
 | `rooted`   | `dev.ranzlappen.gadget.rooted` | Rooted-only capabilities; side-load. |
-
-> **Note (transitional):** the applicationId change to `dev.ranzlappen.*`
-> lands in a later Phase-0 batch alongside the `app/build.gradle` →
-> Kotlin DSL migration. Until then the legacy `com.gadget` /
-> `com.gadget.root` IDs remain.
 
 Full flavor rules live in [`docs/flavors.md`](docs/flavors.md). The
 standard-APK leak gate in `.github/workflows/build-apk.yml` continues to

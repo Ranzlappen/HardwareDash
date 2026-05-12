@@ -4,10 +4,10 @@
 HardwareDash (app name: Gadget) will become the definitive Android app for exploring every sensor and actuator, with sophisticated cross-automation, widgets, notification panels, granular permission management, and hardware-safety guardrails. The rooted version safely extends functionality while the standard version remains fully functional and safe.
 
 **Current State**
-- Branch `claude/refactor-2026`: New modular monorepo (Phase 0 in progress)
+- Branch `claude/refactor-2026`: New modular monorepo (Phase 0 **complete** — May 2026; Phase 1 starting)
 - Branch `legacy-main`: Full archive of the old single-module codebase
 
-**Phase 0: Future-Proof Repo Structure & Foundation** (In Progress)
+**Phase 0: Future-Proof Repo Structure & Foundation** (✅ Complete — May 2026)
 - Modular monorepo with `core/`, `feature/`, `build-logic/`
 - Convention plugins for zero config drift
 - New applicationId (`dev.ranzlappen.gadget` / `.rooted`) for side-by-side install
