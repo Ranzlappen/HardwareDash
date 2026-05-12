@@ -1,0 +1,183 @@
+name: Build signed release (manual)
+
+# Manually-triggered signed-release build. Produces:
+#   - standard-release.apk (signed)
+#   - rooted-release.apk  (signed)
+#   - standard-release.aab (signed, standard flavor only)
+# All three are uploaded as workflow artifacts AND attached to a GitHub
+# Release tagged `v<version>-signed`.
+#
+# This workflow is build-only — no leak-gate, no lint. Those gates run on
+# every push to main in build-apk.yml. Only dispatch this workflow against
+# a commit that has already passed main's gates (typically the head of main
+# right after a merge).
+#
+# Companion workflows:
+#   * build-apk.yml      — auto on main, debug APKs + quality gates.
+#   * ci-refactor.yml    — PR fast feedback (debug build only).
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Version name (e.g. 1.0.42). Leave blank to use 1.0.<run_number>.'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - flavor: standard
+            buildType: release
+            assembleTask: "assembleStandardRelease bundleStandardRelease"
+            outputDir: app/build/outputs/apk/standard/release
+            bundleDir: app/build/outputs/bundle/standardRelease
+            artifactName: standard-release
+          - flavor: rooted
+            buildType: release
+            assembleTask: assembleRootedRelease
+            outputDir: app/build/outputs/apk/rooted/release
+            artifactName: rooted-release
+            extraGradleProps: "-PenableLsposedModule=true"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > Gadget-release.jks
+
+      - name: Prepare build metadata
+        run: |
+          set -euo pipefail
+          VERSION_NAME="${{ inputs.version_name }}"
+          if [ -z "$VERSION_NAME" ]; then
+            VERSION_NAME="1.0.${{ github.run_number }}"
+          fi
+          echo "VERSION_CODE=${{ github.run_number }}" >> $GITHUB_ENV
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+          echo "BUILD_COMMIT=${{ github.sha }}" >> $GITHUB_ENV
+          echo "BUILD_BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "BUILD_AUTHOR=${{ github.actor }}" >> $GITHUB_ENV
+          echo "APP_DESCRIPTION=Gadget — monitor and control device sensors, camera, audio, and more" >> $GITHUB_ENV
+
+      - name: Build signed release (${{ matrix.flavor }})
+        run: |
+          ./gradlew ${{ matrix.assembleTask }} \
+            -Pandroid.injected.signing.store.file=${{ github.workspace }}/Gadget-release.jks \
+            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }} \
+            -PCI_VERSION_CODE=${{ env.VERSION_CODE }} \
+            -PCI_VERSION_NAME=${{ env.VERSION_NAME }} \
+            -PBUILD_AUTHOR="${{ env.BUILD_AUTHOR }}" \
+            -PBUILD_DATE="${{ env.BUILD_DATE }}" \
+            -PBUILD_COMMIT=${{ env.BUILD_COMMIT }} \
+            -PBUILD_BRANCH=${{ env.BUILD_BRANCH }} \
+            -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}" \
+            ${{ matrix.extraGradleProps }}
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifactName }}-apk
+          path: ${{ matrix.outputDir }}/*.apk
+
+      # AGP names AAB outputs `app-{flavor}-{buildType}.aab` — the
+      # `applicationVariants.all { variant.outputs ... }` rename in
+      # app/build.gradle only affects APKs, not bundles. Rename here so the
+      # uploaded artifact and Release attachment match the
+      # `Gadget-{flavor}-v{version}-{buildType}` naming used elsewhere.
+      - name: Rename AAB to Gadget-standard naming
+        if: matrix.flavor == 'standard'
+        run: |
+          set -euo pipefail
+          SRC=$(find ${{ matrix.bundleDir }} -name "*.aab" -print -quit)
+          test -n "$SRC" || { echo "::error::No AAB found in ${{ matrix.bundleDir }}"; exit 1; }
+          DEST="${{ matrix.bundleDir }}/Gadget-standard-v${VERSION_NAME}-release.aab"
+          mv "$SRC" "$DEST"
+          echo "Renamed: $SRC -> $DEST"
+
+      - name: Upload AAB artifact (Play Store)
+        if: matrix.flavor == 'standard'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifactName }}-aab
+          path: ${{ matrix.bundleDir }}/*.aab
+
+  # ─── GitHub Release with all three signed artifacts ────────────────────
+  # Tag suffix `-signed` keeps these releases distinct from the debug-APK
+  # releases that build-apk.yml cuts on every main merge (`v1.0.<n>`).
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Resolve version name
+        id: ver
+        run: |
+          set -euo pipefail
+          VERSION_NAME="${{ inputs.version_name }}"
+          if [ -z "$VERSION_NAME" ]; then
+            VERSION_NAME="1.0.${{ github.run_number }}"
+          fi
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: List downloaded artifacts (diagnostic)
+        run: |
+          echo "Artifact tree:"
+          find artifacts/ -type f -printf '  %p (%s bytes)\n'
+
+      - name: Create GitHub Release with signed builds
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version_name }}-signed
+          name: Gadget v${{ steps.ver.outputs.version_name }} (signed release)
+          body: |
+            **Build:** #${{ github.run_number }}
+            **Commit:** ${{ github.sha }}
+            **Branch:** ${{ github.ref_name }}
+            **Author:** ${{ github.actor }}
+
+            ## Signed downloads
+
+            All three signed artifacts from this run. Quality gates
+            (leak-gate, lint) were enforced upstream on the main-merge build
+            for this commit.
+
+            - `Gadget-standard-v${{ steps.ver.outputs.version_name }}-release.apk` — signed standard release APK (R8-minified).
+            - `Gadget-standard-v${{ steps.ver.outputs.version_name }}-release.aab` — signed standard release AAB (Play Store bundle).
+            - `Gadget-rooted-v${{ steps.ver.outputs.version_name }}-root-release.apk` — signed rooted release APK. Requires Magisk / KernelSU / APatch.
+
+            Standard and rooted APKs install side-by-side (different applicationIds: `com.gadget` vs `com.gadget.root`).
+          files: |
+            artifacts/standard-release-apk/*.apk
+            artifacts/standard-release-aab/*.aab
+            artifacts/rooted-release-apk/*.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,9 +1,19 @@
-name: Build Variants
+name: Build (debug, auto on main)
 
-# Heavy/full build workflow. Runs ONLY on pushes to main and manual
-# workflow_dispatch — pull-request fast feedback lives in ci-refactor.yml.
+# Auto-triggered debug build matrix. Runs only on pushes to main.
+# Produces both debug flavors and cuts a GitHub Release with them attached.
+#
+# Companion workflows:
+#   * build-release.yml — manual workflow_dispatch only, produces signed
+#     standard/rooted-release APKs + standard-release AAB and a separate
+#     GitHub Release.
+#   * ci-refactor.yml — PR fast feedback (debug build, no Release).
+#
+# Quality gates (leak-gate, libsu assertion, lint/detekt) live here because
+# every commit landing on main passes through this workflow; the manual
+# signed-release workflow trusts that gate and is build-only.
+
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -16,11 +26,6 @@ on:
       - 'app/src/test/**'
       - 'app/src/androidTest/**'
 
-# A single workflow with a matrix over (flavor, buildType). Each leg is
-# independent: a rooted-only compile failure cannot block the standard APK,
-# and vice versa. Source-set scoping (src/standard/ vs src/rooted/) is
-# enforced by AGP, NOT by deleting files in CI — never `rm -rf src/rooted/`
-# from this workflow, it would race with the Gradle build cache.
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,27 +41,11 @@ jobs:
             assembleTask: assembleStandardDebug
             outputDir: app/build/outputs/apk/standard/debug
             artifactName: standard-debug
-            needsSigning: false
-          - flavor: standard
-            buildType: release
-            assembleTask: "assembleStandardRelease bundleStandardRelease"
-            outputDir: app/build/outputs/apk/standard/release
-            bundleDir: app/build/outputs/bundle/standardRelease
-            artifactName: standard-release
-            needsSigning: true
           - flavor: rooted
             buildType: debug
             assembleTask: assembleRootedDebug
             outputDir: app/build/outputs/apk/rooted/debug
             artifactName: rooted-debug
-            needsSigning: false
-            extraGradleProps: "-PenableLsposedModule=true"
-          - flavor: rooted
-            buildType: release
-            assembleTask: assembleRootedRelease
-            outputDir: app/build/outputs/apk/rooted/release
-            artifactName: rooted-release
-            needsSigning: true
             extraGradleProps: "-PenableLsposedModule=true"
 
     steps:
@@ -72,10 +61,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Decode Keystore
-        if: matrix.needsSigning
-        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > Gadget-release.jks
-
       - name: Prepare build metadata
         run: |
           echo "VERSION_CODE=${{ github.run_number }}" >> $GITHUB_ENV
@@ -86,27 +71,8 @@ jobs:
           echo "BUILD_AUTHOR=${{ github.actor }}" >> $GITHUB_ENV
           echo "APP_DESCRIPTION=Gadget — monitor and control device sensors, camera, audio, and more" >> $GITHUB_ENV
 
-      # Signed release builds: standard-release (APK + AAB) and rooted-release (APK).
-      - name: Build signed release (${{ matrix.flavor }})
-        if: matrix.needsSigning
-        run: |
-          ./gradlew ${{ matrix.assembleTask }} \
-            -Pandroid.injected.signing.store.file=${{ github.workspace }}/Gadget-release.jks \
-            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
-            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
-            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }} \
-            -PCI_VERSION_CODE=${{ env.VERSION_CODE }} \
-            -PCI_VERSION_NAME=${{ env.VERSION_NAME }} \
-            -PBUILD_AUTHOR="${{ env.BUILD_AUTHOR }}" \
-            -PBUILD_DATE="${{ env.BUILD_DATE }}" \
-            -PBUILD_COMMIT=${{ env.BUILD_COMMIT }} \
-            -PBUILD_BRANCH=${{ env.BUILD_BRANCH }} \
-            -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}" \
-            ${{ matrix.extraGradleProps }}
-
-      # Debug builds — AGP-managed debug keystore, no signing properties needed.
+      # AGP-managed debug keystore, no signing properties needed.
       - name: Build debug (${{ matrix.flavor }})
-        if: ${{ !matrix.needsSigning }}
         run: |
           ./gradlew ${{ matrix.assembleTask }} \
             -PCI_VERSION_CODE=${{ env.VERSION_CODE }} \
@@ -145,38 +111,12 @@ jobs:
           WORK=$(mktemp -d)
           trap 'rm -rf "$WORK"' EXIT
 
-          # Extract every dex (matched by archive-internal glob) plus the
-          # binary AndroidManifest.xml. If either comes back empty, the APK
-          # is malformed or unzip is not behaving — bail loudly rather than
-          # passing the gate by accident.
           unzip -p "$APK" '*.dex' > "$WORK/dexes.bin" 2>/dev/null || true
           test -s "$WORK/dexes.bin" || fail "Could not extract any dex from $APK"
 
           unzip -p "$APK" AndroidManifest.xml > "$WORK/manifest.bin" 2>/dev/null || true
           test -s "$WORK/manifest.bin" || fail "Could not extract AndroidManifest.xml from $APK"
 
-          # 1. No su-related strings in any dex.
-          #
-          # Pattern is intentionally PRECISE: bare `magisk` and `superuser`
-          # would false-positive on the shared `RootProvider$Magisk` sealed-
-          # class variant (whose abstraction lives in src/main/ with no
-          # behavior in the standard flavor) and on cosmetic localization
-          # strings that name Magisk/KernelSU as root managers. The actual
-          # libsu/superuser integration always carries one of these
-          # unambiguous markers in its class signatures or strings.
-          #
-          # Additional tokens beyond the libsu/topjohnwu set:
-          #   - me\.weishu\.kernelsu, me\.bmax\.apatch — fully-qualified
-          #     KernelSU / APatch package names referenced by
-          #     `KernelSuProviderProbe` / `ApatchProviderProbe` in
-          #     src/rooted/. Qualified so they cannot collide with the
-          #     shared `RootProvider$KernelSu` / `$APatch` variants.
-          #   - org\.lsposed\. — qualified with a trailing dot so it
-          #     matches LSPosed framework package paths but not the
-          #     cosmetic "LSPosed framework"/"LSPosed module" UI strings.
-          #   - /data/adb/(magisk|modules|ksu) — root-mod sysfs paths
-          #     referenced by rooted controllers/probes; sufficiently
-          #     specific to avoid false-positives.
           HITS=$(strings -a -n 6 "$WORK/dexes.bin" \
             | grep -iE 'topjohnwu|libsu|/system/(bin|xbin)/su|chainfire|hiddenapibypass|me\.weishu\.kernelsu|me\.bmax\.apatch|org\.lsposed\.|/data/adb/(magisk|modules|ksu)' \
             | sort -u || true)
@@ -186,12 +126,6 @@ jobs:
             fail "Standard APK contains rooted strings (see above)"
           fi
 
-          # 2. No rooted asset filenames bundled inside the APK. Bare
-          #    `kernelsu`/`apatch` tokens are safe here because this
-          #    matcher consumes APK *entry filenames* only — class names
-          #    never feed in — and no standard-flavor asset uses those
-          #    strings. `/ksu/` is a separate alternative because the
-          #    existing `/su/` literal does not substring-match `/ksu/`.
           ASSETS=$(unzip -l "$APK" | awk '{print $NF}' \
             | grep -iE 'lsposed|magisk|spoofer|\.magisk\.|/su/|/ksu/|kernelsu|apatch' || true)
           if [ -n "$ASSETS" ]; then
@@ -200,15 +134,6 @@ jobs:
             fail "Standard APK contains rooted assets (see above)"
           fi
 
-          # 3. No root-tier permissions. The binary AndroidManifest.xml may
-          #    store its string pool as either UTF-8 or UTF-16 LE depending
-          #    on AAPT2's encoding choice. Default `strings` only catches
-          #    contiguous 7-bit / UTF-8 runs, so we additionally pipe the
-          #    blob through `tr -d '\0' | strings` (which collapses any
-          #    UTF-16-style nulls and surfaces the underlying ASCII chars)
-          #    and run a native UTF-16-LE extraction. Combined, these three
-          #    passes catch the permission name regardless of how AAPT2
-          #    chose to encode the pool.
           {
             strings -a -n 8 "$WORK/manifest.bin"
             tr -d '\0' < "$WORK/manifest.bin" | strings -a -n 8
@@ -227,13 +152,6 @@ jobs:
           echo "✅ Standard APK clean — no rooted leakage detected"
 
       # ─── Rooted-APK asset inventory (positive verification) ─────────────
-      # The leak gate above is a *negative* check: it asserts the standard
-      # APK does NOT contain rooted assets. The rooted leg deserves the
-      # *positive* counterpart — assert that `assets/lsposed-spoofer.apk`
-      # IS present, proving the conditional Gradle wiring at
-      # `app/build.gradle:217-235` actually copied the LSPosed module's
-      # release APK in. Output is short and lives in the GitHub Actions
-      # log so it's mobile-readable on the phone you're testing on.
       - name: Inventory rooted APK assets
         if: matrix.flavor == 'rooted'
         run: |
@@ -247,12 +165,6 @@ jobs:
             || true
 
       # ─── Rooted-APK libsu presence assertion ────────────────────────────
-      # Defense-in-depth twin to the standard-APK negative gate: if the
-      # rooted source set silently shipped empty (e.g. a Gradle config
-      # regression scoped src/rooted/ wrong, or a refactor accidentally
-      # moved libsu deps to `implementation` and they were then stripped
-      # from rooted by an `exclude`), the rooted APK would build green
-      # but lack any root capability. Catch that here.
       - name: Assert rooted APK contains expected libsu signature
         if: matrix.flavor == 'rooted'
         run: |
@@ -274,40 +186,9 @@ jobs:
           name: ${{ matrix.artifactName }}-apk
           path: ${{ matrix.outputDir }}/*.apk
 
-      # AGP names AAB outputs `app-{flavor}-{buildType}.aab` and the
-      # `applicationVariants.all { variant.outputs ... }` rename in
-      # app/build.gradle only affects APKs, not bundles. Rename here so
-      # the file matches the `Gadget-{flavor}-v{version}-{buildType}` style
-      # the release body advertises.
-      - name: Rename AAB to Gadget-standard naming
-        if: matrix.flavor == 'standard' && matrix.buildType == 'release'
-        run: |
-          set -euo pipefail
-          SRC=$(find ${{ matrix.bundleDir }} -name "*.aab" -print -quit)
-          test -n "$SRC" || { echo "::error::No AAB found in ${{ matrix.bundleDir }}"; exit 1; }
-          DEST="${{ matrix.bundleDir }}/Gadget-standard-v${VERSION_NAME}-release.aab"
-          mv "$SRC" "$DEST"
-          echo "Renamed: $SRC -> $DEST"
-
-      - name: Upload AAB artifact (Play Store)
-        if: matrix.flavor == 'standard' && matrix.buildType == 'release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifactName }}-aab
-          path: ${{ matrix.bundleDir }}/*.aab
-
-  # ─── Combined GitHub Release (debug APKs attached) ─────────────────────
-  # Runs only after every matrix leg succeeds and only on main. The signed
-  # release artifacts (standard-release.apk, rooted-release.apk,
-  # standard-release.aab) are still produced and uploaded as workflow
-  # artifacts above — for now, only the two debug APKs are attached to the
-  # GitHub Release so external downloads stay on the sideload-friendly,
-  # debug-signed builds. The signed release artifacts remain accessible via
-  # the workflow run's Artifacts panel for promotion to Play / direct
-  # distribution.
+  # ─── GitHub Release (debug APKs attached) ──────────────────────────────
   release:
     needs: build
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -335,12 +216,11 @@ jobs:
 
             ## Downloads
 
-            Debug APKs attached to this release. Signed release artifacts
-            (standard-release.apk, rooted-release.apk, standard-release.aab)
-            are available in the workflow run's Artifacts panel.
+            Debug APKs for both flavors. For signed release artifacts, run
+            the **Build signed release (manual)** workflow.
 
-            - `Gadget-standard-v1.0.${{ github.run_number }}-debug.apk` — non-rooted **debug** build (Timber logs, Compose tooling). Sideload-friendly for testing.
-            - `Gadget-rooted-v1.0.${{ github.run_number }}-root-debug.apk` — **rooted** debug build. Requires Magisk / KernelSU / APatch on device.
+            - `Gadget-standard-v1.0.${{ github.run_number }}-debug.apk` — non-rooted **debug** build (Timber logs, Compose tooling).
+            - `Gadget-rooted-v1.0.${{ github.run_number }}-root-debug.apk` — **rooted** debug build. Requires Magisk / KernelSU / APatch.
 
             Standard and rooted APKs install side-by-side (different applicationIds: `com.gadget` vs `com.gadget.root`).
           files: |
