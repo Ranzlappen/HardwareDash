@@ -235,7 +235,11 @@ dependencies {
     implementation(libs.vico.compose.m3)
 
     // ─── USB serial (CDC-ACM) — Flipper Zero USB transport ─────────────
-    implementation(libs.usb.serial.for.android)
+    // Note: catalog key is `usb-serial-android` (not `usb-serial-for-android`)
+    // because Kotlin's `for` is a reserved word; the accessor would otherwise
+    // expand to `libs.usb.serial.for.android` and fail to parse. The Maven
+    // coordinates (`com.github.mik3y:usb-serial-for-android`) are unchanged.
+    implementation(libs.usb.serial.android)
 
     // ════════════════════ ROOTED-ONLY DEPENDENCIES ════════════════════
     // libsu is the privileged-shell + RootService backend used by the

@@ -1,0 +1,94 @@
+name: CI (refactor-2026)
+
+# Fast-feedback CI for the refactor-2026 branch. Lightweight companion to
+# the full Build Variants matrix in build-apk.yml — this workflow skips
+# signing, AAB bundling, and release uploads, and just exercises both APK
+# flavors in debug so a Kotlin/Gradle regression surfaces quickly.
+#
+# Why both workflows on refactor-2026?
+#   * build-apk.yml is the production matrix: signed standard-release APK,
+#     standard-release AAB, leak gate, rooted libsu assertion. Slow but
+#     comprehensive.
+#   * ci-refactor.yml (this file) is the iteration loop: assemble debug
+#     APKs for both flavors and exit. Quick to fail on a typo in a
+#     `build.gradle.kts` or a `*.kt`, where the matrix would spend several
+#     more minutes on signing + asset gates before reporting the same
+#     root cause.
+
+on:
+  push:
+    branches:
+      - refactor-2026
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - '.gitignore'
+      - '.gitattributes'
+      - '.idea/**'
+  pull_request:
+    branches:
+      - refactor-2026
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - '.gitignore'
+      - '.gitattributes'
+      - '.idea/**'
+
+jobs:
+  build:
+    name: Assemble both flavors (debug)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          # Same caching layout used by build-apk.yml — keys off the Gradle
+          # wrapper distribution URL, the version catalog, and every
+          # build.gradle.kts in the project. Cache hits skip the
+          # ~30s Gradle distribution download.
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # Both assemble tasks in one Gradle invocation so the configuration
+      # phase only runs once. -PenableLsposedModule=true mirrors the
+      # production rooted CI leg and causes the lsposed-module project to
+      # be included + its release APK staged into
+      # app/src/rooted/assets/. Standard variant is unaffected by the
+      # property (the asset-copy task only attaches to the rooted variant's
+      # preBuild).
+      - name: Assemble standard + rooted debug APKs
+        run: |
+          ./gradlew \
+            -PenableLsposedModule=true \
+            assembleStandardDebug \
+            assembleRootedDebug \
+            --stacktrace
+
+      # Surface the result in the workflow Summary tab so the PR check
+      # status is unambiguous even before opening the run logs.
+      - name: Build summary
+        if: always()
+        run: |
+          {
+            echo "## CI (refactor-2026)"
+            echo ""
+            if [ "${{ job.status }}" = "success" ]; then
+              echo "✅ **Both flavors built successfully.**"
+              echo ""
+              echo "Outputs:"
+              find app/build/outputs/apk -name '*.apk' -printf '  - `%p` (%s bytes)\n' 2>/dev/null || true
+            else
+              echo "❌ **Build failed.** See the step logs above."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
