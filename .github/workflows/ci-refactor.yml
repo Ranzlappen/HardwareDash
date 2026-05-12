@@ -1,36 +1,22 @@
 name: CI (claude/refactor-2026)
 
-# Fast-feedback CI for the claude/refactor-2026 branch. Lightweight
-# companion to the full Build Variants matrix in build-apk.yml — this
-# workflow skips signing, AAB bundling, and release uploads, and just
-# exercises both APK flavors in debug so a Kotlin/Gradle regression
-# surfaces quickly.
+# Fast-feedback CI. Lightweight companion to the full Build Variants matrix
+# in build-apk.yml — this workflow skips signing, AAB bundling, and release
+# uploads, and just exercises both APK flavors in debug so a Kotlin/Gradle
+# regression surfaces quickly on every pull request.
 #
-# Why both workflows on claude/refactor-2026 (and main)?
-#   * build-apk.yml is the production matrix: signed standard-release APK,
-#     standard-release AAB, leak gate, rooted libsu assertion. Slow but
-#     comprehensive.
-#   * ci-refactor.yml (this file) is the iteration loop: assemble debug
-#     APKs for both flavors and exit. Quick to fail on a typo in a
+# Why both workflows?
+#   * build-apk.yml is the production matrix: signed release APKs (standard +
+#     rooted), signed AAB, leak gate, rooted libsu assertion. Slow but
+#     comprehensive. Runs on pushes to main + manual dispatch only.
+#   * ci-refactor.yml (this file) is the iteration loop: assemble debug APKs
+#     for both flavors and exit. Quick to fail on a typo in a
 #     `build.gradle.kts` or a `*.kt`, where the matrix would spend several
 #     more minutes on signing + asset gates before reporting the same
-#     root cause.
+#     root cause. Runs on every PR regardless of target branch.
 
 on:
-  push:
-    branches:
-      - main
-      - claude/refactor-2026
-    paths-ignore:
-      - '*.md'
-      - 'docs/**'
-      - '.gitignore'
-      - '.gitattributes'
-      - '.idea/**'
   pull_request:
-    branches:
-      - main
-      - claude/refactor-2026
     paths-ignore:
       - '*.md'
       - 'docs/**'
