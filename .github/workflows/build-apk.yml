@@ -155,8 +155,21 @@ jobs:
           # strings that name Magisk/KernelSU as root managers. The actual
           # libsu/superuser integration always carries one of these
           # unambiguous markers in its class signatures or strings.
+          #
+          # Additional tokens beyond the libsu/topjohnwu set:
+          #   - me\.weishu\.kernelsu, me\.bmax\.apatch — fully-qualified
+          #     KernelSU / APatch package names referenced by
+          #     `KernelSuProviderProbe` / `ApatchProviderProbe` in
+          #     src/rooted/. Qualified so they cannot collide with the
+          #     shared `RootProvider$KernelSu` / `$APatch` variants.
+          #   - org\.lsposed\. — qualified with a trailing dot so it
+          #     matches LSPosed framework package paths but not the
+          #     cosmetic "LSPosed framework"/"LSPosed module" UI strings.
+          #   - /data/adb/(magisk|modules|ksu) — root-mod sysfs paths
+          #     referenced by rooted controllers/probes; sufficiently
+          #     specific to avoid false-positives.
           HITS=$(strings -a -n 6 "$WORK/dexes.bin" \
-            | grep -iE 'topjohnwu|libsu|/system/(bin|xbin)/su|chainfire|hiddenapibypass' \
+            | grep -iE 'topjohnwu|libsu|/system/(bin|xbin)/su|chainfire|hiddenapibypass|me\.weishu\.kernelsu|me\.bmax\.apatch|org\.lsposed\.|/data/adb/(magisk|modules|ksu)' \
             | sort -u || true)
           if [ -n "$HITS" ]; then
             echo "Standard APK contains rooted strings:"
@@ -164,9 +177,14 @@ jobs:
             fail "Standard APK contains rooted strings (see above)"
           fi
 
-          # 2. No rooted asset filenames bundled inside the APK.
+          # 2. No rooted asset filenames bundled inside the APK. Bare
+          #    `kernelsu`/`apatch` tokens are safe here because this
+          #    matcher consumes APK *entry filenames* only — class names
+          #    never feed in — and no standard-flavor asset uses those
+          #    strings. `/ksu/` is a separate alternative because the
+          #    existing `/su/` literal does not substring-match `/ksu/`.
           ASSETS=$(unzip -l "$APK" | awk '{print $NF}' \
-            | grep -iE 'lsposed|magisk|spoofer|\.magisk\.|/su/' || true)
+            | grep -iE 'lsposed|magisk|spoofer|\.magisk\.|/su/|/ksu/|kernelsu|apatch' || true)
           if [ -n "$ASSETS" ]; then
             echo "Standard APK contains rooted assets:"
             echo "$ASSETS"
@@ -218,6 +236,28 @@ jobs:
           unzip -l "$APK" \
             | awk '$NF ~ /^assets\/.*\.apk$/ || tolower($NF) ~ /lsposed|spoofer/ {print "  "$NF" ("$1" bytes)"}' \
             || true
+
+      # ─── Rooted-APK libsu presence assertion ────────────────────────────
+      # Defense-in-depth twin to the standard-APK negative gate: if the
+      # rooted source set silently shipped empty (e.g. a Gradle config
+      # regression scoped src/rooted/ wrong, or a refactor accidentally
+      # moved libsu deps to `implementation` and they were then stripped
+      # from rooted by an `exclude`), the rooted APK would build green
+      # but lack any root capability. Catch that here.
+      - name: Assert rooted APK contains expected libsu signature
+        if: matrix.flavor == 'rooted'
+        run: |
+          set -euo pipefail
+          APK=$(find ${{ matrix.outputDir }} -name "*.apk" -print -quit)
+          test -n "$APK" || { echo "::error::No rooted APK produced in ${{ matrix.outputDir }}"; exit 1; }
+          WORK=$(mktemp -d)
+          trap 'rm -rf "$WORK"' EXIT
+          unzip -p "$APK" '*.dex' > "$WORK/dexes.bin" 2>/dev/null || true
+          test -s "$WORK/dexes.bin" || { echo "::error::Could not extract dex from rooted APK"; exit 1; }
+          strings -a -n 6 "$WORK/dexes.bin" \
+            | grep -qiE 'topjohnwu|libsu' \
+            || { echo "::error::Rooted APK missing libsu — rooted source set may be broken"; exit 1; }
+          echo "✅ Rooted APK contains libsu signature"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
