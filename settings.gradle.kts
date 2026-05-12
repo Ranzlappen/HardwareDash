@@ -26,11 +26,13 @@
 //     skeleton module applies plugins inline via `libs.plugins.*` aliases.
 
 pluginManagement {
-    // Composite-build hook for build-logic/. Commented out until Batch 1
-    // ships the first convention plugin — including an empty composite
-    // build would fail Gradle configuration.
-    //
-    // includeBuild("build-logic")
+    // Composite-build hook for build-logic/. Batch 1 ships the convention
+    // plugins (gadget.android.application, gadget.android.library,
+    // gadget.android.library.compose, gadget.android.application.compose,
+    // gadget.android.feature, gadget.android.hilt, gadget.android.room,
+    // gadget.jvm.library). Module build files apply them by id, e.g.
+    // `plugins { id("gadget.android.library") }`.
+    includeBuild("build-logic")
     repositories {
         google {
             content {
