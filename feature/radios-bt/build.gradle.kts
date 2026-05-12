@@ -1,29 +1,9 @@
-// =========================================================================
-// :feature:radios-bt — Batch 0 skeleton.
-//
-// Empty Android library. Inline plugin application will be replaced by
-// the `gadget.android.feature` convention plugin in Batch 1.
-// =========================================================================
+// :feature:radios-bt — skeleton; configuration via gadget.android.feature.
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
+    id("gadget.android.feature")
 }
 
 android {
     namespace = "dev.ranzlappen.gadget.feature.radios.bt"
-    compileSdk = 35
-
-    defaultConfig {
-        minSdk = 29
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 }

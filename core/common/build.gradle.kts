@@ -1,29 +1,5 @@
-// =========================================================================
-// :core:common — Batch 0 skeleton.
-//
-// Empty Android library. Inline plugin application will be replaced by
-// the `gadget.android.library` convention plugin in Batch 1.
-// =========================================================================
+// :core:common — skeleton; configuration via gadget.jvm.library.
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-}
-
-android {
-    namespace = "dev.ranzlappen.gadget.core.common"
-    compileSdk = 35
-
-    defaultConfig {
-        minSdk = 29
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+    id("gadget.jvm.library")
 }

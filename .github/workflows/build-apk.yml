@@ -5,7 +5,20 @@ on:
   push:
     branches:
       - main
+      - refactor-2026
       - 'claude/**'
+    paths-ignore:
+      - '*.md'
+      - '.gitignore'
+      - '.gitattributes'
+      - '.idea/**'
+      - 'docs/**'
+      - 'app/src/test/**'
+      - 'app/src/androidTest/**'
+  pull_request:
+    branches:
+      - main
+      - refactor-2026
     paths-ignore:
       - '*.md'
       - '.gitignore'
