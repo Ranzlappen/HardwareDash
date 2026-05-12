@@ -1,19 +1,10 @@
 name: Build Variants
 
+# Heavy/full build workflow. Runs ONLY on pushes to main and manual
+# workflow_dispatch — pull-request fast feedback lives in ci-refactor.yml.
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-    paths-ignore:
-      - '*.md'
-      - '.gitignore'
-      - '.gitattributes'
-      - '.idea/**'
-      - 'docs/**'
-      - 'app/src/test/**'
-      - 'app/src/androidTest/**'
-  pull_request:
     branches:
       - main
     paths-ignore:
@@ -60,6 +51,13 @@ jobs:
             artifactName: rooted-debug
             needsSigning: false
             extraGradleProps: "-PenableLsposedModule=true"
+          - flavor: rooted
+            buildType: release
+            assembleTask: assembleRootedRelease
+            outputDir: app/build/outputs/apk/rooted/release
+            artifactName: rooted-release
+            needsSigning: true
+            extraGradleProps: "-PenableLsposedModule=true"
 
     steps:
       - uses: actions/checkout@v4
@@ -88,7 +86,7 @@ jobs:
           echo "BUILD_AUTHOR=${{ github.actor }}" >> $GITHUB_ENV
           echo "APP_DESCRIPTION=Gadget — monitor and control device sensors, camera, audio, and more" >> $GITHUB_ENV
 
-      # Signed release builds (standard-release only in this workflow).
+      # Signed release builds: standard-release (APK + AAB) and rooted-release (APK).
       - name: Build signed release (${{ matrix.flavor }})
         if: matrix.needsSigning
         run: |
@@ -103,7 +101,8 @@ jobs:
             -PBUILD_DATE="${{ env.BUILD_DATE }}" \
             -PBUILD_COMMIT=${{ env.BUILD_COMMIT }} \
             -PBUILD_BRANCH=${{ env.BUILD_BRANCH }} \
-            -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}"
+            -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}" \
+            ${{ matrix.extraGradleProps }}
 
       # Debug builds — AGP-managed debug keystore, no signing properties needed.
       - name: Build debug (${{ matrix.flavor }})
@@ -297,12 +296,15 @@ jobs:
           name: ${{ matrix.artifactName }}-aab
           path: ${{ matrix.bundleDir }}/*.aab
 
-  # ─── Combined GitHub Release (all four build outputs in one tag) ───────
-  # Runs only after every matrix leg succeeds and only on main. Pulls the
-  # uploaded artifacts from this workflow run and attaches them to a single
-  # `vX.Y.Z` release: standard-debug.apk, standard-release.apk + .aab, and
-  # rooted-debug.apk. This replaces the per-matrix-leg release attach,
-  # which could only see its own leg's outputs.
+  # ─── Combined GitHub Release (debug APKs attached) ─────────────────────
+  # Runs only after every matrix leg succeeds and only on main. The signed
+  # release artifacts (standard-release.apk, rooted-release.apk,
+  # standard-release.aab) are still produced and uploaded as workflow
+  # artifacts above — for now, only the two debug APKs are attached to the
+  # GitHub Release so external downloads stay on the sideload-friendly,
+  # debug-signed builds. The signed release artifacts remain accessible via
+  # the workflow run's Artifacts panel for promotion to Play / direct
+  # distribution.
   release:
     needs: build
     if: github.ref == 'refs/heads/main'
@@ -320,7 +322,7 @@ jobs:
           echo "Artifact tree:"
           find artifacts/ -type f -printf '  %p (%s bytes)\n'
 
-      - name: Create GitHub Release with all four builds
+      - name: Create GitHub Release with debug builds
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
@@ -333,18 +335,16 @@ jobs:
 
             ## Downloads
 
-            All four build outputs from this CI run, attached to one release:
+            Debug APKs attached to this release. Signed release artifacts
+            (standard-release.apk, rooted-release.apk, standard-release.aab)
+            are available in the workflow run's Artifacts panel.
 
             - `Gadget-standard-v1.0.${{ github.run_number }}-debug.apk` — non-rooted **debug** build (Timber logs, Compose tooling). Sideload-friendly for testing.
-            - `Gadget-standard-v1.0.${{ github.run_number }}-release.apk` — non-rooted **release** build. R8-minified, signed.
-            - `Gadget-standard-v1.0.${{ github.run_number }}-release.aab` — Play Store bundle for the standard flavor.
             - `Gadget-rooted-v1.0.${{ github.run_number }}-root-debug.apk` — **rooted** debug build. Requires Magisk / KernelSU / APatch on device.
 
             Standard and rooted APKs install side-by-side (different applicationIds: `com.gadget` vs `com.gadget.root`).
           files: |
             artifacts/standard-debug-apk/*.apk
-            artifacts/standard-release-apk/*.apk
-            artifacts/standard-release-aab/*.aab
             artifacts/rooted-debug-apk/*.apk
           draft: false
           prerelease: false
