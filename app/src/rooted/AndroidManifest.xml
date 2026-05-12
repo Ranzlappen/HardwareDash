@@ -24,9 +24,15 @@
             bind privileged operations into the :root process without a
             manifest change. Empty onBind() in Batch 2.
         -->
+        <!--
+            Instantiatable suppressed: GadgetRootService extends libsu's
+            RootService, which extends android.app.Service — lint loses
+            that chain at the AAR boundary and lintVitalRelease escalates
+            it to fatal.
+        -->
         <service
             android:name="com.gadget.root.core.GadgetRootService"
             android:exported="false"
-            tools:ignore="MissingClass" />
+            tools:ignore="MissingClass,Instantiatable" />
     </application>
 </manifest>
