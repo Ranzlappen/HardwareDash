@@ -6,7 +6,7 @@ import org.gradle.kotlin.dsl.dependencies
 /**
  * Convention plugin `gadget.android.feature`.
  *
- * The one-stop plugin for every `feature/*` module. Composes:
+ * The one-stop plugin for every `feature/<name>` module. Composes:
  *   * `gadget.android.library`         — base library configuration
  *   * `gadget.android.library.compose` — Compose support
  *   * `gadget.android.hilt`            — Hilt + KSP

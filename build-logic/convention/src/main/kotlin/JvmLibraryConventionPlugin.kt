@@ -18,7 +18,7 @@ import org.gradle.api.Project
  *   * `core:domain`  — use-cases / policy
  *   * `core:common`  — pure utilities (Result types, dispatchers, …)
  *
- * If a `core/*` module needs `Context`, `Uri`, or other Android types,
+ * If a `core/<name>` module needs `Context`, `Uri`, or other Android types,
  * switch it to `gadget.android.library` instead.
  */
 class JvmLibraryConventionPlugin : Plugin<Project> {

@@ -7,7 +7,7 @@ import org.gradle.kotlin.dsl.configure
 /**
  * Convention plugin `gadget.android.library`.
  *
- * The base Android-library plugin used by every `core/*` and `feature/*`
+ * The base Android-library plugin used by every `core/<name>` and `feature/<name>`
  * module. Applies:
  *   * `com.android.library`
  *   * `org.jetbrains.kotlin.android`

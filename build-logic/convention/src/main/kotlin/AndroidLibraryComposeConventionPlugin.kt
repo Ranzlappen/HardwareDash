@@ -14,7 +14,7 @@ import org.gradle.kotlin.dsl.getByType
  *   * Compose BOM + UI tooling dependencies.
  *
  * Must be paired with `gadget.android.library`. Apply this plugin in any
- * `core/*` or `feature/*` module that uses `@Composable`. The
+ * `core/<name>` or `feature/<name>` module that uses `@Composable`. The
  * `gadget.android.feature` plugin applies it transitively, so feature
  * modules do not need to apply it explicitly.
  */
