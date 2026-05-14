@@ -20,13 +20,19 @@ import androidx.compose.ui.platform.LocalContext
  * so the theme picks up the user's wallpaper-derived palette while
  * keeping our typography, shapes, and motion tokens.
  *
- * Custom-theme seam: the theme reads from [LocalGadgetTheme], which a
- * downstream consumer can override via
- * `CompositionLocalProvider(LocalGadgetTheme provides MyCustomTheme) { … }`.
- * Phase 0 only ships the [GadgetCustomTheme.Default] entry; later
- * phases will expose user-selectable themes from the settings screen
- * (high-contrast / amoled-true / pastel are the obvious first three),
- * and each will plug in here without API changes downstream.
+ * Provides [LocalGadgetTheme] = a [GadgetThemeData] umbrella value
+ * holding every design-system token (colors, typography, shapes,
+ * spacing, motion, glass). Downstream consumers wanting to override
+ * one slot (e.g. a "Compact" theme that halves spacing) wrap their
+ * subtree in:
+ *
+ * ```kotlin
+ * CompositionLocalProvider(
+ *     LocalGadgetTheme provides LocalGadgetTheme.current.copy(
+ *         spacing = GadgetSpacingValues(medium = 8.dp, …)
+ *     ),
+ * ) { … }
+ * ```
  *
  * Usage:
  *
@@ -52,10 +58,14 @@ fun GadgetTheme(
         useDarkTheme -> GadgetDarkColorScheme
         else -> GadgetLightColorScheme
     }
+    val themeData = GadgetThemeData(
+        colors = colorScheme,
+        typography = GadgetTypography,
+        shapes = GadgetShapes,
+        identifier = GadgetCustomTheme.Default,
+    )
 
-    CompositionLocalProvider(
-        LocalGadgetTheme provides GadgetCustomTheme.Default,
-    ) {
+    CompositionLocalProvider(LocalGadgetTheme provides themeData) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = GadgetTypography,
@@ -66,18 +76,25 @@ fun GadgetTheme(
 }
 
 /**
- * Composition local holding the active custom theme. Future-proofs the
- * design system for user-defined themes wired from settings. Read it
- * via `LocalGadgetTheme.current` in any @Composable that wants to
- * branch on the active theme (e.g. choose between two backdrop images).
+ * Composition local exposing the active [GadgetThemeData]. Read via
+ * `LocalGadgetTheme.current` from any `@Composable` that needs a
+ * design-system token (spacing, motion, glass, custom-theme
+ * identifier). The default raises an `error` if no [GadgetTheme]
+ * wraps the call site — every entry point into Compose content
+ * (MainActivity, previews, tests) must wrap content in `GadgetTheme`.
  */
-val LocalGadgetTheme = staticCompositionLocalOf { GadgetCustomTheme.Default }
+val LocalGadgetTheme = staticCompositionLocalOf<GadgetThemeData> {
+    error("No GadgetTheme provided. Wrap your content in GadgetTheme { … }.")
+}
 
 /**
- * Identifies the active custom theme.
+ * Identifies the active custom theme. Lives on [GadgetThemeData] as
+ * the [GadgetThemeData.identifier] field so consumers can branch on
+ * the named theme variant (e.g. pick between two backdrop images
+ * based on `LocalGadgetTheme.current.identifier`).
  *
  * Phase 0 ships only [Default]. Marked [Immutable] so Compose can
- * skip recompositions when the value is unchanged across recompositions.
+ * skip recompositions when the value is unchanged.
  */
 @Immutable
 enum class GadgetCustomTheme {
