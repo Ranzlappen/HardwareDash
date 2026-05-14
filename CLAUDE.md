@@ -205,9 +205,13 @@ fun GadgetSecondaryButton(
   ```kotlin
   Row { GadgetPrimaryButton(...); GadgetSecondaryButton(...) }
   ```
-- **Notes**: outlined glassy surface — container goes through
-  `Modifier.glassSurface()` so the alphas come from
-  `LocalGadgetTheme.current.glass`.
+- **Notes**: the **outlined glassy** tier of the button family.
+  The container's paint comes from
+  `Modifier.glassSurface(intensity = Standard)` — the M3 Surface
+  underneath sits at `Color.Transparent` so the glass gradient +
+  border shine through. The hairline outline still paints in
+  `colorScheme.outline`. Custom themes that retune glass alphas via
+  `LocalGadgetTheme.current.glass` flow through automatically.
 
 #### `GadgetTertiaryButton`
 ```kotlin
@@ -458,7 +462,7 @@ Self-Driving Documentation** batch:
 - [x] **1.1.1** — `LocalGadgetTheme` full wiring (closes #90)
 - [x] **1.1.2** — Accessibility semantics sweep
 - [x] **1.1.3** — `WindowSizeClass`-aware shell
-- [ ] **1.1.4** — Glass consistency for Secondary button
+- [x] **1.1.4** — Glass consistency for Secondary button
 - [ ] **1.1.5** — Shimmer width + blur-fallback polish
 - [ ] **1.1.6** — `@Preview` matrix expansion (RTL / LargeFont / SizeClasses)
 - [ ] **1.1.7** — Final status refresh + catalog verification

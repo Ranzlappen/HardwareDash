@@ -34,7 +34,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
+import dev.ranzlappen.gadget.core.designsystem.glassSurface
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
@@ -144,12 +146,18 @@ fun GadgetSecondaryButton(
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         contentPadding = contentPadding,
+        // useGlass=true → the surface paint comes from
+        // Modifier.glassSurface(intensity=Standard) inside the helper,
+        // not a solid surfaceVariant fill. The hairline border still
+        // paints in colorScheme.outline so the button keeps its
+        // "outlined glassy" visual identity.
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         border = BorderStroke(
             width = spacing.hairline,
             color = MaterialTheme.colorScheme.outline,
         ),
+        useGlass = true,
     )
 }
 
@@ -339,6 +347,7 @@ private fun GlassyLabelledButton(
     containerColor: Color,
     contentColor: Color,
     border: BorderStroke?,
+    useGlass: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -356,14 +365,34 @@ private fun GlassyLabelledButton(
     val resolvedContent = if (enabled) contentColor
     else contentColor.copy(alpha = GadgetButtonDefaults.DisabledAlpha)
 
+    // When useGlass is true the surface paint comes from
+    // Modifier.glassSurface — the M3 Surface's `color` slot stays
+    // transparent so the glass overlay shows through. The glass
+    // modifier reads its alphas from LocalGadgetTheme.current.glass,
+    // so a custom theme that retunes glassmorphism flows through
+    // automatically. When false, the Surface paints `containerColor`
+    // as a solid fill — the existing primary / tertiary behaviour.
+    val surfaceModifier = modifier
+        .defaultMinSize(minHeight = GadgetButtonDefaults.MinHeight)
+        .scale(pressScale)
+        .let { base ->
+            if (useGlass) {
+                base.glassSurface(
+                    intensity = GlassIntensity.Standard,
+                    showBorder = false,
+                )
+            } else {
+                base
+            }
+        }
+    val surfaceColor = if (useGlass) Color.Transparent else resolvedContainer
+
     Surface(
         onClick = onClick,
-        modifier = modifier
-            .defaultMinSize(minHeight = GadgetButtonDefaults.MinHeight)
-            .scale(pressScale),
+        modifier = surfaceModifier,
         enabled = enabled && !loading,
         shape = MaterialTheme.shapes.small,
-        color = resolvedContainer,
+        color = surfaceColor,
         contentColor = resolvedContent,
         border = border,
         interactionSource = interactionSource,
