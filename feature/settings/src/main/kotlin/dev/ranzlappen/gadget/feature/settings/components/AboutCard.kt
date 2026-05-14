@@ -32,7 +32,7 @@ internal fun AboutCard(modifier: Modifier = Modifier) {
         icon = Icons.Outlined.Info,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
-            AboutRow(label = "Version", value = BuildConfig.VERSION_NAME ?: "—")
+            AboutRow(label = "Version", value = BuildConfig.VERSION_NAME)
             AboutRow(label = "Build", value = BuildConfig.VERSION_CODE.toString())
             AboutRow(label = "Build type", value = BuildConfig.BUILD_TYPE)
         }

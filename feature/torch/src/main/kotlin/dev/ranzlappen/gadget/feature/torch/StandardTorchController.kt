@@ -54,15 +54,10 @@ class StandardTorchController @Inject constructor(
     )
     override val state: StateFlow<TorchState> = _state.asStateFlow()
 
-    init {
-        // Subscribe to OS-wide torch callbacks so external state
-        // changes (other apps, the legacy stock QS tile, hardware
-        // power button gestures on some OEMs) keep [_state] in
-        // sync without us polling. Callback runs on the main
-        // thread by default.
-        cameraManager.registerTorchCallback(torchCallback, null)
-    }
-
+    // Declared before the `init` block that registers it — Kotlin
+    // runs `init` blocks and property initializers in declaration
+    // order, so forward-referencing `torchCallback` from `init`
+    // hits an uninitialized field.
     private val torchCallback = object : CameraManager.TorchCallback() {
         override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
             if (cameraId == flashCameraId) {
@@ -77,6 +72,15 @@ class StandardTorchController @Inject constructor(
                 }
             }
         }
+    }
+
+    init {
+        // Subscribe to OS-wide torch callbacks so external state
+        // changes (other apps, the legacy stock QS tile, hardware
+        // power button gestures on some OEMs) keep [_state] in
+        // sync without us polling. Callback runs on the main
+        // thread by default.
+        cameraManager.registerTorchCallback(torchCallback, null)
     }
 
     override fun toggle() {

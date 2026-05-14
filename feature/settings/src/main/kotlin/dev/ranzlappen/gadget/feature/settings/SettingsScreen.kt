@@ -1,10 +1,10 @@
 package dev.ranzlappen.gadget.feature.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.feature.settings.components.AboutCard
 import dev.ranzlappen.gadget.feature.settings.components.AccessibilityCard
@@ -32,7 +32,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
-    val preferences by viewModel.preferences.collectAsStateWithLifecycle()
+    val preferences by viewModel.preferences.collectAsState()
     ModuleScreenScaffold(
         title = "Settings",
         modifier = modifier,
