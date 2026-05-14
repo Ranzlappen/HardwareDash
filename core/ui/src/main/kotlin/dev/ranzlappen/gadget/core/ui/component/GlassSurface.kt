@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
+import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedTransparency
 import dev.ranzlappen.gadget.core.designsystem.glassSurface
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 
@@ -39,7 +40,16 @@ fun GlassSurface(
     onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val baseModifier = modifier.glassSurface(intensity = intensity, showBorder = showBorder)
+    // Respect LocalReducedTransparency: when the user has opted out
+    // of translucent surfaces, swap any Standard/Vivid intensity to
+    // Subtle (highest-opacity preset) so the glass surface stays
+    // distinguishable but content beneath bleeds through less.
+    val effectiveIntensity = if (LocalReducedTransparency.current && intensity != GlassIntensity.Subtle) {
+        GlassIntensity.Subtle
+    } else {
+        intensity
+    }
+    val baseModifier = modifier.glassSurface(intensity = effectiveIntensity, showBorder = showBorder)
     val interactiveModifier = if (onClick != null) {
         baseModifier.clickable(onClick = onClick)
     } else {

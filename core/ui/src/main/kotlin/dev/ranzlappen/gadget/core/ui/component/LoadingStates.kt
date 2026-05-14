@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
+import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
 
 /**
  * Circular progress indicator with Gadget styling.
@@ -114,6 +115,18 @@ fun GadgetShimmerBlock(
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.small,
 ) {
+    // Respect LocalReducedMotion: render a static surfaceVariant
+    // block (still legible as "loading") instead of an animated
+    // gradient sweep. Caller's intent (placeholder skeleton) is
+    // preserved; the motion is suppressed.
+    if (LocalReducedMotion.current) {
+        Box(
+            modifier = modifier
+                .clip(shape)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+        )
+        return
+    }
     val base = MaterialTheme.colorScheme.surfaceVariant
     val highlight = MaterialTheme.colorScheme.surface
     val shimmerColors = listOf(

@@ -30,7 +30,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetMotion
+import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 
 /**
@@ -41,7 +42,8 @@ import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
  * diameter, etc.) rather than magic numbers — they're allowed to
  * appear here per the design-system spec's "design token explicitly
  * requires a fixed-size variant" carve-out. Everything else in this
- * file pulls from [GadgetSpacing] / [GadgetMotion] / [MaterialTheme].
+ * file pulls from [GadgetSpacing] / `LocalGadgetTheme.current.motion`
+ * / [MaterialTheme].
  */
 object GadgetButtonDefaults {
     /** Minimum touch-target height. Matches Material a11y guidance. */
@@ -196,9 +198,11 @@ fun GadgetIconButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    val reducedMotion = LocalReducedMotion.current
+    val motion = LocalGadgetTheme.current.motion
     val pressScale by animateFloatAsState(
-        targetValue = if (isPressed && enabled) PressedScale else 1f,
-        animationSpec = GadgetMotion.springStandard(),
+        targetValue = if (!reducedMotion && isPressed && enabled) PressedScale else 1f,
+        animationSpec = motion.springStandard(),
         label = "icon-button-press-scale",
     )
     Surface(
@@ -246,9 +250,11 @@ fun GadgetFab(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    val reducedMotion = LocalReducedMotion.current
+    val motion = LocalGadgetTheme.current.motion
     val pressScale by animateFloatAsState(
-        targetValue = if (isPressed && enabled) PressedScale else 1f,
-        animationSpec = GadgetMotion.springStandard(),
+        targetValue = if (!reducedMotion && isPressed && enabled) PressedScale else 1f,
+        animationSpec = motion.springStandard(),
         label = "fab-press-scale",
     )
     val resolvedContainer = if (enabled) containerColor
@@ -319,9 +325,11 @@ private fun GlassyLabelledButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    val reducedMotion = LocalReducedMotion.current
+    val motion = LocalGadgetTheme.current.motion
     val pressScale by animateFloatAsState(
-        targetValue = if (isPressed && enabled && !loading) PressedScale else 1f,
-        animationSpec = GadgetMotion.springStandard(),
+        targetValue = if (!reducedMotion && isPressed && enabled && !loading) PressedScale else 1f,
+        animationSpec = motion.springStandard(),
         label = "labelled-button-press-scale",
     )
     val resolvedContainer = if (enabled) containerColor
