@@ -29,7 +29,7 @@ import com.gadget.ui.theme.ThemePreferencesManager
 import com.gadget.widget.WidgetUpdateWorker
 import com.gadget.widget.folder.FolderWidgetController
 import dagger.hilt.android.AndroidEntryPoint
-import dev.ranzlappen.gadget.core.navigation.GadgetAppShell
+import dev.ranzlappen.gadget.core.navigation.GadgetApp
 import dev.ranzlappen.gadget.core.navigation.GadgetDestination
 import dev.ranzlappen.gadget.core.navigation.navigateTopLevel
 import dev.ranzlappen.gadget.core.navigation.placeholderScreen
@@ -56,27 +56,27 @@ class MainActivity : ComponentActivity() {
         bootstrapLegacyManagers()
 
         setContent {
-            GadgetTheme {
-                val outcome by produceState<LaunchGateOutcome?>(initialValue = null) {
-                    value = launchGate.check()
-                }
-                when (val resolved = outcome) {
-                    null -> LaunchSplash()
-                    LaunchGateOutcome.Allowed -> {
-                        val navController = rememberNavController()
-                        GadgetAppShell(navController = navController) {
-                            dashboardScreen(
-                                onNavigate = { destination ->
-                                    navController.navigateTopLevel(destination)
-                                },
-                            )
-                            placeholderScreen(GadgetDestination.Sensors)
-                            placeholderScreen(GadgetDestination.Actuators)
-                            placeholderScreen(GadgetDestination.Automation)
-                            placeholderScreen(GadgetDestination.Settings)
-                        }
+            val outcome by produceState<LaunchGateOutcome?>(initialValue = null) {
+                value = launchGate.check()
+            }
+            when (val resolved = outcome) {
+                null -> GadgetTheme { LaunchSplash() }
+                LaunchGateOutcome.Allowed -> {
+                    val navController = rememberNavController()
+                    GadgetApp(navController = navController) {
+                        dashboardScreen(
+                            onNavigate = { destination ->
+                                navController.navigateTopLevel(destination)
+                            },
+                        )
+                        placeholderScreen(GadgetDestination.Sensors)
+                        placeholderScreen(GadgetDestination.Actuators)
+                        placeholderScreen(GadgetDestination.Automation)
+                        placeholderScreen(GadgetDestination.Settings)
                     }
-                    is LaunchGateOutcome.DeniedFatal -> FatalLaunchScreen(
+                }
+                is LaunchGateOutcome.DeniedFatal -> GadgetTheme {
+                    FatalLaunchScreen(
                         reason = resolved.reason,
                         onExit = { finishAffinity() },
                         onOpenInstructions = { openCompanionInstructions() },
