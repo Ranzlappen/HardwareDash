@@ -7,10 +7,10 @@ import dev.ranzlappen.gadget.core.navigation.GadgetDestination
 /**
  * Wire :feature:dashboard into the Gadget [androidx.navigation.NavGraph].
  *
- * Call from the app's `GadgetAppShell { … }` builder block:
+ * Call from the app's `GadgetApp { … }` builder block:
  *
  * ```kotlin
- * GadgetAppShell {
+ * GadgetApp {
  *     dashboardScreen(onNavigate = { destination ->
  *         navController.navigateTopLevel(destination)
  *     })

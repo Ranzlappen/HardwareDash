@@ -30,10 +30,10 @@ import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetMotion
  * quarter slide distance is deliberately short — full-width slides
  * feel teleport-y between sibling top-level destinations.
  *
- * Most callers should use [GadgetAppShell] instead, which wraps this
- * NavHost in a [androidx.compose.material3.Scaffold] with the bottom
- * navigation bar. Call this directly only when you need a NavHost
- * without the surrounding shell (tests, embedded surfaces).
+ * Most callers should use [GadgetApp] instead, which wraps this
+ * NavHost in a [androidx.compose.material3.Surface] alongside the
+ * vertical [GadgetNavRail]. Call this directly only when you need a
+ * NavHost without the surrounding shell (tests, embedded surfaces).
  */
 @Composable
 fun GadgetNavHost(
@@ -59,8 +59,8 @@ fun GadgetNavHost(
  * the back stack doesn't grow indefinitely from tab switching, and
  * restoring saved state when returning to a previously-visited tab.
  *
- * Used by [GadgetAppShell]'s bottom nav. Direct sub-route navigation
- * (e.g. dashboard → "/sensors/{id}") should call
+ * Used by [GadgetNavRail]'s item taps inside [GadgetApp]. Direct
+ * sub-route navigation (e.g. dashboard → "/sensors/{id}") should call
  * [androidx.navigation.NavController.navigate] directly, not this
  * helper — sub-routes belong on the back stack.
  */
