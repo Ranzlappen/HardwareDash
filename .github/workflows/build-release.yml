@@ -94,11 +94,16 @@ jobs:
             -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}" \
             ${{ matrix.extraGradleProps }}
 
+      # retention-days: 1 — the workflow artifact only needs to live long
+      # enough for the release job to attach it to the GitHub Release;
+      # the Release asset is the durable record. Minimises GitHub Actions
+      # storage quota usage.
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifactName }}-apk
           path: ${{ matrix.outputDir }}/*.apk
+          retention-days: 1
 
       # AGP names AAB outputs `app-{flavor}-{buildType}.aab` — the
       # `applicationVariants.all { variant.outputs ... }` rename in
@@ -121,6 +126,7 @@ jobs:
         with:
           name: ${{ matrix.artifactName }}-aab
           path: ${{ matrix.bundleDir }}/*.aab
+          retention-days: 1
 
   # ─── GitHub Release with all three signed artifacts ────────────────────
   # Tag suffix `-signed` keeps these releases distinct from the debug-APK

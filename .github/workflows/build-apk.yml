@@ -37,17 +37,17 @@ jobs:
       matrix:
         include:
           - flavor: standard
-            buildType: debug
+            buildType: release
             assembleTask: "assembleStandardDebug assembleStandardRelease"
             outputDir: app/build/outputs/apk/standard/debug
             releaseOutputDir: app/build/outputs/apk/standard/release
-            artifactName: standard-debug
+            artifactName: standard-release
           - flavor: rooted
-            buildType: debug
+            buildType: release
             assembleTask: "assembleRootedDebug assembleRootedRelease"
             outputDir: app/build/outputs/apk/rooted/debug
             releaseOutputDir: app/build/outputs/apk/rooted/release
-            artifactName: rooted-debug
+            artifactName: rooted-release
             extraGradleProps: "-PenableLsposedModule=true"
 
     steps:
@@ -73,14 +73,40 @@ jobs:
           echo "BUILD_AUTHOR=${{ github.actor }}" >> $GITHUB_ENV
           echo "APP_DESCRIPTION=Gadget — monitor and control device sensors, camera, audio, and more" >> $GITHUB_ENV
 
-      # AGP-managed debug keystore signs the debug APK; the release APK is
-      # built unsigned (no -Pandroid.injected.signing.* props). The release
-      # build runs solely to exercise R8 / minify*ReleaseWithR8 /
-      # shrinkReleaseRes on the same commit; its APK is not uploaded
-      # (build-release.yml produces the signed release artifacts).
-      - name: Build debug + release (${{ matrix.flavor }})
+      # Generate the AGP debug keystore up front so the release build can
+      # sign with it via -Pandroid.injected.signing.*. AGP would create
+      # ~/.android/debug.keystore lazily during assembleDebug, but Gradle
+      # doesn't guarantee task ordering inside one invocation — the
+      # release package task may evaluate signing config before
+      # debug-assemble has produced the keystore. Idempotent: skips if
+      # the file already exists (e.g. self-hosted runners).
+      - name: Ensure debug keystore exists (for release-signing in CI)
+        run: |
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            mkdir -p "$HOME/.android"
+            keytool -genkey -v \
+              -keystore "$HOME/.android/debug.keystore" \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      # Assemble both build types in one Gradle invocation (single config
+      # phase). The debug APK is built so the leak gate / libsu assertion
+      # can inspect a non-minified dex layout; only the release APK ships
+      # as the GitHub Release attachment. Release is signed with the AGP
+      # debug keystore — installable for sideload QA but explicitly NOT a
+      # production-signed artifact (use build-release.yml's manual
+      # workflow for production signing).
+      - name: Build debug + R8-minified release (${{ matrix.flavor }})
         run: |
           ./gradlew ${{ matrix.assembleTask }} \
+            -Pandroid.injected.signing.store.file=$HOME/.android/debug.keystore \
+            -Pandroid.injected.signing.store.password=android \
+            -Pandroid.injected.signing.key.alias=androiddebugkey \
+            -Pandroid.injected.signing.key.password=android \
             -PCI_VERSION_CODE=${{ env.VERSION_CODE }} \
             -PCI_VERSION_NAME=${{ env.VERSION_NAME }} \
             -PBUILD_AUTHOR="${{ env.BUILD_AUTHOR }}" \
@@ -205,13 +231,19 @@ jobs:
             || { echo "::error::Rooted APK missing libsu — rooted source set may be broken"; exit 1; }
           echo "✅ Rooted APK contains libsu signature"
 
-      - name: Upload APK artifact
+      # Upload only the R8-minified release APK — the debug APK exists on
+      # disk for the leak gate / libsu assertion but is intentionally not
+      # persisted. retention-days: 1 keeps the artifact only as long as
+      # the release job needs to attach it to the GitHub Release; the
+      # Release asset is the durable record.
+      - name: Upload R8-minified release APK
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifactName }}-apk
-          path: ${{ matrix.outputDir }}/*.apk
+          path: ${{ matrix.releaseOutputDir }}/*.apk
+          retention-days: 1
 
-  # ─── GitHub Release (debug APKs attached) ──────────────────────────────
+  # ─── GitHub Release (R8-minified release APKs attached) ───────────────
   release:
     needs: build
     runs-on: ubuntu-latest
@@ -228,7 +260,7 @@ jobs:
           echo "Artifact tree:"
           find artifacts/ -type f -printf '  %p (%s bytes)\n'
 
-      - name: Create GitHub Release with debug builds
+      - name: Create GitHub Release with R8-minified release builds
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
@@ -241,16 +273,18 @@ jobs:
 
             ## Downloads
 
-            Debug APKs for both flavors. For signed release artifacts, run
-            the **Build signed release (manual)** workflow.
+            R8-minified release APKs for both flavors, signed with the AGP
+            debug keystore so they install for sideload QA. For
+            production-signed APKs/AABs, dispatch the
+            **Build signed release (manual)** workflow.
 
-            - `Gadget-standard-v1.0.${{ github.run_number }}-debug.apk` — non-rooted **debug** build (Timber logs, Compose tooling).
-            - `Gadget-rooted-v1.0.${{ github.run_number }}-root-debug.apk` — **rooted** debug build. Requires Magisk / KernelSU / APatch.
+            - `Gadget-standard-v1.0.${{ github.run_number }}-release.apk` — non-rooted **release** build (R8-minified, debug-keystore-signed).
+            - `Gadget-rooted-v1.0.${{ github.run_number }}-release.apk` — **rooted** release build (R8-minified, debug-keystore-signed). Requires Magisk / KernelSU / APatch.
 
             Standard and rooted APKs install side-by-side (different applicationIds: `com.gadget` vs `com.gadget.root`).
           files: |
-            artifacts/standard-debug-apk/*.apk
-            artifacts/rooted-debug-apk/*.apk
+            artifacts/standard-release-apk/*.apk
+            artifacts/rooted-release-apk/*.apk
           draft: false
           prerelease: false
         env:
