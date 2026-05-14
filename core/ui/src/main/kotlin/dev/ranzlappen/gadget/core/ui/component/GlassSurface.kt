@@ -1,16 +1,21 @@
 package dev.ranzlappen.gadget.core.ui.component
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedTransparency
 import dev.ranzlappen.gadget.core.designsystem.glassSurface
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
  * Low-level glassmorphic container — the design-system primitive that
@@ -59,4 +64,22 @@ fun GlassSurface(
         modifier = interactiveModifier.padding(contentPadding),
         content = content,
     )
+}
+
+// ─── Previews ───────────────────────────────────────────────────────
+
+@GadgetPreviewLightDark
+@Composable
+private fun GlassSurfacePreview() = GadgetThemedPreview {
+    Column(verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+        GlassSurface(intensity = GlassIntensity.Subtle) {
+            Text("Subtle intensity — high opacity for content panels.")
+        }
+        GlassSurface(intensity = GlassIntensity.Standard) {
+            Text("Standard intensity — dashboard cards, settings tiles.")
+        }
+        GlassSurface(intensity = GlassIntensity.Vivid) {
+            Text("Vivid intensity — hero surfaces over a backdrop.")
+        }
+    }
 }

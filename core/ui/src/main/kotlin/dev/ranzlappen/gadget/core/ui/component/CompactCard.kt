@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BatteryFull
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +22,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
  * Horizontal glassy card optimised for list rows.
@@ -107,3 +112,35 @@ fun CompactCard(
 
 /** Fixed-size design token: leading icon graphic inside a CompactCard. */
 private val LeadingIconSize: Dp = 24.dp
+
+// ─── Previews ───────────────────────────────────────────────────────
+
+@GadgetPreviewLightDark
+@Composable
+private fun CompactCardPreview() = GadgetThemedPreview {
+    Column(verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+        CompactCard(
+            title = "Battery",
+            subtitle = "87% · charging · 1h 22m to full",
+            leadingIcon = Icons.Outlined.BatteryFull,
+        )
+        CompactCard(
+            title = "Wi-Fi",
+            subtitle = "Connected · −56 dBm",
+            leadingIcon = Icons.Outlined.BatteryFull,
+            trailingContent = {
+                Icon(
+                    imageVector = Icons.Outlined.ChevronRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(LeadingIconSize),
+                )
+            },
+            onClick = {},
+        )
+        CompactCard(
+            title = "A title with significantly longer copy than usual to exercise the truncation",
+            subtitle = "Long subtitle that also overflows so the layout doesn't grow vertically",
+            leadingIcon = Icons.Outlined.BatteryFull,
+        )
+    }
+}

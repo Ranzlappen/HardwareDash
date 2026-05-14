@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +37,9 @@ import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
  * Public-API defaults for Gadget button family.
@@ -386,6 +393,46 @@ private fun GlassyLabelledButton(
                     )
                 }
             }
+        }
+    }
+}
+
+// ─── Previews ───────────────────────────────────────────────────────
+
+@GadgetPreviewLightDark
+@GadgetPreviewLargeFont
+@Composable
+private fun GadgetButtonsPreview() = GadgetThemedPreview {
+    Column(verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+        GadgetPrimaryButton(onClick = {}, text = "Primary action")
+        GadgetSecondaryButton(onClick = {}, text = "Secondary")
+        GadgetTertiaryButton(onClick = {}, text = "Tertiary / Ghost")
+        GadgetPrimaryButton(
+            onClick = {},
+            text = "Disabled",
+            enabled = false,
+        )
+        GadgetPrimaryButton(
+            onClick = {},
+            text = "Loading",
+            loading = true,
+        )
+        GadgetPrimaryButton(
+            onClick = {},
+            text = "A label that runs longer than usual and exercises the singleLine ellipsis fallback",
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+            GadgetIconButton(
+                onClick = {},
+                icon = Icons.Outlined.Search,
+                contentDescription = "Search",
+            )
+            GadgetFab(
+                onClick = {},
+                icon = Icons.Outlined.Add,
+                contentDescription = "Add sensor",
+                text = "Add sensor",
+            )
         }
     }
 }
