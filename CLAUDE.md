@@ -387,16 +387,39 @@ fun CompactCard(
   `assertIsSelected` semantics automatically.
 
 #### `GadgetBadge` (`core/ui/component/StatusIndicators.kt`)
+```kotlin
+fun GadgetBadge(
+    modifier: Modifier = Modifier,
+    text: String? = null,
+    containerColor: Color = MaterialTheme.colorScheme.error,
+    contentColor: Color = MaterialTheme.colorScheme.onError,
+    stateDescriptionOverride: String? = null,
+)
+```
 - **When**: small counter ("3", "99+") or unread dot indicator
   anchored to another composable via `BadgedBox`.
-- **Notes**: `text = null` → dot variant; non-null → pill with the
-  text inside.
+- **Notes**: `text = null` → dot variant (decorative); non-null →
+  pill with the text inside. Text variant announces
+  `"$text unread"` to screen readers; override via
+  [stateDescriptionOverride] for a non-default semantic
+  (e.g. `"3 errors"`).
 
 #### `GadgetStatusDot` (`core/ui/component/StatusIndicators.kt`)
+```kotlin
+fun GadgetStatusDot(
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.primary,
+    size: Dp = StatusDotDefaultSize,
+)
+```
 - **When**: paired with a label for "● Online" / "● Offline"
   affordances.
 - **Notes**: 8 dp diameter default. Caller picks the colour-to-
-  semantic mapping.
+  semantic mapping. **`contentDescription` is required** —
+  passing `null` is acceptable only when a sibling labelled
+  composable (the `Text("Online")` next to the dot in a `Row`)
+  carries the accessible label.
 
 ### Loading
 
@@ -447,9 +470,15 @@ fun CompactCard(
 
 #### `ScreenHeader` / `SectionHeader` / `ModuleScreenScaffold`
 (`core/ui/component/*.kt` + `core/ui/ModuleScreenScaffold.kt`)
-- Standard layout primitives for feature screens. `ModuleScreenScaffold`
-  takes a primary content slot + an optional `secondaryPane` slot
-  rendered alongside when `rememberLayoutMode() ≥ TwoPane`.
+- Standard layout primitives for feature screens.
+- `ModuleScreenScaffold` takes a primary content shape (`title` +
+  `functional` + `permissions` + `disclaimer` slots) **plus** an
+  optional `secondaryPane` slot rendered to the right of the primary
+  column when `rememberLayoutMode() ≠ SinglePane`. On Compact
+  widths the secondary pane is omitted entirely — treat it as
+  supplementary content for wider screens, not something the
+  primary flow depends on. Primary takes `1.5f` weight on TwoPane
+  and `1f` on ThreePane (50/50 split).
 
 ---
 
@@ -465,7 +494,20 @@ Self-Driving Documentation** batch:
 - [x] **1.1.4** — Glass consistency for Secondary button
 - [x] **1.1.5** — Shimmer width polish (BoxWithConstraints-aware sweep)
 - [x] **1.1.6** — `@Preview` matrix expansion (RTL / LargeFont / SizeClasses)
-- [ ] **1.1.7** — Final status refresh + catalog verification
+- [x] **1.1.7** — Final status refresh + catalog verification
+
+**Batch 1.1 is shipped end-to-end.** Eight commits stacked on PR #88:
+
+| Sub-batch | Commit | One-line |
+|---|---|---|
+| 1.1.0 | `27a8d86` | `CLAUDE.md` SSOT foundation rewrite |
+| 1.1.1 | `3fcdef1` | Full `LocalGadgetTheme` wiring (closes #90) |
+| 1.1.2 | `e490b1e` | A11y semantics sweep |
+| 1.1.3 | `3585986` | `WindowSizeClass`-aware shell + `GadgetLayoutMode` |
+| 1.1.4 | `eb41adf` | Glass consistency for `GadgetSecondaryButton` |
+| 1.1.5 | `f4bc3da` | Shimmer `BoxWithConstraints`-aware width |
+| 1.1.6 | `01cd935` | Preview matrix expansion (RTL / LargeFont / SizeClasses) |
+| 1.1.7 | (this commit) | Catalog verification + status refresh |
 
 ### Preview matrix policy
 
