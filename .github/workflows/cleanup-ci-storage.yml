@@ -1,0 +1,221 @@
+name: Cleanup CI storage (manual, 2-mode)
+
+# Dispatchable cleanup with explicit audit-then-delete flow.
+#
+# Dispatch 1 — mode=audit (default, safe):
+#   Lists every workflow-run artifact and categorises every
+#   GitHub Release as KEEP (title contains [STABLE] OR tag in
+#   keep_tags) vs DELETE. Writes the lists to the Summary tab.
+#   No destructive action.
+#
+# Dispatch 2 — mode=delete (destructive, gated):
+#   Requires confirm=PURGE. Re-runs the audit, then deletes the
+#   flagged-DELETE entries. The audit step always runs first in
+#   the same workflow run, so the Summary shows "would delete X"
+#   immediately before the "deleted X" confirmation.
+#
+# git tags are NEVER touched. Only Release objects (notes + asset
+# attachments). Reattach later by creating a new Release pointing
+# at the same tag if needed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'audit = list only (safe); delete = audit then delete (destructive)'
+        type: choice
+        options:
+          - audit
+          - delete
+        default: audit
+      confirm:
+        description: '(delete mode only) Type the literal string PURGE to enable deletion.'
+        required: false
+        default: ''
+      include_artifacts:
+        description: 'Include workflow-run artifacts.'
+        type: boolean
+        default: true
+      include_releases:
+        description: 'Include un-flagged GitHub Releases.'
+        type: boolean
+        default: true
+      keep_tags:
+        description: 'Comma-separated tags to keep regardless of [STABLE] title marker (e.g. v1.0.1-signed,v1.0.84). Whitespace trimmed.'
+        required: false
+        default: ''
+
+permissions:
+  actions: write     # delete workflow artifacts
+  contents: write    # delete releases
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      # ─── Input validation ────────────────────────────────────────
+      - name: Validate inputs
+        run: |
+          set -euo pipefail
+          MODE="${{ inputs.mode }}"
+          CONFIRM="${{ inputs.confirm }}"
+          if [ "$MODE" = "delete" ] && [ "$CONFIRM" != "PURGE" ]; then
+            echo "::error::mode=delete requires the confirm input to equal PURGE; got '$CONFIRM'. Re-dispatch with mode=audit first to see what would be deleted, then with mode=delete + confirm=PURGE."
+            exit 1
+          fi
+          echo "Running mode=$MODE"
+          echo "  include_artifacts=${{ inputs.include_artifacts }}"
+          echo "  include_releases=${{ inputs.include_releases }}"
+
+      # ─── Audit — workflow-run artifacts ──────────────────────────
+      - name: Audit workflow-run artifacts
+        if: inputs.include_artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          : > "$RUNNER_TEMP/artifacts.tsv"
+          page=1
+          while :; do
+            resp=$(curl -sSf \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$REPO/actions/artifacts?per_page=100&page=$page")
+            count=$(echo "$resp" | jq '.artifacts | length')
+            [ "$count" -eq 0 ] && break
+            echo "$resp" | jq -r '.artifacts[] | "\(.id)\t\(.name)\t\(.size_in_bytes)\t\(.created_at)"' \
+              >> "$RUNNER_TEMP/artifacts.tsv"
+            page=$((page + 1))
+          done
+          n=$(wc -l < "$RUNNER_TEMP/artifacts.tsv")
+          total_b=$(awk -F'\t' '{sum += $3} END {print sum+0}' "$RUNNER_TEMP/artifacts.tsv")
+          total_mb=$((total_b / 1024 / 1024))
+          {
+            echo "## Workflow artifacts (audit)"
+            echo "**Found $n artifact(s), ~$total_mb MB total**"
+            echo ""
+            if [ "$n" -gt 0 ]; then
+              echo "| Name | Size (MB) | Created |"
+              echo "|---|---:|---|"
+              awk -F'\t' '{ mb = int($3/1024/1024); printf "| %s | %s | %s |\n", $2, mb, $4 }' \
+                "$RUNNER_TEMP/artifacts.tsv" | head -60
+              if [ "$n" -gt 60 ]; then
+                echo "| _(truncated; $((n - 60)) more)_ |  |  |"
+              fi
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # ─── Audit — GitHub Releases ─────────────────────────────────
+      - name: Audit GitHub Releases
+        if: inputs.include_releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          KEEP_TAGS_RAW: ${{ inputs.keep_tags }}
+        run: |
+          set -euo pipefail
+
+          # Normalise the keep_tags allowlist.
+          KEEP_FILE="$RUNNER_TEMP/keep.txt"
+          echo "$KEEP_TAGS_RAW" \
+            | tr ',' '\n' \
+            | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+            | grep -v '^$' \
+            > "$KEEP_FILE" || true
+
+          : > "$RUNNER_TEMP/releases-delete.tsv"
+          : > "$RUNNER_TEMP/releases-keep.tsv"
+          page=1
+          while :; do
+            resp=$(curl -sSf \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$REPO/releases?per_page=100&page=$page")
+            count=$(echo "$resp" | jq 'length')
+            [ "$count" -eq 0 ] && break
+            while IFS=$'\t' read -r rid tag title; do
+              title_lower=$(echo "$title" | tr '[:upper:]' '[:lower:]')
+              if [[ "$title_lower" == *"[stable]"* ]]; then
+                printf '%s\t%s\t%s\t[STABLE] title\n' "$rid" "$tag" "$title" \
+                  >> "$RUNNER_TEMP/releases-keep.tsv"
+              elif grep -Fxq -- "$tag" "$KEEP_FILE"; then
+                printf '%s\t%s\t%s\tallowlist\n' "$rid" "$tag" "$title" \
+                  >> "$RUNNER_TEMP/releases-keep.tsv"
+              else
+                printf '%s\t%s\t%s\n' "$rid" "$tag" "$title" \
+                  >> "$RUNNER_TEMP/releases-delete.tsv"
+              fi
+            done < <(echo "$resp" | jq -r '.[] | "\(.id)\t\(.tag_name)\t\(.name // .tag_name)"')
+            page=$((page + 1))
+          done
+
+          n_delete=$(wc -l < "$RUNNER_TEMP/releases-delete.tsv")
+          n_keep=$(wc -l < "$RUNNER_TEMP/releases-keep.tsv")
+          {
+            echo ""
+            echo "## GitHub Releases (audit)"
+            echo "**Would delete $n_delete | Would keep $n_keep**"
+            echo ""
+            if [ "$n_keep" -gt 0 ]; then
+              echo "### Keep"
+              echo "| Tag | Title | Reason |"
+              echo "|---|---|---|"
+              awk -F'\t' '{ printf "| `%s` | _%s_ | %s |\n", $2, $3, $4 }' \
+                "$RUNNER_TEMP/releases-keep.tsv"
+              echo ""
+            fi
+            if [ "$n_delete" -gt 0 ]; then
+              echo "### Delete (mode=delete will purge these)"
+              echo "| Tag | Title |"
+              echo "|---|---|"
+              awk -F'\t' '{ printf "| `%s` | _%s_ |\n", $2, $3 }' \
+                "$RUNNER_TEMP/releases-delete.tsv"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # ─── Delete — workflow-run artifacts (mode=delete only) ──────
+      - name: Delete workflow-run artifacts
+        if: inputs.mode == 'delete' && inputs.include_artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          deleted=0
+          while IFS=$'\t' read -r aid _ _ _; do
+            [ -z "$aid" ] && continue
+            curl -sSf -X DELETE \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$REPO/actions/artifacts/$aid"
+            deleted=$((deleted + 1))
+          done < "$RUNNER_TEMP/artifacts.tsv"
+          {
+            echo ""
+            echo "## Workflow artifacts (delete)"
+            echo "**Deleted $deleted artifact(s).**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # ─── Delete — un-flagged Releases (mode=delete only) ─────────
+      - name: Delete un-flagged GitHub Releases
+        if: inputs.mode == 'delete' && inputs.include_releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          deleted=0
+          while IFS=$'\t' read -r rid tag _; do
+            [ -z "$rid" ] && continue
+            curl -sSf -X DELETE \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$REPO/releases/$rid"
+            deleted=$((deleted + 1))
+          done < "$RUNNER_TEMP/releases-delete.tsv"
+          {
+            echo ""
+            echo "## GitHub Releases (delete)"
+            echo "**Deleted $deleted Release(s). Git tags preserved.**"
+          } >> "$GITHUB_STEP_SUMMARY"
