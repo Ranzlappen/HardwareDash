@@ -1,14 +1,14 @@
 package dev.ranzlappen.gadget.core.datastore
 
-import androidx.compose.runtime.Immutable
-
 /**
  * Strongly-typed user preferences surface backed by DataStore.
  *
- * `@Immutable` so Compose can skip recompositions when the value
- * is structurally unchanged. Default constructor values represent
- * the canonical first-launch state: dark-first, dynamic colour on,
- * no a11y overrides.
+ * Default constructor values represent the canonical first-launch
+ * state: dark-first, dynamic colour on, no a11y overrides. Compose
+ * treats this data class as stable (all fields are themselves
+ * stable primitives or enums), so no `@Immutable` annotation is
+ * needed — and `:core:datastore` deliberately doesn't pull in a
+ * Compose dependency.
  *
  * Phase 2 / Batch 1 introduces only the slots required by the
  * Settings v1 screen (Appearance + Accessibility sections). Future
@@ -17,7 +17,6 @@ import androidx.compose.runtime.Immutable
  * + a getter/setter in [UserPreferencesRepository] is the full
  * recipe.
  */
-@Immutable
 data class UserPreferences(
     val darkThemeMode: DarkThemeMode = DarkThemeMode.FollowSystem,
     val dynamicColor: Boolean = true,
@@ -46,7 +45,6 @@ data class UserPreferences(
  * [Light] / [Dark] overrides force the theme regardless of the
  * system setting.
  */
-@Immutable
 enum class DarkThemeMode {
     Light,
     Dark,
@@ -60,7 +58,6 @@ enum class DarkThemeMode {
  * derived from `Settings.Global.ANIMATOR_DURATION_SCALE`; explicit
  * [On] / [Off] forces the override regardless.
  */
-@Immutable
 enum class TriStatePreference {
     On,
     Off,
