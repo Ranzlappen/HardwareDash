@@ -1,7 +1,10 @@
 package dev.ranzlappen.gadget.core.navigation
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -53,7 +56,19 @@ fun GadgetApp(
             modifier = modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,
         ) {
-            Row(modifier = Modifier.fillMaxSize()) {
+            // Row pads in from status bar / nav bar / display cutout so
+            // the rail icons and the host content sit clear of the
+            // (transparent, edge-to-edge) system bars. windowInsetsPadding
+            // CONSUMES the insets it applies, so the downstream M3
+            // NavigationRail's default windowInsets sees 0 and doesn't
+            // re-pad — no double padding in landscape / 3-button-nav.
+            // The outer Surface stays full-bleed so the theme background
+            // colour paints behind the transparent bars.
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.safeDrawing),
+            ) {
                 GadgetNavRail(
                     navController = navController,
                     destinations = GadgetDestination.topLevel,

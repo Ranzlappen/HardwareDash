@@ -57,7 +57,10 @@ fun ModuleScreenScaffold(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(scroll)
-            .padding(GadgetSpacing.Medium),
+            .padding(
+                horizontal = GadgetSpacing.Medium,
+                vertical = GadgetSpacing.Large,
+            ),
         verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Large),
     ) {
         if (title != null) {
