@@ -10,6 +10,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
+import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
+import dev.ranzlappen.gadget.core.designsystem.a11y.rememberSystemReducedMotion
 
 /**
  * Top-level Gadget Material 3 theme.
@@ -64,8 +66,12 @@ fun GadgetTheme(
         shapes = GadgetShapes,
         identifier = GadgetCustomTheme.Default,
     )
+    val reducedMotion = rememberSystemReducedMotion()
 
-    CompositionLocalProvider(LocalGadgetTheme provides themeData) {
+    CompositionLocalProvider(
+        LocalGadgetTheme provides themeData,
+        LocalReducedMotion provides reducedMotion,
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = GadgetTypography,
