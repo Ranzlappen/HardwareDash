@@ -13,28 +13,40 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /**
  * Home-screen flashlight widget — 1×1 cell, single ImageButton.
  *
  * Lifecycle: [AppWidgetProvider] is a [android.content.BroadcastReceiver]
  * under the hood — Android instantiates a fresh instance for each
- * broadcast, so there's no per-instance state to keep. We reach
- * the singleton [TorchController] via [EntryPointAccessors] (same
- * recipe as the QS tile).
+ * broadcast, so there's no per-instance state to keep. We reach the
+ * singleton [TorchController] + [TorchWidgetConfigRepository] via
+ * [EntryPointAccessors] (same recipe as the QS tile).
  *
  * Click flow:
  *   1. User taps the button on the home screen.
  *   2. Launcher fires the [PendingIntent] we attached in [onUpdate],
  *      delivering an [Intent] with action [ACTION_FLASHLIGHT_TOGGLE]
  *      to this receiver.
- *   3. [onReceive] catches the action, runs `controller.toggle()`
- *      on a one-shot `Dispatchers.Main` scope (toggling is a single
- *      Camera2 call — finishes in microseconds, safe to fire and
- *      forget).
- *   4. After toggling, schedule a widget update so the icon can
- *      reflect future state. (We don't visually swap the icon for
- *      on vs off yet; that's a Phase-2 follow-up batch.)
+ *   3. [onReceive] catches the action, runs `controller.toggle()` —
+ *      a single Camera2 call, microsecond-fast.
+ *   4. We then schedule an immediate self-update so the icon flips
+ *      to reflect the new state.
+ *
+ * Per-instance config: each widget owns a [TorchWidgetConfig] entry
+ * in [TorchWidgetConfigRepository] keyed by its `appWidgetId`. The
+ * Flashlight variant doesn't currently surface configurable fields
+ * in the in-app UI, but the load path is in place so future config-
+ * driven Flashlight features (auto-off timer, brightness — issue
+ * https://github.com/Ranzlappen/HardwareDash/issues/95) land without
+ * disturbing the persistence shape.
+ *
+ * [onDeleted] purges the corresponding config so dragging the widget
+ * off the home screen doesn't leak a record into the repository.
  */
 class FlashlightWidgetProvider : AppWidgetProvider() {
 
@@ -43,8 +55,10 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
+        val controller = entry(context).torchController()
+        val isOn = controller.state.value.isOn
         appWidgetIds.forEach { id ->
-            appWidgetManager.updateAppWidget(id, buildRemoteViews(context))
+            appWidgetManager.updateAppWidget(id, buildRemoteViews(context, isOn))
         }
     }
 
@@ -55,35 +69,60 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
         // updates the shared TorchState so other surfaces (screen +
         // tile) react immediately. toggle() is non-suspend; finishes
         // before this broadcast handler returns.
-        EntryPointAccessors
-            .fromApplication(context.applicationContext, FlashlightWidgetEntryPoint::class.java)
-            .torchController()
-            .toggle()
+        val controller = entry(context).torchController()
+        controller.toggle()
+        // Refresh every flashlight widget instance so the icon
+        // flips immediately. Cheap — RemoteViews binding is the
+        // only IPC.
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        val componentName = ComponentName(context, FlashlightWidgetProvider::class.java)
+        val ids = appWidgetManager.getAppWidgetIds(componentName)
+        if (ids.isNotEmpty()) onUpdate(context, appWidgetManager, ids)
+    }
+
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        // Async purge — runs after onReceive returns so the OS's
+        // 10-second receiver budget isn't a concern.
+        val repo = entry(context).widgetRepository()
+        val purgeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        purgeScope.launch {
+            appWidgetIds.forEach { repo.delete(it) }
+        }
     }
 
     /**
-     * Build the [RemoteViews] for one widget instance. Same view
-     * for every instance — the click pending-intent is the only
-     * variable (and even that's identical across instances because
-     * the action is a singleton broadcast).
+     * Build the [RemoteViews] for one widget instance. The state-
+     * sensitive bit is the icon resource: `ic_flashlight_on` when
+     * the torch is currently on, `ic_flashlight_off` otherwise.
      */
-    private fun buildRemoteViews(context: Context): RemoteViews =
+    private fun buildRemoteViews(context: Context, torchOn: Boolean): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_flashlight).apply {
+            setImageViewResource(
+                R.id.widget_flashlight_button,
+                if (torchOn) R.drawable.ic_flashlight_on else R.drawable.ic_flashlight_off,
+            )
             setOnClickPendingIntent(
                 R.id.widget_flashlight_button,
                 togglePendingIntent(context),
             )
         }
 
+    private fun entry(context: Context): FlashlightWidgetEntryPoint =
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            FlashlightWidgetEntryPoint::class.java,
+        )
+
     /**
      * Hilt entry point — gives a system-instantiated BroadcastReceiver
-     * access to the singleton [TorchController] without
-     * `@AndroidEntryPoint`.
+     * access to the singletons without `@AndroidEntryPoint`.
      */
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface FlashlightWidgetEntryPoint {
         fun torchController(): TorchController
+        fun widgetRepository(): TorchWidgetConfigRepository
     }
 
     companion object {

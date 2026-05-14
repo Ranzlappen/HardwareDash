@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
+import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -21,27 +22,42 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 /**
- * Foreground service that loops `TorchController.setOn(true/false)`
- * at a fixed 5 Hz cadence (100 ms on, 100 ms off) until told to
- * stop.
+ * Foreground service that strobes the torch at a configurable rate.
+ *
+ * Per-tap configuration arrives via Intent extras when the strobe
+ * widget starts the service:
+ * - [EXTRA_RATE_HZ] — strobe rate in Hz (clamped to
+ *   `TorchWidgetConfig.MIN_RATE_HZ..MAX_RATE_HZ`). Defaults to
+ *   `TorchWidgetConfig.DEFAULT_RATE_HZ` if absent.
+ * - [EXTRA_SOS_MODE] — boolean flag for SOS pattern playback. The
+ *   flag is plumbed through end-to-end but the SOS pattern logic
+ *   itself is deferred — today this value is read but the loop
+ *   still emits a constant strobe regardless. Tracked at
+ *   https://github.com/Ranzlappen/HardwareDash/issues/96.
+ *
+ * Lifecycle:
+ * - [isRunning] companion-level flag flips `true` once the
+ *   foreground notification has been posted, and `false` in
+ *   [stopStrobing] / [onDestroy]. [StrobeWidgetProvider] reads it
+ *   to decide whether a widget tap starts a new run or stops the
+ *   existing one. The flag is a heuristic — if the OS kills the
+ *   service without notifying us, the flag stays stale until the
+ *   next user tap, which goes through `startForegroundService` →
+ *   `onStartCommand` and re-syncs.
  *
  * Foreground-service contract:
  * - `foregroundServiceType="camera"` in the manifest so the OS
  *   permits flash access while in foreground state on API 34+.
  * - Posts a notification on a dedicated low-importance channel so
  *   the OS shows it without a sound / vibration interruption.
- * - The notification's only action is "tap the widget to stop" —
- *   we deliberately don't add a "stop" action button to keep the
- *   widget the canonical control surface (one toggle, one tap).
- *
- * Strobe rate is fixed for Phase 2 / Batch 1. Configurable rate is
- * a follow-up batch (needs a settings section + persistence).
  *
  * Strobe runs on a dedicated `Dispatchers.Default` coroutine so the
- * 100 ms `delay` doesn't stall the main thread. The torch
- * controller's `setOn` is thread-safe (Camera2 binder calls).
+ * `delay` calls don't stall the main thread. The torch controller's
+ * `setOn` is thread-safe (Camera2 binder calls).
  */
 @AndroidEntryPoint
 class StrobeService : Service() {
@@ -62,7 +78,17 @@ class StrobeService : Service() {
                 stopSelf()
                 return START_NOT_STICKY
             }
-            else -> startStrobing()
+            else -> {
+                val rateHz = (intent?.getFloatExtra(EXTRA_RATE_HZ, TorchWidgetConfig.DEFAULT_RATE_HZ)
+                    ?: TorchWidgetConfig.DEFAULT_RATE_HZ)
+                    .coerceIn(TorchWidgetConfig.MIN_RATE_HZ, TorchWidgetConfig.MAX_RATE_HZ)
+                @Suppress("UNUSED_VARIABLE")
+                val sosMode = intent?.getBooleanExtra(EXTRA_SOS_MODE, false) ?: false
+                // sosMode is plumbed but its playback pattern is
+                // deferred — see issue #96. Today the constant
+                // strobe runs at `rateHz` regardless of the flag.
+                startStrobing(rateHz)
+            }
         }
         return START_STICKY
     }
@@ -80,17 +106,21 @@ class StrobeService : Service() {
         super.onDestroy()
     }
 
-    private fun startStrobing() {
+    private fun startStrobing(rateHz: Float) {
         promoteToForeground()
+        // Re-tap while running = no-op (the running loop already
+        // honours the current rate; future "edit a live strobe"
+        // UX can replace the loop without stopping by cancelling
+        // the existing strobeLoop and relaunching).
         if (strobeLoop?.isActive == true) return
+        isRunning = true
+        val halfPeriodMs = halfPeriodMillis(rateHz)
         strobeLoop = serviceScope.launch {
-            // Coroutine guard — `while (isActive)` would also work
-            // but the explicit cancellation path is clearer.
             var on = false
             while (true) {
                 on = !on
                 torchController.setOn(on)
-                delay(STROBE_HALF_PERIOD_MS)
+                delay(halfPeriodMs)
             }
         }
     }
@@ -100,6 +130,7 @@ class StrobeService : Service() {
         strobeLoop = null
         // Final off — synchronous, no coroutine needed.
         torchController.setOn(false)
+        isRunning = false
     }
 
     private fun promoteToForeground() {
@@ -144,14 +175,48 @@ class StrobeService : Service() {
         /** Sticky notification ID for the foreground promotion. */
         const val NOTIFICATION_ID = 0x57_4F_5F_53 // "WO_S" ascii prefix; unique inside this app.
 
-        /**
-         * Half-period of the strobe in milliseconds. 100 ms on + 100
-         * ms off = 5 Hz, well below the Camera2 rate-limit cliff on
-         * most OEMs (most rate-limit around 8–10 Hz).
-         */
-        const val STROBE_HALF_PERIOD_MS = 100L
-
         /** Intent action: stop the strobe + foreground service. */
         const val ACTION_STOP = "dev.ranzlappen.gadget.feature.torch.STROBE_STOP"
+
+        /** Float extra (Hz) carrying the strobe rate from the
+         *  widget's stored config. Read in [onStartCommand]. */
+        const val EXTRA_RATE_HZ = "dev.ranzlappen.gadget.feature.torch.EXTRA_RATE_HZ"
+
+        /** Boolean extra carrying the SOS toggle. Plumbed but the
+         *  pattern logic is deferred — see issue #96. */
+        const val EXTRA_SOS_MODE = "dev.ranzlappen.gadget.feature.torch.EXTRA_SOS_MODE"
+
+        /**
+         * Heuristic flag indicating whether a strobe loop is
+         * currently running.
+         *
+         * Set `true` once the foreground notification is posted and
+         * the loop launches; set `false` in [stopStrobing] /
+         * [onDestroy]. Read by [dev.ranzlappen.gadget.feature.torch.widget.StrobeWidgetProvider]
+         * to branch between "start" and "stop" intents on a widget
+         * tap.
+         *
+         * `@Volatile` so cross-thread reads from the widget
+         * provider's `onReceive` (broadcast receiver thread) see
+         * the most recent write from the service.
+         */
+        @Volatile
+        var isRunning: Boolean = false
+            private set
+
+        /**
+         * Compute the half-period (ms) for a given Hz value. A
+         * full strobe cycle is one ON half + one OFF half, so the
+         * service `delay(halfPeriodMs)` between flips:
+         * `halfPeriodMs = 500 / rateHz` (rounded).
+         *
+         * Clamped to at least 25 ms to avoid the OEM camera-rate
+         * cliff at very high Hz; the widget UI caps at 20 Hz so
+         * this is mostly defensive.
+         */
+        internal fun halfPeriodMillis(rateHz: Float): Long {
+            val clamped = max(TorchWidgetConfig.MIN_RATE_HZ, min(rateHz, TorchWidgetConfig.MAX_RATE_HZ))
+            return (500f / clamped).toLong().coerceAtLeast(25L)
+        }
     }
 }

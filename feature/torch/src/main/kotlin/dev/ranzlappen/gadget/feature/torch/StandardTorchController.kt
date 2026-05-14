@@ -31,8 +31,9 @@ import javax.inject.Singleton
  * `@Singleton` instances live for the process.
  *
  * Rooted-flavor extras (DutyCycleStrobe / MultiLed / Thermal
- * override) will arrive as a separate `@Binds` from the rooted
- * source set when the RootCapabilityRegistry is ported.
+ * override) ship in a sibling `:feature:torch-rooted` module
+ * after `RootCapabilityRegistry` + `RootSafetyGate` port — see
+ * https://github.com/Ranzlappen/HardwareDash/issues/94.
  */
 @Singleton
 class StandardTorchController @Inject constructor(

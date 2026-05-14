@@ -110,16 +110,16 @@ feature can be tested.
 ### Step 4 — Build the controller / repository layer first
 
 Land the non-UI domain code **before** writing any Compose. This
-gives you a `state: StateFlow<...>` and `suspend fun` setters
-that the UI can consume.
+gives you a `state: StateFlow<...>` and setters that the UI can
+consume.
 
 **Pattern** (extracted from Torch):
 
 ```kotlin
 interface TorchController {
     val state: StateFlow<TorchState>
-    suspend fun toggle()
-    suspend fun setOn(on: Boolean)
+    fun toggle()
+    fun setOn(on: Boolean)
 }
 
 @Immutable data class TorchState(
@@ -130,13 +130,21 @@ interface TorchController {
 
 @Singleton
 class StandardTorchController @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @ApplicationContext context: Context,
 ) : TorchController {
     private val _state = MutableStateFlow(TorchState())
     override val state = _state.asStateFlow()
     // ... Camera2 implementation ...
 }
 ```
+
+Decide `suspend` vs. non-suspend based on the **underlying call**.
+Torch's setters wrap synchronous Camera2 binder calls that finish
+in microseconds, so they're non-suspend — the screen + tile + widget
++ service all hit them directly without coroutine ceremony. A
+controller wrapping a long-running network or disk operation
+should expose `suspend` setters and let consumers launch into their
+own scopes.
 
 Provide via a Hilt module:
 
@@ -169,7 +177,10 @@ Compose every public-facing screen using:
 - All text wrappers default to `singleLine = true` +
   `TextOverflow.Ellipsis` — opt-in to multi-line via flag.
 
-Hoist state into a `@HiltViewModel`:
+Hoist state into a `@HiltViewModel`. For a controller with
+non-suspend setters the click handlers are direct passthroughs —
+no `viewModelScope.launch` needed unless the handler also needs
+to write to a `suspend` repository:
 
 ```kotlin
 @HiltViewModel
@@ -178,22 +189,38 @@ class TorchViewModel @Inject constructor(
 ) : ViewModel() {
     val state: StateFlow<TorchState> = controller.state
     fun onToggleClick() {
-        viewModelScope.launch { controller.toggle() }
+        controller.toggle()
     }
 }
 ```
 
-Then in the screen:
+Decompose the screen into a stateful Hilt-wrapped entry point
+(`TorchScreen`) plus a stateless inner composable
+(`TorchScreenContent`). The split keeps the inner content
+exercisable in instrumented tests without standing up Hilt or
+the real controller:
 
 ```kotlin
 @Composable
 fun TorchScreen(
-    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TorchViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    // ... screen layout ...
+    TorchScreenContent(
+        state = state,
+        onToggleClick = viewModel::onToggleClick,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun TorchScreenContent(
+    state: TorchScreenState,
+    onToggleClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // ... pure declarative layout ...
 }
 ```
 
@@ -217,9 +244,9 @@ dashboard or actuator list.
 Provide a `NavGraphBuilder` extension in the feature module:
 
 ```kotlin
-fun NavGraphBuilder.torchScreen(onBack: () -> Unit) {
+fun NavGraphBuilder.torchScreen() {
     composable(route = GadgetDestination.Torch.route) {
-        TorchScreen(onBack = onBack)
+        TorchScreen()
     }
 }
 ```
@@ -229,10 +256,15 @@ Wire from `MainActivity.setContent { GadgetApp { … } }`:
 ```kotlin
 GadgetApp {
     dashboardScreen(onNavigate = navController::navigateTopLevel)
-    torchScreen(onBack = navController::popBackStack)
+    torchScreen()
     // placeholderScreen(...) for the rest
 }
 ```
+
+If a screen does need a back-navigation callback (most don't —
+the nav rail handles it for top-level destinations), add an
+`onBack: () -> Unit` parameter and thread it through. Don't add
+it speculatively.
 
 Don't forget `implementation(project(":feature:torch"))` in the
 **app** module's `build.gradle.kts`.
@@ -261,20 +293,144 @@ duplicate state.
 
 ### Step 8 — Add tests using `:core:testing`
 
-Once the feature compiles, add instrumented tests under
-`feature/<name>/src/androidTest/`:
+Once the feature compiles, add tests under both source sets:
 
-- `androidTestImplementation(project(":core:testing"))` in the
-  module's `build.gradle.kts`.
-- Wrap test content in `GadgetTestTheme { … }` from
-  `:core:testing`.
-- Mock the controller via Hilt test rules or inject a fake.
-- Test the contracts the legacy implementation had (click toggles
-  state, disabled state suppresses click, etc.).
+JVM tests (`src/test/`) for pure logic — strobe-rate maths,
+@Serializable round-trips, in-memory data structures.
+Dependencies (already wired by the feature convention plugin):
 
-For Phase 2 / Batch 1, tests are queued as a follow-up batch
-once the basic vertical slice is verified manually — landing
-working code first, then locking it in with tests.
+```kotlin
+testImplementation(libs.junit)
+testImplementation(libs.mockk)
+testImplementation(libs.turbine)
+testImplementation(libs.kotlinx.coroutines.test)
+```
+
+Instrumented tests (`src/androidTest/`) for Compose surfaces.
+Wrap content in `GadgetTestTheme { … }` from `:core:testing`:
+
+```kotlin
+androidTestImplementation(project(":core:testing"))
+androidTestImplementation(libs.androidx.junit)
+```
+
+Decompose the screen into a stateful `<Feature>Screen` (Hilt-wrapped
+entry point) plus a stateless `<Feature>ScreenContent` so the
+inner composable is testable without Hilt or the real controller.
+Inject a curated view-state into `<Feature>ScreenContent` and
+assert that the rendered text + control state match.
+
+Instrumented tests don't run on PR CI yet — see issue
+[#92](https://github.com/Ranzlappen/HardwareDash/issues/92). The
+tests are still worth checking in: they run locally with
+`./gradlew :feature:<name>:connectedDebugAndroidTest` against a
+local emulator and will run automatically once the CI workflow
+ships.
+
+---
+
+## Persistence patterns
+
+`:core:datastore` exposes two distinct surfaces. Pick the right
+one for the data you're persisting.
+
+### App-wide singletons → `UserPreferences` / `UserPreferencesRepository`
+
+For settings that have **one** value across the whole app — theme,
+accessibility toggles, default-strobe-rate slider — add a field to
+[`UserPreferences`](../core/datastore/src/main/kotlin/dev/ranzlappen/gadget/core/datastore/UserPreferences.kt)
+and a setter on
+[`UserPreferencesRepository`](../core/datastore/src/main/kotlin/dev/ranzlappen/gadget/core/datastore/UserPreferencesRepository.kt).
+This is a four-line change:
+
+1. Add a field + default to `UserPreferences`.
+2. Add a key constant to `UserPreferencesKeys`.
+3. Map the new key in `readFrom`.
+4. Add the corresponding `suspend fun set…(…)`.
+
+### Per-feature collections → `FeaturePreferences<T>`
+
+For features that need to persist a small **collection** of
+structured records keyed by an integer (AppWidget IDs, sensor
+IDs, etc.), use
+[`FeaturePreferences<T>`](../core/datastore/src/main/kotlin/dev/ranzlappen/gadget/core/datastore/FeaturePreferences.kt).
+Each feature gets its own Preferences DataStore file backing a
+`Map<Int, T>` with JSON-encoded values.
+
+The factory is Hilt-provided; consume it from your feature's own
+Hilt module:
+
+```kotlin
+@Module @InstallIn(SingletonComponent::class)
+object VibrationDataModule {
+    @Provides @Singleton
+    fun provideVibrationPatterns(factory: FeaturePreferencesFactory) =
+        factory.create(
+            fileName = "vibration_patterns",
+            keyPrefix = "pattern_",
+            serializer = VibrationPattern.serializer(),
+        )
+}
+```
+
+Then inject the typed `FeaturePreferences<VibrationPattern>` into
+your repository class and wrap its `all` / `save` / `delete`
+surface in a feature-typed API.
+
+**Worked example (Torch widgets, Phase 2 / Batch 1.1)**:
+[`TorchWidgetConfigRepository`](../feature/torch/src/main/kotlin/dev/ranzlappen/gadget/feature/torch/widget/TorchWidgetConfigRepository.kt)
+wraps `FeaturePreferences<TorchWidgetConfig>` keyed by
+`appWidgetId`. Save happens when the user pins a widget; delete
+fires from `AppWidgetProvider.onDeleted`.
+
+**When to escalate to Room**: only when you need real query
+expressiveness (multi-field filtering, foreign keys, indexed
+range scans). A small collection of structured records is
+better served by `FeaturePreferences<T>` — simpler, no schema
+migrations, and consistent across the codebase.
+
+---
+
+## Dynamic widget creation
+
+Modern launchers support
+[`AppWidgetManager.requestPinAppWidget`](https://developer.android.com/reference/android/appwidget/AppWidgetManager#requestPinAppWidget(android.content.ComponentName,%20android.os.Bundle,%20android.app.PendingIntent))
+(API 26+) — apps can request the launcher to pin a widget directly
+from inside an in-app flow. Useful when a widget needs per-instance
+configuration (rate, theme, source identifier) that the user
+specifies before the widget appears on the home screen.
+
+The pin API returns the newly-assigned `appWidgetId` **after** the
+user accepts the launcher's pin dialog, via a caller-supplied
+success
+[`PendingIntent`](https://developer.android.com/reference/android/app/PendingIntent).
+The Torch feature's pattern (which any future feature can mirror):
+
+1. **In-app UI** calls a per-feature `<Feature>WidgetCreator`
+   (singleton) with the desired `<Feature>WidgetConfig`.
+2. **Creator** stashes the config in an in-memory
+   `Pending<Feature>WidgetConfigs` singleton, receives back a
+   stable token, and calls `requestPinAppWidget(...)` with a
+   success `PendingIntent` carrying the token.
+3. **User** accepts the launcher's pin dialog.
+4. **OS** fires the success `PendingIntent`, which routes into a
+   manifest-declared `BroadcastReceiver` (e.g.
+   [`WidgetPinSuccessReceiver`](../feature/torch/src/main/kotlin/dev/ranzlappen/gadget/feature/torch/widget/WidgetPinSuccessReceiver.kt)).
+5. **Receiver** claims the pending config by token, persists it
+   to the feature's `FeaturePreferences`-backed repository keyed
+   by the new `appWidgetId`, then broadcasts
+   `ACTION_APPWIDGET_UPDATE` so the widget renders with its
+   config immediately.
+
+Reverse path: `AppWidgetProvider.onDeleted` is the canonical
+"widget left the home screen" signal — purge the config there
+to keep the repository tidy.
+
+For older launchers without pin support
+(`isRequestPinAppWidgetSupported() == false`), surface a
+fallback message ("long-press the home screen to add a widget").
+Don't pop a chooser; users on those launchers know the manual
+flow.
 
 ---
 
@@ -337,21 +493,28 @@ inherit:
 
 ## Worked example: Torch / Flashlight (Phase 2 / Batch 1)
 
-A complete walkthrough is preserved in the Phase 2 / Batch 1
-commit on `claude/refactor-2026`. Key artefacts to study when
-doing the next migration:
+A complete walkthrough is preserved across the Phase 2 / Batch 1
+and Batch 1.1 commits on `claude/refactor-2026`. Key artefacts to
+study when doing the next migration:
 
 | File | Why study it |
 |---|---|
-| `feature/torch/.../TorchController.kt` | Interface shape — `StateFlow<TorchState>` + suspend setters. |
+| `feature/torch/.../TorchController.kt` | Interface shape — `StateFlow<TorchState>` + non-suspend setters wrapping fast binder calls. |
 | `feature/torch/.../StandardTorchController.kt` | Hilt-injected implementation with Camera2 + `TorchCallback`. |
-| `feature/torch/.../TorchScreen.kt` | Big-FAB layout using `ModuleScreenScaffold` + `GadgetFab`. |
-| `feature/torch/.../TorchViewModel.kt` | Passthrough VM — controller state in, click in, suspend out. |
-| `feature/torch/.../TorchNavigation.kt` | `NavGraphBuilder.torchScreen(...)` registration. |
+| `feature/torch/.../TorchScreen.kt` | Thin Hilt-wrapped entry point — observes flows, owns the sheet visibility, delegates rendering to `TorchScreenContent`. |
+| `feature/torch/.../TorchScreenContent.kt` | Stateless screen — three `DashCard` sections (toggle / strobe defaults / widgets list). Testable without Hilt. |
+| `feature/torch/.../TorchViewModel.kt` | `combine(...)` over three flows into a single `TorchScreenState`; debounced rate-slider commit; sheet-target state. |
+| `feature/torch/.../TorchNavigation.kt` | `NavGraphBuilder.torchScreen()` registration — no `onBack` because Torch isn't a sub-route. |
 | `feature/torch/.../tile/FlashlightTileService.kt` | `EntryPointAccessors.fromApplication(...)` pattern for non-Hilt components. |
-| `feature/torch/.../widget/FlashlightWidgetProvider.kt` | `AppWidgetProvider` reaching the singleton controller via Hilt entry-point. |
-| `feature/torch/.../strobe/StrobeService.kt` | Foreground service with `FOREGROUND_SERVICE_CAMERA` type. |
-| `feature/torch/src/main/AndroidManifest.xml` | All entry-point declarations co-located in the feature module. |
+| `feature/torch/.../widget/FlashlightWidgetProvider.kt` | `AppWidgetProvider` with config-aware `onUpdate` + icon-state feedback + `onDeleted` config purge. |
+| `feature/torch/.../widget/StrobeWidgetProvider.kt` | Same shape; additionally forwards per-instance `rateHz` + `sosMode` to the service via Intent extras. |
+| `feature/torch/.../widget/TorchWidgetCreator.kt` | `AppWidgetManager.requestPinAppWidget` flow with the in-memory pending-config bridge. |
+| `feature/torch/.../widget/WidgetPinSuccessReceiver.kt` | `goAsync()`-based receiver that claims the pending config and saves it to the repository. |
+| `feature/torch/.../widget/TorchWidgetConfigRepository.kt` | `FeaturePreferences<TorchWidgetConfig>` wrapper — the typed surface other code sees. |
+| `feature/torch/.../ui/WidgetConfigurationSheet.kt` | `GadgetBottomSheet` form for new/edit flows. |
+| `feature/torch/.../strobe/StrobeService.kt` | Foreground service with `FOREGROUND_SERVICE_CAMERA` type, per-tap Intent-extra config, and `isRunning` state flag. |
+| `feature/torch/src/main/AndroidManifest.xml` | All entry-point declarations co-located in the feature module — no `CAMERA` permission. |
+| `core/datastore/.../FeaturePreferences.kt` + `FeaturePreferencesFactory.kt` | Generic per-feature persistence basis that any future module should consume. |
 
 The next feature migration (Sensors / Actuators / Camera / etc.)
 follows this exact shape — only the controller's underlying

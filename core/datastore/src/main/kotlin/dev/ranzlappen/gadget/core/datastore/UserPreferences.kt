@@ -24,7 +24,21 @@ data class UserPreferences(
     val reducedMotionOverride: TriStatePreference = TriStatePreference.FollowSystem,
     val reducedTransparency: Boolean = false,
     val largeTextOverride: Boolean = false,
-)
+    /**
+     * Default strobe rate (Hz) applied to new flashlight-strobe
+     * widgets at pin time. The TorchScreen slider writes this; each
+     * widget captures the value at creation and persists its own
+     * copy thereafter, so changing the slider doesn't retroactively
+     * alter existing widgets. Range pinned to `1f..20f` in the UI.
+     */
+    val defaultStrobeRateHz: Float = DEFAULT_STROBE_RATE_HZ,
+) {
+    companion object {
+        /** Initial strobe rate before the user touches the slider. 5 Hz
+         *  is well below the Camera2 rate cliff on most OEMs. */
+        const val DEFAULT_STROBE_RATE_HZ: Float = 5f
+    }
+}
 
 /**
  * Dark-theme selector. `FollowSystem` defers to the OS setting via

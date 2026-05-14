@@ -1,15 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Tile + widget labels surfaced in system UI. Plain text only;
-         localization handled by future :core:localization batch. -->
+    <!-- ─── System UI surfaces (tile + widget chrome) ──────────── -->
     <string name="torch_tile_label">Flashlight</string>
     <string name="widget_flashlight_label">Flashlight</string>
     <string name="widget_strobe_label">Strobe</string>
     <string name="widget_flashlight_description">Toggle the device flashlight.</string>
-    <string name="widget_strobe_description">Toggle a 5 Hz flashlight strobe.</string>
+    <string name="widget_strobe_description">Toggle a configurable flashlight strobe.</string>
 
-    <!-- Foreground-service notification text. -->
+    <!-- ─── Foreground-service notification ─────────────────────── -->
     <string name="strobe_notification_channel_name">Strobe service</string>
     <string name="strobe_notification_title">Strobe active</string>
     <string name="strobe_notification_text">Tap the widget to stop.</string>
+
+    <!-- ─── TorchScreen ─────────────────────────────────────────── -->
+    <string name="torch_screen_title">Torch</string>
+    <string name="torch_state_on">On</string>
+    <string name="torch_state_off">Off</string>
+    <string name="torch_action_turn_on">Turn on torch</string>
+    <string name="torch_action_turn_off">Turn off torch</string>
+    <string name="torch_status_no_flash">This device doesn\'t have a flash unit.</string>
+    <string name="torch_status_hardware_error">Hardware error — try toggling again.</string>
+    <string name="torch_status_permission_denied">Camera access denied — grant in system settings.</string>
+    <string name="torch_status_on">Torch is on.</string>
+    <string name="torch_status_off">Tap the button to turn the torch on.</string>
+
+    <!-- ─── Strobe defaults section ─────────────────────────────── -->
+    <string name="torch_section_defaults_title">Strobe defaults</string>
+    <string name="torch_section_defaults_subtitle">Used as the default for new strobe widgets you create.</string>
+    <string name="torch_strobe_rate_label">Rate</string>
+    <string name="torch_strobe_rate_value">%1$d Hz</string>
+
+    <!-- ─── Widgets management section ──────────────────────────── -->
+    <string name="torch_section_widgets_title">Your widgets</string>
+    <string name="torch_widget_add_flashlight">Add flashlight widget</string>
+    <string name="torch_widget_add_strobe">Add strobe widget</string>
+    <string name="torch_widget_pin_unsupported">Your launcher doesn\'t support adding widgets directly. Long-press the home screen to add one manually.</string>
+    <string name="torch_widget_default_name_flashlight">Flashlight</string>
+    <string name="torch_widget_default_name_strobe">Strobe</string>
+    <string name="torch_widget_list_empty_title">No widgets yet</string>
+    <string name="torch_widget_list_empty_subtitle">Use the buttons above to add a flashlight or strobe widget to your home screen.</string>
+    <string name="torch_widget_list_subtitle_flashlight">Flashlight</string>
+    <string name="torch_widget_list_subtitle_strobe">Strobe · %1$d Hz</string>
+    <string name="torch_widget_list_subtitle_strobe_sos">Strobe · %1$d Hz · SOS</string>
+    <string name="torch_widget_list_action_edit">Edit widget</string>
+    <string name="torch_widget_list_action_delete">Remove widget</string>
+
+    <!-- ─── Widget configuration sheet ──────────────────────────── -->
+    <string name="torch_widget_config_title_new">New widget</string>
+    <string name="torch_widget_config_title_edit">Edit widget</string>
+    <string name="torch_widget_config_name_label">Name</string>
+    <string name="torch_widget_config_sos_label">SOS mode</string>
+    <string name="torch_widget_config_sos_supporting">Plays the Morse SOS pattern instead of a constant strobe.</string>
+    <string name="torch_widget_config_save_new">Add to home screen</string>
+    <string name="torch_widget_config_save_existing">Save</string>
+    <string name="torch_widget_config_cancel">Cancel</string>
 </resources>

@@ -3,28 +3,26 @@
   :feature:torch — surfaces for the flashlight feature.
 
   Permissions, hardware features, the TileService, two AppWidget
-  receivers, and the StrobeService foreground service are all
-  co-located here. The app's manifest merger picks them into the
-  final manifest automatically (no app-level wiring needed).
+  receivers, the dynamic-widget pin-success receiver, and the
+  StrobeService foreground service are all co-located here. The app's
+  manifest merger picks them into the final manifest automatically (no
+  app-level wiring needed).
 
-  Standard-flavor only — the rooted torch extras live in a future
-  rooted-flavor module per the migration plan in docs/migration-guide.md.
+  Standard-flavor surface only. Rooted-flavor torch extras will ship
+  as a sibling :feature:torch-rooted Gradle module per the codebase's
+  convention for feature-level rooted surfaces (see issue #94 +
+  CLAUDE.md flavor rules).
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <!--
-      CAMERA — required by CameraManager.setTorchMode (Camera2 API).
-      The OS grants the torch capability when the device has a flash
-      unit; no runtime prompt for torch-only Camera2 calls on most
-      OEMs but apps still declare the permission so the merger picks
-      it up.
-    -->
-    <uses-permission android:name="android.permission.CAMERA" />
 
     <!--
       FOREGROUND_SERVICE + the camera-typed variant for StrobeService
       so the OS allows the foreground notification + camera-flash
       access on API 34+.
+
+      Note: CameraManager.setTorchMode does NOT require the CAMERA
+      runtime permission on AOSP. The earlier CAMERA declaration was
+      defensive overreach; removed in Batch 1.1.
     -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
@@ -100,6 +98,22 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_strobe_info" />
+        </receiver>
+
+        <!--
+          Pin-success callback receiver for AppWidgetManager.requestPinAppWidget.
+          exported=true because the OS dispatches the success
+          PendingIntent from the system process. The custom action
+          string is private to our package (PendingIntent's
+          ComponentName resolves to us), so the public surface is
+          minimal.
+        -->
+        <receiver
+            android:name=".widget.WidgetPinSuccessReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="dev.ranzlappen.gadget.feature.torch.ACTION_WIDGET_PIN_SUCCESS" />
+            </intent-filter>
         </receiver>
 
         <!--

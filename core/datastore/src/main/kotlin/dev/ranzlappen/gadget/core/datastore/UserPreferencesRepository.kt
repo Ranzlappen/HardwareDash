@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -69,6 +70,10 @@ class UserPreferencesRepository @Inject constructor(
         dataStore.edit { it[UserPreferencesKeys.LARGE_TEXT_OVERRIDE] = enabled }
     }
 
+    suspend fun setDefaultStrobeRateHz(rateHz: Float) {
+        dataStore.edit { it[UserPreferencesKeys.DEFAULT_STROBE_RATE_HZ] = rateHz }
+    }
+
     private fun Preferences.readFrom(): UserPreferences = UserPreferences(
         darkThemeMode = this[UserPreferencesKeys.DARK_THEME_MODE]
             ?.let { runCatching { DarkThemeMode.valueOf(it) }.getOrNull() }
@@ -79,6 +84,8 @@ class UserPreferencesRepository @Inject constructor(
             ?: TriStatePreference.FollowSystem,
         reducedTransparency = this[UserPreferencesKeys.REDUCED_TRANSPARENCY] ?: false,
         largeTextOverride = this[UserPreferencesKeys.LARGE_TEXT_OVERRIDE] ?: false,
+        defaultStrobeRateHz = this[UserPreferencesKeys.DEFAULT_STROBE_RATE_HZ]
+            ?: UserPreferences.DEFAULT_STROBE_RATE_HZ,
     )
 }
 
@@ -89,4 +96,5 @@ private object UserPreferencesKeys {
     val REDUCED_MOTION_OVERRIDE = stringPreferencesKey("reduced_motion_override")
     val REDUCED_TRANSPARENCY = booleanPreferencesKey("reduced_transparency")
     val LARGE_TEXT_OVERRIDE = booleanPreferencesKey("large_text_override")
+    val DEFAULT_STROBE_RATE_HZ = floatPreferencesKey("default_strobe_rate_hz")
 }

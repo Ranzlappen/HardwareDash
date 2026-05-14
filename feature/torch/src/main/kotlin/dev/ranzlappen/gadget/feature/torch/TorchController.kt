@@ -13,10 +13,12 @@ import kotlinx.coroutines.flow.StateFlow
  * other surface that's observing [state].
  *
  * Phase 2 / Batch 1 ships [StandardTorchController] backed by
- * Camera2's `CameraManager.setTorchMode(...)`. Future flavor-
- * specific implementations (rooted, etc.) will be `@Binds`-bound
- * via flavor-source-set Hilt modules so the call sites here
- * remain unchanged.
+ * Camera2's `CameraManager.setTorchMode(...)`. The rooted-flavor
+ * implementation will land as a sibling `:feature:torch-rooted`
+ * module (mirroring `:feature:lock-rooted` etc.) and supersede
+ * the binding via `rootedImplementation` — tracked at
+ * https://github.com/Ranzlappen/HardwareDash/issues/94. Call
+ * sites here remain unchanged either way.
  */
 interface TorchController {
 
