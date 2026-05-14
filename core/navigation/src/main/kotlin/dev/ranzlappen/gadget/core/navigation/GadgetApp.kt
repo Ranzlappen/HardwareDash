@@ -1,25 +1,18 @@
 package dev.ranzlappen.gadget.core.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
+import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 
 /**
  * Top-level Gadget app shell.
@@ -88,37 +81,37 @@ fun NavGraphBuilder.placeholderScreen(destination: GadgetDestination) {
 }
 
 /**
- * Centered "Coming soon" placeholder. Public so previews can render it
- * in isolation; production callers normally reach it via
- * [placeholderScreen].
+ * "Coming soon" placeholder rendered via [ModuleScreenScaffold].
+ *
+ * Each top-level destination gets its own short, module-appropriate
+ * blurb in the scaffold's `functional` slot; the `permissions` and
+ * `disclaimer` slots are deliberately left empty in Phase 1 and will
+ * be populated in Phase 1.5 as each feature module lands.
+ *
+ * Public so previews can render it in isolation; production callers
+ * normally reach it via [placeholderScreen].
  */
 @Composable
 fun ComingSoonScreen(
     destination: GadgetDestination,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = destination.iconOutlined,
-                contentDescription = null,
-                modifier = Modifier.size(56.dp),
-                tint = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+    val message = when (destination) {
+        GadgetDestination.Dashboard -> "Dashboard overview coming in Phase 2"
+        GadgetDestination.Sensors -> "Sensor overview coming in Phase 2"
+        GadgetDestination.Actuators -> "Actuator controls coming in Phase 2"
+        GadgetDestination.Automation -> "Automation rules coming in Phase 2"
+        GadgetDestination.Settings -> "Settings coming in Phase 2"
+    }
+    ModuleScreenScaffold(
+        title = destination.label,
+        modifier = modifier,
+        functional = {
             Text(
-                text = destination.label,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = "Coming soon",
-                style = MaterialTheme.typography.bodyMedium,
+                text = message,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-        }
-    }
+        },
+    )
 }
