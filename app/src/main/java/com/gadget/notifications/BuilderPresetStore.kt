@@ -1,4 +1,4 @@
-package com.gadget.ui.screens.notifications
+package com.gadget.notifications
 
 import android.content.Context
 import android.content.SharedPreferences

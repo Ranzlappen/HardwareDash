@@ -1,4 +1,4 @@
-package com.gadget.ui.screens.notifications
+package com.gadget.notifications
 
 import com.gadget.localization.S
 import androidx.compose.foundation.background

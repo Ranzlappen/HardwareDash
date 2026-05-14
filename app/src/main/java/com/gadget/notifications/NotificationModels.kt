@@ -1,4 +1,4 @@
-package com.gadget.ui.screens.notifications
+package com.gadget.notifications
 
 import android.app.PendingIntent
 import android.content.Context

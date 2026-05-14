@@ -13,7 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.gadget.ui.screens.notifications.NotifActionEntry
+import com.gadget.notifications.NotifActionEntry
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

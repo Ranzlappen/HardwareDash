@@ -169,6 +169,13 @@ android {
 }
 
 dependencies {
+    // ─── Modular skeleton (:core / :feature) ────────────────────
+    // Wires :app into the GadgetAppShell + Dashboard introduced in
+    // PR #79. :core:designsystem flows in transitively via
+    // :core:navigation; :core:ui via :feature:dashboard.
+    implementation(project(":core:navigation"))
+    implementation(project(":feature:dashboard"))
+
     // ─── Compose UI components ───────────────────────────────────
     // The Compose BOM + ui-tooling-preview + ui-tooling are pulled in by
     // the `gadget.android.application.compose` convention plugin; the
