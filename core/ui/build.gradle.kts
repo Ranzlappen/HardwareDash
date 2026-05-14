@@ -19,4 +19,10 @@ dependencies {
     // WindowSizeClass type in its public signature — every module that
     // reads `LocalWindowSizeClass.current` needs the dep on its classpath.
     api(libs.androidx.material3.window.size.class)
+
+    // Test fixtures consumed by androidTest source set in this module.
+    // :core:testing re-exports ui-test-junit4 (+ ui-test-manifest as
+    // debugImplementation) so a single line plugs in the full Compose
+    // UI test stack.
+    androidTestImplementation(project(":core:testing"))
 }
