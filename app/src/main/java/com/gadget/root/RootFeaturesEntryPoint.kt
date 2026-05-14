@@ -41,7 +41,21 @@ interface RootFeaturesEntryPoint {
     fun capabilityRegistry(): RootCapabilityRegistry
     fun featureRegistry(): RootFeatureRegistry
     fun featureToggles(): RootFeatureToggles
-    fun torchController(): TorchController
+    /**
+     * Returns the **legacy** `com.gadget.torch.TorchController` —
+     * the one still wired into the rooted-extras card. Phase 2
+     * migrated standard-tier torch control to
+     * `dev.ranzlappen.gadget.feature.torch.TorchController`, but
+     * the rooted extras (DutyCycleStrobe / MultiLed / Thermal) live
+     * on the legacy controller until they're ported under issue
+     * https://github.com/Ranzlappen/HardwareDash/issues/94. The
+     * method is intentionally `legacy*`-prefixed so it doesn't
+     * collide with the new modular feature's entry points (which
+     * publish a `torchController()` returning the modular type and
+     * would otherwise generate two methods with the same name and
+     * different return types on the singleton component).
+     */
+    fun legacyTorchController(): TorchController
     fun vibrationController(): VibrationController
     fun cameraController(): CameraController
     fun microphoneController(): MicrophoneController

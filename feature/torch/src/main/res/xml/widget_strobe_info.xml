@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AppWidget provider metadata for the strobe widget.
+
+  Same 1×1 shape as the flashlight widget. Distinct preview drawable
+  (the bolt-style ic_strobe) so users can tell them apart in the
+  Launcher's widget picker.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_strobe"
+    android:previewImage="@drawable/ic_strobe"
+    android:description="@string/widget_strobe_description"
+    android:widgetCategory="home_screen"
+    android:resizeMode="none" />

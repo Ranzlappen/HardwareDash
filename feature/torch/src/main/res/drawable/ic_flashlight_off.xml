@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Flashlight glyph with a diagonal "off" slash overlay. Used by
+  FlashlightWidgetProvider when the torch is currently off, paired
+  with ic_flashlight_on.xml for the on state.
+
+  Visual style intentionally matches the M3 outlined Icons.Outlined.FlashlightOff
+  so the home-screen widget reads as the same icon family as the
+  in-app TorchScreen FAB.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?android:attr/colorControlNormal">
+    <!-- Body (same outline as ic_flashlight_on for visual continuity). -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M6,2L6,7L18,7L18,2L6,2zM7,3L17,3L17,6L7,6L7,3zM6,8L18,8L18,11L20,11L20,12L17,17L17,22L7,22L7,17L4,12L4,11L6,11L6,8z" />
+    <!-- Diagonal slash signalling "off". 2 dp stroke equivalent rendered
+         as a filled parallelogram so the vector stays single-fill at
+         smaller sizes. -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M3.5,2.9L20.4,19.8L19.0,21.2L2.1,4.3L3.5,2.9z" />
+</vector>

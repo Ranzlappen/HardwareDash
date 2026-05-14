@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AppWidget provider metadata for the flashlight widget.
+
+  Sized as a 1x1 cell — the widget is a single tap target. No
+  periodic update; the widget refreshes only when:
+    1. The user taps it (the provider sends itself an explicit
+       APPWIDGET_UPDATE after toggling), or
+    2. The torch state changes from another surface and the
+       controller broadcasts a refresh (Phase 2 / Batch 1: not
+       wired; tile + screen don't trigger widget refresh yet —
+       follow-up batch).
+
+  updatePeriodMillis=0 disables the periodic refresh entirely
+  (AppWidgetManager imposes a minimum of 30 min anyway, which is
+  far too slow for "did the user toggle from another surface").
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_flashlight"
+    android:previewImage="@drawable/ic_flashlight_on"
+    android:description="@string/widget_flashlight_description"
+    android:widgetCategory="home_screen"
+    android:resizeMode="none" />

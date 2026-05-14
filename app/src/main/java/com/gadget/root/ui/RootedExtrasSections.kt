@@ -60,7 +60,7 @@ fun TorchRootExtrasSection(modifier: Modifier = Modifier) {
     }
     if (!rootAvailable) return
 
-    val torch = entryPoint.torchController()
+    val torch = entryPoint.legacyTorchController()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val lang = LocalizationManager.loadLanguage(context)

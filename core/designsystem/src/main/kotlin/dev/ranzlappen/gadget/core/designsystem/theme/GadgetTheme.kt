@@ -11,6 +11,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
+import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedTransparency
 import dev.ranzlappen.gadget.core.designsystem.a11y.rememberSystemReducedMotion
 
 /**
@@ -21,6 +22,17 @@ import dev.ranzlappen.gadget.core.designsystem.a11y.rememberSystemReducedMotion
  * 12+ (`Build.VERSION_CODES.S`), dynamic color is enabled by default
  * so the theme picks up the user's wallpaper-derived palette while
  * keeping our typography, shapes, and motion tokens.
+ *
+ * Accessibility-local overrides:
+ * - [reducedMotionOverride] — pass `true` / `false` to force the
+ *   `LocalReducedMotion` value regardless of the system setting.
+ *   `null` (the default) means "follow system" — the local is
+ *   populated from `Settings.Global.ANIMATOR_DURATION_SCALE` via
+ *   [rememberSystemReducedMotion].
+ * - [reducedTransparency] — drives `LocalReducedTransparency`.
+ *   Android has no system-wide reduce-transparency setting, so this
+ *   defaults to `false` and is meant to be wired from a user
+ *   preference (Settings → Accessibility → Reduce transparency).
  *
  * Provides [LocalGadgetTheme] = a [GadgetThemeData] umbrella value
  * holding every design-system token (colors, typography, shapes,
@@ -50,6 +62,8 @@ import dev.ranzlappen.gadget.core.designsystem.a11y.rememberSystemReducedMotion
 fun GadgetTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     useDynamicColor: Boolean = true,
+    reducedMotionOverride: Boolean? = null,
+    reducedTransparency: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
@@ -66,11 +80,13 @@ fun GadgetTheme(
         shapes = GadgetShapes,
         identifier = GadgetCustomTheme.Default,
     )
-    val reducedMotion = rememberSystemReducedMotion()
+    val systemReducedMotion = rememberSystemReducedMotion()
+    val effectiveReducedMotion = reducedMotionOverride ?: systemReducedMotion
 
     CompositionLocalProvider(
         LocalGadgetTheme provides themeData,
-        LocalReducedMotion provides reducedMotion,
+        LocalReducedMotion provides effectiveReducedMotion,
+        LocalReducedTransparency provides reducedTransparency,
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

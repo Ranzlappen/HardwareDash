@@ -583,6 +583,69 @@ Rules of thumb:
   Components that rely on blur for the glass effect must provide a
   higher-opacity solid fallback under
   `Build.VERSION.SDK_INT < Build.VERSION_CODES.S`.
+- **Compose-only annotations in non-Compose modules.**
+  `:core:datastore` (and other foundation modules) deliberately
+  don't pull in `androidx.compose.runtime`. `@Immutable` /
+  `@Stable` won't resolve there. Compose treats `data class`es and
+  enums of stable members as stable automatically — drop the
+  annotation rather than adding the Compose dep to the foundation
+  module.
+- **`lifecycle-runtime-compose` vs `lifecycle-runtime-ktx`.**
+  `collectAsStateWithLifecycle()` lives in
+  `androidx.lifecycle:lifecycle-runtime-compose`, **not** in the
+  `lifecycle-runtime-ktx` artifact that the feature convention
+  plugin (`gadget.android.feature`) brings in by default.
+  Two valid fixes:
+  1. Add `androidx-lifecycle-runtime-compose` to `libs.versions.toml`
+     and to the feature convention plugin's default `implementation`
+     set.
+  2. Use `androidx.compose.runtime.collectAsState()` instead — fine
+     when the flow is already `stateIn(…)`-backed (the ViewModel is
+     still keeping it hot), which describes most feature ViewModels
+     in this repo.
+- **Library `BuildConfig.VERSION_NAME` / `VERSION_CODE`.** Only
+  `:app`'s `defaultConfig` generates these. A feature module's
+  generated `BuildConfig` carries `BUILD_TYPE` + `DEBUG` only.
+  When a feature card needs the version (the Settings About card,
+  for example), add `buildConfigField` entries to the feature's
+  `build.gradle.kts` that re-derive both values from the same
+  `CI_VERSION_NAME` / `CI_VERSION_CODE` gradle properties `:app`
+  reads:
+  ```kotlin
+  defaultConfig {
+      val ciVersionName = providers.gradleProperty("CI_VERSION_NAME").getOrElse("1.0-dev")
+      val ciVersionCode = providers.gradleProperty("CI_VERSION_CODE").orNull?.toInt() ?: 1
+      buildConfigField("String", "VERSION_NAME", "\"$ciVersionName\"")
+      buildConfigField("int", "VERSION_CODE", ciVersionCode.toString())
+  }
+  ```
+- **Adding a value to `GadgetDestination`** (or any other sealed /
+  enum hierarchy used in non-exhaustive `when` branches). After
+  adding the value, grep for `when (destination)` /
+  `when (it: GadgetDestination)` across `:core:navigation`,
+  `:app`, and every feature module and add the missing branch.
+  `:core:navigation`'s `ComingSoonScreen` was the canonical site
+  the first time around; expect more as feature modules grow.
+- **`init` block forward-reference to a property.** Kotlin runs
+  `init` blocks and property initializers in **declaration order**.
+  An `init` block that reads or registers a property declared
+  *below* it sees an uninitialized field (`Variable 'foo' must be
+  initialized`). Move the property declaration **above** the `init`
+  block, or move the registration logic into the property's
+  initializer expression. The first migrated controller
+  (`StandardTorchController`'s `TorchCallback` registration) tripped
+  on this.
+- **Hilt entry-point method name collisions.** Hilt synthesises a
+  single `SingletonC` that implements every `@EntryPoint` interface
+  in the graph. Two entry points with a getter of the **same name**
+  but **different return types** (e.g. legacy
+  `com.gadget.torch.TorchController` vs new modular
+  `dev.ranzlappen.gadget.feature.torch.TorchController`) fail
+  `hiltJavaCompile*` with `Found conflicting entry point
+  declarations`. When you migrate a controller, the legacy entry
+  point's getter must be renamed (`legacyXController()`) until the
+  legacy implementation is deleted — the new modular feature keeps
+  the idiomatic `xController()` name.
 
 ---
 

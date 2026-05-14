@@ -3,11 +3,13 @@ package dev.ranzlappen.gadget.core.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Tune
@@ -78,6 +80,22 @@ sealed interface GadgetDestination {
         override val label = "Settings"
         override val iconFilled = Icons.Filled.Settings
         override val iconOutlined = Icons.Outlined.Settings
+    }
+
+    /**
+     * Torch / Flashlight sub-screen. Reachable from the Dashboard
+     * tile and from QS tile / home-screen widget interactions
+     * (those go through the controller directly, not via this
+     * route, but the route still exists so a deep-link or
+     * notification action can reach it).
+     *
+     * NOT in [topLevel] — Torch isn't a primary rail destination.
+     */
+    data object Torch : GadgetDestination {
+        override val route = "torch"
+        override val label = "Torch"
+        override val iconFilled = Icons.Filled.FlashlightOn
+        override val iconOutlined = Icons.Outlined.FlashlightOn
     }
 
     companion object {

@@ -175,6 +175,11 @@ dependencies {
     // :core:navigation; :core:ui via :feature:dashboard.
     implementation(project(":core:navigation"))
     implementation(project(":feature:dashboard"))
+    // Phase 2 / Batch 1 — first real-feature migrations from
+    // legacy-main per docs/migration-guide.md.
+    implementation(project(":core:datastore"))
+    implementation(project(":feature:settings"))
+    implementation(project(":feature:torch"))
 
     // ─── Compose UI components ───────────────────────────────────
     // The Compose BOM + ui-tooling-preview + ui-tooling are pulled in by

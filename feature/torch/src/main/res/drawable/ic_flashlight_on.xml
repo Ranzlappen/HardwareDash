@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Material flashlight icon — used by the QS tile, the on/off
+  AppWidget, and as the action icon inside the widget layout.
+  Hand-written vector matching M3's outlined `Icons.Outlined.FlashlightOn`
+  so the visual style matches the in-app icons exactly.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?android:attr/colorControlNormal">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M6,2L6,7L18,7L18,2L6,2zM7,3L17,3L17,6L7,6L7,3zM6,8L18,8L18,11L20,11L20,12L17,17L17,22L7,22L7,17L4,12L4,11L6,11L6,8zM12,11L11,15L13,15L12,11zM7,9L7,11L17,11L17,9L7,9z" />
+</vector>

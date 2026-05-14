@@ -1,2 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<!--
+  :feature:torch — surfaces for the flashlight feature.
+
+  Permissions, hardware features, the TileService, two AppWidget
+  receivers, the dynamic-widget pin-success receiver, and the
+  StrobeService foreground service are all co-located here. The app's
+  manifest merger picks them into the final manifest automatically (no
+  app-level wiring needed).
+
+  Standard-flavor surface only. Rooted-flavor torch extras will ship
+  as a sibling :feature:torch-rooted Gradle module per the codebase's
+  convention for feature-level rooted surfaces (see issue #94 +
+  CLAUDE.md flavor rules).
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      FOREGROUND_SERVICE + the camera-typed variant for StrobeService
+      so the OS allows the foreground notification + camera-flash
+      access on API 34+.
+
+      Note: CameraManager.setTorchMode does NOT require the CAMERA
+      runtime permission on AOSP. The earlier CAMERA declaration was
+      defensive overreach; removed in Batch 1.1.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
+
+    <!--
+      POST_NOTIFICATIONS required on API 33+ for the StrobeService's
+      foreground-service notification. Runtime-prompted; the user
+      can deny without breaking the strobe (the service still runs;
+      they just don't see the notification chrome).
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+      Flash unit is the actual hardware dependency. `required="false"`
+      so the app installs on flashless devices; the controller emits
+      `isAvailable = false` and the UI disables the toggle.
+    -->
+    <uses-feature
+        android:name="android.hardware.camera.flash"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <application>
+
+        <!--
+          Quick Settings tile.
+
+          BIND_QUICK_SETTINGS_TILE is required so only the OS's
+          QS-tile-binding can launch the service. exported=true is
+          required for the OS to find the tile during edit-tiles.
+        -->
+        <service
+            android:name=".tile.FlashlightTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_flashlight_on"
+            android:label="@string/torch_tile_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!--
+          Home-screen flashlight widget. exported=true required for
+          AppWidget host (Launcher) to receive the broadcasts.
+        -->
+        <receiver
+            android:name=".widget.FlashlightWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_flashlight_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="dev.ranzlappen.gadget.feature.torch.ACTION_FLASHLIGHT_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_flashlight_info" />
+        </receiver>
+
+        <!--
+          Home-screen strobe widget — toggles StrobeService.
+        -->
+        <receiver
+            android:name=".widget.StrobeWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_strobe_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="dev.ranzlappen.gadget.feature.torch.ACTION_STROBE_TOGGLE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_strobe_info" />
+        </receiver>
+
+        <!--
+          Pin-success callback receiver for AppWidgetManager.requestPinAppWidget.
+          exported=true because the OS dispatches the success
+          PendingIntent from the system process. The custom action
+          string is private to our package (PendingIntent's
+          ComponentName resolves to us), so the public surface is
+          minimal.
+        -->
+        <receiver
+            android:name=".widget.WidgetPinSuccessReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="dev.ranzlappen.gadget.feature.torch.ACTION_WIDGET_PIN_SUCCESS" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+          Strobe foreground service. exported=false — only the widget
+          provider + the in-app screen can start it.
+          foregroundServiceType="camera" so the OS allows access to
+          the flash unit while in foreground state.
+        -->
+        <service
+            android:name=".strobe.StrobeService"
+            android:exported="false"
+            android:foregroundServiceType="camera" />
+
+    </application>
+</manifest>
