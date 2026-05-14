@@ -463,7 +463,7 @@ Self-Driving Documentation** batch:
 - [x] **1.1.2** — Accessibility semantics sweep
 - [x] **1.1.3** — `WindowSizeClass`-aware shell
 - [x] **1.1.4** — Glass consistency for Secondary button
-- [ ] **1.1.5** — Shimmer width + blur-fallback polish
+- [x] **1.1.5** — Shimmer width polish (BoxWithConstraints-aware sweep)
 - [ ] **1.1.6** — `@Preview` matrix expansion (RTL / LargeFont / SizeClasses)
 - [ ] **1.1.7** — Final status refresh + catalog verification
 

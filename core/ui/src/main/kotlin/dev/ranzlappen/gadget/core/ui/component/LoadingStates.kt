@@ -9,8 +9,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -133,11 +135,17 @@ fun GadgetLinearProgress(
  * `Modifier.size(64.dp)` for an avatar skeleton). The composable
  * does NOT lock a default size — caller controls dimensions.
  *
- * The gradient sweep direction is diagonal (`(0,0) → (translateX,translateY)`)
- * with a 1.5-second linear loop. Three colour stops give a smooth
- * shimmer band; intensities derive from
- * [MaterialTheme.colorScheme.surfaceVariant] so the effect blends
- * across light + dark themes automatically.
+ * The gradient sweep direction is diagonal `(0, 0) → (translateX,
+ * translateX)` with a 1.5-second linear loop. The translation target
+ * is **measured per-instance** via [BoxWithConstraints] — the
+ * gradient sweeps from `0` to `maxWidth.toPx() * 2`, so a 32 dp
+ * avatar and a 1024 dp banner both get the same visually-uniform
+ * shimmer cadence. Without this, a fixed-pixel sweep either flashes
+ * imperceptibly on small surfaces or cycles glacially on wide ones.
+ *
+ * Three colour stops give a smooth shimmer band; intensities derive
+ * from [MaterialTheme.colorScheme.surfaceVariant] / `surface` so the
+ * effect blends across light + dark + dynamic-colour themes.
  */
 @Composable
 fun GadgetShimmerBlock(
@@ -170,29 +178,40 @@ fun GadgetShimmerBlock(
         highlight.copy(alpha = ShimmerHighAlpha),
         base.copy(alpha = ShimmerLowAlpha),
     )
-    val transition = rememberInfiniteTransition(label = "shimmer-transition")
-    val translateX by transition.animateFloat(
-        initialValue = ShimmerStartOffset,
-        targetValue = ShimmerEndOffset,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = ShimmerDurationMillis,
-                easing = LinearEasing,
+    BoxWithConstraints(modifier = a11yModifier) {
+        // constraints.maxWidth is in pixels. For an unbounded parent
+        // (no width constraint) fall back to a sensible default so
+        // the shimmer still animates rather than freezing.
+        val targetPx = if (constraints.maxWidth in 1 until Int.MAX_VALUE) {
+            constraints.maxWidth.toFloat() * ShimmerSweepWidthMultiplier
+        } else {
+            ShimmerFallbackTargetPx
+        }
+        val transition = rememberInfiniteTransition(label = "shimmer-transition")
+        val translateX by transition.animateFloat(
+            initialValue = ShimmerStartOffset,
+            targetValue = targetPx,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = ShimmerDurationMillis,
+                    easing = LinearEasing,
+                ),
+                repeatMode = RepeatMode.Restart,
             ),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "shimmer-translate",
-    )
-    val brush = Brush.linearGradient(
-        colors = shimmerColors,
-        start = Offset.Zero,
-        end = Offset(x = translateX, y = translateX),
-    )
-    Box(
-        modifier = a11yModifier
-            .clip(shape)
-            .background(brush = brush),
-    )
+            label = "shimmer-translate",
+        )
+        val brush = Brush.linearGradient(
+            colors = shimmerColors,
+            start = Offset.Zero,
+            end = Offset(x = translateX, y = translateX),
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(shape)
+                .background(brush = brush),
+        )
+    }
 }
 
 // ─── Internals ──────────────────────────────────────────────────────
@@ -206,8 +225,22 @@ private const val ShimmerHighAlpha: Float = 0.2f
 /** Starting position of the shimmer gradient sweep, in pixels. */
 private const val ShimmerStartOffset: Float = 0f
 
-/** Ending position of the shimmer gradient sweep, in pixels. */
-private const val ShimmerEndOffset: Float = 1000f
+/**
+ * Multiplier applied to the block's pixel width to compute the
+ * gradient sweep endpoint. `2.0f` means the highlight band fully
+ * traverses the visible area + an extra block-width of "off-screen"
+ * travel, giving a smooth wraparound to the start position when the
+ * animation restarts.
+ */
+private const val ShimmerSweepWidthMultiplier: Float = 2f
+
+/**
+ * Sweep endpoint used when the parent's width constraint is
+ * [Int.MAX_VALUE] / unmeasurable (unbounded layout — rare but
+ * possible inside a `LazyRow` cell measured before placement). 1000
+ * px gives a visually plausible sweep on most screen sizes.
+ */
+private const val ShimmerFallbackTargetPx: Float = 1000f
 
 /** Full loop duration of the shimmer animation, in milliseconds. */
 private const val ShimmerDurationMillis: Int = 1500
