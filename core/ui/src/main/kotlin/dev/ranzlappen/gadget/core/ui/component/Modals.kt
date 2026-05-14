@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 
 /**
@@ -57,6 +58,7 @@ fun GadgetBottomSheet(
     ),
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
@@ -69,7 +71,7 @@ fun GadgetBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(contentPadding),
-            verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Medium),
+            verticalArrangement = Arrangement.spacedBy(spacing.medium),
         ) {
             if (title != null) {
                 Text(

@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
@@ -58,6 +59,7 @@ fun CompactCard(
     ),
     singleLineTitle: Boolean = true,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     GlassSurface(
         modifier = modifier,
         intensity = intensity,
@@ -66,7 +68,7 @@ fun CompactCard(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(GadgetSpacing.Small),
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
             if (leadingIcon != null) {
                 Icon(
@@ -79,7 +81,7 @@ fun CompactCard(
             Column(
                 modifier = Modifier
                     .weight(1f, fill = true),
-                verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Pico),
+                verticalArrangement = Arrangement.spacedBy(spacing.pico),
             ) {
                 if (title != null) {
                     Text(
@@ -103,7 +105,7 @@ fun CompactCard(
                 }
             }
             if (trailingContent != null) {
-                Spacer(modifier = Modifier.width(GadgetSpacing.Small))
+                Spacer(modifier = Modifier.width(spacing.small))
                 trailingContent()
             }
         }
@@ -118,7 +120,8 @@ private val LeadingIconSize: Dp = 24.dp
 @GadgetPreviewLightDark
 @Composable
 private fun CompactCardPreview() = GadgetThemedPreview {
-    Column(verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         CompactCard(
             title = "Battery",
             subtitle = "87% · charging · 1h 22m to full",

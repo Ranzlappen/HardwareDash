@@ -26,6 +26,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
@@ -198,7 +199,8 @@ private fun gadgetTextFieldColors(): TextFieldColors = OutlinedTextFieldDefaults
 @GadgetPreviewLightDark
 @Composable
 private fun TextFieldsPreview() = GadgetThemedPreview {
-    Column(verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Medium)) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
         var name by remember { mutableStateOf("") }
         var search by remember { mutableStateOf("Rover-2") }
         GadgetTextField(

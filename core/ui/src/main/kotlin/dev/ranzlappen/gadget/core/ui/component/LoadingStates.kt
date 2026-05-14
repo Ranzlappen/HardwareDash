@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
@@ -191,18 +192,19 @@ private const val ShimmerDurationMillis: Int = 1500
 @GadgetPreviewLightDark
 @Composable
 private fun LoadingStatesPreview() = GadgetThemedPreview {
-    Column(verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Medium)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(GadgetSpacing.Medium)) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(spacing.medium)) {
             GadgetCircularProgress(modifier = Modifier.size(32.dp))
             GadgetCircularProgress(modifier = Modifier.size(32.dp), progress = 0.6f)
         }
         GadgetLinearProgress(modifier = Modifier.fillMaxWidth())
         GadgetLinearProgress(modifier = Modifier.fillMaxWidth(), progress = 0.3f)
-        Row(horizontalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
             GadgetShimmerBlock(modifier = Modifier.size(64.dp))
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Tiny),
+                verticalArrangement = Arrangement.spacedBy(spacing.tiny),
             ) {
                 GadgetShimmerBlock(modifier = Modifier.fillMaxWidth().height(16.dp))
                 GadgetShimmerBlock(modifier = Modifier.fillMaxWidth().height(12.dp))

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedTransparency
 import dev.ranzlappen.gadget.core.designsystem.glassSurface
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
@@ -71,7 +72,8 @@ fun GlassSurface(
 @GadgetPreviewLightDark
 @Composable
 private fun GlassSurfacePreview() = GadgetThemedPreview {
-    Column(verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         GlassSurface(intensity = GlassIntensity.Subtle) {
             Text("Subtle intensity — high opacity for content panels.")
         }

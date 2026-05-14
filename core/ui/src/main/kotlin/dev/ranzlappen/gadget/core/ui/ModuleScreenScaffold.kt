@@ -11,7 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 
 /**
  * Per-module screen scaffold.
@@ -53,15 +53,16 @@ fun ModuleScreenScaffold(
     disclaimer: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     val scroll = rememberScrollState()
+    val spacing = LocalGadgetTheme.current.spacing
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(scroll)
             .padding(
-                horizontal = GadgetSpacing.Medium,
-                vertical = GadgetSpacing.Large,
+                horizontal = spacing.medium,
+                vertical = spacing.large,
             ),
-        verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Large),
+        verticalArrangement = Arrangement.spacedBy(spacing.large),
     ) {
         if (title != null) {
             Text(

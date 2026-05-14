@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
@@ -54,6 +55,7 @@ fun GadgetEmptyState(
     action: (@Composable () -> Unit)? = null,
     contentPadding: PaddingValues = PaddingValues(GadgetSpacing.Large),
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     Box(
         modifier = modifier.padding(contentPadding),
         contentAlignment = Alignment.Center,
@@ -61,7 +63,7 @@ fun GadgetEmptyState(
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Small),
+            verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
             if (icon != null) {
                 Icon(
@@ -90,7 +92,7 @@ fun GadgetEmptyState(
                 )
             }
             if (action != null) {
-                Spacer(modifier = Modifier.height(GadgetSpacing.Small))
+                Spacer(modifier = Modifier.height(spacing.small))
                 action()
             }
         }

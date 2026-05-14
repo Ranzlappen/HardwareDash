@@ -419,7 +419,7 @@ Live status of the **Hardening, Responsiveness, Theming &
 Self-Driving Documentation** batch:
 
 - [x] **1.1.0** — `CLAUDE.md` SSOT foundation rewrite
-- [ ] **1.1.1** — `LocalGadgetTheme` full wiring (closes #90)
+- [x] **1.1.1** — `LocalGadgetTheme` full wiring (closes #90)
 - [ ] **1.1.2** — Accessibility semantics sweep
 - [ ] **1.1.3** — `WindowSizeClass`-aware shell
 - [ ] **1.1.4** — Glass consistency for Secondary button

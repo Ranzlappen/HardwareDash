@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.glassSurface
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 
 /**
@@ -60,6 +61,7 @@ fun DashCard(
     contentPadding: PaddingValues = PaddingValues(GadgetSpacing.Medium),
     content: @Composable () -> Unit,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     val baseModifier = modifier.glassSurface(intensity = intensity)
     val interactiveModifier = if (onClick != null) {
         baseModifier.clickable(onClick = onClick)
@@ -78,7 +80,7 @@ fun DashCard(
                             tint = MaterialTheme.colorScheme.primary,
                         )
                         if (title != null) {
-                            Spacer(modifier = Modifier.width(GadgetSpacing.Tiny))
+                            Spacer(modifier = Modifier.width(spacing.tiny))
                         }
                     }
                     if (title != null) {
@@ -89,7 +91,7 @@ fun DashCard(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(GadgetSpacing.Small))
+                Spacer(modifier = Modifier.height(spacing.small))
             }
             CompositionLocalProvider(
                 LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant,

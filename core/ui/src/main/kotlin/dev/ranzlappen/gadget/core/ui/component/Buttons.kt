@@ -133,6 +133,7 @@ fun GadgetSecondaryButton(
     trailingIcon: ImageVector? = null,
     contentPadding: PaddingValues = GadgetButtonDefaults.ContentPadding,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     GlassyLabelledButton(
         onClick = onClick,
         text = text,
@@ -146,7 +147,7 @@ fun GadgetSecondaryButton(
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         border = BorderStroke(
-            width = GadgetSpacing.Hairline,
+            width = spacing.hairline,
             color = MaterialTheme.colorScheme.outline,
         ),
     )
@@ -258,7 +259,9 @@ fun GadgetFab(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val reducedMotion = LocalReducedMotion.current
-    val motion = LocalGadgetTheme.current.motion
+    val theme = LocalGadgetTheme.current
+    val motion = theme.motion
+    val spacing = theme.spacing
     val pressScale by animateFloatAsState(
         targetValue = if (!reducedMotion && isPressed && enabled) PressedScale else 1f,
         animationSpec = motion.springStandard(),
@@ -285,8 +288,8 @@ fun GadgetFab(
     ) {
         Row(
             modifier = Modifier.padding(
-                horizontal = if (text != null) GadgetSpacing.Medium else GadgetSpacing.Tiny,
-                vertical = GadgetSpacing.Tiny,
+                horizontal = if (text != null) spacing.medium else spacing.tiny,
+                vertical = spacing.tiny,
             ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
@@ -297,7 +300,7 @@ fun GadgetFab(
                 modifier = Modifier.size(GadgetButtonDefaults.InternalIconSize),
             )
             if (text != null) {
-                Spacer(modifier = Modifier.width(GadgetSpacing.Tiny))
+                Spacer(modifier = Modifier.width(spacing.tiny))
                 Text(
                     text = text,
                     style = MaterialTheme.typography.labelLarge,
@@ -333,7 +336,9 @@ private fun GlassyLabelledButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val reducedMotion = LocalReducedMotion.current
-    val motion = LocalGadgetTheme.current.motion
+    val theme = LocalGadgetTheme.current
+    val motion = theme.motion
+    val spacing = theme.spacing
     val pressScale by animateFloatAsState(
         targetValue = if (!reducedMotion && isPressed && enabled && !loading) PressedScale else 1f,
         animationSpec = motion.springStandard(),
@@ -374,7 +379,7 @@ private fun GlassyLabelledButton(
                         contentDescription = null,
                         modifier = Modifier.size(GadgetButtonDefaults.InternalIconSize),
                     )
-                    Spacer(modifier = Modifier.width(GadgetSpacing.Tiny))
+                    Spacer(modifier = Modifier.width(spacing.tiny))
                 }
                 Text(
                     text = text,
@@ -385,7 +390,7 @@ private fun GlassyLabelledButton(
                     modifier = Modifier.wrapContentWidth(),
                 )
                 if (trailingIcon != null) {
-                    Spacer(modifier = Modifier.width(GadgetSpacing.Tiny))
+                    Spacer(modifier = Modifier.width(spacing.tiny))
                     Icon(
                         imageVector = trailingIcon,
                         contentDescription = null,
@@ -403,7 +408,8 @@ private fun GlassyLabelledButton(
 @GadgetPreviewLargeFont
 @Composable
 private fun GadgetButtonsPreview() = GadgetThemedPreview {
-    Column(verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
         GadgetPrimaryButton(onClick = {}, text = "Primary action")
         GadgetSecondaryButton(onClick = {}, text = "Secondary")
         GadgetTertiaryButton(onClick = {}, text = "Tertiary / Ghost")
@@ -421,7 +427,7 @@ private fun GadgetButtonsPreview() = GadgetThemedPreview {
             onClick = {},
             text = "A label that runs longer than usual and exercises the singleLine ellipsis fallback",
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
             GadgetIconButton(
                 onClick = {},
                 icon = Icons.Outlined.Search,
