@@ -1,0 +1,164 @@
+package dev.ranzlappen.gadget.core.ui.component
+
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
+
+/**
+ * Circular progress indicator with Gadget styling.
+ *
+ * Wraps M3 [CircularProgressIndicator]. Passing [progress] in the
+ * `0f..1f` range renders the determinate variant; passing `null` (the
+ * default) renders the indeterminate spinner.
+ *
+ * The composable applies no internal size — pass a size on the
+ * [modifier] (e.g. `Modifier.size(GadgetButtonDefaults.InternalIconSize)`).
+ * Matches the design-system contract that components never lock
+ * dimensions internally.
+ */
+@Composable
+fun GadgetCircularProgress(
+    modifier: Modifier = Modifier,
+    progress: Float? = null,
+    color: Color = MaterialTheme.colorScheme.primary,
+    trackColor: Color = ProgressIndicatorDefaults.circularTrackColor,
+    strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth,
+) {
+    if (progress != null) {
+        CircularProgressIndicator(
+            progress = { progress.coerceIn(0f, 1f) },
+            modifier = modifier,
+            color = color,
+            trackColor = trackColor,
+            strokeWidth = strokeWidth,
+        )
+    } else {
+        CircularProgressIndicator(
+            modifier = modifier,
+            color = color,
+            trackColor = trackColor,
+            strokeWidth = strokeWidth,
+        )
+    }
+}
+
+/**
+ * Linear progress indicator with Gadget styling.
+ *
+ * Wraps M3 [LinearProgressIndicator]. Passing [progress] in the
+ * `0f..1f` range renders the determinate variant; passing `null`
+ * renders the indeterminate sweep.
+ *
+ * Pass a width via [modifier] (typically `Modifier.fillMaxWidth()`);
+ * the height is fixed by M3 defaults.
+ */
+@Composable
+fun GadgetLinearProgress(
+    modifier: Modifier = Modifier,
+    progress: Float? = null,
+    color: Color = MaterialTheme.colorScheme.primary,
+    trackColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+) {
+    if (progress != null) {
+        LinearProgressIndicator(
+            progress = { progress.coerceIn(0f, 1f) },
+            modifier = modifier,
+            color = color,
+            trackColor = trackColor,
+        )
+    } else {
+        LinearProgressIndicator(
+            modifier = modifier,
+            color = color,
+            trackColor = trackColor,
+        )
+    }
+}
+
+/**
+ * Shimmer placeholder block — animated linear-gradient sweep over a
+ * shaped surface. Use as a content placeholder while real data
+ * loads.
+ *
+ * Pass a size on the [modifier] (e.g.
+ * `Modifier.fillMaxWidth().height(16.dp)` for a text-line skeleton,
+ * `Modifier.size(64.dp)` for an avatar skeleton). The composable
+ * does NOT lock a default size — caller controls dimensions.
+ *
+ * The gradient sweep direction is diagonal (`(0,0) → (translateX,translateY)`)
+ * with a 1.5-second linear loop. Three colour stops give a smooth
+ * shimmer band; intensities derive from
+ * [MaterialTheme.colorScheme.surfaceVariant] so the effect blends
+ * across light + dark themes automatically.
+ */
+@Composable
+fun GadgetShimmerBlock(
+    modifier: Modifier = Modifier,
+    shape: Shape = MaterialTheme.shapes.small,
+) {
+    val base = MaterialTheme.colorScheme.surfaceVariant
+    val highlight = MaterialTheme.colorScheme.surface
+    val shimmerColors = listOf(
+        base.copy(alpha = ShimmerLowAlpha),
+        highlight.copy(alpha = ShimmerHighAlpha),
+        base.copy(alpha = ShimmerLowAlpha),
+    )
+    val transition = rememberInfiniteTransition(label = "shimmer-transition")
+    val translateX by transition.animateFloat(
+        initialValue = ShimmerStartOffset,
+        targetValue = ShimmerEndOffset,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = ShimmerDurationMillis,
+                easing = LinearEasing,
+            ),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "shimmer-translate",
+    )
+    val brush = Brush.linearGradient(
+        colors = shimmerColors,
+        start = Offset.Zero,
+        end = Offset(x = translateX, y = translateX),
+    )
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .background(brush = brush),
+    )
+}
+
+// ─── Internals ──────────────────────────────────────────────────────
+
+/** Low alpha used for the dim ends of the shimmer gradient. */
+private const val ShimmerLowAlpha: Float = 0.6f
+
+/** High alpha used for the bright middle of the shimmer gradient. */
+private const val ShimmerHighAlpha: Float = 0.2f
+
+/** Starting position of the shimmer gradient sweep, in pixels. */
+private const val ShimmerStartOffset: Float = 0f
+
+/** Ending position of the shimmer gradient sweep, in pixels. */
+private const val ShimmerEndOffset: Float = 1000f
+
+/** Full loop duration of the shimmer animation, in milliseconds. */
+private const val ShimmerDurationMillis: Int = 1500
