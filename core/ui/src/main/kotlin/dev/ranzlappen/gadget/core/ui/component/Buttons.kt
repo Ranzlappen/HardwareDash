@@ -192,8 +192,15 @@ fun GadgetTertiaryButton(
  * Icon-only square button — 48 dp hit target.
  *
  * Use for chrome / toolbar actions where a label would be redundant.
- * [contentDescription] feeds the accessibility tree; pass `null` only
- * if a sibling element provides the accessible label.
+ *
+ * Accessibility:
+ * - [contentDescription] feeds the accessibility tree. Pass `null`
+ *   **only** when a sibling element (a `Text(...)` next to the
+ *   button in the same `Row`, an `IconButton` inside a `BadgedBox`,
+ *   etc.) provides the accessible label. A `null`
+ *   `contentDescription` on a standalone icon button means a screen
+ *   reader announces nothing — the button becomes invisible to
+ *   non-sighted users.
  */
 @Composable
 fun GadgetIconButton(

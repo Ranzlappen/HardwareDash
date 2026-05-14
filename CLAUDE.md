@@ -93,6 +93,22 @@ them — they're enforced by review.
     `Gadget*Progress` set `progressBarRangeInfo`; `GadgetShimmerBlock`
     announces `liveRegion = Polite` + a "Loading" `contentDescription`.
 
+#### Accessibility contract (per-component)
+
+What every component **must** do for accessibility:
+
+| Component | Contract |
+|---|---|
+| `GadgetIconButton` | `contentDescription` required (nullable only when a sibling labels the button). |
+| `GadgetFab` | `contentDescription` required. Same nullable-with-sibling exception. |
+| `GadgetStatusDot` | `contentDescription` **required** as a non-default parameter; pass `null` only when a labelled sibling carries the semantic. |
+| `GadgetBadge` | Dot variant decorative; text variant announces a `stateDescription` (`"3 unread"` default; override via `stateDescriptionOverride`). |
+| `GadgetCircularProgress` / `GadgetLinearProgress` | Determinate variant publishes `progressBarRangeInfo(current, 0f..1f)` so screen readers announce percent complete. |
+| `GadgetShimmerBlock` | Announces `contentDescription = "Loading"` + `liveRegion = Polite` so screen readers say "Loading" once the user reaches a polite pause. |
+| `GadgetEmptyState` | Title + subtitle + action merge into one a11y node via `semantics(mergeDescendants = true)` — announced as a single coherent unit. |
+| `GadgetDialog` | Title carries `semantics { heading() }` so TalkBack emits a heading earcon before reading. |
+| `GadgetBottomSheet` | Title carries `semantics { heading() }`. |
+
 ### Responsiveness
 
 11. **`LocalWindowSizeClass.current`** is the source of truth for
@@ -420,7 +436,7 @@ Self-Driving Documentation** batch:
 
 - [x] **1.1.0** — `CLAUDE.md` SSOT foundation rewrite
 - [x] **1.1.1** — `LocalGadgetTheme` full wiring (closes #90)
-- [ ] **1.1.2** — Accessibility semantics sweep
+- [x] **1.1.2** — Accessibility semantics sweep
 - [ ] **1.1.3** — `WindowSizeClass`-aware shell
 - [ ] **1.1.4** — Glass consistency for Secondary button
 - [ ] **1.1.5** — Shimmer width + blur-fallback polish

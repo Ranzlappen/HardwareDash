@@ -18,6 +18,8 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -80,6 +82,7 @@ fun GadgetBottomSheet(
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.semantics { heading() },
                 )
             }
             content()
@@ -127,11 +130,15 @@ fun GadgetDialog(
         } else null,
         title = if (title != null) {
             {
+                // A11y: announce as a heading so screen readers know
+                // this is the dialog's primary subject (TalkBack
+                // emits a "Heading" earcon before reading the text).
                 Text(
                     text = title,
                     style = MaterialTheme.typography.headlineSmall,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.semantics { heading() },
                 )
             }
         } else null,

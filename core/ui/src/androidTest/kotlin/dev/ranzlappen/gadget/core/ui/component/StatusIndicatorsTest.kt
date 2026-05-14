@@ -78,7 +78,10 @@ class StatusIndicatorsTest {
     fun statusDot_renders() {
         composeTestRule.setContent {
             GadgetTestTheme {
-                GadgetStatusDot(modifier = Modifier.testTag(DotTag))
+                GadgetStatusDot(
+                    contentDescription = "Online",
+                    modifier = Modifier.testTag(DotTag),
+                )
             }
         }
         composeTestRule.onNodeWithTag(DotTag).assertExists()

@@ -20,6 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -98,6 +101,15 @@ fun GadgetChip(
  * Colours default to the M3 error tone (red-ish) for the conventional
  * "attention required" badge; override [containerColor] /
  * [contentColor] for neutral counters.
+ *
+ * Accessibility:
+ * - The dot variant (`text = null`) is decorative-only. Anchor it to
+ *   a labelled composable via [androidx.compose.material3.BadgedBox]
+ *   so a screen reader announces the parent + "has notification".
+ * - The text variant exposes the value via [stateDescription] so
+ *   screen readers announce "3 unread" / "99 plus unread" in
+ *   context. Override [stateDescriptionOverride] for a different
+ *   announcement (e.g. "3 errors").
  */
 @Composable
 fun GadgetBadge(
@@ -105,6 +117,7 @@ fun GadgetBadge(
     text: String? = null,
     containerColor: Color = MaterialTheme.colorScheme.error,
     contentColor: Color = MaterialTheme.colorScheme.onError,
+    stateDescriptionOverride: String? = null,
 ) {
     if (text == null) {
         Box(
@@ -114,11 +127,13 @@ fun GadgetBadge(
                 .background(containerColor),
         )
     } else {
+        val announcement = stateDescriptionOverride ?: "$text unread"
         Box(
             modifier = modifier
                 .clip(CircleShape)
                 .background(containerColor)
-                .padding(BadgePillPadding),
+                .padding(BadgePillPadding)
+                .semantics { stateDescription = announcement },
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -142,15 +157,29 @@ fun GadgetBadge(
  * for the conventional "● Online" affordance. For a dot inside a
  * larger element (icon, avatar) prefer [GadgetBadge] with
  * [androidx.compose.material3.BadgedBox].
+ *
+ * Accessibility:
+ * - [contentDescription] is **required**. Pass a meaningful string
+ *   ("Online", "Offline", "Warning — battery low") so screen readers
+ *   announce the dot's semantic. Pass `null` only when a sibling
+ *   labelled composable carries the accessibility label (e.g.
+ *   `Row { GadgetStatusDot(null); Text("Online") }` — the Text node
+ *   provides the label and the dot is decorative).
  */
 @Composable
 fun GadgetStatusDot(
+    contentDescription: String?,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary,
     size: Dp = StatusDotDefaultSize,
 ) {
+    val a11yModifier = if (contentDescription != null) {
+        modifier.semantics { this.contentDescription = contentDescription }
+    } else {
+        modifier
+    }
     Box(
-        modifier = modifier
+        modifier = a11yModifier
             .size(size)
             .clip(CircleShape)
             .background(color),
@@ -190,9 +219,9 @@ private fun StatusIndicatorsPreview() = GadgetThemedPreview {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
-            GadgetStatusDot(color = MaterialTheme.colorScheme.primary)
+            GadgetStatusDot(contentDescription = null, color = MaterialTheme.colorScheme.primary)
             Text(text = "Online", style = MaterialTheme.typography.bodyMedium)
-            GadgetStatusDot(color = MaterialTheme.colorScheme.error)
+            GadgetStatusDot(contentDescription = null, color = MaterialTheme.colorScheme.error)
             Text(text = "Offline", style = MaterialTheme.typography.bodyMedium)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {

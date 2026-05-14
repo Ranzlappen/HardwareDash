@@ -26,6 +26,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
@@ -55,9 +61,15 @@ fun GadgetCircularProgress(
     strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth,
 ) {
     if (progress != null) {
+        val clamped = progress.coerceIn(0f, 1f)
         CircularProgressIndicator(
-            progress = { progress.coerceIn(0f, 1f) },
-            modifier = modifier,
+            progress = { clamped },
+            modifier = modifier.semantics {
+                progressBarRangeInfo = ProgressBarRangeInfo(
+                    current = clamped,
+                    range = 0f..1f,
+                )
+            },
             color = color,
             trackColor = trackColor,
             strokeWidth = strokeWidth,
@@ -90,9 +102,15 @@ fun GadgetLinearProgress(
     trackColor: Color = MaterialTheme.colorScheme.surfaceVariant,
 ) {
     if (progress != null) {
+        val clamped = progress.coerceIn(0f, 1f)
         LinearProgressIndicator(
-            progress = { progress.coerceIn(0f, 1f) },
-            modifier = modifier,
+            progress = { clamped },
+            modifier = modifier.semantics {
+                progressBarRangeInfo = ProgressBarRangeInfo(
+                    current = clamped,
+                    range = 0f..1f,
+                )
+            },
             color = color,
             trackColor = trackColor,
         )
@@ -126,13 +144,20 @@ fun GadgetShimmerBlock(
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.small,
 ) {
+    // A11y: announce that we're loading. Polite live region — screen
+    // readers wait for the user to finish their current sentence
+    // before announcing instead of interrupting.
+    val a11yModifier = modifier.semantics {
+        contentDescription = "Loading"
+        liveRegion = LiveRegionMode.Polite
+    }
     // Respect LocalReducedMotion: render a static surfaceVariant
     // block (still legible as "loading") instead of an animated
     // gradient sweep. Caller's intent (placeholder skeleton) is
     // preserved; the motion is suppressed.
     if (LocalReducedMotion.current) {
         Box(
-            modifier = modifier
+            modifier = a11yModifier
                 .clip(shape)
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         )
@@ -164,7 +189,7 @@ fun GadgetShimmerBlock(
         end = Offset(x = translateX, y = translateX),
     )
     Box(
-        modifier = modifier
+        modifier = a11yModifier
             .clip(shape)
             .background(brush = brush),
     )
