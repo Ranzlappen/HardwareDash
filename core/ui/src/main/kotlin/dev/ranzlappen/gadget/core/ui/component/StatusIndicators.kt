@@ -1,8 +1,11 @@
 package dev.ranzlappen.gadget.core.ui.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +24,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
  * Selectable filter chip with Gadget styling.
@@ -167,3 +172,31 @@ private val BadgePillPadding: PaddingValues = PaddingValues(
     horizontal = GadgetSpacing.Tiny,
     vertical = GadgetSpacing.Pico,
 )
+
+// ─── Previews ───────────────────────────────────────────────────────
+
+@GadgetPreviewLightDark
+@Composable
+private fun StatusIndicatorsPreview() = GadgetThemedPreview {
+    Column(verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Medium)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+            GadgetChip(selected = false, onClick = {}, label = "All")
+            GadgetChip(selected = true, onClick = {}, label = "Active")
+            GadgetChip(selected = false, onClick = {}, label = "Archived")
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(GadgetSpacing.Small),
+        ) {
+            GadgetStatusDot(color = MaterialTheme.colorScheme.primary)
+            Text(text = "Online", style = MaterialTheme.typography.bodyMedium)
+            GadgetStatusDot(color = MaterialTheme.colorScheme.error)
+            Text(text = "Offline", style = MaterialTheme.typography.bodyMedium)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+            GadgetBadge()
+            GadgetBadge(text = "3")
+            GadgetBadge(text = "99+")
+        }
+    }
+}

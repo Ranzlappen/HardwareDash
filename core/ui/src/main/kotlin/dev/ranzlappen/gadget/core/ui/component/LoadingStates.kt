@@ -7,7 +7,13 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +27,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
+import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
  * Circular progress indicator with Gadget styling.
@@ -175,3 +185,28 @@ private const val ShimmerEndOffset: Float = 1000f
 
 /** Full loop duration of the shimmer animation, in milliseconds. */
 private const val ShimmerDurationMillis: Int = 1500
+
+// ─── Previews ───────────────────────────────────────────────────────
+
+@GadgetPreviewLightDark
+@Composable
+private fun LoadingStatesPreview() = GadgetThemedPreview {
+    Column(verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Medium)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(GadgetSpacing.Medium)) {
+            GadgetCircularProgress(modifier = Modifier.size(32.dp))
+            GadgetCircularProgress(modifier = Modifier.size(32.dp), progress = 0.6f)
+        }
+        GadgetLinearProgress(modifier = Modifier.fillMaxWidth())
+        GadgetLinearProgress(modifier = Modifier.fillMaxWidth(), progress = 0.3f)
+        Row(horizontalArrangement = Arrangement.spacedBy(GadgetSpacing.Small)) {
+            GadgetShimmerBlock(modifier = Modifier.size(64.dp))
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Tiny),
+            ) {
+                GadgetShimmerBlock(modifier = Modifier.fillMaxWidth().height(16.dp))
+                GadgetShimmerBlock(modifier = Modifier.fillMaxWidth().height(12.dp))
+            }
+        }
+    }
+}

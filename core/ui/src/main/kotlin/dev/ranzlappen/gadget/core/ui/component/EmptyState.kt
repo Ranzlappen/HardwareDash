@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,6 +23,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
  * Centered "nothing to show" placeholder — the conventional empty
@@ -100,3 +104,18 @@ private val HeroIconSize: Dp = 64.dp
 
 /** Maximum subtitle lines before truncation kicks in. */
 private const val SubtitleMaxLines: Int = 4
+
+// ─── Previews ───────────────────────────────────────────────────────
+
+@GadgetPreviewLightDark
+@Composable
+private fun EmptyStatePreview() = GadgetThemedPreview {
+    GadgetEmptyState(
+        title = "No sensors yet",
+        subtitle = "Add your first sensor to start tracking live readouts on the dashboard.",
+        icon = Icons.Outlined.Sensors,
+        action = {
+            GadgetPrimaryButton(onClick = {}, text = "Add sensor")
+        },
+    )
+}

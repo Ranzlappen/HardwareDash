@@ -1,5 +1,7 @@
 package dev.ranzlappen.gadget.core.ui.component
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,12 +16,19 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
  * Outlined text field with Gadget styling.
@@ -183,3 +192,29 @@ private fun gadgetTextFieldColors(): TextFieldColors = OutlinedTextFieldDefaults
     errorBorderColor = MaterialTheme.colorScheme.error,
     errorLabelColor = MaterialTheme.colorScheme.error,
 )
+
+// ─── Previews ───────────────────────────────────────────────────────
+
+@GadgetPreviewLightDark
+@Composable
+private fun TextFieldsPreview() = GadgetThemedPreview {
+    Column(verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Medium)) {
+        var name by remember { mutableStateOf("") }
+        var search by remember { mutableStateOf("Rover-2") }
+        GadgetTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = "Sensor name",
+            placeholder = "e.g. Battery probe",
+        )
+        GadgetTextField(
+            value = "ABC-123",
+            onValueChange = {},
+            label = "ID",
+            isError = true,
+            supportingText = "ID is already in use.",
+        )
+        GadgetSearchField(value = search, onValueChange = { search = it })
+        GadgetSearchField(value = "", onValueChange = {})
+    }
+}
