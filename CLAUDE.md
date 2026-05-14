@@ -464,8 +464,27 @@ Self-Driving Documentation** batch:
 - [x] **1.1.3** — `WindowSizeClass`-aware shell
 - [x] **1.1.4** — Glass consistency for Secondary button
 - [x] **1.1.5** — Shimmer width polish (BoxWithConstraints-aware sweep)
-- [ ] **1.1.6** — `@Preview` matrix expansion (RTL / LargeFont / SizeClasses)
+- [x] **1.1.6** — `@Preview` matrix expansion (RTL / LargeFont / SizeClasses)
 - [ ] **1.1.7** — Final status refresh + catalog verification
+
+### Preview matrix policy
+
+Every component file that ships a public composable also ships at
+least one `@Composable` preview function. The annotation stack
+follows this policy:
+
+- **Always**: `@GadgetPreviewLightDark` + `@GadgetPreviewLargeFont`
+  + `@GadgetPreviewRtl`. Ensures every component is exercised on
+  the dark + light theme, at 200 % font scale, and under RTL
+  locale.
+- **For layout-driven components** (cards, list rows, empty states,
+  shimmer skeletons): add `@GadgetPreviewSizeClasses` so the
+  preview pane renders at Compact / Medium / Expanded widths. Skip
+  for components that don't change with width (buttons, chips,
+  badges, text fields, dots).
+
+Multi-preview annotations are defined in
+`core/ui/preview/GadgetPreviewMatrix.kt`.
 
 Open follow-up issues (Phase 2+ pickup):
 - [#89](https://github.com/Ranzlappen/HardwareDash/issues/89) —

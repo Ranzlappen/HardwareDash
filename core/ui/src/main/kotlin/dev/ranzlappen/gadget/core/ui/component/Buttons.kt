@@ -41,6 +41,7 @@ import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
@@ -442,6 +443,7 @@ private fun GlassyLabelledButton(
 
 @GadgetPreviewLightDark
 @GadgetPreviewLargeFont
+@GadgetPreviewRtl
 @Composable
 private fun GadgetButtonsPreview() = GadgetThemedPreview {
     val spacing = LocalGadgetTheme.current.spacing

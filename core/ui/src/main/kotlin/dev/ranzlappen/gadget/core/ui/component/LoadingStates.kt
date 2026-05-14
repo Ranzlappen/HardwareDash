@@ -39,7 +39,10 @@ import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewSizeClasses
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
@@ -248,6 +251,9 @@ private const val ShimmerDurationMillis: Int = 1500
 // ─── Previews ───────────────────────────────────────────────────────
 
 @GadgetPreviewLightDark
+@GadgetPreviewLargeFont
+@GadgetPreviewRtl
+@GadgetPreviewSizeClasses
 @Composable
 private fun LoadingStatesPreview() = GadgetThemedPreview {
     val spacing = LocalGadgetTheme.current.spacing

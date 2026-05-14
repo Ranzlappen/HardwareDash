@@ -1,6 +1,7 @@
 package dev.ranzlappen.gadget.core.ui.component
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,10 +21,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BatteryFull
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.glassSurface
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
+import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
  * Glassmorphic Material 3 dashboard tile.
@@ -98,6 +105,31 @@ fun DashCard(
             ) {
                 content()
             }
+        }
+    }
+}
+
+// ─── Previews ───────────────────────────────────────────────────────
+
+@GadgetPreviewLightDark
+@GadgetPreviewLargeFont
+@GadgetPreviewRtl
+@Composable
+private fun DashCardPreview() = GadgetThemedPreview {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+        DashCard(title = "Battery", icon = Icons.Outlined.BatteryFull) {
+            Text("87% — charging", style = MaterialTheme.typography.titleLarge)
+        }
+        DashCard(
+            title = "Wi-Fi (vivid)",
+            icon = Icons.Outlined.BatteryFull,
+            intensity = GlassIntensity.Vivid,
+        ) {
+            Text("Connected · −56 dBm")
+        }
+        DashCard {
+            Text("Content-only card — no header. Useful for short blurbs.")
         }
     }
 }

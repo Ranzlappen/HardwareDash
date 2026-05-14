@@ -15,7 +15,9 @@ import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedTransparency
 import dev.ranzlappen.gadget.core.designsystem.glassSurface
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
@@ -70,6 +72,8 @@ fun GlassSurface(
 // ─── Previews ───────────────────────────────────────────────────────
 
 @GadgetPreviewLightDark
+@GadgetPreviewLargeFont
+@GadgetPreviewRtl
 @Composable
 private fun GlassSurfacePreview() = GadgetThemedPreview {
     val spacing = LocalGadgetTheme.current.spacing

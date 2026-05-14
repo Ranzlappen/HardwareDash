@@ -25,7 +25,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewSizeClasses
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
@@ -117,6 +120,9 @@ private const val SubtitleMaxLines: Int = 4
 // ─── Previews ───────────────────────────────────────────────────────
 
 @GadgetPreviewLightDark
+@GadgetPreviewLargeFont
+@GadgetPreviewRtl
+@GadgetPreviewSizeClasses
 @Composable
 private fun EmptyStatePreview() = GadgetThemedPreview {
     GadgetEmptyState(

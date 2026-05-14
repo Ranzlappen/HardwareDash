@@ -28,7 +28,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
@@ -197,6 +199,8 @@ private fun gadgetTextFieldColors(): TextFieldColors = OutlinedTextFieldDefaults
 // ─── Previews ───────────────────────────────────────────────────────
 
 @GadgetPreviewLightDark
+@GadgetPreviewLargeFont
+@GadgetPreviewRtl
 @Composable
 private fun TextFieldsPreview() = GadgetThemedPreview {
     val spacing = LocalGadgetTheme.current.spacing

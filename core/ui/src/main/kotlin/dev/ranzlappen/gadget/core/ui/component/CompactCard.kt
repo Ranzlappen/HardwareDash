@@ -23,7 +23,10 @@ import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewSizeClasses
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
@@ -118,6 +121,9 @@ private val LeadingIconSize: Dp = 24.dp
 // ─── Previews ───────────────────────────────────────────────────────
 
 @GadgetPreviewLightDark
+@GadgetPreviewLargeFont
+@GadgetPreviewRtl
+@GadgetPreviewSizeClasses
 @Composable
 private fun CompactCardPreview() = GadgetThemedPreview {
     val spacing = LocalGadgetTheme.current.spacing
