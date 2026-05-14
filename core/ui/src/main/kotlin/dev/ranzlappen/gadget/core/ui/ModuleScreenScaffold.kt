@@ -3,6 +3,8 @@ package dev.ranzlappen.gadget.core.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -11,7 +13,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
+import dev.ranzlappen.gadget.core.ui.adaptive.GadgetLayoutMode
+import dev.ranzlappen.gadget.core.ui.adaptive.rememberLayoutMode
 
 /**
  * Per-module screen scaffold.
@@ -26,6 +30,13 @@ import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
  *      1. functional   — the module's primary content
  *      2. permissions  — required Android permissions table
  *      3. disclaimer   — collapsible safety / legal note
+ *  - An optional [secondaryPane] slot rendered to the **right** of
+ *    the primary column when the active [GadgetLayoutMode] is
+ *    [GadgetLayoutMode.TwoPane] or [GadgetLayoutMode.ThreePane]
+ *    (medium / expanded widths). On [GadgetLayoutMode.SinglePane]
+ *    the secondary pane is omitted entirely — callers should treat
+ *    it as "supplementary content for wider screens" rather than
+ *    something the primary flow depends on.
  *
  * Modules can add/remove sections freely — **this is only a common
  * pattern** for sensor/actuator modules, not enforced. A settings-style
@@ -51,24 +62,66 @@ fun ModuleScreenScaffold(
     functional: (@Composable ColumnScope.() -> Unit)? = null,
     permissions: (@Composable ColumnScope.() -> Unit)? = null,
     disclaimer: (@Composable ColumnScope.() -> Unit)? = null,
+    secondaryPane: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
-    val scroll = rememberScrollState()
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scroll)
-            .padding(GadgetSpacing.Medium),
-        verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Large),
-    ) {
-        if (title != null) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
+    val spacing = LocalGadgetTheme.current.spacing
+    val layoutMode = rememberLayoutMode()
+    val showSecondary = secondaryPane != null && layoutMode != GadgetLayoutMode.SinglePane
+
+    val primary: @Composable () -> Unit = {
+        val scroll = rememberScrollState()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scroll)
+                .padding(
+                    horizontal = spacing.medium,
+                    vertical = spacing.large,
+                ),
+            verticalArrangement = Arrangement.spacedBy(spacing.large),
+        ) {
+            if (title != null) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+            functional?.invoke(this)
+            permissions?.invoke(this)
+            disclaimer?.invoke(this)
         }
-        functional?.invoke(this)
-        permissions?.invoke(this)
-        disclaimer?.invoke(this)
+    }
+
+    if (showSecondary) {
+        Row(modifier = modifier.fillMaxSize()) {
+            // Primary takes ~60% on TwoPane, ~50% on ThreePane.
+            // weight()s give a clean ratio without committing to dp
+            // breakpoints inside the scaffold.
+            val primaryWeight = when (layoutMode) {
+                GadgetLayoutMode.TwoPane -> 1.5f
+                GadgetLayoutMode.ThreePane -> 1f
+                GadgetLayoutMode.SinglePane -> 1f
+            }
+            Row(modifier = Modifier.weight(primaryWeight)) {
+                primary()
+            }
+            val secondaryScroll = rememberScrollState()
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .verticalScroll(secondaryScroll)
+                    .padding(
+                        horizontal = spacing.medium,
+                        vertical = spacing.large,
+                    ),
+                verticalArrangement = Arrangement.spacedBy(spacing.large),
+            ) {
+                secondaryPane!!.invoke(this)
+            }
+        }
+    } else {
+        Row(modifier = modifier) { primary() }
     }
 }

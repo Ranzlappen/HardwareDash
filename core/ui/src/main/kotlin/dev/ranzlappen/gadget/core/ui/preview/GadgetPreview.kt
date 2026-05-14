@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 
 /**
@@ -38,11 +39,12 @@ fun GadgetThemedPreview(
     content: @Composable () -> Unit,
 ) {
     GadgetTheme(useDarkTheme = darkTheme, useDynamicColor = useDynamicColor) {
+        val spacing = LocalGadgetTheme.current.spacing
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(GadgetSpacing.Medium),
+                .padding(spacing.medium),
         ) {
             content()
         }

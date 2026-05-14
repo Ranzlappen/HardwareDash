@@ -15,7 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 
 /**
  * Top-of-screen header — title, optional subtitle, trailing action slot.
@@ -41,14 +41,15 @@ fun ScreenHeader(
     subtitle: String? = null,
     actions: @Composable (() -> Unit)? = null,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                start = GadgetSpacing.Medium,
-                end = GadgetSpacing.Medium,
-                top = GadgetSpacing.Large,
-                bottom = GadgetSpacing.Medium,
+                start = spacing.medium,
+                end = spacing.medium,
+                top = spacing.large,
+                bottom = spacing.medium,
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {

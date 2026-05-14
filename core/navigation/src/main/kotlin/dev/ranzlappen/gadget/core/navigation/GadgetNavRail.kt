@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -34,6 +35,7 @@ fun GadgetNavRail(
     navController: NavHostController,
     destinations: List<GadgetDestination>,
     modifier: Modifier = Modifier,
+    showLabels: Boolean = false,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -59,6 +61,10 @@ fun GadgetNavRail(
                         contentDescription = destination.label,
                     )
                 },
+                label = if (showLabels) {
+                    { Text(text = destination.label) }
+                } else null,
+                alwaysShowLabel = showLabels,
                 colors = NavigationRailItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.primary,
                     indicatorColor = MaterialTheme.colorScheme.primaryContainer,

@@ -8,9 +8,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.SectionHeaderEmphasis.Loud
 import dev.ranzlappen.gadget.core.ui.component.SectionHeaderEmphasis.Quiet
-import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
 
 /**
  * Visual weight presets for [SectionHeader].
@@ -41,12 +41,13 @@ fun SectionHeader(
     emphasis: SectionHeaderEmphasis = Quiet,
     trailing: @Composable (() -> Unit)? = null,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                horizontal = GadgetSpacing.Medium,
-                vertical = GadgetSpacing.Small,
+                horizontal = spacing.medium,
+                vertical = spacing.small,
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
