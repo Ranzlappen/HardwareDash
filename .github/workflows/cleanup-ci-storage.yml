@@ -98,8 +98,12 @@ jobs:
             if [ "$n" -gt 0 ]; then
               echo "| Name | Size (MB) | Created |"
               echo "|---|---:|---|"
-              awk -F'\t' '{ mb = int($3/1024/1024); printf "| %s | %s | %s |\n", $2, mb, $4 }' \
-                "$RUNNER_TEMP/artifacts.tsv" | head -60
+              # Truncation is done inside awk (NR<=60) rather than via
+              # `| head -60` because piping into head triggers SIGPIPE in
+              # awk once head has read its 60 lines, and `set -o pipefail`
+              # (active here) propagates that as exit-141 failure.
+              awk -F'\t' 'NR<=60 { mb = int($3/1024/1024); printf "| %s | %s | %s |\n", $2, mb, $4 }' \
+                "$RUNNER_TEMP/artifacts.tsv"
               if [ "$n" -gt 60 ]; then
                 echo "| _(truncated; $((n - 60)) more)_ |  |  |"
               fi
