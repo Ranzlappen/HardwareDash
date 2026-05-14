@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  1×1 strobe widget layout. Mirrors widget_flashlight.xml structure
+  but with the strobe icon. Provider attaches a PendingIntent that
+  fires ACTION_STROBE_TOGGLE.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp">
+
+    <ImageButton
+        android:id="@+id/widget_strobe_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/widget_strobe_label"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_strobe" />
+
+</FrameLayout>

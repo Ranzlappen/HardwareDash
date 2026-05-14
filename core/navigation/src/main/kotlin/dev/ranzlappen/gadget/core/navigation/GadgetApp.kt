@@ -1,6 +1,7 @@
 package dev.ranzlappen.gadget.core.navigation
 
 import android.app.Activity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,6 +57,10 @@ fun GadgetApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     startDestination: GadgetDestination = GadgetDestination.Dashboard,
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    useDynamicColor: Boolean = true,
+    reducedMotionOverride: Boolean? = null,
+    reducedTransparency: Boolean = false,
     builder: NavGraphBuilder.() -> Unit,
 ) {
     // Compute the WindowSizeClass once at the top of the shell and
@@ -66,7 +71,12 @@ fun GadgetApp(
     // downstream consumer that reads LocalWindowSizeClass.current will
     // throw — explicit beats silently rendering the wrong layout.
     val activity = LocalContext.current as? Activity
-    GadgetTheme {
+    GadgetTheme(
+        useDarkTheme = useDarkTheme,
+        useDynamicColor = useDynamicColor,
+        reducedMotionOverride = reducedMotionOverride,
+        reducedTransparency = reducedTransparency,
+    ) {
         Surface(
             modifier = modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,

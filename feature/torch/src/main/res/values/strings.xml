@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tile + widget labels surfaced in system UI. Plain text only;
+         localization handled by future :core:localization batch. -->
+    <string name="torch_tile_label">Flashlight</string>
+    <string name="widget_flashlight_label">Flashlight</string>
+    <string name="widget_strobe_label">Strobe</string>
+    <string name="widget_flashlight_description">Toggle the device flashlight.</string>
+    <string name="widget_strobe_description">Toggle a 5 Hz flashlight strobe.</string>
+
+    <!-- Foreground-service notification text. -->
+    <string name="strobe_notification_channel_name">Strobe service</string>
+    <string name="strobe_notification_title">Strobe active</string>
+    <string name="strobe_notification_text">Tap the widget to stop.</string>
+</resources>

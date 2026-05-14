@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  1x1 flashlight widget layout — a single ImageButton centred in
+  the cell. The provider attaches a PendingIntent.broadcast to the
+  ImageButton (id=@+id/widget_flashlight_button) in onUpdate().
+
+  Background uses the system default widget chrome
+  (?android:attr/selectableItemBackground) so it adapts to the
+  launcher's widget container styling.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp">
+
+    <ImageButton
+        android:id="@+id/widget_flashlight_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/widget_flashlight_label"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_flashlight_on" />
+
+</FrameLayout>
