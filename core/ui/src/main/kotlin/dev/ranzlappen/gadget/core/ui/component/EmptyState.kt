@@ -1,0 +1,102 @@
+package dev.ranzlappen.gadget.core.ui.component
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+
+/**
+ * Centered "nothing to show" placeholder — the conventional empty
+ * list / no results / first-run-haven't-set-this-up-yet composable.
+ *
+ * Layout (top → bottom): optional hero [icon] · [title] · optional
+ * [subtitle] · optional [action] slot. All slots after [title] are
+ * conditional — passing `null` omits them from the column entirely
+ * (no empty spacer left behind by `Arrangement.spacedBy`).
+ *
+ * [title] truncates to 2 lines with [TextOverflow.Ellipsis]; the
+ * subtitle wraps freely up to 4 lines then truncates. The [action]
+ * slot accepts any composable — typically a [GadgetPrimaryButton]
+ * for a primary CTA ("Add your first sensor") or a
+ * [GadgetTertiaryButton] for a lower-emphasis call ("Learn more").
+ *
+ * The composable centres itself in the parent. Wrap in a
+ * [Modifier.fillMaxSize] caller if you want it to vertically centre
+ * within a full screen; otherwise it sizes to its content.
+ */
+@Composable
+fun GadgetEmptyState(
+    title: String,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    subtitle: String? = null,
+    action: (@Composable () -> Unit)? = null,
+    contentPadding: PaddingValues = PaddingValues(GadgetSpacing.Large),
+) {
+    Box(
+        modifier = modifier.padding(contentPadding),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(GadgetSpacing.Small),
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(HeroIconSize),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = SubtitleMaxLines,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            if (action != null) {
+                Spacer(modifier = Modifier.height(GadgetSpacing.Small))
+                action()
+            }
+        }
+    }
+}
+
+// ─── Internals ──────────────────────────────────────────────────────
+
+/** Fixed-size design token: hero icon at the top of the empty state. */
+private val HeroIconSize: Dp = 64.dp
+
+/** Maximum subtitle lines before truncation kicks in. */
+private const val SubtitleMaxLines: Int = 4
