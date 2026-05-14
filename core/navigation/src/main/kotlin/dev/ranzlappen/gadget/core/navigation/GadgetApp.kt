@@ -79,7 +79,7 @@ fun GadgetApp(
             // re-pad — no double padding in landscape / 3-button-nav.
             // The outer Surface stays full-bleed so the theme background
             // colour paints behind the transparent bars.
-            val shell: @Composable () -> Unit = {
+            val shell: @Composable (showLabels: Boolean) -> Unit = { showLabels ->
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
@@ -88,6 +88,7 @@ fun GadgetApp(
                     GadgetNavRail(
                         navController = navController,
                         destinations = GadgetDestination.topLevel,
+                        showLabels = showLabels,
                     )
                     GadgetNavHost(
                         modifier = Modifier.weight(1f),
@@ -99,15 +100,24 @@ fun GadgetApp(
             }
             if (activity != null) {
                 val windowSizeClass = calculateWindowSizeClass(activity)
+                // Show rail labels on Expanded widths (tablets,
+                // chromebooks, foldable open). On Compact / Medium
+                // the rail stays icon-only to maximise content area.
+                // Compact landscape → bottom-bar collapse is a
+                // Phase-2 refinement.
+                val showLabels = windowSizeClass.widthSizeClass ==
+                    androidx.compose.material3.windowsizeclass.WindowWidthSizeClass.Expanded
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
-                    shell()
+                    shell(showLabels)
                 }
             } else {
                 // No activity context — render the shell without a
                 // WindowSizeClass provider. Downstream consumers that
                 // read LocalWindowSizeClass.current will throw with the
-                // explanatory error defined on the local.
-                shell()
+                // explanatory error defined on the local. Rail stays
+                // icon-only (showLabels = false) without size-class
+                // info to derive labelling decision.
+                shell(false)
             }
         }
     }

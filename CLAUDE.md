@@ -115,8 +115,28 @@ What every component **must** do for accessibility:
     breakpoint decisions (Compact / Medium / Expanded). For most
     layout decisions, use the higher-level `rememberLayoutMode()`
     helper in `core/ui/adaptive/AdaptiveLayout.kt` which returns
-    `SinglePane` / `TwoPane` / `ThreePane`.
-12. Foldable-posture detection (hinge / tabletop) is **deferred**
+    `SinglePane` / `TwoPane` / `ThreePane`:
+    ```kotlin
+    when (rememberLayoutMode()) {
+        SinglePane -> CompactDashboard()
+        TwoPane, ThreePane -> SplitPaneDashboard()
+    }
+    ```
+    `WindowSizeClass` is the implementation detail (and its API may
+    shift between M3 versions); `GadgetLayoutMode` is the stable
+    seam. Use `BoxWithConstraintsAdaptive { mode -> … }` when a
+    layout needs both pixel constraints and the semantic mode.
+12. The shell adapts automatically: `GadgetApp` passes
+    `showLabels = true` to `GadgetNavRail` when the active width
+    class is **Expanded** (tablet landscape, Chromebook). Compact /
+    Medium widths keep the rail icon-only to maximise content area.
+    Compact-landscape → bottom-bar collapse is queued as Phase-2
+    refinement.
+13. The `ModuleScreenScaffold` exposes an optional `secondaryPane`
+    slot rendered to the right of the primary column when
+    `rememberLayoutMode()` is `TwoPane` / `ThreePane`. Wired
+    ahead of need — no Phase-1 consumer yet.
+14. Foldable-posture detection (hinge / tabletop) is **deferred**
     until a real consumer needs it — see open issue
     [#89](https://github.com/Ranzlappen/HardwareDash/issues/89).
     Don't pull in `material3-adaptive` ad-hoc.
@@ -437,7 +457,7 @@ Self-Driving Documentation** batch:
 - [x] **1.1.0** — `CLAUDE.md` SSOT foundation rewrite
 - [x] **1.1.1** — `LocalGadgetTheme` full wiring (closes #90)
 - [x] **1.1.2** — Accessibility semantics sweep
-- [ ] **1.1.3** — `WindowSizeClass`-aware shell
+- [x] **1.1.3** — `WindowSizeClass`-aware shell
 - [ ] **1.1.4** — Glass consistency for Secondary button
 - [ ] **1.1.5** — Shimmer width + blur-fallback polish
 - [ ] **1.1.6** — `@Preview` matrix expansion (RTL / LargeFont / SizeClasses)
