@@ -38,13 +38,15 @@ jobs:
         include:
           - flavor: standard
             buildType: debug
-            assembleTask: assembleStandardDebug
+            assembleTask: "assembleStandardDebug assembleStandardRelease"
             outputDir: app/build/outputs/apk/standard/debug
+            releaseOutputDir: app/build/outputs/apk/standard/release
             artifactName: standard-debug
           - flavor: rooted
             buildType: debug
-            assembleTask: assembleRootedDebug
+            assembleTask: "assembleRootedDebug assembleRootedRelease"
             outputDir: app/build/outputs/apk/rooted/debug
+            releaseOutputDir: app/build/outputs/apk/rooted/release
             artifactName: rooted-debug
             extraGradleProps: "-PenableLsposedModule=true"
 
@@ -71,8 +73,12 @@ jobs:
           echo "BUILD_AUTHOR=${{ github.actor }}" >> $GITHUB_ENV
           echo "APP_DESCRIPTION=Gadget — monitor and control device sensors, camera, audio, and more" >> $GITHUB_ENV
 
-      # AGP-managed debug keystore, no signing properties needed.
-      - name: Build debug (${{ matrix.flavor }})
+      # AGP-managed debug keystore signs the debug APK; the release APK is
+      # built unsigned (no -Pandroid.injected.signing.* props). The release
+      # build runs solely to exercise R8 / minify*ReleaseWithR8 /
+      # shrinkReleaseRes on the same commit; its APK is not uploaded
+      # (build-release.yml produces the signed release artifacts).
+      - name: Build debug + release (${{ matrix.flavor }})
         run: |
           ./gradlew ${{ matrix.assembleTask }} \
             -PCI_VERSION_CODE=${{ env.VERSION_CODE }} \
@@ -84,7 +90,7 @@ jobs:
             -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}" \
             ${{ matrix.extraGradleProps }}
 
-      # ─── Standard-APK leakage assertion ──────────────────────────────────
+      # ─── Standard-APK leakage assertion (debug + release) ───────────────
       # Belt-and-suspenders check that the standard APK does not bundle any
       # rooted assets, libsu strings, the LSPosed module, or root-tier
       # permissions. Source-set scoping in AGP makes this impossible by
@@ -93,63 +99,82 @@ jobs:
       # strings/assets/permissions are printed and the step emits a
       # ::error:: annotation so the failure surfaces inline on the PR diff.
       #
+      # Scans BOTH the debug APK and the R8-minified release APK so an
+      # R8/shrinker reshuffle can't sneak rooted bytes into the release
+      # build (release dex layout differs from debug). Matches the
+      # CLAUDE.md invariant that the gate runs on both assemble outputs.
+      #
       # Implementation note: dex and AndroidManifest.xml are extracted via
       # `unzip -p` and inspected with `strings`. We deliberately AVOID
       # `aapt dump permissions` here — its path is not stable across
       # GitHub-hosted runner images and silent fail-open was the bug that
       # an earlier version of this gate shipped with.
-      - name: Assert standard APK has no rooted leakage
+      - name: Assert standard APK has no rooted leakage (debug + release)
         if: matrix.flavor == 'standard'
         run: |
           set -euo pipefail
-          APK=$(find ${{ matrix.outputDir }} -name "*.apk" -print -quit)
-          test -n "$APK" || { echo "::error::No standard APK produced in ${{ matrix.outputDir }}"; exit 1; }
-          echo "Inspecting: $APK"
-
           fail() { echo "::error::$1"; exit 1; }
 
-          WORK=$(mktemp -d)
-          trap 'rm -rf "$WORK"' EXIT
+          scan_apk() {
+            local APK="$1"
+            local LABEL="$2"
+            echo "── Inspecting ${LABEL}: ${APK} ──"
 
-          unzip -p "$APK" '*.dex' > "$WORK/dexes.bin" 2>/dev/null || true
-          test -s "$WORK/dexes.bin" || fail "Could not extract any dex from $APK"
+            local WORK
+            WORK=$(mktemp -d)
 
-          unzip -p "$APK" AndroidManifest.xml > "$WORK/manifest.bin" 2>/dev/null || true
-          test -s "$WORK/manifest.bin" || fail "Could not extract AndroidManifest.xml from $APK"
+            unzip -p "$APK" '*.dex' > "$WORK/dexes.bin" 2>/dev/null || true
+            test -s "$WORK/dexes.bin" || fail "Could not extract any dex from $APK"
 
-          HITS=$(strings -a -n 6 "$WORK/dexes.bin" \
-            | grep -iE 'topjohnwu|libsu|/system/(bin|xbin)/su|chainfire|hiddenapibypass|me\.weishu\.kernelsu|me\.bmax\.apatch|org\.lsposed\.|/data/adb/(magisk|modules|ksu)' \
-            | sort -u || true)
-          if [ -n "$HITS" ]; then
-            echo "Standard APK contains rooted strings:"
-            echo "$HITS"
-            fail "Standard APK contains rooted strings (see above)"
-          fi
+            unzip -p "$APK" AndroidManifest.xml > "$WORK/manifest.bin" 2>/dev/null || true
+            test -s "$WORK/manifest.bin" || fail "Could not extract AndroidManifest.xml from $APK"
 
-          ASSETS=$(unzip -l "$APK" | awk '{print $NF}' \
-            | grep -iE 'lsposed|magisk|spoofer|\.magisk\.|/su/|/ksu/|kernelsu|apatch' || true)
-          if [ -n "$ASSETS" ]; then
-            echo "Standard APK contains rooted assets:"
-            echo "$ASSETS"
-            fail "Standard APK contains rooted assets (see above)"
-          fi
+            local HITS
+            HITS=$(strings -a -n 6 "$WORK/dexes.bin" \
+              | grep -iE 'topjohnwu|libsu|/system/(bin|xbin)/su|chainfire|hiddenapibypass|me\.weishu\.kernelsu|me\.bmax\.apatch|org\.lsposed\.|/data/adb/(magisk|modules|ksu)' \
+              | sort -u || true)
+            if [ -n "$HITS" ]; then
+              echo "${LABEL} APK contains rooted strings:"
+              echo "$HITS"
+              fail "${LABEL} APK contains rooted strings (see above)"
+            fi
 
-          {
-            strings -a -n 8 "$WORK/manifest.bin"
-            tr -d '\0' < "$WORK/manifest.bin" | strings -a -n 8
-            strings -a -e l -n 8 "$WORK/manifest.bin"
-          } > "$WORK/manifest.txt"
-          echo "Manifest text extraction: $(wc -l < "$WORK/manifest.txt") lines"
+            local ASSETS
+            ASSETS=$(unzip -l "$APK" | awk '{print $NF}' \
+              | grep -iE 'lsposed|magisk|spoofer|\.magisk\.|/su/|/ksu/|kernelsu|apatch' || true)
+            if [ -n "$ASSETS" ]; then
+              echo "${LABEL} APK contains rooted assets:"
+              echo "$ASSETS"
+              fail "${LABEL} APK contains rooted assets (see above)"
+            fi
 
-          PERMS=$(grep -iE 'WRITE_SECURE_SETTINGS|MOUNT_UNMOUNT|INSTALL_PACKAGES|DELETE_PACKAGES|READ_LOGS|MANAGE_USERS|CHANGE_CONFIGURATION|MASTER_CLEAR|REBOOT|ACCESS_SUPERUSER' "$WORK/manifest.txt" \
-            | sort -u || true)
-          if [ -n "$PERMS" ]; then
-            echo "Standard APK declares root-tier permissions:"
-            echo "$PERMS"
-            fail "Standard APK declares root-tier permissions (see above)"
-          fi
+            {
+              strings -a -n 8 "$WORK/manifest.bin"
+              tr -d '\0' < "$WORK/manifest.bin" | strings -a -n 8
+              strings -a -e l -n 8 "$WORK/manifest.bin"
+            } > "$WORK/manifest.txt"
+            echo "Manifest text extraction: $(wc -l < "$WORK/manifest.txt") lines"
 
-          echo "✅ Standard APK clean — no rooted leakage detected"
+            local PERMS
+            PERMS=$(grep -iE 'WRITE_SECURE_SETTINGS|MOUNT_UNMOUNT|INSTALL_PACKAGES|DELETE_PACKAGES|READ_LOGS|MANAGE_USERS|CHANGE_CONFIGURATION|MASTER_CLEAR|REBOOT|ACCESS_SUPERUSER' "$WORK/manifest.txt" \
+              | sort -u || true)
+            if [ -n "$PERMS" ]; then
+              echo "${LABEL} APK declares root-tier permissions:"
+              echo "$PERMS"
+              fail "${LABEL} APK declares root-tier permissions (see above)"
+            fi
+
+            rm -rf "$WORK"
+            echo "✅ ${LABEL} APK clean — no rooted leakage detected"
+          }
+
+          DEBUG_APK=$(find ${{ matrix.outputDir }} -name "*.apk" -print -quit)
+          test -n "$DEBUG_APK" || fail "No standard debug APK produced in ${{ matrix.outputDir }}"
+          scan_apk "$DEBUG_APK" "standard-debug"
+
+          RELEASE_APK=$(find ${{ matrix.releaseOutputDir }} -name "*.apk" -print -quit)
+          test -n "$RELEASE_APK" || fail "No standard release APK produced in ${{ matrix.releaseOutputDir }}"
+          scan_apk "$RELEASE_APK" "standard-release"
 
       # ─── Rooted-APK asset inventory (positive verification) ─────────────
       - name: Inventory rooted APK assets
