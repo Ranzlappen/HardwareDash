@@ -218,7 +218,7 @@ private fun Modifier.clickableLabel(
  * parsing fails the commit is silently skipped (caller stays at the
  * previous value).
  */
-private inline fun commitText(
+private fun commitText(
     input: String,
     parser: (String) -> Float?,
     range: ClosedFloatingPointRange<Float>,
