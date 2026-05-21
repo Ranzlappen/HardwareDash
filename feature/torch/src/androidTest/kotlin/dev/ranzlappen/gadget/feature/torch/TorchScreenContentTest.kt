@@ -37,24 +37,41 @@ class TorchScreenContentTest {
 
     private val res = InstrumentationRegistry.getInstrumentation().targetContext.resources
 
-    @Test
-    fun rendersOffStateWhenTorchIsOff() {
+    private fun setContent(
+        state: TorchScreenState,
+        onToggleClick: () -> Unit = {},
+        onStrobeToggle: () -> Unit = {},
+        onRateChange: (Float) -> Unit = {},
+        onRateCommit: () -> Unit = {},
+        onAddFlashlight: () -> Unit = {},
+        onAddStrobe: () -> Unit = {},
+        onEditWidget: (SavedTorchWidget) -> Unit = {},
+        onDeleteWidget: (SavedTorchWidget) -> Unit = {},
+    ) {
         composeTestRule.setContent {
             GadgetTestTheme {
                 TorchScreenContent(
-                    state = TorchScreenState.Initial.copy(
-                        torch = TorchState(isOn = false, isAvailable = true),
-                    ),
-                    onToggleClick = {},
-                    onRateChange = {},
-                    onAddFlashlight = {},
-                    onAddStrobe = {},
-                    onEditWidget = {},
-                    onDeleteWidget = {},
+                    state = state,
+                    onToggleClick = onToggleClick,
+                    onStrobeToggle = onStrobeToggle,
+                    onRateChange = onRateChange,
+                    onRateCommit = onRateCommit,
+                    onAddFlashlight = onAddFlashlight,
+                    onAddStrobe = onAddStrobe,
+                    onEditWidget = onEditWidget,
+                    onDeleteWidget = onDeleteWidget,
                 )
             }
         }
+    }
 
+    @Test
+    fun rendersOffStateWhenTorchIsOff() {
+        setContent(
+            TorchScreenState.Initial.copy(
+                torch = TorchState(isOn = false, isAvailable = true),
+            ),
+        )
         composeTestRule.onNodeWithText(res.getString(R.string.torch_state_off))
             .assertIsDisplayed()
         composeTestRule.onNodeWithText(res.getString(R.string.torch_status_off))
@@ -63,48 +80,26 @@ class TorchScreenContentTest {
 
     @Test
     fun rendersOnStateWhenTorchIsOn() {
-        composeTestRule.setContent {
-            GadgetTestTheme {
-                TorchScreenContent(
-                    state = TorchScreenState.Initial.copy(
-                        torch = TorchState(isOn = true, isAvailable = true),
-                    ),
-                    onToggleClick = {},
-                    onRateChange = {},
-                    onAddFlashlight = {},
-                    onAddStrobe = {},
-                    onEditWidget = {},
-                    onDeleteWidget = {},
-                )
-            }
-        }
-
+        setContent(
+            TorchScreenState.Initial.copy(
+                torch = TorchState(isOn = true, isAvailable = true),
+            ),
+        )
         composeTestRule.onNodeWithText(res.getString(R.string.torch_state_on))
             .assertIsDisplayed()
     }
 
     @Test
     fun toggleFabIsDisabledWhenUnavailable() {
-        composeTestRule.setContent {
-            GadgetTestTheme {
-                TorchScreenContent(
-                    state = TorchScreenState.Initial.copy(
-                        torch = TorchState(
-                            isOn = false,
-                            isAvailable = false,
-                            error = TorchError.NoFlashUnit,
-                        ),
-                    ),
-                    onToggleClick = {},
-                    onRateChange = {},
-                    onAddFlashlight = {},
-                    onAddStrobe = {},
-                    onEditWidget = {},
-                    onDeleteWidget = {},
-                )
-            }
-        }
-
+        setContent(
+            TorchScreenState.Initial.copy(
+                torch = TorchState(
+                    isOn = false,
+                    isAvailable = false,
+                    error = TorchError.NoFlashUnit,
+                ),
+            ),
+        )
         composeTestRule
             .onNodeWithContentDescription(res.getString(R.string.torch_action_turn_on))
             .assertIsNotEnabled()
@@ -113,46 +108,22 @@ class TorchScreenContentTest {
     @Test
     fun toggleClickInvokesCallback() {
         var clicks = 0
-        composeTestRule.setContent {
-            GadgetTestTheme {
-                TorchScreenContent(
-                    state = TorchScreenState.Initial.copy(
-                        torch = TorchState(isOn = false, isAvailable = true),
-                    ),
-                    onToggleClick = { clicks += 1 },
-                    onRateChange = {},
-                    onAddFlashlight = {},
-                    onAddStrobe = {},
-                    onEditWidget = {},
-                    onDeleteWidget = {},
-                )
-            }
-        }
-
+        setContent(
+            TorchScreenState.Initial.copy(
+                torch = TorchState(isOn = false, isAvailable = true),
+            ),
+            onToggleClick = { clicks += 1 },
+        )
         composeTestRule
             .onNodeWithContentDescription(res.getString(R.string.torch_action_turn_on))
             .assertIsEnabled()
             .performClick()
-
         assertEquals(1, clicks)
     }
 
     @Test
     fun emptyWidgetsListShowsEmptyState() {
-        composeTestRule.setContent {
-            GadgetTestTheme {
-                TorchScreenContent(
-                    state = TorchScreenState.Initial,
-                    onToggleClick = {},
-                    onRateChange = {},
-                    onAddFlashlight = {},
-                    onAddStrobe = {},
-                    onEditWidget = {},
-                    onDeleteWidget = {},
-                )
-            }
-        }
-
+        setContent(TorchScreenState.Initial)
         composeTestRule
             .onNodeWithText(res.getString(R.string.torch_widget_list_empty_title))
             .assertIsDisplayed()
@@ -171,20 +142,7 @@ class TorchScreenContentTest {
                 ),
             ),
         )
-        composeTestRule.setContent {
-            GadgetTestTheme {
-                TorchScreenContent(
-                    state = TorchScreenState.Initial.copy(widgets = saved),
-                    onToggleClick = {},
-                    onRateChange = {},
-                    onAddFlashlight = {},
-                    onAddStrobe = {},
-                    onEditWidget = {},
-                    onDeleteWidget = {},
-                )
-            }
-        }
-
+        setContent(TorchScreenState.Initial.copy(widgets = saved))
         composeTestRule.onNodeWithText("Loud strobe").assertIsDisplayed()
     }
 
@@ -198,24 +156,28 @@ class TorchScreenContentTest {
             ),
         )
         var deleted: SavedTorchWidget? = null
-        composeTestRule.setContent {
-            GadgetTestTheme {
-                TorchScreenContent(
-                    state = TorchScreenState.Initial.copy(widgets = listOf(widget)),
-                    onToggleClick = {},
-                    onRateChange = {},
-                    onAddFlashlight = {},
-                    onAddStrobe = {},
-                    onEditWidget = {},
-                    onDeleteWidget = { deleted = it },
-                )
-            }
-        }
-
+        setContent(
+            TorchScreenState.Initial.copy(widgets = listOf(widget)),
+            onDeleteWidget = { deleted = it },
+        )
         composeTestRule
             .onNodeWithContentDescription(res.getString(R.string.torch_widget_list_action_delete))
             .performClick()
-
         assertTrue(deleted == widget)
+    }
+
+    @Test
+    fun strobeButtonStartsAndStopsViaCallback() {
+        var toggles = 0
+        setContent(
+            TorchScreenState.Initial.copy(
+                torch = TorchState(isOn = false, isAvailable = true),
+            ),
+            onStrobeToggle = { toggles += 1 },
+        )
+        composeTestRule
+            .onNodeWithText(res.getString(R.string.torch_action_strobe_start))
+            .performClick()
+        assertEquals(1, toggles)
     }
 }

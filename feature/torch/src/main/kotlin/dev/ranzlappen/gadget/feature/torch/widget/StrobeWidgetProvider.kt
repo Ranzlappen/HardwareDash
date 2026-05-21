@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import android.widget.RemoteViews
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -14,14 +15,15 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearanceRenderer
+import dev.ranzlappen.gadget.feature.torch.widget.feedback.WidgetFeedbackDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
- * Home-screen strobe widget — 1×1 cell, single ImageButton.
+ * Home-screen strobe widget — 1×1 cell.
  *
  * Tapping the widget toggles [StrobeService]:
  * - If the service isn't running ([StrobeService.isRunning] == false),
@@ -29,21 +31,13 @@ import kotlinx.coroutines.runBlocking
  *   per-instance [TorchWidgetConfig] as Intent extras (rate Hz +
  *   SOS flag).
  * - If the service IS running, fire an [StrobeService.ACTION_STOP]
- *   intent so the service shuts down cleanly (cancels the loop,
- *   turns the torch off, dismisses the foreground notification).
+ *   intent so the service shuts down cleanly.
  *
- * The widget icon flips between `ic_strobe` (idle) and `ic_strobe_on`
- * (running) in [onUpdate].
- *
- * Per-instance config: each widget owns a [TorchWidgetConfig] entry
- * in [TorchWidgetConfigRepository] keyed by `appWidgetId`. Config is
- * created at pin time (see [TorchWidgetCreator] +
- * [WidgetPinSuccessReceiver]) and deleted by [onDeleted] when the
- * widget leaves the home screen.
- *
- * The SOS-mode flag in the config is plumbed all the way to the
- * service but its playback pattern is deferred — tracked at
- * https://github.com/Ranzlappen/HardwareDash/issues/96.
+ * Each pinned instance owns a [TorchWidgetConfig] keyed by
+ * `appWidgetId`. The config drives rate, SOS, and the visual
+ * appearance (background mode, icon style, tap animation, toggle
+ * feedback). Self-heal applies if a config goes missing — see
+ * [FlashlightWidgetProvider] for the canonical write-up.
  */
 class StrobeWidgetProvider : AppWidgetProvider() {
 
@@ -52,9 +46,27 @@ class StrobeWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
+        val ep = entry(context)
+        val repo = ep.widgetRepository()
+        val configs = repo.all.value
         val running = StrobeService.isRunning
+
         appWidgetIds.forEach { id ->
-            appWidgetManager.updateAppWidget(id, buildRemoteViews(context, id, running))
+            val config = configs[id] ?: run {
+                val default = TorchWidgetConfig(
+                    type = WidgetType.Strobe,
+                    displayName = context.getString(R.string.torch_widget_default_name_strobe),
+                )
+                Log.w(PendingTorchWidgetConfigs.TAG, "StrobeWidget self-heal id=$id")
+                CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+                    repo.save(id, default)
+                }
+                default
+            }
+            appWidgetManager.updateAppWidget(
+                id,
+                buildRemoteViews(context, id, running, config),
+            )
         }
     }
 
@@ -65,22 +77,20 @@ class StrobeWidgetProvider : AppWidgetProvider() {
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID,
         )
+        val ep = entry(context)
+        val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            ep.widgetRepository().all.value[appWidgetId]
+        } else null
+
+        val willBeRunning: Boolean
         if (StrobeService.isRunning) {
             val stopIntent = Intent(context, StrobeService::class.java)
                 .setAction(StrobeService.ACTION_STOP)
             context.startService(stopIntent)
+            willBeRunning = false
         } else {
-            // Lookup is fast (a Preferences DataStore one-shot read)
-            // and we need the rate/SOS before launching the service.
-            // `runBlocking` is safe here — BroadcastReceiver.onReceive
-            // already runs on a binder-pool thread and the read
-            // completes in single-digit ms.
-            val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                runBlocking { entry(context).widgetRepository().get(appWidgetId) }
-            } else null
             val rateHz = config?.rateHz ?: TorchWidgetConfig.DEFAULT_RATE_HZ
             val sosMode = config?.sosMode ?: false
-
             val startIntent = Intent(context, StrobeService::class.java).apply {
                 putExtra(StrobeService.EXTRA_RATE_HZ, rateHz)
                 putExtra(StrobeService.EXTRA_SOS_MODE, sosMode)
@@ -90,10 +100,19 @@ class StrobeWidgetProvider : AppWidgetProvider() {
             } else {
                 context.startService(startIntent)
             }
+            willBeRunning = true
         }
-        // Refresh icon state on all instances. We do it after the
-        // start/stop request so the next render reflects the new
-        // isRunning value.
+
+        // Dispatch the per-widget feedback if a config exists.
+        if (config != null) {
+            ep.feedbackDispatcher().dispatch(
+                displayName = config.displayName,
+                newState = willBeRunning,
+                feedback = config.appearance.feedback,
+            )
+        }
+
+        // Refresh icon state on all instances.
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val componentName = ComponentName(context, StrobeWidgetProvider::class.java)
         val ids = appWidgetManager.getAppWidgetIds(componentName)
@@ -113,16 +132,23 @@ class StrobeWidgetProvider : AppWidgetProvider() {
         context: Context,
         appWidgetId: Int,
         running: Boolean,
+        config: TorchWidgetConfig,
     ): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_strobe).apply {
-            setImageViewResource(
-                R.id.widget_strobe_button,
-                if (running) R.drawable.ic_strobe_on else R.drawable.ic_strobe,
+            entry(context).appearanceRenderer().apply(
+                context = context,
+                views = this,
+                appearance = config.appearance,
+                active = running,
             )
-            setOnClickPendingIntent(
-                R.id.widget_strobe_button,
-                togglePendingIntent(context, appWidgetId),
-            )
+            if (config.appearance.tap.enabled) {
+                setOnClickPendingIntent(
+                    R.id.widget_strobe_button,
+                    togglePendingIntent(context, appWidgetId),
+                )
+            } else {
+                setOnClickPendingIntent(R.id.widget_strobe_button, null)
+            }
         }
 
     private fun entry(context: Context): StrobeWidgetEntryPoint =
@@ -135,6 +161,8 @@ class StrobeWidgetProvider : AppWidgetProvider() {
     @InstallIn(SingletonComponent::class)
     interface StrobeWidgetEntryPoint {
         fun widgetRepository(): TorchWidgetConfigRepository
+        fun appearanceRenderer(): WidgetAppearanceRenderer
+        fun feedbackDispatcher(): WidgetFeedbackDispatcher
     }
 
     companion object {

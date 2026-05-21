@@ -4,13 +4,17 @@
 
   Same 1×1 shape as the flashlight widget. Distinct preview drawable
   (the bolt-style ic_strobe) so users can tell them apart in the
-  Launcher's widget picker.
+  Launcher's widget picker. See widget_flashlight_info.xml for the
+  rationale on previewLayout + targetCellWidth/Height.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="40dp"
     android:minHeight="40dp"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/widget_strobe"
+    android:previewLayout="@layout/widget_strobe"
     android:previewImage="@drawable/ic_strobe"
     android:description="@string/widget_strobe_description"
     android:widgetCategory="home_screen"

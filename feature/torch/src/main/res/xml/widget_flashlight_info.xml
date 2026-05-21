@@ -7,19 +7,25 @@
     1. The user taps it (the provider sends itself an explicit
        APPWIDGET_UPDATE after toggling), or
     2. The torch state changes from another surface and the
-       controller broadcasts a refresh (Phase 2 / Batch 1: not
-       wired; tile + screen don't trigger widget refresh yet —
-       follow-up batch).
+       controller broadcasts a refresh.
 
-  updatePeriodMillis=0 disables the periodic refresh entirely
-  (AppWidgetManager imposes a minimum of 30 min anyway, which is
-  far too slow for "did the user toggle from another surface").
+  updatePeriodMillis=0 disables the periodic refresh entirely.
+
+  previewLayout (API 31+) tells the launcher to render the widget's
+  actual layout in the pin/picker dialog. Older `previewImage` stays
+  as the pre-API-31 fallback. targetCellWidth/Height explicitly
+  declare the widget's 1×1 footprint — some OEM launchers (Samsung
+  One UI in particular) refuse to add widgets without these and
+  show "Couldn't add widget" inside the preview thumbnail.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="40dp"
     android:minHeight="40dp"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/widget_flashlight"
+    android:previewLayout="@layout/widget_flashlight"
     android:previewImage="@drawable/ic_flashlight_on"
     android:description="@string/widget_flashlight_description"
     android:widgetCategory="home_screen"

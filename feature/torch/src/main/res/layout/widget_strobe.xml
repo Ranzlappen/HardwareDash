@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  1×1 strobe widget layout. Mirrors widget_flashlight.xml structure
-  but with the strobe icon. Provider attaches a PendingIntent that
-  fires ACTION_STROBE_TOGGLE.
+  Strobe widget layout. Same structure as widget_flashlight.xml —
+  background surface + icon image + transparent button wrapper that
+  receives the click PendingIntent.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp">
+    android:padding="4dp">
+
+    <View
+        android:id="@+id/widget_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <ImageButton
         android:id="@+id/widget_strobe_button"
@@ -16,6 +21,16 @@
         android:layout_gravity="center"
         android:background="@android:color/transparent"
         android:contentDescription="@string/widget_strobe_label"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@android:color/transparent" />
+
+    <ImageView
+        android:id="@+id/widget_icon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:padding="12dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_strobe" />
 

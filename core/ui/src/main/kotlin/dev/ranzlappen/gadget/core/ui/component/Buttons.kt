@@ -71,9 +71,20 @@ object GadgetButtonDefaults {
     /** Stroke width for the in-button [CircularProgressIndicator]. */
     val ProgressStrokeWidth: Dp = 2.dp
 
-    /** Default content padding for filled/outlined/ghost labels. */
+    /**
+     * Default content padding for filled/outlined/ghost labels.
+     *
+     * Tightened in Phase 2 / Batch 1.2 from the Material-default-
+     * adjacent (`Large` horizontal) to the present `Small` horizontal
+     * after device testing surfaced label truncation in cramped row
+     * layouts (e.g. two `weight(1f)` secondary buttons side-by-side).
+     * Applies globally to every primary/secondary/tertiary button —
+     * if a specific call site needs the older airier padding, pass
+     * `contentPadding = PaddingValues(horizontal = GadgetSpacing.Large,
+     * vertical = GadgetSpacing.Tiny)` explicitly.
+     */
     val ContentPadding: PaddingValues = PaddingValues(
-        horizontal = GadgetSpacing.Large,
+        horizontal = GadgetSpacing.Small,
         vertical = GadgetSpacing.Tiny,
     )
 

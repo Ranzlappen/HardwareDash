@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.RemoteViews
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -13,40 +14,40 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearanceRenderer
+import dev.ranzlappen.gadget.feature.torch.widget.feedback.WidgetFeedbackDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 /**
- * Home-screen flashlight widget — 1×1 cell, single ImageButton.
+ * Home-screen flashlight widget — 1×1 cell.
  *
- * Lifecycle: [AppWidgetProvider] is a [android.content.BroadcastReceiver]
- * under the hood — Android instantiates a fresh instance for each
- * broadcast, so there's no per-instance state to keep. We reach the
- * singleton [TorchController] + [TorchWidgetConfigRepository] via
- * [EntryPointAccessors] (same recipe as the QS tile).
+ * Each pinned instance has its own [TorchWidgetConfig] entry keyed by
+ * `appWidgetId`. The config carries the per-widget appearance
+ * (background mode, icon style, tap animation, feedback). The widget
+ * provider reads the config in `onUpdate` and `onReceive` to drive
+ * both the RemoteViews paint and the optional toast / notification
+ * fired on toggle.
  *
  * Click flow:
- *   1. User taps the button on the home screen.
- *   2. Launcher fires the [PendingIntent] we attached in [onUpdate],
- *      delivering an [Intent] with action [ACTION_FLASHLIGHT_TOGGLE]
- *      to this receiver.
- *   3. [onReceive] catches the action, runs `controller.toggle()` —
- *      a single Camera2 call, microsecond-fast.
- *   4. We then schedule an immediate self-update so the icon flips
- *      to reflect the new state.
+ *   1. User taps the widget; launcher fires the [PendingIntent]
+ *      attached in [onUpdate] with action [ACTION_FLASHLIGHT_TOGGLE]
+ *      and the per-widget `appWidgetId` as an extra.
+ *   2. [onReceive] catches the action, runs `controller.toggle()`,
+ *      then dispatches the widget's configured feedback variant.
+ *   3. We then schedule an immediate self-update so the icon flips.
  *
- * Per-instance config: each widget owns a [TorchWidgetConfig] entry
- * in [TorchWidgetConfigRepository] keyed by its `appWidgetId`. The
- * Flashlight variant doesn't currently surface configurable fields
- * in the in-app UI, but the load path is in place so future config-
- * driven Flashlight features (auto-off timer, brightness — issue
- * https://github.com/Ranzlappen/HardwareDash/issues/95) land without
- * disturbing the persistence shape.
+ * **Self-heal:** if `onUpdate` runs for an `appWidgetId` with no
+ * saved config (a race between the launcher's pin completion and
+ * our pin-success receiver, or a config evicted by an over-eager
+ * cleanup), the provider persists a default config keyed by that
+ * ID so the in-app widget list still surfaces the widget and the
+ * user can configure it without re-pinning.
  *
- * [onDeleted] purges the corresponding config so dragging the widget
- * off the home screen doesn't leak a record into the repository.
+ * [onDeleted] purges the config so dragging the widget off the home
+ * screen doesn't leak a record into the repository.
  */
 class FlashlightWidgetProvider : AppWidgetProvider() {
 
@@ -55,25 +56,61 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
-        val controller = entry(context).torchController()
+        val ep = entry(context)
+        val controller = ep.torchController()
         val isOn = controller.state.value.isOn
+        val repo = ep.widgetRepository()
+        val configs = repo.all.value
+
         appWidgetIds.forEach { id ->
-            appWidgetManager.updateAppWidget(id, buildRemoteViews(context, isOn))
+            val config = configs[id] ?: run {
+                // Self-heal: persist a default Flashlight config so
+                // the in-app list shows this widget on next refresh.
+                // Fire-and-forget — the save is async; the render
+                // below uses the in-memory default in the meantime.
+                val default = TorchWidgetConfig(
+                    type = WidgetType.Flashlight,
+                    displayName = context.getString(R.string.torch_widget_default_name_flashlight),
+                )
+                Log.w(PendingTorchWidgetConfigs.TAG, "FlashlightWidget self-heal id=$id")
+                CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+                    repo.save(id, default)
+                }
+                default
+            }
+            appWidgetManager.updateAppWidget(
+                id,
+                buildRemoteViews(context, id, isOn, config),
+            )
         }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         if (intent.action != ACTION_FLASHLIGHT_TOGGLE) return
+        val appWidgetId = intent.getIntExtra(
+            AppWidgetManager.EXTRA_APPWIDGET_ID,
+            AppWidgetManager.INVALID_APPWIDGET_ID,
+        )
+        val ep = entry(context)
+        val controller = ep.torchController()
         // Toggle on the singleton — the TorchCallback synchronously
-        // updates the shared TorchState so other surfaces (screen +
-        // tile) react immediately. toggle() is non-suspend; finishes
-        // before this broadcast handler returns.
-        val controller = entry(context).torchController()
+        // updates the shared TorchState so other surfaces react.
         controller.toggle()
-        // Refresh every flashlight widget instance so the icon
-        // flips immediately. Cheap — RemoteViews binding is the
-        // only IPC.
+        val newState = controller.state.value.isOn
+
+        // Dispatch the per-widget feedback (toast / notification).
+        // Look up config by appWidgetId; if missing fall back silently.
+        val config = ep.widgetRepository().all.value[appWidgetId]
+        if (config != null) {
+            ep.feedbackDispatcher().dispatch(
+                displayName = config.displayName,
+                newState = newState,
+                feedback = config.appearance.feedback,
+            )
+        }
+
+        // Refresh every flashlight widget instance so the icon flips.
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val componentName = ComponentName(context, FlashlightWidgetProvider::class.java)
         val ids = appWidgetManager.getAppWidgetIds(componentName)
@@ -82,8 +119,6 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         super.onDeleted(context, appWidgetIds)
-        // Async purge — runs after onReceive returns so the OS's
-        // 10-second receiver budget isn't a concern.
         val repo = entry(context).widgetRepository()
         val purgeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         purgeScope.launch {
@@ -92,20 +127,35 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
     }
 
     /**
-     * Build the [RemoteViews] for one widget instance. The state-
-     * sensitive bit is the icon resource: `ic_flashlight_on` when
-     * the torch is currently on, `ic_flashlight_off` otherwise.
+     * Build the [RemoteViews] for one widget instance. The
+     * [WidgetAppearanceRenderer] does the heavy lifting of background
+     * + icon swap; the provider just attaches the click PendingIntent
+     * if taps are enabled.
      */
-    private fun buildRemoteViews(context: Context, torchOn: Boolean): RemoteViews =
+    private fun buildRemoteViews(
+        context: Context,
+        appWidgetId: Int,
+        torchOn: Boolean,
+        config: TorchWidgetConfig,
+    ): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_flashlight).apply {
-            setImageViewResource(
-                R.id.widget_flashlight_button,
-                if (torchOn) R.drawable.ic_flashlight_on else R.drawable.ic_flashlight_off,
+            entry(context).appearanceRenderer().apply(
+                context = context,
+                views = this,
+                appearance = config.appearance,
+                active = torchOn,
             )
-            setOnClickPendingIntent(
-                R.id.widget_flashlight_button,
-                togglePendingIntent(context),
-            )
+            if (config.appearance.tap.enabled) {
+                setOnClickPendingIntent(
+                    R.id.widget_flashlight_button,
+                    togglePendingIntent(context, appWidgetId),
+                )
+            } else {
+                // Tap disabled — explicitly clear any previously
+                // attached PendingIntent so the widget renders
+                // display-only.
+                setOnClickPendingIntent(R.id.widget_flashlight_button, null)
+            }
         }
 
     private fun entry(context: Context): FlashlightWidgetEntryPoint =
@@ -123,6 +173,8 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
     interface FlashlightWidgetEntryPoint {
         fun torchController(): TorchController
         fun widgetRepository(): TorchWidgetConfigRepository
+        fun appearanceRenderer(): WidgetAppearanceRenderer
+        fun feedbackDispatcher(): WidgetFeedbackDispatcher
     }
 
     companion object {
@@ -135,19 +187,19 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
             "dev.ranzlappen.gadget.feature.torch.ACTION_FLASHLIGHT_TOGGLE"
 
         /**
-         * Build the toggle [PendingIntent]. Mutable=false +
-         * UpdateCurrent flags so the OS reuses the existing
-         * PendingIntent across widget updates rather than creating
-         * a new one each refresh.
+         * Build the toggle [PendingIntent]. Each `appWidgetId` gets
+         * a distinct PendingIntent (`requestCode = appWidgetId`) so
+         * per-instance feedback dispatch sees the correct ID.
          */
-        fun togglePendingIntent(context: Context): PendingIntent {
+        fun togglePendingIntent(context: Context, appWidgetId: Int): PendingIntent {
             val intent = Intent(context, FlashlightWidgetProvider::class.java).apply {
                 action = ACTION_FLASHLIGHT_TOGGLE
                 component = ComponentName(context, FlashlightWidgetProvider::class.java)
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             }
             return PendingIntent.getBroadcast(
                 context,
-                /* requestCode = */ 0,
+                /* requestCode = */ appWidgetId,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
