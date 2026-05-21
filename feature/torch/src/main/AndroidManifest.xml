@@ -16,16 +16,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
-      FOREGROUND_SERVICE + the camera-typed variant for StrobeService
-      so the OS allows the foreground notification + camera-flash
-      access on API 34+.
+      FOREGROUND_SERVICE for the StrobeService notification chrome on
+      API 28+. The strobe runs as a `shortService`-typed foreground
+      service on API 34+, which does not require the CAMERA runtime
+      permission (CameraManager.setTorchMode itself never has). The OS
+      enforces a 3-minute cap on shortService — accepted as a safety
+      feature (a strobe left running indefinitely would burn battery
+      and pose a hazard).
 
-      Note: CameraManager.setTorchMode does NOT require the CAMERA
-      runtime permission on AOSP. The earlier CAMERA declaration was
-      defensive overreach; removed in Batch 1.1.
+      `FOREGROUND_SERVICE_CAMERA` was removed alongside the FGS type
+      switch — the camera-typed FGS requires CAMERA + CAMERA_FGS, and
+      the user has to grant the runtime permission. shortService side-
+      steps both for the strobe use case.
     -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_SHORT_SERVICE" />
 
     <!--
       POST_NOTIFICATIONS required on API 33+ for the StrobeService's
@@ -119,13 +125,19 @@
         <!--
           Strobe foreground service. exported=false — only the widget
           provider + the in-app screen can start it.
-          foregroundServiceType="camera" so the OS allows access to
-          the flash unit while in foreground state.
+
+          foregroundServiceType="shortService" (API 34+) lets the OS
+          allow a user-initiated FGS without requiring any camera-
+          family permission. setTorchMode doesn't need CAMERA on AOSP,
+          and shortService caps the service at 3 minutes — the
+          natural "max strobe session" safety limit. Devices on API
+          29-33 ignore the attribute and fall back to a legacy
+          untyped foreground service.
         -->
         <service
             android:name=".strobe.StrobeService"
             android:exported="false"
-            android:foregroundServiceType="camera" />
+            android:foregroundServiceType="shortService" />
 
     </application>
 </manifest>

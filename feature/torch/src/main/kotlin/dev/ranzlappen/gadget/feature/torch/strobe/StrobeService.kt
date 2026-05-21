@@ -136,15 +136,37 @@ class StrobeService : Service() {
     private fun promoteToForeground() {
         ensureNotificationChannel()
         val notification = buildNotification()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
+        when {
+            // API 34+: use shortService — no CAMERA permission required,
+            // OS enforces a ~3 min cap (acceptable safety bound for a
+            // strobe session).
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> startForeground(
+                NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
+            )
+            // API 29-33: type is optional; the camera-typed FGS on
+            // those releases never required runtime CAMERA, so we
+            // keep the existing behaviour.
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> startForeground(
                 NOTIFICATION_ID,
                 notification,
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA,
             )
-        } else {
-            startForeground(NOTIFICATION_ID, notification)
+            else -> startForeground(NOTIFICATION_ID, notification)
         }
+    }
+
+    /**
+     * Called by the OS on API 34+ when the shortService timeout
+     * elapses (~3 min by spec). Stop strobing + tear down the
+     * service rather than letting Android force-kill us — a clean
+     * stop means widget state flips back to "off" via the
+     * StrobeService.isRunning flag.
+     */
+    override fun onTimeout(startId: Int) {
+        stopStrobing()
+        stopSelf(startId)
     }
 
     private fun ensureNotificationChannel() {
