@@ -2,6 +2,8 @@ package dev.ranzlappen.gadget.feature.torch.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -285,10 +287,15 @@ private fun SheetSectionHeader(text: String) {
 }
 
 /**
- * Light-weight segmented selector built from a row of M3 [FilterChip]
- * widgets. Used until the design-system `GadgetSegmentedSelector`
- * primitive ships in a future batch.
+ * Light-weight segmented selector built from a flow of M3
+ * [FilterChip] widgets. Chips wrap to a new line when their
+ * combined intrinsic width exceeds the row — the previous rigid
+ * [Row] squeezed the trailing chip until its label wrapped
+ * vertically (e.g. the four-option Tint row truncating "Black" to
+ * "Bl/ac/k"). [FlowRow] reflows instead of clipping. Used until
+ * the design-system `GadgetSegmentedSelector` primitive ships.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun <T> ChipRow(
     label: String,
@@ -304,15 +311,16 @@ private fun <T> ChipRow(
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing.tiny),
+            verticalArrangement = Arrangement.spacedBy(spacing.tiny),
         ) {
             options.forEach { option ->
                 FilterChip(
                     selected = selected == option,
                     onClick = { onSelect(option) },
-                    label = { Text(labelFor(option)) },
+                    label = { Text(text = labelFor(option), maxLines = 1) },
                     colors = FilterChipDefaults.filterChipColors(),
                 )
             }

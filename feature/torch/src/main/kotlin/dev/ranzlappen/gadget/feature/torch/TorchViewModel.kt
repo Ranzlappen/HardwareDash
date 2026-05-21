@@ -167,14 +167,17 @@ class TorchViewModel @Inject constructor(
     }
 
     fun onAddFlashlight() {
+        // Both Add flows open the configuration sheet now that
+        // appearance + tap + feedback are per-widget knobs — having
+        // flashlight pin directly while strobe opens a sheet was an
+        // inconsistency users noticed (the appearance picker would
+        // never reach the flashlight path).
         val name = context.getString(R.string.torch_widget_default_name_flashlight)
         val config = TorchWidgetConfig(
             type = WidgetType.Flashlight,
             displayName = name,
         )
-        if (!widgetCreator.requestPin(config)) {
-            _pinUnsupportedEvents.tryEmit(Unit)
-        }
+        _sheetTarget.value = SheetTarget.New(config)
     }
 
     fun onAddStrobeRequested() {
