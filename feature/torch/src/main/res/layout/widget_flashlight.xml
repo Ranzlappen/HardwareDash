@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  1x1 flashlight widget layout — a single ImageButton centred in
-  the cell. The provider attaches a PendingIntent.broadcast to the
-  ImageButton (id=@+id/widget_flashlight_button) in onUpdate().
+  Flashlight widget layout.
 
-  Background uses the system default widget chrome
-  (?android:attr/selectableItemBackground) so it adapts to the
-  launcher's widget container styling.
+  Two-view stack: a backing surface (@id/widget_background) for the
+  appearance-driven background swap, with the icon button
+  (@id/widget_icon) on top. The provider attaches a PendingIntent to
+  @id/widget_flashlight_button (the clickable wrapper) in onUpdate().
+
+  Both @id/widget_background and @id/widget_icon are the contract
+  surface the WidgetAppearanceRenderer drives — keep them in sync
+  with the other widget layouts so the renderer's setInt calls
+  resolve across all widget kinds.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp">
+    android:padding="4dp">
+
+    <View
+        android:id="@+id/widget_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <ImageButton
         android:id="@+id/widget_flashlight_button"
@@ -20,6 +29,16 @@
         android:layout_gravity="center"
         android:background="@android:color/transparent"
         android:contentDescription="@string/widget_flashlight_label"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@android:color/transparent" />
+
+    <ImageView
+        android:id="@+id/widget_icon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:padding="12dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_flashlight_on" />
 

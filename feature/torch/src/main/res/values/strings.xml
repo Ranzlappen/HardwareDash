@@ -12,6 +12,10 @@
     <string name="strobe_notification_title">Strobe active</string>
     <string name="strobe_notification_text">Tap the widget to stop.</string>
 
+    <!-- ─── Widget toggle-feedback channel ──────────────────────── -->
+    <string name="widget_feedback_channel_name">Widget feedback</string>
+    <string name="widget_feedback_channel_description">Optional confirmation toasts and notifications when you toggle a widget.</string>
+
     <!-- ─── TorchScreen ─────────────────────────────────────────── -->
     <string name="torch_screen_title">Torch</string>
     <string name="torch_state_on">On</string>
@@ -23,6 +27,12 @@
     <string name="torch_status_permission_denied">Camera access denied — grant in system settings.</string>
     <string name="torch_status_on">Torch is on.</string>
     <string name="torch_status_off">Tap the button to turn the torch on.</string>
+
+    <!-- In-app strobe toggle button (under the flashlight FAB). -->
+    <string name="torch_action_strobe_start">Start strobe</string>
+    <string name="torch_action_strobe_stop">Stop strobe</string>
+    <string name="torch_action_strobe_start_a11y">Start strobe at the current default rate</string>
+    <string name="torch_action_strobe_stop_a11y">Stop the running strobe</string>
 
     <!-- ─── Strobe defaults section ─────────────────────────────── -->
     <string name="torch_section_defaults_title">Strobe defaults</string>
@@ -54,4 +64,45 @@
     <string name="torch_widget_config_save_new">Add to home screen</string>
     <string name="torch_widget_config_save_existing">Save</string>
     <string name="torch_widget_config_cancel">Cancel</string>
+
+    <!-- Appearance / customization sub-sections inside the sheet. -->
+    <string name="torch_widget_config_section_appearance">Appearance</string>
+    <string name="torch_widget_config_section_tap">Tap behaviour</string>
+    <string name="torch_widget_config_section_feedback">Toggle feedback</string>
+
+    <string name="torch_widget_config_background_label">Background</string>
+    <string name="torch_widget_config_background_glass">Glass</string>
+    <string name="torch_widget_config_background_solid">Solid</string>
+    <string name="torch_widget_config_background_transparent">Transparent</string>
+    <string name="torch_widget_config_solid_color_label">Solid colour</string>
+
+    <string name="torch_widget_config_icon_active_label">Active icon</string>
+    <string name="torch_widget_config_icon_inactive_label">Inactive icon</string>
+    <string name="torch_widget_config_tint_label">Tint</string>
+    <string name="torch_widget_config_tint_accent">Accent</string>
+    <string name="torch_widget_config_tint_on_surface">Foreground</string>
+    <string name="torch_widget_config_tint_white">White</string>
+    <string name="torch_widget_config_tint_black">Black</string>
+    <string name="torch_widget_config_tint_custom">Custom</string>
+
+    <string name="torch_widget_config_tap_animation_label">Animation</string>
+    <string name="torch_widget_config_tap_animation_none">None</string>
+    <string name="torch_widget_config_tap_animation_ripple">Ripple</string>
+    <string name="torch_widget_config_tap_animation_pulse">Pulse</string>
+    <string name="torch_widget_config_tap_animation_scale">Scale</string>
+    <string name="torch_widget_config_tap_animation_flash">Flash</string>
+    <string name="torch_widget_config_tap_enabled_label">Tap to toggle</string>
+    <string name="torch_widget_config_tap_disabled_supporting">When off, the widget renders display-only and ignores taps.</string>
+
+    <string name="torch_widget_config_feedback_kind_label">Confirmation</string>
+    <string name="torch_widget_config_feedback_none">None</string>
+    <string name="torch_widget_config_feedback_toast">Toast</string>
+    <string name="torch_widget_config_feedback_notification">Notification</string>
+    <string name="torch_widget_config_feedback_toast_template_label">Toast template</string>
+    <string name="torch_widget_config_feedback_notification_title_label">Notification title</string>
+    <string name="torch_widget_config_feedback_notification_body_label">Notification body</string>
+    <string name="torch_widget_config_feedback_template_help">Use {name} for the widget name and {state} for on/off.</string>
+    <string name="torch_widget_config_feedback_default_toast_template">{name} is now {state}</string>
+    <string name="torch_widget_config_feedback_default_notification_title">{name}</string>
+    <string name="torch_widget_config_feedback_default_notification_body">Now {state}</string>
 </resources>

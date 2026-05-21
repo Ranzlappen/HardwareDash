@@ -1,16 +1,19 @@
 package dev.ranzlappen.gadget.feature.torch
 
 import android.content.Context
+import android.content.Intent
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
+import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfigRepository
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetCreator
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -19,37 +22,44 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// (Unused-import cleanup: `FlowPreview` + `debounce` removed —
+// the slider now commits exactly once via onValueChangeFinished
+// so no debounce pipeline is needed.)
+
 /**
  * Aggregating ViewModel for [TorchScreen].
  *
- * Combines three reactive sources into a single [TorchScreenState]:
+ * Combines four reactive sources into a single [TorchScreenState]:
  * - [TorchController.state] — live hardware snapshot.
  * - [UserPreferencesRepository.flow.map { it.defaultStrobeRateHz }] —
  *   the persisted slider value that becomes the default rate at
  *   widget-pin time.
  * - [TorchWidgetConfigRepository.all] — every persisted widget config.
+ * - A polled [StrobeService.isRunning] flag (250 ms cadence) — drives
+ *   the in-app strobe toggle button label / pressed state.
  *
  * Event handlers cover the screen's full surface area:
  * - [onToggleClick] — passthrough to the controller.
- * - [onRateChange] — debounced commit to
- *   [UserPreferencesRepository.setDefaultStrobeRateHz]. The slider
- *   fires onValueChange at ~60 Hz while the user drags; without
- *   debouncing we'd write to DataStore on every emission. 150 ms
- *   is the sweet spot: fast enough to feel live, slow enough to
- *   coalesce a 1-second drag into ~7 writes.
- * - [onAddFlashlight] / [onAddStrobe] — kick off the
- *   [TorchWidgetCreator] pin flow with the current default rate.
- * - [onEditWidget] — overwrite a saved config.
- * - [onDeleteWidget] — purge a saved config. Note: doesn't remove
- *   the widget from the home screen — that's the user's gesture.
- *   Removing the config here just orphans the on-screen widget,
- *   which falls back to its provider's default rendering.
+ * - [onRateChange] — local optimistic update (the slider's local
+ *   drag value handles UI feedback; this fires only if the caller
+ *   wants to react live to drag values).
+ * - [onRateCommit] — fired by [GadgetSlider.onValueChangeFinished].
+ *   Writes the slider's last value to
+ *   [UserPreferencesRepository.setDefaultStrobeRateHz]. No debounce
+ *   needed because the slider commits exactly once per release.
+ * - [onStrobeToggle] — start / stop [StrobeService] using the
+ *   current slider value. Mirrors the strobe widget tap path.
+ * - [onAddFlashlight] / [onAddStrobeRequested] — kick off the
+ *   [TorchWidgetCreator] pin flow.
+ * - [onEditWidget] / [onSheetConfirmed] / [onSheetDismissed] —
+ *   widget configuration sheet round-trip.
+ * - [onDeleteWidget] — purge a saved config.
  */
 @HiltViewModel
 class TorchViewModel @Inject constructor(
@@ -60,23 +70,40 @@ class TorchViewModel @Inject constructor(
     private val widgetCreator: TorchWidgetCreator,
 ) : ViewModel() {
 
-    /** Public read-only torch hardware snapshot for callers that
-     *  only need the toggle state (e.g. unit tests of click
-     *  behaviour without standing up the full combined flow). */
+    /** Public read-only torch hardware snapshot. */
     val torchState: StateFlow<TorchState> = controller.state
 
-    @OptIn(FlowPreview::class)
+    /** Latest slider value the user landed on; written through to
+     *  DataStore by [onRateCommit]. */
+    private val pendingRateHz = MutableStateFlow<Float?>(null)
+
+    /** Polled hot signal mirroring [StrobeService.isRunning]. 250 ms
+     *  cadence is plenty for a button-label flip and stays cheap
+     *  (one @Volatile read per tick). */
+    private val strobeRunning: StateFlow<Boolean> = flow {
+        while (true) {
+            emit(StrobeService.isRunning)
+            delay(StrobeRunningPollMillis)
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(SubscriptionTimeoutMillis),
+        initialValue = StrobeService.isRunning,
+    )
+
     val state: StateFlow<TorchScreenState> = combine(
         controller.state,
         userPreferences.flow.map { it.defaultStrobeRateHz },
         widgetRepository.all,
-    ) { torch, rateHz, widgets ->
+        strobeRunning,
+    ) { torch, rateHz, widgets, running ->
         TorchScreenState(
             torch = torch,
-            defaultStrobeRateHz = rateHz,
+            defaultStrobeRateHz = pendingRateHz.value ?: rateHz,
             widgets = widgets
                 .toSortedMap()
                 .map { (id, config) -> SavedTorchWidget(id, config) },
+            strobeRunning = running,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -87,44 +114,56 @@ class TorchViewModel @Inject constructor(
     /**
      * One-shot signal raised when the user requests a widget pin but
      * the active launcher doesn't support
-     * [android.appwidget.AppWidgetManager.requestPinAppWidget]. The
-     * screen observes this and shows a transient message.
+     * [android.appwidget.AppWidgetManager.requestPinAppWidget].
      */
     private val _pinUnsupportedEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val pinUnsupportedEvents: SharedFlow<Unit> = _pinUnsupportedEvents.asSharedFlow()
 
-    /**
-     * Transient "open the configuration sheet" signal. The
-     * [TorchScreen] composable owns the visible-or-not state of the
-     * sheet; this flow only signals "the user clicked Add strobe"
-     * and "the user clicked Edit on widget X" so the screen can
-     * stash the right initial config and flip the visible flag.
-     */
+    /** Transient "open the configuration sheet" signal. */
     private val _sheetTarget = MutableStateFlow<SheetTarget?>(null)
     val sheetTarget: StateFlow<SheetTarget?> = _sheetTarget.asStateFlow()
-
-    /** Debounced commit pipeline for the strobe-rate slider. */
-    private val rateChangeFlow = MutableSharedFlow<Float>(extraBufferCapacity = 1)
-
-    init {
-        @OptIn(FlowPreview::class)
-        viewModelScope.launch {
-            rateChangeFlow
-                .debounce(RateChangeDebounceMillis)
-                .collect { rate ->
-                    userPreferences.setDefaultStrobeRateHz(rate)
-                }
-        }
-    }
 
     fun onToggleClick() {
         controller.toggle()
     }
 
+    /** Slider drag handler — keeps the optimistic pending value in
+     *  sync so the rest of the combined flow doesn't snap back to
+     *  the stored DataStore value mid-drag. Persists nothing. */
     fun onRateChange(newRateHz: Float) {
-        rateChangeFlow.tryEmit(
-            newRateHz.coerceIn(TorchWidgetConfig.MIN_RATE_HZ, TorchWidgetConfig.MAX_RATE_HZ),
+        pendingRateHz.value = newRateHz.coerceIn(
+            TorchWidgetConfig.MIN_RATE_HZ,
+            TorchWidgetConfig.MAX_RATE_HZ,
         )
+    }
+
+    /** Slider release handler — persists the last optimistic value
+     *  to DataStore. Clears the pending shadow on commit. */
+    fun onRateCommit() {
+        val rate = pendingRateHz.value ?: return
+        viewModelScope.launch {
+            userPreferences.setDefaultStrobeRateHz(rate)
+            pendingRateHz.value = null
+        }
+    }
+
+    fun onStrobeToggle() {
+        if (StrobeService.isRunning) {
+            val stopIntent = Intent(context, StrobeService::class.java)
+                .setAction(StrobeService.ACTION_STOP)
+            context.startService(stopIntent)
+        } else {
+            val rate = state.value.defaultStrobeRateHz
+            val startIntent = Intent(context, StrobeService::class.java).apply {
+                putExtra(StrobeService.EXTRA_RATE_HZ, rate)
+                putExtra(StrobeService.EXTRA_SOS_MODE, false)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(startIntent)
+            } else {
+                context.startService(startIntent)
+            }
+        }
     }
 
     fun onAddFlashlight() {
@@ -197,7 +236,9 @@ class TorchViewModel @Inject constructor(
          *  used in `:feature:settings`. */
         const val SubscriptionTimeoutMillis: Long = 5_000L
 
-        /** Slider debounce window in ms. See [onRateChange] KDoc. */
-        const val RateChangeDebounceMillis: Long = 150L
+        /** Polling cadence for [StrobeService.isRunning]. 250 ms is
+         *  imperceptible to the user but cheap enough to leave
+         *  always-on while the screen is visible. */
+        const val StrobeRunningPollMillis: Long = 250L
     }
 }

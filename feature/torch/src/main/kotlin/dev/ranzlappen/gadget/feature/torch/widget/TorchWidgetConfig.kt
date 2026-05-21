@@ -1,6 +1,7 @@
 package dev.ranzlappen.gadget.feature.torch.widget
 
 import androidx.compose.runtime.Immutable
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearance
 import kotlinx.serialization.Serializable
 
 /**
@@ -31,9 +32,11 @@ import kotlinx.serialization.Serializable
  *   logic should emit the Morse SOS pattern instead of a constant
  *   strobe. **Today the StrobeService reads this flag but doesn't
  *   yet implement SOS playback** — tracked at
- *   https://github.com/Ranzlappen/HardwareDash/issues/96. The data
- *   model and UI are in place so the pattern logic can land without
- *   a schema bump.
+ *   https://github.com/Ranzlappen/HardwareDash/issues/96.
+ * - [appearance] — visual chrome + tap behaviour + toggle feedback.
+ *   Defaulted to [WidgetAppearance] so existing on-disk configs
+ *   migrate seamlessly: missing `appearance` field decodes as the
+ *   default record.
  */
 @Serializable
 @Immutable
@@ -42,6 +45,7 @@ data class TorchWidgetConfig(
     val displayName: String,
     val rateHz: Float = DEFAULT_RATE_HZ,
     val sosMode: Boolean = false,
+    val appearance: WidgetAppearance = WidgetAppearance(),
 ) {
     companion object {
         /** Initial rate for new strobe widgets when the user hasn't

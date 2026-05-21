@@ -10,11 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashlightOff
 import androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -32,6 +32,7 @@ import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GadgetFab
 import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
+import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import kotlin.math.roundToInt
@@ -40,35 +41,30 @@ import kotlin.math.roundToInt
  * Stateless TorchScreen content — receives a single [TorchScreenState]
  * snapshot plus callbacks for every user-initiated event.
  *
- * Pulled out from [TorchScreen] (the Hilt-wrapped stateful entry point)
- * so the screen can be exercised in instrumented tests without standing
- * up the real Camera2 controller or DataStore. Tests inject a
- * deterministic [TorchScreenState] and assert that the expected text /
- * controls render and that taps invoke the right callbacks.
+ * Three sections render top-to-bottom inside the screen scaffold:
  *
- * Three sections render top-to-bottom inside [ModuleScreenScaffold]:
- *
- *   1. **Torch toggle** — hero FAB centred in a [DashCard], status
- *      message underneath.
- *   2. **Strobe defaults** — Hz slider feeding
+ *   1. **Torch toggle** — hero FAB centred in a [DashCard] plus an
+ *      in-app strobe toggle button right below for immediate testing
+ *      without pinning a widget.
+ *   2. **Strobe defaults** — [GadgetSlider] feeding
  *      [UserPreferencesRepository.setDefaultStrobeRateHz]; the value
  *      is the default that gets captured into every new strobe widget
  *      at pin time. Existing widgets keep their per-instance rate.
+ *      The slider is fully draggable AND the trailing "5 Hz" label
+ *      is tap-to-edit (numeric input).
  *   3. **Your widgets** — list of [TorchScreenState.widgets] rendered
  *      as [CompactCard] rows with edit / delete actions, plus two
- *      [GadgetSecondaryButton]s above the list for "Add flashlight"
- *      and "Add strobe". When the list is empty, a [GadgetEmptyState]
- *      tile replaces it.
- *
- * Rooted-flavor extras (brightness, multi-LED, thermal override) will
- * extend the toggle card with extra slots when the sibling
- * `:feature:torch-rooted` module ships — see issues #94 and #95.
+ *      stacked full-width [GadgetSecondaryButton]s for "Add flashlight"
+ *      and "Add strobe". Vertical stacking + tightened button padding
+ *      avoids the label-truncation bug from the first pass.
  */
 @Composable
 fun TorchScreenContent(
     state: TorchScreenState,
     onToggleClick: () -> Unit,
+    onStrobeToggle: () -> Unit,
     onRateChange: (Float) -> Unit,
+    onRateCommit: () -> Unit,
     onAddFlashlight: () -> Unit,
     onAddStrobe: () -> Unit,
     onEditWidget: (SavedTorchWidget) -> Unit,
@@ -79,8 +75,8 @@ fun TorchScreenContent(
         title = stringResource(R.string.torch_screen_title),
         modifier = modifier,
         functional = {
-            TorchToggleCard(state.torch, onToggleClick)
-            StrobeDefaultsCard(state.defaultStrobeRateHz, onRateChange)
+            TorchToggleCard(state.torch, state.strobeRunning, onToggleClick, onStrobeToggle)
+            StrobeDefaultsCard(state.defaultStrobeRateHz, onRateChange, onRateCommit)
             WidgetsCard(
                 widgets = state.widgets,
                 onAddFlashlight = onAddFlashlight,
@@ -95,7 +91,9 @@ fun TorchScreenContent(
 @Composable
 private fun TorchToggleCard(
     torch: TorchState,
+    strobeRunning: Boolean,
     onToggleClick: () -> Unit,
+    onStrobeToggle: () -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
     DashCard(
@@ -127,6 +125,20 @@ private fun TorchToggleCard(
                     enabled = torch.isAvailable,
                 )
             }
+            // In-app strobe toggle. Mirrors widget behaviour — tap once to
+            // start at the current default rate, tap again to stop. Doubles
+            // as a diagnostic for the strobe service path independent of
+            // widget wiring.
+            GadgetSecondaryButton(
+                onClick = onStrobeToggle,
+                text = stringResource(
+                    if (strobeRunning) R.string.torch_action_strobe_stop
+                    else R.string.torch_action_strobe_start,
+                ),
+                leadingIcon = Icons.Outlined.Bolt,
+                enabled = torch.isAvailable,
+                modifier = Modifier.fillMaxWidth(),
+            )
             Text(
                 text = torch.statusMessage(),
                 style = MaterialTheme.typography.bodyMedium,
@@ -142,6 +154,7 @@ private fun TorchToggleCard(
 private fun StrobeDefaultsCard(
     rateHz: Float,
     onRateChange: (Float) -> Unit,
+    onRateCommit: () -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
     DashCard(
@@ -160,33 +173,15 @@ private fun StrobeDefaultsCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(spacing.small),
-            ) {
-                Text(
-                    text = stringResource(R.string.torch_strobe_rate_label),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-                Slider(
-                    value = rateHz,
-                    onValueChange = onRateChange,
-                    valueRange = TorchWidgetConfig.MIN_RATE_HZ..TorchWidgetConfig.MAX_RATE_HZ,
-                    // Steps are integers between min..max exclusive
-                    // (M3 contract: stepCount = number of discrete
-                    // values BETWEEN the two endpoints, not inclusive).
-                    steps = (TorchWidgetConfig.MAX_RATE_HZ - TorchWidgetConfig.MIN_RATE_HZ).toInt() - 1,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    text = stringResource(
-                        R.string.torch_strobe_rate_value,
-                        rateHz.roundToInt(),
-                    ),
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.padding(start = spacing.tiny),
-                )
-            }
+            GadgetSlider(
+                value = rateHz,
+                onValueChange = onRateChange,
+                onValueChangeFinished = onRateCommit,
+                valueRange = TorchWidgetConfig.MIN_RATE_HZ..TorchWidgetConfig.MAX_RATE_HZ,
+                steps = (TorchWidgetConfig.MAX_RATE_HZ - TorchWidgetConfig.MIN_RATE_HZ).toInt() - 1,
+                label = stringResource(R.string.torch_strobe_rate_label),
+                suffix = "Hz",
+            )
         }
     }
 }
@@ -210,21 +205,22 @@ private fun WidgetsCard(
                 .padding(top = spacing.small),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
-            Row(
+            // Stacked vertical layout — full-width buttons avoid the
+            // label-truncation issue that a side-by-side Row exhibited
+            // when paired with the design system's default button
+            // padding.
+            GadgetSecondaryButton(
+                onClick = onAddFlashlight,
+                text = stringResource(R.string.torch_widget_add_flashlight),
+                leadingIcon = Icons.Outlined.FlashlightOn,
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(spacing.small),
-            ) {
-                GadgetSecondaryButton(
-                    onClick = onAddFlashlight,
-                    text = stringResource(R.string.torch_widget_add_flashlight),
-                    modifier = Modifier.weight(1f),
-                )
-                GadgetSecondaryButton(
-                    onClick = onAddStrobe,
-                    text = stringResource(R.string.torch_widget_add_strobe),
-                    modifier = Modifier.weight(1f),
-                )
-            }
+            )
+            GadgetSecondaryButton(
+                onClick = onAddStrobe,
+                text = stringResource(R.string.torch_widget_add_strobe),
+                leadingIcon = Icons.Outlined.Bolt,
+                modifier = Modifier.fillMaxWidth(),
+            )
             if (widgets.isEmpty()) {
                 GadgetEmptyState(
                     title = stringResource(R.string.torch_widget_list_empty_title),
@@ -240,7 +236,7 @@ private fun WidgetsCard(
                         subtitle = widget.config.subtitleString(),
                         leadingIcon = when (widget.config.type) {
                             WidgetType.Flashlight -> Icons.Outlined.FlashlightOn
-                            WidgetType.Strobe -> Icons.Outlined.FlashlightOn
+                            WidgetType.Strobe -> Icons.Outlined.Bolt
                         },
                         trailingContent = {
                             Row(horizontalArrangement = Arrangement.spacedBy(spacing.tiny)) {
@@ -270,11 +266,12 @@ private fun WidgetsCard(
 /**
  * Stateless view-state container consumed by [TorchScreenContent].
  *
- * Produced by [TorchViewModel.state] from the three reactive sources
+ * Produced by [TorchViewModel.state] from the four reactive sources
  * the screen depends on:
  * - [TorchController.state] (live torch hardware snapshot)
  * - [UserPreferencesRepository.flow.map { it.defaultStrobeRateHz }]
  * - [TorchWidgetConfigRepository.all] (saved widget configs)
+ * - [StrobeService.isRunning] (polled cheaply via a Volatile read)
  *
  * `@Immutable` so Compose skips recompositions when the structural
  * value is unchanged across emissions.
@@ -284,6 +281,7 @@ data class TorchScreenState(
     val torch: TorchState,
     val defaultStrobeRateHz: Float,
     val widgets: List<SavedTorchWidget>,
+    val strobeRunning: Boolean = false,
 ) {
     companion object {
         /** First-emission placeholder used before the flows emit. */
