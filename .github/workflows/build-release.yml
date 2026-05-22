@@ -178,7 +178,7 @@ jobs:
             - `Gadget-standard-v${{ steps.ver.outputs.version_name }}-release.aab` — signed standard release AAB (Play Store bundle).
             - `Gadget-rooted-v${{ steps.ver.outputs.version_name }}-root-release.apk` — signed rooted release APK. Requires Magisk / KernelSU / APatch.
 
-            Standard and rooted APKs install side-by-side (different applicationIds: `com.gadget` vs `com.gadget.root`).
+            Standard and rooted APKs install side-by-side (different applicationIds: `dev.ranzlappen.gadget` vs `dev.ranzlappen.gadget.rooted`).
           files: |
             artifacts/standard-release-apk/*.apk
             artifacts/standard-release-aab/*.aab
