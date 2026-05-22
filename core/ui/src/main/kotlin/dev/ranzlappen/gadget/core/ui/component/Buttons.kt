@@ -384,12 +384,19 @@ private fun GlassyLabelledButton(
     // so a custom theme that retunes glassmorphism flows through
     // automatically. When false, the Surface paints `containerColor`
     // as a solid fill — the existing primary / tertiary behaviour.
+    //
+    // The glass shape MUST match the enclosing Surface's shape
+    // (MaterialTheme.shapes.small below) — passing different shapes
+    // leaves stray hairline segments where the two silhouettes
+    // disagree, the artifact users hit on the "Add … widget" rows.
+    val buttonShape = MaterialTheme.shapes.small
     val surfaceModifier = modifier
         .defaultMinSize(minHeight = GadgetButtonDefaults.MinHeight)
         .scale(pressScale)
         .let { base ->
             if (useGlass) {
                 base.glassSurface(
+                    shape = buttonShape,
                     intensity = GlassIntensity.Standard,
                     showBorder = false,
                 )
@@ -403,7 +410,7 @@ private fun GlassyLabelledButton(
         onClick = onClick,
         modifier = surfaceModifier,
         enabled = enabled && !loading,
-        shape = MaterialTheme.shapes.small,
+        shape = buttonShape,
         color = surfaceColor,
         contentColor = resolvedContent,
         border = border,
