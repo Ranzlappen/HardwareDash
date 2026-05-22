@@ -2,36 +2,45 @@
 <!--
     Debug-build subscript badge.
 
-    Bug glyph = Material `bug_report` (filled variant). Same icon
-    the legacy `com.gadget.ui.screens.BugReportScreen` renders at
-    line 332 of `BugReportScreen.kt` on the `legacy-main` branch
-    via `Icons.Default.BugReport`.
-
-    Path data is the Material Symbols `bug_report` 24x24 source.
-    Scaled (0.58x) and translated via the wrapping <group> so the
-    glyph centers at (82, 82) inside the 108-viewport, sitting in
-    the bottom-right chip.
+    Renders "<>" in the bottom-right corner — a code/dev-style
+    glyph indicating the build is a debug artefact, replacing the
+    earlier bug-icon design.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M82,70 A12,12 0 1,0 82,94 A12,12 0 1,0 82,70 Z" />
+    <group
+        android:translateX="1.2"
+        android:translateY="1.4">
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#00000080"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M80,76 L75,82 L80,88" />
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#00000080"
+            android:strokeWidth="2.8"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M88,76 L93,82 L88,88" />
+    </group>
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#1976D2"
-        android:strokeWidth="1.2"
-        android:pathData="M82,70 A12,12 0 1,0 82,94 A12,12 0 1,0 82,70 Z" />
-    <group
-        android:translateX="75.04"
-        android:translateY="75.04"
-        android:scaleX="0.58"
-        android:scaleY="0.58">
-        <path
-            android:fillColor="#1A237E"
-            android:pathData="M20,8h-2.81c-0.45,-0.78 -1.07,-1.45 -1.82,-1.96L17,4.41 15.59,3l-2.17,2.17C12.96,5.06 12.49,5 12,5c-0.49,0 -0.96,0.06 -1.41,0.17L8.41,3 7,4.41l1.62,1.63C7.88,6.55 7.26,7.22 6.81,8H4v2h2.09c-0.05,0.33 -0.09,0.66 -0.09,1v1H4v2h2v1c0,0.34 0.04,0.67 0.09,1H4v2h2.81c1.04,1.79 2.97,3 5.19,3s4.15,-1.21 5.19,-3H20v-2h-2.09c0.05,-0.33 0.09,-0.66 0.09,-1v-1h2v-2h-2v-1c0,-0.34 -0.04,-0.67 -0.09,-1H20V8zM14,16h-4v-2h4V16zM14,12h-4v-2h4V12z" />
-    </group>
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M80,76 L75,82 L80,88" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M88,76 L93,82 L88,88" />
 </vector>

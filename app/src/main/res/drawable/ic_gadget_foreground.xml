@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/ic_gadget_artwork_inset" />
+    <item android:drawable="@drawable/ic_gadget_artwork" />
     <item android:drawable="@drawable/ic_gadget_flavor_badge" />
     <item android:drawable="@drawable/ic_gadget_debug_badge" />
 </layer-list>

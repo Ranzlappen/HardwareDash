@@ -4,26 +4,36 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M82,14 A12,12 0 1,0 82,38 A12,12 0 1,0 82,14 Z" />
+    <group
+        android:translateX="1.2"
+        android:translateY="1.4">
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#00000080"
+            android:strokeWidth="2.4"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M71,22 L74,27 L78,12 L94,12" />
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#00000080"
+            android:strokeWidth="2.4"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M83,20 C83,17 85,16 87,16 C89,16 91,17 91,20 C91,22 89,24 86,26 L82,30 L92,30" />
+    </group>
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#1976D2"
-        android:strokeWidth="1.2"
-        android:pathData="M82,14 A12,12 0 1,0 82,38 A12,12 0 1,0 82,14 Z" />
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#0D47A1"
-        android:strokeWidth="1.8"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M74,24 L75.5,26 L78,17 L91,17" />
+        android:pathData="M71,22 L74,27 L78,12 L94,12" />
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#0D47A1"
-        android:strokeWidth="1.8"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M82,25 C82,23 84,22 86,22 C88,22 89,23 89,25 C89,27 87,28 85,30 L82,33 L89,33" />
+        android:pathData="M83,20 C83,17 85,16 87,16 C89,16 91,17 91,20 C91,22 89,24 86,26 L82,30 L92,30" />
 </vector>
