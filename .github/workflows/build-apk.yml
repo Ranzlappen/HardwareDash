@@ -73,40 +73,31 @@ jobs:
           echo "BUILD_AUTHOR=${{ github.actor }}" >> $GITHUB_ENV
           echo "APP_DESCRIPTION=Gadget — monitor and control device sensors, camera, audio, and more" >> $GITHUB_ENV
 
-      # Generate the AGP debug keystore up front so the release build can
-      # sign with it via -Pandroid.injected.signing.*. AGP would create
-      # ~/.android/debug.keystore lazily during assembleDebug, but Gradle
-      # doesn't guarantee task ordering inside one invocation — the
-      # release package task may evaluate signing config before
-      # debug-assemble has produced the keystore. Idempotent: skips if
-      # the file already exists (e.g. self-hosted runners).
-      - name: Ensure debug keystore exists (for release-signing in CI)
-        run: |
-          if [ ! -f "$HOME/.android/debug.keystore" ]; then
-            mkdir -p "$HOME/.android"
-            keytool -genkey -v \
-              -keystore "$HOME/.android/debug.keystore" \
-              -storepass android \
-              -alias androiddebugkey \
-              -keypass android \
-              -keyalg RSA -keysize 2048 -validity 10000 \
-              -dname "CN=Android Debug,O=Android,C=US"
-          fi
+      # Sign release APKs with the same production keystore that
+      # build-release.yml uses (secrets.KEYSTORE). The previous setup
+      # generated a fresh AGP debug keystore on every CI run via
+      # `keytool -genkey`, which gave each release APK a different
+      # signing certificate — Android refused the update from v140 to
+      # v141 with "App not installed as package conflicts with an
+      # existing package". Reusing the stable production cert means
+      # every auto-built APK and every manual-release APK share one
+      # signing key, so updates flow between any signed builds.
+      - name: Decode production keystore
+        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > "${{ github.workspace }}/Gadget-release.jks"
 
       # Assemble both build types in one Gradle invocation (single config
       # phase). The debug APK is built so the leak gate / libsu assertion
       # can inspect a non-minified dex layout; only the release APK ships
-      # as the GitHub Release attachment. Release is signed with the AGP
-      # debug keystore — installable for sideload QA but explicitly NOT a
-      # production-signed artifact (use build-release.yml's manual
-      # workflow for production signing).
+      # as the GitHub Release attachment. Release is signed with the
+      # production keystore from secrets.KEYSTORE — identical to the
+      # manual build-release.yml workflow.
       - name: Build debug + R8-minified release (${{ matrix.flavor }})
         run: |
           ./gradlew ${{ matrix.assembleTask }} \
-            -Pandroid.injected.signing.store.file=$HOME/.android/debug.keystore \
-            -Pandroid.injected.signing.store.password=android \
-            -Pandroid.injected.signing.key.alias=androiddebugkey \
-            -Pandroid.injected.signing.key.password=android \
+            -Pandroid.injected.signing.store.file=${{ github.workspace }}/Gadget-release.jks \
+            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }} \
             -PCI_VERSION_CODE=${{ env.VERSION_CODE }} \
             -PCI_VERSION_NAME=${{ env.VERSION_NAME }} \
             -PBUILD_AUTHOR="${{ env.BUILD_AUTHOR }}" \
@@ -273,15 +264,15 @@ jobs:
 
             ## Downloads
 
-            R8-minified release APKs for both flavors, signed with the AGP
-            debug keystore so they install for sideload QA. For
-            production-signed APKs/AABs, dispatch the
-            **Build signed release (manual)** workflow.
+            R8-minified release APKs for both flavors, signed with the
+            production keystore (same cert as the manual
+            **Build signed release (manual)** workflow). Updates flow
+            cleanly between every auto-built and manual-built APK.
 
-            - `Gadget-standard-v1.0.${{ github.run_number }}-release.apk` — non-rooted **release** build (R8-minified, debug-keystore-signed).
-            - `Gadget-rooted-v1.0.${{ github.run_number }}-release.apk` — **rooted** release build (R8-minified, debug-keystore-signed). Requires Magisk / KernelSU / APatch.
+            - `Gadget-standard-v1.0.${{ github.run_number }}-release.apk` — non-rooted **release** build (R8-minified, production-signed).
+            - `Gadget-rooted-v1.0.${{ github.run_number }}-release.apk` — **rooted** release build (R8-minified, production-signed). Requires Magisk / KernelSU / APatch.
 
-            Standard and rooted APKs install side-by-side (different applicationIds: `com.gadget` vs `com.gadget.root`).
+            Standard and rooted APKs install side-by-side (different applicationIds: `dev.ranzlappen.gadget` vs `dev.ranzlappen.gadget.rooted`).
           files: |
             artifacts/standard-release-apk/*.apk
             artifacts/rooted-release-apk/*.apk
