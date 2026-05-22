@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.GadgetBottomSheet
+import dev.ranzlappen.gadget.core.ui.component.GadgetChip
 import dev.ranzlappen.gadget.core.ui.component.GadgetPrimaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
 import dev.ranzlappen.gadget.core.ui.component.GadgetTertiaryButton
@@ -51,10 +52,10 @@ import dev.ranzlappen.gadget.feature.torch.widget.customization.ToggleFeedback
  * the in-app list. Only [onConfirm] propagates the captured values
  * to the caller; cancel / swipe-down dismisses silently.
  *
- * Pickers are built from plain Material 3 widgets (`FilterChip` rows
- * acting as segmented selectors, `Switch`, `OutlinedTextField`) so
- * the sheet stays self-contained without needing the wider
- * design-system picker primitives that future batches will build out.
+ * Pickers are built from design-system primitives ([GadgetChip] rows
+ * acting as segmented selectors plus M3 [Switch] for binary toggles)
+ * so every selectable surface in the sheet inherits the same theme
+ * tokens as the rest of the app.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +82,16 @@ fun WidgetConfigurationSheet(
             else R.string.torch_widget_config_title_new,
         ),
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+        // verticalScroll keeps the Create CTA reachable when the form
+        // outgrows the sheet's vertical bounds (the Strobe variant
+        // adds rate + SOS + animation rows that push the footer off
+        // the bottom edge on Compact widths).
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(spacing.medium),
+        ) {
             GadgetTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -287,13 +297,12 @@ private fun SheetSectionHeader(text: String) {
 }
 
 /**
- * Light-weight segmented selector built from a flow of M3
- * [FilterChip] widgets. Chips wrap to a new line when their
- * combined intrinsic width exceeds the row — the previous rigid
- * [Row] squeezed the trailing chip until its label wrapped
- * vertically (e.g. the four-option Tint row truncating "Black" to
- * "Bl/ac/k"). [FlowRow] reflows instead of clipping. Used until
- * the design-system `GadgetSegmentedSelector` primitive ships.
+ * Light-weight segmented selector built from a flow of [GadgetChip]s.
+ * Chips wrap to a new line when their combined intrinsic width exceeds
+ * the row — the previous rigid [Row] squeezed the trailing chip until
+ * its label wrapped vertically (e.g. the four-option Tint row
+ * truncating "Black" to "Bl/ac/k"). [FlowRow] reflows instead of
+ * clipping.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -317,11 +326,10 @@ private fun <T> ChipRow(
             verticalArrangement = Arrangement.spacedBy(spacing.tiny),
         ) {
             options.forEach { option ->
-                FilterChip(
+                GadgetChip(
                     selected = selected == option,
                     onClick = { onSelect(option) },
-                    label = { Text(text = labelFor(option), maxLines = 1) },
-                    colors = FilterChipDefaults.filterChipColors(),
+                    label = labelFor(option),
                 )
             }
         }
