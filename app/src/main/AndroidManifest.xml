@@ -251,156 +251,17 @@
                 android:value="Continuous sensor monitoring for user-defined link rules" />
         </service>
 
-        <!-- ── Home Screen Widget (Metric) ───────────────────────── -->
-        <receiver
-            android:name=".widget.GadgetWidgetProvider"
-            android:label="@string/widget_label_metric"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_info" />
-        </receiver>
-
-        <!-- ── Log Now Widget ────────────────────────────────────── -->
-        <receiver
-            android:name=".widget.LogNowWidgetProvider"
-            android:label="@string/widget_label_log_now"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.gadget.widget.ACTION_LOG_NOW" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_log_now_info" />
-        </receiver>
-
-        <!-- ── Flashlight Widget ─────────────────────────────────── -->
-        <receiver
-            android:name=".widget.FlashlightWidgetProvider"
-            android:label="@string/widget_label_flashlight"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.gadget.widget.ACTION_FLASHLIGHT_TOGGLE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_flashlight_info" />
-        </receiver>
-
-        <!-- ── Strobe Widget ─────────────────────────────────────── -->
-        <receiver
-            android:name=".widget.StrobeWidgetProvider"
-            android:label="@string/widget_label_strobe"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.gadget.widget.ACTION_STROBE_TOGGLE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_strobe_info" />
-        </receiver>
-
-        <!-- ── Camera Snapshot Widget ────────────────────────────── -->
-        <receiver
-            android:name=".widget.CameraSnapshotWidgetProvider"
-            android:label="@string/widget_label_camera_snapshot"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.gadget.widget.ACTION_CAMERA_SNAPSHOT" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_camera_snapshot_info" />
-        </receiver>
-
-        <!-- ── Video Toggle Widget ───────────────────────────────── -->
-        <receiver
-            android:name=".widget.VideoToggleWidgetProvider"
-            android:label="@string/widget_label_video_toggle"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.gadget.widget.ACTION_VIDEO_TOGGLE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_video_toggle_info" />
-        </receiver>
-
         <!-- ── Video Record Service ──────────────────────────────── -->
         <service
             android:name=".services.VideoRecordService"
             android:exported="false"
             android:foregroundServiceType="camera" />
 
-        <!-- ── Voice Record Widget ───────────────────────────────── -->
-        <receiver
-            android:name=".widget.VoiceRecordWidgetProvider"
-            android:label="@string/widget_label_voice_record"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.gadget.widget.ACTION_VOICE_RECORD_TOGGLE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_voice_record_info" />
-        </receiver>
-
         <!-- ── Voice Record Service ──────────────────────────────── -->
         <service
             android:name=".services.VoiceRecordService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
-
-        <!-- ── Phone Ring Widget ─────────────────────────────────── -->
-        <receiver
-            android:name=".widget.PhoneRingWidgetProvider"
-            android:label="@string/widget_label_phone_ring"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.gadget.widget.ACTION_RING_30S" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_phone_ring_info" />
-        </receiver>
-
-        <!-- ── Notify in 30s Widget ──────────────────────────────── -->
-        <receiver
-            android:name=".widget.NotifyWidgetProvider"
-            android:label="@string/widget_label_notify"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.gadget.widget.ACTION_NOTIFY_30S" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_notify_info" />
-        </receiver>
-
-        <!-- ── dB Meter Widget ───────────────────────────────────── -->
-        <receiver
-            android:name=".widget.DbMeterWidgetProvider"
-            android:label="@string/widget_label_db_meter"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.gadget.widget.ACTION_DB_METER_TOGGLE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_db_meter_info" />
-        </receiver>
 
         <!-- ── dB Meter Service ──────────────────────────────────── -->
         <service
@@ -421,28 +282,6 @@
                 android:resource="@xml/nfc_hce_aid" />
         </service>
 
-        <!-- ── Vibration Toggle Widget ───────────────────────────── -->
-        <receiver
-            android:name=".widget.VibrationWidgetProvider"
-            android:label="@string/widget_label_vibration"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.gadget.widget.ACTION_VIBRATION_TOGGLE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_vibration_info" />
-        </receiver>
-
-        <activity
-            android:name=".widget.WidgetConfigActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
         <!-- ── Folder Popup (App-Organizer) ──────────────────────── -->
         <!-- Translucent floating activity launched on widget short-tap.
              Closes itself when the user taps outside the floating Card. -->
@@ -453,44 +292,6 @@
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
             android:taskAffinity="" />
-
-        <!-- ── Folder Widget (App-Organizer) — RemoteViews 2x2 ───── -->
-        <receiver
-            android:name=".widget.folder.FolderWidgetProvider"
-            android:label="@string/widget_folder_label"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.gadget.apps.PIN_CALLBACK" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_folder_2x2_info" />
-        </receiver>
-
-        <!-- ── Folder Widget (App-Organizer) — RemoteViews 1x1 ───── -->
-        <receiver
-            android:name=".widget.folder.FolderWidget1x1Provider"
-            android:label="@string/widget_folder_1x1_label"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_folder_1x1_info" />
-        </receiver>
-
-        <!-- Configuration activity invoked by the launcher when a folder
-             widget is dropped on the home screen. -->
-        <activity
-            android:name=".widget.folder.FolderWidgetConfigActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Gadget">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
 
         <!-- ── Batch-7: Persistent keep-alive foreground service ─────── -->
         <service
