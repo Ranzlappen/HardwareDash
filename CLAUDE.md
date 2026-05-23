@@ -131,7 +131,17 @@ What every component **must** do for accessibility:
     class is **Expanded** (tablet landscape, Chromebook). Compact /
     Medium widths keep the rail icon-only to maximise content area.
     Compact-landscape → bottom-bar collapse is queued as Phase-2
-    refinement.
+    refinement. The rail itself is a **pinned-anchors** layout:
+    `GadgetDestination.pinnedTop` (Dashboard) at the top,
+    `GadgetDestination.pinnedBottom` (Settings) at the bottom, and
+    `GadgetDestination.modules` in a `verticalScroll`-backed middle
+    region that scrolls independently as the module list grows.
+    Modules replace the placeholder areas as real features land —
+    Torch is the first; Sensors / Actuators / Automation stay as
+    coming-soon placeholders in the module region until their feature
+    modules ship. Add a new module by appending it to
+    `GadgetDestination.modules` and registering its route in the
+    `GadgetApp { … }` builder.
 13. The `ModuleScreenScaffold` exposes an optional `secondaryPane`
     slot rendered to the right of the primary column when
     `rememberLayoutMode()` is `TwoPane` / `ThreePane`. Wired
@@ -472,13 +482,60 @@ fun GadgetStatusDot(
 (`core/ui/component/*.kt` + `core/ui/ModuleScreenScaffold.kt`)
 - Standard layout primitives for feature screens.
 - `ModuleScreenScaffold` takes a primary content shape (`title` +
-  `functional` + `permissions` + `disclaimer` slots) **plus** an
-  optional `secondaryPane` slot rendered to the right of the primary
-  column when `rememberLayoutMode() ≠ SinglePane`. On Compact
-  widths the secondary pane is omitted entirely — treat it as
-  supplementary content for wider screens, not something the
-  primary flow depends on. Primary takes `1.5f` weight on TwoPane
-  and `1f` on ThreePane (50/50 split).
+  `functional` + `disclaimer` free-form slots, plus a declarative
+  `moduleInfo`) **plus** an optional `secondaryPane` slot rendered to
+  the right of the primary column when `rememberLayoutMode() ≠
+  SinglePane`. On Compact widths the secondary pane is omitted
+  entirely — treat it as supplementary content for wider screens, not
+  something the primary flow depends on. Primary takes `1.5f` weight
+  on TwoPane and `1f` on ThreePane (50/50 split).
+
+### Module blueprint (`core/ui/module/`)
+
+Every feature module is **self-describing** via a `ModuleInfo` so the
+shared scaffold renders a consistent metadata block without each
+module hand-rolling the chrome. This is the future-proof seam for new
+modules and for legacy migrations.
+
+#### `ModuleInfo` (`core/ui/module/ModuleInfo.kt`)
+```kotlin
+@Immutable
+data class ModuleInfo(
+    val permissions: List<ModulePermission> = emptyList(),
+    val compatibility: OsCompatibility,
+    val firmware: FirmwareRequirement? = null,
+)
+```
+- **When**: every screen built on `ModuleScreenScaffold` that
+  represents a hardware/feature module. Pass it as the scaffold's
+  `moduleInfo` and the standard **Permissions → OS compatibility →
+  Firmware** cards render automatically (after `functional`, before
+  `disclaimer`).
+- **Build it inside a `@Composable`** and resolve `stringResource(…)`
+  at construction — module-specific copy (permission rationales, OS
+  notes) lives in the **feature's** resources; the generic section
+  chrome lives in `:core:ui` (`core/ui/src/main/res/values/strings.xml`).
+- `firmware = null` (the common case) omits the firmware card. An
+  empty `permissions` list renders a "no permissions required" state.
+- **Reference impl**: `feature/torch`'s `torchModuleInfo()` — no
+  permissions, `minSdk 29` + two foreground-service notes, no
+  firmware.
+
+#### Reusable sections (`core/ui/module/ModuleInfoSections.kt`)
+- `ModulePermissionsSection` — one status row per permission (coloured
+  `GadgetStatusDot` + label + rationale); when any required permission
+  is missing it shows **both** a primary in-app **Grant** request
+  button (`rememberLauncherForActivityResult` /
+  `RequestMultiplePermissions`) **and** a secondary **Open app
+  settings** link. Grant state is live, refreshed on the request
+  callback and on `ON_RESUME` (so it updates after the settings
+  round-trip).
+- `ModuleCompatibilitySection` — compares `minSdk` against the live
+  `Build.VERSION.SDK_INT` for a supported/unsupported verdict, then
+  lists `OsNote`s tagged by the API level they apply from.
+- `ModuleFirmwareSection` — rendered only when `firmware != null`.
+- These usually flow through the scaffold's `moduleInfo` param; call
+  them directly only for a bespoke layout.
 
 ---
 

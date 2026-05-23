@@ -17,9 +17,10 @@ import dev.ranzlappen.gadget.core.navigation.GadgetDestination
  * }
  * ```
  *
- * Torch is **not** in [GadgetDestination.topLevel] — it doesn't
- * appear in the nav rail. Reach it via:
- * - Dashboard tile tap (Phase 2 / Batch 1 wires this).
+ * Torch is a module entry in [GadgetDestination.modules], so the nav
+ * rail renders its icon in the scrollable module region and the route
+ * is reachable via `navigateTopLevel`. Also reachable via:
+ * - Dashboard tile tap.
  * - QS tile (doesn't go through this route; toggles controller
  *   directly).
  * - Home-screen widget (doesn't go through this route either).

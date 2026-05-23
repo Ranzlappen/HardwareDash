@@ -84,11 +84,11 @@ fun GadgetApp(
             // Row pads in from status bar / nav bar / display cutout so
             // the rail icons and the host content sit clear of the
             // (transparent, edge-to-edge) system bars. windowInsetsPadding
-            // CONSUMES the insets it applies, so the downstream M3
-            // NavigationRail's default windowInsets sees 0 and doesn't
-            // re-pad — no double padding in landscape / 3-button-nav.
-            // The outer Surface stays full-bleed so the theme background
-            // colour paints behind the transparent bars.
+            // CONSUMES the insets it applies; the custom GadgetNavRail
+            // adds no insets of its own, so there's no double padding in
+            // landscape / 3-button-nav. The outer Surface stays full-bleed
+            // so the theme background colour paints behind the transparent
+            // bars.
             val shell: @Composable (showLabels: Boolean) -> Unit = { showLabels ->
                 Row(
                     modifier = Modifier
@@ -97,7 +97,9 @@ fun GadgetApp(
                 ) {
                     GadgetNavRail(
                         navController = navController,
-                        destinations = GadgetDestination.topLevel,
+                        topAnchors = GadgetDestination.pinnedTop,
+                        modules = GadgetDestination.modules,
+                        bottomAnchors = GadgetDestination.pinnedBottom,
                         showLabels = showLabels,
                     )
                     GadgetNavHost(
@@ -147,10 +149,11 @@ fun NavGraphBuilder.placeholderScreen(destination: GadgetDestination) {
 /**
  * "Coming soon" placeholder rendered via [ModuleScreenScaffold].
  *
- * Each top-level destination gets its own short, module-appropriate
- * blurb in the scaffold's `functional` slot; the `permissions` and
- * `disclaimer` slots are deliberately left empty in Phase 1 and will
- * be populated in Phase 1.5 as each feature module lands.
+ * Each placeholder destination gets its own short, module-appropriate
+ * blurb in the scaffold's `functional` slot; the `moduleInfo` block
+ * and `disclaimer` slot are deliberately left empty in Phase 1 and
+ * will be populated as each real feature module replaces the
+ * placeholder.
  *
  * Public so previews can render it in isolation; production callers
  * normally reach it via [placeholderScreen].

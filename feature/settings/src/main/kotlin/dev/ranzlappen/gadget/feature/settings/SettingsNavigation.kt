@@ -19,8 +19,8 @@ import dev.ranzlappen.gadget.core.navigation.GadgetDestination
  * }
  * ```
  *
- * Settings sits at a top-level destination (Settings is in
- * `GadgetDestination.topLevel`), so the nav rail renders its icon
+ * Settings is pinned to the bottom of the rail (it's in
+ * `GadgetDestination.pinnedBottom`), so the nav rail renders its icon
  * automatically and the route is reachable via `navigateTopLevel`.
  */
 fun NavGraphBuilder.settingsScreen() {

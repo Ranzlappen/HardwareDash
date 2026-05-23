@@ -16,6 +16,10 @@ import androidx.compose.ui.Modifier
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.adaptive.GadgetLayoutMode
 import dev.ranzlappen.gadget.core.ui.adaptive.rememberLayoutMode
+import dev.ranzlappen.gadget.core.ui.module.ModuleCompatibilitySection
+import dev.ranzlappen.gadget.core.ui.module.ModuleFirmwareSection
+import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
+import dev.ranzlappen.gadget.core.ui.module.ModulePermissionsSection
 
 /**
  * Per-module screen scaffold.
@@ -23,12 +27,17 @@ import dev.ranzlappen.gadget.core.ui.adaptive.rememberLayoutMode
  * Provides:
  *  - Full vertical scroll via `Column(Modifier.verticalScroll(...))`.
  *  - Optional [title] header slot.
- *  - Three example section slots ([functional], [permissions],
- *    [disclaimer]) demonstrating the common pattern observed in the
- *    legacy app:
+ *  - The module-blueprint sections, driven declaratively by an optional
+ *    [moduleInfo]. When supplied, the scaffold renders the standard
+ *    **Permissions**, **OS compatibility**, and (when present)
+ *    **Firmware** cards automatically — so every module gets a
+ *    consistent metadata block without hand-rolling it. See
+ *    [ModuleInfo].
+ *  - Two free-form section slots ([functional], [disclaimer]) for the
+ *    common pattern observed in the legacy app:
  *
  *      1. functional   — the module's primary content
- *      2. permissions  — required Android permissions table
+ *      2. moduleInfo   — permissions / OS-compat / firmware (auto)
  *      3. disclaimer   — collapsible safety / legal note
  *  - An optional [secondaryPane] slot rendered to the **right** of
  *    the primary column when the active [GadgetLayoutMode] is
@@ -60,7 +69,7 @@ fun ModuleScreenScaffold(
     title: String? = null,
     modifier: Modifier = Modifier,
     functional: (@Composable ColumnScope.() -> Unit)? = null,
-    permissions: (@Composable ColumnScope.() -> Unit)? = null,
+    moduleInfo: ModuleInfo? = null,
     disclaimer: (@Composable ColumnScope.() -> Unit)? = null,
     secondaryPane: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
@@ -88,7 +97,11 @@ fun ModuleScreenScaffold(
                 )
             }
             functional?.invoke(this)
-            permissions?.invoke(this)
+            if (moduleInfo != null) {
+                ModulePermissionsSection(permissions = moduleInfo.permissions)
+                ModuleCompatibilitySection(compatibility = moduleInfo.compatibility)
+                moduleInfo.firmware?.let { ModuleFirmwareSection(firmware = it) }
+            }
             disclaimer?.invoke(this)
         }
     }

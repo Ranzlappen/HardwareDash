@@ -105,4 +105,8 @@
     <string name="torch_widget_config_feedback_default_toast_template">{name} is now {state}</string>
     <string name="torch_widget_config_feedback_default_notification_title">{name}</string>
     <string name="torch_widget_config_feedback_default_notification_body">Now {state}</string>
+
+    <!-- Module-blueprint OS-compatibility notes (rendered by ModuleCompatibilitySection) -->
+    <string name="torch_module_compat_note_fgs_active">The strobe runs as a foreground service while active, so it keeps flashing after you leave the screen.</string>
+    <string name="torch_module_compat_note_fgs_short">On Android 14+ the strobe runs as a time-boxed short foreground service (about 3 minutes).</string>
 </resources>

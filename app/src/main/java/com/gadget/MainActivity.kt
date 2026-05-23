@@ -98,10 +98,10 @@ class MainActivity : ComponentActivity() {
                     ) {
                         dashboardScreen(
                             onNavigate = { destination ->
-                                // Top-level destinations (Settings, Sensors, …)
-                                // route via the back-stack-trimming helper;
-                                // sub-routes (Torch) use plain navigate.
-                                if (destination in GadgetDestination.topLevel) {
+                                // Rail destinations (Dashboard, Torch, Settings, …)
+                                // route via the back-stack-trimming helper; any
+                                // non-rail sub-route uses plain navigate.
+                                if (destination in GadgetDestination.railDestinations) {
                                     navController.navigateTopLevel(destination)
                                 } else {
                                     navController.navigate(destination.route)

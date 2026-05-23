@@ -16,11 +16,12 @@ import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 /**
  * Phase 1 dashboard module.
  *
- * Demonstrates the common 3-section [ModuleScreenScaffold] pattern
- * (functional / permissions / disclaimer). Phase 2 / Batch 1 adds
- * the first real feature tile — Torch — inside the functional
- * slot. Future batches grow the functional slot into a true
- * adaptive grid of hardware readouts.
+ * Uses the [ModuleScreenScaffold] with a functional + disclaimer
+ * slot. The dashboard is the app home — not a hardware module — so it
+ * supplies no `moduleInfo` (no permissions / OS-compat / firmware
+ * block). Phase 2 / Batch 1 adds the first real feature tile — Torch —
+ * inside the functional slot. Future batches grow the functional slot
+ * into a true adaptive grid of hardware readouts.
  *
  * [onNavigate] dispatches by route — the host (MainActivity)
  * decides whether to use `navigateTopLevel` (for top-level
@@ -54,17 +55,6 @@ fun DashboardScreen(
                 Text(
                     text = "Toggle the device flashlight, view strobe controls.",
                     style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        },
-        permissions = {
-            DashCard(
-                modifier = Modifier.fillMaxWidth(),
-                title = "Permissions",
-            ) {
-                Text(
-                    text = "No permissions required for this module yet.",
-                    style = MaterialTheme.typography.bodySmall,
                 )
             }
         },
