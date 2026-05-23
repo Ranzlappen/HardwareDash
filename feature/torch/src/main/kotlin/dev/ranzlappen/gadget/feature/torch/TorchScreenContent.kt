@@ -1,5 +1,6 @@
 package dev.ranzlappen.gadget.feature.torch
 
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
+import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
+import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.OsNote
 import dev.ranzlappen.gadget.core.ui.component.CompactCard
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
@@ -85,8 +89,38 @@ fun TorchScreenContent(
                 onDeleteWidget = onDeleteWidget,
             )
         },
+        moduleInfo = torchModuleInfo(),
     )
 }
+
+/**
+ * Torch's [ModuleInfo] — the reference implementation of the module
+ * blueprint. Torch toggles on-device hardware via `CameraManager`, so:
+ *  - it needs **no runtime permissions** (the permissions section then
+ *    renders the "no permissions required" state),
+ *  - it works on every supported OS (minSdk 29) with two foreground-
+ *    service behaviour notes,
+ *  - it has **no firmware** requirement (the firmware section is
+ *    omitted).
+ */
+@Composable
+private fun torchModuleInfo(): ModuleInfo = ModuleInfo(
+    permissions = emptyList(),
+    compatibility = OsCompatibility(
+        minSdk = Build.VERSION_CODES.Q,
+        notes = listOf(
+            OsNote(
+                sinceSdk = Build.VERSION_CODES.Q,
+                text = stringResource(R.string.torch_module_compat_note_fgs_active),
+            ),
+            OsNote(
+                sinceSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+                text = stringResource(R.string.torch_module_compat_note_fgs_short),
+            ),
+        ),
+    ),
+    firmware = null,
+)
 
 @Composable
 private fun TorchToggleCard(

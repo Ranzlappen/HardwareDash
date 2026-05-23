@@ -25,6 +25,13 @@ dependencies {
     // rejected. The artefact name itself is unchanged.
     api(libs.androidx.material3.windowsizeclass)
 
+    // activity-compose powers `rememberLauncherForActivityResult`, used by
+    // the module-blueprint permissions section to fire a runtime
+    // permission request. The compose-library convention plugin doesn't
+    // pull it in (only the feature convention plugin does), so :core:ui
+    // declares it explicitly.
+    implementation(libs.androidx.activity.compose)
+
     // Test fixtures consumed by androidTest source set in this module.
     // :core:testing re-exports ui-test-junit4 (+ ui-test-manifest as
     // debugImplementation) so a single line plugs in the full Compose

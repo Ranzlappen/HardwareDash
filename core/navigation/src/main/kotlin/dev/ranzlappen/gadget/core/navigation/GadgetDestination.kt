@@ -83,13 +83,15 @@ sealed interface GadgetDestination {
     }
 
     /**
-     * Torch / Flashlight sub-screen. Reachable from the Dashboard
-     * tile and from QS tile / home-screen widget interactions
-     * (those go through the controller directly, not via this
-     * route, but the route still exists so a deep-link or
-     * notification action can reach it).
+     * Torch / Flashlight feature module. A first-class rail entry in
+     * the scrollable [modules] region. Also reachable from QS tile /
+     * home-screen widget interactions (those drive the controller
+     * directly, not this route) and from a deep-link / notification
+     * action.
      *
-     * NOT in [topLevel] — Torch isn't a primary rail destination.
+     * Torch is the reference implementation of the module blueprint —
+     * it ships a `ModuleInfo` (permissions / OS-compatibility /
+     * firmware) consumed by `ModuleScreenScaffold`.
      */
     data object Torch : GadgetDestination {
         override val route = "torch"
@@ -100,20 +102,46 @@ sealed interface GadgetDestination {
 
     companion object {
         /**
-         * Order of top-level destinations as they appear in the
-         * navigation bar / rail. Index 0 is the canonical start
+         * Destinations pinned to the **top** of the rail, above the
+         * scrollable [modules] region. Index 0 is the canonical start
          * destination ([Dashboard]).
          */
-        val topLevel: List<GadgetDestination> = listOf(
-            Dashboard, Sensors, Actuators, Automation, Settings,
+        val pinnedTop: List<GadgetDestination> = listOf(Dashboard)
+
+        /**
+         * Feature modules shown in the rail's **scrollable middle**
+         * region between [pinnedTop] and [pinnedBottom]. Each entry
+         * gets a rail button — a module is never dashboard-only.
+         *
+         * Real modules replace the abstract placeholder areas as they
+         * land: [Torch] is the first real module; [Sensors] /
+         * [Actuators] / [Automation] remain coming-soon placeholders
+         * until their feature modules ship. Append new / legacy-
+         * migrated modules here.
+         */
+        val modules: List<GadgetDestination> = listOf(
+            Torch, Sensors, Actuators, Automation,
         )
 
         /**
+         * Destinations pinned to the **bottom** of the rail, below the
+         * scrollable [modules] region.
+         */
+        val pinnedBottom: List<GadgetDestination> = listOf(Settings)
+
+        /**
+         * Every destination that owns a rail button, in render order
+         * (pinned-top → modules → pinned-bottom). Used for selection
+         * highlighting and back-stack-trimming navigation decisions.
+         */
+        val railDestinations: List<GadgetDestination> = pinnedTop + modules + pinnedBottom
+
+        /**
          * Look up a [GadgetDestination] by its route string, or
-         * `null` if the route doesn't match a known top-level entry.
-         * Used by the bottom nav to decide which item is selected.
+         * `null` if the route doesn't match a known rail entry. Used
+         * to decide which rail item is selected.
          */
         fun byRouteOrNull(route: String?): GadgetDestination? =
-            route?.let { r -> topLevel.firstOrNull { it.route == r } }
+            route?.let { r -> railDestinations.firstOrNull { it.route == r } }
     }
 }

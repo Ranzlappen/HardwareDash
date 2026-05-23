@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Generic chrome for the module blueprint sections (ModuleInfoSections.kt).
+         Module-specific copy (permission rationales, OS-behaviour notes) is
+         resolved in each feature module and passed in via ModuleInfo. -->
+
+    <!-- Permissions section -->
+    <string name="module_permissions_title">Permissions</string>
+    <string name="module_permissions_none">This module needs no special permissions.</string>
+    <string name="module_permission_all_granted">All required permissions are granted.</string>
+    <string name="module_permission_grant">Grant permissions</string>
+    <string name="module_permission_open_settings">Open app settings</string>
+    <string name="module_permission_granted">Granted</string>
+    <string name="module_permission_denied">Not granted</string>
+    <string name="module_permission_optional_label">%1$s (optional)</string>
+
+    <!-- OS-compatibility section -->
+    <string name="module_compat_title">OS compatibility</string>
+    <string name="module_compat_requires">Requires Android API level %1$d or newer.</string>
+    <string name="module_compat_current">This device runs API level %1$d.</string>
+    <string name="module_compat_supported">Supported on this device</string>
+    <string name="module_compat_unsupported">Not supported on this device</string>
+    <string name="module_compat_note">API %1$d+: %2$s</string>
+
+    <!-- Firmware section -->
+    <string name="module_firmware_title">Firmware</string>
+    <string name="module_firmware_version">%1$s · firmware %2$s or newer</string>
+</resources>
