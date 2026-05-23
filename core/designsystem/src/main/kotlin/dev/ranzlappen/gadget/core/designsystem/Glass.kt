@@ -9,7 +9,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 
@@ -50,9 +50,8 @@ enum class GlassIntensity {
  *      `LocalGadgetTheme.current.glass`).
  *   2. A hairline `colorScheme.outlineVariant` border, opacity-
  *      modulated by the same intensity tier.
- *   3. A rounded clip at [cornerRadius] applied to both the
- *      background and the border so the gradient never bleeds beyond
- *      the silhouette.
+ *   3. A rounded clip at [shape] applied to both the background and
+ *      the border so the gradient never bleeds beyond the silhouette.
  *
  * Backdrop blur is intentionally not applied here — true backdrop
  * blur on Android requires a `RenderEffect` on API 31+ plus a
@@ -64,10 +63,19 @@ enum class GlassIntensity {
  *
  * Surfaces with no readable content beneath them should use
  * [GlassIntensity.Subtle] so users don't perceive a "hole" in the UI.
+ *
+ * **Shape pitfall.** When [glassSurface] is composed with an outer
+ * `Surface(shape = …)` the two shapes MUST match, or the M3 surface's
+ * own border will paint at a different silhouette than the glass clip
+ * — leaving two stray vertical hairline segments at the left/right
+ * edges of long pills. Always pass an explicit [shape] aligned with
+ * the enclosing surface (e.g. `MaterialTheme.shapes.small` for the
+ * Gadget button family). For standalone glass containers (no
+ * enclosing `Surface`) the default 18 dp corner is fine.
  */
 @Composable
 fun Modifier.glassSurface(
-    cornerRadius: Dp = 18.dp,
+    shape: Shape = RoundedCornerShape(18.dp),
     intensity: GlassIntensity = GlassIntensity.Standard,
     showBorder: Boolean = true,
 ): Modifier {
@@ -93,7 +101,6 @@ fun Modifier.glassSurface(
             borderAlpha = glassValues.vividBorderAlpha
         }
     }
-    val shape = RoundedCornerShape(cornerRadius)
     val gradient = Brush.verticalGradient(
         colors = listOf(
             scheme.surface.copy(alpha = topAlpha),
