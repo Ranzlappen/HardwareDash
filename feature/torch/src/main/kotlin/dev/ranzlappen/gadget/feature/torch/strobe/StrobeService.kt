@@ -136,24 +136,23 @@ class StrobeService : Service() {
     private fun promoteToForeground() {
         ensureNotificationChannel()
         val notification = buildNotification()
-        when {
-            // API 34+: use shortService — no CAMERA permission required,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            // API 34+: shortService — no CAMERA permission required,
             // OS enforces a ~3 min cap (acceptable safety bound for a
-            // strobe session).
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> startForeground(
+            // strobe session). Matches the manifest's declared type.
+            startForeground(
                 NOTIFICATION_ID,
                 notification,
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
             )
-            // API 29-33: type is optional; the camera-typed FGS on
-            // those releases never required runtime CAMERA, so we
-            // keep the existing behaviour.
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> startForeground(
-                NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA,
-            )
-            else -> startForeground(NOTIFICATION_ID, notification)
+        } else {
+            // API 29-33: promote without a type. setTorchMode flash
+            // access needs no camera-typed FGS here, and the manifest
+            // declares only `shortService` (an unrecognised flag pre-34,
+            // so the declared set is effectively empty) — passing
+            // FOREGROUND_SERVICE_TYPE_CAMERA would not be a subset of
+            // the declared types and throws IllegalArgumentException.
+            startForeground(NOTIFICATION_ID, notification)
         }
     }
 
