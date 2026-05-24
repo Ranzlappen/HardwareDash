@@ -51,6 +51,7 @@ class WidgetConfigurationSheetTest {
                     onDismiss = {},
                     onConfirm = {},
                     resolveIconRes = { R.drawable.ic_flashlight_on },
+                    iconChoices = emptyList(),
                 )
             }
         }
@@ -70,6 +71,7 @@ class WidgetConfigurationSheetTest {
                     onDismiss = {},
                     onConfirm = {},
                     resolveIconRes = { R.drawable.ic_flashlight_on },
+                    iconChoices = emptyList(),
                 )
             }
         }
@@ -89,6 +91,7 @@ class WidgetConfigurationSheetTest {
                     onDismiss = {},
                     onConfirm = {},
                     resolveIconRes = { R.drawable.ic_flashlight_on },
+                    iconChoices = emptyList(),
                 )
             }
         }
@@ -108,6 +111,7 @@ class WidgetConfigurationSheetTest {
                     onDismiss = {},
                     onConfirm = {},
                     resolveIconRes = { R.drawable.ic_flashlight_on },
+                    iconChoices = emptyList(),
                 )
             }
         }
@@ -138,6 +142,7 @@ class WidgetConfigurationSheetTest {
                     onDismiss = {},
                     onConfirm = { captured = it },
                     resolveIconRes = { R.drawable.ic_flashlight_on },
+                    iconChoices = emptyList(),
                 )
             }
         }

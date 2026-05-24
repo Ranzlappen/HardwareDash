@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Home-screen flashlight widget — 1×1 cell.
@@ -57,32 +58,43 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
-        val ep = entry(context)
-        val controller = ep.torchController()
-        val isOn = controller.state.value.isOn
-        val repo = ep.widgetRepository()
-        val configs = repo.all.value
+        val pendingResult = goAsync()
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            try {
+                renderAll(context, appWidgetManager, appWidgetIds)
+            } finally {
+                pendingResult.finish()
+            }
+        }
+    }
 
+    /**
+     * Render every [appWidgetIds] instance from its persisted config.
+     * Reads via the DataStore-backed [TorchWidgetConfigRepository.getAll]
+     * (not the hot `all.value` cache) so a cold process — empty cache —
+     * still paints the saved appearance instead of self-healing a default
+     * over it. Self-heal only fires when the config is genuinely absent.
+     */
+    private suspend fun renderAll(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray,
+    ) {
+        val ep = entry(context)
+        val isOn = ep.torchController().state.value.isOn
+        val repo = ep.widgetRepository()
+        val configs = repo.getAll()
         appWidgetIds.forEach { id ->
             val config = configs[id] ?: run {
-                // Self-heal: persist a default Flashlight config so
-                // the in-app list shows this widget on next refresh.
-                // Fire-and-forget — the save is async; the render
-                // below uses the in-memory default in the meantime.
                 val default = TorchWidgetConfig(
                     type = WidgetType.Flashlight,
                     displayName = context.getString(R.string.torch_widget_default_name_flashlight),
                 )
                 Log.w(PendingTorchWidgetConfigs.TAG, "FlashlightWidget self-heal id=$id")
-                CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-                    repo.save(id, default)
-                }
+                repo.save(id, default)
                 default
             }
-            appWidgetManager.updateAppWidget(
-                id,
-                buildRemoteViews(context, id, isOn, config),
-            )
+            appWidgetManager.updateAppWidget(id, buildRemoteViews(context, id, isOn, config))
         }
     }
 
@@ -94,42 +106,57 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
             AppWidgetManager.INVALID_APPWIDGET_ID,
         )
         val ep = entry(context)
+        // Toggle immediately on the receiver thread — the TorchCallback
+        // synchronously updates the shared TorchState so the torch reacts
+        // without waiting on the config read below.
         val controller = ep.torchController()
-        // Toggle on the singleton — the TorchCallback synchronously
-        // updates the shared TorchState so other surfaces react.
         controller.toggle()
         val newState = controller.state.value.isOn
 
-        // Dispatch the per-widget feedback (toast / notification).
-        // Look up config by appWidgetId; if missing fall back silently.
-        val config = ep.widgetRepository().all.value[appWidgetId]
-        if (config != null) {
-            ep.feedbackDispatcher().dispatch(
-                displayName = config.displayName,
-                newState = newState,
-                feedback = config.appearance.feedback,
-            )
-        }
+        val pendingResult = goAsync()
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            try {
+                // DataStore-backed read so a cold process still sees the
+                // per-widget feedback + animation config (the hot cache is
+                // empty until its first async emission).
+                val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                    ep.widgetRepository().get(appWidgetId)
+                } else {
+                    null
+                }
+                if (config != null) {
+                    // Toast needs a Looper — dispatch on the main thread.
+                    withContext(Dispatchers.Main) {
+                        ep.feedbackDispatcher().dispatch(
+                            displayName = config.displayName,
+                            newState = newState,
+                            feedback = config.appearance.feedback,
+                        )
+                    }
+                }
 
-        // Refresh every flashlight widget instance so the icon flips.
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        val componentName = ComponentName(context, FlashlightWidgetProvider::class.java)
-        val ids = appWidgetManager.getAppWidgetIds(componentName)
-        if (ids.isNotEmpty()) onUpdate(context, appWidgetManager, ids)
+                // Repaint every instance (resting state).
+                val appWidgetManager = AppWidgetManager.getInstance(context)
+                val componentName = ComponentName(context, FlashlightWidgetProvider::class.java)
+                val ids = appWidgetManager.getAppWidgetIds(componentName)
+                if (ids.isNotEmpty()) renderAll(context, appWidgetManager, ids)
 
-        // Overlay the held tap-press frame on the tapped instance (the
-        // refresh above already painted its resting state).
-        if (config != null &&
-            appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID &&
-            config.appearance.tap.enabled &&
-            config.appearance.tap.animation.hasPressFrame()
-        ) {
-            playTapPressFrame(
-                context = context,
-                appWidgetId = appWidgetId,
-                pressedViews = buildRemoteViews(context, appWidgetId, newState, config, pressed = true),
-                restingViews = buildRemoteViews(context, appWidgetId, newState, config, pressed = false),
-            )
+                // Overlay the held tap-press frame on the tapped instance.
+                if (config != null &&
+                    appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID &&
+                    config.appearance.tap.enabled &&
+                    config.appearance.tap.animation.hasPressFrame()
+                ) {
+                    playTapPressFrame(
+                        manager = appWidgetManager,
+                        appWidgetId = appWidgetId,
+                        pressedViews = buildRemoteViews(context, appWidgetId, newState, config, pressed = true),
+                        restingViews = buildRemoteViews(context, appWidgetId, newState, config, pressed = false),
+                    )
+                }
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 

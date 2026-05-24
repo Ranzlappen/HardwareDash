@@ -22,6 +22,7 @@
     <string name="torch_state_off">Off</string>
     <string name="torch_action_turn_on">Turn on torch</string>
     <string name="torch_action_turn_off">Turn off torch</string>
+    <string name="torch_action_hold">Hold for light</string>
     <string name="torch_status_no_flash">This device doesn\'t have a flash unit.</string>
     <string name="torch_status_hardware_error">Hardware error — try toggling again.</string>
     <string name="torch_status_permission_denied">Camera access denied — grant in system settings.</string>
@@ -86,6 +87,7 @@
     <string name="torch_widget_config_tint_white">White</string>
     <string name="torch_widget_config_tint_black">Black</string>
     <string name="torch_widget_config_tint_custom">Custom</string>
+    <string name="torch_widget_config_tint_custom_color">Custom colour</string>
 
     <string name="torch_widget_config_tap_animation_label">Animation</string>
     <string name="torch_widget_config_tap_animation_none">None</string>
@@ -109,6 +111,8 @@
     <string name="torch_widget_config_feedback_default_notification_body">Now {state}</string>
 
     <!-- Module-blueprint OS-compatibility notes (rendered by ModuleCompatibilitySection) -->
+    <string name="torch_module_perm_notifications_label">Notifications</string>
+    <string name="torch_module_perm_notifications_rationale">Lets the strobe service show its status and widget toggle confirmations appear.</string>
     <string name="torch_module_compat_note_fgs_active">The strobe runs as a foreground service while active, so it keeps flashing after you leave the screen.</string>
     <string name="torch_module_compat_note_fgs_short">On Android 14+ the strobe runs as a time-boxed short foreground service (about 3 minutes).</string>
 </resources>
