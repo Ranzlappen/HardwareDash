@@ -2,7 +2,6 @@ package dev.ranzlappen.gadget.feature.torch.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -91,7 +90,7 @@ class WidgetPinSuccessReceiver : BroadcastReceiver() {
                 }
                 entry.repository().save(appWidgetId, config)
                 Log.d(PendingTorchWidgetConfigs.TAG, "save complete id=$appWidgetId type=${config.type}")
-                broadcastUpdate(context, config.type, appWidgetId)
+                broadcastTorchWidgetUpdate(context, config.type, appWidgetId)
                 Log.d(PendingTorchWidgetConfigs.TAG, "broadcastUpdate sent id=$appWidgetId")
             } catch (t: Throwable) {
                 Log.e(PendingTorchWidgetConfigs.TAG, "pin-success flow failed", t)
@@ -99,30 +98,6 @@ class WidgetPinSuccessReceiver : BroadcastReceiver() {
                 pendingResult.finish()
             }
         }
-    }
-
-    private fun broadcastUpdate(
-        context: Context,
-        type: WidgetType,
-        appWidgetId: Int,
-    ) {
-        val providerClass = when (type) {
-            WidgetType.Flashlight -> FlashlightWidgetProvider::class.java
-            WidgetType.Strobe -> StrobeWidgetProvider::class.java
-        }
-        val updateIntent = Intent(
-            AppWidgetManager.ACTION_APPWIDGET_UPDATE,
-            null,
-            context,
-            providerClass,
-        ).apply {
-            putExtra(
-                AppWidgetManager.EXTRA_APPWIDGET_IDS,
-                intArrayOf(appWidgetId),
-            )
-            component = ComponentName(context, providerClass)
-        }
-        context.sendBroadcast(updateIntent)
     }
 
     /** Hilt entry point — gives a system-instantiated

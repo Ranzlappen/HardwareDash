@@ -13,6 +13,7 @@ import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfigRepository
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetCreator
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
+import dev.ranzlappen.gadget.feature.torch.widget.broadcastTorchWidgetUpdate
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -208,6 +209,10 @@ class TorchViewModel @Inject constructor(
             is SheetTarget.Existing -> {
                 viewModelScope.launch {
                     widgetRepository.save(target.appWidgetId, updated)
+                    // Repaint the placed widget now — saving alone leaves
+                    // the launcher's cached RemoteViews stale until the
+                    // next tap.
+                    broadcastTorchWidgetUpdate(context, updated.type, target.appWidgetId)
                 }
             }
             null -> Unit
