@@ -28,11 +28,8 @@ import kotlinx.serialization.Serializable
  * - [rateHz] — strobe cadence. Only meaningful when `type == Strobe`;
  *   ignored otherwise. Range 1f..20f in the UI; the service clamps
  *   defensively in case of corrupted on-disk values.
- * - [sosMode] — strobe variant only. When `true`, the playback
- *   logic should emit the Morse SOS pattern instead of a constant
- *   strobe. **Today the StrobeService reads this flag but doesn't
- *   yet implement SOS playback** — tracked at
- *   https://github.com/Ranzlappen/HardwareDash/issues/96.
+ * - [sosMode] — strobe variant only. When `true`, [StrobeService]
+ *   emits the Morse SOS pattern instead of a constant strobe.
  * - [appearance] — visual chrome + tap behaviour + toggle feedback.
  *   Defaulted to [WidgetAppearance] so existing on-disk configs
  *   migrate seamlessly: missing `appearance` field decodes as the

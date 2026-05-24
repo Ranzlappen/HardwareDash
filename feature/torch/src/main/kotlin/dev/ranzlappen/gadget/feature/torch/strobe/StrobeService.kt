@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -14,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
+import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfigRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -28,15 +30,16 @@ import kotlin.math.min
 /**
  * Foreground service that strobes the torch at a configurable rate.
  *
- * Per-tap configuration arrives via Intent extras when the strobe
- * widget starts the service:
- * - [EXTRA_RATE_HZ] — strobe rate in Hz (clamped to
- *   `TorchWidgetConfig.MIN_RATE_HZ..MAX_RATE_HZ`). Defaults to
- *   `TorchWidgetConfig.DEFAULT_RATE_HZ` if absent.
- * - [EXTRA_SOS_MODE] — boolean flag selecting SOS playback. When
- *   `true` the loop emits a repeating Morse "SOS" pattern
- *   ([sosTimeline]) instead of the constant strobe; the rate value
- *   tunes the Morse dot unit via [sosUnitMillis].
+ * Configuration source depends on the caller:
+ * - **Widget taps** pass only [EXTRA_APPWIDGET_ID]; the service reads
+ *   that widget's persisted [TorchWidgetConfig] (rate / SOS) itself,
+ *   off the broadcast thread. This avoids trusting a cold StateFlow
+ *   cache on the provider side.
+ * - **In-app controls** pass the values directly via [EXTRA_RATE_HZ]
+ *   (Hz, clamped to `TorchWidgetConfig.MIN_RATE_HZ..MAX_RATE_HZ`) and
+ *   [EXTRA_SOS_MODE]. When SOS is selected the loop emits a repeating
+ *   Morse "SOS" ([sosTimeline]); the rate tunes the dot unit via
+ *   [sosUnitMillis].
  *
  * Lifecycle:
  * - [isRunning] companion-level flag flips `true` once the
@@ -64,6 +67,9 @@ class StrobeService : Service() {
     @Inject
     lateinit var torchController: TorchController
 
+    @Inject
+    lateinit var widgetRepository: TorchWidgetConfigRepository
+
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Default + serviceJob)
     private var strobeLoop: Job? = null
@@ -77,13 +83,7 @@ class StrobeService : Service() {
                 stopSelf()
                 return START_NOT_STICKY
             }
-            else -> {
-                val rateHz = (intent?.getFloatExtra(EXTRA_RATE_HZ, TorchWidgetConfig.DEFAULT_RATE_HZ)
-                    ?: TorchWidgetConfig.DEFAULT_RATE_HZ)
-                    .coerceIn(TorchWidgetConfig.MIN_RATE_HZ, TorchWidgetConfig.MAX_RATE_HZ)
-                val sosMode = intent?.getBooleanExtra(EXTRA_SOS_MODE, false) ?: false
-                startStrobing(rateHz, sosMode)
-            }
+            else -> startSession(intent)
         }
         return START_STICKY
     }
@@ -101,7 +101,9 @@ class StrobeService : Service() {
         super.onDestroy()
     }
 
-    private fun startStrobing(rateHz: Float, sos: Boolean) {
+    private fun startSession(intent: Intent?) {
+        // Promote synchronously so the startForegroundService → startForeground
+        // contract is satisfied before the suspending config read below.
         promoteToForeground()
         // Re-tap while running = no-op (the running loop already
         // honours the current rate; future "edit a live strobe"
@@ -109,7 +111,27 @@ class StrobeService : Service() {
         // the existing strobeLoop and relaunching).
         if (strobeLoop?.isActive == true) return
         isRunning = true
+
+        val appWidgetId = intent?.getIntExtra(EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+            ?: AppWidgetManager.INVALID_APPWIDGET_ID
+        val explicitRate = intent?.getFloatExtra(EXTRA_RATE_HZ, TorchWidgetConfig.DEFAULT_RATE_HZ)
+            ?: TorchWidgetConfig.DEFAULT_RATE_HZ
+        val explicitSos = intent?.getBooleanExtra(EXTRA_SOS_MODE, false) ?: false
+
         strobeLoop = serviceScope.launch {
+            // A widget tap passes only EXTRA_APPWIDGET_ID; the service reads
+            // that widget's persisted config (rate / SOS) here — off the
+            // broadcast thread, so a cold StateFlow cache can't strand the
+            // session on stale defaults (the bug behind "SOS doesn't work").
+            // In-app callers pass the rate / SOS extras directly instead.
+            val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                widgetRepository.get(appWidgetId)
+            } else {
+                null
+            }
+            val rateHz = (config?.rateHz ?: explicitRate)
+                .coerceIn(TorchWidgetConfig.MIN_RATE_HZ, TorchWidgetConfig.MAX_RATE_HZ)
+            val sos = config?.sosMode ?: explicitSos
             if (sos) runSosPattern(rateHz) else runConstant(rateHz)
         }
     }
@@ -220,6 +242,12 @@ class StrobeService : Service() {
         /** Boolean extra selecting SOS Morse playback over the constant
          *  strobe. Read in [onStartCommand]. */
         const val EXTRA_SOS_MODE = "dev.ranzlappen.gadget.feature.torch.EXTRA_SOS_MODE"
+
+        /** Int extra carrying the tapped widget's `appWidgetId`. When
+         *  present the service reads that widget's persisted config
+         *  (rate / SOS) itself rather than trusting extras — robust
+         *  against a cold-process StateFlow cache. */
+        const val EXTRA_APPWIDGET_ID = "dev.ranzlappen.gadget.feature.torch.EXTRA_APPWIDGET_ID"
 
         /**
          * Heuristic flag indicating whether a strobe loop is

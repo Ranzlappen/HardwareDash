@@ -124,6 +124,12 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
                 } else {
                     null
                 }
+                Log.d(
+                    PendingTorchWidgetConfigs.TAG,
+                    "FlashlightWidget tap id=$appWidgetId on=$newState config=${config != null} " +
+                        "fb=${config?.appearance?.feedback?.let { it::class.simpleName }} " +
+                        "anim=${config?.appearance?.tap?.animation}",
+                )
                 if (config != null) {
                     // Toast needs a Looper — dispatch on the main thread.
                     withContext(Dispatchers.Main) {
@@ -154,6 +160,8 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
                         restingViews = buildRemoteViews(context, appWidgetId, newState, config, pressed = false),
                     )
                 }
+            } catch (t: Throwable) {
+                Log.e(PendingTorchWidgetConfigs.TAG, "FlashlightWidget onReceive failed", t)
             } finally {
                 pendingResult.finish()
             }
