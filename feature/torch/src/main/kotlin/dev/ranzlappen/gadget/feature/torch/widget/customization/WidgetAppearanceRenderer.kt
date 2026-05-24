@@ -19,10 +19,10 @@ private const val DEFAULT_ICON_PADDING_DP = 12
 
 /** Pressed-frame icon padding (dp) for [TapAnimation.Scale] — larger than
  *  the resting value so the icon visibly shrinks. */
-private const val SCALE_PRESSED_PADDING_DP = 22
+private const val SCALE_PRESSED_PADDING_DP = 26
 
 /** Pressed-frame icon alpha for [TapAnimation.Pulse]. */
-private const val PULSE_ALPHA = 110
+private const val PULSE_ALPHA = 70
 
 /** Pressed-frame icon tint for [TapAnimation.Flash] — bright white. */
 private val FLASH_COLOR = 0xFFFFFFFF.toInt()
