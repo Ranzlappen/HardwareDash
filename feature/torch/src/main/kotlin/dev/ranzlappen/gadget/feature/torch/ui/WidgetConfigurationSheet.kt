@@ -1,5 +1,6 @@
 package dev.ranzlappen.gadget.feature.torch.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,7 +11,9 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -30,6 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
@@ -49,6 +55,8 @@ import dev.ranzlappen.gadget.feature.torch.widget.customization.BackgroundMode
 import dev.ranzlappen.gadget.feature.torch.widget.customization.IconTint
 import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
 import dev.ranzlappen.gadget.feature.torch.widget.customization.ToggleFeedback
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
+import dev.ranzlappen.gadget.feature.torch.widget.customization.iconTintArgb
 
 /**
  * Modal sheet for creating or editing a [TorchWidgetConfig].
@@ -78,6 +86,7 @@ fun WidgetConfigurationSheet(
     onDismiss: () -> Unit,
     onConfirm: (TorchWidgetConfig) -> Unit,
     resolveIconRes: (String) -> Int,
+    iconChoices: List<WidgetIconCatalog.Entry>,
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
@@ -184,6 +193,25 @@ fun WidgetConfigurationSheet(
                     },
                 )
             }
+            val iconTint = iconTintArgb(LocalContext.current, appearance.iconStyle)
+            IconPickerRow(
+                label = stringResource(R.string.torch_widget_config_icon_active_label),
+                selectedKey = appearance.iconStyle.activeKey,
+                choices = iconChoices,
+                tintArgb = iconTint,
+                onSelect = { key ->
+                    appearance = appearance.copy(iconStyle = appearance.iconStyle.copy(activeKey = key))
+                },
+            )
+            IconPickerRow(
+                label = stringResource(R.string.torch_widget_config_icon_inactive_label),
+                selectedKey = appearance.iconStyle.inactiveKey,
+                choices = iconChoices,
+                tintArgb = iconTint,
+                onSelect = { key ->
+                    appearance = appearance.copy(iconStyle = appearance.iconStyle.copy(inactiveKey = key))
+                },
+            )
 
             // ─── Tap behaviour section ───────────────────────────────
             SheetSectionHeader(stringResource(R.string.torch_widget_config_section_tap))
@@ -460,6 +488,68 @@ private fun ColorSwatchRow(
                         }
                         .semantics { this.selected = isSelected },
                 )
+            }
+        }
+    }
+}
+
+/**
+ * Segmented icon picker — a flow of tappable icon swatches from
+ * [WidgetIconCatalog]. The icons preview in the widget's current
+ * [tintArgb] so the choice reads as it will on the widget. Selection is
+ * conveyed visually (a primary-tinted ring) and semantically.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun IconPickerRow(
+    label: String,
+    selectedKey: String,
+    choices: List<WidgetIconCatalog.Entry>,
+    tintArgb: Int,
+    onSelect: (String) -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            verticalArrangement = Arrangement.spacedBy(spacing.tiny),
+        ) {
+            choices.forEach { entry ->
+                val isSelected = entry.key == selectedKey
+                Box(
+                    modifier = Modifier
+                        .defaultMinSize(SwatchDefaults.Diameter, SwatchDefaults.Diameter)
+                        .size(SwatchDefaults.Diameter)
+                        .clip(CircleShape)
+                        .border(
+                            width = if (isSelected) SwatchDefaults.SelectedRing else SwatchDefaults.UnselectedRing,
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.outline
+                            },
+                            shape = CircleShape,
+                        )
+                        .clickable(role = Role.RadioButton, onClickLabel = entry.displayName) {
+                            onSelect(entry.key)
+                        }
+                        .semantics { this.selected = isSelected }
+                        .padding(spacing.small),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Image(
+                        painter = painterResource(entry.drawable),
+                        contentDescription = entry.displayName,
+                        colorFilter = ColorFilter.tint(Color(tintArgb)),
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
         }
     }

@@ -76,6 +76,7 @@ fun TorchScreen(
             onDismiss = viewModel::onSheetDismissed,
             onConfirm = viewModel::onSheetConfirmed,
             resolveIconRes = viewModel::resolveWidgetIcon,
+            iconChoices = viewModel.iconChoices,
         )
     }
 

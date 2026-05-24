@@ -201,6 +201,9 @@ class TorchViewModel @Inject constructor(
      *  configuration sheet's live appearance preview. */
     fun resolveWidgetIcon(key: String): Int = iconCatalog.resolve(key)
 
+    /** Icons the configuration sheet offers in its icon picker. */
+    val iconChoices: List<WidgetIconCatalog.Entry> = iconCatalog.entries
+
     fun onSheetDismissed() {
         _sheetTarget.value = null
     }
