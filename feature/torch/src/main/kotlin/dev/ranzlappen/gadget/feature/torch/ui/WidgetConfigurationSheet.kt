@@ -93,6 +93,7 @@ fun WidgetConfigurationSheet(
     var name by remember(initial) { mutableStateOf(initial.displayName) }
     var rateHz by remember(initial) { mutableFloatStateOf(initial.rateHz) }
     var sosMode by remember(initial) { mutableStateOf(initial.sosMode) }
+    var morseText by remember(initial) { mutableStateOf(initial.morseText) }
     var appearance by remember(initial) { mutableStateOf(initial.appearance) }
 
     GadgetBottomSheet(
@@ -148,6 +149,13 @@ fun WidgetConfigurationSheet(
                     }
                     Switch(checked = sosMode, onCheckedChange = { sosMode = it })
                 }
+                GadgetTextField(
+                    value = morseText,
+                    onValueChange = { morseText = it },
+                    label = stringResource(R.string.torch_widget_config_morse_label),
+                    supportingText = stringResource(R.string.torch_widget_config_morse_supporting),
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
 
             // ─── Appearance section ──────────────────────────────────
@@ -342,6 +350,7 @@ fun WidgetConfigurationSheet(
                                 displayName = name.ifBlank { initial.displayName },
                                 rateHz = rateHz,
                                 sosMode = sosMode,
+                                morseText = morseText,
                                 appearance = appearance,
                             ),
                         )

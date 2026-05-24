@@ -69,6 +69,8 @@
     <string name="torch_widget_config_name_label">Name</string>
     <string name="torch_widget_config_sos_label">SOS mode</string>
     <string name="torch_widget_config_sos_supporting">Plays the Morse SOS pattern instead of a constant strobe.</string>
+    <string name="torch_widget_config_morse_label">Morse message (optional)</string>
+    <string name="torch_widget_config_morse_supporting">When set, the widget loops this text as Morse instead of strobing.</string>
     <string name="torch_widget_config_save_new">Add to home screen</string>
     <string name="torch_widget_config_save_existing">Save</string>
     <string name="torch_widget_config_cancel">Cancel</string>
