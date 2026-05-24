@@ -22,8 +22,7 @@ import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.ModulePermissionsSection
 
 /**
- * Per-module screen scaffold.
- *
+ * Per-module screen scaffold
  * Provides:
  *  - Full vertical scroll via `Column(Modifier.verticalScroll(...))`.
  *  - Optional [title] header slot.
