@@ -59,6 +59,7 @@ fun TorchScreen(
     TorchScreenContent(
         state = state,
         onToggleClick = viewModel::onToggleClick,
+        onMomentaryHold = viewModel::onMomentaryHold,
         onStrobeToggle = viewModel::onStrobeToggle,
         onRateChange = viewModel::onRateChange,
         onRateCommit = viewModel::onRateCommit,

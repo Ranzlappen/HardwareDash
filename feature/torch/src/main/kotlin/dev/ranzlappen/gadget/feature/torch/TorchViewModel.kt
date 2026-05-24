@@ -130,6 +130,13 @@ class TorchViewModel @Inject constructor(
         controller.toggle()
     }
 
+    /** Momentary "hold for light": torch on while the button is held
+     *  ([active] = true on press), off the moment it's released
+     *  ([active] = false). */
+    fun onMomentaryHold(active: Boolean) {
+        controller.setOn(active)
+    }
+
     /** Slider drag handler — keeps the optimistic pending value in
      *  sync so the rest of the combined flow doesn't snap back to
      *  the stored DataStore value mid-drag. Persists nothing. */

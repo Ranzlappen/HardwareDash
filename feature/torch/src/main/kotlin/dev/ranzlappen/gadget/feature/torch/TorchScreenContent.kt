@@ -2,13 +2,18 @@ package dev.ranzlappen.gadget.feature.torch
 
 import android.Manifest
 import android.os.Build
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashlightOff
 import androidx.compose.material.icons.filled.FlashlightOn
@@ -16,13 +21,21 @@ import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FlashlightOn
+import androidx.compose.material.icons.outlined.TouchApp
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -68,6 +81,7 @@ import kotlin.math.roundToInt
 fun TorchScreenContent(
     state: TorchScreenState,
     onToggleClick: () -> Unit,
+    onMomentaryHold: (Boolean) -> Unit,
     onStrobeToggle: () -> Unit,
     onRateChange: (Float) -> Unit,
     onRateCommit: () -> Unit,
@@ -81,7 +95,7 @@ fun TorchScreenContent(
         title = stringResource(R.string.torch_screen_title),
         modifier = modifier,
         functional = {
-            TorchToggleCard(state.torch, state.strobeRunning, onToggleClick, onStrobeToggle)
+            TorchToggleCard(state.torch, state.strobeRunning, onToggleClick, onMomentaryHold, onStrobeToggle)
             StrobeDefaultsCard(state.defaultStrobeRateHz, onRateChange, onRateCommit)
             WidgetsCard(
                 widgets = state.widgets,
@@ -145,6 +159,7 @@ private fun TorchToggleCard(
     torch: TorchState,
     strobeRunning: Boolean,
     onToggleClick: () -> Unit,
+    onMomentaryHold: (Boolean) -> Unit,
     onStrobeToggle: () -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
@@ -167,15 +182,25 @@ private fun TorchToggleCard(
                     .height(HeroBoxHeight),
                 contentAlignment = Alignment.Center,
             ) {
-                GadgetFab(
-                    onClick = onToggleClick,
-                    icon = if (torch.isOn) Icons.Filled.FlashlightOn else Icons.Filled.FlashlightOff,
-                    contentDescription = stringResource(
-                        if (torch.isOn) R.string.torch_action_turn_off
-                        else R.string.torch_action_turn_on,
-                    ),
-                    enabled = torch.isAvailable,
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(spacing.large),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    GadgetFab(
+                        onClick = onToggleClick,
+                        icon = if (torch.isOn) Icons.Filled.FlashlightOn else Icons.Filled.FlashlightOff,
+                        contentDescription = stringResource(
+                            if (torch.isOn) R.string.torch_action_turn_off
+                            else R.string.torch_action_turn_on,
+                        ),
+                        enabled = torch.isAvailable,
+                    )
+                    // Momentary: torch on only while held down.
+                    MomentaryTorchButton(
+                        enabled = torch.isAvailable,
+                        onHold = onMomentaryHold,
+                    )
+                }
             }
             // In-app strobe toggle. Mirrors widget behaviour — tap once to
             // start at the current default rate, tap again to stop. Doubles
@@ -199,6 +224,59 @@ private fun TorchToggleCard(
                 modifier = Modifier.fillMaxWidth(),
             )
         }
+    }
+}
+
+/**
+ * Momentary torch button — fires the torch only while held.
+ *
+ * [onHold] is called with `true` the instant the press lands and `false`
+ * the moment it's released **or** the gesture is cancelled (the
+ * `finally` guarantees the torch turns off even if this composable
+ * leaves composition mid-hold). Styled as a [secondaryContainer] circle
+ * to read as a sibling of — not a duplicate of — the primary toggle FAB.
+ */
+@Composable
+private fun MomentaryTorchButton(
+    enabled: Boolean,
+    onHold: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val description = stringResource(R.string.torch_action_hold)
+    val container =
+        if (enabled) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant
+    val content =
+        if (enabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+    Box(
+        modifier = modifier
+            .defaultMinSize(MomentaryButtonDiameter, MomentaryButtonDiameter)
+            .size(MomentaryButtonDiameter)
+            .clip(CircleShape)
+            .background(container)
+            .pointerInput(enabled) {
+                if (!enabled) return@pointerInput
+                detectTapGestures(
+                    onPress = {
+                        onHold(true)
+                        try {
+                            tryAwaitRelease()
+                        } finally {
+                            onHold(false)
+                        }
+                    },
+                )
+            }
+            .semantics {
+                contentDescription = description
+                role = Role.Button
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.TouchApp,
+            contentDescription = null,
+            tint = content,
+        )
     }
 }
 
@@ -377,3 +455,7 @@ private fun TorchWidgetConfig.subtitleString(): String = when (type) {
 
 /** Hero box height — generous tap target for the central FAB. */
 private val HeroBoxHeight: Dp = 160.dp
+
+/** Momentary-button diameter — matches the 56 dp FAB so the two read as
+ *  a pair, and clears the 48 dp accessibility touch-target minimum. */
+private val MomentaryButtonDiameter: Dp = 56.dp

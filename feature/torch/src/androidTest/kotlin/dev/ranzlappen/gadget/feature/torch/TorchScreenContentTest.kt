@@ -40,6 +40,7 @@ class TorchScreenContentTest {
     private fun setContent(
         state: TorchScreenState,
         onToggleClick: () -> Unit = {},
+        onMomentaryHold: (Boolean) -> Unit = {},
         onStrobeToggle: () -> Unit = {},
         onRateChange: (Float) -> Unit = {},
         onRateCommit: () -> Unit = {},
@@ -53,6 +54,7 @@ class TorchScreenContentTest {
                 TorchScreenContent(
                     state = state,
                     onToggleClick = onToggleClick,
+                    onMomentaryHold = onMomentaryHold,
                     onStrobeToggle = onStrobeToggle,
                     onRateChange = onRateChange,
                     onRateCommit = onRateCommit,
