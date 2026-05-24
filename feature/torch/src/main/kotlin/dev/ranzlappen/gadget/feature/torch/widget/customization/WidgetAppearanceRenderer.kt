@@ -2,7 +2,6 @@ package dev.ranzlappen.gadget.feature.torch.widget.customization
 
 import android.content.Context
 import android.widget.RemoteViews
-import androidx.core.content.ContextCompat
 import dev.ranzlappen.gadget.feature.torch.R
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -106,17 +105,10 @@ class WidgetAppearanceRenderer @Inject constructor(
         val drawable = iconCatalog.resolve(key)
         views.setImageViewResource(R.id.widget_icon, drawable)
 
-        val tintArgb = when (appearance.iconStyle.tint) {
-            IconTint.ThemeAccent -> ContextCompat.getColor(context, R.color.widget_tint_accent)
-            IconTint.ThemeOnSurface -> ContextCompat.getColor(context, R.color.widget_tint_on_surface)
-            IconTint.MonochromeWhite -> 0xFFFFFFFF.toInt()
-            IconTint.MonochromeBlack -> 0xFF000000.toInt()
-            IconTint.Custom -> appearance.iconStyle.customTintArgb.toInt()
-        }
         // Pre-31 fallback uses setColorFilter; API 31+ also supports
         // it for backwards compat. SRC_IN preserves the alpha channel
         // of the source drawable.
-        views.setInt(R.id.widget_icon, "setColorFilter", tintArgb)
+        views.setInt(R.id.widget_icon, "setColorFilter", iconTintArgb(context, appearance.iconStyle))
 
         // Reset the two properties a tap-press frame mutates, so a
         // recycled host view always reverts cleanly to its resting look

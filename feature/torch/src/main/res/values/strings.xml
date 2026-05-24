@@ -69,6 +69,7 @@
     <string name="torch_widget_config_section_appearance">Appearance</string>
     <string name="torch_widget_config_section_tap">Tap behaviour</string>
     <string name="torch_widget_config_section_feedback">Toggle feedback</string>
+    <string name="torch_widget_config_section_preview">Preview</string>
 
     <string name="torch_widget_config_background_label">Background</string>
     <string name="torch_widget_config_background_glass">Glass</string>

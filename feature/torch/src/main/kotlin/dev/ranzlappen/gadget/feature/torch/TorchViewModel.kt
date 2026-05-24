@@ -14,6 +14,7 @@ import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfigRepository
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetCreator
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import dev.ranzlappen.gadget.feature.torch.widget.broadcastTorchWidgetUpdate
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,6 +70,7 @@ class TorchViewModel @Inject constructor(
     private val userPreferences: UserPreferencesRepository,
     private val widgetRepository: TorchWidgetConfigRepository,
     private val widgetCreator: TorchWidgetCreator,
+    private val iconCatalog: WidgetIconCatalog,
 ) : ViewModel() {
 
     /** Public read-only torch hardware snapshot. */
@@ -194,6 +196,10 @@ class TorchViewModel @Inject constructor(
     fun onEditWidget(widget: SavedTorchWidget) {
         _sheetTarget.value = SheetTarget.Existing(widget.appWidgetId, widget.config)
     }
+
+    /** Resolve a widget icon key to its drawable resource for the
+     *  configuration sheet's live appearance preview. */
+    fun resolveWidgetIcon(key: String): Int = iconCatalog.resolve(key)
 
     fun onSheetDismissed() {
         _sheetTarget.value = null

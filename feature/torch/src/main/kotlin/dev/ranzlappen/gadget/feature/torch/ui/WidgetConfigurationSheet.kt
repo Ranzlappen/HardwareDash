@@ -77,6 +77,7 @@ fun WidgetConfigurationSheet(
     isExisting: Boolean,
     onDismiss: () -> Unit,
     onConfirm: (TorchWidgetConfig) -> Unit,
+    resolveIconRes: (String) -> Int,
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
@@ -274,6 +275,18 @@ fun WidgetConfigurationSheet(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            }
+
+            // ─── Live preview ────────────────────────────────────────
+            SheetSectionHeader(stringResource(R.string.torch_widget_config_section_preview))
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                WidgetAppearancePreview(
+                    appearance = appearance,
+                    iconResId = resolveIconRes(appearance.iconStyle.activeKey),
+                )
             }
 
             // ─── Footer actions ──────────────────────────────────────

@@ -50,6 +50,7 @@ class WidgetConfigurationSheetTest {
                     isExisting = false,
                     onDismiss = {},
                     onConfirm = {},
+                    resolveIconRes = { R.drawable.ic_flashlight_on },
                 )
             }
         }
@@ -68,6 +69,7 @@ class WidgetConfigurationSheetTest {
                     isExisting = true,
                     onDismiss = {},
                     onConfirm = {},
+                    resolveIconRes = { R.drawable.ic_flashlight_on },
                 )
             }
         }
@@ -86,6 +88,7 @@ class WidgetConfigurationSheetTest {
                     isExisting = false,
                     onDismiss = {},
                     onConfirm = {},
+                    resolveIconRes = { R.drawable.ic_flashlight_on },
                 )
             }
         }
@@ -104,6 +107,7 @@ class WidgetConfigurationSheetTest {
                     isExisting = false,
                     onDismiss = {},
                     onConfirm = {},
+                    resolveIconRes = { R.drawable.ic_flashlight_on },
                 )
             }
         }
@@ -133,6 +137,7 @@ class WidgetConfigurationSheetTest {
                     isExisting = false,
                     onDismiss = {},
                     onConfirm = { captured = it },
+                    resolveIconRes = { R.drawable.ic_flashlight_on },
                 )
             }
         }
