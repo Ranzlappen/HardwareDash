@@ -42,6 +42,7 @@ data class TorchWidgetConfig(
     val displayName: String,
     val rateHz: Float = DEFAULT_RATE_HZ,
     val sosMode: Boolean = false,
+    val morseText: String = "",
     val appearance: WidgetAppearance = WidgetAppearance(),
 ) {
     companion object {

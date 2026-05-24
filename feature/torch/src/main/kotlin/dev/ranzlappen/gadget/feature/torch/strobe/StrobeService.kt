@@ -117,13 +117,14 @@ class StrobeService : Service() {
         val explicitRate = intent?.getFloatExtra(EXTRA_RATE_HZ, TorchWidgetConfig.DEFAULT_RATE_HZ)
             ?: TorchWidgetConfig.DEFAULT_RATE_HZ
         val explicitSos = intent?.getBooleanExtra(EXTRA_SOS_MODE, false) ?: false
+        val explicitMorse = intent?.getStringExtra(EXTRA_MORSE_TEXT)
 
         strobeLoop = serviceScope.launch {
             // A widget tap passes only EXTRA_APPWIDGET_ID; the service reads
-            // that widget's persisted config (rate / SOS) here — off the
-            // broadcast thread, so a cold StateFlow cache can't strand the
-            // session on stale defaults (the bug behind "SOS doesn't work").
-            // In-app callers pass the rate / SOS extras directly instead.
+            // that widget's persisted config (rate / SOS / Morse text) here
+            // — off the broadcast thread, so a cold StateFlow cache can't
+            // strand the session on stale defaults (the bug behind "SOS
+            // doesn't work"). In-app callers pass the extras directly.
             val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
                 widgetRepository.get(appWidgetId)
             } else {
@@ -131,8 +132,29 @@ class StrobeService : Service() {
             }
             val rateHz = (config?.rateHz ?: explicitRate)
                 .coerceIn(TorchWidgetConfig.MIN_RATE_HZ, TorchWidgetConfig.MAX_RATE_HZ)
+            val morse = (explicitMorse ?: config?.morseText)?.takeIf { it.isNotBlank() }
             val sos = config?.sosMode ?: explicitSos
-            if (sos) runSosPattern(rateHz) else runConstant(rateHz)
+            when {
+                morse != null -> runMorse(morse, rateHz)
+                sos -> runSosPattern(rateHz)
+                else -> runConstant(rateHz)
+            }
+        }
+    }
+
+    /** Repeating Morse playback of arbitrary [text]; falls back to a
+     *  constant strobe if nothing in the text is encodable. */
+    private suspend fun runMorse(text: String, rateHz: Float) {
+        val timeline = MorseCodec.toTimeline(text, sosUnitMillis(rateHz))
+        if (timeline.isEmpty()) {
+            runConstant(rateHz)
+            return
+        }
+        while (true) {
+            for ((on, durationMs) in timeline) {
+                torchController.setOn(on)
+                delay(durationMs)
+            }
         }
     }
 
@@ -248,6 +270,10 @@ class StrobeService : Service() {
          *  (rate / SOS) itself rather than trusting extras — robust
          *  against a cold-process StateFlow cache. */
         const val EXTRA_APPWIDGET_ID = "dev.ranzlappen.gadget.feature.torch.EXTRA_APPWIDGET_ID"
+
+        /** String extra: arbitrary text to play as Morse, looped. Takes
+         *  precedence over SOS / constant when non-blank. */
+        const val EXTRA_MORSE_TEXT = "dev.ranzlappen.gadget.feature.torch.EXTRA_MORSE_TEXT"
 
         /**
          * Heuristic flag indicating whether a strobe loop is

@@ -99,7 +99,8 @@ class TorchViewModel @Inject constructor(
         userPreferences.flow.map { it.defaultStrobeRateHz },
         widgetRepository.all,
         strobeRunning,
-    ) { torch, rateHz, widgets, running ->
+        userPreferences.flow.map { it.morseText },
+    ) { torch, rateHz, widgets, running, morseText ->
         TorchScreenState(
             torch = torch,
             defaultStrobeRateHz = pendingRateHz.value ?: rateHz,
@@ -107,6 +108,7 @@ class TorchViewModel @Inject constructor(
                 .toSortedMap()
                 .map { (id, config) -> SavedTorchWidget(id, config) },
             strobeRunning = running,
+            morseText = morseText,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -157,23 +159,48 @@ class TorchViewModel @Inject constructor(
         }
     }
 
+    /** Tap-to-toggle constant strobe (mirrors the strobe widget). */
     fun onStrobeToggle() {
-        if (StrobeService.isRunning) {
-            val stopIntent = Intent(context, StrobeService::class.java)
-                .setAction(StrobeService.ACTION_STOP)
-            context.startService(stopIntent)
-        } else {
-            val rate = state.value.defaultStrobeRateHz
-            val startIntent = Intent(context, StrobeService::class.java).apply {
-                putExtra(StrobeService.EXTRA_RATE_HZ, rate)
-                putExtra(StrobeService.EXTRA_SOS_MODE, false)
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(startIntent)
-            } else {
-                context.startService(startIntent)
-            }
+        if (StrobeService.isRunning) stopStrobeService() else startStrobeService(morseText = null)
+    }
+
+    /** Momentary constant strobe — runs only while the button is held. */
+    fun onStrobeHold(active: Boolean) {
+        if (active) startStrobeService(morseText = null) else stopStrobeService()
+    }
+
+    /** Tap-to-toggle Morse playback of the persistent [TorchScreenState.morseText]. */
+    fun onMorseToggle() {
+        if (StrobeService.isRunning) stopStrobeService() else startStrobeService(morseText = state.value.morseText)
+    }
+
+    /** Momentary Morse playback — loops the message only while held. */
+    fun onMorseHold(active: Boolean) {
+        if (active) startStrobeService(morseText = state.value.morseText) else stopStrobeService()
+    }
+
+    /** Persist the in-app Morse message. */
+    fun onMorseTextChange(text: String) {
+        viewModelScope.launch { userPreferences.setMorseText(text) }
+    }
+
+    private fun startStrobeService(morseText: String?) {
+        val startIntent = Intent(context, StrobeService::class.java).apply {
+            putExtra(StrobeService.EXTRA_RATE_HZ, state.value.defaultStrobeRateHz)
+            putExtra(StrobeService.EXTRA_SOS_MODE, false)
+            if (!morseText.isNullOrBlank()) putExtra(StrobeService.EXTRA_MORSE_TEXT, morseText)
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(startIntent)
+        } else {
+            context.startService(startIntent)
+        }
+    }
+
+    private fun stopStrobeService() {
+        context.startService(
+            Intent(context, StrobeService::class.java).setAction(StrobeService.ACTION_STOP),
+        )
     }
 
     fun onAddFlashlight() {

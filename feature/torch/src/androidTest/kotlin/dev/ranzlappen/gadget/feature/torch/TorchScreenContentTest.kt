@@ -42,6 +42,10 @@ class TorchScreenContentTest {
         onToggleClick: () -> Unit = {},
         onMomentaryHold: (Boolean) -> Unit = {},
         onStrobeToggle: () -> Unit = {},
+        onStrobeHold: (Boolean) -> Unit = {},
+        onMorseToggle: () -> Unit = {},
+        onMorseHold: (Boolean) -> Unit = {},
+        onMorseTextChange: (String) -> Unit = {},
         onRateChange: (Float) -> Unit = {},
         onRateCommit: () -> Unit = {},
         onAddFlashlight: () -> Unit = {},
@@ -56,6 +60,10 @@ class TorchScreenContentTest {
                     onToggleClick = onToggleClick,
                     onMomentaryHold = onMomentaryHold,
                     onStrobeToggle = onStrobeToggle,
+                    onStrobeHold = onStrobeHold,
+                    onMorseToggle = onMorseToggle,
+                    onMorseHold = onMorseHold,
+                    onMorseTextChange = onMorseTextChange,
                     onRateChange = onRateChange,
                     onRateCommit = onRateCommit,
                     onAddFlashlight = onAddFlashlight,
@@ -178,7 +186,7 @@ class TorchScreenContentTest {
             onStrobeToggle = { toggles += 1 },
         )
         composeTestRule
-            .onNodeWithText(res.getString(R.string.torch_action_strobe_start))
+            .onNodeWithContentDescription(res.getString(R.string.torch_action_strobe_toggle))
             .performClick()
         assertEquals(1, toggles)
     }

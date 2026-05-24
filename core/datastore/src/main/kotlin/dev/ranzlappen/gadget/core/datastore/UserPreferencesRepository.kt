@@ -74,6 +74,10 @@ class UserPreferencesRepository @Inject constructor(
         dataStore.edit { it[UserPreferencesKeys.DEFAULT_STROBE_RATE_HZ] = rateHz }
     }
 
+    suspend fun setMorseText(text: String) {
+        dataStore.edit { it[UserPreferencesKeys.MORSE_TEXT] = text }
+    }
+
     private fun Preferences.readFrom(): UserPreferences = UserPreferences(
         darkThemeMode = this[UserPreferencesKeys.DARK_THEME_MODE]
             ?.let { runCatching { DarkThemeMode.valueOf(it) }.getOrNull() }
@@ -86,6 +90,7 @@ class UserPreferencesRepository @Inject constructor(
         largeTextOverride = this[UserPreferencesKeys.LARGE_TEXT_OVERRIDE] ?: false,
         defaultStrobeRateHz = this[UserPreferencesKeys.DEFAULT_STROBE_RATE_HZ]
             ?: UserPreferences.DEFAULT_STROBE_RATE_HZ,
+        morseText = this[UserPreferencesKeys.MORSE_TEXT] ?: UserPreferences.DEFAULT_MORSE_TEXT,
     )
 }
 
@@ -97,4 +102,5 @@ private object UserPreferencesKeys {
     val REDUCED_TRANSPARENCY = booleanPreferencesKey("reduced_transparency")
     val LARGE_TEXT_OVERRIDE = booleanPreferencesKey("large_text_override")
     val DEFAULT_STROBE_RATE_HZ = floatPreferencesKey("default_strobe_rate_hz")
+    val MORSE_TEXT = stringPreferencesKey("morse_text")
 }
