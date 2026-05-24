@@ -171,6 +171,19 @@ fun WidgetConfigurationSheet(
                     )
                 },
             )
+            if (appearance.iconStyle.tint == IconTint.Custom) {
+                ColorSwatchRow(
+                    label = stringResource(R.string.torch_widget_config_tint_custom_color),
+                    selectLabel = stringResource(R.string.torch_widget_config_solid_color_select),
+                    selected = appearance.iconStyle.customTintArgb,
+                    options = SolidColorSwatches,
+                    onSelect = {
+                        appearance = appearance.copy(
+                            iconStyle = appearance.iconStyle.copy(customTintArgb = it),
+                        )
+                    },
+                )
+            }
 
             // ─── Tap behaviour section ───────────────────────────────
             SheetSectionHeader(stringResource(R.string.torch_widget_config_section_tap))

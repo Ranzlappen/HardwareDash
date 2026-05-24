@@ -86,6 +86,7 @@
     <string name="torch_widget_config_tint_white">White</string>
     <string name="torch_widget_config_tint_black">Black</string>
     <string name="torch_widget_config_tint_custom">Custom</string>
+    <string name="torch_widget_config_tint_custom_color">Custom colour</string>
 
     <string name="torch_widget_config_tap_animation_label">Animation</string>
     <string name="torch_widget_config_tap_animation_none">None</string>
