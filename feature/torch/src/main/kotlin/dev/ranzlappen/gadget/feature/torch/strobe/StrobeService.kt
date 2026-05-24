@@ -33,11 +33,10 @@ import kotlin.math.min
  * - [EXTRA_RATE_HZ] — strobe rate in Hz (clamped to
  *   `TorchWidgetConfig.MIN_RATE_HZ..MAX_RATE_HZ`). Defaults to
  *   `TorchWidgetConfig.DEFAULT_RATE_HZ` if absent.
- * - [EXTRA_SOS_MODE] — boolean flag for SOS pattern playback. The
- *   flag is plumbed through end-to-end but the SOS pattern logic
- *   itself is deferred — today this value is read but the loop
- *   still emits a constant strobe regardless. Tracked at
- *   https://github.com/Ranzlappen/HardwareDash/issues/96.
+ * - [EXTRA_SOS_MODE] — boolean flag selecting SOS playback. When
+ *   `true` the loop emits a repeating Morse "SOS" pattern
+ *   ([sosTimeline]) instead of the constant strobe; the rate value
+ *   tunes the Morse dot unit via [sosUnitMillis].
  *
  * Lifecycle:
  * - [isRunning] companion-level flag flips `true` once the
@@ -82,12 +81,8 @@ class StrobeService : Service() {
                 val rateHz = (intent?.getFloatExtra(EXTRA_RATE_HZ, TorchWidgetConfig.DEFAULT_RATE_HZ)
                     ?: TorchWidgetConfig.DEFAULT_RATE_HZ)
                     .coerceIn(TorchWidgetConfig.MIN_RATE_HZ, TorchWidgetConfig.MAX_RATE_HZ)
-                @Suppress("UNUSED_VARIABLE")
                 val sosMode = intent?.getBooleanExtra(EXTRA_SOS_MODE, false) ?: false
-                // sosMode is plumbed but its playback pattern is
-                // deferred — see issue #96. Today the constant
-                // strobe runs at `rateHz` regardless of the flag.
-                startStrobing(rateHz)
+                startStrobing(rateHz, sosMode)
             }
         }
         return START_STICKY
@@ -106,7 +101,7 @@ class StrobeService : Service() {
         super.onDestroy()
     }
 
-    private fun startStrobing(rateHz: Float) {
+    private fun startStrobing(rateHz: Float, sos: Boolean) {
         promoteToForeground()
         // Re-tap while running = no-op (the running loop already
         // honours the current rate; future "edit a live strobe"
@@ -114,13 +109,32 @@ class StrobeService : Service() {
         // the existing strobeLoop and relaunching).
         if (strobeLoop?.isActive == true) return
         isRunning = true
-        val halfPeriodMs = halfPeriodMillis(rateHz)
         strobeLoop = serviceScope.launch {
-            var on = false
-            while (true) {
-                on = !on
+            if (sos) runSosPattern(rateHz) else runConstant(rateHz)
+        }
+    }
+
+    /** Constant 50%-duty strobe at [rateHz]. */
+    private suspend fun runConstant(rateHz: Float) {
+        val halfPeriodMs = halfPeriodMillis(rateHz)
+        var on = false
+        while (true) {
+            on = !on
+            torchController.setOn(on)
+            delay(halfPeriodMs)
+        }
+    }
+
+    /** Repeating Morse "SOS" (· · · — — — · · ·). The dot unit scales
+     *  with [rateHz] via [sosUnitMillis] so the rate slider still tunes
+     *  playback speed. Each [delay] is cancellable, so [stopStrobing]
+     *  tears the loop down promptly. */
+    private suspend fun runSosPattern(rateHz: Float) {
+        val timeline = sosTimeline(sosUnitMillis(rateHz))
+        while (true) {
+            for ((on, durationMs) in timeline) {
                 torchController.setOn(on)
-                delay(halfPeriodMs)
+                delay(durationMs)
             }
         }
     }
@@ -203,8 +217,8 @@ class StrobeService : Service() {
          *  widget's stored config. Read in [onStartCommand]. */
         const val EXTRA_RATE_HZ = "dev.ranzlappen.gadget.feature.torch.EXTRA_RATE_HZ"
 
-        /** Boolean extra carrying the SOS toggle. Plumbed but the
-         *  pattern logic is deferred — see issue #96. */
+        /** Boolean extra selecting SOS Morse playback over the constant
+         *  strobe. Read in [onStartCommand]. */
         const val EXTRA_SOS_MODE = "dev.ranzlappen.gadget.feature.torch.EXTRA_SOS_MODE"
 
         /**
@@ -238,6 +252,46 @@ class StrobeService : Service() {
         internal fun halfPeriodMillis(rateHz: Float): Long {
             val clamped = max(TorchWidgetConfig.MIN_RATE_HZ, min(rateHz, TorchWidgetConfig.MAX_RATE_HZ))
             return (500f / clamped).toLong().coerceAtLeast(25L)
+        }
+
+        /**
+         * Morse "dot" unit (ms) for SOS playback, derived from [rateHz]
+         * so the rate slider tunes SOS speed, then clamped to a legible
+         * 60..400 ms so extreme rates stay readable as Morse.
+         */
+        internal fun sosUnitMillis(rateHz: Float): Long {
+            val clamped = max(TorchWidgetConfig.MIN_RATE_HZ, min(rateHz, TorchWidgetConfig.MAX_RATE_HZ))
+            return (1000f / clamped).toLong().coerceIn(60L, 400L)
+        }
+
+        /**
+         * Build one full SOS cycle as an ordered list of
+         * `(torchOn, durationMs)` steps using standard Morse timing
+         * relative to [unit]: dot = 1u on, dash = 3u on, gap between
+         * elements = 1u off, gap between letters = 3u off, and a 7u off
+         * tail before the pattern repeats.
+         */
+        internal fun sosTimeline(unit: Long): List<Pair<Boolean, Long>> {
+            val dot = unit
+            val dash = unit * 3
+            val elementGap = unit
+            val letterGap = unit * 3
+            val wordGap = unit * 7
+
+            fun letter(elements: List<Long>): List<Pair<Boolean, Long>> = buildList {
+                elements.forEachIndexed { index, onMs ->
+                    add(true to onMs)
+                    if (index != elements.lastIndex) add(false to elementGap)
+                }
+            }
+
+            val s = letter(listOf(dot, dot, dot))
+            val o = letter(listOf(dash, dash, dash))
+            return buildList {
+                addAll(s); add(false to letterGap)
+                addAll(o); add(false to letterGap)
+                addAll(s); add(false to wordGap)
+            }
         }
     }
 }

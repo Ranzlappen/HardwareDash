@@ -75,6 +75,7 @@ fun TorchScreen(
             isExisting = target is TorchViewModel.SheetTarget.Existing,
             onDismiss = viewModel::onSheetDismissed,
             onConfirm = viewModel::onSheetConfirmed,
+            resolveIconRes = viewModel::resolveWidgetIcon,
         )
     }
 
