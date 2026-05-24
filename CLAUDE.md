@@ -703,6 +703,27 @@ Rules of thumb:
   point's getter must be renamed (`legacyXController()`) until the
   legacy implementation is deleted — the new modular feature keeps
   the idiomatic `xController()` name.
+- **App-widget layouts are `RemoteViews` — only `@RemoteView`
+  classes inflate.** Home-screen widget layouts (the
+  `initialLayout` / `previewLayout` referenced from an
+  `<appwidget-provider>`) are inflated by the launcher as
+  `RemoteViews`, which accepts **only** the framework's
+  `@RemoteView`-annotated classes: `FrameLayout`, `LinearLayout`,
+  `RelativeLayout`, `GridLayout`, `ImageView`, `ImageButton`,
+  `TextView`, `Button`, `ProgressBar`, `Chronometer`, `AnalogClock`,
+  the adapter views (`ListView` / `GridView` / `StackView` /
+  `ViewFlipper` / `AdapterViewFlipper`), and `ViewStub`. A bare
+  `android.view.View` (or `Space`) is **not** on that list — it
+  throws `InflateException` at inflation time and the launcher shows
+  **"Couldn't add widget"** in the picker and on the home screen. For
+  a background/surface element use `ImageView` or `FrameLayout`
+  (both support `setBackgroundResource`), never a bare `<View>`. This
+  is CI-invisible (no Android SDK locally, and the layout compiles
+  fine — it only fails at runtime inside the launcher process); it
+  broke the torch widget migration. `:feature:torch`'s
+  `widget_flashlight.xml` / `widget_strobe.xml` are the reference
+  RemoteViews-safe layouts for follow-up modules and legacy
+  migrations to copy.
 
 ---
 
