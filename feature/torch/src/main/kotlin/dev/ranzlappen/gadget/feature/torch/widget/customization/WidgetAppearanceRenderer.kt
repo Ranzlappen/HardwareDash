@@ -7,6 +7,9 @@ import dev.ranzlappen.gadget.feature.torch.R
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Fully-transparent ARGB — a no-op colour filter under SRC_ATOP. */
+private const val TRANSPARENT = 0
+
 /**
  * Applies a [WidgetAppearance] to a [RemoteViews] tree.
  *
@@ -53,20 +56,26 @@ class WidgetAppearanceRenderer @Inject constructor(
     }
 
     private fun applyBackground(views: RemoteViews, appearance: WidgetAppearance) {
-        val drawableRes = when (appearance.background) {
-            BackgroundMode.GlassSurface -> R.drawable.widget_background_glass
-            BackgroundMode.Solid -> R.drawable.widget_background_solid
-            BackgroundMode.Transparent -> android.R.color.transparent
+        // Paint the surface through the @id/widget_background ImageView's
+        // *image* (not its View background) so Solid mode can recolour a
+        // rounded-rect shape via setColorFilter while keeping the corners.
+        // setColorFilter uses PorterDuff.SRC_ATOP, so a colour with alpha 0
+        // is a no-op — we set it on every render to clear any tint left on
+        // a recycled host view (RemoteViews reuses views across updates).
+        when (appearance.background) {
+            BackgroundMode.GlassSurface -> {
+                views.setImageViewResource(R.id.widget_background, R.drawable.widget_background_glass)
+                views.setInt(R.id.widget_background, "setColorFilter", TRANSPARENT)
+            }
+            BackgroundMode.Solid -> {
+                views.setImageViewResource(R.id.widget_background, R.drawable.widget_background_solid)
+                views.setInt(R.id.widget_background, "setColorFilter", appearance.solidColor.toInt())
+            }
+            BackgroundMode.Transparent -> {
+                views.setImageViewResource(R.id.widget_background, 0)
+                views.setInt(R.id.widget_background, "setColorFilter", TRANSPARENT)
+            }
         }
-        views.setInt(R.id.widget_background, "setBackgroundResource", drawableRes)
-        // Per-instance solid colour tinting is intentionally NOT
-        // applied here. RemoteViews can't sensibly compose a shape
-        // drawable + a background tint on a generic View, and using
-        // `setBackgroundColor` would clobber the rounded corners.
-        // A future batch can ship pre-tinted drawables or move to a
-        // composed ImageView background to support arbitrary colours.
-        // For now the schema field [WidgetAppearance.solidColor] is
-        // captured + exported but not visually applied.
     }
 
     private fun applyIcon(

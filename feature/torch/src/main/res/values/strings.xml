@@ -75,6 +75,7 @@
     <string name="torch_widget_config_background_solid">Solid</string>
     <string name="torch_widget_config_background_transparent">Transparent</string>
     <string name="torch_widget_config_solid_color_label">Solid colour</string>
+    <string name="torch_widget_config_solid_color_select">Select fill colour</string>
 
     <string name="torch_widget_config_icon_active_label">Active icon</string>
     <string name="torch_widget_config_icon_inactive_label">Inactive icon</string>

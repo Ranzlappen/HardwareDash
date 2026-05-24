@@ -1,12 +1,19 @@
 package dev.ranzlappen.gadget.feature.torch.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +28,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.GadgetBottomSheet
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
@@ -137,6 +150,15 @@ fun WidgetConfigurationSheet(
                 labelFor = { backgroundModeLabel(it) },
                 onSelect = { appearance = appearance.copy(background = it) },
             )
+            if (appearance.background == BackgroundMode.Solid) {
+                ColorSwatchRow(
+                    label = stringResource(R.string.torch_widget_config_solid_color_label),
+                    selectLabel = stringResource(R.string.torch_widget_config_solid_color_select),
+                    selected = appearance.solidColor,
+                    options = SolidColorSwatches,
+                    onSelect = { appearance = appearance.copy(solidColor = it) },
+                )
+            }
             ChipRow(
                 label = stringResource(R.string.torch_widget_config_tint_label),
                 selected = appearance.iconStyle.tint,
@@ -330,6 +352,87 @@ private fun <T> ChipRow(
                     selected = selected == option,
                     onClick = { onSelect(option) },
                     label = labelFor(option),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Preset palette for the Solid background fill picker. Packed ARGB
+ * longs matching [dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearance.solidColor].
+ * The first entry is the schema default (neutral dark).
+ */
+private val SolidColorSwatches: List<Long> = listOf(
+    0xFF1F1F1FL, // neutral dark (default)
+    0xFF455A64L, // slate
+    0xFFFFFFFFL, // white
+    0xFFEF5350L, // red
+    0xFFFFA726L, // orange
+    0xFFFFEE58L, // yellow
+    0xFF66BB6AL, // green
+    0xFF26C6DAL, // cyan
+    0xFF42A5F5L, // blue
+    0xFFAB47BCL, // purple
+)
+
+/** Fixed swatch geometry. 48 dp is the Material accessibility minimum
+ *  touch target; the ring widths are cosmetic selected / unselected
+ *  affordances. Per-file design-token constants per the repo's no-raw-dp
+ *  rule. */
+private object SwatchDefaults {
+    val Diameter = 48.dp
+    val SelectedRing = 3.dp
+    val UnselectedRing = 1.dp
+}
+
+/**
+ * Segmented colour picker — a flow of circular swatches mirroring the
+ * [ChipRow] layout. Selection is conveyed both visually (a primary-tinted
+ * ring) and semantically (`selected` + a RadioButton role) for TalkBack.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ColorSwatchRow(
+    label: String,
+    selectLabel: String,
+    selected: Long,
+    options: List<Long>,
+    onSelect: (Long) -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            verticalArrangement = Arrangement.spacedBy(spacing.tiny),
+        ) {
+            options.forEach { argb ->
+                val isSelected = argb == selected
+                Box(
+                    modifier = Modifier
+                        .defaultMinSize(SwatchDefaults.Diameter, SwatchDefaults.Diameter)
+                        .size(SwatchDefaults.Diameter)
+                        .clip(CircleShape)
+                        .background(Color(argb))
+                        .border(
+                            width = if (isSelected) SwatchDefaults.SelectedRing else SwatchDefaults.UnselectedRing,
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.outline
+                            },
+                            shape = CircleShape,
+                        )
+                        .clickable(role = Role.RadioButton, onClickLabel = selectLabel) {
+                            onSelect(argb)
+                        }
+                        .semantics { this.selected = isSelected },
                 )
             }
         }
