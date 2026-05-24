@@ -1,5 +1,6 @@
 package dev.ranzlappen.gadget.feature.torch
 
+import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
+import dev.ranzlappen.gadget.core.ui.module.ModulePermission
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
 import dev.ranzlappen.gadget.core.ui.module.OsNote
 import dev.ranzlappen.gadget.core.ui.component.CompactCard
@@ -96,8 +98,10 @@ fun TorchScreenContent(
 /**
  * Torch's [ModuleInfo] — the reference implementation of the module
  * blueprint. Torch toggles on-device hardware via `CameraManager`, so:
- *  - it needs **no runtime permissions** (the permissions section then
- *    renders the "no permissions required" state),
+ *  - the only runtime permission is the optional `POST_NOTIFICATIONS`
+ *    (Android 13+) that lets the strobe foreground-service chrome and
+ *    the widget toggle confirmations show — the feature works without
+ *    it, so it's marked `optional`,
  *  - it works on every supported OS (minSdk 29) with two foreground-
  *    service behaviour notes,
  *  - it has **no firmware** requirement (the firmware section is
@@ -105,7 +109,21 @@ fun TorchScreenContent(
  */
 @Composable
 private fun torchModuleInfo(): ModuleInfo = ModuleInfo(
-    permissions = emptyList(),
+    permissions = buildList {
+        // POST_NOTIFICATIONS only exists as a runtime permission on
+        // API 33+; below that it's auto-granted, so don't surface it as
+        // a perpetually-missing row.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(
+                ModulePermission(
+                    permission = Manifest.permission.POST_NOTIFICATIONS,
+                    label = stringResource(R.string.torch_module_perm_notifications_label),
+                    rationale = stringResource(R.string.torch_module_perm_notifications_rationale),
+                    optional = true,
+                ),
+            )
+        }
+    },
     compatibility = OsCompatibility(
         minSdk = Build.VERSION_CODES.Q,
         notes = listOf(
