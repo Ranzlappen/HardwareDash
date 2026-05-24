@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Home-screen strobe widget — 1×1 cell.
@@ -47,11 +48,30 @@ class StrobeWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
-        val ep = entry(context)
-        val repo = ep.widgetRepository()
-        val configs = repo.all.value
-        val running = StrobeService.isRunning
+        val pendingResult = goAsync()
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            try {
+                renderAll(context, appWidgetManager, appWidgetIds)
+            } finally {
+                pendingResult.finish()
+            }
+        }
+    }
 
+    /**
+     * Render every [appWidgetIds] instance from its persisted config,
+     * read via the DataStore-backed [TorchWidgetConfigRepository.getAll]
+     * (not the hot `all.value` cache) so a cold process still paints the
+     * saved appearance instead of self-healing a default over it.
+     */
+    private suspend fun renderAll(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray,
+    ) {
+        val repo = entry(context).widgetRepository()
+        val configs = repo.getAll()
+        val running = StrobeService.isRunning
         appWidgetIds.forEach { id ->
             val config = configs[id] ?: run {
                 val default = TorchWidgetConfig(
@@ -59,15 +79,10 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                     displayName = context.getString(R.string.torch_widget_default_name_strobe),
                 )
                 Log.w(PendingTorchWidgetConfigs.TAG, "StrobeWidget self-heal id=$id")
-                CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-                    repo.save(id, default)
-                }
+                repo.save(id, default)
                 default
             }
-            appWidgetManager.updateAppWidget(
-                id,
-                buildRemoteViews(context, id, running, config),
-            )
+            appWidgetManager.updateAppWidget(id, buildRemoteViews(context, id, running, config))
         }
     }
 
@@ -79,59 +94,68 @@ class StrobeWidgetProvider : AppWidgetProvider() {
             AppWidgetManager.INVALID_APPWIDGET_ID,
         )
         val ep = entry(context)
-        val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            ep.widgetRepository().all.value[appWidgetId]
-        } else null
 
-        val willBeRunning: Boolean
-        if (StrobeService.isRunning) {
-            val stopIntent = Intent(context, StrobeService::class.java)
-                .setAction(StrobeService.ACTION_STOP)
-            context.startService(stopIntent)
-            willBeRunning = false
-        } else {
-            val rateHz = config?.rateHz ?: TorchWidgetConfig.DEFAULT_RATE_HZ
-            val sosMode = config?.sosMode ?: false
-            val startIntent = Intent(context, StrobeService::class.java).apply {
-                putExtra(StrobeService.EXTRA_RATE_HZ, rateHz)
-                putExtra(StrobeService.EXTRA_SOS_MODE, sosMode)
+        val pendingResult = goAsync()
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            try {
+                // DataStore-backed read so a cold process sees the real
+                // rate / SOS / feedback / animation config — the hot cache
+                // is empty until its first async emission.
+                val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                    ep.widgetRepository().get(appWidgetId)
+                } else {
+                    null
+                }
+
+                val willBeRunning: Boolean
+                if (StrobeService.isRunning) {
+                    context.startService(
+                        Intent(context, StrobeService::class.java).setAction(StrobeService.ACTION_STOP),
+                    )
+                    willBeRunning = false
+                } else {
+                    val startIntent = Intent(context, StrobeService::class.java).apply {
+                        putExtra(StrobeService.EXTRA_RATE_HZ, config?.rateHz ?: TorchWidgetConfig.DEFAULT_RATE_HZ)
+                        putExtra(StrobeService.EXTRA_SOS_MODE, config?.sosMode ?: false)
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        context.startForegroundService(startIntent)
+                    } else {
+                        context.startService(startIntent)
+                    }
+                    willBeRunning = true
+                }
+
+                if (config != null) {
+                    withContext(Dispatchers.Main) {
+                        ep.feedbackDispatcher().dispatch(
+                            displayName = config.displayName,
+                            newState = willBeRunning,
+                            feedback = config.appearance.feedback,
+                        )
+                    }
+                }
+
+                val appWidgetManager = AppWidgetManager.getInstance(context)
+                val componentName = ComponentName(context, StrobeWidgetProvider::class.java)
+                val ids = appWidgetManager.getAppWidgetIds(componentName)
+                if (ids.isNotEmpty()) renderAll(context, appWidgetManager, ids)
+
+                if (config != null &&
+                    appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID &&
+                    config.appearance.tap.enabled &&
+                    config.appearance.tap.animation.hasPressFrame()
+                ) {
+                    playTapPressFrame(
+                        manager = appWidgetManager,
+                        appWidgetId = appWidgetId,
+                        pressedViews = buildRemoteViews(context, appWidgetId, willBeRunning, config, pressed = true),
+                        restingViews = buildRemoteViews(context, appWidgetId, willBeRunning, config, pressed = false),
+                    )
+                }
+            } finally {
+                pendingResult.finish()
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(startIntent)
-            } else {
-                context.startService(startIntent)
-            }
-            willBeRunning = true
-        }
-
-        // Dispatch the per-widget feedback if a config exists.
-        if (config != null) {
-            ep.feedbackDispatcher().dispatch(
-                displayName = config.displayName,
-                newState = willBeRunning,
-                feedback = config.appearance.feedback,
-            )
-        }
-
-        // Refresh icon state on all instances.
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        val componentName = ComponentName(context, StrobeWidgetProvider::class.java)
-        val ids = appWidgetManager.getAppWidgetIds(componentName)
-        if (ids.isNotEmpty()) onUpdate(context, appWidgetManager, ids)
-
-        // Overlay the held tap-press frame on the tapped instance (the
-        // refresh above already painted its resting state).
-        if (config != null &&
-            appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID &&
-            config.appearance.tap.enabled &&
-            config.appearance.tap.animation.hasPressFrame()
-        ) {
-            playTapPressFrame(
-                context = context,
-                appWidgetId = appWidgetId,
-                pressedViews = buildRemoteViews(context, appWidgetId, willBeRunning, config, pressed = true),
-                restingViews = buildRemoteViews(context, appWidgetId, willBeRunning, config, pressed = false),
-            )
         }
     }
 
