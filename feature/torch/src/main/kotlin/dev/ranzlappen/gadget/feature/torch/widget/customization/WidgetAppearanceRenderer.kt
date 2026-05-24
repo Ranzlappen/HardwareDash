@@ -10,6 +10,24 @@ import javax.inject.Singleton
 /** Fully-transparent ARGB — a no-op colour filter under SRC_ATOP. */
 private const val TRANSPARENT = 0
 
+/** Fully-opaque image alpha (0..255). The resting icon alpha. */
+private const val OPAQUE = 255
+
+/** Resting icon padding (dp) — mirrors the value baked into the widget
+ *  layouts. Re-applied on every normal render so a Scale press frame can
+ *  be reverted on a recycled view. */
+private const val DEFAULT_ICON_PADDING_DP = 12
+
+/** Pressed-frame icon padding (dp) for [TapAnimation.Scale] — larger than
+ *  the resting value so the icon visibly shrinks. */
+private const val SCALE_PRESSED_PADDING_DP = 22
+
+/** Pressed-frame icon alpha for [TapAnimation.Pulse]. */
+private const val PULSE_ALPHA = 110
+
+/** Pressed-frame icon tint for [TapAnimation.Flash] — bright white. */
+private val FLASH_COLOR = 0xFFFFFFFF.toInt()
+
 /**
  * Applies a [WidgetAppearance] to a [RemoteViews] tree.
  *
@@ -99,5 +117,39 @@ class WidgetAppearanceRenderer @Inject constructor(
         // it for backwards compat. SRC_IN preserves the alpha channel
         // of the source drawable.
         views.setInt(R.id.widget_icon, "setColorFilter", tintArgb)
+
+        // Reset the two properties a tap-press frame mutates, so a
+        // recycled host view always reverts cleanly to its resting look
+        // (RemoteViews reuses views — state not re-set here would stick).
+        views.setInt(R.id.widget_icon, "setImageAlpha", OPAQUE)
+        val pad = dp(context, DEFAULT_ICON_PADDING_DP)
+        views.setViewPadding(R.id.widget_icon, pad, pad, pad, pad)
     }
+
+    /**
+     * Overlay the transient "pressed" look for [TapBehavior.animation] on
+     * top of an already-[apply]'d [views]. RemoteViews can't truly animate,
+     * so each effect is a single mutated frame the provider holds for
+     * ~150 ms before re-rendering the resting state:
+     *  - [TapAnimation.Flash] — recolour the icon bright white.
+     *  - [TapAnimation.Pulse] — drop the icon alpha.
+     *  - [TapAnimation.Scale] — grow the icon padding so it shrinks.
+     *  - [TapAnimation.None] / [TapAnimation.Ripple] — no frame
+     *    (Ripple is the launcher's stock press ripple, applied as a
+     *    button background by the provider).
+     */
+    fun applyPressedFrame(context: Context, views: RemoteViews, appearance: WidgetAppearance) {
+        when (appearance.tap.animation) {
+            TapAnimation.Flash -> views.setInt(R.id.widget_icon, "setColorFilter", FLASH_COLOR)
+            TapAnimation.Pulse -> views.setInt(R.id.widget_icon, "setImageAlpha", PULSE_ALPHA)
+            TapAnimation.Scale -> {
+                val pad = dp(context, SCALE_PRESSED_PADDING_DP)
+                views.setViewPadding(R.id.widget_icon, pad, pad, pad, pad)
+            }
+            TapAnimation.None, TapAnimation.Ripple -> Unit
+        }
+    }
+
+    private fun dp(context: Context, value: Int): Int =
+        (value * context.resources.displayMetrics.density).toInt()
 }

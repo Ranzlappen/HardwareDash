@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Press ripple for the widget's clickable surface, applied as the click
+  button's background by the providers when TapAnimation.Ripple is the
+  selected tap animation. The rounded-rect mask bounds the ripple to the
+  widget's 16dp-corner shape so it matches the background surface.
+-->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#40FFFFFF">
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <corners android:radius="16dp" />
+            <solid android:color="#FFFFFFFF" />
+        </shape>
+    </item>
+</ripple>

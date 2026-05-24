@@ -14,6 +14,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
+import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.feature.torch.widget.feedback.WidgetFeedbackDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -115,6 +116,21 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
         val componentName = ComponentName(context, FlashlightWidgetProvider::class.java)
         val ids = appWidgetManager.getAppWidgetIds(componentName)
         if (ids.isNotEmpty()) onUpdate(context, appWidgetManager, ids)
+
+        // Overlay the held tap-press frame on the tapped instance (the
+        // refresh above already painted its resting state).
+        if (config != null &&
+            appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID &&
+            config.appearance.tap.enabled &&
+            config.appearance.tap.animation.hasPressFrame()
+        ) {
+            playTapPressFrame(
+                context = context,
+                appWidgetId = appWidgetId,
+                pressedViews = buildRemoteViews(context, appWidgetId, newState, config, pressed = true),
+                restingViews = buildRemoteViews(context, appWidgetId, newState, config, pressed = false),
+            )
+        }
     }
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
@@ -137,13 +153,26 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
         appWidgetId: Int,
         torchOn: Boolean,
         config: TorchWidgetConfig,
+        pressed: Boolean = false,
     ): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_flashlight).apply {
-            entry(context).appearanceRenderer().apply(
+            val renderer = entry(context).appearanceRenderer()
+            renderer.apply(
                 context = context,
                 views = this,
                 appearance = config.appearance,
                 active = torchOn,
+            )
+            if (pressed) renderer.applyPressedFrame(context, this, config.appearance)
+            // Ripple is the launcher's stock press effect — set it as the
+            // click target's background only when selected, transparent
+            // otherwise (set every render so a recycled view reverts).
+            val rippleOn = config.appearance.tap.enabled &&
+                config.appearance.tap.animation == TapAnimation.Ripple
+            setInt(
+                R.id.widget_flashlight_button,
+                "setBackgroundResource",
+                if (rippleOn) R.drawable.widget_tap_ripple else android.R.color.transparent,
             )
             if (config.appearance.tap.enabled) {
                 setOnClickPendingIntent(
