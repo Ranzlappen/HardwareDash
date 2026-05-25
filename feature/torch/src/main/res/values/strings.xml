@@ -90,6 +90,8 @@
 
     <string name="torch_widget_config_icon_active_label">Active icon</string>
     <string name="torch_widget_config_icon_inactive_label">Inactive icon</string>
+    <string name="torch_widget_config_icon_add_custom">Add custom icon from files</string>
+    <string name="torch_widget_config_icon_custom">Custom icon</string>
     <string name="torch_widget_config_tint_label">Tint</string>
     <string name="torch_widget_config_tint_accent">Accent</string>
     <string name="torch_widget_config_tint_on_surface">Foreground</string>

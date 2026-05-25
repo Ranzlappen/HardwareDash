@@ -1,5 +1,6 @@
 package dev.ranzlappen.gadget.feature.torch.ui
 
+import android.graphics.BitmapFactory
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +24,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -31,7 +35,10 @@ import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
 import dev.ranzlappen.gadget.feature.torch.widget.customization.BackgroundMode
 import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearance
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 import dev.ranzlappen.gadget.feature.torch.widget.customization.iconTintArgb
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Approximate, live render of how a 1×1 torch widget will look with the
@@ -40,8 +47,11 @@ import dev.ranzlappen.gadget.feature.torch.widget.customization.iconTintArgb
  * mapping — same background shapes/colours and the shared [iconTintArgb]
  * tint — so the preview tracks the placed widget.
  *
- * Shows the active-state icon ([iconResId] should resolve
- * `appearance.iconStyle.activeKey`).
+ * Shows the active-state [icon] (resolve `appearance.iconStyle.activeKey`
+ * via [dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog.resolveSource]).
+ * A [WidgetIconSource.CustomFile] is decoded off the main thread and
+ * rendered untinted (it carries its own colours); a
+ * [WidgetIconSource.Resource] is tinted per the icon style.
  *
  * When [interactive] is true (the widget editor sets this) the preview
  * becomes pressable and **demonstrates the configured tap animation** so
@@ -56,7 +66,7 @@ import dev.ranzlappen.gadget.feature.torch.widget.customization.iconTintArgb
 @Composable
 fun WidgetAppearancePreview(
     appearance: WidgetAppearance,
-    iconResId: Int,
+    icon: WidgetIconSource,
     modifier: Modifier = Modifier,
     interactive: Boolean = false,
 ) {
@@ -113,17 +123,36 @@ fun WidgetAppearancePreview(
             )
             BackgroundMode.Transparent -> Unit
         }
-        Image(
-            painter = painterResource(iconResId),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(iconTint),
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .matchParentSize()
-                .padding(PreviewDefaults.IconPadding)
-                .scale(iconScale)
-                .alpha(iconAlpha),
-        )
+        val iconModifier = Modifier
+            .matchParentSize()
+            .padding(PreviewDefaults.IconPadding)
+            .scale(iconScale)
+            .alpha(iconAlpha)
+        when (icon) {
+            is WidgetIconSource.Resource -> Image(
+                painter = painterResource(icon.resId),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(iconTint),
+                contentScale = ContentScale.Fit,
+                modifier = iconModifier,
+            )
+            is WidgetIconSource.CustomFile -> {
+                // Decode off the main thread; a user image renders untinted.
+                val bitmap by produceState<ImageBitmap?>(initialValue = null, icon.path) {
+                    value = withContext(Dispatchers.IO) {
+                        runCatching { BitmapFactory.decodeFile(icon.path)?.asImageBitmap() }.getOrNull()
+                    }
+                }
+                bitmap?.let {
+                    Image(
+                        bitmap = it,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = iconModifier,
+                    )
+                }
+            }
+        }
     }
 }
 

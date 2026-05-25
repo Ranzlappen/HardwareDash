@@ -12,6 +12,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,7 +53,9 @@ class TorchScreenContentTest {
         onAddStrobe: () -> Unit = {},
         onEditWidget: (SavedTorchWidget) -> Unit = {},
         onDeleteWidget: (SavedTorchWidget) -> Unit = {},
-        onResolveIcon: (String) -> Int = { R.drawable.ic_flashlight_on },
+        onResolveIcon: (String) -> WidgetIconSource = {
+            WidgetIconSource.Resource(R.drawable.ic_flashlight_on)
+        },
     ) {
         composeTestRule.setContent {
             GadgetTestTheme {

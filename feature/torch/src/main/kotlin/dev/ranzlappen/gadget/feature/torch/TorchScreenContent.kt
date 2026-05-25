@@ -71,6 +71,7 @@ import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
 import dev.ranzlappen.gadget.core.ui.component.GlassSurface
 import dev.ranzlappen.gadget.feature.torch.ui.WidgetAppearancePreview
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 
 /**
  * Stateless TorchScreen content — receives a single [TorchScreenState]
@@ -109,7 +110,7 @@ fun TorchScreenContent(
     onAddStrobe: () -> Unit,
     onEditWidget: (SavedTorchWidget) -> Unit,
     onDeleteWidget: (SavedTorchWidget) -> Unit,
-    onResolveIcon: (String) -> Int,
+    onResolveIcon: (String) -> WidgetIconSource,
     modifier: Modifier = Modifier,
 ) {
     ModuleScreenScaffold(
@@ -471,7 +472,7 @@ private fun StrobeDefaultsCard(
 @Composable
 private fun WidgetsCard(
     widgets: List<SavedTorchWidget>,
-    onResolveIcon: (String) -> Int,
+    onResolveIcon: (String) -> WidgetIconSource,
     onAddFlashlight: () -> Unit,
     onAddStrobe: () -> Unit,
     onEditWidget: (SavedTorchWidget) -> Unit,
@@ -535,7 +536,7 @@ private fun WidgetsCard(
 @Composable
 private fun WidgetListRow(
     widget: SavedTorchWidget,
-    onResolveIcon: (String) -> Int,
+    onResolveIcon: (String) -> WidgetIconSource,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -552,7 +553,7 @@ private fun WidgetListRow(
         ) {
             WidgetAppearancePreview(
                 appearance = widget.config.appearance,
-                iconResId = onResolveIcon(widget.config.appearance.iconStyle.activeKey),
+                icon = onResolveIcon(widget.config.appearance.iconStyle.activeKey),
                 modifier = Modifier.semantics {
                     contentDescription = widget.config.displayName
                 },

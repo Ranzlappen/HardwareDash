@@ -10,6 +10,7 @@ import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,7 +51,8 @@ class WidgetConfigurationSheetTest {
                     isExisting = false,
                     onDismiss = {},
                     onConfirm = {},
-                    resolveIconRes = { R.drawable.ic_flashlight_on },
+                    resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
+                    onImportCustomIcon = { null },
                     iconChoices = emptyList(),
                 )
             }
@@ -70,7 +72,8 @@ class WidgetConfigurationSheetTest {
                     isExisting = true,
                     onDismiss = {},
                     onConfirm = {},
-                    resolveIconRes = { R.drawable.ic_flashlight_on },
+                    resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
+                    onImportCustomIcon = { null },
                     iconChoices = emptyList(),
                 )
             }
@@ -90,7 +93,8 @@ class WidgetConfigurationSheetTest {
                     isExisting = false,
                     onDismiss = {},
                     onConfirm = {},
-                    resolveIconRes = { R.drawable.ic_flashlight_on },
+                    resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
+                    onImportCustomIcon = { null },
                     iconChoices = emptyList(),
                 )
             }
@@ -110,7 +114,8 @@ class WidgetConfigurationSheetTest {
                     isExisting = false,
                     onDismiss = {},
                     onConfirm = {},
-                    resolveIconRes = { R.drawable.ic_flashlight_on },
+                    resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
+                    onImportCustomIcon = { null },
                     iconChoices = emptyList(),
                 )
             }
@@ -141,7 +146,8 @@ class WidgetConfigurationSheetTest {
                     isExisting = false,
                     onDismiss = {},
                     onConfirm = { captured = it },
-                    resolveIconRes = { R.drawable.ic_flashlight_on },
+                    resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
+                    onImportCustomIcon = { null },
                     iconChoices = emptyList(),
                 )
             }

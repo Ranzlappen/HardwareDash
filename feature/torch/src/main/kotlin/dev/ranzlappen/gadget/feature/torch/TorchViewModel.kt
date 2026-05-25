@@ -2,6 +2,7 @@ package dev.ranzlappen.gadget.feature.torch
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +16,7 @@ import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetCreator
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import dev.ranzlappen.gadget.feature.torch.widget.broadcastTorchWidgetUpdate
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -245,9 +247,14 @@ class TorchViewModel @Inject constructor(
         _sheetTarget.value = SheetTarget.Existing(widget.appWidgetId, widget.config)
     }
 
-    /** Resolve a widget icon key to its drawable resource for the
-     *  configuration sheet's live appearance preview. */
-    fun resolveWidgetIcon(key: String): Int = iconCatalog.resolve(key)
+    /** Resolve a widget icon key to a render source (bundled drawable or
+     *  a user-imported custom file) for the live appearance preview and
+     *  the in-app widget list. */
+    fun resolveWidgetIcon(key: String): WidgetIconSource = iconCatalog.resolveSource(key)
+
+    /** Copy + downscale a picked image into app-internal storage and
+     *  return its stable custom icon key, or `null` on failure. */
+    suspend fun importCustomIcon(uri: Uri): String? = iconCatalog.importCustomIcon(uri)
 
     /** Icons the configuration sheet offers in its icon picker. */
     val iconChoices: List<WidgetIconCatalog.Entry> = iconCatalog.entries
