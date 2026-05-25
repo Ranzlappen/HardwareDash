@@ -534,8 +534,60 @@ data class ModuleInfo(
   `Build.VERSION.SDK_INT` for a supported/unsupported verdict, then
   lists `OsNote`s tagged by the API level they apply from.
 - `ModuleFirmwareSection` — rendered only when `firmware != null`.
+- `ModuleCapabilitiesSection` — **per-function** green/amber/red status
+  block (the "Functions & compatibility" card). Driven by
+  `ModuleInfo.capabilities: List<ModuleCapability>`. Each
+  `ModuleCapability` carries a name, optional detail, and a
+  `@Composable () -> CapabilityStatus` live check that resolves to a
+  `GadgetStatusKind` (Success → `primary`/teal, Warning →
+  `tertiary`/amber, Error → `error`/red) + a message + an optional
+  `CapabilityAction` (`RequestPermissions`, `OpenAppSettings`, or a
+  `Custom` handler). Statuses re-evaluate on permission results and
+  `ON_RESUME` (the section owns the `RequestMultiplePermissions`
+  launcher + a `key(refreshKey)`). Use this to report, per button /
+  per function and **per flavor**, exactly what works on the device and
+  what's missing. Torch is the reference: flash-hardware + OS-version
+  rows for the standard functions, and four rooted rows whose status
+  comes from the `TorchRootCapabilities` probe.
+- The tri-state mapping lives in
+  `core/ui/component/StatusIndicators.kt` (`enum GadgetStatusKind` +
+  `@Composable GadgetStatusKind.color()`). Reuse it anywhere a
+  green/amber/red readout is needed; never hand-pick the three colours.
 - These usually flow through the scaffold's `moduleInfo` param; call
   them directly only for a bespoke layout.
+
+#### Rooted-flavor module extension (`TorchRootCapabilities` reference)
+
+The blueprint for adding **root-only** capabilities to a *modular*
+feature without breaking flavor isolation or the Hilt graph:
+
+1. Declare a capability interface + result/availability types in the
+   feature module's `src/main` (e.g. `TorchRootCapabilities`,
+   `TorchRootResult`, `TorchRootAvailability`). The feature stays
+   flavor-agnostic and never imports libsu or `com.gadget.root.*`.
+2. Bind it in **`:app`'s flavor source sets** (not the feature module):
+   a no-op impl in `app/src/standard/.../<feature>/` (reports
+   everything unavailable) and a real impl in `app/src/rooted/.../<feature>/`.
+   Add both to the matching flavor `RootBindings` (`@Provides` in
+   standard, `@Binds` in rooted). This mirrors how
+   `RootCapabilityRegistry` / `RootSafetyGate` are split and avoids the
+   Hilt duplicate-binding trap (the feature module never binds it).
+3. The rooted impl should **reuse the existing legacy rooted controller**
+   (`com.gadget.<feature>.Rooted*Controller`) where one exists — adapt
+   its result type rather than re-implementing sysfs/libsu. All
+   privileged calls must route through `RootSafetyGate`
+   (capability + opt-out + rate-limit) and use a `RootFeatureKey`.
+4. The feature's `@HiltViewModel` injects the interface directly; Hilt
+   resolves the binding at `:app` assembly. Probe availability once and
+   fold it into the screen state; show root controls only when
+   available, and surface each rooted function as a
+   `ModuleCapability` row so the badges read red ("requires the rooted
+   app version") on standard.
+
+   Reference impl: `TorchRootCapabilities` (interface) +
+   `StandardTorchRootCapabilities` / `RootedTorchRootCapabilities`
+   (app flavor bindings, the latter delegating to the legacy
+   `RootedTorchController`).
 
 ---
 
