@@ -22,6 +22,7 @@
     <string name="torch_state_off">Off</string>
     <string name="torch_action_turn_on">Turn on torch</string>
     <string name="torch_action_turn_off">Turn off torch</string>
+    <string name="torch_action_toggle_caption">Torch</string>
     <string name="torch_action_hold">Hold for light</string>
     <string name="torch_action_strobe">Strobe</string>
     <string name="torch_action_strobe_toggle">Toggle strobe</string>

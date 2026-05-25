@@ -8,19 +8,20 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashlightOff
 import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FlashlightOn
@@ -31,16 +32,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -54,7 +62,6 @@ import dev.ranzlappen.gadget.core.ui.module.OsNote
 import dev.ranzlappen.gadget.core.ui.component.CompactCard
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
-import dev.ranzlappen.gadget.core.ui.component.GadgetFab
 import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
@@ -176,7 +183,6 @@ private fun torchModuleInfo(): ModuleInfo = ModuleInfo(
     firmware = null,
 )
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TorchToggleCard(
     torch: TorchState,
@@ -200,47 +206,38 @@ private fun TorchToggleCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = spacing.large),
+                .padding(top = spacing.medium),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(spacing.medium),
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(HeroBoxHeight),
-                contentAlignment = Alignment.Center,
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(spacing.large),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    GadgetFab(
-                        onClick = onToggleClick,
-                        icon = if (torch.isOn) Icons.Filled.FlashlightOn else Icons.Filled.FlashlightOff,
-                        contentDescription = stringResource(
-                            if (torch.isOn) R.string.torch_action_turn_off
-                            else R.string.torch_action_turn_on,
-                        ),
-                        enabled = torch.isAvailable,
-                    )
-                    CircleControlButton(
-                        icon = Icons.Outlined.TouchApp,
-                        contentDescription = stringResource(R.string.torch_action_hold),
-                        caption = stringResource(R.string.torch_action_hold),
-                        enabled = torch.isAvailable,
-                        active = torch.isOn,
-                        onHold = onMomentaryHold,
-                    )
-                }
+            // Three explicit rows of paired controls — torch + hold,
+            // strobe + strobe-hold, morse + morse-hold. Tap variants
+            // toggle; hold variants run only while pressed. All drive the
+            // one StrobeService. Fixed pairing keeps the layout stable
+            // instead of reflowing with width.
+            ControlRow {
+                CircleControlButton(
+                    icon = if (torch.isOn) Icons.Filled.FlashlightOn else Icons.Filled.FlashlightOff,
+                    contentDescription = stringResource(
+                        if (torch.isOn) R.string.torch_action_turn_off
+                        else R.string.torch_action_turn_on,
+                    ),
+                    caption = stringResource(R.string.torch_action_toggle_caption),
+                    enabled = torch.isAvailable,
+                    active = torch.isOn,
+                    hero = true,
+                    onClick = onToggleClick,
+                )
+                CircleControlButton(
+                    icon = Icons.Outlined.TouchApp,
+                    contentDescription = stringResource(R.string.torch_action_hold),
+                    caption = stringResource(R.string.torch_action_hold),
+                    enabled = torch.isAvailable,
+                    active = torch.isOn,
+                    onHold = onMomentaryHold,
+                )
             }
-            // Strobe + Morse controls — circular buttons consistent with the
-            // torch pair above. Tap variants toggle; hold variants run only
-            // while pressed. All drive the one StrobeService.
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(spacing.medium, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(spacing.small),
-            ) {
+            ControlRow {
                 CircleControlButton(
                     icon = Icons.Outlined.Bolt,
                     contentDescription = stringResource(R.string.torch_action_strobe_toggle),
@@ -256,6 +253,8 @@ private fun TorchToggleCard(
                     enabled = torch.isAvailable,
                     onHold = onStrobeHold,
                 )
+            }
+            ControlRow {
                 CircleControlButton(
                     icon = Icons.Outlined.MoreHoriz,
                     contentDescription = stringResource(R.string.torch_action_morse_toggle),
@@ -272,10 +271,9 @@ private fun TorchToggleCard(
                     onHold = onMorseHold,
                 )
             }
-            GadgetTextField(
-                value = morseText,
-                onValueChange = onMorseTextChange,
-                label = stringResource(R.string.torch_morse_message_label),
+            MorseMessageField(
+                persisted = morseText,
+                onCommit = onMorseTextChange,
                 modifier = Modifier.fillMaxWidth(),
             )
             Text(
@@ -289,12 +287,74 @@ private fun TorchToggleCard(
     }
 }
 
+/** A horizontally-centred pair of [CircleControlButton]s. The torch
+ *  screen's three control rows share this so spacing + alignment stay
+ *  identical across them. */
+@Composable
+private fun ControlRow(content: @Composable RowScope.() -> Unit) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(spacing.medium, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.Top,
+        content = content,
+    )
+}
+
 /**
- * Circular torch control. Pass [onClick] for tap-to-toggle or [onHold]
+ * Morse message input for the in-app strobe. Typing updates a local
+ * [rememberSaveable] buffer only (no per-keystroke persistence — that
+ * round-trip through DataStore was the source of the typing lag), and a
+ * trailing confirm (check) action commits the buffer via [onCommit].
+ * Commit also fires on IME `Done` and on focus loss so edits aren't
+ * silently lost. The check only appears while the buffer differs from
+ * the persisted value.
+ */
+@Composable
+private fun MorseMessageField(
+    persisted: String,
+    onCommit: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var local by rememberSaveable(persisted) { mutableStateOf(persisted) }
+    val dirty = local != persisted
+    val focusManager = LocalFocusManager.current
+    GadgetTextField(
+        value = local,
+        onValueChange = { local = it },
+        label = stringResource(R.string.torch_morse_message_label),
+        modifier = modifier.onFocusChanged { focus ->
+            if (!focus.isFocused && local != persisted) onCommit(local)
+        },
+        trailingIcon = if (dirty) Icons.Outlined.Check else null,
+        onTrailingIconClick = if (dirty) {
+            {
+                onCommit(local)
+                focusManager.clearFocus()
+            }
+        } else {
+            null
+        },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                if (local != persisted) onCommit(local)
+                focusManager.clearFocus()
+            },
+        ),
+    )
+}
+
+/**
+ * Circular torch control — the single captioned control used by all six
+ * buttons on the screen. Pass [onClick] for tap-to-toggle or [onHold]
  * for press-and-hold (called `true` on press, `false` on release **or**
  * cancel via try/finally so it can't get stuck on). [active] tints it
- * with the primary container to signal the "on" state. Styled to pair
- * with the toggle FAB.
+ * with the primary container to signal the "on" state.
+ *
+ * [hero] marks the primary action (the torch toggle): it reads as a
+ * filled primary surface so it stands out from the secondary controls
+ * while keeping the identical circle-over-caption shape, which is what
+ * gives the row its consistency.
  */
 @Composable
 private fun CircleControlButton(
@@ -304,17 +364,22 @@ private fun CircleControlButton(
     enabled: Boolean,
     modifier: Modifier = Modifier,
     active: Boolean = false,
+    hero: Boolean = false,
     onClick: (() -> Unit)? = null,
     onHold: ((Boolean) -> Unit)? = null,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
     val container = when {
         !enabled -> MaterialTheme.colorScheme.surfaceVariant
+        hero && active -> MaterialTheme.colorScheme.primary
+        hero -> MaterialTheme.colorScheme.primaryContainer
         active -> MaterialTheme.colorScheme.primaryContainer
         else -> MaterialTheme.colorScheme.secondaryContainer
     }
     val content = when {
         !enabled -> MaterialTheme.colorScheme.onSurfaceVariant
+        hero && active -> MaterialTheme.colorScheme.onPrimary
+        hero -> MaterialTheme.colorScheme.onPrimaryContainer
         active -> MaterialTheme.colorScheme.onPrimaryContainer
         else -> MaterialTheme.colorScheme.onSecondaryContainer
     }
@@ -537,9 +602,7 @@ private fun TorchWidgetConfig.subtitleString(): String = when (type) {
     )
 }
 
-/** Hero box height — generous tap target for the central FAB. */
-private val HeroBoxHeight: Dp = 160.dp
-
-/** Momentary-button diameter — matches the 56 dp FAB so the two read as
- *  a pair, and clears the 48 dp accessibility touch-target minimum. */
+/** Circular-control diameter — all six buttons share it so they read as
+ *  a consistent grid, and it clears the 48 dp accessibility touch-target
+ *  minimum. */
 private val MomentaryButtonDiameter: Dp = 56.dp
