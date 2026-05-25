@@ -13,6 +13,11 @@ import kotlinx.coroutines.delay
  *  rather than coalescing it with the resting render. */
 internal const val PRESS_FRAME_MILLIS: Long = 280L
 
+/** Icon alpha (0..255) for a widget the user deleted in-app but that the
+ *  launcher still hosts. Dim enough to read as defunct without vanishing
+ *  entirely (the app can't remove it from a third-party launcher). */
+internal const val REMOVED_WIDGET_ICON_ALPHA: Int = 70
+
 /** True for the tap animations rendered as a held "pressed" frame (as
  *  opposed to [TapAnimation.None] / the passive [TapAnimation.Ripple]). */
 internal fun TapAnimation.hasPressFrame(): Boolean =

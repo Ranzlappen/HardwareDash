@@ -199,6 +199,15 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                 appearance = config.appearance,
                 active = running,
             )
+            if (config.removed) {
+                // Deleted in-app but still hosted by the launcher: dim it
+                // and drop the tap target so it reads as defunct until
+                // the user drags it off the home screen.
+                setInt(R.id.widget_icon, "setImageAlpha", REMOVED_WIDGET_ICON_ALPHA)
+                setInt(R.id.widget_strobe_button, "setBackgroundResource", android.R.color.transparent)
+                setOnClickPendingIntent(R.id.widget_strobe_button, null)
+                return@apply
+            }
             if (pressed) renderer.applyPressedFrame(context, this, config.appearance)
             // Ripple is the launcher's stock press effect — set it as the
             // click target's background only when selected, transparent

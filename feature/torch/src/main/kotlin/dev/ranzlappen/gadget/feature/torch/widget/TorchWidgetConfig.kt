@@ -38,6 +38,12 @@ import kotlinx.serialization.Serializable
  *   Defaulted to [WidgetAppearance] so existing on-disk configs
  *   migrate seamlessly: missing `appearance` field decodes as the
  *   default record.
+ * - [removed] — set when the user deletes the widget from the in-app
+ *   list. A non-host app can't pull a placed widget off the launcher,
+ *   so instead of deleting the config (which would let the provider
+ *   self-heal it straight back) we flag it `removed`: the in-app list
+ *   drops it and the home-screen instance repaints inert until the user
+ *   drags it off (which fires `onDeleted` and purges the config).
  */
 @Serializable
 @Immutable
@@ -49,6 +55,7 @@ data class TorchWidgetConfig(
     val morseMode: Boolean = false,
     val morseText: String = "",
     val appearance: WidgetAppearance = WidgetAppearance(),
+    val removed: Boolean = false,
 ) {
     companion object {
         /** Initial rate for new strobe widgets when the user hasn't

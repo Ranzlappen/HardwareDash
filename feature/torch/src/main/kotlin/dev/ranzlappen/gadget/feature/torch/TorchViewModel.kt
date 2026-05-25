@@ -106,6 +106,9 @@ class TorchViewModel @Inject constructor(
             defaultStrobeRateHz = pendingRateHz.value ?: rateHz,
             widgets = widgets
                 .toSortedMap()
+                // Drop widgets the user deleted in-app (kept on disk as
+                // `removed` only so the provider stops self-healing them).
+                .filterValues { !it.removed }
                 .map { (id, config) -> SavedTorchWidget(id, config) },
             strobeRunning = running,
             morseText = morseText,
@@ -123,6 +126,15 @@ class TorchViewModel @Inject constructor(
      */
     private val _pinUnsupportedEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val pinUnsupportedEvents: SharedFlow<Unit> = _pinUnsupportedEvents.asSharedFlow()
+
+    /**
+     * One-shot signal raised after a widget is deleted from the in-app
+     * list, so the screen can tell the user the placed home-screen
+     * instance must still be removed manually (the app can't pull it off
+     * a third-party launcher).
+     */
+    private val _widgetRemovedEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val widgetRemovedEvents: SharedFlow<Unit> = _widgetRemovedEvents.asSharedFlow()
 
     /** Transient "open the configuration sheet" signal. */
     private val _sheetTarget = MutableStateFlow<SheetTarget?>(null)
@@ -267,7 +279,18 @@ class TorchViewModel @Inject constructor(
 
     fun onDeleteWidget(widget: SavedTorchWidget) {
         viewModelScope.launch {
-            widgetRepository.delete(widget.appWidgetId)
+            // A non-host app can't pull a placed widget off the launcher,
+            // so flag it `removed` rather than deleting the config — a
+            // plain delete would let the provider self-heal it straight
+            // back into the list. This drops it from the list and
+            // repaints the home-screen instance inert; dragging it off
+            // later fires onDeleted, which purges the config for real.
+            widgetRepository.save(
+                widget.appWidgetId,
+                widget.config.copy(removed = true),
+            )
+            broadcastTorchWidgetUpdate(context, widget.config.type, widget.appWidgetId)
+            _widgetRemovedEvents.tryEmit(Unit)
         }
     }
 

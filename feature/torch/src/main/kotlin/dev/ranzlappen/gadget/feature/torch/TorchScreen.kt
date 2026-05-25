@@ -46,12 +46,22 @@ fun TorchScreen(
     val sheetTarget by viewModel.sheetTarget.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val pinUnsupportedMessage = stringResource(R.string.torch_widget_pin_unsupported)
+    val widgetRemovedMessage = stringResource(R.string.torch_widget_removed_hint)
 
     LaunchedEffect(Unit) {
         viewModel.pinUnsupportedEvents.collect {
             snackbarHostState.showSnackbar(
                 message = pinUnsupportedMessage,
                 duration = SnackbarDuration.Short,
+            )
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.widgetRemovedEvents.collect {
+            snackbarHostState.showSnackbar(
+                message = widgetRemovedMessage,
+                duration = SnackbarDuration.Long,
             )
         }
     }
