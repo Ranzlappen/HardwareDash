@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.PhoneAndroid
@@ -21,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -38,6 +41,7 @@ import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetPrimaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetStatusDot
 import dev.ranzlappen.gadget.core.ui.component.GadgetTertiaryButton
+import dev.ranzlappen.gadget.core.ui.component.color
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -248,6 +252,125 @@ fun ModuleCompatibilitySection(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+        }
+    }
+}
+
+/**
+ * Per-function capability section of the module blueprint.
+ *
+ * Renders one tri-state row per [ModuleCapability]: a coloured
+ * [GadgetStatusDot] (green / amber / red via [GadgetStatusKind]) + the
+ * function name + its live status message, plus an optional inline action
+ * (grant a permission, open settings, or a module-specific handler) to
+ * resolve a warning. Each capability's `status` lambda is re-evaluated on
+ * permission results and `ON_RESUME`, so the badges stay live.
+ *
+ * Omitted entirely when [capabilities] is empty.
+ */
+@Composable
+fun ModuleCapabilitiesSection(
+    capabilities: List<ModuleCapability>,
+    modifier: Modifier = Modifier,
+) {
+    if (capabilities.isEmpty()) return
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val spacing = LocalGadgetTheme.current.spacing
+
+    var refreshKey by remember { mutableIntStateOf(0) }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) refreshKey++
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { refreshKey++ }
+
+    val onAction: (CapabilityAction) -> Unit = { action ->
+        when (action) {
+            is CapabilityAction.RequestPermissions ->
+                launcher.launch(action.permissions.toTypedArray())
+            CapabilityAction.OpenAppSettings -> context.openAppSettings()
+            is CapabilityAction.Custom -> action.onClick()
+        }
+    }
+
+    DashCard(
+        modifier = modifier.fillMaxWidth(),
+        title = stringResource(R.string.module_capabilities_title),
+        icon = Icons.Outlined.Checklist,
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+            // key(refreshKey) re-runs the rows (and each live status() check)
+            // whenever a permission result or ON_RESUME bumps the key.
+            key(refreshKey) {
+                capabilities.forEach { capability ->
+                    CapabilityRow(
+                        capability = capability,
+                        status = capability.status(),
+                        onAction = onAction,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CapabilityRow(
+    capability: ModuleCapability,
+    status: CapabilityStatus,
+    onAction: (CapabilityAction) -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {},
+        verticalArrangement = Arrangement.spacedBy(spacing.pico),
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            GadgetStatusDot(contentDescription = null, color = status.kind.color())
+            Text(
+                text = capability.name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        capability.detail?.let { detail ->
+            Text(
+                text = detail,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Text(
+            text = status.message,
+            style = MaterialTheme.typography.bodySmall,
+            color = status.kind.color(),
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
+        status.action?.let { action ->
+            val label = when (action) {
+                is CapabilityAction.RequestPermissions ->
+                    stringResource(R.string.module_permission_grant)
+                CapabilityAction.OpenAppSettings ->
+                    stringResource(R.string.module_permission_open_settings)
+                is CapabilityAction.Custom -> action.label
+            }
+            GadgetTertiaryButton(onClick = { onAction(action) }, text = label)
         }
     }
 }

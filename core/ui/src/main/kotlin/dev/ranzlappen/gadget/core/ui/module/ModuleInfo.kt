@@ -1,6 +1,8 @@
 package dev.ranzlappen.gadget.core.ui.module
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import dev.ranzlappen.gadget.core.ui.component.GadgetStatusKind
 
 /**
  * Self-describing metadata every Gadget feature module supplies so the
@@ -27,7 +29,50 @@ data class ModuleInfo(
     val permissions: List<ModulePermission> = emptyList(),
     val compatibility: OsCompatibility,
     val firmware: FirmwareRequirement? = null,
+    val capabilities: List<ModuleCapability> = emptyList(),
 )
+
+/**
+ * One per-function capability row in a module's status block: a named
+ * feature (a button, a hardware action) plus a live [status] check that
+ * resolves to a green / amber / red [CapabilityStatus]. This is how a
+ * module reports, per function and per flavor, exactly what works on this
+ * device and what's missing — with an optional inline [CapabilityAction]
+ * (request a permission, open settings) to resolve a warning.
+ *
+ * [status] is a `@Composable` lambda so it can read live signals
+ * (`Build.VERSION`, permission grant state, root availability). It is
+ * re-invoked whenever [dev.ranzlappen.gadget.core.ui.module.ModuleCapabilitiesSection]
+ * recomposes (e.g. after a permission result or `ON_RESUME`), so the
+ * badge stays current.
+ */
+@Immutable
+class ModuleCapability(
+    val name: String,
+    val detail: String? = null,
+    val status: @Composable () -> CapabilityStatus,
+)
+
+/** Resolved tri-state status of a [ModuleCapability] on this device/flavor. */
+@Immutable
+data class CapabilityStatus(
+    val kind: GadgetStatusKind,
+    val message: String,
+    val action: CapabilityAction? = null,
+)
+
+/** An inline action offered to resolve a non-[GadgetStatusKind.Success]
+ *  capability. */
+sealed interface CapabilityAction {
+    /** Request the given runtime permissions in-app. */
+    data class RequestPermissions(val permissions: List<String>) : CapabilityAction
+
+    /** Deep-link to the app's system settings page. */
+    data object OpenAppSettings : CapabilityAction
+
+    /** A module-specific action with its own [label] + handler. */
+    data class Custom(val label: String, val onClick: () -> Unit) : CapabilityAction
+}
 
 /**
  * A single Android runtime permission a module relies on.

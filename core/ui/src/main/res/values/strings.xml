@@ -25,4 +25,7 @@
     <!-- Firmware section -->
     <string name="module_firmware_title">Firmware</string>
     <string name="module_firmware_version">%1$s · firmware %2$s or newer</string>
+
+    <!-- Per-function capability section -->
+    <string name="module_capabilities_title">Functions &amp; compatibility</string>
 </resources>

@@ -151,9 +151,30 @@ fun GadgetBadge(
 }
 
 /**
+ * Tri-state semantic status. Maps to the theme's reserved triad so every
+ * module's permission / compatibility / capability readouts use one
+ * consistent green-amber-red language:
+ *  - [Success] → `colorScheme.primary` (teal): works / granted / compatible.
+ *  - [Warning] → `colorScheme.tertiary` (amber, reserved for warnings):
+ *    should work / not yet granted / works with a caveat.
+ *  - [Error] → `colorScheme.error` (red): incompatible / unavailable /
+ *    insufficient hardware or software.
+ */
+enum class GadgetStatusKind { Success, Warning, Error }
+
+/** Theme colour for a [GadgetStatusKind]. Read inside a `@Composable`. */
+@Composable
+fun GadgetStatusKind.color(): Color = when (this) {
+    GadgetStatusKind.Success -> MaterialTheme.colorScheme.primary
+    GadgetStatusKind.Warning -> MaterialTheme.colorScheme.tertiary
+    GadgetStatusKind.Error -> MaterialTheme.colorScheme.error
+}
+
+/**
  * Colored status dot — semantic "online / offline / warning / error"
  * indicator. Pure presentation: caller is responsible for picking the
- * [color] semantic-meaning mapping.
+ * [color] semantic-meaning mapping (see [GadgetStatusKind.color] for the
+ * standard tri-state mapping).
  *
  * Pair with a label via a [androidx.compose.foundation.layout.Row]
  * for the conventional "● Online" affordance. For a dot inside a
