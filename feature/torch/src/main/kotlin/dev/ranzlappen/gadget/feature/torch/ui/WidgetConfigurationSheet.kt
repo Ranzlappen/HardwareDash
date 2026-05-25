@@ -330,6 +330,15 @@ fun WidgetConfigurationSheet(
                 WidgetAppearancePreview(
                     appearance = appearance,
                     iconResId = resolveIconRes(appearance.iconStyle.activeKey),
+                    interactive = true,
+                )
+            }
+            if (appearance.tap.enabled && appearance.tap.animation != TapAnimation.None) {
+                Text(
+                    text = stringResource(R.string.torch_widget_config_preview_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 
