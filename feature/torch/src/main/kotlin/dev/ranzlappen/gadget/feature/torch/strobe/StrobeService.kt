@@ -32,14 +32,15 @@ import kotlin.math.min
  *
  * Configuration source depends on the caller:
  * - **Widget taps** pass only [EXTRA_APPWIDGET_ID]; the service reads
- *   that widget's persisted [TorchWidgetConfig] (rate / SOS) itself,
- *   off the broadcast thread. This avoids trusting a cold StateFlow
- *   cache on the provider side.
+ *   that widget's persisted [TorchWidgetConfig] (rate + Morse mode /
+ *   message) itself, straight from DataStore. A widget in Morse mode
+ *   loops its message through [MorseCodec] (defaulting to
+ *   [DEFAULT_MORSE_TEXT] = "SOS" when the box is blank); otherwise it
+ *   runs a constant strobe.
  * - **In-app controls** pass the values directly via [EXTRA_RATE_HZ]
- *   (Hz, clamped to `TorchWidgetConfig.MIN_RATE_HZ..MAX_RATE_HZ`) and
- *   [EXTRA_SOS_MODE]. When SOS is selected the loop emits a repeating
- *   Morse "SOS" ([sosTimeline]); the rate tunes the dot unit via
- *   [sosUnitMillis].
+ *   (Hz, clamped to `TorchWidgetConfig.MIN_RATE_HZ..MAX_RATE_HZ`) and an
+ *   optional [EXTRA_MORSE_TEXT]; when present the loop plays that text
+ *   as Morse. The rate tunes the dot unit via [morseUnitMillis].
  *
  * Lifecycle:
  * - [isRunning] companion-level flag flips `true` once the
@@ -116,36 +117,39 @@ class StrobeService : Service() {
             ?: AppWidgetManager.INVALID_APPWIDGET_ID
         val explicitRate = intent?.getFloatExtra(EXTRA_RATE_HZ, TorchWidgetConfig.DEFAULT_RATE_HZ)
             ?: TorchWidgetConfig.DEFAULT_RATE_HZ
-        val explicitSos = intent?.getBooleanExtra(EXTRA_SOS_MODE, false) ?: false
         val explicitMorse = intent?.getStringExtra(EXTRA_MORSE_TEXT)
 
         strobeLoop = serviceScope.launch {
-            // A widget tap passes only EXTRA_APPWIDGET_ID; the service reads
-            // that widget's persisted config (rate / SOS / Morse text) here
-            // — off the broadcast thread, so a cold StateFlow cache can't
-            // strand the session on stale defaults (the bug behind "SOS
-            // doesn't work"). In-app callers pass the extras directly.
+            // A widget tap passes only EXTRA_APPWIDGET_ID; read that
+            // widget's persisted config straight from DataStore
+            // (getFresh, not the hot cache) so a just-pinned widget plays
+            // its Morse message on the very first tap. In-app callers
+            // pass the values directly via the extras.
             val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                widgetRepository.get(appWidgetId)
+                widgetRepository.getFresh(appWidgetId)
             } else {
                 null
             }
             val rateHz = (config?.rateHz ?: explicitRate)
                 .coerceIn(TorchWidgetConfig.MIN_RATE_HZ, TorchWidgetConfig.MAX_RATE_HZ)
-            val morse = (explicitMorse ?: config?.morseText)?.takeIf { it.isNotBlank() }
-            val sos = config?.sosMode ?: explicitSos
-            when {
-                morse != null -> runMorse(morse, rateHz)
-                sos -> runSosPattern(rateHz)
-                else -> runConstant(rateHz)
+            // Morse resolution:
+            //  - in-app Morse button passes EXTRA_MORSE_TEXT directly;
+            //  - a widget in Morse mode plays its message, defaulting to
+            //    "SOS" when the box was left blank;
+            //  - otherwise it's a plain constant strobe.
+            val morse = when {
+                !explicitMorse.isNullOrBlank() -> explicitMorse
+                config != null && config.morseMode -> config.morseText.ifBlank { DEFAULT_MORSE_TEXT }
+                else -> null
             }
+            if (morse != null) runMorse(morse, rateHz) else runConstant(rateHz)
         }
     }
 
     /** Repeating Morse playback of arbitrary [text]; falls back to a
      *  constant strobe if nothing in the text is encodable. */
     private suspend fun runMorse(text: String, rateHz: Float) {
-        val timeline = MorseCodec.toTimeline(text, sosUnitMillis(rateHz))
+        val timeline = MorseCodec.toTimeline(text, morseUnitMillis(rateHz))
         if (timeline.isEmpty()) {
             runConstant(rateHz)
             return
@@ -166,20 +170,6 @@ class StrobeService : Service() {
             on = !on
             torchController.setOn(on)
             delay(halfPeriodMs)
-        }
-    }
-
-    /** Repeating Morse "SOS" (· · · — — — · · ·). The dot unit scales
-     *  with [rateHz] via [sosUnitMillis] so the rate slider still tunes
-     *  playback speed. Each [delay] is cancellable, so [stopStrobing]
-     *  tears the loop down promptly. */
-    private suspend fun runSosPattern(rateHz: Float) {
-        val timeline = sosTimeline(sosUnitMillis(rateHz))
-        while (true) {
-            for ((on, durationMs) in timeline) {
-                torchController.setOn(on)
-                delay(durationMs)
-            }
         }
     }
 
@@ -245,6 +235,13 @@ class StrobeService : Service() {
             .setOngoing(true)
             .setSilent(true)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            // A foreground service MUST post a notification on API 26+
+            // (OS requirement — it can't be suppressed in the standard
+            // flavor). DEFERRED lets the OS hold it back ~10s, so a brief
+            // strobe the user toggles straight off never surfaces one.
+            // The rooted flavor avoids the notification entirely by
+            // running the strobe outside an FGS.
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFERRED)
             .build()
 
     companion object {
@@ -261,19 +258,19 @@ class StrobeService : Service() {
          *  widget's stored config. Read in [onStartCommand]. */
         const val EXTRA_RATE_HZ = "dev.ranzlappen.gadget.feature.torch.EXTRA_RATE_HZ"
 
-        /** Boolean extra selecting SOS Morse playback over the constant
-         *  strobe. Read in [onStartCommand]. */
-        const val EXTRA_SOS_MODE = "dev.ranzlappen.gadget.feature.torch.EXTRA_SOS_MODE"
-
         /** Int extra carrying the tapped widget's `appWidgetId`. When
          *  present the service reads that widget's persisted config
-         *  (rate / SOS) itself rather than trusting extras — robust
-         *  against a cold-process StateFlow cache. */
+         *  (rate / Morse mode + message) itself rather than trusting
+         *  extras — robust against a cold-process cache. */
         const val EXTRA_APPWIDGET_ID = "dev.ranzlappen.gadget.feature.torch.EXTRA_APPWIDGET_ID"
 
         /** String extra: arbitrary text to play as Morse, looped. Takes
-         *  precedence over SOS / constant when non-blank. */
+         *  precedence over the constant strobe when non-blank. */
         const val EXTRA_MORSE_TEXT = "dev.ranzlappen.gadget.feature.torch.EXTRA_MORSE_TEXT"
+
+        /** Fallback Morse message for a widget left in Morse mode with
+         *  an empty message box. */
+        const val DEFAULT_MORSE_TEXT = "SOS"
 
         /**
          * Heuristic flag indicating whether a strobe loop is
@@ -309,43 +306,13 @@ class StrobeService : Service() {
         }
 
         /**
-         * Morse "dot" unit (ms) for SOS playback, derived from [rateHz]
-         * so the rate slider tunes SOS speed, then clamped to a legible
+         * Morse "dot" unit (ms) derived from [rateHz] so the rate slider
+         * tunes Morse playback speed, then clamped to a legible
          * 60..400 ms so extreme rates stay readable as Morse.
          */
-        internal fun sosUnitMillis(rateHz: Float): Long {
+        internal fun morseUnitMillis(rateHz: Float): Long {
             val clamped = max(TorchWidgetConfig.MIN_RATE_HZ, min(rateHz, TorchWidgetConfig.MAX_RATE_HZ))
             return (1000f / clamped).toLong().coerceIn(60L, 400L)
-        }
-
-        /**
-         * Build one full SOS cycle as an ordered list of
-         * `(torchOn, durationMs)` steps using standard Morse timing
-         * relative to [unit]: dot = 1u on, dash = 3u on, gap between
-         * elements = 1u off, gap between letters = 3u off, and a 7u off
-         * tail before the pattern repeats.
-         */
-        internal fun sosTimeline(unit: Long): List<Pair<Boolean, Long>> {
-            val dot = unit
-            val dash = unit * 3
-            val elementGap = unit
-            val letterGap = unit * 3
-            val wordGap = unit * 7
-
-            fun letter(elements: List<Long>): List<Pair<Boolean, Long>> = buildList {
-                elements.forEachIndexed { index, onMs ->
-                    add(true to onMs)
-                    if (index != elements.lastIndex) add(false to elementGap)
-                }
-            }
-
-            val s = letter(listOf(dot, dot, dot))
-            val o = letter(listOf(dash, dash, dash))
-            return buildList {
-                addAll(s); add(false to letterGap)
-                addAll(o); add(false to letterGap)
-                addAll(s); add(false to wordGap)
-            }
         }
     }
 }

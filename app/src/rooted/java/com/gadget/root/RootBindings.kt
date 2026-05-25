@@ -112,6 +112,11 @@ abstract class RootBindings {
     abstract fun bindTorchController(impl: RootedTorchController): TorchController
 
     @Binds @Singleton
+    abstract fun bindTorchRootCapabilities(
+        impl: com.gadget.torch.RootedTorchRootCapabilities,
+    ): dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities
+
+    @Binds @Singleton
     abstract fun bindVibrationController(impl: RootedVibrationController): VibrationController
 
     @Binds @Singleton

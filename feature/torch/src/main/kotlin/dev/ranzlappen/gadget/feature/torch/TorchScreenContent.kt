@@ -8,19 +8,22 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashlightOff
 import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FlashlightOn
@@ -31,37 +34,47 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
+import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
+import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.ModulePermission
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
 import dev.ranzlappen.gadget.core.ui.module.OsNote
-import dev.ranzlappen.gadget.core.ui.component.CompactCard
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
-import dev.ranzlappen.gadget.core.ui.component.GadgetFab
 import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
+import dev.ranzlappen.gadget.core.ui.component.GadgetStatusKind
 import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
+import dev.ranzlappen.gadget.core.ui.component.GlassSurface
+import dev.ranzlappen.gadget.feature.torch.ui.WidgetAppearancePreview
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
-import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
-import kotlin.math.roundToInt
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 
 /**
  * Stateless TorchScreen content — receives a single [TorchScreenState]
@@ -100,6 +113,11 @@ fun TorchScreenContent(
     onAddStrobe: () -> Unit,
     onEditWidget: (SavedTorchWidget) -> Unit,
     onDeleteWidget: (SavedTorchWidget) -> Unit,
+    onResolveIcon: (String) -> WidgetIconSource,
+    onRootBoostBrightness: () -> Unit,
+    onRootDutyStrobe: () -> Unit,
+    onRootMultiLed: () -> Unit,
+    onRootThermal: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ModuleScreenScaffold(
@@ -121,13 +139,24 @@ fun TorchScreenContent(
             StrobeDefaultsCard(state.defaultStrobeRateHz, onRateChange, onRateCommit)
             WidgetsCard(
                 widgets = state.widgets,
+                onResolveIcon = onResolveIcon,
                 onAddFlashlight = onAddFlashlight,
                 onAddStrobe = onAddStrobe,
                 onEditWidget = onEditWidget,
                 onDeleteWidget = onDeleteWidget,
             )
+            // Rooted-only privileged controls — shown only when the
+            // rooted app version reports a usable root shell.
+            if (state.rootAvailability.rootReady) {
+                RootToolsCard(
+                    onBoostBrightness = onRootBoostBrightness,
+                    onDutyStrobe = onRootDutyStrobe,
+                    onMultiLed = onRootMultiLed,
+                    onThermal = onRootThermal,
+                )
+            }
         },
-        moduleInfo = torchModuleInfo(),
+        moduleInfo = torchModuleInfo(state.torch, state.rootAvailability),
     )
 }
 
@@ -144,7 +173,10 @@ fun TorchScreenContent(
  *    omitted).
  */
 @Composable
-private fun torchModuleInfo(): ModuleInfo = ModuleInfo(
+private fun torchModuleInfo(
+    torch: TorchState,
+    root: TorchRootAvailability,
+): ModuleInfo = ModuleInfo(
     permissions = buildList {
         // POST_NOTIFICATIONS only exists as a runtime permission on
         // API 33+; below that it's auto-granted, so don't surface it as
@@ -174,9 +206,99 @@ private fun torchModuleInfo(): ModuleInfo = ModuleInfo(
         ),
     ),
     firmware = null,
+    capabilities = torchCapabilities(torch, root),
 )
 
-@OptIn(ExperimentalLayoutApi::class)
+/**
+ * Per-function capability rows for Torch — green/amber/red status for each
+ * button and action across both the standard and rooted app versions. The
+ * standard functions key off live flash-hardware + OS-version checks; the
+ * rooted functions key off the [TorchRootCapabilities] probe ([root]), so
+ * on the standard build (or an un-rooted device) they read red with a
+ * "requires the rooted app version" message.
+ */
+@Composable
+private fun torchCapabilities(
+    torch: TorchState,
+    root: TorchRootAvailability,
+): List<ModuleCapability> {
+    val hasFlash = torch.isAvailable
+    val noFlashMsg = stringResource(R.string.torch_cap_no_flash)
+    val needsRootMsg = stringResource(R.string.torch_cap_needs_root)
+
+    return listOf(
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_basic_name),
+            detail = stringResource(R.string.torch_cap_basic_detail),
+            status = {
+                if (hasFlash) {
+                    CapabilityStatus(GadgetStatusKind.Success, stringResource(R.string.torch_cap_basic_ok))
+                } else {
+                    CapabilityStatus(GadgetStatusKind.Error, noFlashMsg)
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_strobe_name),
+            detail = stringResource(R.string.torch_cap_strobe_detail),
+            status = {
+                when {
+                    !hasFlash -> CapabilityStatus(GadgetStatusKind.Error, noFlashMsg)
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE ->
+                        CapabilityStatus(GadgetStatusKind.Warning, stringResource(R.string.torch_cap_strobe_caveat))
+                    else -> CapabilityStatus(GadgetStatusKind.Success, stringResource(R.string.torch_cap_strobe_ok))
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_root_brightness_name),
+            detail = stringResource(R.string.torch_cap_root_brightness_detail),
+            status = {
+                when {
+                    root.brightnessReady ->
+                        CapabilityStatus(GadgetStatusKind.Success, stringResource(R.string.torch_cap_root_ready))
+                    root.rootReady ->
+                        CapabilityStatus(GadgetStatusKind.Warning, stringResource(R.string.torch_cap_root_no_led))
+                    else -> CapabilityStatus(GadgetStatusKind.Error, needsRootMsg)
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_root_strobe_name),
+            detail = stringResource(R.string.torch_cap_root_strobe_detail),
+            status = {
+                if (root.rootReady) {
+                    CapabilityStatus(GadgetStatusKind.Success, stringResource(R.string.torch_cap_root_ready))
+                } else {
+                    CapabilityStatus(GadgetStatusKind.Error, needsRootMsg)
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_root_multiled_name),
+            detail = stringResource(R.string.torch_cap_root_multiled_detail),
+            status = {
+                if (root.rootReady) {
+                    CapabilityStatus(GadgetStatusKind.Warning, stringResource(R.string.torch_cap_root_multiled_caveat))
+                } else {
+                    CapabilityStatus(GadgetStatusKind.Error, needsRootMsg)
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_root_thermal_name),
+            detail = stringResource(R.string.torch_cap_root_thermal_detail),
+            status = {
+                if (root.rootReady) {
+                    CapabilityStatus(GadgetStatusKind.Warning, stringResource(R.string.torch_cap_root_thermal_caveat))
+                } else {
+                    CapabilityStatus(GadgetStatusKind.Error, needsRootMsg)
+                }
+            },
+        ),
+    )
+}
+
 @Composable
 private fun TorchToggleCard(
     torch: TorchState,
@@ -200,47 +322,38 @@ private fun TorchToggleCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = spacing.large),
+                .padding(top = spacing.medium),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(spacing.medium),
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(HeroBoxHeight),
-                contentAlignment = Alignment.Center,
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(spacing.large),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    GadgetFab(
-                        onClick = onToggleClick,
-                        icon = if (torch.isOn) Icons.Filled.FlashlightOn else Icons.Filled.FlashlightOff,
-                        contentDescription = stringResource(
-                            if (torch.isOn) R.string.torch_action_turn_off
-                            else R.string.torch_action_turn_on,
-                        ),
-                        enabled = torch.isAvailable,
-                    )
-                    CircleControlButton(
-                        icon = Icons.Outlined.TouchApp,
-                        contentDescription = stringResource(R.string.torch_action_hold),
-                        caption = stringResource(R.string.torch_action_hold),
-                        enabled = torch.isAvailable,
-                        active = torch.isOn,
-                        onHold = onMomentaryHold,
-                    )
-                }
+            // Three explicit rows of paired controls — torch + hold,
+            // strobe + strobe-hold, morse + morse-hold. Tap variants
+            // toggle; hold variants run only while pressed. All drive the
+            // one StrobeService. Fixed pairing keeps the layout stable
+            // instead of reflowing with width.
+            ControlRow {
+                CircleControlButton(
+                    icon = if (torch.isOn) Icons.Filled.FlashlightOn else Icons.Filled.FlashlightOff,
+                    contentDescription = stringResource(
+                        if (torch.isOn) R.string.torch_action_turn_off
+                        else R.string.torch_action_turn_on,
+                    ),
+                    caption = stringResource(R.string.torch_action_toggle_caption),
+                    enabled = torch.isAvailable,
+                    active = torch.isOn,
+                    hero = true,
+                    onClick = onToggleClick,
+                )
+                CircleControlButton(
+                    icon = Icons.Outlined.TouchApp,
+                    contentDescription = stringResource(R.string.torch_action_hold),
+                    caption = stringResource(R.string.torch_action_hold),
+                    enabled = torch.isAvailable,
+                    active = torch.isOn,
+                    onHold = onMomentaryHold,
+                )
             }
-            // Strobe + Morse controls — circular buttons consistent with the
-            // torch pair above. Tap variants toggle; hold variants run only
-            // while pressed. All drive the one StrobeService.
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(spacing.medium, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(spacing.small),
-            ) {
+            ControlRow {
                 CircleControlButton(
                     icon = Icons.Outlined.Bolt,
                     contentDescription = stringResource(R.string.torch_action_strobe_toggle),
@@ -256,6 +369,8 @@ private fun TorchToggleCard(
                     enabled = torch.isAvailable,
                     onHold = onStrobeHold,
                 )
+            }
+            ControlRow {
                 CircleControlButton(
                     icon = Icons.Outlined.MoreHoriz,
                     contentDescription = stringResource(R.string.torch_action_morse_toggle),
@@ -272,10 +387,9 @@ private fun TorchToggleCard(
                     onHold = onMorseHold,
                 )
             }
-            GadgetTextField(
-                value = morseText,
-                onValueChange = onMorseTextChange,
-                label = stringResource(R.string.torch_morse_message_label),
+            MorseMessageField(
+                persisted = morseText,
+                onCommit = onMorseTextChange,
                 modifier = Modifier.fillMaxWidth(),
             )
             Text(
@@ -289,12 +403,74 @@ private fun TorchToggleCard(
     }
 }
 
+/** A horizontally-centred pair of [CircleControlButton]s. The torch
+ *  screen's three control rows share this so spacing + alignment stay
+ *  identical across them. */
+@Composable
+private fun ControlRow(content: @Composable RowScope.() -> Unit) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(spacing.medium, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.Top,
+        content = content,
+    )
+}
+
 /**
- * Circular torch control. Pass [onClick] for tap-to-toggle or [onHold]
+ * Morse message input for the in-app strobe. Typing updates a local
+ * [rememberSaveable] buffer only (no per-keystroke persistence — that
+ * round-trip through DataStore was the source of the typing lag), and a
+ * trailing confirm (check) action commits the buffer via [onCommit].
+ * Commit also fires on IME `Done` and on focus loss so edits aren't
+ * silently lost. The check only appears while the buffer differs from
+ * the persisted value.
+ */
+@Composable
+private fun MorseMessageField(
+    persisted: String,
+    onCommit: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var local by rememberSaveable(persisted) { mutableStateOf(persisted) }
+    val dirty = local != persisted
+    val focusManager = LocalFocusManager.current
+    GadgetTextField(
+        value = local,
+        onValueChange = { local = it },
+        label = stringResource(R.string.torch_morse_message_label),
+        modifier = modifier.onFocusChanged { focus ->
+            if (!focus.isFocused && local != persisted) onCommit(local)
+        },
+        trailingIcon = if (dirty) Icons.Outlined.Check else null,
+        onTrailingIconClick = if (dirty) {
+            {
+                onCommit(local)
+                focusManager.clearFocus()
+            }
+        } else {
+            null
+        },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                if (local != persisted) onCommit(local)
+                focusManager.clearFocus()
+            },
+        ),
+    )
+}
+
+/**
+ * Circular torch control — the single captioned control used by all six
+ * buttons on the screen. Pass [onClick] for tap-to-toggle or [onHold]
  * for press-and-hold (called `true` on press, `false` on release **or**
  * cancel via try/finally so it can't get stuck on). [active] tints it
- * with the primary container to signal the "on" state. Styled to pair
- * with the toggle FAB.
+ * with the primary container to signal the "on" state.
+ *
+ * [hero] marks the primary action (the torch toggle): it reads as a
+ * filled primary surface so it stands out from the secondary controls
+ * while keeping the identical circle-over-caption shape, which is what
+ * gives the row its consistency.
  */
 @Composable
 private fun CircleControlButton(
@@ -304,17 +480,22 @@ private fun CircleControlButton(
     enabled: Boolean,
     modifier: Modifier = Modifier,
     active: Boolean = false,
+    hero: Boolean = false,
     onClick: (() -> Unit)? = null,
     onHold: ((Boolean) -> Unit)? = null,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
     val container = when {
         !enabled -> MaterialTheme.colorScheme.surfaceVariant
+        hero && active -> MaterialTheme.colorScheme.primary
+        hero -> MaterialTheme.colorScheme.primaryContainer
         active -> MaterialTheme.colorScheme.primaryContainer
         else -> MaterialTheme.colorScheme.secondaryContainer
     }
     val content = when {
         !enabled -> MaterialTheme.colorScheme.onSurfaceVariant
+        hero && active -> MaterialTheme.colorScheme.onPrimary
+        hero -> MaterialTheme.colorScheme.onPrimaryContainer
         active -> MaterialTheme.colorScheme.onPrimaryContainer
         else -> MaterialTheme.colorScheme.onSecondaryContainer
     }
@@ -402,6 +583,7 @@ private fun StrobeDefaultsCard(
 @Composable
 private fun WidgetsCard(
     widgets: List<SavedTorchWidget>,
+    onResolveIcon: (String) -> WidgetIconSource,
     onAddFlashlight: () -> Unit,
     onAddStrobe: () -> Unit,
     onEditWidget: (SavedTorchWidget) -> Unit,
@@ -443,35 +625,116 @@ private fun WidgetsCard(
                 )
             } else {
                 widgets.forEach { widget ->
-                    CompactCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        title = widget.config.displayName,
-                        subtitle = widget.config.subtitleString(),
-                        leadingIcon = when (widget.config.type) {
-                            WidgetType.Flashlight -> Icons.Outlined.FlashlightOn
-                            WidgetType.Strobe -> Icons.Outlined.Bolt
-                        },
-                        trailingContent = {
-                            Row(horizontalArrangement = Arrangement.spacedBy(spacing.tiny)) {
-                                GadgetIconButton(
-                                    onClick = { onEditWidget(widget) },
-                                    icon = Icons.Outlined.Edit,
-                                    contentDescription = stringResource(
-                                        R.string.torch_widget_list_action_edit,
-                                    ),
-                                )
-                                GadgetIconButton(
-                                    onClick = { onDeleteWidget(widget) },
-                                    icon = Icons.Outlined.Delete,
-                                    contentDescription = stringResource(
-                                        R.string.torch_widget_list_action_delete,
-                                    ),
-                                )
-                            }
-                        },
+                    WidgetListRow(
+                        widget = widget,
+                        onResolveIcon = onResolveIcon,
+                        onEdit = { onEditWidget(widget) },
+                        onDelete = { onDeleteWidget(widget) },
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * Privileged flashlight controls for the rooted app version. Only placed
+ * in the tree when [TorchRootAvailability.rootReady] is true; each button
+ * routes through the rooted implementation's `RootSafetyGate` and reports
+ * back via a snackbar. One-tap presets — the parameter surface lives in
+ * the ViewModel constants.
+ */
+@Composable
+private fun RootToolsCard(
+    onBoostBrightness: () -> Unit,
+    onDutyStrobe: () -> Unit,
+    onMultiLed: () -> Unit,
+    onThermal: () -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    DashCard(
+        modifier = Modifier.fillMaxWidth(),
+        title = stringResource(R.string.torch_root_tools_title),
+        icon = Icons.Outlined.Bolt,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = spacing.small),
+            verticalArrangement = Arrangement.spacedBy(spacing.small),
+        ) {
+            Text(
+                text = stringResource(R.string.torch_root_tools_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            GadgetSecondaryButton(
+                onClick = onBoostBrightness,
+                text = stringResource(R.string.torch_root_action_brightness),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            GadgetSecondaryButton(
+                onClick = onDutyStrobe,
+                text = stringResource(R.string.torch_root_action_strobe),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            GadgetSecondaryButton(
+                onClick = onMultiLed,
+                text = stringResource(R.string.torch_root_action_multiled),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            GadgetSecondaryButton(
+                onClick = onThermal,
+                text = stringResource(R.string.torch_root_action_thermal),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+/**
+ * One row in the in-app widget list. Shows a live [WidgetAppearancePreview]
+ * — the exact thumbnail the home-screen widget renders — followed by edit
+ * and delete actions. There's deliberately no title/subtitle text: the
+ * preview is the identifier, which removes the old (unhelpful) label
+ * column entirely.
+ */
+@Composable
+private fun WidgetListRow(
+    widget: SavedTorchWidget,
+    onResolveIcon: (String) -> WidgetIconSource,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    GlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        intensity = GlassIntensity.Subtle,
+        contentPadding = PaddingValues(spacing.small),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+        ) {
+            WidgetAppearancePreview(
+                appearance = widget.config.appearance,
+                icon = onResolveIcon(widget.config.appearance.iconStyle.activeKey),
+                modifier = Modifier.semantics {
+                    contentDescription = widget.config.displayName
+                },
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            GadgetIconButton(
+                onClick = onEdit,
+                icon = Icons.Outlined.Edit,
+                contentDescription = stringResource(R.string.torch_widget_list_action_edit),
+            )
+            GadgetIconButton(
+                onClick = onDelete,
+                icon = Icons.Outlined.Delete,
+                contentDescription = stringResource(R.string.torch_widget_list_action_delete),
+            )
         }
     }
 }
@@ -496,6 +759,7 @@ data class TorchScreenState(
     val widgets: List<SavedTorchWidget>,
     val strobeRunning: Boolean = false,
     val morseText: String = "",
+    val rootAvailability: TorchRootAvailability = TorchRootAvailability.Unavailable,
 ) {
     companion object {
         /** First-emission placeholder used before the flows emit. */
@@ -526,20 +790,7 @@ private fun TorchState.statusMessage(): String = when {
     else -> stringResource(R.string.torch_status_off)
 }
 
-@Composable
-private fun TorchWidgetConfig.subtitleString(): String = when (type) {
-    WidgetType.Flashlight ->
-        stringResource(R.string.torch_widget_list_subtitle_flashlight)
-    WidgetType.Strobe -> stringResource(
-        if (sosMode) R.string.torch_widget_list_subtitle_strobe_sos
-        else R.string.torch_widget_list_subtitle_strobe,
-        rateHz.roundToInt(),
-    )
-}
-
-/** Hero box height — generous tap target for the central FAB. */
-private val HeroBoxHeight: Dp = 160.dp
-
-/** Momentary-button diameter — matches the 56 dp FAB so the two read as
- *  a pair, and clears the 48 dp accessibility touch-target minimum. */
+/** Circular-control diameter — all six buttons share it so they read as
+ *  a consistent grid, and it clears the 48 dp accessibility touch-target
+ *  minimum. */
 private val MomentaryButtonDiameter: Dp = 56.dp

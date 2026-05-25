@@ -79,7 +79,11 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                     displayName = context.getString(R.string.torch_widget_default_name_strobe),
                 )
                 Log.w(PendingTorchWidgetConfigs.TAG, "StrobeWidget self-heal id=$id")
-                repo.save(id, default)
+                // saveIfAbsent (not save) so a concurrent pin-success
+                // write of the real config — including its Morse text —
+                // is never clobbered by this default. This is the fix
+                // for "Morse only works after editing a new widget".
+                repo.saveIfAbsent(id, default)
                 default
             }
             appWidgetManager.updateAppWidget(id, buildRemoteViews(context, id, running, config))
@@ -131,7 +135,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                 Log.d(
                     PendingTorchWidgetConfigs.TAG,
                     "StrobeWidget tap id=$appWidgetId running->$willBeRunning " +
-                        "config=${config != null} sos=${config?.sosMode} " +
+                        "config=${config != null} morse=${config?.morseMode} " +
                         "fb=${config?.appearance?.feedback?.let { it::class.simpleName }} " +
                         "anim=${config?.appearance?.tap?.animation}",
                 )
@@ -195,6 +199,15 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                 appearance = config.appearance,
                 active = running,
             )
+            if (config.removed) {
+                // Deleted in-app but still hosted by the launcher: dim it
+                // and drop the tap target so it reads as defunct until
+                // the user drags it off the home screen.
+                setInt(R.id.widget_icon, "setImageAlpha", REMOVED_WIDGET_ICON_ALPHA)
+                setInt(R.id.widget_strobe_button, "setBackgroundResource", android.R.color.transparent)
+                setOnClickPendingIntent(R.id.widget_strobe_button, null)
+                return@apply
+            }
             if (pressed) renderer.applyPressedFrame(context, this, config.appearance)
             // Ripple is the launcher's stock press effect — set it as the
             // click target's background only when selected, transparent

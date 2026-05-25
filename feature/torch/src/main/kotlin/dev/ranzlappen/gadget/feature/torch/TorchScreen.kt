@@ -46,6 +46,12 @@ fun TorchScreen(
     val sheetTarget by viewModel.sheetTarget.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val pinUnsupportedMessage = stringResource(R.string.torch_widget_pin_unsupported)
+    val widgetRemovedMessage = stringResource(R.string.torch_widget_removed_hint)
+    val rootResultOk = stringResource(R.string.torch_root_result_ok)
+    val rootResultUnsupported = stringResource(R.string.torch_root_result_unsupported)
+    val rootResultOptedOut = stringResource(R.string.torch_root_result_opted_out)
+    val rootResultRateLimited = stringResource(R.string.torch_root_result_rate_limited)
+    val rootResultErrorFmt = stringResource(R.string.torch_root_result_error)
 
     LaunchedEffect(Unit) {
         viewModel.pinUnsupportedEvents.collect {
@@ -53,6 +59,28 @@ fun TorchScreen(
                 message = pinUnsupportedMessage,
                 duration = SnackbarDuration.Short,
             )
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.widgetRemovedEvents.collect {
+            snackbarHostState.showSnackbar(
+                message = widgetRemovedMessage,
+                duration = SnackbarDuration.Long,
+            )
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.rootToolEvents.collect { result ->
+            val message = when (result) {
+                TorchRootResult.Ok -> rootResultOk
+                TorchRootResult.Unsupported -> rootResultUnsupported
+                TorchRootResult.OptedOut -> rootResultOptedOut
+                is TorchRootResult.RateLimited -> rootResultRateLimited
+                is TorchRootResult.Error -> rootResultErrorFmt.format(result.message)
+            }
+            snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Short)
         }
     }
 
@@ -71,6 +99,11 @@ fun TorchScreen(
         onAddStrobe = viewModel::onAddStrobeRequested,
         onEditWidget = viewModel::onEditWidget,
         onDeleteWidget = viewModel::onDeleteWidget,
+        onResolveIcon = viewModel::resolveWidgetIcon,
+        onRootBoostBrightness = viewModel::onRootBoostBrightness,
+        onRootDutyStrobe = viewModel::onRootDutyCycleStrobe,
+        onRootMultiLed = viewModel::onRootMultiLed,
+        onRootThermal = viewModel::onRootThermalOverride,
         modifier = modifier,
     )
 
@@ -80,7 +113,8 @@ fun TorchScreen(
             isExisting = target is TorchViewModel.SheetTarget.Existing,
             onDismiss = viewModel::onSheetDismissed,
             onConfirm = viewModel::onSheetConfirmed,
-            resolveIconRes = viewModel::resolveWidgetIcon,
+            resolveIcon = viewModel::resolveWidgetIcon,
+            onImportCustomIcon = viewModel::importCustomIcon,
             iconChoices = viewModel.iconChoices,
         )
     }

@@ -2,6 +2,7 @@ package dev.ranzlappen.gadget.feature.torch
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +16,7 @@ import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetCreator
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import dev.ranzlappen.gadget.feature.torch.widget.broadcastTorchWidgetUpdate
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,7 +73,21 @@ class TorchViewModel @Inject constructor(
     private val widgetRepository: TorchWidgetConfigRepository,
     private val widgetCreator: TorchWidgetCreator,
     private val iconCatalog: WidgetIconCatalog,
+    private val rootCapabilities: TorchRootCapabilities,
 ) : ViewModel() {
+
+    /** Live availability of the rooted Torch capabilities (probed once on
+     *  init). Standard flavor stays [TorchRootAvailability.Unavailable]. */
+    private val rootAvailability = MutableStateFlow(TorchRootAvailability.Unavailable)
+
+    init {
+        viewModelScope.launch { rootAvailability.value = rootCapabilities.probe() }
+    }
+
+    /** One-shot results from rooted-tool invocations, surfaced as a
+     *  snackbar by the screen. */
+    private val _rootToolEvents = MutableSharedFlow<TorchRootResult>(extraBufferCapacity = 1)
+    val rootToolEvents: SharedFlow<TorchRootResult> = _rootToolEvents.asSharedFlow()
 
     /** Public read-only torch hardware snapshot. */
     val torchState: StateFlow<TorchState> = controller.state
@@ -94,7 +110,7 @@ class TorchViewModel @Inject constructor(
         initialValue = StrobeService.isRunning,
     )
 
-    val state: StateFlow<TorchScreenState> = combine(
+    private val baseState: kotlinx.coroutines.flow.Flow<TorchScreenState> = combine(
         controller.state,
         userPreferences.flow.map { it.defaultStrobeRateHz },
         widgetRepository.all,
@@ -106,10 +122,22 @@ class TorchViewModel @Inject constructor(
             defaultStrobeRateHz = pendingRateHz.value ?: rateHz,
             widgets = widgets
                 .toSortedMap()
+                // Drop widgets the user deleted in-app (kept on disk as
+                // `removed` only so the provider stops self-healing them).
+                .filterValues { !it.removed }
                 .map { (id, config) -> SavedTorchWidget(id, config) },
             strobeRunning = running,
             morseText = morseText,
         )
+    }
+
+    // Folded as a second step (combine maxes out at 5 typed sources) so
+    // the rooted-capability availability flows into the screen state.
+    val state: StateFlow<TorchScreenState> = combine(
+        baseState,
+        rootAvailability,
+    ) { base, root ->
+        base.copy(rootAvailability = root)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(SubscriptionTimeoutMillis),
@@ -123,6 +151,15 @@ class TorchViewModel @Inject constructor(
      */
     private val _pinUnsupportedEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val pinUnsupportedEvents: SharedFlow<Unit> = _pinUnsupportedEvents.asSharedFlow()
+
+    /**
+     * One-shot signal raised after a widget is deleted from the in-app
+     * list, so the screen can tell the user the placed home-screen
+     * instance must still be removed manually (the app can't pull it off
+     * a third-party launcher).
+     */
+    private val _widgetRemovedEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val widgetRemovedEvents: SharedFlow<Unit> = _widgetRemovedEvents.asSharedFlow()
 
     /** Transient "open the configuration sheet" signal. */
     private val _sheetTarget = MutableStateFlow<SheetTarget?>(null)
@@ -184,10 +221,36 @@ class TorchViewModel @Inject constructor(
         viewModelScope.launch { userPreferences.setMorseText(text) }
     }
 
+    // ─── Rooted tools ────────────────────────────────────────────────
+    // One-tap presets for the rooted controls. Each routes through the
+    // rooted implementation's RootSafetyGate (capability + opt-out +
+    // rate-limit); the result is surfaced via [rootToolEvents]. No-ops on
+    // the standard flavor (the seam reports Unsupported and the controls
+    // aren't shown).
+
+    fun onRootBoostBrightness() = runRootTool {
+        rootCapabilities.boostBrightness(ROOT_BRIGHTNESS_PERCENT)
+    }
+
+    fun onRootDutyCycleStrobe() = runRootTool {
+        rootCapabilities.dutyCycleStrobe(ROOT_STROBE_HZ, ROOT_STROBE_DUTY_PERCENT, ROOT_STROBE_DURATION_MS)
+    }
+
+    fun onRootMultiLed() = runRootTool {
+        rootCapabilities.multiLedActivate(ROOT_MULTILED_DURATION_MS, includeScreen = false)
+    }
+
+    fun onRootThermalOverride() = runRootTool {
+        rootCapabilities.thermalOverrideStrobe(ROOT_STROBE_HZ, ROOT_STROBE_DUTY_PERCENT, ROOT_THERMAL_DURATION_MS)
+    }
+
+    private fun runRootTool(action: suspend () -> TorchRootResult) {
+        viewModelScope.launch { _rootToolEvents.tryEmit(action()) }
+    }
+
     private fun startStrobeService(morseText: String?) {
         val startIntent = Intent(context, StrobeService::class.java).apply {
             putExtra(StrobeService.EXTRA_RATE_HZ, state.value.defaultStrobeRateHz)
-            putExtra(StrobeService.EXTRA_SOS_MODE, false)
             if (!morseText.isNullOrBlank()) putExtra(StrobeService.EXTRA_MORSE_TEXT, morseText)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -223,6 +286,9 @@ class TorchViewModel @Inject constructor(
             type = WidgetType.Strobe,
             displayName = name,
             rateHz = state.value.defaultStrobeRateHz,
+            // Pre-fill the Morse box so flipping on Morse mode plays
+            // "SOS" out of the box without the user typing anything.
+            morseText = StrobeService.DEFAULT_MORSE_TEXT,
         )
         _sheetTarget.value = SheetTarget.New(config)
     }
@@ -231,9 +297,14 @@ class TorchViewModel @Inject constructor(
         _sheetTarget.value = SheetTarget.Existing(widget.appWidgetId, widget.config)
     }
 
-    /** Resolve a widget icon key to its drawable resource for the
-     *  configuration sheet's live appearance preview. */
-    fun resolveWidgetIcon(key: String): Int = iconCatalog.resolve(key)
+    /** Resolve a widget icon key to a render source (bundled drawable or
+     *  a user-imported custom file) for the live appearance preview and
+     *  the in-app widget list. */
+    fun resolveWidgetIcon(key: String): WidgetIconSource = iconCatalog.resolveSource(key)
+
+    /** Copy + downscale a picked image into app-internal storage and
+     *  return its stable custom icon key, or `null` on failure. */
+    suspend fun importCustomIcon(uri: Uri): String? = iconCatalog.importCustomIcon(uri)
 
     /** Icons the configuration sheet offers in its icon picker. */
     val iconChoices: List<WidgetIconCatalog.Entry> = iconCatalog.entries
@@ -265,7 +336,18 @@ class TorchViewModel @Inject constructor(
 
     fun onDeleteWidget(widget: SavedTorchWidget) {
         viewModelScope.launch {
-            widgetRepository.delete(widget.appWidgetId)
+            // A non-host app can't pull a placed widget off the launcher,
+            // so flag it `removed` rather than deleting the config — a
+            // plain delete would let the provider self-heal it straight
+            // back into the list. This drops it from the list and
+            // repaints the home-screen instance inert; dragging it off
+            // later fires onDeleted, which purges the config for real.
+            widgetRepository.save(
+                widget.appWidgetId,
+                widget.config.copy(removed = true),
+            )
+            broadcastTorchWidgetUpdate(context, widget.config.type, widget.appWidgetId)
+            _widgetRemovedEvents.tryEmit(Unit)
         }
     }
 
@@ -291,5 +373,15 @@ class TorchViewModel @Inject constructor(
          *  imperceptible to the user but cheap enough to leave
          *  always-on while the screen is visible. */
         const val StrobeRunningPollMillis: Long = 250L
+
+        // ─── Rooted-tool one-tap presets ─────────────────────────────
+        /** Brightness boost target as a percent of `max_brightness`
+         *  (the rooted impl hard-ceilings at 150 %). */
+        const val ROOT_BRIGHTNESS_PERCENT: Int = 150
+        const val ROOT_STROBE_HZ: Int = 30
+        const val ROOT_STROBE_DUTY_PERCENT: Int = 20
+        const val ROOT_STROBE_DURATION_MS: Long = 5_000L
+        const val ROOT_MULTILED_DURATION_MS: Long = 3_000L
+        const val ROOT_THERMAL_DURATION_MS: Long = 5_000L
     }
 }

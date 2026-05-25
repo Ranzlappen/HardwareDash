@@ -91,7 +91,10 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
                     displayName = context.getString(R.string.torch_widget_default_name_flashlight),
                 )
                 Log.w(PendingTorchWidgetConfigs.TAG, "FlashlightWidget self-heal id=$id")
-                repo.save(id, default)
+                // saveIfAbsent (not save) so a concurrent pin-success
+                // write of the real config is never clobbered by this
+                // default. See TorchWidgetConfigRepository.saveIfAbsent.
+                repo.saveIfAbsent(id, default)
                 default
             }
             appWidgetManager.updateAppWidget(id, buildRemoteViews(context, id, isOn, config))
@@ -198,6 +201,15 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
                 appearance = config.appearance,
                 active = torchOn,
             )
+            if (config.removed) {
+                // Deleted in-app but still hosted by the launcher: dim it
+                // and drop the tap target so it reads as defunct until
+                // the user drags it off the home screen.
+                setInt(R.id.widget_icon, "setImageAlpha", REMOVED_WIDGET_ICON_ALPHA)
+                setInt(R.id.widget_flashlight_button, "setBackgroundResource", android.R.color.transparent)
+                setOnClickPendingIntent(R.id.widget_flashlight_button, null)
+                return@apply
+            }
             if (pressed) renderer.applyPressedFrame(context, this, config.appearance)
             // Ripple is the launcher's stock press effect — set it as the
             // click target's background only when selected, transparent

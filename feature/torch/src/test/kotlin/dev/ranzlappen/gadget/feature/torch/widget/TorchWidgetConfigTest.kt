@@ -35,18 +35,39 @@ class TorchWidgetConfigTest {
     }
 
     @Test
-    fun `strobe config with custom rate and SOS round-trips`() {
+    fun `strobe config with custom rate and Morse mode round-trips`() {
         val original = TorchWidgetConfig(
             type = WidgetType.Strobe,
             displayName = "Bright SOS",
             rateHz = 12f,
-            sosMode = true,
+            morseMode = true,
         )
 
         val encoded = json.encodeToString(TorchWidgetConfig.serializer(), original)
         val decoded = json.decodeFromString(TorchWidgetConfig.serializer(), encoded)
 
         assertEquals(original, decoded)
+    }
+
+    @Test
+    fun `morseMode persists under the legacy sosMode json key`() {
+        val encoded = json.encodeToString(
+            TorchWidgetConfig.serializer(),
+            TorchWidgetConfig(
+                type = WidgetType.Strobe,
+                displayName = "Legacy",
+                morseMode = true,
+            ),
+        )
+        // The wire key stays `sosMode` so existing on-disk configs and
+        // older app versions stay compatible across the rename.
+        assertEquals(true, encoded.contains("\"sosMode\":true"))
+
+        val decodedLegacy = json.decodeFromString(
+            TorchWidgetConfig.serializer(),
+            """{"type":"Strobe","displayName":"Legacy","rateHz":5.0,"sosMode":true}""",
+        )
+        assertEquals(true, decodedLegacy.morseMode)
     }
 
     @Test

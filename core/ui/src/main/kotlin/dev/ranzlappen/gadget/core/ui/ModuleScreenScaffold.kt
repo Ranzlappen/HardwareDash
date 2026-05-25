@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.adaptive.GadgetLayoutMode
 import dev.ranzlappen.gadget.core.ui.adaptive.rememberLayoutMode
+import dev.ranzlappen.gadget.core.ui.module.ModuleCapabilitiesSection
 import dev.ranzlappen.gadget.core.ui.module.ModuleCompatibilitySection
 import dev.ranzlappen.gadget.core.ui.module.ModuleFirmwareSection
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
@@ -100,6 +101,7 @@ fun ModuleScreenScaffold(
                 ModulePermissionsSection(permissions = moduleInfo.permissions)
                 ModuleCompatibilitySection(compatibility = moduleInfo.compatibility)
                 moduleInfo.firmware?.let { ModuleFirmwareSection(firmware = it) }
+                ModuleCapabilitiesSection(capabilities = moduleInfo.capabilities)
             }
             disclaimer?.invoke(this)
         }

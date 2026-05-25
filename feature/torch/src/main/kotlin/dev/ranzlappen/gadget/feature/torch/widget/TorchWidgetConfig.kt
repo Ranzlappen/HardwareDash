@@ -2,6 +2,7 @@ package dev.ranzlappen.gadget.feature.torch.widget
 
 import androidx.compose.runtime.Immutable
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearance
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -28,12 +29,21 @@ import kotlinx.serialization.Serializable
  * - [rateHz] — strobe cadence. Only meaningful when `type == Strobe`;
  *   ignored otherwise. Range 1f..20f in the UI; the service clamps
  *   defensively in case of corrupted on-disk values.
- * - [sosMode] — strobe variant only. When `true`, [StrobeService]
- *   emits the Morse SOS pattern instead of a constant strobe.
+ * - [morseMode] — strobe variant only. When `true`, [StrobeService]
+ *   loops [morseText] as Morse (defaulting to "SOS" when the box is
+ *   blank) instead of a constant strobe. Persisted under the legacy
+ *   JSON key `sosMode` (via [SerialName]) so existing on-disk configs
+ *   migrate unchanged.
  * - [appearance] — visual chrome + tap behaviour + toggle feedback.
  *   Defaulted to [WidgetAppearance] so existing on-disk configs
  *   migrate seamlessly: missing `appearance` field decodes as the
  *   default record.
+ * - [removed] — set when the user deletes the widget from the in-app
+ *   list. A non-host app can't pull a placed widget off the launcher,
+ *   so instead of deleting the config (which would let the provider
+ *   self-heal it straight back) we flag it `removed`: the in-app list
+ *   drops it and the home-screen instance repaints inert until the user
+ *   drags it off (which fires `onDeleted` and purges the config).
  */
 @Serializable
 @Immutable
@@ -41,9 +51,11 @@ data class TorchWidgetConfig(
     val type: WidgetType,
     val displayName: String,
     val rateHz: Float = DEFAULT_RATE_HZ,
-    val sosMode: Boolean = false,
+    @SerialName("sosMode")
+    val morseMode: Boolean = false,
     val morseText: String = "",
     val appearance: WidgetAppearance = WidgetAppearance(),
+    val removed: Boolean = false,
 ) {
     companion object {
         /** Initial rate for new strobe widgets when the user hasn't

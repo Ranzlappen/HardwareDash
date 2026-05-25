@@ -22,6 +22,7 @@
     <string name="torch_state_off">Off</string>
     <string name="torch_action_turn_on">Turn on torch</string>
     <string name="torch_action_turn_off">Turn off torch</string>
+    <string name="torch_action_toggle_caption">Torch</string>
     <string name="torch_action_hold">Hold for light</string>
     <string name="torch_action_strobe">Strobe</string>
     <string name="torch_action_strobe_toggle">Toggle strobe</string>
@@ -53,13 +54,11 @@
     <string name="torch_widget_add_flashlight">Add flashlight widget</string>
     <string name="torch_widget_add_strobe">Add strobe widget</string>
     <string name="torch_widget_pin_unsupported">Your launcher doesn\'t support adding widgets directly. Long-press the home screen to add one manually.</string>
+    <string name="torch_widget_removed_hint">Removed from your list. To clear it from the home screen, long-press the widget there and remove it.</string>
     <string name="torch_widget_default_name_flashlight">Flashlight</string>
     <string name="torch_widget_default_name_strobe">Strobe</string>
     <string name="torch_widget_list_empty_title">No widgets yet</string>
     <string name="torch_widget_list_empty_subtitle">Use the buttons above to add a flashlight or strobe widget to your home screen.</string>
-    <string name="torch_widget_list_subtitle_flashlight">Flashlight</string>
-    <string name="torch_widget_list_subtitle_strobe">Strobe · %1$d Hz</string>
-    <string name="torch_widget_list_subtitle_strobe_sos">Strobe · %1$d Hz · SOS</string>
     <string name="torch_widget_list_action_edit">Edit widget</string>
     <string name="torch_widget_list_action_delete">Remove widget</string>
 
@@ -67,10 +66,10 @@
     <string name="torch_widget_config_title_new">New widget</string>
     <string name="torch_widget_config_title_edit">Edit widget</string>
     <string name="torch_widget_config_name_label">Name</string>
-    <string name="torch_widget_config_sos_label">SOS mode</string>
-    <string name="torch_widget_config_sos_supporting">Plays the Morse SOS pattern instead of a constant strobe.</string>
-    <string name="torch_widget_config_morse_label">Morse message (optional)</string>
-    <string name="torch_widget_config_morse_supporting">When set, the widget loops this text as Morse instead of strobing.</string>
+    <string name="torch_widget_config_sos_label">Morse mode</string>
+    <string name="torch_widget_config_sos_supporting">Plays the Morse message below instead of a constant strobe.</string>
+    <string name="torch_widget_config_morse_label">Morse message</string>
+    <string name="torch_widget_config_morse_supporting">Looped as Morse when Morse mode is on. Defaults to SOS if left blank.</string>
     <string name="torch_widget_config_save_new">Add to home screen</string>
     <string name="torch_widget_config_save_existing">Save</string>
     <string name="torch_widget_config_cancel">Cancel</string>
@@ -80,6 +79,7 @@
     <string name="torch_widget_config_section_tap">Tap behaviour</string>
     <string name="torch_widget_config_section_feedback">Toggle feedback</string>
     <string name="torch_widget_config_section_preview">Preview</string>
+    <string name="torch_widget_config_preview_hint">Tap the preview to try the tap animation.</string>
 
     <string name="torch_widget_config_background_label">Background</string>
     <string name="torch_widget_config_background_glass">Glass</string>
@@ -90,6 +90,8 @@
 
     <string name="torch_widget_config_icon_active_label">Active icon</string>
     <string name="torch_widget_config_icon_inactive_label">Inactive icon</string>
+    <string name="torch_widget_config_icon_add_custom">Add custom icon from files</string>
+    <string name="torch_widget_config_icon_custom">Custom icon</string>
     <string name="torch_widget_config_tint_label">Tint</string>
     <string name="torch_widget_config_tint_accent">Accent</string>
     <string name="torch_widget_config_tint_on_surface">Foreground</string>
@@ -124,4 +126,40 @@
     <string name="torch_module_perm_notifications_rationale">Lets the strobe service show its status and widget toggle confirmations appear.</string>
     <string name="torch_module_compat_note_fgs_active">The strobe runs as a foreground service while active, so it keeps flashing after you leave the screen.</string>
     <string name="torch_module_compat_note_fgs_short">On Android 14+ the strobe runs as a time-boxed short foreground service (about 3 minutes).</string>
+
+    <!-- Per-function capability badges (Functions & compatibility section) -->
+    <string name="torch_cap_no_flash">This device has no flash unit.</string>
+    <string name="torch_cap_needs_root">Requires the rooted app version with granted root access.</string>
+    <string name="torch_cap_basic_name">Torch on / off + hold</string>
+    <string name="torch_cap_basic_detail">Toggle and momentary hold-for-light.</string>
+    <string name="torch_cap_basic_ok">Flash unit detected — works.</string>
+    <string name="torch_cap_strobe_name">Strobe &amp; Morse</string>
+    <string name="torch_cap_strobe_detail">Configurable strobe and Morse playback.</string>
+    <string name="torch_cap_strobe_ok">Works.</string>
+    <string name="torch_cap_strobe_caveat">Works; on Android 14+ a background strobe runs as a time-boxed (~3 min) foreground service and shows a notification.</string>
+    <string name="torch_cap_root_ready">Root and flashlight hardware available.</string>
+    <string name="torch_cap_root_no_led">Root available, but no supported LED sysfs node was found on this device.</string>
+    <string name="torch_cap_root_brightness_name">Extreme brightness (root)</string>
+    <string name="torch_cap_root_brightness_detail">Drives the LED past the stock cap (up to 150%).</string>
+    <string name="torch_cap_root_strobe_name">High-frequency duty-cycle strobe (root)</string>
+    <string name="torch_cap_root_strobe_detail">Low-duty pulses at high frequency for thermal headroom.</string>
+    <string name="torch_cap_root_multiled_name">Multi-LED activation (root)</string>
+    <string name="torch_cap_root_multiled_detail">Lights every detected emitter at once.</string>
+    <string name="torch_cap_root_multiled_caveat">Available; the exact set of emitters is device-specific.</string>
+    <string name="torch_cap_root_thermal_name">Thermal override (root)</string>
+    <string name="torch_cap_root_thermal_detail">Briefly suspends LED thermal throttling for a strobe.</string>
+    <string name="torch_cap_root_thermal_caveat">Available — suspends thermal limits (hard 45s cap). May heat the device; use briefly.</string>
+
+    <!-- Root tools card (rooted app version only) -->
+    <string name="torch_root_tools_title">Root tools</string>
+    <string name="torch_root_tools_subtitle">Privileged flashlight controls. Each routes through the root safety gate (rate-limited; can be turned off in settings).</string>
+    <string name="torch_root_action_brightness">Boost brightness</string>
+    <string name="torch_root_action_strobe">Duty-cycle strobe</string>
+    <string name="torch_root_action_multiled">Multi-LED burst</string>
+    <string name="torch_root_action_thermal">Thermal-override strobe</string>
+    <string name="torch_root_result_ok">Done.</string>
+    <string name="torch_root_result_unsupported">Not available on this device.</string>
+    <string name="torch_root_result_opted_out">This feature is turned off in settings.</string>
+    <string name="torch_root_result_rate_limited">Rate-limited — try again shortly.</string>
+    <string name="torch_root_result_error">Failed: %1$s</string>
 </resources>

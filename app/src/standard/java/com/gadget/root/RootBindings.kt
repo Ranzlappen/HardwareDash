@@ -122,6 +122,12 @@ object RootBindings {
 
     @Provides
     @Singleton
+    fun provideTorchRootCapabilities(
+        impl: com.gadget.torch.StandardTorchRootCapabilities,
+    ): dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities = impl
+
+    @Provides
+    @Singleton
     fun provideVibrationController(impl: StandardVibrationController): VibrationController = impl
 
     @Provides

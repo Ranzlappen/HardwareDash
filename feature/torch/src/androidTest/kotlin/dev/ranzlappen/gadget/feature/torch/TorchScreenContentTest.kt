@@ -12,6 +12,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,6 +53,13 @@ class TorchScreenContentTest {
         onAddStrobe: () -> Unit = {},
         onEditWidget: (SavedTorchWidget) -> Unit = {},
         onDeleteWidget: (SavedTorchWidget) -> Unit = {},
+        onResolveIcon: (String) -> WidgetIconSource = {
+            WidgetIconSource.Resource(R.drawable.ic_flashlight_on)
+        },
+        onRootBoostBrightness: () -> Unit = {},
+        onRootDutyStrobe: () -> Unit = {},
+        onRootMultiLed: () -> Unit = {},
+        onRootThermal: () -> Unit = {},
     ) {
         composeTestRule.setContent {
             GadgetTestTheme {
@@ -70,6 +78,11 @@ class TorchScreenContentTest {
                     onAddStrobe = onAddStrobe,
                     onEditWidget = onEditWidget,
                     onDeleteWidget = onDeleteWidget,
+                    onResolveIcon = onResolveIcon,
+                    onRootBoostBrightness = onRootBoostBrightness,
+                    onRootDutyStrobe = onRootDutyStrobe,
+                    onRootMultiLed = onRootMultiLed,
+                    onRootThermal = onRootThermal,
                 )
             }
         }
@@ -148,12 +161,14 @@ class TorchScreenContentTest {
                     type = WidgetType.Strobe,
                     displayName = "Loud strobe",
                     rateHz = 12f,
-                    sosMode = false,
+                    morseMode = false,
                 ),
             ),
         )
         setContent(TorchScreenState.Initial.copy(widgets = saved))
-        composeTestRule.onNodeWithText("Loud strobe").assertIsDisplayed()
+        // The row shows the live preview (no title text); the widget name
+        // is carried as the preview's content description.
+        composeTestRule.onNodeWithContentDescription("Loud strobe").assertIsDisplayed()
     }
 
     @Test

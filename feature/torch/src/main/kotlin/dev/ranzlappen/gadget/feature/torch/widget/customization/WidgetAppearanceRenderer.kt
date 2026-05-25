@@ -102,13 +102,20 @@ class WidgetAppearanceRenderer @Inject constructor(
         active: Boolean,
     ) {
         val key = if (active) appearance.iconStyle.activeKey else appearance.iconStyle.inactiveKey
-        val drawable = iconCatalog.resolve(key)
-        views.setImageViewResource(R.id.widget_icon, drawable)
-
-        // Pre-31 fallback uses setColorFilter; API 31+ also supports
-        // it for backwards compat. SRC_IN preserves the alpha channel
-        // of the source drawable.
-        views.setInt(R.id.widget_icon, "setColorFilter", iconTintArgb(context, appearance.iconStyle))
+        val customBitmap = if (iconCatalog.isCustom(key)) iconCatalog.loadCustomBitmap(key) else null
+        if (customBitmap != null) {
+            views.setImageViewBitmap(R.id.widget_icon, customBitmap)
+            // A user image carries its own colours — a tint would recolour
+            // the whole bitmap, so clear any filter (TRANSPARENT is a SRC_ATOP
+            // no-op) rather than applying the icon-style tint.
+            views.setInt(R.id.widget_icon, "setColorFilter", TRANSPARENT)
+        } else {
+            views.setImageViewResource(R.id.widget_icon, iconCatalog.resolve(key))
+            // Pre-31 fallback uses setColorFilter; API 31+ also supports
+            // it for backwards compat. SRC_IN preserves the alpha channel
+            // of the source drawable.
+            views.setInt(R.id.widget_icon, "setColorFilter", iconTintArgb(context, appearance.iconStyle))
+        }
 
         // Reset the two properties a tap-press frame mutates, so a
         // recycled host view always reverts cleanly to its resting look

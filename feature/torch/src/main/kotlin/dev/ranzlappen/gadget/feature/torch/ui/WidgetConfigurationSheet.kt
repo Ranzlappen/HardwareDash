@@ -1,5 +1,9 @@
 package dev.ranzlappen.gadget.feature.torch.ui
 
+import android.graphics.BitmapFactory
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,7 +21,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -26,13 +33,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -55,7 +66,11 @@ import dev.ranzlappen.gadget.feature.torch.widget.customization.IconTint
 import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
 import dev.ranzlappen.gadget.feature.torch.widget.customization.ToggleFeedback
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 import dev.ranzlappen.gadget.feature.torch.widget.customization.iconTintArgb
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Modal sheet for creating or editing a [TorchWidgetConfig].
@@ -84,7 +99,8 @@ fun WidgetConfigurationSheet(
     isExisting: Boolean,
     onDismiss: () -> Unit,
     onConfirm: (TorchWidgetConfig) -> Unit,
-    resolveIconRes: (String) -> Int,
+    resolveIcon: (String) -> WidgetIconSource,
+    onImportCustomIcon: suspend (Uri) -> String?,
     iconChoices: List<WidgetIconCatalog.Entry>,
     modifier: Modifier = Modifier,
 ) {
@@ -92,7 +108,7 @@ fun WidgetConfigurationSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var name by remember(initial) { mutableStateOf(initial.displayName) }
     var rateHz by remember(initial) { mutableFloatStateOf(initial.rateHz) }
-    var sosMode by remember(initial) { mutableStateOf(initial.sosMode) }
+    var morseMode by remember(initial) { mutableStateOf(initial.morseMode) }
     var morseText by remember(initial) { mutableStateOf(initial.morseText) }
     var appearance by remember(initial) { mutableStateOf(initial.appearance) }
 
@@ -147,7 +163,7 @@ fun WidgetConfigurationSheet(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    Switch(checked = sosMode, onCheckedChange = { sosMode = it })
+                    Switch(checked = morseMode, onCheckedChange = { morseMode = it })
                 }
                 GadgetTextField(
                     value = morseText,
@@ -202,6 +218,8 @@ fun WidgetConfigurationSheet(
                 selectedKey = appearance.iconStyle.activeKey,
                 choices = iconChoices,
                 tintArgb = iconTint,
+                resolveIcon = resolveIcon,
+                onImportCustomIcon = onImportCustomIcon,
                 onSelect = { key ->
                     appearance = appearance.copy(iconStyle = appearance.iconStyle.copy(activeKey = key))
                 },
@@ -211,6 +229,8 @@ fun WidgetConfigurationSheet(
                 selectedKey = appearance.iconStyle.inactiveKey,
                 choices = iconChoices,
                 tintArgb = iconTint,
+                resolveIcon = resolveIcon,
+                onImportCustomIcon = onImportCustomIcon,
                 onSelect = { key ->
                     appearance = appearance.copy(iconStyle = appearance.iconStyle.copy(inactiveKey = key))
                 },
@@ -329,7 +349,16 @@ fun WidgetConfigurationSheet(
             ) {
                 WidgetAppearancePreview(
                     appearance = appearance,
-                    iconResId = resolveIconRes(appearance.iconStyle.activeKey),
+                    icon = resolveIcon(appearance.iconStyle.activeKey),
+                    interactive = true,
+                )
+            }
+            if (appearance.tap.enabled && appearance.tap.animation != TapAnimation.None) {
+                Text(
+                    text = stringResource(R.string.torch_widget_config_preview_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 
@@ -349,7 +378,7 @@ fun WidgetConfigurationSheet(
                             initial.copy(
                                 displayName = name.ifBlank { initial.displayName },
                                 rateHz = rateHz,
-                                sosMode = sosMode,
+                                morseMode = morseMode,
                                 morseText = morseText,
                                 appearance = appearance,
                             ),
@@ -447,9 +476,11 @@ private object SwatchDefaults {
 
 /**
  * Segmented icon picker — a flow of tappable icon swatches from
- * [WidgetIconCatalog]. The icons preview in the widget's current
- * [tintArgb] so the choice reads as it will on the widget. Selection is
- * conveyed visually (a primary-tinted ring) and semantically.
+ * [WidgetIconCatalog], the currently-selected custom icon (if any), plus
+ * an "add custom" swatch that opens the system document picker so the
+ * user can pick an image from their file manager. Built-in icons preview
+ * in the widget's current [tintArgb]; a custom image renders untinted.
+ * Selection is conveyed visually (a primary-tinted ring) and semantically.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -458,9 +489,23 @@ private fun IconPickerRow(
     selectedKey: String,
     choices: List<WidgetIconCatalog.Entry>,
     tintArgb: Int,
+    resolveIcon: (String) -> WidgetIconSource,
+    onImportCustomIcon: suspend (Uri) -> String?,
     onSelect: (String) -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
+    val scope = rememberCoroutineScope()
+    // OpenDocument opens the SAF file manager; we copy the bytes into
+    // app storage immediately (in onImportCustomIcon) so the one-shot read
+    // grant is enough — no persistable Uri permission needed.
+    val picker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) {
+            scope.launch { onImportCustomIcon(uri)?.let(onSelect) }
+        }
+    }
+    val customSelected = selectedKey.startsWith(WidgetIconCatalog.CUSTOM_PREFIX)
     Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
         Text(
             text = label,
@@ -473,32 +518,72 @@ private fun IconPickerRow(
             verticalArrangement = Arrangement.spacedBy(spacing.tiny),
         ) {
             choices.forEach { entry ->
-                val isSelected = entry.key == selectedKey
-                Box(
-                    modifier = Modifier
-                        .defaultMinSize(SwatchDefaults.Diameter, SwatchDefaults.Diameter)
-                        .size(SwatchDefaults.Diameter)
-                        .clip(CircleShape)
-                        .border(
-                            width = if (isSelected) SwatchDefaults.SelectedRing else SwatchDefaults.UnselectedRing,
-                            color = if (isSelected) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.outline
-                            },
-                            shape = CircleShape,
-                        )
-                        .clickable(role = Role.RadioButton, onClickLabel = entry.displayName) {
-                            onSelect(entry.key)
-                        }
-                        .semantics { this.selected = isSelected }
-                        .padding(spacing.small),
-                    contentAlignment = Alignment.Center,
-                ) {
+                IconSwatch(
+                    source = WidgetIconSource.Resource(entry.drawable),
+                    tintArgb = tintArgb,
+                    selected = entry.key == selectedKey,
+                    contentDescription = entry.displayName,
+                    onClick = { onSelect(entry.key) },
+                )
+            }
+            if (customSelected) {
+                IconSwatch(
+                    source = resolveIcon(selectedKey),
+                    tintArgb = null,
+                    selected = true,
+                    contentDescription = stringResource(R.string.torch_widget_config_icon_custom),
+                    onClick = { picker.launch(IMAGE_MIME_TYPES) },
+                )
+            }
+            AddCustomSwatch(onClick = { picker.launch(IMAGE_MIME_TYPES) })
+        }
+    }
+}
+
+/** One icon swatch — a circular, ring-selectable button rendering either a
+ *  bundled drawable (tinted via [tintArgb]) or a custom image file
+ *  (untinted, decoded off the main thread). */
+@Composable
+private fun IconSwatch(
+    source: WidgetIconSource,
+    tintArgb: Int?,
+    selected: Boolean,
+    contentDescription: String,
+    onClick: () -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Box(
+        modifier = Modifier
+            .defaultMinSize(SwatchDefaults.Diameter, SwatchDefaults.Diameter)
+            .size(SwatchDefaults.Diameter)
+            .clip(CircleShape)
+            .border(
+                width = if (selected) SwatchDefaults.SelectedRing else SwatchDefaults.UnselectedRing,
+                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                shape = CircleShape,
+            )
+            .clickable(role = Role.RadioButton, onClickLabel = contentDescription, onClick = onClick)
+            .semantics { this.selected = selected }
+            .padding(spacing.small),
+        contentAlignment = Alignment.Center,
+    ) {
+        when (source) {
+            is WidgetIconSource.Resource -> Image(
+                painter = painterResource(source.resId),
+                contentDescription = contentDescription,
+                colorFilter = tintArgb?.let { ColorFilter.tint(Color(it)) },
+                modifier = Modifier.fillMaxSize(),
+            )
+            is WidgetIconSource.CustomFile -> {
+                val bitmap by produceState<ImageBitmap?>(initialValue = null, source.path) {
+                    value = withContext(Dispatchers.IO) {
+                        runCatching { BitmapFactory.decodeFile(source.path)?.asImageBitmap() }.getOrNull()
+                    }
+                }
+                bitmap?.let {
                     Image(
-                        painter = painterResource(entry.drawable),
-                        contentDescription = entry.displayName,
-                        colorFilter = ColorFilter.tint(Color(tintArgb)),
+                        bitmap = it,
+                        contentDescription = contentDescription,
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
@@ -506,6 +591,34 @@ private fun IconPickerRow(
         }
     }
 }
+
+/** Trailing "+" swatch that opens the file picker to import a custom
+ *  icon. */
+@Composable
+private fun AddCustomSwatch(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .defaultMinSize(SwatchDefaults.Diameter, SwatchDefaults.Diameter)
+            .size(SwatchDefaults.Diameter)
+            .clip(CircleShape)
+            .border(SwatchDefaults.UnselectedRing, MaterialTheme.colorScheme.outline, CircleShape)
+            .clickable(
+                role = Role.Button,
+                onClickLabel = stringResource(R.string.torch_widget_config_icon_add_custom),
+                onClick = onClick,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.AddPhotoAlternate,
+            contentDescription = stringResource(R.string.torch_widget_config_icon_add_custom),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+/** SAF mime filter for the custom-icon document picker. */
+private val IMAGE_MIME_TYPES = arrayOf("image/*")
 
 /** Compact discriminator for the feedback-kind chip row. The real
  *  payload is built lazily on selection via [FeedbackKind
