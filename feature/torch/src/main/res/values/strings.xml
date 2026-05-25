@@ -23,6 +23,13 @@
     <string name="torch_action_turn_on">Turn on torch</string>
     <string name="torch_action_turn_off">Turn off torch</string>
     <string name="torch_action_hold">Hold for light</string>
+    <string name="torch_action_strobe">Strobe</string>
+    <string name="torch_action_strobe_toggle">Toggle strobe</string>
+    <string name="torch_action_strobe_hold">Strobe hold</string>
+    <string name="torch_action_morse">Morse</string>
+    <string name="torch_action_morse_toggle">Toggle Morse</string>
+    <string name="torch_action_morse_hold">Morse hold</string>
+    <string name="torch_morse_message_label">Morse message</string>
     <string name="torch_status_no_flash">This device doesn\'t have a flash unit.</string>
     <string name="torch_status_hardware_error">Hardware error — try toggling again.</string>
     <string name="torch_status_permission_denied">Camera access denied — grant in system settings.</string>
@@ -62,6 +69,8 @@
     <string name="torch_widget_config_name_label">Name</string>
     <string name="torch_widget_config_sos_label">SOS mode</string>
     <string name="torch_widget_config_sos_supporting">Plays the Morse SOS pattern instead of a constant strobe.</string>
+    <string name="torch_widget_config_morse_label">Morse message (optional)</string>
+    <string name="torch_widget_config_morse_supporting">When set, the widget loops this text as Morse instead of strobing.</string>
     <string name="torch_widget_config_save_new">Add to home screen</string>
     <string name="torch_widget_config_save_existing">Save</string>
     <string name="torch_widget_config_cancel">Cancel</string>

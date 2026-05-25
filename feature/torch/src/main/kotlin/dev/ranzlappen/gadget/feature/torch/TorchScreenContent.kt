@@ -3,10 +3,13 @@ package dev.ranzlappen.gadget.feature.torch
 import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +24,7 @@ import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FlashlightOn
+import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +34,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -37,6 +42,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
@@ -52,6 +58,7 @@ import dev.ranzlappen.gadget.core.ui.component.GadgetFab
 import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
+import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import kotlin.math.roundToInt
@@ -83,6 +90,10 @@ fun TorchScreenContent(
     onToggleClick: () -> Unit,
     onMomentaryHold: (Boolean) -> Unit,
     onStrobeToggle: () -> Unit,
+    onStrobeHold: (Boolean) -> Unit,
+    onMorseToggle: () -> Unit,
+    onMorseHold: (Boolean) -> Unit,
+    onMorseTextChange: (String) -> Unit,
     onRateChange: (Float) -> Unit,
     onRateCommit: () -> Unit,
     onAddFlashlight: () -> Unit,
@@ -95,7 +106,18 @@ fun TorchScreenContent(
         title = stringResource(R.string.torch_screen_title),
         modifier = modifier,
         functional = {
-            TorchToggleCard(state.torch, state.strobeRunning, onToggleClick, onMomentaryHold, onStrobeToggle)
+            TorchToggleCard(
+                torch = state.torch,
+                strobeRunning = state.strobeRunning,
+                morseText = state.morseText,
+                onToggleClick = onToggleClick,
+                onMomentaryHold = onMomentaryHold,
+                onStrobeToggle = onStrobeToggle,
+                onStrobeHold = onStrobeHold,
+                onMorseToggle = onMorseToggle,
+                onMorseHold = onMorseHold,
+                onMorseTextChange = onMorseTextChange,
+            )
             StrobeDefaultsCard(state.defaultStrobeRateHz, onRateChange, onRateCommit)
             WidgetsCard(
                 widgets = state.widgets,
@@ -154,13 +176,19 @@ private fun torchModuleInfo(): ModuleInfo = ModuleInfo(
     firmware = null,
 )
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TorchToggleCard(
     torch: TorchState,
     strobeRunning: Boolean,
+    morseText: String,
     onToggleClick: () -> Unit,
     onMomentaryHold: (Boolean) -> Unit,
     onStrobeToggle: () -> Unit,
+    onStrobeHold: (Boolean) -> Unit,
+    onMorseToggle: () -> Unit,
+    onMorseHold: (Boolean) -> Unit,
+    onMorseTextChange: (String) -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
     DashCard(
@@ -195,25 +223,59 @@ private fun TorchToggleCard(
                         ),
                         enabled = torch.isAvailable,
                     )
-                    // Momentary: torch on only while held down.
-                    MomentaryTorchButton(
+                    CircleControlButton(
+                        icon = Icons.Outlined.TouchApp,
+                        contentDescription = stringResource(R.string.torch_action_hold),
+                        caption = stringResource(R.string.torch_action_hold),
                         enabled = torch.isAvailable,
+                        active = torch.isOn,
                         onHold = onMomentaryHold,
                     )
                 }
             }
-            // In-app strobe toggle. Mirrors widget behaviour — tap once to
-            // start at the current default rate, tap again to stop. Doubles
-            // as a diagnostic for the strobe service path independent of
-            // widget wiring.
-            GadgetSecondaryButton(
-                onClick = onStrobeToggle,
-                text = stringResource(
-                    if (strobeRunning) R.string.torch_action_strobe_stop
-                    else R.string.torch_action_strobe_start,
-                ),
-                leadingIcon = Icons.Outlined.Bolt,
-                enabled = torch.isAvailable,
+            // Strobe + Morse controls — circular buttons consistent with the
+            // torch pair above. Tap variants toggle; hold variants run only
+            // while pressed. All drive the one StrobeService.
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(spacing.medium, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(spacing.small),
+            ) {
+                CircleControlButton(
+                    icon = Icons.Outlined.Bolt,
+                    contentDescription = stringResource(R.string.torch_action_strobe_toggle),
+                    caption = stringResource(R.string.torch_action_strobe),
+                    enabled = torch.isAvailable,
+                    active = strobeRunning,
+                    onClick = onStrobeToggle,
+                )
+                CircleControlButton(
+                    icon = Icons.Outlined.Bolt,
+                    contentDescription = stringResource(R.string.torch_action_strobe_hold),
+                    caption = stringResource(R.string.torch_action_strobe_hold),
+                    enabled = torch.isAvailable,
+                    onHold = onStrobeHold,
+                )
+                CircleControlButton(
+                    icon = Icons.Outlined.MoreHoriz,
+                    contentDescription = stringResource(R.string.torch_action_morse_toggle),
+                    caption = stringResource(R.string.torch_action_morse),
+                    enabled = torch.isAvailable,
+                    active = strobeRunning,
+                    onClick = onMorseToggle,
+                )
+                CircleControlButton(
+                    icon = Icons.Outlined.MoreHoriz,
+                    contentDescription = stringResource(R.string.torch_action_morse_hold),
+                    caption = stringResource(R.string.torch_action_morse_hold),
+                    enabled = torch.isAvailable,
+                    onHold = onMorseHold,
+                )
+            }
+            GadgetTextField(
+                value = morseText,
+                onValueChange = onMorseTextChange,
+                label = stringResource(R.string.torch_morse_message_label),
                 modifier = Modifier.fillMaxWidth(),
             )
             Text(
@@ -228,54 +290,75 @@ private fun TorchToggleCard(
 }
 
 /**
- * Momentary torch button — fires the torch only while held.
- *
- * [onHold] is called with `true` the instant the press lands and `false`
- * the moment it's released **or** the gesture is cancelled (the
- * `finally` guarantees the torch turns off even if this composable
- * leaves composition mid-hold). Styled as a [secondaryContainer] circle
- * to read as a sibling of — not a duplicate of — the primary toggle FAB.
+ * Circular torch control. Pass [onClick] for tap-to-toggle or [onHold]
+ * for press-and-hold (called `true` on press, `false` on release **or**
+ * cancel via try/finally so it can't get stuck on). [active] tints it
+ * with the primary container to signal the "on" state. Styled to pair
+ * with the toggle FAB.
  */
 @Composable
-private fun MomentaryTorchButton(
+private fun CircleControlButton(
+    icon: ImageVector,
+    contentDescription: String,
+    caption: String,
     enabled: Boolean,
-    onHold: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    active: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    onHold: ((Boolean) -> Unit)? = null,
 ) {
-    val description = stringResource(R.string.torch_action_hold)
-    val container =
-        if (enabled) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant
-    val content =
-        if (enabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-    Box(
-        modifier = modifier
-            .defaultMinSize(MomentaryButtonDiameter, MomentaryButtonDiameter)
-            .size(MomentaryButtonDiameter)
-            .clip(CircleShape)
-            .background(container)
-            .pointerInput(enabled) {
-                if (!enabled) return@pointerInput
-                detectTapGestures(
-                    onPress = {
-                        onHold(true)
-                        try {
-                            tryAwaitRelease()
-                        } finally {
-                            onHold(false)
-                        }
-                    },
-                )
-            }
-            .semantics {
-                contentDescription = description
-                role = Role.Button
-            },
-        contentAlignment = Alignment.Center,
+    val spacing = LocalGadgetTheme.current.spacing
+    val container = when {
+        !enabled -> MaterialTheme.colorScheme.surfaceVariant
+        active -> MaterialTheme.colorScheme.primaryContainer
+        else -> MaterialTheme.colorScheme.secondaryContainer
+    }
+    val content = when {
+        !enabled -> MaterialTheme.colorScheme.onSurfaceVariant
+        active -> MaterialTheme.colorScheme.onPrimaryContainer
+        else -> MaterialTheme.colorScheme.onSecondaryContainer
+    }
+    val interaction = when {
+        onHold != null -> Modifier.pointerInput(enabled) {
+            if (!enabled) return@pointerInput
+            detectTapGestures(
+                onPress = {
+                    onHold?.invoke(true)
+                    try {
+                        tryAwaitRelease()
+                    } finally {
+                        onHold?.invoke(false)
+                    }
+                },
+            )
+        }
+        onClick != null -> Modifier.clickable(enabled = enabled, role = Role.Button) { onClick?.invoke() }
+        else -> Modifier
+    }
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(spacing.tiny),
     ) {
-        Icon(
-            imageVector = Icons.Outlined.TouchApp,
-            contentDescription = null,
-            tint = content,
+        Box(
+            modifier = Modifier
+                .defaultMinSize(MomentaryButtonDiameter, MomentaryButtonDiameter)
+                .size(MomentaryButtonDiameter)
+                .clip(CircleShape)
+                .background(container)
+                .then(interaction)
+                .semantics { this.contentDescription = contentDescription; role = Role.Button },
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = content)
+        }
+        Text(
+            text = caption,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outline,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -412,6 +495,7 @@ data class TorchScreenState(
     val defaultStrobeRateHz: Float,
     val widgets: List<SavedTorchWidget>,
     val strobeRunning: Boolean = false,
+    val morseText: String = "",
 ) {
     companion object {
         /** First-emission placeholder used before the flows emit. */

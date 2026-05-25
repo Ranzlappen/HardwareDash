@@ -95,36 +95,46 @@ class StrobeWidgetProvider : AppWidgetProvider() {
         )
         val ep = entry(context)
 
+        // Start / stop the service SYNCHRONOUSLY in the foreground broadcast
+        // context. Deferring the start into the goAsync coroutine below
+        // risks ForegroundServiceStartNotAllowedException on Android 12+.
+        // We pass only the appWidgetId — the service reads that widget's
+        // rate / SOS config itself.
+        val willBeRunning: Boolean
+        if (StrobeService.isRunning) {
+            context.startService(
+                Intent(context, StrobeService::class.java).setAction(StrobeService.ACTION_STOP),
+            )
+            willBeRunning = false
+        } else {
+            val startIntent = Intent(context, StrobeService::class.java).apply {
+                putExtra(StrobeService.EXTRA_APPWIDGET_ID, appWidgetId)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(startIntent)
+            } else {
+                context.startService(startIntent)
+            }
+            willBeRunning = true
+        }
+
+        // Feedback + animation + repaint run off the FGS path (no service
+        // start here), so an FGS exception can never abort them.
         val pendingResult = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
-                // DataStore-backed read so a cold process sees the real
-                // rate / SOS / feedback / animation config — the hot cache
-                // is empty until its first async emission.
                 val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
                     ep.widgetRepository().get(appWidgetId)
                 } else {
                     null
                 }
-
-                val willBeRunning: Boolean
-                if (StrobeService.isRunning) {
-                    context.startService(
-                        Intent(context, StrobeService::class.java).setAction(StrobeService.ACTION_STOP),
-                    )
-                    willBeRunning = false
-                } else {
-                    val startIntent = Intent(context, StrobeService::class.java).apply {
-                        putExtra(StrobeService.EXTRA_RATE_HZ, config?.rateHz ?: TorchWidgetConfig.DEFAULT_RATE_HZ)
-                        putExtra(StrobeService.EXTRA_SOS_MODE, config?.sosMode ?: false)
-                    }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        context.startForegroundService(startIntent)
-                    } else {
-                        context.startService(startIntent)
-                    }
-                    willBeRunning = true
-                }
+                Log.d(
+                    PendingTorchWidgetConfigs.TAG,
+                    "StrobeWidget tap id=$appWidgetId running->$willBeRunning " +
+                        "config=${config != null} sos=${config?.sosMode} " +
+                        "fb=${config?.appearance?.feedback?.let { it::class.simpleName }} " +
+                        "anim=${config?.appearance?.tap?.animation}",
+                )
 
                 if (config != null) {
                     withContext(Dispatchers.Main) {
@@ -153,6 +163,8 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                         restingViews = buildRemoteViews(context, appWidgetId, willBeRunning, config, pressed = false),
                     )
                 }
+            } catch (t: Throwable) {
+                Log.e(PendingTorchWidgetConfigs.TAG, "StrobeWidget onReceive failed", t)
             } finally {
                 pendingResult.finish()
             }
