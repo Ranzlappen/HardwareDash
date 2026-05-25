@@ -58,7 +58,7 @@ object MorseCodec {
             val code = CODE[ch] ?: return@forEach
             if (emittedLetter) steps.add(false to letterGap)
             code.forEachIndexed { sIndex, symbol ->
-                steps.add(true to if (symbol == '-') dash else dot)
+                steps.add(true to (if (symbol == '-') dash else dot))
                 if (sIndex != code.lastIndex) steps.add(false to symbolGap)
             }
             emittedLetter = true

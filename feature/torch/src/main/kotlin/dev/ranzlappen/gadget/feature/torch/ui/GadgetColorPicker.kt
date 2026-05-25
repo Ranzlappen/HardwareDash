@@ -50,7 +50,7 @@ fun GadgetColorPicker(
     var hue by remember(argb) { mutableStateOf(hsv[0]) }
     var sat by remember(argb) { mutableStateOf(hsv[1]) }
     var value by remember(argb) { mutableStateOf(hsv[2]) }
-    var alpha by remember(argb) { mutableStateOf(((argb ushr 24) and 0xFF) / 255f) }
+    var alpha by remember(argb) { mutableStateOf(((argb ushr 24) and 0xFFL) / 255f) }
 
     fun emit() = onArgbChange(hsvToArgb(hue, sat, value, alpha))
 

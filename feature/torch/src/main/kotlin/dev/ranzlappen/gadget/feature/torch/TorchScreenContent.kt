@@ -323,16 +323,16 @@ private fun CircleControlButton(
             if (!enabled) return@pointerInput
             detectTapGestures(
                 onPress = {
-                    onHold(true)
+                    onHold?.invoke(true)
                     try {
                         tryAwaitRelease()
                     } finally {
-                        onHold(false)
+                        onHold?.invoke(false)
                     }
                 },
             )
         }
-        onClick != null -> Modifier.clickable(enabled = enabled, role = Role.Button) { onClick() }
+        onClick != null -> Modifier.clickable(enabled = enabled, role = Role.Button) { onClick?.invoke() }
         else -> Modifier
     }
     Column(
