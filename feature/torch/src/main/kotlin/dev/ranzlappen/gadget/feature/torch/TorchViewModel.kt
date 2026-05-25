@@ -73,7 +73,21 @@ class TorchViewModel @Inject constructor(
     private val widgetRepository: TorchWidgetConfigRepository,
     private val widgetCreator: TorchWidgetCreator,
     private val iconCatalog: WidgetIconCatalog,
+    private val rootCapabilities: TorchRootCapabilities,
 ) : ViewModel() {
+
+    /** Live availability of the rooted Torch capabilities (probed once on
+     *  init). Standard flavor stays [TorchRootAvailability.Unavailable]. */
+    private val rootAvailability = MutableStateFlow(TorchRootAvailability.Unavailable)
+
+    init {
+        viewModelScope.launch { rootAvailability.value = rootCapabilities.probe() }
+    }
+
+    /** One-shot results from rooted-tool invocations, surfaced as a
+     *  snackbar by the screen. */
+    private val _rootToolEvents = MutableSharedFlow<TorchRootResult>(extraBufferCapacity = 1)
+    val rootToolEvents: SharedFlow<TorchRootResult> = _rootToolEvents.asSharedFlow()
 
     /** Public read-only torch hardware snapshot. */
     val torchState: StateFlow<TorchState> = controller.state
@@ -96,7 +110,7 @@ class TorchViewModel @Inject constructor(
         initialValue = StrobeService.isRunning,
     )
 
-    val state: StateFlow<TorchScreenState> = combine(
+    private val baseState: kotlinx.coroutines.flow.Flow<TorchScreenState> = combine(
         controller.state,
         userPreferences.flow.map { it.defaultStrobeRateHz },
         widgetRepository.all,
@@ -115,6 +129,15 @@ class TorchViewModel @Inject constructor(
             strobeRunning = running,
             morseText = morseText,
         )
+    }
+
+    // Folded as a second step (combine maxes out at 5 typed sources) so
+    // the rooted-capability availability flows into the screen state.
+    val state: StateFlow<TorchScreenState> = combine(
+        baseState,
+        rootAvailability,
+    ) { base, root ->
+        base.copy(rootAvailability = root)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(SubscriptionTimeoutMillis),
@@ -196,6 +219,33 @@ class TorchViewModel @Inject constructor(
     /** Persist the in-app Morse message. */
     fun onMorseTextChange(text: String) {
         viewModelScope.launch { userPreferences.setMorseText(text) }
+    }
+
+    // ─── Rooted tools ────────────────────────────────────────────────
+    // One-tap presets for the rooted controls. Each routes through the
+    // rooted implementation's RootSafetyGate (capability + opt-out +
+    // rate-limit); the result is surfaced via [rootToolEvents]. No-ops on
+    // the standard flavor (the seam reports Unsupported and the controls
+    // aren't shown).
+
+    fun onRootBoostBrightness() = runRootTool {
+        rootCapabilities.boostBrightness(ROOT_BRIGHTNESS_PERCENT)
+    }
+
+    fun onRootDutyCycleStrobe() = runRootTool {
+        rootCapabilities.dutyCycleStrobe(ROOT_STROBE_HZ, ROOT_STROBE_DUTY_PERCENT, ROOT_STROBE_DURATION_MS)
+    }
+
+    fun onRootMultiLed() = runRootTool {
+        rootCapabilities.multiLedActivate(ROOT_MULTILED_DURATION_MS, includeScreen = false)
+    }
+
+    fun onRootThermalOverride() = runRootTool {
+        rootCapabilities.thermalOverrideStrobe(ROOT_STROBE_HZ, ROOT_STROBE_DUTY_PERCENT, ROOT_THERMAL_DURATION_MS)
+    }
+
+    private fun runRootTool(action: suspend () -> TorchRootResult) {
+        viewModelScope.launch { _rootToolEvents.tryEmit(action()) }
     }
 
     private fun startStrobeService(morseText: String?) {
@@ -323,5 +373,15 @@ class TorchViewModel @Inject constructor(
          *  imperceptible to the user but cheap enough to leave
          *  always-on while the screen is visible. */
         const val StrobeRunningPollMillis: Long = 250L
+
+        // ─── Rooted-tool one-tap presets ─────────────────────────────
+        /** Brightness boost target as a percent of `max_brightness`
+         *  (the rooted impl hard-ceilings at 150 %). */
+        const val ROOT_BRIGHTNESS_PERCENT: Int = 150
+        const val ROOT_STROBE_HZ: Int = 30
+        const val ROOT_STROBE_DUTY_PERCENT: Int = 20
+        const val ROOT_STROBE_DURATION_MS: Long = 5_000L
+        const val ROOT_MULTILED_DURATION_MS: Long = 3_000L
+        const val ROOT_THERMAL_DURATION_MS: Long = 5_000L
     }
 }

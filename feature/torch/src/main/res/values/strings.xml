@@ -126,4 +126,40 @@
     <string name="torch_module_perm_notifications_rationale">Lets the strobe service show its status and widget toggle confirmations appear.</string>
     <string name="torch_module_compat_note_fgs_active">The strobe runs as a foreground service while active, so it keeps flashing after you leave the screen.</string>
     <string name="torch_module_compat_note_fgs_short">On Android 14+ the strobe runs as a time-boxed short foreground service (about 3 minutes).</string>
+
+    <!-- Per-function capability badges (Functions & compatibility section) -->
+    <string name="torch_cap_no_flash">This device has no flash unit.</string>
+    <string name="torch_cap_needs_root">Requires the rooted app version with granted root access.</string>
+    <string name="torch_cap_basic_name">Torch on / off + hold</string>
+    <string name="torch_cap_basic_detail">Toggle and momentary hold-for-light.</string>
+    <string name="torch_cap_basic_ok">Flash unit detected — works.</string>
+    <string name="torch_cap_strobe_name">Strobe &amp; Morse</string>
+    <string name="torch_cap_strobe_detail">Configurable strobe and Morse playback.</string>
+    <string name="torch_cap_strobe_ok">Works.</string>
+    <string name="torch_cap_strobe_caveat">Works; on Android 14+ a background strobe runs as a time-boxed (~3 min) foreground service and shows a notification.</string>
+    <string name="torch_cap_root_ready">Root and flashlight hardware available.</string>
+    <string name="torch_cap_root_no_led">Root available, but no supported LED sysfs node was found on this device.</string>
+    <string name="torch_cap_root_brightness_name">Extreme brightness (root)</string>
+    <string name="torch_cap_root_brightness_detail">Drives the LED past the stock cap (up to 150%).</string>
+    <string name="torch_cap_root_strobe_name">High-frequency duty-cycle strobe (root)</string>
+    <string name="torch_cap_root_strobe_detail">Low-duty pulses at high frequency for thermal headroom.</string>
+    <string name="torch_cap_root_multiled_name">Multi-LED activation (root)</string>
+    <string name="torch_cap_root_multiled_detail">Lights every detected emitter at once.</string>
+    <string name="torch_cap_root_multiled_caveat">Available; the exact set of emitters is device-specific.</string>
+    <string name="torch_cap_root_thermal_name">Thermal override (root)</string>
+    <string name="torch_cap_root_thermal_detail">Briefly suspends LED thermal throttling for a strobe.</string>
+    <string name="torch_cap_root_thermal_caveat">Available — suspends thermal limits (hard 45s cap). May heat the device; use briefly.</string>
+
+    <!-- Root tools card (rooted app version only) -->
+    <string name="torch_root_tools_title">Root tools</string>
+    <string name="torch_root_tools_subtitle">Privileged flashlight controls. Each routes through the root safety gate (rate-limited; can be turned off in settings).</string>
+    <string name="torch_root_action_brightness">Boost brightness</string>
+    <string name="torch_root_action_strobe">Duty-cycle strobe</string>
+    <string name="torch_root_action_multiled">Multi-LED burst</string>
+    <string name="torch_root_action_thermal">Thermal-override strobe</string>
+    <string name="torch_root_result_ok">Done.</string>
+    <string name="torch_root_result_unsupported">Not available on this device.</string>
+    <string name="torch_root_result_opted_out">This feature is turned off in settings.</string>
+    <string name="torch_root_result_rate_limited">Rate-limited — try again shortly.</string>
+    <string name="torch_root_result_error">Failed: %1$s</string>
 </resources>

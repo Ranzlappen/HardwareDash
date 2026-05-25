@@ -58,6 +58,8 @@ import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
+import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
+import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.ModulePermission
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
@@ -67,6 +69,7 @@ import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
+import dev.ranzlappen.gadget.core.ui.component.GadgetStatusKind
 import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
 import dev.ranzlappen.gadget.core.ui.component.GlassSurface
 import dev.ranzlappen.gadget.feature.torch.ui.WidgetAppearancePreview
@@ -111,6 +114,10 @@ fun TorchScreenContent(
     onEditWidget: (SavedTorchWidget) -> Unit,
     onDeleteWidget: (SavedTorchWidget) -> Unit,
     onResolveIcon: (String) -> WidgetIconSource,
+    onRootBoostBrightness: () -> Unit,
+    onRootDutyStrobe: () -> Unit,
+    onRootMultiLed: () -> Unit,
+    onRootThermal: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ModuleScreenScaffold(
@@ -138,8 +145,18 @@ fun TorchScreenContent(
                 onEditWidget = onEditWidget,
                 onDeleteWidget = onDeleteWidget,
             )
+            // Rooted-only privileged controls — shown only when the
+            // rooted app version reports a usable root shell.
+            if (state.rootAvailability.rootReady) {
+                RootToolsCard(
+                    onBoostBrightness = onRootBoostBrightness,
+                    onDutyStrobe = onRootDutyStrobe,
+                    onMultiLed = onRootMultiLed,
+                    onThermal = onRootThermal,
+                )
+            }
         },
-        moduleInfo = torchModuleInfo(),
+        moduleInfo = torchModuleInfo(state.torch, state.rootAvailability),
     )
 }
 
@@ -156,7 +173,10 @@ fun TorchScreenContent(
  *    omitted).
  */
 @Composable
-private fun torchModuleInfo(): ModuleInfo = ModuleInfo(
+private fun torchModuleInfo(
+    torch: TorchState,
+    root: TorchRootAvailability,
+): ModuleInfo = ModuleInfo(
     permissions = buildList {
         // POST_NOTIFICATIONS only exists as a runtime permission on
         // API 33+; below that it's auto-granted, so don't surface it as
@@ -186,7 +206,98 @@ private fun torchModuleInfo(): ModuleInfo = ModuleInfo(
         ),
     ),
     firmware = null,
+    capabilities = torchCapabilities(torch, root),
 )
+
+/**
+ * Per-function capability rows for Torch — green/amber/red status for each
+ * button and action across both the standard and rooted app versions. The
+ * standard functions key off live flash-hardware + OS-version checks; the
+ * rooted functions key off the [TorchRootCapabilities] probe ([root]), so
+ * on the standard build (or an un-rooted device) they read red with a
+ * "requires the rooted app version" message.
+ */
+@Composable
+private fun torchCapabilities(
+    torch: TorchState,
+    root: TorchRootAvailability,
+): List<ModuleCapability> {
+    val hasFlash = torch.isAvailable
+    val noFlashMsg = stringResource(R.string.torch_cap_no_flash)
+    val needsRootMsg = stringResource(R.string.torch_cap_needs_root)
+
+    return listOf(
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_basic_name),
+            detail = stringResource(R.string.torch_cap_basic_detail),
+            status = {
+                if (hasFlash) {
+                    CapabilityStatus(GadgetStatusKind.Success, stringResource(R.string.torch_cap_basic_ok))
+                } else {
+                    CapabilityStatus(GadgetStatusKind.Error, noFlashMsg)
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_strobe_name),
+            detail = stringResource(R.string.torch_cap_strobe_detail),
+            status = {
+                when {
+                    !hasFlash -> CapabilityStatus(GadgetStatusKind.Error, noFlashMsg)
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE ->
+                        CapabilityStatus(GadgetStatusKind.Warning, stringResource(R.string.torch_cap_strobe_caveat))
+                    else -> CapabilityStatus(GadgetStatusKind.Success, stringResource(R.string.torch_cap_strobe_ok))
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_root_brightness_name),
+            detail = stringResource(R.string.torch_cap_root_brightness_detail),
+            status = {
+                when {
+                    root.brightnessReady ->
+                        CapabilityStatus(GadgetStatusKind.Success, stringResource(R.string.torch_cap_root_ready))
+                    root.rootReady ->
+                        CapabilityStatus(GadgetStatusKind.Warning, stringResource(R.string.torch_cap_root_no_led))
+                    else -> CapabilityStatus(GadgetStatusKind.Error, needsRootMsg)
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_root_strobe_name),
+            detail = stringResource(R.string.torch_cap_root_strobe_detail),
+            status = {
+                if (root.rootReady) {
+                    CapabilityStatus(GadgetStatusKind.Success, stringResource(R.string.torch_cap_root_ready))
+                } else {
+                    CapabilityStatus(GadgetStatusKind.Error, needsRootMsg)
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_root_multiled_name),
+            detail = stringResource(R.string.torch_cap_root_multiled_detail),
+            status = {
+                if (root.rootReady) {
+                    CapabilityStatus(GadgetStatusKind.Warning, stringResource(R.string.torch_cap_root_multiled_caveat))
+                } else {
+                    CapabilityStatus(GadgetStatusKind.Error, needsRootMsg)
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.torch_cap_root_thermal_name),
+            detail = stringResource(R.string.torch_cap_root_thermal_detail),
+            status = {
+                if (root.rootReady) {
+                    CapabilityStatus(GadgetStatusKind.Warning, stringResource(R.string.torch_cap_root_thermal_caveat))
+                } else {
+                    CapabilityStatus(GadgetStatusKind.Error, needsRootMsg)
+                }
+            },
+        ),
+    )
+}
 
 @Composable
 private fun TorchToggleCard(
@@ -527,6 +638,61 @@ private fun WidgetsCard(
 }
 
 /**
+ * Privileged flashlight controls for the rooted app version. Only placed
+ * in the tree when [TorchRootAvailability.rootReady] is true; each button
+ * routes through the rooted implementation's `RootSafetyGate` and reports
+ * back via a snackbar. One-tap presets — the parameter surface lives in
+ * the ViewModel constants.
+ */
+@Composable
+private fun RootToolsCard(
+    onBoostBrightness: () -> Unit,
+    onDutyStrobe: () -> Unit,
+    onMultiLed: () -> Unit,
+    onThermal: () -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    DashCard(
+        modifier = Modifier.fillMaxWidth(),
+        title = stringResource(R.string.torch_root_tools_title),
+        icon = Icons.Outlined.Bolt,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = spacing.small),
+            verticalArrangement = Arrangement.spacedBy(spacing.small),
+        ) {
+            Text(
+                text = stringResource(R.string.torch_root_tools_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            GadgetSecondaryButton(
+                onClick = onBoostBrightness,
+                text = stringResource(R.string.torch_root_action_brightness),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            GadgetSecondaryButton(
+                onClick = onDutyStrobe,
+                text = stringResource(R.string.torch_root_action_strobe),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            GadgetSecondaryButton(
+                onClick = onMultiLed,
+                text = stringResource(R.string.torch_root_action_multiled),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            GadgetSecondaryButton(
+                onClick = onThermal,
+                text = stringResource(R.string.torch_root_action_thermal),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+/**
  * One row in the in-app widget list. Shows a live [WidgetAppearancePreview]
  * — the exact thumbnail the home-screen widget renders — followed by edit
  * and delete actions. There's deliberately no title/subtitle text: the
@@ -593,6 +759,7 @@ data class TorchScreenState(
     val widgets: List<SavedTorchWidget>,
     val strobeRunning: Boolean = false,
     val morseText: String = "",
+    val rootAvailability: TorchRootAvailability = TorchRootAvailability.Unavailable,
 ) {
     companion object {
         /** First-emission placeholder used before the flows emit. */

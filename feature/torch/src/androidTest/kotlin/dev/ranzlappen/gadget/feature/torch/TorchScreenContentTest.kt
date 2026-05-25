@@ -56,6 +56,10 @@ class TorchScreenContentTest {
         onResolveIcon: (String) -> WidgetIconSource = {
             WidgetIconSource.Resource(R.drawable.ic_flashlight_on)
         },
+        onRootBoostBrightness: () -> Unit = {},
+        onRootDutyStrobe: () -> Unit = {},
+        onRootMultiLed: () -> Unit = {},
+        onRootThermal: () -> Unit = {},
     ) {
         composeTestRule.setContent {
             GadgetTestTheme {
@@ -75,6 +79,10 @@ class TorchScreenContentTest {
                     onEditWidget = onEditWidget,
                     onDeleteWidget = onDeleteWidget,
                     onResolveIcon = onResolveIcon,
+                    onRootBoostBrightness = onRootBoostBrightness,
+                    onRootDutyStrobe = onRootDutyStrobe,
+                    onRootMultiLed = onRootMultiLed,
+                    onRootThermal = onRootThermal,
                 )
             }
         }
