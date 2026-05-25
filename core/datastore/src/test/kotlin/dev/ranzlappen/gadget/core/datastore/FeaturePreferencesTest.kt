@@ -78,6 +78,18 @@ class FeaturePreferencesTest {
     }
 
     @Test
+    fun `saveIfAbsent writes when missing and skips when present`() = runTest {
+        val wroteFirst = prefs.saveIfAbsent(1, Sample("first", 1))
+        assertEquals(true, wroteFirst)
+        assertEquals(Sample("first", 1), prefs.get(1))
+
+        // Second call must NOT overwrite the existing entry.
+        val wroteSecond = prefs.saveIfAbsent(1, Sample("second", 2))
+        assertEquals(false, wroteSecond)
+        assertEquals(Sample("first", 1), prefs.get(1))
+    }
+
+    @Test
     fun `delete removes the entry from getAll`() = runTest {
         prefs.save(1, Sample("alpha", 1))
         prefs.save(2, Sample("beta", 2))

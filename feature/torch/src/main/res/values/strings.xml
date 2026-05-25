@@ -58,9 +58,6 @@
     <string name="torch_widget_default_name_strobe">Strobe</string>
     <string name="torch_widget_list_empty_title">No widgets yet</string>
     <string name="torch_widget_list_empty_subtitle">Use the buttons above to add a flashlight or strobe widget to your home screen.</string>
-    <string name="torch_widget_list_subtitle_flashlight">Flashlight</string>
-    <string name="torch_widget_list_subtitle_strobe">Strobe · %1$d Hz</string>
-    <string name="torch_widget_list_subtitle_strobe_sos">Strobe · %1$d Hz · SOS</string>
     <string name="torch_widget_list_action_edit">Edit widget</string>
     <string name="torch_widget_list_action_delete">Remove widget</string>
 
@@ -68,10 +65,10 @@
     <string name="torch_widget_config_title_new">New widget</string>
     <string name="torch_widget_config_title_edit">Edit widget</string>
     <string name="torch_widget_config_name_label">Name</string>
-    <string name="torch_widget_config_sos_label">SOS mode</string>
-    <string name="torch_widget_config_sos_supporting">Plays the Morse SOS pattern instead of a constant strobe.</string>
-    <string name="torch_widget_config_morse_label">Morse message (optional)</string>
-    <string name="torch_widget_config_morse_supporting">When set, the widget loops this text as Morse instead of strobing.</string>
+    <string name="torch_widget_config_sos_label">Morse mode</string>
+    <string name="torch_widget_config_sos_supporting">Plays the Morse message below instead of a constant strobe.</string>
+    <string name="torch_widget_config_morse_label">Morse message</string>
+    <string name="torch_widget_config_morse_supporting">Looped as Morse when Morse mode is on. Defaults to SOS if left blank.</string>
     <string name="torch_widget_config_save_new">Add to home screen</string>
     <string name="torch_widget_config_save_existing">Save</string>
     <string name="torch_widget_config_cancel">Cancel</string>

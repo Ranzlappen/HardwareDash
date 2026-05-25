@@ -187,7 +187,6 @@ class TorchViewModel @Inject constructor(
     private fun startStrobeService(morseText: String?) {
         val startIntent = Intent(context, StrobeService::class.java).apply {
             putExtra(StrobeService.EXTRA_RATE_HZ, state.value.defaultStrobeRateHz)
-            putExtra(StrobeService.EXTRA_SOS_MODE, false)
             if (!morseText.isNullOrBlank()) putExtra(StrobeService.EXTRA_MORSE_TEXT, morseText)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -223,6 +222,9 @@ class TorchViewModel @Inject constructor(
             type = WidgetType.Strobe,
             displayName = name,
             rateHz = state.value.defaultStrobeRateHz,
+            // Pre-fill the Morse box so flipping on Morse mode plays
+            // "SOS" out of the box without the user typing anything.
+            morseText = StrobeService.DEFAULT_MORSE_TEXT,
         )
         _sheetTarget.value = SheetTarget.New(config)
     }

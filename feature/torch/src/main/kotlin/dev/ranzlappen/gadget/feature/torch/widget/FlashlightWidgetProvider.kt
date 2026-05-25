@@ -91,7 +91,10 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
                     displayName = context.getString(R.string.torch_widget_default_name_flashlight),
                 )
                 Log.w(PendingTorchWidgetConfigs.TAG, "FlashlightWidget self-heal id=$id")
-                repo.save(id, default)
+                // saveIfAbsent (not save) so a concurrent pin-success
+                // write of the real config is never clobbered by this
+                // default. See TorchWidgetConfigRepository.saveIfAbsent.
+                repo.saveIfAbsent(id, default)
                 default
             }
             appWidgetManager.updateAppWidget(id, buildRemoteViews(context, id, isOn, config))

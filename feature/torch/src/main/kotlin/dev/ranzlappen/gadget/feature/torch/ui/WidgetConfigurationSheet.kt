@@ -92,7 +92,7 @@ fun WidgetConfigurationSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var name by remember(initial) { mutableStateOf(initial.displayName) }
     var rateHz by remember(initial) { mutableFloatStateOf(initial.rateHz) }
-    var sosMode by remember(initial) { mutableStateOf(initial.sosMode) }
+    var morseMode by remember(initial) { mutableStateOf(initial.morseMode) }
     var morseText by remember(initial) { mutableStateOf(initial.morseText) }
     var appearance by remember(initial) { mutableStateOf(initial.appearance) }
 
@@ -147,7 +147,7 @@ fun WidgetConfigurationSheet(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    Switch(checked = sosMode, onCheckedChange = { sosMode = it })
+                    Switch(checked = morseMode, onCheckedChange = { morseMode = it })
                 }
                 GadgetTextField(
                     value = morseText,
@@ -349,7 +349,7 @@ fun WidgetConfigurationSheet(
                             initial.copy(
                                 displayName = name.ifBlank { initial.displayName },
                                 rateHz = rateHz,
-                                sosMode = sosMode,
+                                morseMode = morseMode,
                                 morseText = morseText,
                                 appearance = appearance,
                             ),

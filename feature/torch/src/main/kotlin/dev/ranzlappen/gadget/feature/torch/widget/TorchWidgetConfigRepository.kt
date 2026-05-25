@@ -62,18 +62,31 @@ class TorchWidgetConfigRepository @Inject constructor(
      *  `onUpdate` to render every instance in a single pass. */
     suspend fun getAll(): Map<Int, TorchWidgetConfig> = prefs.getAll()
 
-    /** Single-config one-shot read. Used by [StrobeWidgetProvider]
-     *  to fetch the rate/SOS settings before starting the service.
-     *  Reads from the cached StateFlow when warm (microsecond cost)
-     *  and falls back to a DataStore read when the StateFlow hasn't
-     *  emitted yet. */
+    /** Single-config one-shot read. Reads from the cached StateFlow
+     *  when warm (microsecond cost) and falls back to a DataStore read
+     *  when the StateFlow hasn't emitted yet. */
     suspend fun get(appWidgetId: Int): TorchWidgetConfig? =
         all.value[appWidgetId] ?: prefs.get(appWidgetId)
+
+    /** Authoritative single-config read straight from DataStore,
+     *  bypassing the hot `all` cache. Used by [StrobeService] right
+     *  after a pin so a stale cache entry (e.g. a self-healed default
+     *  the StateFlow hasn't replaced yet) can't strand the first tap on
+     *  the wrong config. */
+    suspend fun getFresh(appWidgetId: Int): TorchWidgetConfig? =
+        prefs.get(appWidgetId)
 
     /** Persist a config keyed by `appWidgetId`. Replaces any
      *  existing entry. */
     suspend fun save(appWidgetId: Int, config: TorchWidgetConfig) =
         prefs.save(appWidgetId, config)
+
+    /** Persist a config only if `appWidgetId` has none yet. Atomic, so
+     *  a provider's self-heal can't clobber a real config that the
+     *  pin-success receiver is writing concurrently. Returns `true` if
+     *  it wrote. */
+    suspend fun saveIfAbsent(appWidgetId: Int, config: TorchWidgetConfig): Boolean =
+        prefs.saveIfAbsent(appWidgetId, config)
 
     /** Remove the config for `appWidgetId`. No-op if absent. */
     suspend fun delete(appWidgetId: Int) = prefs.delete(appWidgetId)

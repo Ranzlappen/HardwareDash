@@ -33,7 +33,7 @@ class WidgetConfigurationSheetTest {
         type = WidgetType.Strobe,
         displayName = "Test strobe",
         rateHz = 5f,
-        sosMode = false,
+        morseMode = false,
     )
 
     private val flashlightInitial = TorchWidgetConfig(

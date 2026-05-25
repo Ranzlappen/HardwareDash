@@ -71,6 +71,7 @@ fun TorchScreen(
         onAddStrobe = viewModel::onAddStrobeRequested,
         onEditWidget = viewModel::onEditWidget,
         onDeleteWidget = viewModel::onDeleteWidget,
+        onResolveIcon = viewModel::resolveWidgetIcon,
         modifier = modifier,
     )
 

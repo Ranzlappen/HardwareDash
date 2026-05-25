@@ -95,6 +95,32 @@ class FeaturePreferences<T : Any> internal constructor(
     }
 
     /**
+     * Persist [value] under [id] **only if no entry already exists**.
+     * Returns `true` if it wrote, `false` if an entry was already
+     * present.
+     *
+     * The existence check and the write happen inside a single
+     * [DataStore.edit] transaction, and DataStore serialises edits, so
+     * this can't clobber a concurrent [save]: whichever of a racing
+     * `save(real)` / `saveIfAbsent(default)` runs first, the
+     * unconditional `save` always wins the final value. This is what
+     * lets a widget provider self-heal a missing config without
+     * overwriting a real config that a pin-success write is committing
+     * at the same moment.
+     */
+    suspend fun saveIfAbsent(id: Int, value: T): Boolean {
+        var wrote = false
+        dataStore.edit { prefs ->
+            val key = stringPreferencesKey("$keyPrefix$id")
+            if (prefs[key] == null) {
+                prefs[key] = json.encodeToString(serializer, value)
+                wrote = true
+            }
+        }
+        return wrote
+    }
+
+    /**
      * Remove the entry for [id]. No-op if no such entry exists.
      */
     suspend fun delete(id: Int) {

@@ -8,8 +8,10 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -53,22 +55,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.ModulePermission
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
 import dev.ranzlappen.gadget.core.ui.module.OsNote
-import dev.ranzlappen.gadget.core.ui.component.CompactCard
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
 import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
+import dev.ranzlappen.gadget.core.ui.component.GlassSurface
+import dev.ranzlappen.gadget.feature.torch.ui.WidgetAppearancePreview
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
-import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
-import kotlin.math.roundToInt
 
 /**
  * Stateless TorchScreen content — receives a single [TorchScreenState]
@@ -107,6 +109,7 @@ fun TorchScreenContent(
     onAddStrobe: () -> Unit,
     onEditWidget: (SavedTorchWidget) -> Unit,
     onDeleteWidget: (SavedTorchWidget) -> Unit,
+    onResolveIcon: (String) -> Int,
     modifier: Modifier = Modifier,
 ) {
     ModuleScreenScaffold(
@@ -128,6 +131,7 @@ fun TorchScreenContent(
             StrobeDefaultsCard(state.defaultStrobeRateHz, onRateChange, onRateCommit)
             WidgetsCard(
                 widgets = state.widgets,
+                onResolveIcon = onResolveIcon,
                 onAddFlashlight = onAddFlashlight,
                 onAddStrobe = onAddStrobe,
                 onEditWidget = onEditWidget,
@@ -467,6 +471,7 @@ private fun StrobeDefaultsCard(
 @Composable
 private fun WidgetsCard(
     widgets: List<SavedTorchWidget>,
+    onResolveIcon: (String) -> Int,
     onAddFlashlight: () -> Unit,
     onAddStrobe: () -> Unit,
     onEditWidget: (SavedTorchWidget) -> Unit,
@@ -508,35 +513,61 @@ private fun WidgetsCard(
                 )
             } else {
                 widgets.forEach { widget ->
-                    CompactCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        title = widget.config.displayName,
-                        subtitle = widget.config.subtitleString(),
-                        leadingIcon = when (widget.config.type) {
-                            WidgetType.Flashlight -> Icons.Outlined.FlashlightOn
-                            WidgetType.Strobe -> Icons.Outlined.Bolt
-                        },
-                        trailingContent = {
-                            Row(horizontalArrangement = Arrangement.spacedBy(spacing.tiny)) {
-                                GadgetIconButton(
-                                    onClick = { onEditWidget(widget) },
-                                    icon = Icons.Outlined.Edit,
-                                    contentDescription = stringResource(
-                                        R.string.torch_widget_list_action_edit,
-                                    ),
-                                )
-                                GadgetIconButton(
-                                    onClick = { onDeleteWidget(widget) },
-                                    icon = Icons.Outlined.Delete,
-                                    contentDescription = stringResource(
-                                        R.string.torch_widget_list_action_delete,
-                                    ),
-                                )
-                            }
-                        },
+                    WidgetListRow(
+                        widget = widget,
+                        onResolveIcon = onResolveIcon,
+                        onEdit = { onEditWidget(widget) },
+                        onDelete = { onDeleteWidget(widget) },
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * One row in the in-app widget list. Shows a live [WidgetAppearancePreview]
+ * — the exact thumbnail the home-screen widget renders — followed by edit
+ * and delete actions. There's deliberately no title/subtitle text: the
+ * preview is the identifier, which removes the old (unhelpful) label
+ * column entirely.
+ */
+@Composable
+private fun WidgetListRow(
+    widget: SavedTorchWidget,
+    onResolveIcon: (String) -> Int,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    GlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        intensity = GlassIntensity.Subtle,
+        contentPadding = PaddingValues(spacing.small),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+        ) {
+            WidgetAppearancePreview(
+                appearance = widget.config.appearance,
+                iconResId = onResolveIcon(widget.config.appearance.iconStyle.activeKey),
+                modifier = Modifier.semantics {
+                    contentDescription = widget.config.displayName
+                },
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            GadgetIconButton(
+                onClick = onEdit,
+                icon = Icons.Outlined.Edit,
+                contentDescription = stringResource(R.string.torch_widget_list_action_edit),
+            )
+            GadgetIconButton(
+                onClick = onDelete,
+                icon = Icons.Outlined.Delete,
+                contentDescription = stringResource(R.string.torch_widget_list_action_delete),
+            )
         }
     }
 }
@@ -589,17 +620,6 @@ private fun TorchState.statusMessage(): String = when {
         stringResource(R.string.torch_status_permission_denied)
     isOn -> stringResource(R.string.torch_status_on)
     else -> stringResource(R.string.torch_status_off)
-}
-
-@Composable
-private fun TorchWidgetConfig.subtitleString(): String = when (type) {
-    WidgetType.Flashlight ->
-        stringResource(R.string.torch_widget_list_subtitle_flashlight)
-    WidgetType.Strobe -> stringResource(
-        if (sosMode) R.string.torch_widget_list_subtitle_strobe_sos
-        else R.string.torch_widget_list_subtitle_strobe,
-        rateHz.roundToInt(),
-    )
 }
 
 /** Circular-control diameter — all six buttons share it so they read as

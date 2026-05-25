@@ -79,7 +79,11 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                     displayName = context.getString(R.string.torch_widget_default_name_strobe),
                 )
                 Log.w(PendingTorchWidgetConfigs.TAG, "StrobeWidget self-heal id=$id")
-                repo.save(id, default)
+                // saveIfAbsent (not save) so a concurrent pin-success
+                // write of the real config — including its Morse text —
+                // is never clobbered by this default. This is the fix
+                // for "Morse only works after editing a new widget".
+                repo.saveIfAbsent(id, default)
                 default
             }
             appWidgetManager.updateAppWidget(id, buildRemoteViews(context, id, running, config))
@@ -131,7 +135,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                 Log.d(
                     PendingTorchWidgetConfigs.TAG,
                     "StrobeWidget tap id=$appWidgetId running->$willBeRunning " +
-                        "config=${config != null} sos=${config?.sosMode} " +
+                        "config=${config != null} morse=${config?.morseMode} " +
                         "fb=${config?.appearance?.feedback?.let { it::class.simpleName }} " +
                         "anim=${config?.appearance?.tap?.animation}",
                 )
