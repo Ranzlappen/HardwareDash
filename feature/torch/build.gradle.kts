@@ -33,6 +33,14 @@ dependencies {
     // :core:ui transitively brings :core:designsystem (DashCard,
     // GadgetFab, the design-system component library).
     implementation(project(":core:ui"))
+    // :core:monitoring — the reusable monitoring container + MetricSource
+    // seam (api-exposes :core:ui and :core:model). Torch is its first
+    // consumer: it charts torch intensity and contributes a MetricSource.
+    implementation(project(":core:monitoring"))
+    // :core:automation — the action contract (ModuleAction / ActionHandler).
+    // Torch is the first automation-ready module, exposing its actions for
+    // the future automation tool.
+    implementation(project(":core:automation"))
     // :core:navigation surfaces GadgetDestination.Torch + the
     // NavGraphBuilder.torchScreen() extension target.
     implementation(project(":core:navigation"))

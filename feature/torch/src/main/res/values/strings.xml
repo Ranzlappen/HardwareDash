@@ -43,6 +43,10 @@
     <string name="torch_action_strobe_start_a11y">Start strobe at the current default rate</string>
     <string name="torch_action_strobe_stop_a11y">Stop the running strobe</string>
 
+    <!-- ─── Monitoring (torch instantiation of MonitorContainer) ──── -->
+    <string name="torch_monitor_title">Torch activity</string>
+    <string name="torch_monitor_metric_name">Torch intensity</string>
+
     <!-- ─── Strobe defaults section ─────────────────────────────── -->
     <string name="torch_section_defaults_title">Strobe defaults</string>
     <string name="torch_section_defaults_subtitle">Used as the default for new strobe widgets you create.</string>

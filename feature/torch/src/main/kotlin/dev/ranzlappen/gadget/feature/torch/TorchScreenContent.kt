@@ -119,6 +119,7 @@ fun TorchScreenContent(
     onRootMultiLed: () -> Unit,
     onRootThermal: () -> Unit,
     modifier: Modifier = Modifier,
+    monitor: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
         title = stringResource(R.string.torch_screen_title),
@@ -137,6 +138,10 @@ fun TorchScreenContent(
                 onMorseTextChange = onMorseTextChange,
             )
             StrobeDefaultsCard(state.defaultStrobeRateHz, onRateChange, onRateCommit)
+            // Monitoring tile (torch's instantiation of the reusable
+            // MonitorContainer). Injected as a slot so the stateless content
+            // stays Hilt-free for previews/tests; TorchScreen supplies it.
+            monitor()
             WidgetsCard(
                 widgets = state.widgets,
                 onResolveIcon = onResolveIcon,
