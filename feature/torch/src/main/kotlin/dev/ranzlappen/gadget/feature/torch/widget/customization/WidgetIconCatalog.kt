@@ -3,14 +3,17 @@ package dev.ranzlappen.gadget.feature.torch.widget.customization
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.DrawableRes
+import androidx.exifinterface.media.ExifInterface
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.widget.PendingTorchWidgetConfigs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
@@ -124,11 +127,14 @@ class WidgetIconCatalog @Inject constructor(
                 Log.w(PendingTorchWidgetConfigs.TAG, "importCustomIcon: empty/unreadable stream for $uri")
                 return@withContext null
             }
-            val bitmap = decodeDownscaled(bytes, MAX_ICON_PX)
-            if (bitmap == null) {
+            val decoded = decodeDownscaled(bytes, MAX_ICON_PX)
+            if (decoded == null) {
                 Log.w(PendingTorchWidgetConfigs.TAG, "importCustomIcon: undecodable image for $uri")
                 return@withContext null
             }
+            // Gallery photos carry their rotation in EXIF, which the
+            // decoder ignores — apply it so the icon isn't sideways.
+            val bitmap = applyExifOrientation(decoded, bytes)
             customDir.mkdirs()
             val file = File(customDir, "${UUID.randomUUID()}.png")
             FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, PNG_QUALITY, out) }
@@ -168,6 +174,43 @@ class WidgetIconCatalog @Inject constructor(
         )
         if (scaled !== decoded) decoded.recycle()
         return scaled
+    }
+
+    /** Rotate / flip [bitmap] to honour the source image's EXIF
+     *  orientation (read from the same [bytes]). Returns the input
+     *  unchanged for normal/undefined orientation or if the transform
+     *  can't be allocated. */
+    private fun applyExifOrientation(bitmap: Bitmap, bytes: ByteArray): Bitmap {
+        val orientation = runCatching {
+            ExifInterface(ByteArrayInputStream(bytes))
+                .getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+        }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+
+        val matrix = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.postScale(-1f, 1f)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.postScale(1f, -1f)
+            ExifInterface.ORIENTATION_TRANSPOSE -> {
+                matrix.postRotate(90f)
+                matrix.postScale(-1f, 1f)
+            }
+            ExifInterface.ORIENTATION_TRANSVERSE -> {
+                matrix.postRotate(270f)
+                matrix.postScale(-1f, 1f)
+            }
+            else -> return bitmap
+        }
+        return try {
+            val rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+            if (rotated !== bitmap) bitmap.recycle()
+            rotated
+        } catch (e: OutOfMemoryError) {
+            Log.w(PendingTorchWidgetConfigs.TAG, "applyExifOrientation OOM — using unrotated icon", e)
+            bitmap
+        }
     }
 
     companion object {

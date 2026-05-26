@@ -48,6 +48,9 @@ dependencies {
     // kotlinx.serialization JSON — TorchWidgetConfig is @Serializable
     // and rides through FeaturePreferences<T>'s JSON encoder.
     implementation(libs.kotlinx.serialization.json)
+    // ExifInterface — applies a picked custom-icon image's EXIF
+    // orientation so gallery photos don't render sideways on the widget.
+    implementation(libs.androidx.exifinterface)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
