@@ -82,6 +82,7 @@ include(
     ":core:ui",
     ":core:model",
     ":core:data",
+    ":core:monitoring",
     ":core:datastore",
     ":core:domain",
     ":core:navigation",

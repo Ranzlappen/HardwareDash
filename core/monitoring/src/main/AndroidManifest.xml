@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+        <!--
+          No standard foregroundServiceType fits "continuous app-specific
+          signal monitoring", so we declare `specialUse` with a justification
+          property. Play distribution requires this subtype to be justified
+          in the console submission. Continuous monitoring rules out
+          `shortService` (capped at ~3 min).
+        -->
+        <service
+            android:name=".MonitorService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Continuous user-initiated monitoring of on-device hardware/sensor signals for charts, widgets, and notifications." />
+        </service>
+    </application>
+</manifest>
