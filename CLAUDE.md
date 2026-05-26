@@ -633,16 +633,32 @@ module** — features plug in via Hilt map multibindings resolved at
 ```kotlin
 interface MetricSource {
     val descriptor: MetricDescriptor   // metricKey, displayName, unit, min, max, category
-    suspend fun sample(): Float
+    suspend fun sample(): Float        // poll path (always required)
+    fun stream(): Flow<Float>? = null  // optional push path (null = poll)
 }
 ```
 - The **single** readable-signal contract — consumed by monitoring
-  **today** and the automation trigger-evaluator **later**. Lives in the
-  dependency-free `:core:model` (a `suspend` read, no `Flow`, no Compose)
-  so neither monitoring nor automation pulls in a feature.
+  **today** and the automation trigger-evaluator **later**. Lives in
+  `:core:model`; its only foundation dependency is pure-Kotlin
+  `kotlinx-coroutines-core` (the `-core`, **not** the `-android`, artifact)
+  for the optional `stream()` — no Android, no feature, no Compose.
 - A feature contributes one per signal:
   `@Binds @IntoMap @StringKey("<metricKey>") fun …(): MetricSource`.
   Reference: `TorchMetricSource` (`"torch_intensity"`).
+- **Push vs. poll** (chosen per signal so the shared service stays cheap as
+  modules multiply):
+  - **Poll** (`stream()` returns null, the default): the sampler calls
+    `sample()` every `pollIntervalMs`. Use for genuinely sampled signals
+    (battery %, temperature, RSSI) **and for any continuously-charted
+    signal** — a downsampled time chart needs a sample in every bucket, so
+    an actuator whose chart should show a filled plateau (the torch
+    reference) polls rather than emitting only on change.
+  - **Push** (override `stream()`): emit only when the value changes. Use
+    for sparse/event-only signals and to feed the automation evaluator; an
+    idle source then causes **zero** wakeups. `descriptor.max` is the
+    metric's full-scale ceiling and is allowed to be **capability-driven**
+    (the torch reports 100 on standard, ~150 on the rooted boost flavor) so
+    the chart/widget axes scale to the real range.
 - This is the deliberate fix for legacy `Link`, which hardcoded a
   70-entry metric registry inside `LinkService`.
 
@@ -655,8 +671,10 @@ interface MetricSource {
   `MetricSource`) and a title; config + history come from the framework
   via Hilt (`hiltViewModel(key = metricKey)`).
 - A glass `DashCard` with the live chart, an on/off toggle, and a
-  persistent settings block (sample interval `GadgetSlider`, chart-style
-  `GadgetChip`s, "show as widget" + "show as notification" switches).
+  persistent settings block (sample-interval `GadgetSlider`, **time-window
+  `GadgetSlider` in minutes** (1m–24h, default 5h), chart-style
+  `GadgetChip`s, "show as widget" + "show as notification" switches). The
+  window drives both the in-app chart and the chart widget.
 - **Embed it via a `@Composable () -> Unit` slot on the stateless screen
   content**, supplied by the Hilt route — so the stateless content +
   its previews/tests stay Hilt-free. Reference: `TorchScreenContent`'s
@@ -666,42 +684,98 @@ interface MetricSource {
 ### Other pieces
 - `MonitorConfig` (`@Serializable @Immutable`) — per-metric persisted
   settings (`enabled`, `pollIntervalMs`, `chartLayout`, `windowSeconds`,
-  `yMax`, `widgetEnabled`, `notificationEnabled`). Stored per metricKey
-  by `MonitorConfigRepository` (mirrors `TorchWidgetConfigRepository`).
+  `yMax`, `widgetEnabled`, `notificationEnabled`). `windowSeconds` defaults
+  to **5h** and is user-editable from 1m to **24h** (`MIN/MAX_WINDOW_SECONDS`;
+  the 24h cap matches `MonitorService.RETENTION_MS` so the chart never asks
+  for pruned data). Stored per metricKey by `MonitorConfigRepository`
+  (mirrors `TorchWidgetConfigRepository`).
 - `MonitorChart` — Vico **1.13.x old API** (`Chart` + `lineChart`/
-  `columnChart` + `entryOf`), **not** the new Cartesian API. **X is the
-  integer sample index, not a time value.** Vico caps x at **two decimal
-  places** and throws `IllegalArgumentException: The precision of the x
-  values is too large` at runtime (CI-invisible) for anything finer —
-  float-encoded elapsed-seconds (millisecond resolution = 3 decimals)
-  trips it, and rounding to 2 decimals is fragile (float error + the
-  0.25s min poll interval risk duplicate/again-too-precise x). An integer
-  index is exact, strictly increasing, and duplicate-free; map it back to
-  a real elapsed-time label with a `rememberBottomAxis(valueFormatter =
-  …)` that indexes a precomputed elapsed-seconds list (bounds-checked so
-  minor ticks return `""`). Y is pinned `0..yMax`. **Feed the
-  `Chart` a synchronous model built with `entryModelOf(...)` via the
-  `model =` overload — NOT a `ChartEntryModelProducer`.** The producer
-  generates its model on a background executor, so on the first frame the
-  chart draws against `ChartValuesProvider.Empty` and crashes at runtime
-  with `ChartValuesProvider.Empty#getChartValues shouldn't be used` (a
-  CI-invisible trap — it compiles fine). A synchronous model is populated
-  before the first draw; re-render on data change instead of relying on
-  the producer's diff animation. Guard `samples.size < 2` with a
-  "collecting…" placeholder so the model is never built from an empty list.
-- `MonitorService` — `specialUse` FGS that samples each enabled metric,
-  persists via `MonitorSampleRepository`, posts a **determinate** ongoing
-  notification per `notificationEnabled` metric, pushes widget repaints
-  per `widgetEnabled`, and **self-stops** when no metric is enabled.
-  `MonitorController.ensureStarted()` is the only start path.
-- `MonitorWidgetNotifier` — seam letting a feature refresh its own
-  monitor widget on each sample without monitoring depending on it
-  (`@IntoMap` keyed by metricKey). Reference: `TorchMonitorWidgetNotifier`
-  + `MonitorWidgetProvider` (determinate `ProgressBar`, toggle, reload).
+  `columnChart` + `entryOf`), **not** the new Cartesian API. It charts a
+  **downsampled** window (`MonitorViewModel.history()` → peak-per-bucket via
+  `MonitorSampleDao.observeBucketedSince`, capped at ~500 points), so a 24h
+  window stays a few hundred points instead of tens of thousands.
+  - **X = fixed-time-bucket index** (`MonitorBucket.bucket`, an integer),
+    NOT a timestamp and NOT a raw sample index. This dodges two
+    runtime-only (CI-invisible) Vico traps: (1) Vico caps x at **two decimal
+    places** (`IllegalArgumentException: The precision of the x values is too
+    large`), which fractional-time x trips; (2) Vico's scrollable content
+    width is `(maxX − minX) / xStep` segments where `xStep` is the GCD of x
+    deltas, so **real-time (millis/centisecond) x produces a tiny GCD over a
+    huge range → millions of segments → the layout hangs**. A bucket index
+    is unit-stepped and bounded by the bucket count. Empty buckets are
+    absent, so a monitoring gap shows as a proportional horizontal gap —
+    real time preserved without the precision/range cost. The bottom axis
+    multiplies the index by the bucket size (`history.bucketMs`) for an
+    elapsed-time label.
+  - **Scroll/zoom**: pass `chartScrollSpec = rememberChartScrollSpec(
+    isScrollEnabled = true, initialScroll = InitialScroll.End,
+    autoScrollCondition = AutoScrollCondition.OnModelSizeIncreased)` +
+    `isZoomEnabled = true` so the chart opens at the live (right) edge,
+    follows new data, and pinch-zooms into a sub-range of a long window.
+    (`rememberChartScrollSpec` is in `…compose.chart.scroll`; `InitialScroll`
+    in `…core.scroll`; `AutoScrollCondition` in `…core.chart.scroll`.)
+  - **Feed a synchronous model via the `model =` overload — NOT a
+    `ChartEntryModelProducer`.** The producer builds its model on a
+    background executor, so the first frame draws against
+    `ChartValuesProvider.Empty` and crashes at runtime with
+    `ChartValuesProvider.Empty#getChartValues shouldn't be used` (compiles
+    fine — CI-invisible). Guard `< 2` points with a "collecting…"
+    placeholder so the model is never built empty. Y is pinned `0..yMax`,
+    where `yMax = MonitorViewModel.maxValue()` = the source's
+    `descriptor.max` (capability-driven; 150 on the rooted torch).
+- `MonitorChartBitmapRenderer` (`core/monitoring`) — reusable pure-`Canvas`
+  sparkline (line/area/column, `0..yMax`) → `Bitmap`. RemoteViews can't host
+  a Vico chart, so the **chart widget** renders the downsampled window to a
+  bitmap and ships it via `setImageViewBitmap` (the same path the torch
+  custom-icon widget uses). No Vico/Compose deps, safe off the main thread.
+- `MonitorService` — the **single** `specialUse` FGS for the whole app
+  (features never run their own monitoring service/process). Per metric it
+  runs one structured coroutine that follows the metric's live config via
+  `collectLatest` and reads the source by **push** (`stream()` collected —
+  zero idle wakeups) or **poll** (`sample()` every `pollIntervalMs`, wrapped
+  in `withTimeout` so a slow source can't stall the shared dispatcher).
+  Scaling guards: DB **inserts** are per-reading (full-resolution history),
+  but **pruning is batched** (`PRUNE_INTERVAL_MS`, once/min) and **widget +
+  notification repaints are throttled** (`UI_UPDATE_THROTTLE_MS`) so a fast
+  poll rate can't cause an I/O / RemoteViews storm. Posts a **determinate**
+  ongoing notification per `notificationEnabled` metric, pushes widget
+  repaints per `widgetEnabled`, and **self-stops** when no metric is
+  enabled. `MonitorController.ensureStarted()` is the only start path.
+- `MonitorWidgetNotifier` — seam letting a feature refresh its own monitor
+  widget(s) when a sample lands without monitoring depending on it
+  (`@IntoMap` keyed by metricKey; the service already coalesces the calls).
+  Reference: `TorchMonitorWidgetNotifier` repaints **both** torch monitor
+  widgets — `MonitorWidgetProvider` (determinate `ProgressBar`) and
+  `MonitorChartWidgetProvider` (sparkline bitmap). Both share the metric's
+  `MonitorConfig` (window + enable toggle) and read its `descriptor.max` for
+  the progress ceiling / y-scale.
 - **Room lives in `:core:data`** (the `MonitorSample` time-series store +
-  `MonitorSampleRepository`). Repo convention: other modules read
-  `:core:data` repositories, never Room directly. First modular DB —
-  `schemas/` committed.
+  `MonitorSampleRepository`; `observeBucketedSince` is the downsample query).
+  Repo convention: other modules read `:core:data` repositories, never Room
+  directly. First modular DB — `schemas/` committed.
+
+### Monitoring scaling & limits (blueprint rules)
+As actuator/sensor modules multiply, follow these so monitoring stays within
+Android's process/battery/IPC limits:
+- **One shared `MonitorService`** for the whole app — never a per-module
+  service or process. N monitored modules cost one FGS.
+- **Prefer push (`stream()`) over poll** for event-driven signals; poll only
+  genuinely-sampled signals and continuously-charted ones (a downsampled
+  chart needs a sample per bucket — see `MonitorChart`).
+- **Downsample for display** (~500 in-app / ~120 widget points), keep a
+  **bounded retention** (24h), **batch the prune**, and **throttle** widget /
+  notification repaints. Never feed Vico tens of thousands of raw points.
+- **Chart x = integer bucket index** (Vico's 2-decimal cap + GCD/x-range
+  blow-up); scroll-to-end + zoom via `chartScrollSpec`.
+- **Other device limits to respect**: `specialUse` FGS needs a Play-console
+  justification (`<property>` in the manifest) and a continuous FGS depends
+  on `POST_NOTIFICATIONS` + Doze allowances; **RemoteViews bitmaps** must be
+  sized to the widget (the chart widget caps its bitmap) to stay under the
+  transaction-size limit; the AppWidget native update floor is ~30 min so
+  push via the notifier, never `updatePeriodMillis`; DB size/IOPS grow with
+  `poll rate × metric count` (retention + downsample + batched prune bound
+  it); prefer adaptive intervals and respect battery-saver for future
+  sensor sources.
 
 ---
 
