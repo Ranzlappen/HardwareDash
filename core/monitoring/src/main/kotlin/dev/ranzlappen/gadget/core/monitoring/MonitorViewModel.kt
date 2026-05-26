@@ -64,7 +64,7 @@ class MonitorViewModel @Inject constructor(
                 }
             }.flatMapLatest { sinceMs ->
                 sampleRepo.observeBucketedSince(metricKey, sinceMs, bucketMs)
-                    .map { MonitorHistory(buckets = it, bucketMs = bucketMs) }
+                    .map { MonitorHistory(buckets = it, bucketMs = bucketMs, windowMs = windowMs) }
             }
         }
 
@@ -81,11 +81,15 @@ class MonitorViewModel @Inject constructor(
 }
 
 /**
- * A downsampled chart window: peak-per-bucket [buckets] plus the [bucketMs]
- * each bucket index spans (so the chart maps indices back to elapsed time).
+ * A downsampled chart window: peak-per-bucket [buckets], the [bucketMs] each
+ * bucket index spans, and the total [windowMs] the chart covers. The chart
+ * pins its x-axis to the full window (`bucket index 0..windowMs/bucketMs`,
+ * right edge = now) so the axis always shows the configured span with
+ * "time-ago" labels anchored to now, and data flows in from the right.
  */
 @Immutable
 data class MonitorHistory(
     val buckets: List<MonitorBucket>,
     val bucketMs: Long,
+    val windowMs: Long,
 )
