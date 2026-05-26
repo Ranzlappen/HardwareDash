@@ -92,6 +92,7 @@ fun MonitorContent(
             MonitorChart(
                 buckets = history.buckets,
                 bucketMs = history.bucketMs,
+                windowMs = history.windowMs,
                 layout = config.chartLayout,
                 yMax = yMax,
             )
@@ -219,7 +220,11 @@ private const val POLL_MAX_S = 10f
 private val WINDOW_MIN_MIN = MonitorConfig.MIN_WINDOW_SECONDS / 60f
 private val WINDOW_MAX_MIN = MonitorConfig.MAX_WINDOW_SECONDS / 60f
 
-private val EmptyHistory = MonitorHistory(buckets = emptyList(), bucketMs = 1_000L)
+private val EmptyHistory = MonitorHistory(
+    buckets = emptyList(),
+    bucketMs = 1_000L,
+    windowMs = MonitorConfig.DEFAULT_WINDOW_SECONDS.toLong() * 1_000L,
+)
 
 // ─── Previews ───────────────────────────────────────────────────────
 
@@ -235,7 +240,7 @@ private fun MonitorContentPreview() = GadgetThemedPreview {
     MonitorContent(
         title = "Torch activity",
         config = MonitorConfig(enabled = true),
-        history = MonitorHistory(buckets = buckets, bucketMs = 1_000L),
+        history = MonitorHistory(buckets = buckets, bucketMs = 1_000L, windowMs = 30_000L),
         yMax = 100f,
         onConfigChange = {},
     )

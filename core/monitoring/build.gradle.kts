@@ -29,7 +29,6 @@ dependencies {
     api(project(":core:data"))
     implementation(project(":core:datastore"))
 
-    implementation(libs.vico.compose.m3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.core.ktx)

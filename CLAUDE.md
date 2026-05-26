@@ -672,7 +672,7 @@ interface MetricSource {
   via Hilt (`hiltViewModel(key = metricKey)`).
 - A glass `DashCard` with the live chart, an on/off toggle, and a
   persistent settings block (sample-interval `GadgetSlider`, **time-window
-  `GadgetSlider` in minutes** (1m–24h, default 5h), chart-style
+  `GadgetSlider` in minutes** (1m–24h, default 1m), chart-style
   `GadgetChip`s, "show as widget" + "show as notification" switches). The
   window drives both the in-app chart and the chart widget.
 - **Embed it via a `@Composable () -> Unit` slot on the stateless screen
@@ -685,49 +685,39 @@ interface MetricSource {
 - `MonitorConfig` (`@Serializable @Immutable`) — per-metric persisted
   settings (`enabled`, `pollIntervalMs`, `chartLayout`, `windowSeconds`,
   `yMax`, `widgetEnabled`, `notificationEnabled`). `windowSeconds` defaults
-  to **5h** and is user-editable from 1m to **24h** (`MIN/MAX_WINDOW_SECONDS`;
+  to **1m** and is user-editable from 1m to **24h** (`MIN/MAX_WINDOW_SECONDS`;
   the 24h cap matches `MonitorService.RETENTION_MS` so the chart never asks
   for pruned data). Stored per metricKey by `MonitorConfigRepository`
   (mirrors `TorchWidgetConfigRepository`).
-- `MonitorChart` — Vico **1.13.x old API** (`Chart` + `lineChart`/
-  `columnChart` + `entryOf`), **not** the new Cartesian API. It charts a
-  **downsampled** window (`MonitorViewModel.history()` → peak-per-bucket via
-  `MonitorSampleDao.observeBucketedSince`, capped at ~500 points), so a 24h
-  window stays a few hundred points instead of tens of thousands.
-  - **X = fixed-time-bucket index** (`MonitorBucket.bucket`, an integer),
-    NOT a timestamp and NOT a raw sample index. This dodges two
-    runtime-only (CI-invisible) Vico traps: (1) Vico caps x at **two decimal
-    places** (`IllegalArgumentException: The precision of the x values is too
-    large`), which fractional-time x trips; (2) Vico's scrollable content
-    width is `(maxX − minX) / xStep` segments where `xStep` is the GCD of x
-    deltas, so **real-time (millis/centisecond) x produces a tiny GCD over a
-    huge range → millions of segments → the layout hangs**. A bucket index
-    is unit-stepped and bounded by the bucket count. Empty buckets are
-    absent, so a monitoring gap shows as a proportional horizontal gap —
-    real time preserved without the precision/range cost. The bottom axis
-    multiplies the index by the bucket size (`history.bucketMs`) for an
-    elapsed-time label.
-  - **Scroll/zoom**: pass `chartScrollSpec = rememberChartScrollSpec(
-    isScrollEnabled = true, initialScroll = InitialScroll.End,
-    autoScrollCondition = AutoScrollCondition.OnModelSizeIncreased)` +
-    `isZoomEnabled = true` so the chart opens at the live (right) edge,
-    follows new data, and pinch-zooms into a sub-range of a long window.
-    (`rememberChartScrollSpec` is in `…compose.chart.scroll`; `InitialScroll`
-    and `AutoScrollCondition` are both in `…core.scroll`.)
-  - **Feed a synchronous model via the `model =` overload — NOT a
-    `ChartEntryModelProducer`.** The producer builds its model on a
-    background executor, so the first frame draws against
-    `ChartValuesProvider.Empty` and crashes at runtime with
-    `ChartValuesProvider.Empty#getChartValues shouldn't be used` (compiles
-    fine — CI-invisible). Guard `< 2` points with a "collecting…"
-    placeholder so the model is never built empty. Y is pinned `0..yMax`,
-    where `yMax = MonitorViewModel.maxValue()` = the source's
-    `descriptor.max` (capability-driven; 150 on the rooted torch).
+- `MonitorChart` — a **hand-drawn Compose `Canvas`** chart (line/area/column
+  per `chartLayout`), deliberately **not Vico**. Vico's scroll/zoom + per-
+  entry axis labelling fought the sliding-window model (labels relative to
+  the oldest present sample, erratic auto-scroll, coarse duplicate ticks
+  cramming on zoom across three failed x-encodings); drawing it ourselves is
+  fully controllable and matches the widget sparkline the user trusts. It
+  charts a **downsampled** window (`MonitorViewModel.history()` → peak-per-
+  bucket via `MonitorSampleDao.observeBucketedSince`, capped at ~500 points),
+  so a 24h window stays a few hundred points instead of tens of thousands.
+  - **X-axis is pinned to the full window, anchored to *now*.** A bucket's
+    index is `(timestamp − windowStart) / bucketMs` (range `0..windowMs/
+    bucketMs`); the chart pins x to that full range via `MonitorHistory
+    .windowMs`, so the right edge is always the present and the left is
+    `windowMs` ago **regardless of how much data exists yet** (fixes the old
+    "stuck at 0s, empty axis" bug). Data flows in from the right as it
+    accumulates; gaps stay proportional. X labels are **time-ago marks at
+    nice round intervals** (`…3h, 2h, 1h, now`), a fixed handful (~5) sharing
+    one unit derived from the interval — no per-entry labelling, so nothing
+    crams. Y is pinned `0..yMax`, where `yMax = MonitorViewModel.maxValue()`
+    = the source's `descriptor.max` (capability-driven; 150 on the rooted
+    torch). No horizontal scroll/pinch-zoom: to "zoom in", shrink the window
+    (the slider) — it re-queries at a finer bucket size.
+  - Axis text is drawn with `rememberTextMeasurer()` + `DrawScope.drawText`;
+    guard `< 2` points with a "collecting…" placeholder.
 - `MonitorChartBitmapRenderer` (`core/monitoring`) — reusable pure-`Canvas`
-  sparkline (line/area/column, `0..yMax`) → `Bitmap`. RemoteViews can't host
-  a Vico chart, so the **chart widget** renders the downsampled window to a
-  bitmap and ships it via `setImageViewBitmap` (the same path the torch
-  custom-icon widget uses). No Vico/Compose deps, safe off the main thread.
+  sparkline (line/area/column, `0..yMax`) → `Bitmap` for the **chart widget**
+  (RemoteViews can't host a Compose chart). Ships via `setImageViewBitmap`
+  (the same path the torch custom-icon widget uses). No Compose deps, safe
+  off the main thread.
 - `MonitorService` — the **single** `specialUse` FGS for the whole app
   (features never run their own monitoring service/process). Per metric it
   runs one structured coroutine that follows the metric's live config via
@@ -765,8 +755,9 @@ Android's process/battery/IPC limits:
 - **Downsample for display** (~500 in-app / ~120 widget points), keep a
   **bounded retention** (24h), **batch the prune**, and **throttle** widget /
   notification repaints. Never feed Vico tens of thousands of raw points.
-- **Chart x = integer bucket index** (Vico's 2-decimal cap + GCD/x-range
-  blow-up); scroll-to-end + zoom via `chartScrollSpec`.
+- **Chart x = fixed-time-bucket index, axis pinned to the full window
+  anchored to now** (hand-drawn `Canvas`, not Vico); "zoom" = change the
+  window so it re-queries at a finer bucket size.
 - **Other device limits to respect**: `specialUse` FGS needs a Play-console
   justification (`<property>` in the manifest) and a continuous FGS depends
   on `POST_NOTIFICATIONS` + Doze allowances; **RemoteViews bitmaps** must be
