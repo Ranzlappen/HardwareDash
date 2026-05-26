@@ -17,13 +17,15 @@ import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.Chart
 import com.patrykandpatrick.vico.compose.chart.column.columnChart
 import com.patrykandpatrick.vico.compose.chart.line.lineChart
+import com.patrykandpatrick.vico.compose.chart.scroll.rememberChartScrollSpec
 import com.patrykandpatrick.vico.core.axis.AxisPosition
 import com.patrykandpatrick.vico.core.axis.formatter.AxisValueFormatter
+import com.patrykandpatrick.vico.core.chart.scroll.AutoScrollCondition
 import com.patrykandpatrick.vico.core.chart.values.AxisValuesOverrider
 import com.patrykandpatrick.vico.core.entry.entryModelOf
 import com.patrykandpatrick.vico.core.entry.entryOf
-import dev.ranzlappen.gadget.core.data.MonitorSample
-import kotlin.math.roundToInt
+import com.patrykandpatrick.vico.core.scroll.InitialScroll
+import dev.ranzlappen.gadget.core.data.MonitorBucket
 
 /**
  * Fixed-size design tokens for the monitor chart. Per the no-raw-dp rule,
@@ -36,25 +38,40 @@ private object MonitorChartDefaults {
 }
 
 /**
- * Renders a metric's windowed history as a Vico line/area/column chart.
+ * Renders a metric's **downsampled** windowed history as a Vico line/area/
+ * column chart, opened at the live (right) edge and pinch-zoomable.
  *
- * X is the integer **sample index** (0, 1, 2, …). Vico rejects x values
- * with more than two decimal places ("The precision of the x values is
- * too large") and float-encoded elapsed-seconds (millisecond resolution)
- * trips that limit; an integer index is exact, strictly increasing (so no
- * duplicate-x), and survives sub-second poll intervals. The bottom axis
- * maps each index back to its real elapsed-seconds label. Y is pinned to
- * `0..yMax` so a flat signal doesn't autoscale into a misleading
+ * **X = fixed-time-bucket index** (the [MonitorBucket.bucket] integer). This
+ * encoding is the deliberate fix for two Vico traps that are invisible to a
+ * local compile and only blow up at runtime / at long windows:
+ *  - Vico rejects x values with more than two decimal places ("The precision
+ *    of the x values is too large"), so float-encoded elapsed-seconds crash.
+ *    A bucket index is an exact integer.
+ *  - Vico's scrollable content width is `(maxX - minX) / xStep` segments,
+ *    where `xStep` is the GCD of the x deltas. Real elapsed-millis/centisecond
+ *    timestamps produce a tiny GCD over a huge range (millions of segments)
+ *    and hang the layout. Bucket indices are unit-stepped and bounded by the
+ *    bucket count (a few hundred), so the content stays small.
+ * Empty buckets are simply absent, so a monitoring gap shows as a
+ * proportional horizontal gap rather than collapsing — real time is
+ * preserved without the precision/range cost of timestamp-based x. The
+ * bottom axis multiplies the index back to elapsed time via [bucketMs]. Y is
+ * pinned to `0..yMax` so a flat signal doesn't autoscale into a misleading
  * full-height line.
+ *
+ * Scroll/zoom: [rememberChartScrollSpec] opens at [InitialScroll.End] (now)
+ * and auto-follows new data ([AutoScrollCondition.OnModelSizeIncreased]);
+ * `isZoomEnabled` lets the user pinch to inspect a sub-range of a long window.
  */
 @Composable
 fun MonitorChart(
-    samples: List<MonitorSample>,
+    buckets: List<MonitorBucket>,
+    bucketMs: Long,
     layout: MonitorChartLayout,
     yMax: Float,
     modifier: Modifier = Modifier,
 ) {
-    if (samples.size < 2) {
+    if (buckets.size < 2) {
         Box(
             modifier = modifier
                 .fillMaxWidth()
@@ -70,25 +87,19 @@ fun MonitorChart(
         return
     }
 
-    // Build the model SYNCHRONOUSLY via entryModelOf and pass it through
-    // the `model` overload — NOT a ChartEntryModelProducer. The producer
-    // generates its model on a background executor, so on the first frame
-    // the Chart draws against ChartValuesProvider.Empty and throws
-    // "ChartValuesProvider.Empty#getChartValues shouldn't be used". A
-    // synchronous model exists before the first draw; we re-render on
-    // `samples` change, so the producer's diff animation isn't needed.
-    // x = sample index (see KDoc — Vico caps x at two decimal places).
-    val model = remember(samples) {
-        entryModelOf(samples.mapIndexed { index, sample -> entryOf(index.toFloat(), sample.value) })
+    // Synchronous model via entryModelOf + the `model` overload — NOT a
+    // ChartEntryModelProducer. The producer builds its model on a background
+    // executor, so the first frame draws against ChartValuesProvider.Empty
+    // and throws at runtime ("…Empty#getChartValues shouldn't be used"). A
+    // synchronous model exists before the first draw; we re-render on data
+    // change instead of relying on the producer's diff animation.
+    val model = remember(buckets) {
+        entryModelOf(buckets.map { entryOf(it.bucket.toFloat(), it.maxValue) })
     }
-    val elapsedSeconds = remember(samples) {
-        val t0 = samples.first().timestampMs
-        samples.map { (it.timestampMs - t0) / 1000f }
-    }
-    val bottomAxisFormatter = remember(elapsedSeconds) {
+    val firstBucket = remember(buckets) { buckets.first().bucket }
+    val bottomAxisFormatter = remember(firstBucket, bucketMs) {
         AxisValueFormatter<AxisPosition.Horizontal.Bottom> { value, _ ->
-            val index = value.roundToInt()
-            if (index in elapsedSeconds.indices) "${elapsedSeconds[index].roundToInt()}s" else ""
+            formatElapsed(((value.toLong() - firstBucket) * bucketMs).coerceAtLeast(0L))
         }
     }
 
@@ -103,8 +114,22 @@ fun MonitorChart(
         model = model,
         startAxis = rememberStartAxis(),
         bottomAxis = rememberBottomAxis(valueFormatter = bottomAxisFormatter),
+        chartScrollSpec = rememberChartScrollSpec(
+            isScrollEnabled = true,
+            initialScroll = InitialScroll.End,
+            autoScrollCondition = AutoScrollCondition.OnModelSizeIncreased,
+        ),
+        isZoomEnabled = true,
         modifier = modifier
             .fillMaxWidth()
             .height(MonitorChartDefaults.Height),
     )
+}
+
+/** Compact elapsed-time axis label: seconds under a minute, minutes under an
+ *  hour, else whole hours. */
+private fun formatElapsed(ms: Long): String = when {
+    ms < 60_000L -> "${ms / 1_000L}s"
+    ms < 3_600_000L -> "${ms / 60_000L}m"
+    else -> "${ms / 3_600_000L}h"
 }

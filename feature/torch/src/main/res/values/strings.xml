@@ -12,6 +12,9 @@
     <string name="widget_monitor_toggle_on">Monitoring on</string>
     <string name="widget_monitor_toggle_off">Monitoring off</string>
     <string name="widget_monitor_reload">Refresh</string>
+    <string name="widget_monitor_chart_label">Torch activity chart</string>
+    <string name="widget_monitor_chart_description">Live sparkline of torch activity over the configured time window.</string>
+    <string name="widget_monitor_chart_empty">Collecting data…</string>
 
     <!-- ─── Foreground-service notification ─────────────────────── -->
     <string name="strobe_notification_channel_name">Strobe service</string>

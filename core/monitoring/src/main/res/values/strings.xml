@@ -3,6 +3,7 @@
     <string name="monitor_toggle_label">Monitor this signal</string>
     <string name="monitor_poll_interval_label">Sample interval</string>
     <string name="monitor_poll_interval_suffix">s</string>
+    <string name="monitor_window_label">Time window</string>
     <string name="monitor_layout_section">Chart style</string>
     <string name="monitor_layout_line">Line</string>
     <string name="monitor_layout_area">Area</string>

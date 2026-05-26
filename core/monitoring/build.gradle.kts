@@ -20,11 +20,13 @@ android {
 }
 
 dependencies {
-    // `api` so embedding features reach DashCard/GadgetSlider/etc. and the
-    // MetricSource contract without an extra dependency line.
+    // `api` so embedding features reach DashCard/GadgetSlider/etc., the
+    // MetricSource contract, and the MonitorBucket/MonitorSample data types
+    // that MonitorChart/MonitorHistory expose, without an extra dependency
+    // line.
     api(project(":core:ui"))
     api(project(":core:model"))
-    implementation(project(":core:data"))
+    api(project(":core:data"))
     implementation(project(":core:datastore"))
 
     implementation(libs.vico.compose.m3)

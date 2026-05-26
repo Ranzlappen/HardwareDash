@@ -18,8 +18,18 @@ class MonitorSampleRepository @Inject constructor(
     suspend fun insert(metricKey: String, timestampMs: Long, value: Float) =
         dao.insert(MonitorSample(metricKey = metricKey, timestampMs = timestampMs, value = value))
 
-    fun observeSince(metricKey: String, sinceMs: Long): Flow<List<MonitorSample>> =
-        dao.observeSince(metricKey, sinceMs)
+    /**
+     * Downsampled windowed history — at most `window / bucketMs` peak-per-
+     * bucket points. Feeds the chart + chart widget so a long window (up to
+     * 24h) stays bounded. [bucketMs] is coerced to `>= 1` to keep the SQL
+     * bucket divisor safe.
+     */
+    fun observeBucketedSince(
+        metricKey: String,
+        sinceMs: Long,
+        bucketMs: Long,
+    ): Flow<List<MonitorBucket>> =
+        dao.observeBucketedSince(metricKey, sinceMs, bucketMs.coerceAtLeast(1L))
 
     fun observeLatest(metricKey: String): Flow<MonitorSample?> =
         dao.observeLatest(metricKey)

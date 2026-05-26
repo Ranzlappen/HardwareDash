@@ -14,19 +14,30 @@ import dev.ranzlappen.gadget.core.model.MetricSource
 import dev.ranzlappen.gadget.core.monitoring.MonitorWidgetNotifier
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
+import dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * Torch's readable signal for the monitoring framework (and, later, for
- * automation triggers). Standard intensity is binary — `100` when the
- * flash is on, `0` otherwise; rooted brightness reporting is a later
- * enhancement once `boostBrightness` lands.
+ * automation triggers).
+ *
+ * Intensity is reported as a percent of the stock max: `0` when off, `100`
+ * at a normal on, and up to the rooted boost ceiling (≈150) when the rooted
+ * flavor has driven [TorchRootCapabilities.boostBrightness]. The descriptor
+ * max is the flavor's ceiling ([TorchRootCapabilities.maxBrightnessPercent]),
+ * so the chart y-axis and the progress widgets scale to the real range — 100
+ * on standard (binary), 150 on the rooted boost flavor.
+ *
+ * Polled (not push): a continuously-displayed chart needs a sample in every
+ * downsample bucket, so [sample] is read on the monitor cadence rather than
+ * emitting only on change.
  */
 @Singleton
 class TorchMetricSource @Inject constructor(
     @ApplicationContext context: Context,
     private val controller: TorchController,
+    private val rootCapabilities: TorchRootCapabilities,
 ) : MetricSource {
 
     override val descriptor: MetricDescriptor = MetricDescriptor(
@@ -34,14 +45,19 @@ class TorchMetricSource @Inject constructor(
         displayName = context.getString(R.string.torch_monitor_metric_name),
         unit = "%",
         min = 0f,
-        max = 100f,
+        max = rootCapabilities.maxBrightnessPercent.toFloat(),
         category = MetricCategory.Actuator,
     )
 
-    override suspend fun sample(): Float = if (controller.state.value.isOn) 100f else 0f
+    override suspend fun sample(): Float {
+        if (!controller.state.value.isOn) return 0f
+        val commanded = rootCapabilities.commandedBrightnessPercent.value
+        return if (commanded > 0) commanded.toFloat() else NORMAL_ON_PERCENT
+    }
 
     companion object {
         const val METRIC_KEY = "torch_intensity"
+        private const val NORMAL_ON_PERCENT = 100f
     }
 }
 

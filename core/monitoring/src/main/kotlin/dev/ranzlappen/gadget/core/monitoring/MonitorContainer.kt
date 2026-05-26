@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
-import dev.ranzlappen.gadget.core.data.MonitorSample
+import dev.ranzlappen.gadget.core.data.MonitorBucket
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
@@ -30,11 +30,13 @@ import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewSizeClasses
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
+import kotlin.math.roundToInt
 
 /**
  * Drop-in monitoring tile for any feature: a glass [DashCard] with a live
  * chart, an on/off toggle, and a persistent settings block (sample
- * interval, chart style, "show as widget", "show as notification").
+ * interval, time window, chart style, "show as widget", "show as
+ * notification").
  *
  * Self-contained — supply a `metricKey` (matching a contributed
  * [dev.ranzlappen.gadget.core.model.MetricSource]) and a [title]; the
@@ -51,12 +53,14 @@ fun MonitorContainer(
     val configFlow = remember(metricKey, viewModel) { viewModel.config(metricKey) }
     val historyFlow = remember(metricKey, viewModel) { viewModel.history(metricKey) }
     val config by configFlow.collectAsState(initial = MonitorConfig())
-    val samples by historyFlow.collectAsState(initial = emptyList())
+    val history by historyFlow.collectAsState(initial = EmptyHistory)
+    val yMax = remember(metricKey, viewModel) { viewModel.maxValue(metricKey) }
 
     MonitorContent(
         title = title,
         config = config,
-        samples = samples,
+        history = history,
+        yMax = yMax,
         onConfigChange = { viewModel.update(metricKey, it) },
         modifier = modifier,
     )
@@ -71,7 +75,8 @@ fun MonitorContainer(
 fun MonitorContent(
     title: String,
     config: MonitorConfig,
-    samples: List<MonitorSample>,
+    history: MonitorHistory,
+    yMax: Float,
     onConfigChange: (MonitorConfig) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -84,7 +89,12 @@ fun MonitorContent(
                 onCheckedChange = { onConfigChange(config.copy(enabled = it)) },
             )
 
-            MonitorChart(samples = samples, layout = config.chartLayout, yMax = config.yMax)
+            MonitorChart(
+                buckets = history.buckets,
+                bucketMs = history.bucketMs,
+                layout = config.chartLayout,
+                yMax = yMax,
+            )
 
             if (config.enabled) {
                 // Local draft so dragging doesn't hammer DataStore at 60 Hz;
@@ -105,6 +115,30 @@ fun MonitorContent(
                             config.copy(
                                 pollIntervalMs = (pollDraftSeconds * 1_000f).toLong()
                                     .coerceAtLeast(250L),
+                            ),
+                        )
+                    },
+                )
+
+                // Time window in minutes (1m..24h). One value drives both the
+                // in-app chart and the chart widget.
+                var windowDraftMinutes by remember(config.windowSeconds) {
+                    mutableStateOf(config.windowSeconds / 60f)
+                }
+                GadgetSlider(
+                    value = windowDraftMinutes,
+                    onValueChange = { windowDraftMinutes = it },
+                    valueRange = WINDOW_MIN_MIN..WINDOW_MAX_MIN,
+                    label = stringResource(R.string.monitor_window_label),
+                    valueFormatter = { formatWindowMinutes(it) },
+                    onValueChangeFinished = {
+                        onConfigChange(
+                            config.copy(
+                                windowSeconds = (windowDraftMinutes * 60f).roundToInt()
+                                    .coerceIn(
+                                        MonitorConfig.MIN_WINDOW_SECONDS,
+                                        MonitorConfig.MAX_WINDOW_SECONDS,
+                                    ),
                             ),
                         )
                     },
@@ -172,8 +206,20 @@ private fun layoutLabel(layout: MonitorChartLayout): String = stringResource(
 private fun formatSeconds(seconds: Float): String =
     if (seconds >= 1f) "${seconds.toInt()}" else String.format("%.2f", seconds)
 
+/** "Xm" under an hour, otherwise whole/half hours ("2h", "1.5h"). */
+private fun formatWindowMinutes(minutes: Float): String {
+    val m = minutes.roundToInt()
+    if (m < 60) return "${m}m"
+    val hours = m / 60f
+    return if (hours % 1f == 0f) "${hours.toInt()}h" else String.format("%.1fh", hours)
+}
+
 private const val POLL_MIN_S = 0.25f
 private const val POLL_MAX_S = 10f
+private val WINDOW_MIN_MIN = MonitorConfig.MIN_WINDOW_SECONDS / 60f
+private val WINDOW_MAX_MIN = MonitorConfig.MAX_WINDOW_SECONDS / 60f
+
+private val EmptyHistory = MonitorHistory(buckets = emptyList(), bucketMs = 1_000L)
 
 // ─── Previews ───────────────────────────────────────────────────────
 
@@ -183,19 +229,14 @@ private const val POLL_MAX_S = 10f
 @GadgetPreviewSizeClasses
 @Composable
 private fun MonitorContentPreview() = GadgetThemedPreview {
-    val now = System.currentTimeMillis()
-    val samples = List(30) { i ->
-        MonitorSample(
-            id = i.toLong(),
-            metricKey = "preview",
-            timestampMs = now - (30 - i) * 1_000L,
-            value = if (i % 4 == 0) 100f else 0f,
-        )
+    val buckets = List(30) { i ->
+        MonitorBucket(bucket = i.toLong(), maxValue = if (i % 4 == 0) 100f else 0f)
     }
     MonitorContent(
         title = "Torch activity",
         config = MonitorConfig(enabled = true),
-        samples = samples,
+        history = MonitorHistory(buckets = buckets, bucketMs = 1_000L),
+        yMax = 100f,
         onConfigChange = {},
     )
 }

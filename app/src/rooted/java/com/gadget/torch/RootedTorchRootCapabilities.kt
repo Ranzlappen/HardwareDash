@@ -4,9 +4,17 @@ import com.gadget.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.feature.torch.TorchRootAvailability
 import dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities
 import dev.ranzlappen.gadget.feature.torch.TorchRootResult
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.gadget.torch.TorchControllerResult as LegacyResult
+import dev.ranzlappen.gadget.feature.torch.TorchController as ModularTorchController
 
 /**
  * Rooted-flavor adapter that surfaces the new modular Torch screen's root
@@ -15,15 +23,41 @@ import com.gadget.torch.TorchControllerResult as LegacyResult
  * This reuses the battle-tested sysfs / libsu paths and the `RootSafetyGate`
  * gating rather than re-implementing them, and maps the legacy result tiers
  * onto the modular [TorchRootResult].
+ *
+ * It also tracks the live commanded brightness: a successful boost records
+ * the commanded percent; turning the torch off (observed via the modular
+ * Camera2 controller) clears it back to 0 so a subsequent normal on reads as
+ * 100 rather than a stale boost. The monitoring metric folds this with the
+ * on/off state to chart real intensity up to the boost ceiling.
  */
 @Singleton
 class RootedTorchRootCapabilities @Inject constructor(
     private val registry: RootCapabilityRegistry,
     private val legacy: TorchController,
     private val paths: TorchSysfsPaths,
+    modularController: ModularTorchController,
 ) : TorchRootCapabilities {
 
     override val isRootedFlavor: Boolean get() = registry.isRootedFlavor
+
+    override val maxBrightnessPercent: Int = BRIGHTNESS_BOOST_CAP_PERCENT
+
+    private val _commandedBrightnessPercent = MutableStateFlow(0)
+    override val commandedBrightnessPercent: StateFlow<Int> =
+        _commandedBrightnessPercent.asStateFlow()
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    init {
+        // Clear the commanded boost whenever the torch turns off — a direct
+        // sysfs boost doesn't survive a Camera2 off→on cycle, so the next
+        // normal on must read as 100, not the previous boost.
+        scope.launch {
+            modularController.state.collect { state ->
+                if (!state.isOn) _commandedBrightnessPercent.value = 0
+            }
+        }
+    }
 
     override fun hasRootAccess(): Boolean = registry.hasRootAccess()
 
@@ -39,7 +73,11 @@ class RootedTorchRootCapabilities @Inject constructor(
     }
 
     override suspend fun boostBrightness(percent: Int): TorchRootResult =
-        legacy.boostBrightness(percent).toModular()
+        legacy.boostBrightness(percent).toModular().also { result ->
+            if (result is TorchRootResult.Ok) {
+                _commandedBrightnessPercent.value = percent.coerceIn(0, maxBrightnessPercent)
+            }
+        }
 
     override suspend fun dutyCycleStrobe(
         frequencyHz: Int,

@@ -128,6 +128,27 @@
         </receiver>
 
         <!--
+          Home-screen monitor chart widget — renders the windowed
+          torch_intensity history as a live sparkline Bitmap (RemoteViews
+          can't host a Compose/Vico chart). Shares the metric's MonitorConfig
+          (window + enable toggle) with the bar widget above. Added from the
+          launcher's widget picker; live updates pushed by MonitorService.
+        -->
+        <receiver
+            android:name=".widget.MonitorChartWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_monitor_chart_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="dev.ranzlappen.gadget.feature.torch.ACTION_CHART_TOGGLE" />
+                <action android:name="dev.ranzlappen.gadget.feature.torch.ACTION_CHART_RELOAD" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_monitor_chart_info" />
+        </receiver>
+
+        <!--
           Pin-success callback receiver for AppWidgetManager.requestPinAppWidget.
           exported=true because the OS dispatches the success
           PendingIntent from the system process. The custom action

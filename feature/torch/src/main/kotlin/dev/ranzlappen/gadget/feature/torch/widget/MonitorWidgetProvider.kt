@@ -12,6 +12,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import dev.ranzlappen.gadget.core.model.MetricSource
 import dev.ranzlappen.gadget.core.monitoring.MonitorConfigRepository
 import dev.ranzlappen.gadget.core.monitoring.MonitorController
 import dev.ranzlappen.gadget.core.data.MonitorSampleRepository
@@ -72,8 +73,9 @@ class MonitorWidgetProvider : AppWidgetProvider() {
         val ep = entry(context)
         val value = ep.sampleRepository().observeLatest(METRIC_KEY).first()?.value ?: 0f
         val enabled = ep.configRepository().get(METRIC_KEY).enabled
+        val max = ep.metricSources()[METRIC_KEY]?.descriptor?.max ?: DEFAULT_MAX
         appWidgetIds.forEach { id ->
-            appWidgetManager.updateAppWidget(id, buildRemoteViews(context, value, enabled))
+            appWidgetManager.updateAppWidget(id, buildRemoteViews(context, value, max, enabled))
         }
     }
 
@@ -86,14 +88,16 @@ class MonitorWidgetProvider : AppWidgetProvider() {
     private fun buildRemoteViews(
         context: Context,
         value: Float,
+        max: Float,
         monitoringEnabled: Boolean,
     ): RemoteViews = RemoteViews(context.packageName, R.layout.widget_monitor).apply {
-        val percent = value.roundToInt().coerceIn(0, 100)
+        val ceiling = max.roundToInt().coerceAtLeast(1)
+        val percent = value.roundToInt().coerceIn(0, ceiling)
         setTextViewText(
             R.id.widget_monitor_label,
             context.getString(R.string.widget_monitor_value, percent),
         )
-        setProgressBar(R.id.widget_monitor_bar, 100, percent, false)
+        setProgressBar(R.id.widget_monitor_bar, ceiling, percent, false)
         setTextViewText(
             R.id.widget_monitor_toggle,
             context.getString(
@@ -130,10 +134,12 @@ class MonitorWidgetProvider : AppWidgetProvider() {
         fun sampleRepository(): MonitorSampleRepository
         fun configRepository(): MonitorConfigRepository
         fun controller(): MonitorController
+        fun metricSources(): Map<String, @JvmSuppressWildcards MetricSource>
     }
 
     companion object {
         private const val TAG = "TorchMonitorWidget"
+        private const val DEFAULT_MAX = 100f
         private val METRIC_KEY = TorchMetricSource.METRIC_KEY
 
         const val ACTION_MONITOR_TOGGLE =

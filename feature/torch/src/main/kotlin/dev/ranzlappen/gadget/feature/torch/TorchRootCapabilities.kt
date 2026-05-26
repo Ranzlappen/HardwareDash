@@ -1,6 +1,7 @@
 package dev.ranzlappen.gadget.feature.torch
 
 import androidx.compose.runtime.Immutable
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Modular seam for the **rooted-flavor** Torch capabilities. Following the
@@ -19,6 +20,25 @@ interface TorchRootCapabilities {
 
     /** Whether this build is the rooted flavor (true even before [probe]). */
     val isRootedFlavor: Boolean
+
+    /**
+     * The torch's full-scale brightness ceiling as a percent of the stock
+     * `max_brightness`. `100` on standard (binary on/off); the rooted boost
+     * cap (currently 150) on the rooted flavor. The monitoring metric uses
+     * this as its descriptor max so the chart y-axis / progress widgets scale
+     * to the real ceiling instead of a hardcoded 100.
+     */
+    val maxBrightnessPercent: Int
+
+    /**
+     * Live last-commanded brightness as a percent of the stock max: `0` while
+     * the torch is off, `100` at a normal on, up to [maxBrightnessPercent]
+     * after a [boostBrightness]. Standard reports a constant `0` (it can't
+     * boost). Resets to `0` when the torch turns off (a fresh normal on then
+     * reads as 100, not a stale boost). Drives the monitoring metric's live
+     * value on the rooted flavor.
+     */
+    val commandedBrightnessPercent: StateFlow<Int>
 
     /** Cached "is there a usable root shell right now?". False until
      *  [probe] has resolved once. */
