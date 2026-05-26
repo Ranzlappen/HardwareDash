@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,7 +18,7 @@ import com.patrykandpatrick.vico.compose.chart.Chart
 import com.patrykandpatrick.vico.compose.chart.column.columnChart
 import com.patrykandpatrick.vico.compose.chart.line.lineChart
 import com.patrykandpatrick.vico.core.chart.values.AxisValuesOverrider
-import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
+import com.patrykandpatrick.vico.core.entry.entryModelOf
 import com.patrykandpatrick.vico.core.entry.entryOf
 import dev.ranzlappen.gadget.core.data.MonitorSample
 
@@ -64,12 +63,16 @@ fun MonitorChart(
         return
     }
 
-    val producer = remember { ChartEntryModelProducer() }
-    LaunchedEffect(samples) {
+    // Build the model SYNCHRONOUSLY via entryModelOf and pass it through
+    // the `model` overload — NOT a ChartEntryModelProducer. The producer
+    // generates its model on a background executor, so on the first frame
+    // the Chart draws against ChartValuesProvider.Empty and throws
+    // "ChartValuesProvider.Empty#getChartValues shouldn't be used". A
+    // synchronous model exists before the first draw; we re-render on
+    // `samples` change, so the producer's diff animation isn't needed.
+    val model = remember(samples) {
         val t0 = samples.first().timestampMs
-        producer.setEntries(
-            samples.map { entryOf((it.timestampMs - t0) / 1000f, it.value) },
-        )
+        entryModelOf(samples.map { entryOf((it.timestampMs - t0) / 1000f, it.value) })
     }
 
     val overrider = remember(yMax) { AxisValuesOverrider.fixed(minY = 0f, maxY = yMax) }
@@ -80,7 +83,7 @@ fun MonitorChart(
 
     Chart(
         chart = chart,
-        chartModelProducer = producer,
+        model = model,
         startAxis = rememberStartAxis(),
         bottomAxis = rememberBottomAxis(),
         modifier = modifier

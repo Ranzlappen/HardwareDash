@@ -669,10 +669,18 @@ interface MetricSource {
   `yMax`, `widgetEnabled`, `notificationEnabled`). Stored per metricKey
   by `MonitorConfigRepository` (mirrors `TorchWidgetConfigRepository`).
 - `MonitorChart` — Vico **1.13.x old API** (`Chart` + `lineChart`/
-  `columnChart` + `ChartEntryModelProducer` + `entryOf`), **not** the new
-  Cartesian API. X is seconds-since-window-start (raw epoch millis can't
-  be a chart `Float` — mantissa collapses sub-minute deltas); Y pinned
-  `0..yMax`.
+  `columnChart` + `entryOf`), **not** the new Cartesian API. X is
+  seconds-since-window-start (raw epoch millis can't be a chart `Float` —
+  mantissa collapses sub-minute deltas); Y pinned `0..yMax`. **Feed the
+  `Chart` a synchronous model built with `entryModelOf(...)` via the
+  `model =` overload — NOT a `ChartEntryModelProducer`.** The producer
+  generates its model on a background executor, so on the first frame the
+  chart draws against `ChartValuesProvider.Empty` and crashes at runtime
+  with `ChartValuesProvider.Empty#getChartValues shouldn't be used` (a
+  CI-invisible trap — it compiles fine). A synchronous model is populated
+  before the first draw; re-render on data change instead of relying on
+  the producer's diff animation. Guard `samples.size < 2` with a
+  "collecting…" placeholder so the model is never built from an empty list.
 - `MonitorService` — `specialUse` FGS that samples each enabled metric,
   persists via `MonitorSampleRepository`, posts a **determinate** ongoing
   notification per `notificationEnabled` metric, pushes widget repaints
