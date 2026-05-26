@@ -101,7 +101,7 @@ class WidgetConfigurationSheetTest {
         }
 
         composeTestRule
-            .onNodeWithText(res.getString(R.string.torch_widget_config_sos_label))
+            .onNodeWithText(res.getString(R.string.torch_widget_config_morse_mode_label))
             .assertIsDisplayed()
     }
 
@@ -128,7 +128,7 @@ class WidgetConfigurationSheetTest {
         var failed = false
         try {
             composeTestRule
-                .onNodeWithText(res.getString(R.string.torch_widget_config_sos_label))
+                .onNodeWithText(res.getString(R.string.torch_widget_config_morse_mode_label))
                 .assertIsDisplayed()
         } catch (_: AssertionError) {
             failed = true

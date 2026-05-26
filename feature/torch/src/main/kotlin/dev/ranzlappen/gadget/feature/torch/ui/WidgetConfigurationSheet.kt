@@ -154,11 +154,11 @@ fun WidgetConfigurationSheet(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = stringResource(R.string.torch_widget_config_sos_label),
+                            text = stringResource(R.string.torch_widget_config_morse_mode_label),
                             style = MaterialTheme.typography.labelLarge,
                         )
                         Text(
-                            text = stringResource(R.string.torch_widget_config_sos_supporting),
+                            text = stringResource(R.string.torch_widget_config_morse_mode_supporting),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

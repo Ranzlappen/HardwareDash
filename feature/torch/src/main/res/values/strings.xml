@@ -76,8 +76,8 @@
     <string name="torch_widget_config_title_new">New widget</string>
     <string name="torch_widget_config_title_edit">Edit widget</string>
     <string name="torch_widget_config_name_label">Name</string>
-    <string name="torch_widget_config_sos_label">Morse mode</string>
-    <string name="torch_widget_config_sos_supporting">Plays the Morse message below instead of a constant strobe.</string>
+    <string name="torch_widget_config_morse_mode_label">Morse mode</string>
+    <string name="torch_widget_config_morse_mode_supporting">Plays the Morse message below instead of a constant strobe.</string>
     <string name="torch_widget_config_morse_label">Morse message</string>
     <string name="torch_widget_config_morse_supporting">Looped as Morse when Morse mode is on. Defaults to SOS if left blank.</string>
     <string name="torch_widget_config_save_new">Add to home screen</string>
