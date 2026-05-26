@@ -713,7 +713,7 @@ interface MetricSource {
     `isZoomEnabled = true` so the chart opens at the live (right) edge,
     follows new data, and pinch-zooms into a sub-range of a long window.
     (`rememberChartScrollSpec` is in `…compose.chart.scroll`; `InitialScroll`
-    in `…core.scroll`; `AutoScrollCondition` in `…core.chart.scroll`.)
+    and `AutoScrollCondition` are both in `…core.scroll`.)
   - **Feed a synchronous model via the `model =` overload — NOT a
     `ChartEntryModelProducer`.** The producer builds its model on a
     background executor, so the first frame draws against
