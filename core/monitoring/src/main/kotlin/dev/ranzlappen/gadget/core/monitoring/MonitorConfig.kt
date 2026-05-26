@@ -20,9 +20,10 @@ data class MonitorConfig(
     val notificationEnabled: Boolean = false,
 ) {
     companion object {
-        /** 5h default window. The chart downsamples so a long window stays
-         *  cheap; the user can widen it up to [MAX_WINDOW_SECONDS] (24h). */
-        const val DEFAULT_WINDOW_SECONDS = 5 * 60 * 60
+        /** 1-minute default window — responsive out of the box (a point per
+         *  second). The chart downsamples so the user can widen it all the way
+         *  to [MAX_WINDOW_SECONDS] (24h) without the chart getting expensive. */
+        const val DEFAULT_WINDOW_SECONDS = 60
 
         /** 1-minute floor / 24-hour ceiling for the window slider. The 24h cap
          *  matches the sample-retention horizon, so the chart can never ask

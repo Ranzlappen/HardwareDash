@@ -672,7 +672,7 @@ interface MetricSource {
   via Hilt (`hiltViewModel(key = metricKey)`).
 - A glass `DashCard` with the live chart, an on/off toggle, and a
   persistent settings block (sample-interval `GadgetSlider`, **time-window
-  `GadgetSlider` in minutes** (1m–24h, default 5h), chart-style
+  `GadgetSlider` in minutes** (1m–24h, default 1m), chart-style
   `GadgetChip`s, "show as widget" + "show as notification" switches). The
   window drives both the in-app chart and the chart widget.
 - **Embed it via a `@Composable () -> Unit` slot on the stateless screen
@@ -685,7 +685,7 @@ interface MetricSource {
 - `MonitorConfig` (`@Serializable @Immutable`) — per-metric persisted
   settings (`enabled`, `pollIntervalMs`, `chartLayout`, `windowSeconds`,
   `yMax`, `widgetEnabled`, `notificationEnabled`). `windowSeconds` defaults
-  to **5h** and is user-editable from 1m to **24h** (`MIN/MAX_WINDOW_SECONDS`;
+  to **1m** and is user-editable from 1m to **24h** (`MIN/MAX_WINDOW_SECONDS`;
   the 24h cap matches `MonitorService.RETENTION_MS` so the chart never asks
   for pruned data). Stored per metricKey by `MonitorConfigRepository`
   (mirrors `TorchWidgetConfigRepository`).
