@@ -6,6 +6,12 @@
     <string name="widget_strobe_label">Strobe</string>
     <string name="widget_flashlight_description">Toggle the device flashlight.</string>
     <string name="widget_strobe_description">Toggle a configurable flashlight strobe.</string>
+    <string name="widget_monitor_label">Torch activity</string>
+    <string name="widget_monitor_description">Live readout of torch activity with a determinate progress bar.</string>
+    <string name="widget_monitor_value">Torch intensity: %1$d%%</string>
+    <string name="widget_monitor_toggle_on">Monitoring on</string>
+    <string name="widget_monitor_toggle_off">Monitoring off</string>
+    <string name="widget_monitor_reload">Refresh</string>
 
     <!-- ─── Foreground-service notification ─────────────────────── -->
     <string name="strobe_notification_channel_name">Strobe service</string>

@@ -11,6 +11,7 @@ import dagger.multibindings.StringKey
 import dev.ranzlappen.gadget.core.model.MetricCategory
 import dev.ranzlappen.gadget.core.model.MetricDescriptor
 import dev.ranzlappen.gadget.core.model.MetricSource
+import dev.ranzlappen.gadget.core.monitoring.MonitorWidgetNotifier
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
 import javax.inject.Inject
@@ -52,4 +53,11 @@ interface TorchMonitorModule {
     @IntoMap
     @StringKey(TorchMetricSource.METRIC_KEY)
     fun bindTorchMetricSource(source: TorchMetricSource): MetricSource
+
+    @Binds
+    @IntoMap
+    @StringKey(TorchMetricSource.METRIC_KEY)
+    fun bindTorchMonitorWidgetNotifier(
+        notifier: TorchMonitorWidgetNotifier,
+    ): MonitorWidgetNotifier
 }
