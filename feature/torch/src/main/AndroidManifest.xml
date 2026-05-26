@@ -107,6 +107,27 @@
         </receiver>
 
         <!--
+          Home-screen monitor widget — torch's "show as widget" reference
+          for the reusable monitoring framework. Renders the latest
+          torch_intensity sample as a determinate ProgressBar with a
+          toggle + reload. Added from the launcher's widget picker; live
+          updates pushed by MonitorService via TorchMonitorWidgetNotifier.
+        -->
+        <receiver
+            android:name=".widget.MonitorWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_monitor_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="dev.ranzlappen.gadget.feature.torch.ACTION_MONITOR_TOGGLE" />
+                <action android:name="dev.ranzlappen.gadget.feature.torch.ACTION_MONITOR_RELOAD" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_monitor_info" />
+        </receiver>
+
+        <!--
           Pin-success callback receiver for AppWidgetManager.requestPinAppWidget.
           exported=true because the OS dispatches the success
           PendingIntent from the system process. The custom action

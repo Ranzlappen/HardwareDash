@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monitor_toggle_label">Monitor this signal</string>
+    <string name="monitor_poll_interval_label">Sample interval</string>
+    <string name="monitor_poll_interval_suffix">s</string>
+    <string name="monitor_layout_section">Chart style</string>
+    <string name="monitor_layout_line">Line</string>
+    <string name="monitor_layout_area">Area</string>
+    <string name="monitor_layout_bars">Bars</string>
+    <string name="monitor_show_widget">Show as widget</string>
+    <string name="monitor_show_notification">Show as notification</string>
+    <string name="monitor_chart_collecting">Collecting data…</string>
+
+    <string name="monitor_notification_channel">Monitoring</string>
+    <string name="monitor_notification_summary_title">Monitoring active</string>
+    <plurals name="monitor_notification_summary_text">
+        <item quantity="one">%d signal</item>
+        <item quantity="other">%d signals</item>
+    </plurals>
+</resources>

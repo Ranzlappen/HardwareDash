@@ -11,6 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
+import dev.ranzlappen.gadget.feature.torch.monitor.TorchMetricSource
 import dev.ranzlappen.gadget.feature.torch.ui.WidgetConfigurationSheet
 
 /**
@@ -105,6 +107,12 @@ fun TorchScreen(
         onRootMultiLed = viewModel::onRootMultiLed,
         onRootThermal = viewModel::onRootThermalOverride,
         modifier = modifier,
+        monitor = {
+            MonitorContainer(
+                metricKey = TorchMetricSource.METRIC_KEY,
+                title = stringResource(R.string.torch_monitor_title),
+            )
+        },
     )
 
     sheetTarget?.let { target ->
