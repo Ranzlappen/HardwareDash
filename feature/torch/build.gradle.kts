@@ -37,6 +37,11 @@ dependencies {
     // seam (api-exposes :core:ui and :core:model). Torch is its first
     // consumer: it charts torch intensity and contributes a MetricSource.
     implementation(project(":core:monitoring"))
+    // :core:data — the monitor widget reads persisted sample history via
+    // MonitorSampleRepository (the sanctioned ":core:data repositories,
+    // never Room directly" path). :core:monitoring keeps :core:data as
+    // `implementation`, so torch declares it where it consumes it.
+    implementation(project(":core:data"))
     // :core:automation — the action contract (ModuleAction / ActionHandler).
     // Torch is the first automation-ready module, exposing its actions for
     // the future automation tool.
