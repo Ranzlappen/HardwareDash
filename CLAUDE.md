@@ -669,9 +669,17 @@ interface MetricSource {
   `yMax`, `widgetEnabled`, `notificationEnabled`). Stored per metricKey
   by `MonitorConfigRepository` (mirrors `TorchWidgetConfigRepository`).
 - `MonitorChart` — Vico **1.13.x old API** (`Chart` + `lineChart`/
-  `columnChart` + `entryOf`), **not** the new Cartesian API. X is
-  seconds-since-window-start (raw epoch millis can't be a chart `Float` —
-  mantissa collapses sub-minute deltas); Y pinned `0..yMax`. **Feed the
+  `columnChart` + `entryOf`), **not** the new Cartesian API. **X is the
+  integer sample index, not a time value.** Vico caps x at **two decimal
+  places** and throws `IllegalArgumentException: The precision of the x
+  values is too large` at runtime (CI-invisible) for anything finer —
+  float-encoded elapsed-seconds (millisecond resolution = 3 decimals)
+  trips it, and rounding to 2 decimals is fragile (float error + the
+  0.25s min poll interval risk duplicate/again-too-precise x). An integer
+  index is exact, strictly increasing, and duplicate-free; map it back to
+  a real elapsed-time label with a `rememberBottomAxis(valueFormatter =
+  …)` that indexes a precomputed elapsed-seconds list (bounds-checked so
+  minor ticks return `""`). Y is pinned `0..yMax`. **Feed the
   `Chart` a synchronous model built with `entryModelOf(...)` via the
   `model =` overload — NOT a `ChartEntryModelProducer`.** The producer
   generates its model on a background executor, so on the first frame the
