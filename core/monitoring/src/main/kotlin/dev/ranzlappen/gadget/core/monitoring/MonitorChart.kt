@@ -17,10 +17,13 @@ import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.Chart
 import com.patrykandpatrick.vico.compose.chart.column.columnChart
 import com.patrykandpatrick.vico.compose.chart.line.lineChart
+import com.patrykandpatrick.vico.core.axis.AxisPosition
+import com.patrykandpatrick.vico.core.axis.formatter.AxisValueFormatter
 import com.patrykandpatrick.vico.core.chart.values.AxisValuesOverrider
 import com.patrykandpatrick.vico.core.entry.entryModelOf
 import com.patrykandpatrick.vico.core.entry.entryOf
 import dev.ranzlappen.gadget.core.data.MonitorSample
+import kotlin.math.roundToInt
 
 /**
  * Fixed-size design tokens for the monitor chart. Per the no-raw-dp rule,
@@ -35,10 +38,14 @@ private object MonitorChartDefaults {
 /**
  * Renders a metric's windowed history as a Vico line/area/column chart.
  *
- * X is seconds elapsed since the oldest sample in the window (raw epoch
- * millis can't be a chart `Float` — the 24-bit mantissa collapses
- * sub-minute differences). Y is pinned to `0..yMax` so a flat signal
- * doesn't autoscale into a misleading full-height line.
+ * X is the integer **sample index** (0, 1, 2, …). Vico rejects x values
+ * with more than two decimal places ("The precision of the x values is
+ * too large") and float-encoded elapsed-seconds (millisecond resolution)
+ * trips that limit; an integer index is exact, strictly increasing (so no
+ * duplicate-x), and survives sub-second poll intervals. The bottom axis
+ * maps each index back to its real elapsed-seconds label. Y is pinned to
+ * `0..yMax` so a flat signal doesn't autoscale into a misleading
+ * full-height line.
  */
 @Composable
 fun MonitorChart(
@@ -70,9 +77,19 @@ fun MonitorChart(
     // "ChartValuesProvider.Empty#getChartValues shouldn't be used". A
     // synchronous model exists before the first draw; we re-render on
     // `samples` change, so the producer's diff animation isn't needed.
+    // x = sample index (see KDoc — Vico caps x at two decimal places).
     val model = remember(samples) {
+        entryModelOf(samples.mapIndexed { index, sample -> entryOf(index.toFloat(), sample.value) })
+    }
+    val elapsedSeconds = remember(samples) {
         val t0 = samples.first().timestampMs
-        entryModelOf(samples.map { entryOf((it.timestampMs - t0) / 1000f, it.value) })
+        samples.map { (it.timestampMs - t0) / 1000f }
+    }
+    val bottomAxisFormatter = remember(elapsedSeconds) {
+        AxisValueFormatter<AxisPosition.Horizontal.Bottom> { value, _ ->
+            val index = value.roundToInt()
+            if (index in elapsedSeconds.indices) "${elapsedSeconds[index].roundToInt()}s" else ""
+        }
     }
 
     val overrider = remember(yMax) { AxisValuesOverrider.fixed(minY = 0f, maxY = yMax) }
@@ -85,7 +102,7 @@ fun MonitorChart(
         chart = chart,
         model = model,
         startAxis = rememberStartAxis(),
-        bottomAxis = rememberBottomAxis(),
+        bottomAxis = rememberBottomAxis(valueFormatter = bottomAxisFormatter),
         modifier = modifier
             .fillMaxWidth()
             .height(MonitorChartDefaults.Height),
