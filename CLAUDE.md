@@ -287,6 +287,37 @@ fun GadgetFab(
 - **Notes**: passing `text` upgrades to an Extended FAB (icon +
   label). 56 dp diameter for the circular variant.
 
+#### `GadgetCircleControl` (`core/ui/component/GadgetCircleControl.kt`)
+```kotlin
+fun GadgetCircleControl(
+    icon: ImageVector,
+    contentDescription: String,
+    caption: String,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    active: Boolean = false,
+    hero: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    onHold: ((Boolean) -> Unit)? = null,
+)
+```
+- **When**: a row of identical captioned round controls — a circle
+  (icon) over a short label. Torch's toggle / hold / strobe / morse row
+  is the reference.
+- **NOT when**: a single CTA (use `GadgetPrimaryButton`/`GadgetFab`) or
+  toolbar chrome (use `GadgetIconButton`).
+- **Example**:
+  ```kotlin
+  GadgetCircleControl(icon = Icons.Filled.FlashlightOn,
+      contentDescription = "Torch", caption = "Torch", enabled = true,
+      active = isOn, hero = true, onClick = onToggle)
+  ```
+- **Notes**: pass `onClick` for tap **or** `onHold` for press-and-hold
+  (`true` on press, `false` on release/cancel via try/finally so it
+  can't stick). `hero` marks the primary action with a filled `primary`
+  surface; `active` tints the on-state. 56 dp touch target.
+  `contentDescription` required (icon-only).
+
 ### Surfaces
 
 #### `GlassSurface` (`core/ui/component/GlassSurface.kt`)
@@ -588,6 +619,153 @@ feature without breaking flavor isolation or the Hilt graph:
    `StandardTorchRootCapabilities` / `RootedTorchRootCapabilities`
    (app flavor bindings, the latter delegating to the legacy
    `RootedTorchController`).
+
+---
+
+## Monitoring framework (`:core:monitoring`, `:core:model`, `:core:data`)
+
+The reusable, drop-in monitoring container every actuator/sensor module
+embeds to chart + persist a signal. **Never depends on a feature
+module** — features plug in via Hilt map multibindings resolved at
+`:app`. Torch is the reference consumer.
+
+### The readable-signal seam — `MetricSource` (`:core:model`)
+```kotlin
+interface MetricSource {
+    val descriptor: MetricDescriptor   // metricKey, displayName, unit, min, max, category
+    suspend fun sample(): Float
+}
+```
+- The **single** readable-signal contract — consumed by monitoring
+  **today** and the automation trigger-evaluator **later**. Lives in the
+  dependency-free `:core:model` (a `suspend` read, no `Flow`, no Compose)
+  so neither monitoring nor automation pulls in a feature.
+- A feature contributes one per signal:
+  `@Binds @IntoMap @StringKey("<metricKey>") fun …(): MetricSource`.
+  Reference: `TorchMetricSource` (`"torch_intensity"`).
+- This is the deliberate fix for legacy `Link`, which hardcoded a
+  70-entry metric registry inside `LinkService`.
+
+### `MonitorContainer` (`core/monitoring/MonitorContainer.kt`)
+```kotlin
+@Composable fun MonitorContainer(metricKey: String, title: String, modifier: Modifier = Modifier)
+```
+- **When**: drop into any feature screen to chart + persist a metric.
+  Self-contained — supply a `metricKey` (matching a contributed
+  `MetricSource`) and a title; config + history come from the framework
+  via Hilt (`hiltViewModel(key = metricKey)`).
+- A glass `DashCard` with the live chart, an on/off toggle, and a
+  persistent settings block (sample interval `GadgetSlider`, chart-style
+  `GadgetChip`s, "show as widget" + "show as notification" switches).
+- **Embed it via a `@Composable () -> Unit` slot on the stateless screen
+  content**, supplied by the Hilt route — so the stateless content +
+  its previews/tests stay Hilt-free. Reference: `TorchScreenContent`'s
+  `monitor` slot, supplied by `TorchScreen`. The stateless renderer is
+  `MonitorContent` (preview-safe).
+
+### Other pieces
+- `MonitorConfig` (`@Serializable @Immutable`) — per-metric persisted
+  settings (`enabled`, `pollIntervalMs`, `chartLayout`, `windowSeconds`,
+  `yMax`, `widgetEnabled`, `notificationEnabled`). Stored per metricKey
+  by `MonitorConfigRepository` (mirrors `TorchWidgetConfigRepository`).
+- `MonitorChart` — Vico **1.13.x old API** (`Chart` + `lineChart`/
+  `columnChart` + `ChartEntryModelProducer` + `entryOf`), **not** the new
+  Cartesian API. X is seconds-since-window-start (raw epoch millis can't
+  be a chart `Float` — mantissa collapses sub-minute deltas); Y pinned
+  `0..yMax`.
+- `MonitorService` — `specialUse` FGS that samples each enabled metric,
+  persists via `MonitorSampleRepository`, posts a **determinate** ongoing
+  notification per `notificationEnabled` metric, pushes widget repaints
+  per `widgetEnabled`, and **self-stops** when no metric is enabled.
+  `MonitorController.ensureStarted()` is the only start path.
+- `MonitorWidgetNotifier` — seam letting a feature refresh its own
+  monitor widget on each sample without monitoring depending on it
+  (`@IntoMap` keyed by metricKey). Reference: `TorchMonitorWidgetNotifier`
+  + `MonitorWidgetProvider` (determinate `ProgressBar`, toggle, reload).
+- **Room lives in `:core:data`** (the `MonitorSample` time-series store +
+  `MonitorSampleRepository`). Repo convention: other modules read
+  `:core:data` repositories, never Room directly. First modular DB —
+  `schemas/` committed.
+
+---
+
+## Automation contract (`:core:automation`)
+
+The per-module **action** surface the final automation tool drives modules
+through. `:core:automation` holds **only the contract**; the rule model,
+condition-tree evaluator, scheduler, and builder UI are the final
+`:feature:automation-ui` feature (deferred — every module satisfies the
+contract first).
+```kotlin
+interface ActionHandler {
+    val featureId: String
+    val actions: List<ModuleAction>   // metadata: key, label, requiresRoot, params
+    suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult
+}
+```
+- A feature binds one handler: `@Binds @IntoMap @StringKey("<featureId>")
+  … : ActionHandler`. `ModuleActionRegistry` (injects the map) is what the
+  automation engine enumerates + dispatches through — **no central
+  hardcoding** (the fix for legacy `Link`'s hardcoded `LinkActionType`).
+- Reuse the feature's existing controllers/services in `dispatch` rather
+  than re-implementing hardware control. Reference: `TorchActionHandler`
+  (torch on/off, strobe start/stop, morse) delegating to `TorchController`
+  + `StrobeService`.
+- Contract types are plain (no `@Immutable` — `:core:automation` is not a
+  Compose module).
+
+---
+
+## Module Authoring Contract — the migration checklist
+
+> **Every** legacy→modular actuator/sensor migration (torch was the
+> first of many) MUST satisfy this so the final feature — a combined
+> **automation + monitoring** tool, the modular successor to the legacy
+> `Link` module — can discover and drive the module with **zero central
+> hardcoding**. Treat this as the acceptance checklist for a new feature
+> module. Torch is the worked example of every item.
+
+1. **Design system** — every token from `LocalGadgetTheme.current`; no
+   raw `dp` at call sites (per-file `Defaults` for fixed sizes); modifier
+   after required params, composable slots last; single-line +
+   `Ellipsis` text by default; the a11y contract (required
+   `contentDescription`, `defaultMinSize(48.dp)`, reduced-motion /
+   reduced-transparency).
+2. **Screen shell** — build on `ModuleScreenScaffold` with a `ModuleInfo`
+   (permissions / OS compatibility / firmware) **and** a tri-state
+   per-function `ModuleCapabilitiesSection` (green/amber/red, grant /
+   open-settings actions) covering **standard and rooted** functions.
+3. **Rooted seam** — feature-side capability interface; app-flavor no-op
+   (standard) + real (rooted) bindings reusing the legacy rooted
+   controller, gated by `RootSafetyGate` + a `RootFeatureKey`. Never
+   branch on `BuildConfig.IS_ROOTED`; never import su under `src/main`.
+4. **Reuse, don't reinvent** — `GadgetCircleControl`, `DashCard` /
+   `CompactCard` / `GlassSurface`, `GadgetSlider`, the tri-state
+   `GadgetStatusKind` badges, `MonitorContainer` / `MonitorChart`. Promote
+   a genuinely-reusable new primitive into `:core:ui` (as `GadgetCircleControl`
+   was) rather than leaving it feature-private.
+5. **Widgets + notifications** (when the feature has them) — AppWidget
+   provider + pin/launcher flow + **RemoteViews-safe** (`@RemoteView`)
+   layouts only; determinate-progress FGS notification; atomic
+   `saveIfAbsent` self-heal; inert "removed" handling on in-app delete;
+   custom-icon import (read-once + EXIF + `GetContent`). Patterns in
+   `:feature:torch/widget`.
+6. **Monitoring-ready** — implement a `MetricSource` per readable signal
+   and bind it `@IntoMap`; embed `MonitorContainer` for the chart;
+   history persists through `:core:data`. The same `MetricSource` feeds
+   automation triggers later — define signals once.
+7. **Automation-ready** — expose invocable actions via an `ActionHandler`
+   (with `ModuleAction` metadata + param schema + `requiresRoot`) bound
+   `@IntoMap`. The future automation engine resolves both maps
+   (`MetricSource` for triggers/conditions, `ActionHandler` for actions)
+   from Hilt and drives the module without importing it. **This is the
+   non-negotiable end-state requirement**: a module that isn't both
+   monitoring- and automation-ready is not "done".
+8. **Tests + previews + CI traps** — unit tests for serialization /
+   repos; instrumented tests for the stateless screen (kept Hilt-free);
+   the `@Preview` matrix policy (LightDark + LargeFont + RTL always,
+   SizeClasses for layout-driven components); and the CI-only pitfalls
+   below (no Android SDK locally → CI compiles, device verifies).
 
 ---
 
