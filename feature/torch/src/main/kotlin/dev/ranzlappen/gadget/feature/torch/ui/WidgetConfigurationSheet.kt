@@ -495,14 +495,20 @@ private fun IconPickerRow(
 ) {
     val spacing = LocalGadgetTheme.current.spacing
     val scope = rememberCoroutineScope()
-    // OpenDocument opens the SAF file manager; we copy the bytes into
-    // app storage immediately (in onImportCustomIcon) so the one-shot read
-    // grant is enough — no persistable Uri permission needed.
+    var importError by remember { mutableStateOf(false) }
+    // GetContent (ACTION_GET_CONTENT) reliably returns a single image
+    // from the file manager or gallery; we copy the bytes into app
+    // storage immediately, so the one-shot read grant is enough — no
+    // persistable Uri permission needed.
     val picker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument(),
+        ActivityResultContracts.GetContent(),
     ) { uri ->
         if (uri != null) {
-            scope.launch { onImportCustomIcon(uri)?.let(onSelect) }
+            importError = false
+            scope.launch {
+                val key = onImportCustomIcon(uri)
+                if (key != null) onSelect(key) else importError = true
+            }
         }
     }
     val customSelected = selectedKey.startsWith(WidgetIconCatalog.CUSTOM_PREFIX)
@@ -532,10 +538,17 @@ private fun IconPickerRow(
                     tintArgb = null,
                     selected = true,
                     contentDescription = stringResource(R.string.torch_widget_config_icon_custom),
-                    onClick = { picker.launch(IMAGE_MIME_TYPES) },
+                    onClick = { picker.launch(IMAGE_MIME_TYPE) },
                 )
             }
-            AddCustomSwatch(onClick = { picker.launch(IMAGE_MIME_TYPES) })
+            AddCustomSwatch(onClick = { picker.launch(IMAGE_MIME_TYPE) })
+        }
+        if (importError) {
+            Text(
+                text = stringResource(R.string.torch_widget_config_icon_import_error),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
     }
 }
@@ -617,8 +630,8 @@ private fun AddCustomSwatch(onClick: () -> Unit) {
     }
 }
 
-/** SAF mime filter for the custom-icon document picker. */
-private val IMAGE_MIME_TYPES = arrayOf("image/*")
+/** Mime filter for the custom-icon ACTION_GET_CONTENT picker. */
+private const val IMAGE_MIME_TYPE = "image/*"
 
 /** Compact discriminator for the feedback-kind chip row. The real
  *  payload is built lazily on selection via [FeedbackKind
