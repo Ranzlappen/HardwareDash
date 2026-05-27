@@ -24,6 +24,7 @@ import dev.ranzlappen.gadget.core.data.MonitorBucket
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
+import dev.ranzlappen.gadget.core.ui.component.GadgetExpandableCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
@@ -48,6 +49,7 @@ fun MonitorContainer(
     metricKey: String,
     title: String,
     modifier: Modifier = Modifier,
+    collapseId: String? = null,
     viewModel: MonitorViewModel = hiltViewModel(key = metricKey),
 ) {
     val configFlow = remember(metricKey, viewModel) { viewModel.config(metricKey) }
@@ -55,15 +57,35 @@ fun MonitorContainer(
     val config by configFlow.collectAsState(initial = MonitorConfig())
     val history by historyFlow.collectAsState(initial = EmptyHistory)
     val yMax = remember(metricKey, viewModel) { viewModel.maxValue(metricKey) }
+    val onConfigChange: (MonitorConfig) -> Unit = { viewModel.update(metricKey, it) }
 
-    MonitorContent(
-        title = title,
-        config = config,
-        history = history,
-        yMax = yMax,
-        onConfigChange = { viewModel.update(metricKey, it) },
-        modifier = modifier,
-    )
+    if (collapseId == null) {
+        MonitorContent(
+            title = title,
+            config = config,
+            history = history,
+            yMax = yMax,
+            onConfigChange = onConfigChange,
+            modifier = modifier,
+        )
+    } else {
+        val expandedFlow = remember(collapseId, viewModel) { viewModel.expanded(collapseId) }
+        val expanded by expandedFlow.collectAsState(initial = true)
+        GadgetExpandableCard(
+            title = title,
+            expanded = expanded,
+            onExpandedChange = { viewModel.setExpanded(collapseId, it) },
+            modifier = modifier,
+            icon = Icons.Outlined.ShowChart,
+        ) {
+            MonitorBody(
+                config = config,
+                history = history,
+                yMax = yMax,
+                onConfigChange = onConfigChange,
+            )
+        }
+    }
 }
 
 /**
@@ -80,10 +102,32 @@ fun MonitorContent(
     onConfigChange: (MonitorConfig) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val spacing = LocalGadgetTheme.current.spacing
     DashCard(modifier = modifier, title = title, icon = Icons.Outlined.ShowChart) {
-        Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
-            ToggleRow(
+        MonitorBody(
+            config = config,
+            history = history,
+            yMax = yMax,
+            onConfigChange = onConfigChange,
+        )
+    }
+}
+
+/**
+ * The inner content of the monitoring tile (everything below the card
+ * header). Extracted so the stateful [MonitorContainer] can host it inside
+ * either a plain [DashCard] or a collapsible [GadgetExpandableCard] without
+ * duplicating the settings block.
+ */
+@Composable
+private fun MonitorBody(
+    config: MonitorConfig,
+    history: MonitorHistory,
+    yMax: Float,
+    onConfigChange: (MonitorConfig) -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+        ToggleRow(
                 label = stringResource(R.string.monitor_toggle_label),
                 checked = config.enabled,
                 onCheckedChange = { onConfigChange(config.copy(enabled = it)) },
@@ -173,10 +217,9 @@ fun MonitorContent(
             }
         }
     }
-}
 
 @Composable
-private fun ToggleRow(
+internal fun ToggleRow(
     label: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,

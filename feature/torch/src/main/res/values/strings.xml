@@ -54,6 +54,7 @@
 
     <!-- ─── Monitoring (torch instantiation of MonitorContainer) ──── -->
     <string name="torch_monitor_title">Torch activity</string>
+    <string name="torch_live_monitor_title">Torch activity (live)</string>
     <string name="torch_monitor_metric_name">Torch intensity</string>
 
     <!-- ─── Strobe defaults section ─────────────────────────────── -->

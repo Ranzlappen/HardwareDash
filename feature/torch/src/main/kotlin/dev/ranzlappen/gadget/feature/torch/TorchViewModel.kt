@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
+import dev.ranzlappen.gadget.core.monitoring.CollapseStateRepository
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfigRepository
@@ -74,6 +75,7 @@ class TorchViewModel @Inject constructor(
     private val widgetCreator: TorchWidgetCreator,
     private val iconCatalog: WidgetIconCatalog,
     private val rootCapabilities: TorchRootCapabilities,
+    private val collapseRepo: CollapseStateRepository,
 ) : ViewModel() {
 
     /** Live availability of the rooted Torch capabilities (probed once on
@@ -132,12 +134,14 @@ class TorchViewModel @Inject constructor(
     }
 
     // Folded as a second step (combine maxes out at 5 typed sources) so
-    // the rooted-capability availability flows into the screen state.
+    // the rooted-capability availability + persisted card collapse state
+    // flow into the screen state.
     val state: StateFlow<TorchScreenState> = combine(
         baseState,
         rootAvailability,
-    ) { base, root ->
-        base.copy(rootAvailability = root)
+        collapseRepo.expandedStates(TorchSectionId.hoisted),
+    ) { base, root, expanded ->
+        base.copy(rootAvailability = root, expandedSections = expanded)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(SubscriptionTimeoutMillis),
@@ -219,6 +223,11 @@ class TorchViewModel @Inject constructor(
     /** Persist the in-app Morse message. */
     fun onMorseTextChange(text: String) {
         viewModelScope.launch { userPreferences.setMorseText(text) }
+    }
+
+    /** Toggle (and persist) a torch card's collapsed/expanded state. */
+    fun onSectionToggle(id: String) {
+        viewModelScope.launch { collapseRepo.toggle(id) }
     }
 
     // ─── Rooted tools ────────────────────────────────────────────────

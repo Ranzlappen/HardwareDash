@@ -49,8 +49,8 @@ import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.ModulePermission
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
 import dev.ranzlappen.gadget.core.ui.module.OsNote
-import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetCircleControl
+import dev.ranzlappen.gadget.core.ui.component.GadgetExpandableCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
@@ -66,22 +66,22 @@ import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
  * Stateless TorchScreen content — receives a single [TorchScreenState]
  * snapshot plus callbacks for every user-initiated event.
  *
- * Three sections render top-to-bottom inside the screen scaffold:
+ * The cards render top-to-bottom inside the screen scaffold; each is a
+ * collapsible [GadgetExpandableCard] whose expanded state persists — the
+ * torch-owned cards via [TorchScreenState.expandedSections] + [onSectionToggle]
+ * (see [TorchSectionId]), the two monitor tiles self-manage via their own
+ * `collapseId`:
  *
- *   1. **Torch toggle** — hero FAB centred in a [DashCard] plus an
- *      in-app strobe toggle button right below for immediate testing
- *      without pinning a widget.
+ *   1. **Torch toggle** — hero controls plus in-app strobe / Morse toggles
+ *      for immediate testing without pinning a widget.
  *   2. **Strobe defaults** — [GadgetSlider] feeding
  *      [UserPreferencesRepository.setDefaultStrobeRateHz]; the value
- *      is the default that gets captured into every new strobe widget
- *      at pin time. Existing widgets keep their per-instance rate.
- *      The slider is fully draggable AND the trailing "5 Hz" label
- *      is tap-to-edit (numeric input).
- *   3. **Your widgets** — list of [TorchScreenState.widgets] rendered
- *      as [CompactCard] rows with edit / delete actions, plus two
- *      stacked full-width [GadgetSecondaryButton]s for "Add flashlight"
- *      and "Add strobe". Vertical stacking + tightened button padding
- *      avoids the label-truncation bug from the first pass.
+ *      is the default captured into every new strobe widget at pin time.
+ *   3. **Monitoring** — two independent tiles supplied as slots: the
+ *      persisted history chart ([monitor]) and the in-memory live-stream
+ *      chart ([liveMonitor]).
+ *   4. **Your widgets** — the saved-widget list with edit / delete + add.
+ *   5. **Root tools** — privileged controls, shown only when rooted.
  */
 @Composable
 fun TorchScreenContent(
@@ -105,8 +105,15 @@ fun TorchScreenContent(
     onRootMultiLed: () -> Unit,
     onRootThermal: () -> Unit,
     modifier: Modifier = Modifier,
+    onSectionToggle: (String) -> Unit = {},
     monitor: @Composable () -> Unit = {},
+    liveMonitor: @Composable () -> Unit = {},
 ) {
+    // Every torch card is collapsible; the expanded state is persisted and
+    // hoisted in via [TorchScreenState.expandedSections] (default expanded).
+    // The monitor / live-monitor tiles manage their own collapse inside the
+    // reusable containers, so only the torch-owned cards read this map.
+    fun expanded(id: String): Boolean = state.expandedSections[id] ?: true
     ModuleScreenScaffold(
         title = stringResource(R.string.torch_screen_title),
         modifier = modifier,
@@ -115,6 +122,8 @@ fun TorchScreenContent(
                 torch = state.torch,
                 strobeRunning = state.strobeRunning,
                 morseText = state.morseText,
+                expanded = expanded(TorchSectionId.Controls),
+                onExpandedChange = { onSectionToggle(TorchSectionId.Controls) },
                 onToggleClick = onToggleClick,
                 onMomentaryHold = onMomentaryHold,
                 onStrobeToggle = onStrobeToggle,
@@ -123,11 +132,20 @@ fun TorchScreenContent(
                 onMorseHold = onMorseHold,
                 onMorseTextChange = onMorseTextChange,
             )
-            StrobeDefaultsCard(state.defaultStrobeRateHz, onRateChange, onRateCommit)
-            // Monitoring tile (torch's instantiation of the reusable
-            // MonitorContainer). Injected as a slot so the stateless content
-            // stays Hilt-free for previews/tests; TorchScreen supplies it.
+            StrobeDefaultsCard(
+                rateHz = state.defaultStrobeRateHz,
+                onRateChange = onRateChange,
+                onRateCommit = onRateCommit,
+                expanded = expanded(TorchSectionId.StrobeDefaults),
+                onExpandedChange = { onSectionToggle(TorchSectionId.StrobeDefaults) },
+            )
+            // Two independent monitoring tiles (torch's instantiations of the
+            // reusable containers). Injected as slots so the stateless content
+            // stays Hilt-free for previews/tests; TorchScreen supplies them.
+            // The persisted history chart…
             monitor()
+            // …and the in-memory live-stream chart, operating separately.
+            liveMonitor()
             WidgetsCard(
                 widgets = state.widgets,
                 onResolveIcon = onResolveIcon,
@@ -135,6 +153,8 @@ fun TorchScreenContent(
                 onAddStrobe = onAddStrobe,
                 onEditWidget = onEditWidget,
                 onDeleteWidget = onDeleteWidget,
+                expanded = expanded(TorchSectionId.Widgets),
+                onExpandedChange = { onSectionToggle(TorchSectionId.Widgets) },
             )
             // Rooted-only privileged controls — shown only when the
             // rooted app version reports a usable root shell.
@@ -144,11 +164,33 @@ fun TorchScreenContent(
                     onDutyStrobe = onRootDutyStrobe,
                     onMultiLed = onRootMultiLed,
                     onThermal = onRootThermal,
+                    expanded = expanded(TorchSectionId.RootTools),
+                    onExpandedChange = { onSectionToggle(TorchSectionId.RootTools) },
                 )
             }
         },
         moduleInfo = torchModuleInfo(state.torch, state.rootAvailability),
     )
+}
+
+/**
+ * Stable, persisted collapse-state ids for the torch screen's cards. The
+ * torch-owned cards in [hoisted] flow through [TorchViewModel] into
+ * [TorchScreenState.expandedSections]; [Monitor] / [LiveMonitor] are passed
+ * as `collapseId` to the reusable containers, which persist via the same
+ * `CollapseStateRepository`.
+ */
+internal object TorchSectionId {
+    const val Controls = "torch_controls"
+    const val StrobeDefaults = "torch_strobe_defaults"
+    const val Widgets = "torch_widgets"
+    const val RootTools = "torch_root_tools"
+    const val Monitor = "torch_monitor"
+    const val LiveMonitor = "torch_live_monitor"
+
+    /** Cards whose collapse state the screen hoists (not the self-managing
+     *  monitor containers). */
+    val hoisted = listOf(Controls, StrobeDefaults, Widgets, RootTools)
 }
 
 /**
@@ -295,6 +337,8 @@ private fun TorchToggleCard(
     torch: TorchState,
     strobeRunning: Boolean,
     morseText: String,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
     onToggleClick: () -> Unit,
     onMomentaryHold: (Boolean) -> Unit,
     onStrobeToggle: () -> Unit,
@@ -304,11 +348,13 @@ private fun TorchToggleCard(
     onMorseTextChange: (String) -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
-    DashCard(
-        modifier = Modifier.fillMaxWidth(),
+    GadgetExpandableCard(
         title = stringResource(
             if (torch.isOn) R.string.torch_state_on else R.string.torch_state_off,
         ),
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
@@ -456,11 +502,15 @@ private fun StrobeDefaultsCard(
     rateHz: Float,
     onRateChange: (Float) -> Unit,
     onRateCommit: () -> Unit,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
-    DashCard(
-        modifier = Modifier.fillMaxWidth(),
+    GadgetExpandableCard(
         title = stringResource(R.string.torch_section_defaults_title),
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+        modifier = Modifier.fillMaxWidth(),
         icon = Icons.Outlined.FlashlightOn,
     ) {
         Column(
@@ -495,11 +545,15 @@ private fun WidgetsCard(
     onAddStrobe: () -> Unit,
     onEditWidget: (SavedTorchWidget) -> Unit,
     onDeleteWidget: (SavedTorchWidget) -> Unit,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
-    DashCard(
-        modifier = Modifier.fillMaxWidth(),
+    GadgetExpandableCard(
         title = stringResource(R.string.torch_section_widgets_title),
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
@@ -557,11 +611,15 @@ private fun RootToolsCard(
     onDutyStrobe: () -> Unit,
     onMultiLed: () -> Unit,
     onThermal: () -> Unit,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
-    DashCard(
-        modifier = Modifier.fillMaxWidth(),
+    GadgetExpandableCard(
         title = stringResource(R.string.torch_root_tools_title),
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+        modifier = Modifier.fillMaxWidth(),
         icon = Icons.Outlined.Bolt,
     ) {
         Column(
@@ -667,6 +725,9 @@ data class TorchScreenState(
     val strobeRunning: Boolean = false,
     val morseText: String = "",
     val rootAvailability: TorchRootAvailability = TorchRootAvailability.Unavailable,
+    /** Persisted expanded/collapsed state per [TorchSectionId]; missing =
+     *  expanded. */
+    val expandedSections: Map<String, Boolean> = emptyMap(),
 ) {
     companion object {
         /** First-emission placeholder used before the flows emit. */

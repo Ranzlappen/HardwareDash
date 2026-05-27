@@ -26,10 +26,18 @@ class MonitorViewModel @Inject constructor(
     private val configRepo: MonitorConfigRepository,
     private val sampleRepo: MonitorSampleRepository,
     private val controller: MonitorController,
+    private val collapseRepo: CollapseStateRepository,
     private val metricSources: Map<String, @JvmSuppressWildcards MetricSource>,
 ) : ViewModel() {
 
     fun config(metricKey: String): Flow<MonitorConfig> = configRepo.config(metricKey)
+
+    /** Persisted expanded/collapsed state for a collapsible host id. */
+    fun expanded(id: String): Flow<Boolean> = collapseRepo.expanded(id)
+
+    fun setExpanded(id: String, expanded: Boolean) {
+        viewModelScope.launch { collapseRepo.setExpanded(id, expanded) }
+    }
 
     /**
      * The metric's full-scale ceiling, from its [MetricSource] descriptor —

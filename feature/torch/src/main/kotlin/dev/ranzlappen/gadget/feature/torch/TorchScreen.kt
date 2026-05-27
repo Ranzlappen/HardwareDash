@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
 import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
 import dev.ranzlappen.gadget.feature.torch.monitor.TorchMetricSource
 import dev.ranzlappen.gadget.feature.torch.ui.WidgetConfigurationSheet
@@ -107,10 +108,19 @@ fun TorchScreen(
         onRootMultiLed = viewModel::onRootMultiLed,
         onRootThermal = viewModel::onRootThermalOverride,
         modifier = modifier,
+        onSectionToggle = viewModel::onSectionToggle,
         monitor = {
             MonitorContainer(
                 metricKey = TorchMetricSource.METRIC_KEY,
                 title = stringResource(R.string.torch_monitor_title),
+                collapseId = TorchSectionId.Monitor,
+            )
+        },
+        liveMonitor = {
+            LiveMonitorContainer(
+                metricKey = TorchMetricSource.METRIC_KEY,
+                title = stringResource(R.string.torch_live_monitor_title),
+                collapseId = TorchSectionId.LiveMonitor,
             )
         },
     )

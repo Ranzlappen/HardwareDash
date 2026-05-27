@@ -12,6 +12,20 @@
     <string name="monitor_show_notification">Show as notification</string>
     <string name="monitor_chart_collecting">Collecting data…</string>
 
+    <!-- Live monitor (in-memory realtime chart) -->
+    <string name="live_monitor_toggle_label">Live stream</string>
+    <string name="live_monitor_freeze">Freeze</string>
+    <string name="live_monitor_auto">Auto</string>
+    <string name="live_monitor_stat_now">Now</string>
+    <string name="live_monitor_stat_min">Min</string>
+    <string name="live_monitor_stat_max">Max</string>
+    <string name="live_monitor_stat_avg">Avg</string>
+    <string name="live_monitor_interval_label">Refresh</string>
+    <string name="live_monitor_interval_suffix">ms</string>
+    <string name="live_monitor_window_label">Live window</string>
+    <string name="live_monitor_window_suffix">s</string>
+    <string name="live_monitor_stat_empty">—</string>
+
     <string name="monitor_notification_channel">Monitoring</string>
     <string name="monitor_notification_summary_title">Monitoring active</string>
     <plurals name="monitor_notification_summary_text">
