@@ -28,4 +28,8 @@
 
     <!-- Per-function capability section -->
     <string name="module_capabilities_title">Functions &amp; compatibility</string>
+
+    <!-- GadgetExpandableCard (collapsible card) state announcements -->
+    <string name="expandable_card_state_expanded">Expanded</string>
+    <string name="expandable_card_state_collapsed">Collapsed</string>
 </resources>

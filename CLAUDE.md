@@ -387,6 +387,33 @@ fun CompactCard(
 - **NOT when**: dashboard tiles, hero surfaces.
 - **Example**: see `BatteryListRow` placeholder in `:feature:dashboard`.
 
+#### `GadgetExpandableCard` (`core/ui/component/GadgetExpandableCard.kt`)
+```kotlin
+fun GadgetExpandableCard(
+    title: String,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    intensity: GlassIntensity = GlassIntensity.Standard,
+    contentPadding: PaddingValues = PaddingValues(GadgetSpacing.Medium),
+    content: @Composable () -> Unit,
+)
+```
+- **When**: a collapsible `DashCard` — same glass surface + icon/title
+  header, but the header is a toggle that shows/hides the body with a
+  rotating chevron. Use it for screen sections the user may want to fold
+  away.
+- **NOT when**: a always-open tile (use `DashCard`) or a list row
+  (`CompactCard`).
+- **Stateless** — `expanded` is hoisted. For **persisted** collapse state
+  pair it with `:core:monitoring`'s `CollapseStateRepository` (see the
+  collapse-state blueprint in the monitoring section); for ephemeral state a
+  `rememberSaveable { mutableStateOf(true) }` suffices.
+- **Notes**: header is one `toggleable` node (role Button) announcing
+  "Expanded"/"Collapsed" via `stateDescription`; the chevron is decorative.
+  Honors `LocalReducedMotion` (chevron + body enter/exit pinned instant).
+
 ### Inputs
 
 #### `GadgetTextField` (`core/ui/component/TextFields.kt`)
@@ -664,22 +691,66 @@ interface MetricSource {
 
 ### `MonitorContainer` (`core/monitoring/MonitorContainer.kt`)
 ```kotlin
-@Composable fun MonitorContainer(metricKey: String, title: String, modifier: Modifier = Modifier)
+@Composable fun MonitorContainer(metricKey: String, title: String, modifier: Modifier = Modifier, collapseId: String? = null)
 ```
-- **When**: drop into any feature screen to chart + persist a metric.
-  Self-contained — supply a `metricKey` (matching a contributed
-  `MetricSource`) and a title; config + history come from the framework
-  via Hilt (`hiltViewModel(key = metricKey)`).
+- **When**: drop into any feature screen to chart + **persist** a metric for
+  **long histories**. Self-contained — supply a `metricKey` (matching a
+  contributed `MetricSource`) and a title; config + history come from the
+  framework via Hilt (`hiltViewModel(key = metricKey)`).
 - A glass `DashCard` with the live chart, an on/off toggle, and a
   persistent settings block (sample-interval `GadgetSlider`, **time-window
   `GadgetSlider` in minutes** (1m–24h, default 1m), chart-style
   `GadgetChip`s, "show as widget" + "show as notification" switches). The
   window drives both the in-app chart and the chart widget.
+- Pass `collapseId` to render inside a collapsible `GadgetExpandableCard`
+  whose expanded state persists via `CollapseStateRepository` (the stateless
+  `MonitorContent` / extracted `MonitorBody` stay Hilt-free).
 - **Embed it via a `@Composable () -> Unit` slot on the stateless screen
   content**, supplied by the Hilt route — so the stateless content +
   its previews/tests stay Hilt-free. Reference: `TorchScreenContent`'s
   `monitor` slot, supplied by `TorchScreen`. The stateless renderer is
   `MonitorContent` (preview-safe).
+
+### `LiveMonitorContainer` (`core/monitoring/LiveMonitorContainer.kt`)
+```kotlin
+@Composable fun LiveMonitorContainer(metricKey: String, title: String, modifier: Modifier = Modifier, collapseId: String? = null)
+```
+- **When**: the **live, in-memory** companion to `MonitorContainer`, for
+  realtime analysis. The two are **independent** — embed both for a metric.
+  This one **bypasses Room and the foreground service**: `LiveMonitorViewModel`
+  reads the `MetricSource` directly (prefers `stream()`, else fast-polls
+  `sample()` every `intervalMs`, default 100 ms) into a bounded ring buffer
+  and exposes a fast `LiveTrace` (samples + current/min/max/avg).
+- The card is a "Live stream" on/off toggle, a `LiveChart`, a stats row, a
+  **Freeze** chip (hold the trace for inspection), and **ephemeral** refresh /
+  live-window sliders (live is a transient surface — settings aren't
+  persisted, unlike `MonitorConfig`).
+- **Lifecycle**: sampling runs only while the card is composed (a
+  `DisposableEffect` calls `start`/`stop`) **and** the toggle is on; freeze
+  pauses it. So an off-screen or off/frozen card incurs no wakeups.
+- `LiveChart` — a hand-drawn `Canvas` with **soft auto-scale Y** (displayed
+  bounds *ease* toward the visible buffer's padded min/max via
+  `animateFloatAsState`, honoring `LocalReducedMotion`) **plus pinch-zoom /
+  vertical-drag** for a manual Y viewport; an **Auto** chip / double-tap
+  returns to soft-auto. X is the live window anchored to now. Reuses the
+  cubic-Bézier half-step smoothing from `core/ui`'s `SparklineChart`.
+- Embed via its own slot (`liveMonitor`), the same Hilt-free seam as
+  `monitor`. `LiveMonitorContent` is the preview-safe stateless renderer.
+
+### Persistent collapsible cards — `CollapseStateRepository`
+- **`GadgetExpandableCard`** (`:core:ui`, stateless) is the collapsible card
+  primitive; **`CollapseStateRepository`** (`core/monitoring/CollapseStateRepository.kt`,
+  DataStore — mirrors `MonitorConfigRepository`) persists expanded/collapsed
+  state keyed by a stable string id, **defaulting to expanded**. It is **not**
+  monitoring-specific — it lives in `:core:monitoring` only because that's the
+  shared Hilt + DataStore core every feature already depends on.
+- **Blueprint for making a feature's cards collapsible** (torch is the
+  reference): the screen content stays Hilt-free, so **hoist** expanded state
+  through the feature's ViewModel — inject `CollapseStateRepository`, expose
+  `expandedStates(ids).` as a map into the view-state + an `onSectionToggle(id)`
+  handler, and wrap each card in `GadgetExpandableCard`. The reusable monitor
+  containers instead take a `collapseId` and manage their own collapse via
+  their VM. Section ids: see `TorchSectionId`.
 
 ### Other pieces
 - `MonitorConfig` (`@Serializable @Immutable`) — per-metric persisted
@@ -832,9 +903,13 @@ interface ActionHandler {
    custom-icon import (read-once + EXIF + `GetContent`). Patterns in
    `:feature:torch/widget`.
 6. **Monitoring-ready** — implement a `MetricSource` per readable signal
-   and bind it `@IntoMap`; embed `MonitorContainer` for the chart;
-   history persists through `:core:data`. The same `MetricSource` feeds
-   automation triggers later — define signals once.
+   and bind it `@IntoMap`; embed `MonitorContainer` for the **persisted**
+   history chart and `LiveMonitorContainer` for the **live** realtime chart
+   (the two are independent — both read the same `MetricSource`); history
+   persists through `:core:data`. The same `MetricSource` feeds automation
+   triggers later — define signals once. Make each card collapsible
+   (`GadgetExpandableCard` + persisted `CollapseStateRepository`; torch is
+   the reference).
 7. **Automation-ready** — expose invocable actions via an `ActionHandler`
    (with `ModuleAction` metadata + param schema + `requiresRoot`) bound
    `@IntoMap`. The future automation engine resolves both maps
