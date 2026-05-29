@@ -103,6 +103,18 @@ remaining review items that are *localized and safe* are completed in Batches
   is a UI affordance on the widget card best added while that file is
   restructured.
 
+## Batch 8 — Service / FGS polish ✅
+- **P2-25** `StrobeService.onStartCommand` returns `START_NOT_STICKY` (was
+  `START_STICKY`) so a user-initiated strobe isn't resurrected after a kill;
+  added a **Stop** notification action (`PendingIntent.getService` →
+  `ACTION_STOP`) so the strobe is controllable from the shade, not only the
+  widget; and the channel now explicitly `setSound(null, null)` +
+  `enableVibration(false)` to defeat OEM default-sound quirks.
+- **P2-26** `StandardTorchController` implements `Closeable` (`close()`
+  unregisters the `CameraManager.TorchCallback`) so a test constructing it
+  directly can release the OS subscription. Production keeps the
+  process-lived singleton.
+
 ### Scope note (important)
 A *fully-wired* `:feature:torch-rooted` (real `RootedTorchRootCapabilities`
 delegating to the legacy rooted controllers) is **blocked** on extracting the

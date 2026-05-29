@@ -3,6 +3,7 @@ package dev.ranzlappen.gadget.feature.torch.strobe
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.appwidget.AppWidgetManager
 import android.content.Context
@@ -90,7 +91,10 @@ class StrobeService : Service() {
             }
             else -> startSession(intent)
         }
-        return START_STICKY
+        // NOT_STICKY: a user-initiated flashlight strobe must not be silently
+        // resurrected by the OS after a process kill — the user asked for it
+        // once. (Legacy behaviour; START_STICKY here was a regression.)
+        return START_NOT_STICKY
     }
 
     override fun onDestroy() {
@@ -227,7 +231,13 @@ class StrobeService : Service() {
             NOTIFICATION_CHANNEL_ID,
             getString(R.string.strobe_notification_channel_name),
             NotificationManager.IMPORTANCE_LOW,
-        )
+        ).apply {
+            // Explicitly silence — IMPORTANCE_LOW already suppresses sound on
+            // AOSP, but some OEM skins still play the default channel sound
+            // unless it's nulled out. Belt-and-braces for a service channel.
+            setSound(null, null)
+            enableVibration(false)
+        }
         manager.createNotificationChannel(channel)
     }
 
@@ -239,6 +249,14 @@ class StrobeService : Service() {
             .setOngoing(true)
             .setSilent(true)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            // A "Stop" action so the strobe is controllable from the
+            // notification shade, not only via the widget — a discoverability
+            // gap the reviews flagged.
+            .addAction(
+                R.drawable.ic_strobe,
+                getString(R.string.strobe_notification_stop),
+                buildStopIntent(),
+            )
             // A foreground service MUST post a notification on API 26+
             // (OS requirement — it can't be suppressed in the standard
             // flavor). DEFERRED lets the OS hold it back ~10s, so a brief
@@ -247,6 +265,18 @@ class StrobeService : Service() {
             // running the strobe outside an FGS.
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFERRED)
             .build()
+
+    /** PendingIntent that delivers [ACTION_STOP] back to this service when the
+     *  notification's Stop action is tapped. */
+    private fun buildStopIntent(): PendingIntent {
+        val intent = Intent(this, StrobeService::class.java).setAction(ACTION_STOP)
+        return PendingIntent.getService(
+            this,
+            /* requestCode = */ 0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
 
     companion object {
         /** Notification channel ID — stable across app versions. */
