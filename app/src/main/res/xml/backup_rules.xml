@@ -6,8 +6,10 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <!-- Torch widget configs key on appWidgetId, which is device-specific:
+         restoring them onto another device would resurrect configs for widget
+         IDs that don't exist there. Exclude the per-widget store and the
+         transient pin-flow bridge from cloud backup. -->
+    <exclude domain="file" path="datastore/torch_widgets.preferences_pb" />
+    <exclude domain="file" path="datastore/torch_pending_widgets.preferences_pb" />
 </full-backup-content>

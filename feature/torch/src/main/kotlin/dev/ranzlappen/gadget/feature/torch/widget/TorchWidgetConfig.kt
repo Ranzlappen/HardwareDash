@@ -1,6 +1,7 @@
 package dev.ranzlappen.gadget.feature.torch.widget
 
 import androidx.compose.runtime.Immutable
+import dev.ranzlappen.gadget.core.widgetkit.WidgetKitConfig
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearance
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -49,15 +50,22 @@ import kotlinx.serialization.Serializable
 @Immutable
 data class TorchWidgetConfig(
     val type: WidgetType,
-    val displayName: String,
+    override val displayName: String,
     val rateHz: Float = DEFAULT_RATE_HZ,
     @SerialName("sosMode")
     val morseMode: Boolean = false,
     val morseText: String = "",
     val appearance: WidgetAppearance = WidgetAppearance(),
-    val removed: Boolean = false,
-) {
+    override val removed: Boolean = false,
+    override val schemaVersion: Int = SCHEMA_VERSION,
+) : WidgetKitConfig {
     companion object {
+        /** Current serialized schema version. Bump when a field is renamed
+         *  or its meaning shifts (additive fields with defaults don't need a
+         *  bump — they decode cleanly on old configs). A future
+         *  `Migrator<TorchWidgetConfig>` keys off this. */
+        const val SCHEMA_VERSION: Int = 1
+
         /** Initial rate for new strobe widgets when the user hasn't
          *  touched the TorchScreen rate slider yet. */
         const val DEFAULT_RATE_HZ: Float = 5f

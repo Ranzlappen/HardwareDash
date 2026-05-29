@@ -62,6 +62,19 @@ renderer / provider migration is the explicit compiler-required follow-up. The
 remaining review items that are *localized and safe* are completed in Batches
 8–13 instead of waiting on the extraction.
 
+## Batch 5 — Persistence hardening ✅
+- **P1-9 (partial)** `TorchWidgetConfig` now implements `WidgetKitConfig` and
+  carries `schemaVersion: Int = 1` (additive serialized field — wire-safe:
+  old JSON missing it decodes to the default, the round-trip tests still
+  pass). Torch now depends on `:core:widgetkit` (first real consumer). The
+  `Migrator<T>` seam is deferred to the compiler-in-loop store extraction.
+- **backup** Excluded the device-specific widget DataStore files
+  (`torch_widgets` + `torch_pending_widgets`) from cloud backup AND
+  device-transfer in `backup_rules.xml` / `data_extraction_rules.xml` —
+  appWidgetIds can't map onto another device's launcher.
+- **P3-28** `UserPreferencesRepository.setMorseText` clamps to 2048 chars so a
+  pasted novel can't bloat the preferences file.
+
 ### Scope note (important)
 A *fully-wired* `:feature:torch-rooted` (real `RootedTorchRootCapabilities`
 delegating to the legacy rooted controllers) is **blocked** on extracting the
