@@ -34,6 +34,34 @@ Commit `1583506`.
   detekt `ForbiddenImport` rule was rejected because detekt is only applied
   to `:app`, which legitimately uses `com.gadget.*` throughout.
 
+## Batch 4 — `:core:widgetkit` foundation ✅
+Created the `:core:widgetkit` module (registered in `settings.gradle.kts`) with
+the safe, compiling, **new** generic seam — no risky cross-module moves:
+- `WidgetKitConfig` — the per-instance config contract (`displayName`,
+  `removed`, `schemaVersion`) future feature configs implement.
+- `WidgetReceiverScope` — one process-lifetime scope replacing the per-tap
+  `CoroutineScope(...)` each provider leaked (P2-24 seam; torch adopts later).
+- `WidgetPinPolicy` + `WidgetPinResult` — per-kind cap + a typed pin outcome
+  (foundation for P2-14 count cap; torch adopts in the hardening batch).
+
+### Why the deep extraction is NOT done blind
+The resource/Hilt/serialization-coupled layer (the `WidgetAppearance`
+value-type family, `WidgetAppearanceRenderer`, `WidgetIconCatalog`, the
+providers, the pin-flow store) is the bulk of the reusable code, but moving it
+requires THREE things CI-less editing cannot verify:
+1. **Android resource merging** — the renderer references `R.id.widget_*` /
+   `R.drawable.widget_background_*`; moving them repoints R-class lookups
+   across modules.
+2. **Hilt graph** — `@Singleton`/`@EntryPoint` rewiring across the new edge.
+3. **kotlinx.serialization wire format** — `ToggleFeedback` is a *sealed*
+   (polymorphic) type whose on-disk JSON discriminator is derived from its
+   package; moving it silently breaks every existing user's persisted widget
+   feedback unless the discriminator is pinned exactly (unverifiable blind).
+So the module + contract + shared infra are established now; the value-type /
+renderer / provider migration is the explicit compiler-required follow-up. The
+remaining review items that are *localized and safe* are completed in Batches
+8–13 instead of waiting on the extraction.
+
 ### Scope note (important)
 A *fully-wired* `:feature:torch-rooted` (real `RootedTorchRootCapabilities`
 delegating to the legacy rooted controllers) is **blocked** on extracting the

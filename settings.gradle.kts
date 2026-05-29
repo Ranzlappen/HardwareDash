@@ -83,6 +83,7 @@ include(
     ":core:model",
     ":core:data",
     ":core:monitoring",
+    ":core:widgetkit",
     ":core:datastore",
     ":core:domain",
     ":core:navigation",
