@@ -9,9 +9,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import kotlinx.coroutines.launch
 
 /**
@@ -80,8 +78,7 @@ class WidgetPinSuccessReceiver : BroadcastReceiver() {
         // goAsync() coroutine so the receiver stays alive across
         // the disk read+write.
         val pendingResult = goAsync()
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-        scope.launch {
+        WidgetReceiverScope.scope.launch {
             try {
                 val config = entry.pendingConfigs().claim(token)
                 if (config == null) {

@@ -250,10 +250,23 @@ class TorchViewModel @Inject constructor(
             putExtra(StrobeService.EXTRA_RATE_HZ, state.value.defaultStrobeRateHz)
             if (!morseText.isNullOrBlank()) putExtra(StrobeService.EXTRA_MORSE_TEXT, morseText)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(startIntent)
-        } else {
-            context.startService(startIntent)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(startIntent)
+            } else {
+                context.startService(startIntent)
+            }
+        } catch (e: IllegalStateException) {
+            // ForegroundServiceStartNotAllowedException (API 31+) is an
+            // IllegalStateException subtype the OS throws when the app isn't
+            // in an allowed FGS-start window. Degrade gracefully instead of
+            // crashing the screen.
+            android.util.Log.w("TorchViewModel", "Strobe FGS start refused", e)
+            android.widget.Toast.makeText(
+                context,
+                context.getString(R.string.strobe_widget_start_failed),
+                android.widget.Toast.LENGTH_SHORT,
+            ).show()
         }
     }
 

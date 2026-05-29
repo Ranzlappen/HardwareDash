@@ -20,6 +20,8 @@
     <string name="strobe_notification_channel_name">Strobe service</string>
     <string name="strobe_notification_title">Strobe active</string>
     <string name="strobe_notification_text">Tap the widget to stop.</string>
+    <string name="strobe_notification_stop">Stop</string>
+    <string name="strobe_widget_start_failed">Couldn\'t start strobe — open the app</string>
 
     <!-- ─── Widget toggle-feedback channel ──────────────────────── -->
     <string name="widget_feedback_channel_name">Widget feedback</string>

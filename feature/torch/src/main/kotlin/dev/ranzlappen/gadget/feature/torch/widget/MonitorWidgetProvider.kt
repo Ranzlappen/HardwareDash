@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
 import dagger.hilt.EntryPoint
@@ -16,11 +17,9 @@ import dev.ranzlappen.gadget.core.model.MetricSource
 import dev.ranzlappen.gadget.core.monitoring.MonitorConfigRepository
 import dev.ranzlappen.gadget.core.monitoring.MonitorController
 import dev.ranzlappen.gadget.core.data.MonitorSampleRepository
+import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.monitor.TorchMetricSource
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -48,6 +47,18 @@ class MonitorWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray,
     ) {
         runAsync { renderAll(context, appWidgetManager, appWidgetIds) }
+    }
+
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle,
+    ) {
+        // Re-render on resize so the determinate bar repaints at the new
+        // size immediately, matching MonitorChartWidgetProvider (previously
+        // the bar widget only refreshed on the next sample).
+        runAsync { renderAll(context, appWidgetManager, intArrayOf(appWidgetId)) }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -111,7 +122,7 @@ class MonitorWidgetProvider : AppWidgetProvider() {
 
     private fun runAsync(block: suspend () -> Unit) {
         val pendingResult = goAsync()
-        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+        WidgetReceiverScope.scope.launch {
             try {
                 block()
             } catch (t: Throwable) {

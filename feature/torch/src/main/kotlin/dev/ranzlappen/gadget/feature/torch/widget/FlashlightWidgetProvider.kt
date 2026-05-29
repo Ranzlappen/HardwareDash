@@ -12,14 +12,13 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
 import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.feature.torch.widget.feedback.WidgetFeedbackDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -59,7 +58,7 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray,
     ) {
         val pendingResult = goAsync()
-        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+        WidgetReceiverScope.scope.launch {
             try {
                 renderAll(context, appWidgetManager, appWidgetIds)
             } finally {
@@ -117,7 +116,7 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
         val newState = controller.state.value.isOn
 
         val pendingResult = goAsync()
-        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+        WidgetReceiverScope.scope.launch {
             try {
                 // DataStore-backed read so a cold process still sees the
                 // per-widget feedback + animation config (the hot cache is
@@ -174,8 +173,7 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         super.onDeleted(context, appWidgetIds)
         val repo = entry(context).widgetRepository()
-        val purgeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-        purgeScope.launch {
+        WidgetReceiverScope.scope.launch {
             appWidgetIds.forEach { repo.delete(it) }
         }
     }

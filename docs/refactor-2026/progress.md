@@ -75,6 +75,22 @@ remaining review items that are *localized and safe* are completed in Batches
 - **P3-28** `UserPreferencesRepository.setMorseText` clamps to 2048 chars so a
   pasted novel can't bloat the preferences file.
 
+## Batch 6 — Widget runtime hardening ✅
+- **P2-24** All widget receivers (Flashlight / Strobe / Monitor / Chart +
+  `WidgetPinSuccessReceiver`) now use the shared `WidgetReceiverScope.scope`
+  instead of allocating a fresh `CoroutineScope(SupervisorJob()+Dispatchers.IO)`
+  per `onUpdate` / `onReceive` (which leaked the scope object every tap).
+- **P2-20** `startForegroundService` is wrapped in try/catch
+  (`IllegalStateException`, the `ForegroundServiceStartNotAllowedException`
+  supertype) in `StrobeWidgetProvider.onReceive` and
+  `TorchViewModel.startStrobeService`; on refusal it logs + shows a graceful
+  "couldn't start strobe — open the app" toast instead of crashing.
+- **P2-19** `MonitorWidgetProvider` now overrides `onAppWidgetOptionsChanged`
+  to re-render on resize, matching `MonitorChartWidgetProvider`.
+- **P2-21** `TorchMonitorWidgetNotifier.onSample` self-throttles to one
+  repaint per 250 ms so a future high-rate metric can't pelt the launcher
+  with RemoteViews broadcasts.
+
 ### Scope note (important)
 A *fully-wired* `:feature:torch-rooted` (real `RootedTorchRootCapabilities`
 delegating to the legacy rooted controllers) is **blocked** on extracting the
