@@ -14,6 +14,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.feature.torch.R
+import dev.ranzlappen.gadget.feature.torch.strobe.StrobeRuntime
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
 import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearanceRenderer
@@ -28,7 +29,7 @@ import kotlinx.coroutines.withContext
  * Home-screen strobe widget — 1×1 cell.
  *
  * Tapping the widget toggles [StrobeService]:
- * - If the service isn't running ([StrobeService.isRunning] == false),
+ * - If the service isn't running ([StrobeRuntime.running] == false),
  *   start it via `startForegroundService` carrying the widget's
  *   per-instance [TorchWidgetConfig] as Intent extras (rate Hz +
  *   SOS flag).
@@ -69,9 +70,10 @@ class StrobeWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
-        val repo = entry(context).widgetRepository()
+        val ep = entry(context)
+        val repo = ep.widgetRepository()
         val configs = repo.getAll()
-        val running = StrobeService.isRunning
+        val running = ep.strobeRuntime().running.value
         appWidgetIds.forEach { id ->
             val config = configs[id] ?: run {
                 val default = TorchWidgetConfig(
@@ -105,7 +107,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
         // We pass only the appWidgetId — the service reads that widget's
         // rate / SOS config itself.
         val willBeRunning: Boolean
-        if (StrobeService.isRunning) {
+        if (ep.strobeRuntime().running.value) {
             context.startService(
                 Intent(context, StrobeService::class.java).setAction(StrobeService.ACTION_STOP),
             )
@@ -241,6 +243,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
         fun widgetRepository(): TorchWidgetConfigRepository
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
+        fun strobeRuntime(): StrobeRuntime
     }
 
     companion object {

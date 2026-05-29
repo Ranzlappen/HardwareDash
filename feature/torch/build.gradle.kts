@@ -27,6 +27,13 @@ plugins {
 
 android {
     namespace = "dev.ranzlappen.gadget.feature.torch"
+
+    defaultConfig {
+        // Keep rules for this module's @Serializable types — merged into
+        // :app's release R8 run so minified builds don't strip the
+        // generated serializers. See consumer-rules.pro.
+        consumerProguardFiles("consumer-rules.pro")
+    }
 }
 
 dependencies {

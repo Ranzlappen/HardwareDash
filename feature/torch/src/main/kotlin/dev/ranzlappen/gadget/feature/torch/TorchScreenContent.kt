@@ -712,7 +712,7 @@ private fun WidgetListRow(
  * - [TorchController.state] (live torch hardware snapshot)
  * - [UserPreferencesRepository.flow.map { it.defaultStrobeRateHz }]
  * - [TorchWidgetConfigRepository.all] (saved widget configs)
- * - [StrobeService.isRunning] (polled cheaply via a Volatile read)
+ * - [StrobeRuntime.running] (live strobe-running signal, no polling)
  *
  * `@Immutable` so Compose skips recompositions when the structural
  * value is unchanged across emissions.

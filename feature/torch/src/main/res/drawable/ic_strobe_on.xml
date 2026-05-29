@@ -3,7 +3,7 @@
   Active-strobe glyph: the same lightning bolt as ic_strobe.xml plus
   a pair of "emission" radial rays signalling that the strobe loop is
   currently running. Used by StrobeWidgetProvider's onUpdate when
-  StrobeService.isRunning == true; the inactive state continues to
+  StrobeRuntime.running == true; the inactive state continues to
   use ic_strobe.xml.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"

@@ -7,10 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -49,10 +45,6 @@ class TorchWidgetCreator @Inject constructor(
     private val pending: PendingTorchWidgetConfigs,
 ) {
 
-    /** Internal scope for the pre-pin DataStore write. Survives the
-     *  synchronous return of [requestPin]. */
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     /**
      * Request the launcher to pin a new home-screen widget configured
      * per [config]. Returns `true` if the OS accepted the request
@@ -64,15 +56,16 @@ class TorchWidgetCreator @Inject constructor(
      * and the pending entry remains until the stale-purge janitor
      * drops it (an hour later).
      *
-     * The pending config is persisted *synchronously* on the caller's
-     * thread via `kotlinx.coroutines.runBlocking` so the
-     * PendingIntent's token is guaranteed to resolve when the OS
-     * fires the success callback. The runBlocking is acceptable
-     * because the DataStore write is single-digit-ms and this method
-     * is called from a Compose click handler (not the main render
-     * loop).
+     * **Suspend, not blocking.** The pending config must be persisted
+     * *before* `requestPinAppWidget` returns so the success-callback
+     * token resolves when the OS later fires it. That persistence is a
+     * DataStore write (suspend), so this method suspends and the caller
+     * drives it from a coroutine (`viewModelScope`). The previous
+     * version blocked the UI thread with `runBlocking`; making the API
+     * honestly asynchronous costs the caller one `launch { }` and
+     * removes a main-thread-I/O foot-gun future modules would copy.
      */
-    fun requestPin(config: TorchWidgetConfig): Boolean {
+    suspend fun requestPin(config: TorchWidgetConfig): Boolean {
         val appWidgetManager = AppWidgetManager.getInstance(context)
         if (!appWidgetManager.isRequestPinAppWidgetSupported) {
             Log.w(PendingTorchWidgetConfigs.TAG, "requestPin → launcher unsupported")
@@ -80,11 +73,10 @@ class TorchWidgetCreator @Inject constructor(
         }
         Log.d(PendingTorchWidgetConfigs.TAG, "requestPin → type=${config.type}")
 
-        // Synchronous enqueue so the token persists before the OS
-        // fires the success callback. The factory method is suspend
-        // because DataStore writes are. Using kotlinx.coroutines'
-        // runBlocking is safe here — single short write on Dispatchers.IO.
-        val token = kotlinx.coroutines.runBlocking { pending.enqueue(config) }
+        // Persist the pending config before requesting the pin so the
+        // success-callback token is guaranteed to resolve when the OS
+        // fires it (even across process death — the bridge is on disk).
+        val token = pending.enqueue(config)
 
         val provider = when (config.type) {
             WidgetType.Flashlight ->

@@ -2,7 +2,9 @@ package dev.ranzlappen.gadget.core.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -87,6 +89,15 @@ class FeaturePreferencesFactory @Inject constructor(
         synchronized(storesLock) {
             stores.getOrPut(fileName) {
                 PreferenceDataStoreFactory.create(
+                    // Without this, a single corrupt write (power loss, OEM
+                    // filesystem flake) makes DataStore throw
+                    // CorruptionException on EVERY future read and block this
+                    // feature's persistence forever — e.g. every pinned
+                    // widget config becomes permanently unreadable with no
+                    // recovery path. Replacing the file with empty prefs
+                    // degrades the failure to a one-time "settings reset"
+                    // instead of "settings bricked".
+                    corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
                     scope = ioScope,
                     produceFile = { context.preferencesDataStoreFile(fileName) },
                 )

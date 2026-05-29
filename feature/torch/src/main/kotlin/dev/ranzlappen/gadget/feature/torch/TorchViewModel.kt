@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
 import dev.ranzlappen.gadget.core.monitoring.CollapseStateRepository
+import dev.ranzlappen.gadget.feature.torch.strobe.StrobeRuntime
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfigRepository
@@ -18,7 +19,6 @@ import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import dev.ranzlappen.gadget.feature.torch.widget.broadcastTorchWidgetUpdate
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -27,15 +27,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-// (Unused-import cleanup: `FlowPreview` + `debounce` removed —
-// the slider now commits exactly once via onValueChangeFinished
-// so no debounce pipeline is needed.)
 
 /**
  * Aggregating ViewModel for [TorchScreen].
@@ -46,8 +41,9 @@ import javax.inject.Inject
  *   the persisted slider value that becomes the default rate at
  *   widget-pin time.
  * - [TorchWidgetConfigRepository.all] — every persisted widget config.
- * - A polled [StrobeService.isRunning] flag (250 ms cadence) — drives
- *   the in-app strobe toggle button label / pressed state.
+ * - [StrobeRuntime.running] — the live strobe-running signal published
+ *   by the [StrobeService] lifecycle (no polling); drives the in-app
+ *   strobe toggle button label / pressed state.
  *
  * Event handlers cover the screen's full surface area:
  * - [onToggleClick] — passthrough to the controller.
@@ -76,6 +72,7 @@ class TorchViewModel @Inject constructor(
     private val iconCatalog: WidgetIconCatalog,
     private val rootCapabilities: TorchRootCapabilities,
     private val collapseRepo: CollapseStateRepository,
+    private val strobeRuntime: StrobeRuntime,
 ) : ViewModel() {
 
     /** Live availability of the rooted Torch capabilities (probed once on
@@ -98,19 +95,10 @@ class TorchViewModel @Inject constructor(
      *  DataStore by [onRateCommit]. */
     private val pendingRateHz = MutableStateFlow<Float?>(null)
 
-    /** Polled hot signal mirroring [StrobeService.isRunning]. 250 ms
-     *  cadence is plenty for a button-label flip and stays cheap
-     *  (one @Volatile read per tick). */
-    private val strobeRunning: StateFlow<Boolean> = flow {
-        while (true) {
-            emit(StrobeService.isRunning)
-            delay(StrobeRunningPollMillis)
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(SubscriptionTimeoutMillis),
-        initialValue = StrobeService.isRunning,
-    )
+    /** Live strobe-running signal, owned by [StrobeRuntime] and updated by
+     *  the [StrobeService] lifecycle. Folded into the screen state below —
+     *  no polling, recomposes only on an actual transition. */
+    private val strobeRunning: StateFlow<Boolean> = strobeRuntime.running
 
     private val baseState: kotlinx.coroutines.flow.Flow<TorchScreenState> = combine(
         controller.state,
@@ -202,7 +190,7 @@ class TorchViewModel @Inject constructor(
 
     /** Tap-to-toggle constant strobe (mirrors the strobe widget). */
     fun onStrobeToggle() {
-        if (StrobeService.isRunning) stopStrobeService() else startStrobeService(morseText = null)
+        if (strobeRuntime.running.value) stopStrobeService() else startStrobeService(morseText = null)
     }
 
     /** Momentary constant strobe — runs only while the button is held. */
@@ -212,7 +200,7 @@ class TorchViewModel @Inject constructor(
 
     /** Tap-to-toggle Morse playback of the persistent [TorchScreenState.morseText]. */
     fun onMorseToggle() {
-        if (StrobeService.isRunning) stopStrobeService() else startStrobeService(morseText = state.value.morseText)
+        if (strobeRuntime.running.value) stopStrobeService() else startStrobeService(morseText = state.value.morseText)
     }
 
     /** Momentary Morse playback — loops the message only while held. */
@@ -325,8 +313,13 @@ class TorchViewModel @Inject constructor(
     fun onSheetConfirmed(updated: TorchWidgetConfig) {
         when (val target = _sheetTarget.value) {
             is SheetTarget.New -> {
-                if (!widgetCreator.requestPin(updated)) {
-                    _pinUnsupportedEvents.tryEmit(Unit)
+                // requestPin is suspend (it persists the pending config to
+                // DataStore before asking the launcher to pin) — drive it
+                // from viewModelScope rather than blocking the UI thread.
+                viewModelScope.launch {
+                    if (!widgetCreator.requestPin(updated)) {
+                        _pinUnsupportedEvents.tryEmit(Unit)
+                    }
                 }
             }
             is SheetTarget.Existing -> {
@@ -377,11 +370,6 @@ class TorchViewModel @Inject constructor(
          *  last UI subscriber leaves. 5 s matches the convention
          *  used in `:feature:settings`. */
         const val SubscriptionTimeoutMillis: Long = 5_000L
-
-        /** Polling cadence for [StrobeService.isRunning]. 250 ms is
-         *  imperceptible to the user but cheap enough to leave
-         *  always-on while the screen is visible. */
-        const val StrobeRunningPollMillis: Long = 250L
 
         // ─── Rooted-tool one-tap presets ─────────────────────────────
         /** Brightness boost target as a percent of `max_brightness`

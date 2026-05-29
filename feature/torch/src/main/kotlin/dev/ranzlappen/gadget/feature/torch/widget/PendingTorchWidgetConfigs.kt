@@ -3,7 +3,10 @@ package dev.ranzlappen.gadget.feature.torch.widget
 import android.util.Log
 import dev.ranzlappen.gadget.core.datastore.FeaturePreferences
 import dev.ranzlappen.gadget.core.datastore.FeaturePreferencesFactory
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.util.UUID
 import javax.inject.Inject
@@ -58,14 +61,18 @@ class PendingTorchWidgetConfigs @Inject constructor(
         serializer = PendingEntry.serializer(),
     )
 
+    /** Process-lifetime scope for the fire-and-forget startup janitor.
+     *  Never blocks the injecting thread. */
+    private val janitorScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     init {
-        // Best-effort startup janitor — drops pending entries older
-        // than the stale threshold. Runs on the calling thread
-        // (constructor injection from Hilt), but the work is one
-        // DataStore read + a few writes; well under 100 ms on cold
-        // start.
-        runCatching { runBlocking { purgeStale() } }
-            .onFailure { Log.w(TAG, "Stale-pending janitor skipped", it) }
+        // Best-effort startup janitor — drops pending entries older than
+        // the stale threshold. Launched (not runBlocking) so Hilt's
+        // constructor-injection path never blocks on DataStore IO.
+        janitorScope.launch {
+            runCatching { purgeStale() }
+                .onFailure { Log.w(TAG, "Stale-pending janitor skipped", it) }
+        }
     }
 
     /**
