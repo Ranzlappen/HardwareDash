@@ -841,6 +841,50 @@ Android's process/battery/IPC limits:
 
 ---
 
+## Widgetkit framework (`:core:widgetkit`)
+
+The reusable home-screen-widget framework — the generic half of the torch
+widget subsystem, extracted so a 30-module app doesn't re-hand-roll the pin
+flow, per-`appWidgetId` persistence, RemoteViews appearance rendering, the
+icon catalog, and toast/notification feedback for every feature. Features
+plug in via a config implementing `WidgetKitConfig`; the kit never depends
+on a feature module.
+
+**Established in `refactor-2026` (Batches 4–9):**
+- `WidgetKitConfig` — the per-instance config contract (`displayName`,
+  `removed`, `schemaVersion`) every feature widget config implements.
+  `TorchWidgetConfig` is the first consumer.
+- `WidgetReceiverScope` — one process-lifetime
+  `CoroutineScope(SupervisorJob() + Dispatchers.IO)` every widget receiver
+  uses from `onUpdate`/`onReceive`, replacing the per-tap scope each
+  provider used to allocate (and never cancel).
+- `WidgetPinPolicy` + `WidgetPinResult` — per-kind pin cap
+  (`MAX_WIDGETS_PER_KIND = 20`) and a typed pin outcome (`Requested` /
+  `LauncherUnsupported` / `CapReached`) so callers stop conflating
+  "launcher can't pin" with "cap reached".
+
+**Deferred to a compiler-in-loop follow-up (the resource/Hilt/serialization-
+coupled layer):** `WidgetAppearance` value-type family,
+`WidgetAppearanceRenderer`, the `WidgetIconCatalog` infrastructure,
+`WidgetFeedbackDispatcher`, the `WidgetConfigStore<T>` + `PendingWidgetConfigs<T>`
+generalization, the `BaseGadgetWidgetProvider` scaffold, and the
+`WidgetPinRequester` provider registry. Moving them requires Android
+resource merging across modules, Hilt entry-point rewiring, and pinning the
+`ToggleFeedback` polymorphic discriminator — none of which CI-less editing
+can verify safely. See `docs/refactor-2026/` for the full extraction route.
+
+**The "remove-but-keep-inert" widget pattern** (also documented in the
+migration guide): a non-host app can't pull a placed widget off a
+third-party launcher, so an in-app delete sets `removed = true` on the
+config instead of deleting it (the provider's self-heal would otherwise
+recreate it on next `onUpdate`). The placed widget then repaints inert
+(dimmed icon, click target cleared) until the user drags it off — at which
+point `onDeleted` purges the config for real. Every future widget-bearing
+feature must honour this pattern; `TorchWidgetConfig.removed` is the
+reference.
+
+---
+
 ## Automation contract (`:core:automation`)
 
 The per-module **action** surface the final automation tool drives modules

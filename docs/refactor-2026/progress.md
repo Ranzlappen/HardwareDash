@@ -5,6 +5,16 @@ lives in `README.md` + the plan scratchpad). No Android SDK in the container,
 so CI is the compile gate — each batch is written to respect the CLAUDE.md
 CI-only pitfalls.
 
+## Status: complete for this autonomous run ✅
+
+11 batches landed (1 docs + 10 code/docs). All P0 review items + the
+overwhelming majority of P1/P2/P3 items are addressed; the explicit
+deferrals (the deep widgetkit value-type/renderer/store extraction, screen
+sealed-event rewrite, long-press quick-pin UI, `BootCompletedReceiver`,
+`collectAsStateWithLifecycle` rollout, and the fully-wired
+`:feature:torch-rooted` impl) are documented below with the precise reason
+each needs a compiler in the loop or a separate `:core:root` extraction.
+
 ## Batch 1 — Architecture + `:core:widgetkit` route (docs only) ✅
 Commit `4f24da0`. Master plan + extraction route + 2026 sourcing.
 
@@ -178,6 +188,131 @@ edits would risk the build:
   ship without compile verification.
 - **`BootCompletedReceiver`** (P1-11) — needs a manifest + permission change
   with cross-module Hilt entry-point wiring; defer until widgetkit hosts it.
+
+## Batch 11 — Docs (the final batch) ✅
+- **P1-12** Rewrote the stale parts of `docs/migration-guide.md`:
+  - The pin flow correctly describes the **DataStore-backed** pending bridge
+    (not in-memory), the **suspend** creator API, the explicit `ComponentName`
+    on the success callback, the `WidgetPinPolicy` cap + typed
+    `WidgetPinResult`, and the `WidgetReceiverScope` for receiver async work.
+  - The Torch worked-example table reflects the **current** module shape —
+    state-reflecting widget icon, `WidgetReceiverScope` adoption, FGS
+    try/catch, `shortService` FGS, `START_NOT_STICKY` + Stop notification
+    action, `StrobeRuntime` singleton, `WhileSubscribed` repository, and the
+    `consumer-rules.pro` keep rules.
+  - Documented the "remove-but-keep-inert" widget pattern in the pin-flow
+    section.
+  - Updated the FGS anti-pattern entry to require try/catch +
+    `shortService` over the obsolete `camera` example.
+- **CLAUDE.md** Added a `:core:widgetkit` framework section mirroring the
+  monitoring-framework section's shape: what's established (the contract,
+  shared scope, pin policy/result), what's deferred (and why), and the
+  remove-but-keep-inert blueprint rule every future widget feature must
+  honour.
+
+---
+
+## Final summary (everything that landed)
+
+13 commits on `claude/refactor-2026` since the branch was cut from the tip
+of the torch refactor work. Coverage of each review item is tagged
+`[R1]`–`[R4]` / `[self]` in this log + `docs/refactor-2026/README.md`.
+
+**Persistence:** `FeaturePreferencesFactory` adds `ReplaceFileCorruptionHandler`
+(P0-1); widget DataStore files excluded from cloud backup + device transfer
+(P1 backup); `TorchWidgetConfig` implements `WidgetKitConfig` and gains
+`schemaVersion = 1` (P1-9 partial); `setMorseText` clamped to 2048 chars
+(P3-28).
+
+**Pin flow:** `TorchWidgetCreator.requestPin` is **suspend** (no
+`runBlocking` on the UI path, P0-2); `PendingTorchWidgetConfigs` janitor
+runs on an internal IO scope (P0-2); the creator returns a typed
+`WidgetPinResult` and enforces a per-kind cap via `WidgetPinPolicy`
+(P2-14); the ViewModel surfaces a `pinCapReachedEvents` snackbar.
+
+**Runtime state:** `StrobeRuntime` singleton `StateFlow<Boolean>` replaces
+the `@Volatile StrobeService.isRunning` companion + the 250 ms ViewModel
+poll (P0-3). All four widget providers + the pin-success receiver use the
+shared `WidgetReceiverScope` (P2-24). `MonitorWidgetProvider` now overrides
+`onAppWidgetOptionsChanged` (P2-19). `TorchMonitorWidgetNotifier` throttles
+repaints to one per 250 ms (P2-21). `TorchWidgetConfigRepository.all` is
+`WhileSubscribed(Long.MAX_VALUE)` (P2-23). `startForegroundService` is
+wrapped in try/catch in `StrobeWidgetProvider` and `TorchViewModel` (P2-20).
+
+**Service / FGS:** `StrobeService` returns `START_NOT_STICKY` (P2-25),
+notification carries a **Stop** action (P2-25), channel `setSound(null,null)`
++ `enableVibration(false)` (P2-25). `StandardTorchController` implements
+`Closeable` to release the OS `TorchCallback` from tests (P2-26).
+
+**Flavor seam:** `StandardTorchRootCapabilities` moved out of the legacy
+`com.gadget.torch` package into `dev.ranzlappen.gadget.feature.torch.standard`
+(P0-4). `:feature:torch-rooted` sibling module created (skeleton parity with
+the other `-rooted` siblings); fully-wired impl gated on `:core:root`
+extraction (#94). New CI step hard-fails on any `import com.gadget.*` in
+`core/` or `feature/` (the leak-rule intent, correctly scoped — detekt only
+runs on `:app`).
+
+**Blueprint foundation:** `:core:widgetkit` module created with
+`WidgetKitConfig`, `WidgetReceiverScope`, and `WidgetPinPolicy`/`WidgetPinResult`
+(P1-6 foundation). Torch is its first consumer.
+
+**R8:** `feature/torch/consumer-rules.pro` keeps the module's
+`@Serializable` serializers (P0-5).
+
+**Tests:** `MorseCodecTest`, `StrobeRuntimeTest`, `TorchActionHandlerTest`
+(P2-27 partial — pure-JVM coverage; the instrumented + integration ones
+need a real Android runtime).
+
+**Docs:** `docs/migration-guide.md` rewritten to match the current state;
+`CLAUDE.md` gets a `:core:widgetkit` section + the remove-but-keep-inert
+blueprint rule; this `progress.md` is the durable per-batch record.
+
+---
+
+## Explicit deferrals (compiler-required to land safely)
+
+Each item below was rejected for this autonomous run because no Android SDK
+is available locally and CI is the only compile/runtime gate — a botched
+change risks taking the branch red and burning the other 13 commits' value.
+Each is a clean follow-up once a compiler is in the loop:
+
+1. **The deep `:core:widgetkit` extraction (P1-6 remainder)** — moving
+   `WidgetAppearance` (sealed `ToggleFeedback`), `WidgetAppearanceRenderer`,
+   `WidgetIconCatalog`, the generic resources, `WidgetConfigStore<T>`,
+   `PendingWidgetConfigs<T>`, the `BaseGadgetWidgetProvider`, and the pin
+   requester. Requires Android resource merging across modules, Hilt
+   entry-point rewiring, and pinning the polymorphic discriminator to
+   preserve users' on-disk feedback configs. Foundation (contract + scope +
+   policy) shipped — torch already consumes it.
+2. **Screen refactor (P1-8)** — decompose 759-line `TorchScreenContent.kt`
+   into `feature/torch/components/` + replace the 17 callbacks with a sealed
+   `TorchUiEvent` + `onEvent`. The instrumented `TorchScreenContentTest`
+   pins the exact callback signature; rewriting without a compiler risks
+   silently breaking the androidTest source set.
+3. **Long-press quick-pin UI (P2-15)** — `GadgetSecondaryButton` has no
+   `onLongClick` and `combinedClickable` over a button absorbs taps
+   unreliably. Clean fix touches `:core:ui` (signature change) or
+   restructures the WidgetsCard. The cap (P2-14) shipped, which is the
+   hardening rule the reviews care about most.
+4. **`collectAsStateWithLifecycle` rollout (P1-13)** — needs
+   `lifecycle-runtime-compose` added to `libs.versions.toml` + the feature
+   convention plugin (affects every feature module). Version-catalog edits
+   are unsafe to ship without compile verification.
+5. **`BootCompletedReceiver` re-arming `MonitorService` (P1-11)** — needs a
+   manifest + permission change and cross-module Hilt entry-point wiring.
+   Belongs in widgetkit; defer until widgetkit hosts it.
+6. **Fully-wired `:feature:torch-rooted` (P0-4 remainder / P1-7)** — gated
+   on extracting the `com.gadget.root.*` safety framework (currently in
+   `:app/src/rooted/`) to a `:core:root` module — a repo-wide change
+   touching 20+ feature controllers, out of scope and unsafe to do blind.
+   Sibling module + namespace relocation + CI guard shipped now.
+7. **P2-22 `RGB_565` + `BitmapPool` for the chart renderer** — R4 was
+   incorrect that the chart has no alpha; it uses both a transparent
+   background and a translucent area fill, so `RGB_565` would visually
+   regress it. `Bitmap.recycle()` after `setImageViewBitmap` is also unsafe
+   (RemoteViews marshals asynchronously over IPC). Analysis in Batch 9.
+8. **P3-29 WEBP_LOSSY for custom icons** — would regress alpha on
+   user-imported PNG icons. Keep PNG.
 
 ### Scope note (important)
 A *fully-wired* `:feature:torch-rooted` (real `RootedTorchRootCapabilities`
