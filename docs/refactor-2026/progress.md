@@ -115,6 +115,29 @@ remaining review items that are *localized and safe* are completed in Batches
   directly can release the OS subscription. Production keeps the
   process-lived singleton.
 
+## Batch 9 — Perf / leak (partial) ✅
+- **P2-23** `TorchWidgetConfigRepository.all` is now
+  `WhileSubscribed(Long.MAX_VALUE)` instead of `Eagerly`. The original
+  `Eagerly` was justified by "providers read via `.value`" — but they
+  actually use the suspend `getAll()`/`get()` (for cold-process correctness),
+  so the eager subscription paid for nothing. Bounds per-feature idle cost as
+  the module count grows.
+
+### Skipped (with analysis)
+- **P2-22 (RGB_565 + BitmapPool for `MonitorChartBitmapRenderer`)** — R4
+  asserted "the chart has no alpha", but it actively does: the bitmap starts
+  *transparent* (the widget background shows through) and the Area layout uses
+  a *translucent* `fillColor` (alpha `0x33` for torch). `RGB_565` drops both,
+  which would replace transparency with solid black/junk and turn the
+  translucent fill opaque. Keep ARGB_8888. Bitmap pooling + `recycle()` after
+  `setImageViewBitmap` is also unsafe — RemoteViews marshals the bitmap into
+  IPC asynchronously; recycling too early can crash the launcher process. The
+  size cap (600×280 ≈ 0.67 MB, already documented) keeps it well under the
+  Binder transaction limit.
+- **P3-29 (WEBP_LOSSY for custom icons)** — would regress transparency on
+  user-imported PNG icons (lossy WEBP doesn't preserve alpha well). Custom
+  icons are user images; alpha matters. Keep PNG.
+
 ### Scope note (important)
 A *fully-wired* `:feature:torch-rooted` (real `RootedTorchRootCapabilities`
 delegating to the legacy rooted controllers) is **blocked** on extracting the
