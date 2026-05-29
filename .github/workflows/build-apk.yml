@@ -291,6 +291,20 @@ jobs:
           java-version: '17'
           cache: gradle
       - run: chmod +x ./gradlew
+      - name: Assert no legacy com.gadget.* imports in modular code
+        # New modular code (:core:* / :feature:*) must never import the
+        # legacy com.gadget.* namespace — that coupling is exactly what the
+        # modular refactor exists to remove. Legacy code lives only in :app
+        # (app/src/main + the standard/rooted flavor source sets), which is
+        # not scanned here. A hit means a feature/core file reached back into
+        # the monolith; scope the dependency through a :core seam instead.
+        run: |
+          set -euo pipefail
+          if grep -rn --include='*.kt' 'import com\.gadget\.' core/ feature/; then
+            echo "::error::Modular code (core/ or feature/) imports the legacy com.gadget.* namespace. Route the dependency through a :core module instead."
+            exit 1
+          fi
+          echo "OK — no legacy com.gadget.* imports in core/ or feature/."
       - name: Detekt (both flavors)
         run: ./gradlew detekt
         continue-on-error: true

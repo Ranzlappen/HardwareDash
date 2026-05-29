@@ -112,6 +112,7 @@ include(
     ":feature:audio",
     ":feature:camera",
     ":feature:torch",
+    ":feature:torch-rooted",
     ":feature:vibration",
     ":feature:gps",
     ":feature:motion",
