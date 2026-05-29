@@ -138,6 +138,47 @@ remaining review items that are *localized and safe* are completed in Batches
   user-imported PNG icons (lossy WEBP doesn't preserve alpha well). Custom
   icons are user images; alpha matters. Keep PNG.
 
+## Batch 10 — Safe new unit tests ✅
+Three additive JVM test files (no integration setup required):
+- `MorseCodecTest` (6 tests) — empty/unencodable inputs yield empty timelines;
+  single-letter S timing; the canonical SOS timeline shape (18 steps, 9 ON
+  steps with the right per-letter durations, trailing word-gap, intra-word
+  letter-gaps); `isEncodable` cases.
+- `StrobeRuntimeTest` (3 tests) — initial state, set/observe round-trip,
+  idempotent writes. Pins the singleton's `StateFlow` contract that widget
+  providers + the ViewModel now read instead of the removed
+  `@Volatile StrobeService.isRunning`.
+- `TorchActionHandlerTest` (4 tests) — `ACTION_TORCH_ON` / `OFF` reach the
+  injected `TorchController`; unknown action key returns `ActionResult
+  .Unsupported`; `featureId` matches `FEATURE_ID` (a rename would silently
+  break the automation engine's `@StringKey @IntoMap` binding). The strobe /
+  morse branches go through `Context.startForegroundService` and live behind
+  instrumented tests.
+
+### Deferred refactors (compiler-required to land safely)
+Two items from the plan are deferred with explicit rationale, since blind
+edits would risk the build:
+- **Screen refactor (Batch-10-plan):** decompose `TorchScreenContent` →
+  `feature/torch/components/` and replace its 17 callbacks with a sealed
+  `TorchUiEvent` + `onEvent`. The composable-extraction is mechanical (file
+  moves + imports) but the sealed-event rewrite touches the
+  `TorchScreenContentTest` androidTest which pins the exact callback
+  signature — a missed argument silently breaks the test source set. Safer
+  with a compiler in the loop.
+- **Long-press quick-pin** (P2-15) — `GadgetSecondaryButton` has no
+  `onLongClick`, and wrapping in `combinedClickable` over the button absorbs
+  clicks unreliably. The clean fix needs either a `GadgetSecondaryButton`
+  signature change in `:core:ui` (touches every consumer) or restructuring
+  the WidgetsCard with a separate quick-pin affordance — both compiler-
+  required to verify. The cap (P2-14) landed in Batch 7, which is the
+  hardening rule the reviews care about most.
+- **`collectAsStateWithLifecycle`** (P1-13) — needs `lifecycle-runtime-compose`
+  added to `libs.versions.toml` + the feature convention plugin (touches
+  every feature module). Additive but version-catalog edits are unsafe to
+  ship without compile verification.
+- **`BootCompletedReceiver`** (P1-11) — needs a manifest + permission change
+  with cross-module Hilt entry-point wiring; defer until widgetkit hosts it.
+
 ### Scope note (important)
 A *fully-wired* `:feature:torch-rooted` (real `RootedTorchRootCapabilities`
 delegating to the legacy rooted controllers) is **blocked** on extracting the
