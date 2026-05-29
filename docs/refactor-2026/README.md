@@ -13,18 +13,19 @@ widget creation + persisted/live monitoring already present).
 
 ---
 
-## ⚠️ Open input gap — the 4 external reviews
+## The 4 external reviews — now folded in
 
-The task references **4 detailed external AI reviews of the Torch module
-(PR #120 state)**. They are **not present** in the repo, the uploads dir, or
-the plan scratchpad — I searched all three. Batch 1 (architecture +
-`:core:widgetkit` route) is **review-independent**, so it proceeds on
-codebase analysis + 2026 research + my own audit. **Before the prioritised
-P0/P1/P2 list is finalised** (and before Batch 6+ scope is locked), the 4
-reviews must be pasted/uploaded so every point they raise is cross-checked
-against §"Prioritised recommendations" below. Items sourced purely from my
-own analysis are tagged `[self]`; once the reviews arrive, each review point
-gets a `[R1]`…`[R4]` tag and any gap is added.
+The 4 external AI reviews of the PR-#120/main Torch state have been provided
+and reconciled against the **current** tree (this branch is ahead of the
+reviewed state, so some findings were already fixed here). All four land
+**Approve with notes** and converge on one message: the migration is
+excellent but premature as a "blueprint" because ~2,500 LOC of generic widget
+framework lives inside `:feature:torch`. Review 4 names the highest-leverage
+change explicitly: **extract `:core:widgetkit`**.
+
+Every finding is tagged `[R1]`–`[R4]` (which review raised it) in the
+prioritised list below, with its verified current status. Items I added from
+my own analysis / 2026 research are tagged `[self]`.
 
 ---
 
@@ -201,35 +202,61 @@ Rationale + sources are in
 
 ## Prioritised recommendations (P0 / P1 / P2)
 
-> **Provisional — `[self]` items only until the 4 reviews are folded in.**
-> Final ordering is set once reviews land (each becomes `[R1]`…`[R4]`).
+Reconciled from the 4 reviews + own analysis, verified against the current
+tree. `[R1]`–`[R4]` = source review; `[self]` = own/2026. Items already fixed
+on this branch (state-reflecting widget icon `[R3]`, `shortService` FGS +
+corrected KDoc `[R2,R3]`, DataStore-backed pin bridge `[R2,R4]`, atomic
+`saveIfAbsent` `[R4]`, standard-APK leak gate `[R4]`, app backup rules `[R4]`)
+are **not** relisted. Batch column = where each lands.
 
-### P0 — blueprint-blocking (must fix before Torch is "canonical")
-- `[self]` Extract `:core:widgetkit`; remove all hand-rolled-per-feature
-  widget plumbing. (Batches 2–5)
-- `[self]` Kill `runBlocking` on broadcast/main-thread paths in widget
-  providers/creator; replace with `goAsync` + structured suspend. (Batch 8)
-- `[self]` Audit every settings/config surface for process-death round-trip;
-  add corruption handler. (Batch 8)
-- `[self]` Bring `StrobeService` into Android 15/16 FGS-type compliance
-  (type, 3-min `shortService` cap behaviour, start-from-background rules). (Batch 7)
+### P0 — must fix before the kit (verified NOT DONE)
+- **P0-1** `[R4]` `ReplaceFileCorruptionHandler` on every DataStore in
+  `FeaturePreferencesFactory`. (Batch 2)
+- **P0-2** `[R2,R4]` Kill `runBlocking` on UI/broadcast path: `requestPin`
+  suspend; `purgeStale` off the constructor. (Batch 2)
+- **P0-3** `[R2,R3,R4]` `StrobeRuntime` `StateFlow<Boolean>` replaces
+  `@Volatile isRunning` + 250 ms poll. (Batch 2)
+- **P0-4** `[R4]` Relocate `StandardTorchRootCapabilities` out of legacy
+  `com.gadget.torch`. (Batch 3)
+- **P0-5** `[R4]` `consumer-rules.pro` keep rules for all `@Serializable`
+  types. (Batch 2)
 
-### P1 — hardening & scalability (needed for 30+ modules)
-- `[self]` Widget count cap + graceful "limit reached" UX. (Batch 6)
-- `[self]` Long-press quick-pin (skip the config sheet for a sensible default). (Batch 6)
-- `[self]` Generated widget previews via `setWidgetPreviews` (Android 15+,
-  rate-limited ~2/hr). (Batch 6)
-- `[self]` Bitmap lifecycle / RemoteViews transaction-size guards in chart
-  widget; recycle, size-to-widget. (Batch 9)
-- `[self]` Compose stability + baseline profile for torch screen. (Batch 9)
-- `[self]` `setCompoundButtonChecked` for any toggle-style RemoteViews to
-  survive drag/resize. (Batch 6)
+### P1 — required for the blueprint claim
+- **P1-6** `[R1,R4]` Extract `:core:widgetkit`. (Batches 4–7)
+- **P1-7** `[R3,R4]` `:feature:torch-rooted` sibling + relocate to
+  `dev.ranzlappen…torch.standard` + detekt rule blocking `com.gadget.*`. (Batch 3)
+- **P1-8** `[R2,R4]` Decompose `TorchScreenContent` → `components/` + sealed
+  `TorchUiEvent`. (Batch 10)
+- **P1-9** `[R4]` `schemaVersion` + `Migrator<T>` on configs. (Batch 5)
+- **P1-10** `[R4]` `GadgetColorPicker` → `:core:designsystem`. (Batch 4)
+- **P1-11** `[R4]` `BootCompletedReceiver` re-arming `MonitorService`. (Batch 6)
+- **P1-12** `[R2,R3,R4]` Rewrite stale `docs/migration-guide.md`. (Batch 13)
+- **P1-13** `[R2]` `lifecycle-runtime-compose` + `collectAsStateWithLifecycle`. (Batch 10)
 
-### P2 — polish & future-proofing
-- `[self]` UI primitive consistency sweep across the catalog. (Batch 11)
-- `[self]` Rendering-engine-agnostic seam so a future Glance migration is
-  internal. (designed in Batch 2, no migration now)
-- `[self]` Macrobenchmark coverage for widget render + screen scroll. (Batch 9)
+### P2 — scalability / correctness
+- **P2-14** `[R4]` Per-kind widget count cap (`Result`). (Batch 8) *(task req.)*
+- **P2-15** `[R4]` Long-press quick-pin. (Batch 8) *(task req.)*
+- **P2-16** `[self]` Generated widget previews (`setWidgetPreviews`). (Batch 8)
+- **P2-17** `[R4]` `WidgetType` carries provider `Class` / registry. (Batch 6)
+- **P2-18** `[R4]` Monotonic-counter pending keying. (Batch 5)
+- **P2-19** `[R4]` Symmetric `onAppWidgetOptionsChanged`. (Batch 8)
+- **P2-20** `[R4]` try/catch `ForegroundServiceStartNotAllowedException`. (Batch 8)
+- **P2-21** `[R4]` Debounce `TorchMonitorWidgetNotifier`. (Batch 8)
+- **P2-22** `[R4]` `RGB_565` + `BitmapPool` for chart bitmaps. (Batch 11)
+- **P2-23** `[R4]` `all` → `WhileSubscribed`. (Batch 11)
+- **P2-24** `[R4]` Shared `WidgetReceiverScope`. (Batch 6)
+- **P2-25** `[R2,R3]` `START_NOT_STICKY` + notification Stop + `setSound`. (Batch 9)
+- **P2-26** `[R2,R3]` `TorchCallback` Closeable/unregister + `TorchHardware`. (Batch 9)
+- **P2-27** `[R2,R3,R4]` Missing tests (pending/morse/handler/controller/VM/race). (Batch 12)
+
+### P3 — polish
+- **P3-28** `[R4]` Clamp `setMorseText`. (Batch 11)
+- **P3-29** `[R4]` WEBP_LOSSY custom icons. (Batch 11)
+- **P3-30** `[R3]` Adaptive hero-box height. (Batch 10)
+- **P3-31** `[R4]` Chart colours → `colors.xml`. (Batch 13)
+- **P3-32** `[R4]` APK-size CI delta. (Batch 11)
+- **P3-33** `[R4]` Document remove-but-keep-inert pattern. (Batch 13)
+- **P3-34** `[R4]` `:core:notifications` (optional/deferred).
 
 ---
 
@@ -240,18 +267,19 @@ Each batch: implement → commit (clear message) → push → pause with
 
 | Batch | Title | Output |
 |---|---|---|
-| **1** | Architecture + `:core:widgetkit` route | **This doc-set (no code).** |
-| 2 | Scaffold `:core:widgetkit`; move generic appearance/render/icon/tint/feedback | new module compiles, torch still uses its own copies |
-| 3 | Generic config store + pending bridge + pin-success base | kit pin plumbing, unit-tested |
-| 4 | Base provider scaffold + generic pin requester (provider registry) | kit provider harness |
-| 5 | Migrate Torch + monitoring widgets onto the kit | torch is first consumer; legacy torch widget plumbing deleted |
-| 6 | Widget hardening: count cap, long-press quick-pin, generated previews, checked-state | hardened dynamic creation |
-| 7 | `StrobeService` / FGS Android 15-16 compliance + ProgressStyle | FGS-correct |
-| 8 | Persistence audit: process-death round-trip, corruption handler, kill `runBlocking` | bulletproof persistence |
-| 9 | Perf/leak audit: RAM/CPU/GPU/storage, bitmaps, Compose stability, baseline profile, macrobench | measured |
-| 10 | Rooted/standard flavor-separation audit incl. widgetkit seam | leak gate green by construction |
-| 11 | UI primitive consistency sweep | immaculate UI |
-| 12 | `CLAUDE.md` + Module Authoring Contract update; reconcile P0/P1/P2 vs 4 reviews | blueprint documented |
+| **1** ✅ | Architecture + `:core:widgetkit` route | doc-set (committed `4f24da0`) |
+| 2 | P0 safety pack | corruptionHandler · suspend `requestPin` + purgeStale · `StrobeRuntime` · consumer-rules.pro |
+| 3 | Rooted seam realness | relocate standard no-op · ship `:feature:torch-rooted` · detekt `com.gadget.*` rule · leak-gate verify |
+| 4 | `:core:widgetkit` scaffold + leaf-generic move | new module · move appearance/render/icon/tint + `GadgetColorPicker`→designsystem · torch untouched |
+| 5 | Kit store + pending bridge + pin-success base | `WidgetConfigStore<T>` · `PendingWidgetConfigs<T>` (counter) · `schemaVersion`+`Migrator` · unit tests |
+| 6 | Kit provider scaffold + requester + boot | `BaseGadgetWidgetProvider` · `WidgetReceiverScope` · provider registry · `WidgetPinRequester` · `BootCompletedReceiver` |
+| 7 | Flip Torch onto the kit | `TorchWidgetConfig : WidgetKitConfig` · providers extend base · monitor widgets via kit · slot `WidgetTypeFields` |
+| 8 | Dynamic-creation hardening | count cap · long-press quick-pin · generated previews · checked-state · symmetric resize · FGS try/catch · debounce |
+| 9 | Service / FGS polish | `START_NOT_STICKY` + Stop action + `setSound` · ProgressStyle · `TorchCallback` Closeable + `TorchHardware` |
+| 10 | Screen refactor | decompose → `components/` + sealed `TorchUiEvent` · `TorchInputs` · `collectAsStateWithLifecycle` · adaptive hero |
+| 11 | Perf / leak | `RGB_565`+`BitmapPool` · `WhileSubscribed` · WEBP icons · clamp morseText · macrobench + baseline · APK-size CI |
+| 12 | Tests | the six missing suites |
+| 13 | Docs + contract | rewrite `migration-guide.md` · `CLAUDE.md` widgetkit catalog + hardened contract · remove-inert · final reconciliation |
 
 ---
 
