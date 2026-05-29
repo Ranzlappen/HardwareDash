@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
 import dev.ranzlappen.gadget.core.monitoring.CollapseStateRepository
+import dev.ranzlappen.gadget.core.widgetkit.WidgetPinResult
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeRuntime
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
@@ -143,6 +144,14 @@ class TorchViewModel @Inject constructor(
      */
     private val _pinUnsupportedEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val pinUnsupportedEvents: SharedFlow<Unit> = _pinUnsupportedEvents.asSharedFlow()
+
+    /**
+     * One-shot signal raised when the user requests a widget pin but the
+     * per-kind cap ([dev.ranzlappen.gadget.core.widgetkit.WidgetPinPolicy])
+     * is already reached, so the screen can explain why nothing happened.
+     */
+    private val _pinCapReachedEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val pinCapReachedEvents: SharedFlow<Unit> = _pinCapReachedEvents.asSharedFlow()
 
     /**
      * One-shot signal raised after a widget is deleted from the in-app
@@ -330,8 +339,10 @@ class TorchViewModel @Inject constructor(
                 // DataStore before asking the launcher to pin) — drive it
                 // from viewModelScope rather than blocking the UI thread.
                 viewModelScope.launch {
-                    if (!widgetCreator.requestPin(updated)) {
-                        _pinUnsupportedEvents.tryEmit(Unit)
+                    when (widgetCreator.requestPin(updated)) {
+                        WidgetPinResult.Requested -> Unit
+                        WidgetPinResult.LauncherUnsupported -> _pinUnsupportedEvents.tryEmit(Unit)
+                        WidgetPinResult.CapReached -> _pinCapReachedEvents.tryEmit(Unit)
                     }
                 }
             }

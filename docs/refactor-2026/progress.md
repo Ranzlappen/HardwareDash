@@ -91,6 +91,18 @@ remaining review items that are *localized and safe* are completed in Batches
   repaint per 250 ms so a future high-rate metric can't pelt the launcher
   with RemoteViews broadcasts.
 
+## Batch 7 — Dynamic-creation hardening: count cap ✅
+- **P2-14** `TorchWidgetCreator.requestPin` now returns `WidgetPinResult`
+  (`Requested` / `LauncherUnsupported` / `CapReached`) instead of a bare
+  `Boolean`, and enforces `WidgetPinPolicy.MAX_WIDGETS_PER_KIND` (20) by
+  counting placed instances of the provider via `AppWidgetManager`. The
+  ViewModel maps the result to the existing snackbar event channels + a new
+  `pinCapReachedEvents`; `TorchScreen` shows a "you can pin at most N of each
+  kind" message. First real consumer of the kit's `WidgetPinPolicy`/`WidgetPinResult`.
+- **P2-15 (long-press quick-pin)** deferred to the screen-refactor batch — it
+  is a UI affordance on the widget card best added while that file is
+  restructured.
+
 ### Scope note (important)
 A *fully-wired* `:feature:torch-rooted` (real `RootedTorchRootCapabilities`
 delegating to the legacy rooted controllers) is **blocked** on extracting the

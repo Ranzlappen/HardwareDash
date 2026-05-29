@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.ranzlappen.gadget.core.widgetkit.WidgetPinPolicy
+import dev.ranzlappen.gadget.core.widgetkit.WidgetPinResult
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -64,19 +66,17 @@ class TorchWidgetCreator @Inject constructor(
      * version blocked the UI thread with `runBlocking`; making the API
      * honestly asynchronous costs the caller one `launch { }` and
      * removes a main-thread-I/O foot-gun future modules would copy.
+     *
+     * Returns a [WidgetPinResult] so the caller can tell "launcher can't
+     * pin" apart from "you've hit the per-kind cap" — both previously
+     * collapsed into a bare `false`.
      */
-    suspend fun requestPin(config: TorchWidgetConfig): Boolean {
+    suspend fun requestPin(config: TorchWidgetConfig): WidgetPinResult {
         val appWidgetManager = AppWidgetManager.getInstance(context)
         if (!appWidgetManager.isRequestPinAppWidgetSupported) {
             Log.w(PendingTorchWidgetConfigs.TAG, "requestPin → launcher unsupported")
-            return false
+            return WidgetPinResult.LauncherUnsupported
         }
-        Log.d(PendingTorchWidgetConfigs.TAG, "requestPin → type=${config.type}")
-
-        // Persist the pending config before requesting the pin so the
-        // success-callback token is guaranteed to resolve when the OS
-        // fires it (even across process death — the bridge is on disk).
-        val token = pending.enqueue(config)
 
         val provider = when (config.type) {
             WidgetType.Flashlight ->
@@ -84,6 +84,21 @@ class TorchWidgetCreator @Inject constructor(
             WidgetType.Strobe ->
                 ComponentName(context, StrobeWidgetProvider::class.java)
         }
+
+        // Per-kind cap: count the currently-placed instances of this
+        // provider so a user (or a pathological loop) can't pin unbounded
+        // widgets and grow the per-feature DataStore without limit.
+        val currentCount = appWidgetManager.getAppWidgetIds(provider).size
+        if (!WidgetPinPolicy.canPin(currentCount)) {
+            Log.w(PendingTorchWidgetConfigs.TAG, "requestPin → cap reached ($currentCount) type=${config.type}")
+            return WidgetPinResult.CapReached
+        }
+        Log.d(PendingTorchWidgetConfigs.TAG, "requestPin → type=${config.type}")
+
+        // Persist the pending config before requesting the pin so the
+        // success-callback token is guaranteed to resolve when the OS
+        // fires it (even across process death — the bridge is on disk).
+        val token = pending.enqueue(config)
 
         // Explicit ComponentName on the success-callback intent —
         // see the KDoc's "Reliability" note above. The OS dispatches
@@ -110,7 +125,9 @@ class TorchWidgetCreator @Inject constructor(
             successCallback,
         )
         Log.d(PendingTorchWidgetConfigs.TAG, "requestPin → OS accepted=$accepted")
-        return accepted
+        // A rare `false` despite isRequestPinAppWidgetSupported == true (OEM
+        // launcher quirk) surfaces the same "unsupported" message to the user.
+        return if (accepted) WidgetPinResult.Requested else WidgetPinResult.LauncherUnsupported
     }
 
     companion object {
