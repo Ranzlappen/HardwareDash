@@ -10,7 +10,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ranzlappen.gadget.core.data.MonitorBucket
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.DashCard
@@ -54,8 +54,8 @@ fun MonitorContainer(
 ) {
     val configFlow = remember(metricKey, viewModel) { viewModel.config(metricKey) }
     val historyFlow = remember(metricKey, viewModel) { viewModel.history(metricKey) }
-    val config by configFlow.collectAsState(initial = MonitorConfig())
-    val history by historyFlow.collectAsState(initial = EmptyHistory)
+    val config by configFlow.collectAsStateWithLifecycle(initialValue = MonitorConfig())
+    val history by historyFlow.collectAsStateWithLifecycle(initialValue = EmptyHistory)
     val yMax = remember(metricKey, viewModel) { viewModel.maxValue(metricKey) }
     val onConfigChange: (MonitorConfig) -> Unit = { viewModel.update(metricKey, it) }
 
@@ -70,7 +70,7 @@ fun MonitorContainer(
         )
     } else {
         val expandedFlow = remember(collapseId, viewModel) { viewModel.expanded(collapseId) }
-        val expanded by expandedFlow.collectAsState(initial = true)
+        val expanded by expandedFlow.collectAsStateWithLifecycle(initialValue = true)
         GadgetExpandableCard(
             title = title,
             expanded = expanded,
