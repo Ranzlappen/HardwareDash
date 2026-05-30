@@ -101,36 +101,46 @@ class TorchViewModel @Inject constructor(
      *  no polling, recomposes only on an actual transition. */
     private val strobeRunning: StateFlow<Boolean> = strobeRuntime.running
 
-    private val baseState: kotlinx.coroutines.flow.Flow<TorchScreenState> = combine(
+    /** Five-source aggregate so [state]'s outer `combine` can fit
+     *  rooted-availability + collapse state alongside it under the
+     *  5-source typed `combine` cap (R4 #20 — replaces an inner
+     *  combine that produced a half-baked TorchScreenState). */
+    private data class TorchInputs(
+        val torch: TorchState,
+        val defaultRateHz: Float,
+        val widgets: Map<Int, TorchWidgetConfig>,
+        val strobeRunning: Boolean,
+        val morseText: String,
+    )
+
+    private val inputs: kotlinx.coroutines.flow.Flow<TorchInputs> = combine(
         controller.state,
         userPreferences.flow.map { it.defaultStrobeRateHz },
         widgetRepository.all,
         strobeRunning,
         userPreferences.flow.map { it.morseText },
-    ) { torch, rateHz, widgets, running, morseText ->
+        ::TorchInputs,
+    )
+
+    val state: StateFlow<TorchScreenState> = combine(
+        inputs,
+        rootAvailability,
+        collapseRepo.expandedStates(TorchSectionId.hoisted),
+    ) { i, root, expanded ->
         TorchScreenState(
-            torch = torch,
-            defaultStrobeRateHz = pendingRateHz.value ?: rateHz,
-            widgets = widgets
+            torch = i.torch,
+            defaultStrobeRateHz = pendingRateHz.value ?: i.defaultRateHz,
+            widgets = i.widgets
                 .toSortedMap()
                 // Drop widgets the user deleted in-app (kept on disk as
                 // `removed` only so the provider stops self-healing them).
                 .filterValues { !it.removed }
                 .map { (id, config) -> SavedTorchWidget(id, config) },
-            strobeRunning = running,
-            morseText = morseText,
+            strobeRunning = i.strobeRunning,
+            morseText = i.morseText,
+            rootAvailability = root,
+            expandedSections = expanded,
         )
-    }
-
-    // Folded as a second step (combine maxes out at 5 typed sources) so
-    // the rooted-capability availability + persisted card collapse state
-    // flow into the screen state.
-    val state: StateFlow<TorchScreenState> = combine(
-        baseState,
-        rootAvailability,
-        collapseRepo.expandedStates(TorchSectionId.hoisted),
-    ) { base, root, expanded ->
-        base.copy(rootAvailability = root, expandedSections = expanded)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(SubscriptionTimeoutMillis),
