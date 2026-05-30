@@ -28,6 +28,9 @@ dependencies {
     api(project(":core:model"))
     api(project(":core:data"))
     implementation(project(":core:datastore"))
+    // :core:notifications — MonitorService registers its
+    // determinate-progress channel through NotificationChannelRegistry.
+    implementation(project(":core:notifications"))
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.hilt.navigation.compose)

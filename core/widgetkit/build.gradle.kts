@@ -31,6 +31,9 @@ dependencies {
     // :core:designsystem — LocalGadgetTheme tokens consumed by the
     // kit's Compose surfaces (WidgetAppearancePreview etc.).
     api(project(":core:designsystem"))
+    // :core:notifications — NotificationChannelRegistry the
+    // WidgetFeedbackDispatcher uses to ensure its feedback channel.
+    implementation(project(":core:notifications"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)

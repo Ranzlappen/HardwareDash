@@ -84,6 +84,7 @@ include(
     ":core:data",
     ":core:monitoring",
     ":core:widgetkit",
+    ":core:notifications",
     ":core:datastore",
     ":core:domain",
     ":core:navigation",
