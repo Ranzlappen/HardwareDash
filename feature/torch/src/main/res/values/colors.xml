@@ -10,4 +10,13 @@
     -->
     <color name="widget_tint_accent">#FFB0BFFF</color>
     <color name="widget_tint_on_surface">#FFE6E1E5</color>
+
+    <!--
+      Monitor-chart widget colors. The Compose chart pulls accent /
+      surface from the live theme; the RemoteViews-backed widget can't,
+      so we approximate teal (line) + 20% teal (area fill). A future
+      values-night/ split could match a light-widget variant.
+    -->
+    <color name="widget_chart_line">#FF26C6DA</color>
+    <color name="widget_chart_fill">#3326C6DA</color>
 </resources>
