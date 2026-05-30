@@ -23,8 +23,9 @@ import kotlin.test.assertTrue
  * Instrumented tests for [TorchScreenContent].
  *
  * Exercises the stateless screen with curated [TorchScreenState]
- * snapshots and asserts that the rendered title / status / button
- * state matches.
+ * snapshots and asserts the rendered title / status / button state.
+ * Captures every dispatched [TorchUiEvent] into a list so callback
+ * assertions are a single, type-safe pattern.
  *
  * Tests run via `:feature:torch:connectedDebugAndroidTest`. CI
  * emulator workflow tracked at
@@ -40,52 +41,21 @@ class TorchScreenContentTest {
 
     private fun setContent(
         state: TorchScreenState,
-        onToggleClick: () -> Unit = {},
-        onMomentaryHold: (Boolean) -> Unit = {},
-        onStrobeToggle: () -> Unit = {},
-        onStrobeHold: (Boolean) -> Unit = {},
-        onMorseToggle: () -> Unit = {},
-        onMorseHold: (Boolean) -> Unit = {},
-        onMorseTextChange: (String) -> Unit = {},
-        onRateChange: (Float) -> Unit = {},
-        onRateCommit: () -> Unit = {},
-        onAddFlashlight: () -> Unit = {},
-        onAddStrobe: () -> Unit = {},
-        onEditWidget: (SavedTorchWidget) -> Unit = {},
-        onDeleteWidget: (SavedTorchWidget) -> Unit = {},
+        events: MutableList<TorchUiEvent> = mutableListOf(),
         onResolveIcon: (String) -> WidgetIconSource = {
             WidgetIconSource.Resource(R.drawable.ic_flashlight_on)
         },
-        onRootBoostBrightness: () -> Unit = {},
-        onRootDutyStrobe: () -> Unit = {},
-        onRootMultiLed: () -> Unit = {},
-        onRootThermal: () -> Unit = {},
-    ) {
+    ): MutableList<TorchUiEvent> {
         composeTestRule.setContent {
             GadgetTestTheme {
                 TorchScreenContent(
                     state = state,
-                    onToggleClick = onToggleClick,
-                    onMomentaryHold = onMomentaryHold,
-                    onStrobeToggle = onStrobeToggle,
-                    onStrobeHold = onStrobeHold,
-                    onMorseToggle = onMorseToggle,
-                    onMorseHold = onMorseHold,
-                    onMorseTextChange = onMorseTextChange,
-                    onRateChange = onRateChange,
-                    onRateCommit = onRateCommit,
-                    onAddFlashlight = onAddFlashlight,
-                    onAddStrobe = onAddStrobe,
-                    onEditWidget = onEditWidget,
-                    onDeleteWidget = onDeleteWidget,
+                    onEvent = { events += it },
                     onResolveIcon = onResolveIcon,
-                    onRootBoostBrightness = onRootBoostBrightness,
-                    onRootDutyStrobe = onRootDutyStrobe,
-                    onRootMultiLed = onRootMultiLed,
-                    onRootThermal = onRootThermal,
                 )
             }
         }
+        return events
     }
 
     @Test
@@ -129,19 +99,17 @@ class TorchScreenContentTest {
     }
 
     @Test
-    fun toggleClickInvokesCallback() {
-        var clicks = 0
-        setContent(
+    fun toggleClickDispatchesToggleEvent() {
+        val events = setContent(
             TorchScreenState.Initial.copy(
                 torch = TorchState(isOn = false, isAvailable = true),
             ),
-            onToggleClick = { clicks += 1 },
         )
         composeTestRule
             .onNodeWithContentDescription(res.getString(R.string.torch_action_turn_on))
             .assertIsEnabled()
             .performClick()
-        assertEquals(1, clicks)
+        assertEquals(listOf(TorchUiEvent.ToggleClick), events)
     }
 
     @Test
@@ -172,7 +140,7 @@ class TorchScreenContentTest {
     }
 
     @Test
-    fun deleteButtonInvokesCallback() {
+    fun deleteButtonDispatchesDeleteWidget() {
         val widget = SavedTorchWidget(
             appWidgetId = 7,
             config = TorchWidgetConfig(
@@ -180,29 +148,25 @@ class TorchScreenContentTest {
                 displayName = "Test",
             ),
         )
-        var deleted: SavedTorchWidget? = null
-        setContent(
+        val events = setContent(
             TorchScreenState.Initial.copy(widgets = listOf(widget)),
-            onDeleteWidget = { deleted = it },
         )
         composeTestRule
             .onNodeWithContentDescription(res.getString(R.string.torch_widget_list_action_delete))
             .performClick()
-        assertTrue(deleted == widget)
+        assertTrue(events.contains(TorchUiEvent.DeleteWidget(widget)))
     }
 
     @Test
-    fun strobeButtonStartsAndStopsViaCallback() {
-        var toggles = 0
-        setContent(
+    fun strobeButtonDispatchesStrobeToggle() {
+        val events = setContent(
             TorchScreenState.Initial.copy(
                 torch = TorchState(isOn = false, isAvailable = true),
             ),
-            onStrobeToggle = { toggles += 1 },
         )
         composeTestRule
             .onNodeWithContentDescription(res.getString(R.string.torch_action_strobe_toggle))
             .performClick()
-        assertEquals(1, toggles)
+        assertEquals(listOf(TorchUiEvent.StrobeToggle), events)
     }
 }

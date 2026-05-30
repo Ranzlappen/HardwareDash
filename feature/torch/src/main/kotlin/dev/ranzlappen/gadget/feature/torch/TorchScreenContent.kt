@@ -13,12 +13,14 @@ import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 
 /**
  * Stateless TorchScreen content — receives a single [TorchScreenState]
- * snapshot plus callbacks for every user-initiated event.
+ * snapshot plus a flat [TorchUiEvent] dispatcher for every user-initiated
+ * event. (Read-only lookups like [onResolveIcon] stay separate — they
+ * aren't events.)
  *
  * The cards render top-to-bottom inside the screen scaffold; each is a
  * collapsible card whose expanded state persists — the torch-owned cards
- * via [TorchScreenState.expandedSections] + [onSectionToggle] (see
- * [TorchSectionId]), the two monitor tiles self-manage via their own
+ * via [TorchScreenState.expandedSections] + [TorchUiEvent.SectionToggle]
+ * (see [TorchSectionId]), the two monitor tiles self-manage via their own
  * `collapseId`:
  *
  *   1. **Torch toggle** — hero controls plus in-app strobe / Morse toggles
@@ -36,26 +38,9 @@ import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 @Composable
 fun TorchScreenContent(
     state: TorchScreenState,
-    onToggleClick: () -> Unit,
-    onMomentaryHold: (Boolean) -> Unit,
-    onStrobeToggle: () -> Unit,
-    onStrobeHold: (Boolean) -> Unit,
-    onMorseToggle: () -> Unit,
-    onMorseHold: (Boolean) -> Unit,
-    onMorseTextChange: (String) -> Unit,
-    onRateChange: (Float) -> Unit,
-    onRateCommit: () -> Unit,
-    onAddFlashlight: () -> Unit,
-    onAddStrobe: () -> Unit,
-    onEditWidget: (SavedTorchWidget) -> Unit,
-    onDeleteWidget: (SavedTorchWidget) -> Unit,
+    onEvent: (TorchUiEvent) -> Unit,
     onResolveIcon: (String) -> WidgetIconSource,
-    onRootBoostBrightness: () -> Unit,
-    onRootDutyStrobe: () -> Unit,
-    onRootMultiLed: () -> Unit,
-    onRootThermal: () -> Unit,
     modifier: Modifier = Modifier,
-    onSectionToggle: (String) -> Unit = {},
     monitor: @Composable () -> Unit = {},
     liveMonitor: @Composable () -> Unit = {},
 ) {
@@ -73,21 +58,21 @@ fun TorchScreenContent(
                 strobeRunning = state.strobeRunning,
                 morseText = state.morseText,
                 expanded = expanded(TorchSectionId.Controls),
-                onExpandedChange = { onSectionToggle(TorchSectionId.Controls) },
-                onToggleClick = onToggleClick,
-                onMomentaryHold = onMomentaryHold,
-                onStrobeToggle = onStrobeToggle,
-                onStrobeHold = onStrobeHold,
-                onMorseToggle = onMorseToggle,
-                onMorseHold = onMorseHold,
-                onMorseTextChange = onMorseTextChange,
+                onExpandedChange = { onEvent(TorchUiEvent.SectionToggle(TorchSectionId.Controls)) },
+                onToggleClick = { onEvent(TorchUiEvent.ToggleClick) },
+                onMomentaryHold = { onEvent(TorchUiEvent.MomentaryHold(it)) },
+                onStrobeToggle = { onEvent(TorchUiEvent.StrobeToggle) },
+                onStrobeHold = { onEvent(TorchUiEvent.StrobeHold(it)) },
+                onMorseToggle = { onEvent(TorchUiEvent.MorseToggle) },
+                onMorseHold = { onEvent(TorchUiEvent.MorseHold(it)) },
+                onMorseTextChange = { onEvent(TorchUiEvent.MorseTextChange(it)) },
             )
             StrobeDefaultsCard(
                 rateHz = state.defaultStrobeRateHz,
-                onRateChange = onRateChange,
-                onRateCommit = onRateCommit,
+                onRateChange = { onEvent(TorchUiEvent.RateChange(it)) },
+                onRateCommit = { onEvent(TorchUiEvent.RateCommit) },
                 expanded = expanded(TorchSectionId.StrobeDefaults),
-                onExpandedChange = { onSectionToggle(TorchSectionId.StrobeDefaults) },
+                onExpandedChange = { onEvent(TorchUiEvent.SectionToggle(TorchSectionId.StrobeDefaults)) },
             )
             // Two independent monitoring tiles (torch's instantiations of the
             // reusable containers). Injected as slots so the stateless content
@@ -99,23 +84,23 @@ fun TorchScreenContent(
             WidgetsCard(
                 widgets = state.widgets,
                 onResolveIcon = onResolveIcon,
-                onAddFlashlight = onAddFlashlight,
-                onAddStrobe = onAddStrobe,
-                onEditWidget = onEditWidget,
-                onDeleteWidget = onDeleteWidget,
+                onAddFlashlight = { onEvent(TorchUiEvent.AddFlashlight) },
+                onAddStrobe = { onEvent(TorchUiEvent.AddStrobe) },
+                onEditWidget = { onEvent(TorchUiEvent.EditWidget(it)) },
+                onDeleteWidget = { onEvent(TorchUiEvent.DeleteWidget(it)) },
                 expanded = expanded(TorchSectionId.Widgets),
-                onExpandedChange = { onSectionToggle(TorchSectionId.Widgets) },
+                onExpandedChange = { onEvent(TorchUiEvent.SectionToggle(TorchSectionId.Widgets)) },
             )
             // Rooted-only privileged controls — shown only when the
             // rooted app version reports a usable root shell.
             if (state.rootAvailability.rootReady) {
                 RootToolsCard(
-                    onBoostBrightness = onRootBoostBrightness,
-                    onDutyStrobe = onRootDutyStrobe,
-                    onMultiLed = onRootMultiLed,
-                    onThermal = onRootThermal,
+                    onBoostBrightness = { onEvent(TorchUiEvent.RootBoostBrightness) },
+                    onDutyStrobe = { onEvent(TorchUiEvent.RootDutyStrobe) },
+                    onMultiLed = { onEvent(TorchUiEvent.RootMultiLed) },
+                    onThermal = { onEvent(TorchUiEvent.RootThermal) },
                     expanded = expanded(TorchSectionId.RootTools),
-                    onExpandedChange = { onSectionToggle(TorchSectionId.RootTools) },
+                    onExpandedChange = { onEvent(TorchUiEvent.SectionToggle(TorchSectionId.RootTools)) },
                 )
             }
         },

@@ -166,6 +166,37 @@ class TorchViewModel @Inject constructor(
     private val _sheetTarget = MutableStateFlow<SheetTarget?>(null)
     val sheetTarget: StateFlow<SheetTarget?> = _sheetTarget.asStateFlow()
 
+    /**
+     * Single dispatch entry point consumed by [TorchScreenContent].
+     *
+     * Each [TorchUiEvent] variant maps to one of the typed handlers
+     * below — those stay as the implementation so per-action unit
+     * testing remains easy and the snackbar / sheet / pin paths keep
+     * a stable invocation site.
+     */
+    fun onEvent(event: TorchUiEvent) {
+        when (event) {
+            TorchUiEvent.ToggleClick -> onToggleClick()
+            is TorchUiEvent.MomentaryHold -> onMomentaryHold(event.active)
+            TorchUiEvent.StrobeToggle -> onStrobeToggle()
+            is TorchUiEvent.StrobeHold -> onStrobeHold(event.active)
+            TorchUiEvent.MorseToggle -> onMorseToggle()
+            is TorchUiEvent.MorseHold -> onMorseHold(event.active)
+            is TorchUiEvent.MorseTextChange -> onMorseTextChange(event.text)
+            is TorchUiEvent.RateChange -> onRateChange(event.rateHz)
+            TorchUiEvent.RateCommit -> onRateCommit()
+            TorchUiEvent.AddFlashlight -> onAddFlashlight()
+            TorchUiEvent.AddStrobe -> onAddStrobeRequested()
+            is TorchUiEvent.EditWidget -> onEditWidget(event.widget)
+            is TorchUiEvent.DeleteWidget -> onDeleteWidget(event.widget)
+            TorchUiEvent.RootBoostBrightness -> onRootBoostBrightness()
+            TorchUiEvent.RootDutyStrobe -> onRootDutyCycleStrobe()
+            TorchUiEvent.RootMultiLed -> onRootMultiLed()
+            TorchUiEvent.RootThermal -> onRootThermalOverride()
+            is TorchUiEvent.SectionToggle -> onSectionToggle(event.id)
+        }
+    }
+
     fun onToggleClick() {
         controller.toggle()
     }

@@ -103,26 +103,9 @@ fun TorchScreen(
 
     TorchScreenContent(
         state = state,
-        onToggleClick = viewModel::onToggleClick,
-        onMomentaryHold = viewModel::onMomentaryHold,
-        onStrobeToggle = viewModel::onStrobeToggle,
-        onStrobeHold = viewModel::onStrobeHold,
-        onMorseToggle = viewModel::onMorseToggle,
-        onMorseHold = viewModel::onMorseHold,
-        onMorseTextChange = viewModel::onMorseTextChange,
-        onRateChange = viewModel::onRateChange,
-        onRateCommit = viewModel::onRateCommit,
-        onAddFlashlight = viewModel::onAddFlashlight,
-        onAddStrobe = viewModel::onAddStrobeRequested,
-        onEditWidget = viewModel::onEditWidget,
-        onDeleteWidget = viewModel::onDeleteWidget,
+        onEvent = viewModel::onEvent,
         onResolveIcon = viewModel::resolveWidgetIcon,
-        onRootBoostBrightness = viewModel::onRootBoostBrightness,
-        onRootDutyStrobe = viewModel::onRootDutyCycleStrobe,
-        onRootMultiLed = viewModel::onRootMultiLed,
-        onRootThermal = viewModel::onRootThermalOverride,
         modifier = modifier,
-        onSectionToggle = viewModel::onSectionToggle,
         monitor = {
             MonitorContainer(
                 metricKey = TorchMetricSource.METRIC_KEY,
