@@ -577,9 +577,13 @@ demands them, reusing `:core:widgetkit` / `:core:monitoring` /
 - **Monitoring**: implement a `MetricSource` per readable signal and embed
   `MonitorContainer` / `LiveMonitorContainer`.
 - **Automation**: expose an `ActionHandler` with `ModuleAction` metadata.
-- **Rooted extras**: a feature-side capability interface with a no-op
-  standard binding and a real `:feature:<name>-rooted` binding, every
-  privileged call gated by `RootSafetyGate` + a `RootFeatureKey`.
+- **Rooted extras**: a feature-side capability interface implemented by two
+  sibling per-flavor modules — a no-op `:feature:<name>-standard` (pulled in
+  via `standardImplementation`) and a real `:feature:<name>-rooted` (via
+  `rootedImplementation`), each with its own small Hilt `@Binds` module so
+  exactly one impl is on each variant's classpath. Every privileged call is
+  gated by `RootSafetyGate` + a `RootFeatureKey`. Torch is the reference
+  (`:feature:torch-rooted` + `:feature:torch-standard`).
 
 Rule of thumb: a torch (an actuator with widgets + monitoring +
 automation + rooted boost) is advanced; a read-only sensor readout is

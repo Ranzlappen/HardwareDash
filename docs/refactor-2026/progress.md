@@ -32,9 +32,11 @@ Commit `1583506`.
 
 ## Batch 3 — Rooted seam realness ✅
 - **P0-4** Relocated `StandardTorchRootCapabilities` out of legacy
-  `com.gadget.torch` → `dev.ranzlappen.gadget.feature.torch.standard`
-  (stays in `app/src/standard/`, the standard-only flavor source set; updated
-  the standard `RootBindings` import).
+  `com.gadget.torch` → `dev.ranzlappen.gadget.feature.torch.standard`.
+  Originally kept in `app/src/standard/`; **E2 (final-polish batch) completed
+  the move** into the new `:feature:torch-standard` module (mirror of
+  `:feature:torch-rooted`) bound by `StandardTorchModule` via
+  `standardImplementation`.
 - Created the `:feature:torch-rooted` sibling module (skeleton parity with
   `:feature:diagnostics-rooted` et al.) + registered it in
   `settings.gradle.kts`.
@@ -262,11 +264,11 @@ notification carries a **Stop** action (P2-25), channel `setSound(null,null)`
 
 **Flavor seam:** `StandardTorchRootCapabilities` moved out of the legacy
 `com.gadget.torch` package into `dev.ranzlappen.gadget.feature.torch.standard`
-(P0-4). `:feature:torch-rooted` sibling module created (skeleton parity with
-the other `-rooted` siblings); fully-wired impl gated on `:core:root`
-extraction (#94). New CI step hard-fails on any `import com.gadget.*` in
-`core/` or `feature/` (the leak-rule intent, correctly scoped — detekt only
-runs on `:app`).
+(P0-4), and **E2 (final-polish batch)** relocated both standard no-ops into the
+new `:feature:torch-standard` module — the mirror of `:feature:torch-rooted` —
+so neither flavor's Torch impls live in `:app`. New CI step hard-fails on any
+`import com.gadget.*` in `core/` or `feature/` (the leak-rule intent, correctly
+scoped — detekt only runs on `:app`).
 
 **Blueprint foundation:** `:core:widgetkit` module created with
 `WidgetKitConfig`, `WidgetReceiverScope`, and `WidgetPinPolicy`/`WidgetPinResult`
