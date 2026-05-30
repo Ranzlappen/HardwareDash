@@ -22,6 +22,7 @@ import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeRuntime
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
+import dev.ranzlappen.gadget.core.widgetkit.R as WidgetKitR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -220,7 +221,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                 // Deleted in-app but still hosted by the launcher: dim it
                 // and drop the tap target so it reads as defunct until
                 // the user drags it off the home screen.
-                setInt(R.id.widget_icon, "setImageAlpha", REMOVED_WIDGET_ICON_ALPHA)
+                setInt(WidgetKitR.id.widget_icon, "setImageAlpha", REMOVED_WIDGET_ICON_ALPHA)
                 setInt(R.id.widget_strobe_button, "setBackgroundResource", android.R.color.transparent)
                 setOnClickPendingIntent(R.id.widget_strobe_button, null)
                 return@apply
@@ -234,7 +235,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
             setInt(
                 R.id.widget_strobe_button,
                 "setBackgroundResource",
-                if (rippleOn) R.drawable.widget_tap_ripple else android.R.color.transparent,
+                if (rippleOn) WidgetKitR.drawable.widget_tap_ripple else android.R.color.transparent,
             )
             if (config.appearance.tap.enabled) {
                 setOnClickPendingIntent(
