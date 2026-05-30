@@ -1,4 +1,4 @@
-package com.gadget.root
+package dev.ranzlappen.gadget.feature.rooted.root
 
 import dev.ranzlappen.gadget.core.root.*
 import androidx.datastore.core.DataStore

@@ -1,4 +1,4 @@
-package com.gadget.root.companion
+package dev.ranzlappen.gadget.feature.rooted.root.companion
 
 import dev.ranzlappen.gadget.core.root.companion.*
 import dev.ranzlappen.gadget.core.root.core.RootShell

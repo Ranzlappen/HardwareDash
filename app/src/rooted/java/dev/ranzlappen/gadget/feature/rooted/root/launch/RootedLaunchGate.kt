@@ -1,4 +1,4 @@
-package com.gadget.root.launch
+package dev.ranzlappen.gadget.feature.rooted.root.launch
 
 import dev.ranzlappen.gadget.core.root.launch.*
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry

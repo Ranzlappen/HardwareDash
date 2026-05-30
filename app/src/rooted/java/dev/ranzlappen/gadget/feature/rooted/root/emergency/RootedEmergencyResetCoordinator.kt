@@ -1,4 +1,4 @@
-package com.gadget.root.emergency
+package dev.ranzlappen.gadget.feature.rooted.root.emergency
 
 import dev.ranzlappen.gadget.core.root.emergency.*
 import android.content.Context
