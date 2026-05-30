@@ -1,9 +1,9 @@
 package com.gadget.microphone
 
-import com.gadget.root.RootFeatureKey
-import com.gadget.root.RootGateDecision
-import com.gadget.root.RootSafetyGate
-import com.gadget.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.RootFeatureKey
+import dev.ranzlappen.gadget.core.root.RootGateDecision
+import dev.ranzlappen.gadget.core.root.RootSafetyGate
+import dev.ranzlappen.gadget.core.root.core.RootShell
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

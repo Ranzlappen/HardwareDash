@@ -2,8 +2,8 @@ package com.gadget.audio
 
 import android.content.Context
 import android.media.AudioManager
-import com.gadget.root.core.RootShell
-import com.gadget.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay

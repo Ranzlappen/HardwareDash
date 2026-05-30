@@ -178,6 +178,11 @@ dependencies {
     // Phase 2 / Batch 1 — first real-feature migrations from
     // legacy-main per docs/migration-guide.md.
     implementation(project(":core:datastore"))
+    // refactor-2026 Phase 2 / D1: root-safety framework — every rooted
+    // controller routes its privileged mutations through RootSafetyGate +
+    // RootCapabilityRegistry living in this module. Legacy
+    // app/src/{standard,rooted}/java/com/gadget/root/* impls bind it.
+    implementation(project(":core:root"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:torch"))
 
@@ -260,6 +265,12 @@ dependencies {
     // gate asserts this on every push.
     "rootedImplementation"(libs.libsu.core)
     "rootedImplementation"(libs.libsu.service)
+    // refactor-2026 Phase 2 / E2: rooted Torch capability module. Hosts
+    // RootedTorchController (libsu sysfs writes) + RootedTorchRootCapabilities
+    // (modular TorchRootCapabilities adapter) + the three helper coroutine
+    // workers. Standard APK never sees this module — sourceSet scoping
+    // physically prevents the dep from reaching the standard variant.
+    "rootedImplementation"(project(":feature:torch-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

@@ -5,7 +5,7 @@ package com.gadget.wifi
  * always returns [WifiControllerResult.Unsupported] so shared UI uses one
  * code path for both flavors.
  *
- * Every method routes through `com.gadget.root.RootSafetyGate` before
+ * Every method routes through `dev.ranzlappen.gadget.core.root.RootSafetyGate` before
  * doing anything privileged. Hard cutoffs (TX-power ceiling, channel
  * allow-list, active windows) are enforced inside the impl and cannot
  * be extended by callers.

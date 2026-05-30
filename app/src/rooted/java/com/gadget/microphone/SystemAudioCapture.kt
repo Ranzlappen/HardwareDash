@@ -1,7 +1,7 @@
 package com.gadget.microphone
 
 import android.content.Context
-import com.gadget.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.core.RootShell
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay

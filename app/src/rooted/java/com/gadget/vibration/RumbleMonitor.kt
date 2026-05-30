@@ -2,7 +2,7 @@ package com.gadget.vibration
 
 import android.content.Context
 import android.os.BatteryManager
-import com.gadget.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.core.RootShell
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive

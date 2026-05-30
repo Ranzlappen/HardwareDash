@@ -1,5 +1,6 @@
 package com.gadget.root.ui
 
+import dev.ranzlappen.gadget.core.root.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,8 +32,8 @@ import androidx.compose.ui.unit.dp
 import com.gadget.localization.Language
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
-import com.gadget.root.RootFeatureDescriptor
-import com.gadget.root.RootFeatureKey
+import dev.ranzlappen.gadget.core.root.RootFeatureDescriptor
+import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import com.gadget.root.RootFeaturesEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.launch

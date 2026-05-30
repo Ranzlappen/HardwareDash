@@ -21,11 +21,10 @@ import javax.inject.Singleton
  *
  * **Namespace:** this no-op lives under `dev.ranzlappen.gadget.feature.torch
  * .standard` (not the legacy `com.gadget.torch`) so the blueprint's flavor
- * seam matches the modular package convention. It still physically resides in
- * `app/src/standard/` because the no-op is standard-only and the rooted
- * counterpart depends on the `com.gadget.root.*` safety framework that is not
- * yet extracted to a `:core:root` module — once that lands, both bindings
- * move to sibling `:feature:torch-standard` / `:feature:torch-rooted` modules.
+ * seam matches the modular package convention. The root-safety framework
+ * extracted to `:core:root` in refactor-2026 D1; the follow-up E2 moves this
+ * no-op into `:feature:torch-rooted` (and the rooted impl alongside it). It
+ * still physically resides in `app/src/standard/` until that lands.
  */
 @Singleton
 class StandardTorchRootCapabilities @Inject constructor() : TorchRootCapabilities {

@@ -3,10 +3,10 @@ package com.gadget.keepalive
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
-import com.gadget.root.RootFeatureKey
-import com.gadget.root.RootGateDecision
-import com.gadget.root.RootSafetyGate
-import com.gadget.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.core.root.RootFeatureKey
+import dev.ranzlappen.gadget.core.root.RootGateDecision
+import dev.ranzlappen.gadget.core.root.RootSafetyGate
+import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import com.gadget.services.PersistentKeepAliveService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject

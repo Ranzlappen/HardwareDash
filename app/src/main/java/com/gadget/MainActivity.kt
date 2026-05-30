@@ -20,9 +20,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.navigation.compose.rememberNavController
 import com.gadget.apps.AppRepository
 import com.gadget.localization.LocalizationManager
-import com.gadget.root.companion.CompanionModuleDetector
-import com.gadget.root.launch.LaunchGate
-import com.gadget.root.launch.LaunchGateOutcome
+import dev.ranzlappen.gadget.core.root.companion.CompanionModuleDetector
+import dev.ranzlappen.gadget.core.root.launch.LaunchGate
+import dev.ranzlappen.gadget.core.root.launch.LaunchGateOutcome
 import com.gadget.root.ui.FatalLaunchScreen
 import com.gadget.ui.logbook.LogbookReminderWorker
 import com.gadget.ui.theme.AccessibilityPreferencesManager

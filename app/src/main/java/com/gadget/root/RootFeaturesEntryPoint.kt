@@ -1,5 +1,6 @@
 package com.gadget.root
 
+import dev.ranzlappen.gadget.core.root.*
 import com.gadget.adbdebug.AdbDebuggingController
 import com.gadget.audio.AudioRoutingController
 import com.gadget.automation.AutomationController
@@ -16,10 +17,10 @@ import com.gadget.keepalive.KeepAliveController
 import com.gadget.microphone.MicrophoneController
 import com.gadget.nfc.NfcController
 import com.gadget.notification.NotificationController
-import com.gadget.root.emergency.EmergencyResetCoordinator
+import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
 import com.gadget.sensors.SensorsController
 import com.gadget.storage.StorageController
-import com.gadget.torch.TorchController
+import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController
 import com.gadget.usbdebug.UsbDebuggingController
 import com.gadget.vibration.VibrationController
 import com.gadget.wifi.WifiController
@@ -33,6 +34,35 @@ import dagger.hilt.components.SingletonComponent
  * `EntryPointAccessors.fromApplication(...)` rather than `@Inject`, since
  * `@Composable` functions can't take constructor parameters.
  *
+ * **Why this file (and its `ui/` siblings) stay in `:app/src/main/`
+ * (refactor-2026 Phase 2 / D4 policy).** The safety + capability
+ * framework (`RootSafetyGate`, `RootCapabilityRegistry`,
+ * `RootFeatureToggles`, `RootSafetyEvent`, `EmergencyResetCoordinator`,
+ * …) moved to `:core:root` in D1. The flavor impls under both
+ * `app/src/{standard,rooted}/java/com/gadget/root/` re-packaged to
+ * `dev.ranzlappen.gadget.feature.{standard,rooted}.root.*` in D2 + D3.
+ *
+ * This file (and the 13 `ui/Rooted*` Compose composables that reach it)
+ * stays at its legacy `com.gadget.root.*` location for one specific
+ * reason: it depends on **22 legacy non-modular feature controllers**
+ * (LegacyTorchController via `dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController`,
+ * VibrationController via `com.gadget.vibration.VibrationController`,
+ * …, each still in `app/src/main/java/com/gadget/<feature>/`). Pulling
+ * the entry-point into `:core:root` would force `:core:root` to depend
+ * on every one of those legacy controllers, defeating the purpose of
+ * the extraction.
+ *
+ * **Replacement plan.** Once each feature controller migrates to its
+ * own `:feature:<name>` module (the modular torch / vibration / etc.
+ * controllers already exist as the standard tier), this entry point
+ * becomes obsolete: the UI sites would consume the modular controllers
+ * directly via Hilt `@Inject` (since they'd live in feature modules
+ * with their own composables), and the few cross-feature aggregations
+ * the entry-point still provides could migrate to a kit-style
+ * `Map<FeatureId, ?>` multibinding (the pattern `:core:automation`'s
+ * `ModuleActionRegistry` already established). Tracked at
+ * https://github.com/Ranzlappen/HardwareDash/issues/94.
+ *
  * Mirrors the `AppsEntryPoint` shape.
  */
 @EntryPoint
@@ -42,10 +72,10 @@ interface RootFeaturesEntryPoint {
     fun featureRegistry(): RootFeatureRegistry
     fun featureToggles(): RootFeatureToggles
     /**
-     * Returns the **legacy** `com.gadget.torch.TorchController` —
+     * Returns the **legacy** `dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController` —
      * the one still wired into the rooted-extras card. Phase 2
      * migrated standard-tier torch control to
-     * `dev.ranzlappen.gadget.feature.torch.TorchController`, but
+     * `dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController`, but
      * the rooted extras (DutyCycleStrobe / MultiLed / Thermal) live
      * on the legacy controller until they're ported under issue
      * https://github.com/Ranzlappen/HardwareDash/issues/94. The
@@ -55,7 +85,7 @@ interface RootFeaturesEntryPoint {
      * would otherwise generate two methods with the same name and
      * different return types on the singleton component).
      */
-    fun legacyTorchController(): TorchController
+    fun legacyTorchController(): LegacyTorchController
     fun vibrationController(): VibrationController
     fun cameraController(): CameraController
     fun microphoneController(): MicrophoneController

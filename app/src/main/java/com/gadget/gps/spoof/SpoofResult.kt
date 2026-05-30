@@ -1,6 +1,6 @@
 package com.gadget.gps.spoof
 
-import com.gadget.root.RootGateDecision
+import dev.ranzlappen.gadget.core.root.RootGateDecision
 
 /**
  * Common result shape for every controller method that mutates state.

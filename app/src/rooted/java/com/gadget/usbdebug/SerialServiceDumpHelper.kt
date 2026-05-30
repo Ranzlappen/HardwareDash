@@ -1,7 +1,7 @@
 package com.gadget.usbdebug
 
 import android.os.Build
-import com.gadget.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.core.RootShell
 import javax.inject.Inject
 import javax.inject.Singleton
 
