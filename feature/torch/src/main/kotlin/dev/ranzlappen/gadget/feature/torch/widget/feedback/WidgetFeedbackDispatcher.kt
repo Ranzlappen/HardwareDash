@@ -9,7 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.feature.torch.R
-import dev.ranzlappen.gadget.feature.torch.widget.customization.ToggleFeedback
+import dev.ranzlappen.gadget.core.widgetkit.config.ToggleFeedback
 import javax.inject.Inject
 import javax.inject.Singleton
 

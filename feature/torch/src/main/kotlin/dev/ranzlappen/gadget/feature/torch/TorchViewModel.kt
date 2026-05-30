@@ -19,7 +19,7 @@ import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetCreator
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import dev.ranzlappen.gadget.feature.torch.widget.broadcastTorchWidgetUpdate
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow

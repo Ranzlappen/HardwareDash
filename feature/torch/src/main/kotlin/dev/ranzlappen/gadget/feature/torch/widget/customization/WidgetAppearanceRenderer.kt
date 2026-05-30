@@ -2,6 +2,11 @@ package dev.ranzlappen.gadget.feature.torch.widget.customization
 
 import android.content.Context
 import android.widget.RemoteViews
+import dev.ranzlappen.gadget.core.widgetkit.config.BackgroundMode
+import dev.ranzlappen.gadget.core.widgetkit.config.IconStyle
+import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import dev.ranzlappen.gadget.feature.torch.R
 import javax.inject.Inject
 import javax.inject.Singleton

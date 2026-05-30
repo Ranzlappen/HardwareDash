@@ -30,7 +30,7 @@ import dev.ranzlappen.gadget.core.ui.component.GlassSurface
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.SavedTorchWidget
 import dev.ranzlappen.gadget.feature.torch.ui.WidgetAppearancePreview
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 
 @Composable
 internal fun WidgetsCard(

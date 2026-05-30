@@ -32,10 +32,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
-import dev.ranzlappen.gadget.feature.torch.widget.customization.BackgroundMode
-import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearance
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.config.BackgroundMode
+import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import dev.ranzlappen.gadget.feature.torch.widget.customization.iconTintArgb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

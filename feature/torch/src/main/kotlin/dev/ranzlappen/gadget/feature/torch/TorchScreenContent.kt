@@ -9,7 +9,7 @@ import dev.ranzlappen.gadget.feature.torch.components.StrobeDefaultsCard
 import dev.ranzlappen.gadget.feature.torch.components.TorchToggleCard
 import dev.ranzlappen.gadget.feature.torch.components.WidgetsCard
 import dev.ranzlappen.gadget.feature.torch.components.torchModuleInfo
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 
 /**
  * Stateless TorchScreen content — receives a single [TorchScreenState]

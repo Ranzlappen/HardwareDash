@@ -5,7 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
 import kotlinx.coroutines.delay
 
 /** How long a tap-press frame is held before reverting to the resting

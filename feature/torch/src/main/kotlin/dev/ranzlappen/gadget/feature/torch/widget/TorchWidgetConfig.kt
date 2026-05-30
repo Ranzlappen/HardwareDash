@@ -2,7 +2,7 @@ package dev.ranzlappen.gadget.feature.torch.widget
 
 import androidx.compose.runtime.Immutable
 import dev.ranzlappen.gadget.core.widgetkit.WidgetKitConfig
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearance
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

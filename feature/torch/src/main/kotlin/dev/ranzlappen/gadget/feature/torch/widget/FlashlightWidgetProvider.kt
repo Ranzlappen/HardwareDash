@@ -15,7 +15,7 @@ import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
-import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.feature.torch.widget.feedback.WidgetFeedbackDispatcher
 import kotlinx.coroutines.Dispatchers

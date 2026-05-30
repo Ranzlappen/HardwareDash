@@ -1,19 +1,18 @@
-package dev.ranzlappen.gadget.feature.torch.widget.customization
+package dev.ranzlappen.gadget.core.widgetkit.config
 
-import androidx.compose.runtime.Immutable
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Per-instance appearance + interaction config shared by every torch
- * widget kind (Flashlight, Strobe, Container, container slots).
+ * Per-instance appearance + interaction config shared by every kit-built
+ * widget (Flashlight, Strobe, future feature kinds).
  *
- * Lives on each widget's persisted config as a structural sub-record
- * so customisation flows uniformly across widget types and so future
- * widget kinds can opt into the same surface without re-inventing the
- * fields. Stored as JSON via the existing `FeaturePreferences<T>`
- * pipeline — defaults on each field keep on-disk configs migrable
- * (older serialised configs missing the new block decode as
- * `WidgetAppearance()`).
+ * Lives on each widget's persisted config as a structural sub-record so
+ * customisation flows uniformly across widget types and so future widget
+ * kinds can opt into the same surface without re-inventing the fields.
+ * Stored as JSON via the existing `FeaturePreferences<T>` pipeline —
+ * defaults on each field keep on-disk configs migrable (older serialised
+ * configs missing the new block decode as `WidgetAppearance()`).
  *
  * Fields:
  * - [background] — chrome behind the icon. `GlassSurface` (default),
@@ -27,7 +26,6 @@ import kotlinx.serialization.Serializable
  * - [feedback] — optional toggle confirmation (toast or notification).
  */
 @Serializable
-@Immutable
 data class WidgetAppearance(
     val background: BackgroundMode = BackgroundMode.GlassSurface,
     val solidColor: Long = DEFAULT_SOLID_COLOR_ARGB,
@@ -57,15 +55,14 @@ enum class BackgroundMode { GlassSurface, Solid, Transparent }
 /**
  * Icon resource keys + tint mode.
  *
- * Keys reference entries in [WidgetIconCatalog] rather than raw
+ * Keys reference entries in the feature's icon catalog rather than raw
  * drawable resource IDs so persisted configs survive icon-resource
  * renames and export to plain JSON cleanly.
  */
 @Serializable
-@Immutable
 data class IconStyle(
-    val activeKey: String = WidgetIconCatalog.DEFAULT_ACTIVE,
-    val inactiveKey: String = WidgetIconCatalog.DEFAULT_INACTIVE,
+    val activeKey: String = WidgetIconKeys.DEFAULT_ACTIVE,
+    val inactiveKey: String = WidgetIconKeys.DEFAULT_INACTIVE,
     val tint: IconTint = IconTint.ThemeAccent,
     val customTintArgb: Long = 0xFFFFFFFFL,
 )
@@ -73,10 +70,9 @@ data class IconStyle(
 /**
  * Tint mode for the icon.
  *
- * `ThemeAccent` / `ThemeOnSurface` pull from the active GadgetTheme
- * via the design-system Provider. `Monochrome*` pin to a fixed
- * value (safe across themes). `Custom` reads
- * [IconStyle.customTintArgb].
+ * `ThemeAccent` / `ThemeOnSurface` pull from the active GadgetTheme via
+ * the design-system Provider. `Monochrome*` pin to a fixed value (safe
+ * across themes). `Custom` reads [IconStyle.customTintArgb].
  */
 @Serializable
 enum class IconTint { ThemeAccent, ThemeOnSurface, MonochromeWhite, MonochromeBlack, Custom }
@@ -90,7 +86,6 @@ enum class IconTint { ThemeAccent, ThemeOnSurface, MonochromeWhite, MonochromeBl
  *   variants of widgets that should mirror state but not react.
  */
 @Serializable
-@Immutable
 data class TapBehavior(
     val animation: TapAnimation = TapAnimation.Ripple,
     val enabled: Boolean = true,
@@ -111,8 +106,7 @@ data class TapBehavior(
 enum class TapAnimation { None, Ripple, Pulse, Scale, Flash }
 
 /**
- * Optional confirmation surface fired when the widget's tap-handler
- * runs.
+ * Optional confirmation surface fired when the widget's tap-handler runs.
  *
  * The placeholder grammar inside [Toast.template] / [Notification
  * .titleTemplate] / [Notification.bodyTemplate]:
@@ -121,20 +115,37 @@ enum class TapAnimation { None, Ripple, Pulse, Scale, Flash }
  *
  * Sealed so future feedback kinds (Vibration, Sound, Voice) can land
  * additively without breaking existing configs.
+ *
+ * **Wire-format pin.** kotlinx.serialization writes a polymorphic
+ * discriminator derived from each subtype's serial name (default: the
+ * class's qualified name). The previous package was
+ * `dev.ranzlappen.gadget.feature.torch.widget.customization`; this type
+ * moved to `dev.ranzlappen.gadget.core.widgetkit.config` in
+ * refactor-2026 Phase 2 / C1. The `@SerialName` annotations below **pin
+ * the wire string to the legacy FQN** so every user's persisted widget
+ * config keeps decoding after the upgrade. A future schema-bump
+ * migrator (planned for C4's `Migrator<T>` seam) can rewrite the
+ * discriminator to the new package and let us drop these pins.
  */
 @Serializable
 sealed class ToggleFeedback {
     /** No confirmation surface. */
-    @Serializable object None : ToggleFeedback()
+    @Serializable
+    @SerialName("dev.ranzlappen.gadget.feature.torch.widget.customization.ToggleFeedback.None")
+    object None : ToggleFeedback()
 
     /** Brief toast on the home-screen. Best for non-intrusive
      *  confirmations of binary toggles. */
-    @Serializable data class Toast(val template: String) : ToggleFeedback()
+    @Serializable
+    @SerialName("dev.ranzlappen.gadget.feature.torch.widget.customization.ToggleFeedback.Toast")
+    data class Toast(val template: String) : ToggleFeedback()
 
     /** Posted notification on the "Widget feedback" channel. Auto-
      *  cancels after 3 s via [android.app.Notification.Builder
      *  .setTimeoutAfter]. */
-    @Serializable data class Notification(
+    @Serializable
+    @SerialName("dev.ranzlappen.gadget.feature.torch.widget.customization.ToggleFeedback.Notification")
+    data class Notification(
         val titleTemplate: String,
         val bodyTemplate: String,
     ) : ToggleFeedback()

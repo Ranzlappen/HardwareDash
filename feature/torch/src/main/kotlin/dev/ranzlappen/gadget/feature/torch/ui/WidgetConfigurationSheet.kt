@@ -61,12 +61,13 @@ import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
-import dev.ranzlappen.gadget.feature.torch.widget.customization.BackgroundMode
-import dev.ranzlappen.gadget.feature.torch.widget.customization.IconTint
-import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
-import dev.ranzlappen.gadget.feature.torch.widget.customization.ToggleFeedback
+import dev.ranzlappen.gadget.core.widgetkit.config.BackgroundMode
+import dev.ranzlappen.gadget.core.widgetkit.config.IconTint
+import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.config.ToggleFeedback
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconKeys
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
 import dev.ranzlappen.gadget.feature.torch.widget.customization.iconTintArgb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -511,7 +512,7 @@ private fun IconPickerRow(
             }
         }
     }
-    val customSelected = selectedKey.startsWith(WidgetIconCatalog.CUSTOM_PREFIX)
+    val customSelected = selectedKey.startsWith(WidgetIconKeys.CUSTOM_PREFIX)
     Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
         Text(
             text = label,

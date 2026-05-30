@@ -12,7 +12,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
