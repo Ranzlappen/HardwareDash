@@ -101,36 +101,46 @@ class TorchViewModel @Inject constructor(
      *  no polling, recomposes only on an actual transition. */
     private val strobeRunning: StateFlow<Boolean> = strobeRuntime.running
 
-    private val baseState: kotlinx.coroutines.flow.Flow<TorchScreenState> = combine(
+    /** Five-source aggregate so [state]'s outer `combine` can fit
+     *  rooted-availability + collapse state alongside it under the
+     *  5-source typed `combine` cap (R4 #20 — replaces an inner
+     *  combine that produced a half-baked TorchScreenState). */
+    private data class TorchInputs(
+        val torch: TorchState,
+        val defaultRateHz: Float,
+        val widgets: Map<Int, TorchWidgetConfig>,
+        val strobeRunning: Boolean,
+        val morseText: String,
+    )
+
+    private val inputs: kotlinx.coroutines.flow.Flow<TorchInputs> = combine(
         controller.state,
         userPreferences.flow.map { it.defaultStrobeRateHz },
         widgetRepository.all,
         strobeRunning,
         userPreferences.flow.map { it.morseText },
-    ) { torch, rateHz, widgets, running, morseText ->
+        ::TorchInputs,
+    )
+
+    val state: StateFlow<TorchScreenState> = combine(
+        inputs,
+        rootAvailability,
+        collapseRepo.expandedStates(TorchSectionId.hoisted),
+    ) { i, root, expanded ->
         TorchScreenState(
-            torch = torch,
-            defaultStrobeRateHz = pendingRateHz.value ?: rateHz,
-            widgets = widgets
+            torch = i.torch,
+            defaultStrobeRateHz = pendingRateHz.value ?: i.defaultRateHz,
+            widgets = i.widgets
                 .toSortedMap()
                 // Drop widgets the user deleted in-app (kept on disk as
                 // `removed` only so the provider stops self-healing them).
                 .filterValues { !it.removed }
                 .map { (id, config) -> SavedTorchWidget(id, config) },
-            strobeRunning = running,
-            morseText = morseText,
+            strobeRunning = i.strobeRunning,
+            morseText = i.morseText,
+            rootAvailability = root,
+            expandedSections = expanded,
         )
-    }
-
-    // Folded as a second step (combine maxes out at 5 typed sources) so
-    // the rooted-capability availability + persisted card collapse state
-    // flow into the screen state.
-    val state: StateFlow<TorchScreenState> = combine(
-        baseState,
-        rootAvailability,
-        collapseRepo.expandedStates(TorchSectionId.hoisted),
-    ) { base, root, expanded ->
-        base.copy(rootAvailability = root, expandedSections = expanded)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(SubscriptionTimeoutMillis),
@@ -165,6 +175,39 @@ class TorchViewModel @Inject constructor(
     /** Transient "open the configuration sheet" signal. */
     private val _sheetTarget = MutableStateFlow<SheetTarget?>(null)
     val sheetTarget: StateFlow<SheetTarget?> = _sheetTarget.asStateFlow()
+
+    /**
+     * Single dispatch entry point consumed by [TorchScreenContent].
+     *
+     * Each [TorchUiEvent] variant maps to one of the typed handlers
+     * below — those stay as the implementation so per-action unit
+     * testing remains easy and the snackbar / sheet / pin paths keep
+     * a stable invocation site.
+     */
+    fun onEvent(event: TorchUiEvent) {
+        when (event) {
+            TorchUiEvent.ToggleClick -> onToggleClick()
+            is TorchUiEvent.MomentaryHold -> onMomentaryHold(event.active)
+            TorchUiEvent.StrobeToggle -> onStrobeToggle()
+            is TorchUiEvent.StrobeHold -> onStrobeHold(event.active)
+            TorchUiEvent.MorseToggle -> onMorseToggle()
+            is TorchUiEvent.MorseHold -> onMorseHold(event.active)
+            is TorchUiEvent.MorseTextChange -> onMorseTextChange(event.text)
+            is TorchUiEvent.RateChange -> onRateChange(event.rateHz)
+            TorchUiEvent.RateCommit -> onRateCommit()
+            TorchUiEvent.AddFlashlight -> onAddFlashlight()
+            TorchUiEvent.AddStrobe -> onAddStrobeRequested()
+            TorchUiEvent.QuickPinFlashlight -> onQuickPinFlashlight()
+            TorchUiEvent.QuickPinStrobe -> onQuickPinStrobe()
+            is TorchUiEvent.EditWidget -> onEditWidget(event.widget)
+            is TorchUiEvent.DeleteWidget -> onDeleteWidget(event.widget)
+            TorchUiEvent.RootBoostBrightness -> onRootBoostBrightness()
+            TorchUiEvent.RootDutyStrobe -> onRootDutyCycleStrobe()
+            TorchUiEvent.RootMultiLed -> onRootMultiLed()
+            TorchUiEvent.RootThermal -> onRootThermalOverride()
+            is TorchUiEvent.SectionToggle -> onSectionToggle(event.id)
+        }
+    }
 
     fun onToggleClick() {
         controller.toggle()
@@ -291,25 +334,47 @@ class TorchViewModel @Inject constructor(
         // flashlight pin directly while strobe opens a sheet was an
         // inconsistency users noticed (the appearance picker would
         // never reach the flashlight path).
-        val name = context.getString(R.string.torch_widget_default_name_flashlight)
-        val config = TorchWidgetConfig(
-            type = WidgetType.Flashlight,
-            displayName = name,
-        )
-        _sheetTarget.value = SheetTarget.New(config)
+        _sheetTarget.value = SheetTarget.New(defaultFlashlightConfig())
     }
 
     fun onAddStrobeRequested() {
-        val name = context.getString(R.string.torch_widget_default_name_strobe)
-        val config = TorchWidgetConfig(
-            type = WidgetType.Strobe,
-            displayName = name,
-            rateHz = state.value.defaultStrobeRateHz,
-            // Pre-fill the Morse box so flipping on Morse mode plays
-            // "SOS" out of the box without the user typing anything.
-            morseText = StrobeService.DEFAULT_MORSE_TEXT,
-        )
-        _sheetTarget.value = SheetTarget.New(config)
+        _sheetTarget.value = SheetTarget.New(defaultStrobeConfig())
+    }
+
+    /** Skip the sheet — pin a flashlight widget with the default look. */
+    fun onQuickPinFlashlight() {
+        requestPin(defaultFlashlightConfig())
+    }
+
+    /** Skip the sheet — pin a strobe widget with the default look. */
+    fun onQuickPinStrobe() {
+        requestPin(defaultStrobeConfig())
+    }
+
+    private fun defaultFlashlightConfig(): TorchWidgetConfig = TorchWidgetConfig(
+        type = WidgetType.Flashlight,
+        displayName = context.getString(R.string.torch_widget_default_name_flashlight),
+    )
+
+    private fun defaultStrobeConfig(): TorchWidgetConfig = TorchWidgetConfig(
+        type = WidgetType.Strobe,
+        displayName = context.getString(R.string.torch_widget_default_name_strobe),
+        rateHz = state.value.defaultStrobeRateHz,
+        // Pre-fill the Morse box so flipping on Morse mode plays
+        // "SOS" out of the box without the user typing anything.
+        morseText = StrobeService.DEFAULT_MORSE_TEXT,
+    )
+
+    /** Drive the same pin path the sheet's confirm uses, mapping the
+     *  result to the matching one-shot snackbar event. */
+    private fun requestPin(config: TorchWidgetConfig) {
+        viewModelScope.launch {
+            when (widgetCreator.requestPin(config)) {
+                WidgetPinResult.Requested -> Unit
+                WidgetPinResult.LauncherUnsupported -> _pinUnsupportedEvents.tryEmit(Unit)
+                WidgetPinResult.CapReached -> _pinCapReachedEvents.tryEmit(Unit)
+            }
+        }
     }
 
     fun onEditWidget(widget: SavedTorchWidget) {
@@ -334,18 +399,7 @@ class TorchViewModel @Inject constructor(
 
     fun onSheetConfirmed(updated: TorchWidgetConfig) {
         when (val target = _sheetTarget.value) {
-            is SheetTarget.New -> {
-                // requestPin is suspend (it persists the pending config to
-                // DataStore before asking the launcher to pin) — drive it
-                // from viewModelScope rather than blocking the UI thread.
-                viewModelScope.launch {
-                    when (widgetCreator.requestPin(updated)) {
-                        WidgetPinResult.Requested -> Unit
-                        WidgetPinResult.LauncherUnsupported -> _pinUnsupportedEvents.tryEmit(Unit)
-                        WidgetPinResult.CapReached -> _pinCapReachedEvents.tryEmit(Unit)
-                    }
-                }
-            }
+            is SheetTarget.New -> requestPin(updated)
             is SheetTarget.Existing -> {
                 viewModelScope.launch {
                     widgetRepository.save(target.appWidgetId, updated)

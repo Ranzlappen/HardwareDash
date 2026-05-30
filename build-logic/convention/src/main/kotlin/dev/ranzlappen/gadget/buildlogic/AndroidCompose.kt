@@ -42,5 +42,10 @@ internal fun Project.configureAndroidCompose(
         add("androidTestImplementation", platform(bom))
         add("implementation", libs.findLibrary("androidx-ui-tooling-preview").get())
         add("debugImplementation", libs.findLibrary("androidx-ui-tooling").get())
+        // androidx.lifecycle.compose.collectAsStateWithLifecycle — pauses
+        // flow collection when the host lifecycle drops below STARTED.
+        // Lives in lifecycle-runtime-compose (not -ktx); every Compose
+        // module gets it here so callsites just import + use.
+        add("implementation", libs.findLibrary("androidx-lifecycle-runtime-compose").get())
     }
 }

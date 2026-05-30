@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -132,8 +133,8 @@ class MonitorChartWidgetProvider : AppWidgetProvider() {
                 yMax = yMax,
                 widthPx = widthPx,
                 heightPx = heightPx,
-                lineColor = CHART_LINE_COLOR,
-                fillColor = CHART_FILL_COLOR,
+                lineColor = ContextCompat.getColor(context, R.color.widget_chart_line),
+                fillColor = ContextCompat.getColor(context, R.color.widget_chart_fill),
                 layout = layout,
                 strokeWidthPx = STROKE_WIDTH_DP * density,
             )
@@ -199,10 +200,6 @@ class MonitorChartWidgetProvider : AppWidgetProvider() {
         private const val DEFAULT_HEIGHT_DP = 110
         private const val MAX_WIDTH_PX = 600
         private const val MAX_HEIGHT_PX = 280
-
-        // Teal accent line with a translucent fill for the Area style.
-        private const val CHART_LINE_COLOR = 0xFF26C6DA.toInt()
-        private const val CHART_FILL_COLOR = 0x3326C6DA
 
         const val ACTION_CHART_TOGGLE =
             "dev.ranzlappen.gadget.feature.torch.ACTION_CHART_TOGGLE"

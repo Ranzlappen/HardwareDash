@@ -10,7 +10,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -19,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
@@ -57,11 +57,11 @@ fun LiveMonitorContainer(
         viewModel.start(metricKey)
         onDispose { viewModel.stop() }
     }
-    val enabled by viewModel.enabled.collectAsState()
-    val frozen by viewModel.frozen.collectAsState()
-    val trace by viewModel.trace.collectAsState()
-    val intervalMs by viewModel.intervalMs.collectAsState()
-    val windowMs by viewModel.windowMs.collectAsState()
+    val enabled by viewModel.enabled.collectAsStateWithLifecycle()
+    val frozen by viewModel.frozen.collectAsStateWithLifecycle()
+    val trace by viewModel.trace.collectAsStateWithLifecycle()
+    val intervalMs by viewModel.intervalMs.collectAsStateWithLifecycle()
+    val windowMs by viewModel.windowMs.collectAsStateWithLifecycle()
     val unit = remember(metricKey, viewModel) { viewModel.unit(metricKey) }
 
     val body: @Composable () -> Unit = {
@@ -83,7 +83,7 @@ fun LiveMonitorContainer(
         DashCard(modifier = modifier, title = title, icon = Icons.Outlined.Timeline, content = body)
     } else {
         val expandedFlow = remember(collapseId, viewModel) { viewModel.expanded(collapseId) }
-        val expanded by expandedFlow.collectAsState(initial = true)
+        val expanded by expandedFlow.collectAsStateWithLifecycle(initialValue = true)
         GadgetExpandableCard(
             title = title,
             expanded = expanded,

@@ -23,7 +23,7 @@ import javax.inject.Inject
  * delegated to the repository.
  *
  * Settings UI cards consume the flow via
- * `viewModel.preferences.collectAsState()` so they recompose on
+ * `viewModel.preferences.collectAsStateWithLifecycle()` so they recompose on
  * any pref change — including changes triggered by the QS tile or
  * a widget elsewhere.
  */

@@ -5,12 +5,12 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
 import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
 import dev.ranzlappen.gadget.core.widgetkit.WidgetPinPolicy
@@ -46,8 +46,8 @@ fun TorchScreen(
     modifier: Modifier = Modifier,
     viewModel: TorchViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsState()
-    val sheetTarget by viewModel.sheetTarget.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val sheetTarget by viewModel.sheetTarget.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val pinUnsupportedMessage = stringResource(R.string.torch_widget_pin_unsupported)
     val widgetRemovedMessage = stringResource(R.string.torch_widget_removed_hint)
@@ -103,26 +103,9 @@ fun TorchScreen(
 
     TorchScreenContent(
         state = state,
-        onToggleClick = viewModel::onToggleClick,
-        onMomentaryHold = viewModel::onMomentaryHold,
-        onStrobeToggle = viewModel::onStrobeToggle,
-        onStrobeHold = viewModel::onStrobeHold,
-        onMorseToggle = viewModel::onMorseToggle,
-        onMorseHold = viewModel::onMorseHold,
-        onMorseTextChange = viewModel::onMorseTextChange,
-        onRateChange = viewModel::onRateChange,
-        onRateCommit = viewModel::onRateCommit,
-        onAddFlashlight = viewModel::onAddFlashlight,
-        onAddStrobe = viewModel::onAddStrobeRequested,
-        onEditWidget = viewModel::onEditWidget,
-        onDeleteWidget = viewModel::onDeleteWidget,
+        onEvent = viewModel::onEvent,
         onResolveIcon = viewModel::resolveWidgetIcon,
-        onRootBoostBrightness = viewModel::onRootBoostBrightness,
-        onRootDutyStrobe = viewModel::onRootDutyCycleStrobe,
-        onRootMultiLed = viewModel::onRootMultiLed,
-        onRootThermal = viewModel::onRootThermalOverride,
         modifier = modifier,
-        onSectionToggle = viewModel::onSectionToggle,
         monitor = {
             MonitorContainer(
                 metricKey = TorchMetricSource.METRIC_KEY,

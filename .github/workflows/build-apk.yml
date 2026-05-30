@@ -234,6 +234,19 @@ jobs:
           path: ${{ matrix.releaseOutputDir }}/*.apk
           retention-days: 1
 
+      # Stash the standard-debug APK as a longer-lived baseline so the PR
+      # CI's APK-size delta step can compare a PR's debug build against
+      # the latest main-branch debug build of the same flavor. Debug-vs-
+      # debug keeps the comparison apples-to-apples (R8 disabled both
+      # sides). 14 days is enough to weather a quiet weekend on main.
+      - name: Upload standard debug APK (size baseline)
+        if: matrix.flavor == 'standard'
+        uses: actions/upload-artifact@v4
+        with:
+          name: standard-debug-apk
+          path: ${{ matrix.outputDir }}/*.apk
+          retention-days: 14
+
   # ─── GitHub Release (R8-minified release APKs attached) ───────────────
   release:
     needs: build
