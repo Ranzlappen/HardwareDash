@@ -102,6 +102,15 @@ fun WidgetAppearanceSection(
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
+    // Pre-resolve the default feedback templates here, in @Composable
+    // context, so the FeedbackKind chip's onSelect callback (which
+    // isn't @Composable) can build a fresh ToggleFeedback payload
+    // without re-calling stringResource.
+    val defaultTemplates = DefaultFeedbackTemplates(
+        toast = stringResource(R.string.widget_kit_appearance_feedback_default_toast_template),
+        notificationTitle = stringResource(R.string.widget_kit_appearance_feedback_default_notification_title),
+        notificationBody = stringResource(R.string.widget_kit_appearance_feedback_default_notification_body),
+    )
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(spacing.medium),
@@ -226,7 +235,7 @@ fun WidgetAppearanceSection(
             options = FeedbackKind.values().toList(),
             labelFor = { feedbackKindLabel(it) },
             onSelect = { kind ->
-                onAppearanceChange(appearance.copy(feedback = kind.defaultPayload()))
+                onAppearanceChange(appearance.copy(feedback = kind.defaultPayload(defaultTemplates)))
             },
         )
         FeedbackTemplateFields(
@@ -502,15 +511,24 @@ private const val IMAGE_MIME_TYPE = "image/*"
 
 private enum class FeedbackKind { None, Toast, Notification }
 
-@Composable
-private fun FeedbackKind.defaultPayload(): ToggleFeedback = when (this) {
+/** Default template strings the FeedbackKind chip's onSelect callback
+ *  uses to populate a fresh [ToggleFeedback]. Pre-resolved in @Composable
+ *  context by the [WidgetAppearanceSection] caller; carried into the
+ *  click callback as plain strings. */
+private data class DefaultFeedbackTemplates(
+    val toast: String,
+    val notificationTitle: String,
+    val notificationBody: String,
+)
+
+private fun FeedbackKind.defaultPayload(
+    templates: DefaultFeedbackTemplates,
+): ToggleFeedback = when (this) {
     FeedbackKind.None -> ToggleFeedback.None
-    FeedbackKind.Toast -> ToggleFeedback.Toast(
-        template = stringResource(R.string.widget_kit_appearance_feedback_default_toast_template),
-    )
+    FeedbackKind.Toast -> ToggleFeedback.Toast(template = templates.toast)
     FeedbackKind.Notification -> ToggleFeedback.Notification(
-        titleTemplate = stringResource(R.string.widget_kit_appearance_feedback_default_notification_title),
-        bodyTemplate = stringResource(R.string.widget_kit_appearance_feedback_default_notification_body),
+        titleTemplate = templates.notificationTitle,
+        bodyTemplate = templates.notificationBody,
     )
 }
 
