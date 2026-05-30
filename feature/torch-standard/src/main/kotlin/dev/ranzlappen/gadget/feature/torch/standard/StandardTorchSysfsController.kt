@@ -1,4 +1,4 @@
-package dev.ranzlappen.gadget.feature.standard.torch
+package dev.ranzlappen.gadget.feature.torch.standard
 
 import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsController
 import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsControllerResult

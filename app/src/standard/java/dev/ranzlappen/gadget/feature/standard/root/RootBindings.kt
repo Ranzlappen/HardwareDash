@@ -48,8 +48,6 @@ import com.gadget.storage.StandardStorageController
 import com.gadget.storage.StorageController
 import com.gadget.wifi.StandardWifiController
 import com.gadget.wifi.WifiController
-import dev.ranzlappen.gadget.feature.standard.torch.StandardTorchSysfsController
-import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsController
 import com.gadget.usbdebug.StandardUsbDebuggingController
 import com.gadget.usbdebug.UsbDebuggingController
 import com.gadget.vibration.StandardVibrationController
@@ -116,16 +114,12 @@ object RootBindings {
         NoOpCompanionModuleDetector()
 
     // ──── Batch 3: feature controllers ────
-
-    @Provides
-    @Singleton
-    fun provideTorchSysfsController(impl: StandardTorchSysfsController): TorchSysfsController = impl
-
-    @Provides
-    @Singleton
-    fun provideTorchRootCapabilities(
-        impl: dev.ranzlappen.gadget.feature.torch.standard.StandardTorchRootCapabilities,
-    ): dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities = impl
+    //
+    // Torch bindings (TorchSysfsController + TorchRootCapabilities) moved to
+    // :feature:torch-standard's StandardTorchModule — the standard-flavor
+    // sibling of :feature:torch-rooted's RootedTorchModule — pulled in via
+    // standardImplementation. The remaining cross-feature no-ops stay here
+    // until each feature follows the same migration.
 
     @Provides
     @Singleton
