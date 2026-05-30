@@ -1,13 +1,12 @@
 package dev.ranzlappen.gadget.core.widgetkit.feedback
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.ranzlappen.gadget.core.notifications.ChannelSpec
+import dev.ranzlappen.gadget.core.notifications.NotificationChannelRegistry
 import dev.ranzlappen.gadget.core.widgetkit.config.ToggleFeedback
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,9 +39,19 @@ import javax.inject.Singleton
 class WidgetFeedbackDispatcher @Inject constructor(
     @ApplicationContext private val context: Context,
     private val config: WidgetFeedbackConfig,
+    private val channelRegistry: NotificationChannelRegistry,
 ) {
+    private val channelSpec by lazy {
+        ChannelSpec(
+            id = config.channelId,
+            displayName = config.channelName,
+            description = config.channelDescription,
+            importance = ChannelSpec.Importance.Low,
+            silent = true,
+        )
+    }
     private val notificationManager: NotificationManagerCompat by lazy {
-        NotificationManagerCompat.from(context).also { ensureChannel() }
+        NotificationManagerCompat.from(context).also { channelRegistry.ensure(channelSpec) }
     }
 
     /**
@@ -94,22 +103,6 @@ class WidgetFeedbackDispatcher @Inject constructor(
         runCatching {
             notificationManager.notify(config.notificationIdBase + (title.hashCode() and 0xFFFF), notification)
         }
-    }
-
-    private fun ensureChannel() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-        val sysManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (sysManager.getNotificationChannel(config.channelId) != null) return
-        val channel = NotificationChannel(
-            config.channelId,
-            config.channelName,
-            NotificationManager.IMPORTANCE_LOW,
-        ).apply {
-            description = config.channelDescription
-            setSound(null, null)
-            enableVibration(false)
-        }
-        sysManager.createNotificationChannel(channel)
     }
 
     companion object {

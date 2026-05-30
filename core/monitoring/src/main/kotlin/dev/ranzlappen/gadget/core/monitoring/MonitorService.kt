@@ -2,8 +2,6 @@ package dev.ranzlappen.gadget.core.monitoring
 
 import android.Manifest
 import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -64,6 +62,7 @@ class MonitorService : Service() {
     @Inject lateinit var sampleRepo: MonitorSampleRepository
     @Inject lateinit var metricSources: Map<String, @JvmSuppressWildcards MetricSource>
     @Inject lateinit var widgetNotifiers: Map<String, @JvmSuppressWildcards MonitorWidgetNotifier>
+    @Inject lateinit var channelRegistry: dev.ranzlappen.gadget.core.notifications.NotificationChannelRegistry
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val active = Collections.synchronizedSet(mutableSetOf<String>())
@@ -206,17 +205,15 @@ class MonitorService : Service() {
     }
 
     private fun ensureChannel() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-        val mgr = getSystemService(NotificationManager::class.java)
-        if (mgr.getNotificationChannel(CHANNEL_ID) == null) {
-            mgr.createNotificationChannel(
-                NotificationChannel(
-                    CHANNEL_ID,
-                    getString(R.string.monitor_notification_channel),
-                    NotificationManager.IMPORTANCE_LOW,
-                ),
-            )
-        }
+        channelRegistry.ensure(
+            dev.ranzlappen.gadget.core.notifications.ChannelSpec(
+                id = CHANNEL_ID,
+                displayName = getString(R.string.monitor_notification_channel),
+                description = getString(R.string.monitor_notification_channel),
+                importance = dev.ranzlappen.gadget.core.notifications.ChannelSpec.Importance.Low,
+                silent = false,
+            ),
+        )
     }
 
     private fun canPostNotifications(): Boolean =
