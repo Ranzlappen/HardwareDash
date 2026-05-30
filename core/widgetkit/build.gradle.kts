@@ -31,6 +31,10 @@ dependencies {
     // :core:designsystem — LocalGadgetTheme tokens consumed by the
     // kit's Compose surfaces (WidgetAppearancePreview etc.).
     api(project(":core:designsystem"))
+    // :core:ui — GadgetChip / GadgetColorPicker / GadgetTextField the
+    // WidgetAppearanceSection's chip rows + color picker fields + icon
+    // import flow consume.
+    implementation(project(":core:ui"))
     // :core:notifications — NotificationChannelRegistry the
     // WidgetFeedbackDispatcher uses to ensure its feedback channel.
     implementation(project(":core:notifications"))
@@ -38,6 +42,17 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     api(libs.kotlinx.serialization.json)
+
+    // Compose Material3 + UI primitives + the icon set the appearance
+    // section uses. The BOM is supplied by gadget.android.library.compose
+    // (configureAndroidCompose); the BOM only pins versions — each
+    // artifact still needs an explicit dep line.
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.extended)
+    // rememberLauncherForActivityResult + ActivityResultContracts.GetContent
+    // for the custom-icon import flow.
+    implementation(libs.androidx.activity.compose)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
