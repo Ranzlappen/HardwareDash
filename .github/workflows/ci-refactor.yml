@@ -31,6 +31,10 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      # APK-size delta step downloads the latest main-branch baseline
+      # artifact from build-apk.yml runs and writes a sticky PR comment.
+      actions: read
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +67,97 @@ jobs:
             assembleStandardDebug \
             assembleRootedDebug \
             --stacktrace
+
+      # ─── APK-size delta vs main (standard-debug) ─────────────────────
+      # Computes the size of the PR's standard-debug APK, downloads the
+      # latest main-branch standard-debug APK from build-apk.yml as the
+      # baseline, and publishes the delta to the PR Summary + a sticky
+      # PR comment. The comment carries a hidden marker so subsequent
+      # runs update it in place instead of stacking new comments. If the
+      # baseline is unavailable (no recent main run, retention expired),
+      # the step still prints the absolute PR size so reviewers see a
+      # number.
+      - name: Compute APK-size delta vs main
+        if: success() && github.event_name == 'pull_request'
+        id: apk_size
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          PR_APK=$(find app/build/outputs/apk/standard/debug -name "*.apk" -print -quit || true)
+          if [ -z "$PR_APK" ]; then
+            echo "No standard debug APK found — skipping size delta."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          PR_BYTES=$(stat -c%s "$PR_APK")
+          echo "pr_bytes=$PR_BYTES" >> "$GITHUB_OUTPUT"
+
+          # Find the most recent successful build-apk.yml run on main.
+          LATEST_RUN=$(gh run list \
+              --workflow=build-apk.yml \
+              --branch=main \
+              --status=success \
+              --limit=1 \
+              --json=databaseId \
+              --jq='.[0].databaseId // empty' \
+              --repo "$GITHUB_REPOSITORY")
+
+          MAIN_BYTES=""
+          if [ -n "$LATEST_RUN" ]; then
+            mkdir -p /tmp/main-baseline
+            if gh run download "$LATEST_RUN" \
+                --name standard-debug-apk \
+                --dir /tmp/main-baseline \
+                --repo "$GITHUB_REPOSITORY" 2>/dev/null; then
+              MAIN_APK=$(find /tmp/main-baseline -name "*.apk" -print -quit || true)
+              if [ -n "$MAIN_APK" ]; then
+                MAIN_BYTES=$(stat -c%s "$MAIN_APK")
+              fi
+            fi
+          fi
+          echo "main_bytes=$MAIN_BYTES" >> "$GITHUB_OUTPUT"
+          echo "main_run=$LATEST_RUN" >> "$GITHUB_OUTPUT"
+
+      - name: Post APK-size delta PR comment
+        if: success() && github.event_name == 'pull_request' && steps.apk_size.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        env:
+          PR_BYTES: ${{ steps.apk_size.outputs.pr_bytes }}
+          MAIN_BYTES: ${{ steps.apk_size.outputs.main_bytes }}
+          MAIN_RUN: ${{ steps.apk_size.outputs.main_run }}
+        with:
+          script: |
+            const marker = '<!-- apk-size-delta -->';
+            const prBytes = Number(process.env.PR_BYTES);
+            const mainBytesRaw = process.env.MAIN_BYTES;
+            const mainBytes = mainBytesRaw ? Number(mainBytesRaw) : null;
+            const fmt = (b) => `${(b / 1024 / 1024).toFixed(2)} MB`;
+            const sign = (n) => (n > 0 ? '+' : n < 0 ? '-' : '');
+            let body = `${marker}\n📦 **standard-debug APK** — ${fmt(prBytes)} (${prBytes.toLocaleString()} B)`;
+            if (mainBytes != null) {
+              const delta = prBytes - mainBytes;
+              const deltaAbs = Math.abs(delta);
+              const pct = ((delta / mainBytes) * 100).toFixed(2);
+              const arrow = delta > 0 ? '🔺' : delta < 0 ? '🔻' : '➖';
+              body += `\nΔ vs \`main\` baseline (${fmt(mainBytes)}): ${arrow} **${sign(delta)}${fmt(deltaAbs)}** (${sign(delta)}${deltaAbs.toLocaleString()} B, ${pct}%)`;
+              body += `\n_baseline: build-apk.yml run #${process.env.MAIN_RUN}_`;
+            } else {
+              body += `\n_main-branch baseline unavailable (no recent successful build-apk.yml run found, or artifact retention expired)._`;
+            }
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100,
+            });
+            const existing = comments.find((c) => c.body && c.body.startsWith(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
 
       # Surface the result in the workflow Summary tab so the PR check
       # status is unambiguous even before opening the run logs.
