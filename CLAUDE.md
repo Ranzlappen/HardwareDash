@@ -850,28 +850,61 @@ icon catalog, and toast/notification feedback for every feature. Features
 plug in via a config implementing `WidgetKitConfig`; the kit never depends
 on a feature module.
 
-**Established in `refactor-2026` (Batches 4–9):**
-- `WidgetKitConfig` — the per-instance config contract (`displayName`,
-  `removed`, `schemaVersion`) every feature widget config implements.
-  `TorchWidgetConfig` is the first consumer.
-- `WidgetReceiverScope` — one process-lifetime
-  `CoroutineScope(SupervisorJob() + Dispatchers.IO)` every widget receiver
-  uses from `onUpdate`/`onReceive`, replacing the per-tap scope each
-  provider used to allocate (and never cancel).
-- `WidgetPinPolicy` + `WidgetPinResult` — per-kind pin cap
-  (`MAX_WIDGETS_PER_KIND = 20`) and a typed pin outcome (`Requested` /
-  `LauncherUnsupported` / `CapReached`) so callers stop conflating
-  "launcher can't pin" with "cap reached".
+**Established in `refactor-2026` Phase 1 (Batches 4–9):** `WidgetKitConfig`
+contract (`displayName`, `removed`, `schemaVersion`, `appearance`),
+`WidgetReceiverScope`, `WidgetPinPolicy` + `WidgetPinResult`.
 
-**Deferred to a compiler-in-loop follow-up (the resource/Hilt/serialization-
-coupled layer):** `WidgetAppearance` value-type family,
-`WidgetAppearanceRenderer`, the `WidgetIconCatalog` infrastructure,
-`WidgetFeedbackDispatcher`, the `WidgetConfigStore<T>` + `PendingWidgetConfigs<T>`
-generalization, the `BaseGadgetWidgetProvider` scaffold, and the
-`WidgetPinRequester` provider registry. Moving them requires Android
-resource merging across modules, Hilt entry-point rewiring, and pinning the
-`ToggleFeedback` polymorphic discriminator — none of which CI-less editing
-can verify safely. See `docs/refactor-2026/` for the full extraction route.
+**Filled in by `refactor-2026` Phase 2 (Batches C1–C7):**
+- **`config/`** — `WidgetAppearance` value-type family (`BackgroundMode`,
+  `IconStyle`, `IconTint`, `TapBehavior`, `TapAnimation`, `ToggleFeedback`)
+  + `WidgetIconSource` + `WidgetIconKeys`. `ToggleFeedback`'s polymorphic
+  serial-name discriminators are **pinned to the legacy FQN** via explicit
+  `@SerialName` so users' on-disk configs decode unchanged across the
+  package move. A `WidgetAppearanceSerializationTest` enforces this.
+- **`render/`** — `WidgetAppearanceRenderer` + `WidgetIconTint` +
+  `RemoteViewsExt` (`playTapPressFrame`, `hasPressFrame`,
+  `PRESS_FRAME_MILLIS`) + the `WidgetIconResolver` interface every feature
+  catalog implements. The renderer is generic; resource refs use the
+  kit's R; feature layouts reference `@id/widget_background` and
+  `@id/widget_icon` (no `+` — kit's `values/ids.xml` declares them).
+- **`feedback/`** — `WidgetFeedbackDispatcher` + per-feature
+  `WidgetFeedbackConfig` (channel id / display name / description / small
+  icon / notification-id base). Channel id pinned to legacy
+  `"widget_feedback"` so system-settings overrides users already set
+  carry across the migration.
+- **`store/`** — `WidgetConfigStore<T : WidgetKitConfig>` (hot-StateFlow
+  cache + `Migrator<T>` seam) replaces every per-feature
+  `<Feature>WidgetConfigRepository`. Bind once per feature from the
+  feature's Hilt module.
+- **`pin/`** — `PendingWidgetConfigs<T>` (generic DataStore-backed
+  bridge with **monotonic-counter keying under a `Mutex`** — replaces the
+  legacy collision-prone `token.hashCode().absoluteValue`) +
+  `BaseWidgetPinSuccessReceiver<T>` abstract base. Feature receivers
+  subclass + plug in the action / extra-key / EntryPoint accessors.
+- **`provider/`** — `BaseGadgetWidgetProvider<T : WidgetKitConfig>`
+  capturing the `onUpdate` / `onDeleted` / `renderAll` / post-tap chain
+  every feature provider used to copy. Feature subclasses only own the
+  Hilt EntryPoint shape + `buildRemoteViews` + the synchronous
+  feature-specific part of `onReceive`. Monitor / chart providers do
+  **not** follow this pattern (they read a shared metric config, not a
+  per-`appWidgetId` `WidgetKitConfig`) and stay as standalone
+  `AppWidgetProvider`s.
+- **`boot/`** — `BootCompletedReceiver` + `BootRearmHandler` `fun
+  interface`. Features bind a `BootRearmHandler` into a
+  `Map<FeatureId, BootRearmHandler>` Hilt multibinding; the kit
+  receiver iterates each handler under one `goAsync` coroutine. Torch
+  uses this to rearm `MonitorService` iff (a) a monitor widget is
+  placed and (b) monitoring is enabled.
+- **`ui/`** — `WidgetAppearancePreview` (the in-app live mock of the
+  RemoteViews-rendered widget). `GadgetColorPicker` moved to `:core:ui`
+  (P1-10).
+
+**Pending follow-up (deferred from C6):** the appearance-section UI
+(chip rows + icon picker + tap-animation chooser + feedback templates)
+still lives in torch's `WidgetConfigurationSheet`. Extracting it
+generically requires lifting ~30 labels into kit `strings.xml` plus a
+generic `WidgetIconChoice` type — scoped out of Phase 2 to keep diffs
+reviewable.
 
 **The "remove-but-keep-inert" widget pattern** (also documented in the
 migration guide): a non-host app can't pull a placed widget off a
@@ -1154,6 +1187,57 @@ Rules of thumb:
   `widget_flashlight.xml` / `widget_strobe.xml` are the reference
   RemoteViews-safe layouts for follow-up modules and legacy
   migrations to copy.
+- **`android.nonTransitiveRClass=true` + cross-module resource
+  references.** With `nonTransitiveRClass=true` (set in
+  `gradle.properties`), each module's `R` class contains only its
+  **own** resources. Kotlin references like `R.id.widget_icon` in a
+  feature module compile against the feature's `R` — and fail with
+  `Unresolved reference` if the id actually lives in a dep module's
+  `R`. **XML** references (`@drawable/widget_background_glass` in a
+  layout) keep working because AAPT2's resource merger fuses the
+  pool. **Kotlin** references must qualify the dep's R class
+  explicitly. Pattern: `import dev.ranzlappen.gadget.core.widgetkit.R
+  as WidgetKitR` + `WidgetKitR.id.widget_icon`. Broke C2; see
+  `feature/torch/.../widget/{Flashlight,Strobe}WidgetProvider.kt` for
+  the reference fix.
+- **kotlinx-serialization polymorphic discriminator drift on
+  package moves.** `@Serializable sealed class` subtypes encode their
+  type discriminator (default JSON key `"type"`) as the subtype's
+  fully-qualified name. Moving a sealed root or its subtypes to a
+  new package silently breaks decoding of every existing user's
+  persisted record — the wire string changes. Two recovery paths:
+  pin every subtype with explicit `@SerialName("<legacy.FQN.path>")`
+  so the wire string stays put (rock-solid, ugly magic string), OR
+  bump the persisted record's `schemaVersion` and write a `Migrator
+  <T>` that rewrites the discriminator on read. Phase 2 / C1 used
+  the pin for `ToggleFeedback`; `:core:widgetkit`'s
+  `WidgetAppearanceSerializationTest` regression-tests it.
+- **Companion-object `@Provides` on an abstract `@Module`** is
+  fragile across Hilt / KSP versions — some configurations silently
+  skip the `@Provides`, leaving the binding unresolved and the
+  whole graph red. Convention everywhere else in this repo
+  (`DataModule`, `DataStoreModule`, …) is a top-level `object`
+  module for `@Provides` + a separate abstract class for `@Binds`.
+  Stick to it. See `feature/torch/.../di/TorchProvidesModule.kt`
+  for the split.
+- **Room schema-export 0-byte file.** A 0-byte `.gitkeep` (or any
+  unparseable file) in the configured `room.schemaLocation` causes
+  Room's KSP processor to throw
+  `IllegalStateException("Empty schema file")` from
+  `SchemaBundle.deserialize`. The processor iterates every file in
+  the dir; it doesn't filter by `.json` extension on every version.
+  Use a non-empty placeholder (e.g. delete it and let Room create
+  the dir on first export) or commit a real schema. Surfaced + fixed
+  on PR #123 in Phase 2 / C7 cycle.
+- **Same-package symbol resolution across module-move.** Kotlin
+  source can reference any same-package type without an `import`.
+  After a module move that lifts an interface out of `package
+  com.foo.bar` (now in a new module), every impl that stayed at
+  `package com.foo.bar` loses access — the unimported reference
+  becomes `error.NonExistentClass` at KSP time. Audit before / after
+  moves with `grep -rn "interface X\|: X\b"` and inject an explicit
+  `import` to the new home. Phase 2 / D1 hit this on every
+  `com.gadget.root.*` flavor impl.
 
 ---
 
@@ -1188,16 +1272,24 @@ Rules (full details in `docs/flavors.md`):
 
 1. Shared code lives in `app/src/main/`. New features default here.
 2. Standard-only stubs live in `app/src/standard/`. Rooted-only code
-   lives in `app/src/rooted/`. Files in those two directories MUST
-   share fully-qualified class names — Gradle picks one at build
-   time based on the active flavor.
+   lives in `app/src/rooted/`. **Older guideline** said the two
+   directories must share FQNs so Gradle picks one per flavor; the
+   refactor-2026 D2 + D3 + E1 batches relaxed that — flavor impls
+   now live under modular per-feature packages
+   (`dev.ranzlappen.gadget.feature.{standard,rooted}.<feature>.*`)
+   with distinct FQNs per flavor. Hilt bindings still pick the right
+   impl per flavor because each flavor's `RootBindings.kt` (and the
+   per-feature Hilt modules in sibling `:feature:<name>-rooted`
+   modules) is itself flavor-scoped and contributes only its impl to
+   the build variant.
 3. Never branch on `BuildConfig.IS_ROOTED`. Inject
-   `RootCapabilityRegistry` / `RootSafetyGate` (in
-   `com.gadget.root`) and let the Hilt seam pick the right
-   implementation per flavor.
+   `RootCapabilityRegistry` / `RootSafetyGate` (from `:core:root` —
+   `dev.ranzlappen.gadget.core.root.*`) and let the Hilt seam pick
+   the right implementation per flavor.
 4. Never put rooted-specific imports (e.g. anything that talks to
-   su) under `src/main/`. They belong in `src/rooted/` with a no-op
-   twin in `src/standard/`.
+   su) under `src/main/`. They belong in `src/rooted/` (or a sibling
+   `:feature:<name>-rooted` module wired in via
+   `rootedImplementation`) with a no-op twin in `src/standard/`.
 5. CI produces `standard-debug.apk`, `standard-release.apk` +
    `.aab`, and `rooted-debug.apk`. `versionCode = CI_VERSION_CODE *
    10 + flavor_offset` (standard=+0, rooted=+1).
