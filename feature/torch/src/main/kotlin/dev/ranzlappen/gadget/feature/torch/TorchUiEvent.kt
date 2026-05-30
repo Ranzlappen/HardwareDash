@@ -28,6 +28,13 @@ sealed interface TorchUiEvent {
 
     data object AddFlashlight : TorchUiEvent
     data object AddStrobe : TorchUiEvent
+
+    /** "Pin with the default look" — skip the configuration sheet and
+     *  immediately request a pin with the same default config the Add
+     *  buttons would have started the sheet with. */
+    data object QuickPinFlashlight : TorchUiEvent
+    data object QuickPinStrobe : TorchUiEvent
+
     data class EditWidget(val widget: SavedTorchWidget) : TorchUiEvent
     data class DeleteWidget(val widget: SavedTorchWidget) : TorchUiEvent
 
