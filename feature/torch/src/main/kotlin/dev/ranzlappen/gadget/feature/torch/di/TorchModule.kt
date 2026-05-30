@@ -4,9 +4,13 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoMap
+import dagger.multibindings.StringKey
+import dev.ranzlappen.gadget.core.widgetkit.boot.BootRearmHandler
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetIconResolver
 import dev.ranzlappen.gadget.feature.torch.StandardTorchController
 import dev.ranzlappen.gadget.feature.torch.TorchController
+import dev.ranzlappen.gadget.feature.torch.monitor.TorchBootRearmHandler
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
 import javax.inject.Singleton
 
@@ -82,4 +86,19 @@ abstract class TorchModule {
     abstract fun bindWidgetIconResolver(
         impl: WidgetIconCatalog,
     ): WidgetIconResolver
+
+    /**
+     * Bind torch's [BootRearmHandler] into the kit-side
+     * `Map<String, BootRearmHandler>` multibinding under
+     * [TorchBootRearmHandler.FEATURE_ID]. Fired by the kit's
+     * `BootCompletedReceiver` after device boot to rearm the monitor
+     * foreground service iff there's a placed monitor widget AND
+     * monitoring is enabled.
+     */
+    @Binds
+    @IntoMap
+    @StringKey(TorchBootRearmHandler.FEATURE_ID)
+    abstract fun bindBootRearmHandler(
+        impl: TorchBootRearmHandler,
+    ): BootRearmHandler
 }
