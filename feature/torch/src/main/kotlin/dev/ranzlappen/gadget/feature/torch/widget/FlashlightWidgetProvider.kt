@@ -19,7 +19,7 @@ import dev.ranzlappen.gadget.core.widgetkit.render.hasPressFrame
 import dev.ranzlappen.gadget.core.widgetkit.render.playTapPressFrame
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
-import dev.ranzlappen.gadget.feature.torch.widget.feedback.WidgetFeedbackDispatcher
+import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
