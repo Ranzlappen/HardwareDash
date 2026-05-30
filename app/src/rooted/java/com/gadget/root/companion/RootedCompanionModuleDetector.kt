@@ -1,5 +1,6 @@
 package com.gadget.root.companion
 
+import dev.ranzlappen.gadget.core.root.companion.*
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import javax.inject.Inject
 import javax.inject.Singleton

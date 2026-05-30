@@ -1,5 +1,6 @@
 package com.gadget.root
 
+import dev.ranzlappen.gadget.core.root.*
 /**
  * Standard-flavor [RootSoftLimiter]: nothing to limit because no rooted code
  * runs. Always reports the request as granted; the gate has already denied

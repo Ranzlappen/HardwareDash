@@ -1,15 +1,16 @@
 package com.gadget.root
 
+import dev.ranzlappen.gadget.core.root.*
 import dev.ranzlappen.gadget.core.root.companion.CompanionModuleDetector
-import dev.ranzlappen.gadget.core.root.companion.RootedCompanionModuleDetector
+import com.gadget.root.companion.RootedCompanionModuleDetector
 import dev.ranzlappen.gadget.core.root.core.RootDetector
 import dev.ranzlappen.gadget.core.root.core.RootService
 import dev.ranzlappen.gadget.core.root.core.RootShell
-import dev.ranzlappen.gadget.core.root.core.RootedRootDetector
-import dev.ranzlappen.gadget.core.root.core.RootedRootService
-import dev.ranzlappen.gadget.core.root.core.RootedRootShell
+import com.gadget.root.core.RootedRootDetector
+import com.gadget.root.core.RootedRootService
+import com.gadget.root.core.RootedRootShell
 import dev.ranzlappen.gadget.core.root.launch.LaunchGate
-import dev.ranzlappen.gadget.core.root.launch.RootedLaunchGate
+import com.gadget.root.launch.RootedLaunchGate
 import com.gadget.adbdebug.AdbDebuggingController
 import com.gadget.adbdebug.RootedAdbDebuggingController
 import com.gadget.audio.AudioRoutingController
@@ -43,8 +44,8 @@ import com.gadget.nfc.RootedNfcController
 import com.gadget.notification.NotificationController
 import com.gadget.notification.RootedNotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
-import dev.ranzlappen.gadget.core.root.emergency.RootedEmergencyResetCoordinator
-import dev.ranzlappen.gadget.core.root.sysfs.RootedSysfsMutationLog
+import com.gadget.root.emergency.RootedEmergencyResetCoordinator
+import com.gadget.root.sysfs.RootedSysfsMutationLog
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.RootedSensorsController
 import com.gadget.sensors.SensorsController

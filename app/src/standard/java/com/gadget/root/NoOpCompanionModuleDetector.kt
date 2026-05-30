@@ -1,5 +1,6 @@
 package com.gadget.root
 
+import dev.ranzlappen.gadget.core.root.*
 import dev.ranzlappen.gadget.core.root.companion.CompanionModuleConstants
 import dev.ranzlappen.gadget.core.root.companion.CompanionModuleDetector
 import dev.ranzlappen.gadget.core.root.companion.CompanionModuleStatus

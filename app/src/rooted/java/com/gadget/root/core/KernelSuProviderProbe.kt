@@ -1,5 +1,6 @@
 package com.gadget.root.core
 
+import dev.ranzlappen.gadget.core.root.core.*
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject

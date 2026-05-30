@@ -1,5 +1,6 @@
 package com.gadget.root
 
+import dev.ranzlappen.gadget.core.root.*
 /**
  * Standard-flavor [RootSafetyGate]: every check denies as `Unsupported`.
  * Recording invocations is a no-op.

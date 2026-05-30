@@ -1,5 +1,6 @@
 package com.gadget.root.emergency
 
+import dev.ranzlappen.gadget.core.root.emergency.*
 import javax.inject.Inject
 import javax.inject.Singleton
 

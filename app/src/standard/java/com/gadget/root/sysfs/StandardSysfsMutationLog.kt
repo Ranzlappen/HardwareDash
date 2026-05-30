@@ -1,5 +1,6 @@
 package com.gadget.root.sysfs
 
+import dev.ranzlappen.gadget.core.root.sysfs.*
 import javax.inject.Inject
 import javax.inject.Singleton
 

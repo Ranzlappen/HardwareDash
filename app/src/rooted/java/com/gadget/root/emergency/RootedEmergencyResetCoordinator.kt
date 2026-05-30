@@ -1,5 +1,6 @@
 package com.gadget.root.emergency
 
+import dev.ranzlappen.gadget.core.root.emergency.*
 import android.content.Context
 import com.gadget.keepalive.KeepAliveController
 import com.gadget.keepalive.KeepAliveControllerResult

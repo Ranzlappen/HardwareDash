@@ -1,5 +1,6 @@
 package com.gadget.root
 
+import dev.ranzlappen.gadget.core.root.*
 import dev.ranzlappen.gadget.core.root.companion.CompanionModuleDetector
 import dev.ranzlappen.gadget.core.root.core.RootDetector
 import dev.ranzlappen.gadget.core.root.core.RootService
@@ -38,8 +39,8 @@ import com.gadget.nfc.StandardNfcController
 import com.gadget.notification.NotificationController
 import com.gadget.notification.StandardNotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
-import dev.ranzlappen.gadget.core.root.emergency.StandardEmergencyResetCoordinator
-import dev.ranzlappen.gadget.core.root.sysfs.StandardSysfsMutationLog
+import com.gadget.root.emergency.StandardEmergencyResetCoordinator
+import com.gadget.root.sysfs.StandardSysfsMutationLog
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.SensorsController
 import com.gadget.sensors.StandardSensorsController
