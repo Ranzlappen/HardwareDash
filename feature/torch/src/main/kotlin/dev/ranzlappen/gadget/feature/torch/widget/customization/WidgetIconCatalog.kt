@@ -9,8 +9,11 @@ import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.exifinterface.media.ExifInterface
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconKeys
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.render.WidgetIconResolver
 import dev.ranzlappen.gadget.feature.torch.R
-import dev.ranzlappen.gadget.feature.torch.widget.PendingTorchWidgetConfigs
+import dev.ranzlappen.gadget.feature.torch.widget.TorchPinLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayInputStream
@@ -22,22 +25,10 @@ import javax.inject.Singleton
 import kotlin.math.max
 
 /**
- * Where an icon key resolves to. Built-in keys map to a bundled
- * [DrawableRes]; user-supplied keys (prefixed [WidgetIconCatalog.CUSTOM_PREFIX])
- * map to a downscaled PNG copied into app-internal storage. Both the
- * Compose preview and the RemoteViews renderer branch on this so a custom
- * image renders identically in-app and on the home screen.
- */
-sealed interface WidgetIconSource {
-    data class Resource(@DrawableRes val resId: Int) : WidgetIconSource
-    data class CustomFile(val path: String) : WidgetIconSource
-}
-
-/**
  * Curated registry of icons available to widget configurations, plus the
  * import/resolve surface for user-supplied custom icons.
  *
- * Built-in entries pair a stable [Entry.key] (persisted in [IconStyle])
+ * Built-in entries pair a stable [Entry.key] (persisted in IconStyle)
  * with a [DrawableRes]. Custom icons are persisted as keys of the form
  * `custom:<uuid>.png` pointing at a downscaled copy in
  * `filesDir/widget_icons/` — configs never store a raw content Uri (those
@@ -48,7 +39,7 @@ sealed interface WidgetIconSource {
 @Singleton
 class WidgetIconCatalog @Inject constructor(
     @ApplicationContext private val context: Context,
-) {
+) : WidgetIconResolver {
 
     /**
      * One built-in icon in the catalog.
@@ -65,16 +56,16 @@ class WidgetIconCatalog @Inject constructor(
 
     /** Public, ordered list of built-ins — drives the picker grid order. */
     val entries: List<Entry> = listOf(
-        Entry(DEFAULT_ACTIVE,   R.drawable.ic_flashlight_on,  "Flashlight on"),
-        Entry(DEFAULT_INACTIVE, R.drawable.ic_flashlight_off, "Flashlight off"),
-        Entry("strobe_on",      R.drawable.ic_strobe_on,      "Strobe active"),
-        Entry("strobe_off",     R.drawable.ic_strobe,         "Strobe idle"),
+        Entry(WidgetIconKeys.DEFAULT_ACTIVE,   R.drawable.ic_flashlight_on,  "Flashlight on"),
+        Entry(WidgetIconKeys.DEFAULT_INACTIVE, R.drawable.ic_flashlight_off, "Flashlight off"),
+        Entry("strobe_on",                     R.drawable.ic_strobe_on,      "Strobe active"),
+        Entry("strobe_off",                    R.drawable.ic_strobe,         "Strobe idle"),
     )
 
     private val customDir: File by lazy { File(context.filesDir, CUSTOM_DIR_NAME) }
 
     /** True iff [key] denotes a user-supplied custom icon. */
-    fun isCustom(key: String): Boolean = key.startsWith(CUSTOM_PREFIX)
+    override fun isCustom(key: String): Boolean = key.startsWith(WidgetIconKeys.CUSTOM_PREFIX)
 
     /**
      * Resolve a key to its [WidgetIconSource]. Unknown built-in keys fall
@@ -84,7 +75,7 @@ class WidgetIconCatalog @Inject constructor(
      */
     fun resolveSource(key: String): WidgetIconSource =
         if (isCustom(key)) {
-            WidgetIconSource.CustomFile(File(customDir, key.removePrefix(CUSTOM_PREFIX)).absolutePath)
+            WidgetIconSource.CustomFile(File(customDir, key.removePrefix(WidgetIconKeys.CUSTOM_PREFIX)).absolutePath)
         } else {
             WidgetIconSource.Resource(resolve(key))
         }
@@ -92,7 +83,7 @@ class WidgetIconCatalog @Inject constructor(
     /** Resolve a built-in key to its drawable, falling back to the default
      *  active icon for unknown / custom keys. */
     @DrawableRes
-    fun resolve(key: String): Int =
+    override fun resolve(key: String): Int =
         entries.firstOrNull { it.key == key }?.drawable
             ?: entries.first().drawable
 
@@ -105,9 +96,9 @@ class WidgetIconCatalog @Inject constructor(
      * to the default drawable). The stored file is already downscaled, so
      * this is a cheap decode safe to call on the provider's IO coroutine.
      */
-    fun loadCustomBitmap(key: String): Bitmap? {
+    override fun loadCustomBitmap(key: String): Bitmap? {
         if (!isCustom(key)) return null
-        val path = File(customDir, key.removePrefix(CUSTOM_PREFIX)).absolutePath
+        val path = File(customDir, key.removePrefix(WidgetIconKeys.CUSTOM_PREFIX)).absolutePath
         return runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
     }
 
@@ -124,12 +115,12 @@ class WidgetIconCatalog @Inject constructor(
             // was silently failing on real devices.
             val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
             if (bytes == null || bytes.isEmpty()) {
-                Log.w(PendingTorchWidgetConfigs.TAG, "importCustomIcon: empty/unreadable stream for $uri")
+                Log.w(TorchPinLog.TAG, "importCustomIcon: empty/unreadable stream for $uri")
                 return@withContext null
             }
             val decoded = decodeDownscaled(bytes, MAX_ICON_PX)
             if (decoded == null) {
-                Log.w(PendingTorchWidgetConfigs.TAG, "importCustomIcon: undecodable image for $uri")
+                Log.w(TorchPinLog.TAG, "importCustomIcon: undecodable image for $uri")
                 return@withContext null
             }
             // Gallery photos carry their rotation in EXIF, which the
@@ -139,10 +130,10 @@ class WidgetIconCatalog @Inject constructor(
             val file = File(customDir, "${UUID.randomUUID()}.png")
             FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, PNG_QUALITY, out) }
             bitmap.recycle()
-            Log.d(PendingTorchWidgetConfigs.TAG, "importCustomIcon: wrote ${file.name}")
-            CUSTOM_PREFIX + file.name
+            Log.d(TorchPinLog.TAG, "importCustomIcon: wrote ${file.name}")
+            WidgetIconKeys.CUSTOM_PREFIX + file.name
         } catch (t: Throwable) {
-            Log.w(PendingTorchWidgetConfigs.TAG, "importCustomIcon failed for $uri", t)
+            Log.w(TorchPinLog.TAG, "importCustomIcon failed for $uri", t)
             null
         }
     }
@@ -208,22 +199,12 @@ class WidgetIconCatalog @Inject constructor(
             if (rotated !== bitmap) bitmap.recycle()
             rotated
         } catch (e: OutOfMemoryError) {
-            Log.w(PendingTorchWidgetConfigs.TAG, "applyExifOrientation OOM — using unrotated icon", e)
+            Log.w(TorchPinLog.TAG, "applyExifOrientation OOM — using unrotated icon", e)
             bitmap
         }
     }
 
     companion object {
-        /** Default active-state icon key. */
-        const val DEFAULT_ACTIVE = "default_active"
-
-        /** Default inactive-state icon key. */
-        const val DEFAULT_INACTIVE = "default_inactive"
-
-        /** Key prefix marking a user-supplied custom icon. The remainder
-         *  is the file name inside [CUSTOM_DIR_NAME]. */
-        const val CUSTOM_PREFIX = "custom:"
-
         private const val CUSTOM_DIR_NAME = "widget_icons"
 
         /** Longest-edge cap (px) for an imported icon — small enough for

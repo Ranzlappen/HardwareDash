@@ -4,42 +4,14 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.widget.RemoteViews
-import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
-import kotlinx.coroutines.delay
-
-/** How long a tap-press frame is held before reverting to the resting
- *  render. Long enough that the launcher applies it as a distinct frame
- *  rather than coalescing it with the resting render. */
-internal const val PRESS_FRAME_MILLIS: Long = 280L
 
 /** Icon alpha (0..255) for a widget the user deleted in-app but that the
  *  launcher still hosts. Dim enough to read as defunct without vanishing
- *  entirely (the app can't remove it from a third-party launcher). */
-internal const val REMOVED_WIDGET_ICON_ALPHA: Int = 70
-
-/** True for the tap animations rendered as a held "pressed" frame (as
- *  opposed to [TapAnimation.None] / the passive [TapAnimation.Ripple]). */
-internal fun TapAnimation.hasPressFrame(): Boolean =
-    this == TapAnimation.Flash || this == TapAnimation.Scale || this == TapAnimation.Pulse
-
-/**
- * Render a held "pressed" frame on a single widget instance, then revert
- * to the resting frame after [PRESS_FRAME_MILLIS].
+ *  entirely (the app can't remove it from a third-party launcher).
  *
- * Suspend — call from the provider's existing `onReceive` coroutine
- * (kept alive by the caller's `goAsync`), so it does not open its own.
- */
-internal suspend fun playTapPressFrame(
-    manager: AppWidgetManager,
-    appWidgetId: Int,
-    pressedViews: RemoteViews,
-    restingViews: RemoteViews,
-) {
-    manager.updateAppWidget(appWidgetId, pressedViews)
-    delay(PRESS_FRAME_MILLIS)
-    manager.updateAppWidget(appWidgetId, restingViews)
-}
+ *  Stays torch-side: it's part of the per-feature "deleted-but-still-
+ *  placed" inert-rendering pattern the providers own. */
+internal const val REMOVED_WIDGET_ICON_ALPHA: Int = 70
 
 /**
  * Fire an [AppWidgetManager.ACTION_APPWIDGET_UPDATE] broadcast at the provider
@@ -57,10 +29,7 @@ internal fun broadcastTorchWidgetUpdate(
     type: WidgetType,
     appWidgetId: Int,
 ) {
-    val providerClass = when (type) {
-        WidgetType.Flashlight -> FlashlightWidgetProvider::class.java
-        WidgetType.Strobe -> StrobeWidgetProvider::class.java
-    }
+    val providerClass = type.providerClass
     val intent = Intent(
         AppWidgetManager.ACTION_APPWIDGET_UPDATE,
         null,

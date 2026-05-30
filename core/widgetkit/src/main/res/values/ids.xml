@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Kit-owned id declarations for the WidgetAppearanceRenderer contract.
+
+  The renderer reads these via R.id.widget_background / R.id.widget_icon
+  from the :core:widgetkit module. Feature widget layouts (in :feature:torch
+  etc.) reference them via @id/widget_background / @id/widget_icon — note
+  the lack of `+`: the kit declares them here, the layouts only reference.
+
+  Why a dedicated values/ids.xml: every consumer that pulls in :core:widgetkit
+  gets these ids in their merged R class, so the renderer's setInt calls
+  resolve uniformly across features. Without this file each feature layout
+  would have to declare them with `@+id/`, and a typo in any one would
+  silently break that feature's widget rendering at runtime.
+-->
+<resources>
+    <item name="widget_background" type="id" />
+    <item name="widget_icon" type="id" />
+</resources>

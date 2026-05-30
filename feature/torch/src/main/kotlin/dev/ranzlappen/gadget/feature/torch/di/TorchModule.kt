@@ -4,13 +4,20 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoMap
+import dagger.multibindings.StringKey
+import dev.ranzlappen.gadget.core.widgetkit.boot.BootRearmHandler
+import dev.ranzlappen.gadget.core.widgetkit.render.WidgetIconResolver
 import dev.ranzlappen.gadget.feature.torch.StandardTorchController
 import dev.ranzlappen.gadget.feature.torch.TorchController
+import dev.ranzlappen.gadget.feature.torch.monitor.TorchBootRearmHandler
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
 import javax.inject.Singleton
 
 /**
- * Hilt module that binds the singleton [TorchController]
- * implementation.
+ * Hilt module that binds the singleton [TorchController] implementation
+ * and surfaces torch's [WidgetIconCatalog] as the kit-side
+ * [WidgetIconResolver].
  *
  * Phase 2 / Batch 1 + 1.1 ship only the standard-flavor
  * [StandardTorchController] (Camera2-based). Rooted extras
@@ -42,6 +49,13 @@ import javax.inject.Singleton
  * https://github.com/Ranzlappen/HardwareDash/issues/94 for the
  * pickup plan.
  *
+ * **Why two modules in this directory.** `@Binds` requires an `abstract`
+ * class, but `@Provides` in a companion object on an abstract Dagger
+ * module is fragile across Hilt/KSP versions (some configurations
+ * silently skip it). Per the codebase convention (mirrors
+ * `core.data.di.DataModule` etc.), `@Provides` functions live in a
+ * sibling top-level `object` module — see [TorchProvidesModule].
+ *
  * `@InstallIn(SingletonComponent::class)` so the controller's
  * lifecycle matches the app's — its CameraManager.TorchCallback
  * subscription stays live for the whole process.
@@ -55,4 +69,36 @@ abstract class TorchModule {
     abstract fun bindTorchController(
         impl: StandardTorchController,
     ): TorchController
+
+    /**
+     * Surface torch's [WidgetIconCatalog] as the kit-side
+     * [WidgetIconResolver]. The kit's `WidgetAppearanceRenderer`
+     * injects the resolver interface (not the concrete catalog) so the
+     * renderer can live in `:core:widgetkit` without knowing about any
+     * particular feature's bundled drawables.
+     *
+     * As more widget-bearing features land, this binding will become a
+     * multibinding keyed by feature id (planned for C5's provider
+     * registry batch).
+     */
+    @Binds
+    @Singleton
+    abstract fun bindWidgetIconResolver(
+        impl: WidgetIconCatalog,
+    ): WidgetIconResolver
+
+    /**
+     * Bind torch's [BootRearmHandler] into the kit-side
+     * `Map<String, BootRearmHandler>` multibinding under
+     * [TorchBootRearmHandler.FEATURE_ID]. Fired by the kit's
+     * `BootCompletedReceiver` after device boot to rearm the monitor
+     * foreground service iff there's a placed monitor widget AND
+     * monitoring is enabled.
+     */
+    @Binds
+    @IntoMap
+    @StringKey(TorchBootRearmHandler.FEATURE_ID)
+    abstract fun bindBootRearmHandler(
+        impl: TorchBootRearmHandler,
+    ): BootRearmHandler
 }

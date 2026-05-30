@@ -2,7 +2,7 @@ package dev.ranzlappen.gadget.feature.torch.widget
 
 import androidx.compose.runtime.Immutable
 import dev.ranzlappen.gadget.core.widgetkit.WidgetKitConfig
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearance
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  *
  * One [TorchWidgetConfig] persists per `appWidgetId` inside the
  * `torch_widgets` Preferences DataStore (see
- * [TorchWidgetConfigRepository]). The widget provider reads the
+ * [WidgetConfigStore]). The widget provider reads the
  * config in `onUpdate` / `onReceive` to drive both the RemoteViews
  * presentation and (for strobe widgets) the Intent extras passed to
  * [dev.ranzlappen.gadget.feature.torch.strobe.StrobeService].
@@ -55,7 +55,7 @@ data class TorchWidgetConfig(
     @SerialName("sosMode")
     val morseMode: Boolean = false,
     val morseText: String = "",
-    val appearance: WidgetAppearance = WidgetAppearance(),
+    override val appearance: WidgetAppearance = WidgetAppearance(),
     override val removed: Boolean = false,
     override val schemaVersion: Int = SCHEMA_VERSION,
 ) : WidgetKitConfig {

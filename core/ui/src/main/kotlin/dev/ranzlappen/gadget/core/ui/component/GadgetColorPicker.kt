@@ -1,4 +1,4 @@
-package dev.ranzlappen.gadget.feature.torch.ui
+package dev.ranzlappen.gadget.core.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

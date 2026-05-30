@@ -1,2 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+      Kit-owned boot receiver. Fires every feature's BootRearmHandler
+      (via the Map<String, BootRearmHandler> Hilt multibinding) so a
+      placed widget's runtime invariants (e.g. monitor service alive)
+      survive a device reboot.
+
+      `:app` already declares android.permission.RECEIVE_BOOT_COMPLETED;
+      manifest merging lifts this receiver into the merged manifest.
+
+      Listens for both ACTION_BOOT_COMPLETED and
+      ACTION_LOCKED_BOOT_COMPLETED — the latter fires before the user
+      unlocks on Direct Boot devices so non-credential-protected work
+      can start earlier. The handlers themselves gate on whether their
+      data actually needs them now.
+    -->
+    <application>
+        <receiver
+            android:name="dev.ranzlappen.gadget.core.widgetkit.boot.BootCompletedReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

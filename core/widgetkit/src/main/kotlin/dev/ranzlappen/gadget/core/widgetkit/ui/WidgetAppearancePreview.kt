@@ -1,4 +1,4 @@
-package dev.ranzlappen.gadget.feature.torch.ui
+package dev.ranzlappen.gadget.core.widgetkit.ui
 
 import android.graphics.BitmapFactory
 import androidx.compose.animation.core.animateFloatAsState
@@ -32,24 +32,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.a11y.LocalReducedMotion
-import dev.ranzlappen.gadget.feature.torch.widget.customization.BackgroundMode
-import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearance
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
-import dev.ranzlappen.gadget.feature.torch.widget.customization.iconTintArgb
+import dev.ranzlappen.gadget.core.widgetkit.config.BackgroundMode
+import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.render.iconTintArgb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Approximate, live render of how a 1×1 torch widget will look with the
- * given [appearance]. Drawn in pure Compose (not RemoteViews) but mirrors
- * the [dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearanceRenderer]
+ * Approximate, live render of how a 1×1 kit-built widget will look with
+ * the given [appearance]. Drawn in pure Compose (not RemoteViews) but
+ * mirrors the [dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer]
  * mapping — same background shapes/colours and the shared [iconTintArgb]
  * tint — so the preview tracks the placed widget.
  *
- * Shows the active-state [icon] (resolve `appearance.iconStyle.activeKey`
- * via [dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog.resolveSource]).
- * A [WidgetIconSource.CustomFile] is decoded off the main thread and
+ * Shows the active-state [icon] (callers resolve
+ * `appearance.iconStyle.activeKey` to a [WidgetIconSource] via their
+ * feature's icon resolver, e.g. torch's `WidgetIconCatalog`). A
+ * [WidgetIconSource.CustomFile] is decoded off the main thread and
  * rendered untinted (it carries its own colours); a
  * [WidgetIconSource.Resource] is tinted per the icon style.
  *

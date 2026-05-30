@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Theme-approximation tints for widget icons.
+
+  RemoteViews can't read the active MaterialTheme color scheme (it lives
+  in the launcher process), so we approximate the theme's accent +
+  on-surface colors as static color resources. Matches the dark-first
+  default theme; a future "light widget" variant could swap these via
+  values-night/.
+-->
+<resources>
+    <color name="widget_tint_accent">#FFB0BFFF</color>
+    <color name="widget_tint_on_surface">#FFE6E1E5</color>
+</resources>

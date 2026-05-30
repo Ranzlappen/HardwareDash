@@ -9,6 +9,7 @@ import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.widgetkit.WidgetPinPolicy
 import dev.ranzlappen.gadget.core.widgetkit.WidgetPinResult
+import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +21,7 @@ import javax.inject.Singleton
  * [android.appwidget.AppWidgetManager.requestPinAppWidget] with a
  * success-callback `PendingIntent` that routes back into
  * [WidgetPinSuccessReceiver]. The pre-pin [TorchWidgetConfig] rides
- * along through the [PendingTorchWidgetConfigs] DataStore-backed
+ * along through the [PendingWidgetConfigs] DataStore-backed
  * bridge so the receiver can persist it once the OS assigns an
  * `appWidgetId`.
  *
@@ -38,13 +39,13 @@ import javax.inject.Singleton
  * fix and lines up with the manifest's exported intent filter.
  *
  * Logging — every step writes to logcat under tag
- * [PendingTorchWidgetConfigs.TAG] so `adb logcat -s TorchPinFlow:D`
+ * [TorchPinLog.TAG] so `adb logcat -s TorchPinFlow:D`
  * traces the full flow.
  */
 @Singleton
 class TorchWidgetCreator @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val pending: PendingTorchWidgetConfigs,
+    private val pending: PendingWidgetConfigs<TorchWidgetConfig>,
 ) {
 
     /**
@@ -74,26 +75,21 @@ class TorchWidgetCreator @Inject constructor(
     suspend fun requestPin(config: TorchWidgetConfig): WidgetPinResult {
         val appWidgetManager = AppWidgetManager.getInstance(context)
         if (!appWidgetManager.isRequestPinAppWidgetSupported) {
-            Log.w(PendingTorchWidgetConfigs.TAG, "requestPin → launcher unsupported")
+            Log.w(TorchPinLog.TAG, "requestPin → launcher unsupported")
             return WidgetPinResult.LauncherUnsupported
         }
 
-        val provider = when (config.type) {
-            WidgetType.Flashlight ->
-                ComponentName(context, FlashlightWidgetProvider::class.java)
-            WidgetType.Strobe ->
-                ComponentName(context, StrobeWidgetProvider::class.java)
-        }
+        val provider = ComponentName(context, config.type.providerClass)
 
         // Per-kind cap: count the currently-placed instances of this
         // provider so a user (or a pathological loop) can't pin unbounded
         // widgets and grow the per-feature DataStore without limit.
         val currentCount = appWidgetManager.getAppWidgetIds(provider).size
         if (!WidgetPinPolicy.canPin(currentCount)) {
-            Log.w(PendingTorchWidgetConfigs.TAG, "requestPin → cap reached ($currentCount) type=${config.type}")
+            Log.w(TorchPinLog.TAG, "requestPin → cap reached ($currentCount) type=${config.type}")
             return WidgetPinResult.CapReached
         }
-        Log.d(PendingTorchWidgetConfigs.TAG, "requestPin → type=${config.type}")
+        Log.d(TorchPinLog.TAG, "requestPin → type=${config.type}")
 
         // Persist the pending config before requesting the pin so the
         // success-callback token is guaranteed to resolve when the OS
@@ -124,7 +120,7 @@ class TorchWidgetCreator @Inject constructor(
             /* extras = */ null,
             successCallback,
         )
-        Log.d(PendingTorchWidgetConfigs.TAG, "requestPin → OS accepted=$accepted")
+        Log.d(TorchPinLog.TAG, "requestPin → OS accepted=$accepted")
         // A rare `false` despite isRequestPinAppWidgetSupported == true (OEM
         // launcher quirk) surfaces the same "unsupported" message to the user.
         return if (accepted) WidgetPinResult.Requested else WidgetPinResult.LauncherUnsupported
@@ -137,7 +133,7 @@ class TorchWidgetCreator @Inject constructor(
         const val ACTION_WIDGET_PIN_SUCCESS =
             "dev.ranzlappen.gadget.feature.torch.ACTION_WIDGET_PIN_SUCCESS"
 
-        /** Extra key carrying the [PendingTorchWidgetConfigs] token. */
+        /** Extra key carrying the [PendingWidgetConfigs] token. */
         const val EXTRA_PENDING_CONFIG_TOKEN =
             "dev.ranzlappen.gadget.feature.torch.EXTRA_PENDING_CONFIG_TOKEN"
     }

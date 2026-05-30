@@ -54,20 +54,23 @@ import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.GadgetBottomSheet
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
+import dev.ranzlappen.gadget.core.ui.component.GadgetColorPicker
 import dev.ranzlappen.gadget.core.ui.component.GadgetPrimaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
 import dev.ranzlappen.gadget.core.ui.component.GadgetTertiaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
+import dev.ranzlappen.gadget.core.widgetkit.ui.WidgetAppearancePreview
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
-import dev.ranzlappen.gadget.feature.torch.widget.customization.BackgroundMode
-import dev.ranzlappen.gadget.feature.torch.widget.customization.IconTint
-import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
-import dev.ranzlappen.gadget.feature.torch.widget.customization.ToggleFeedback
+import dev.ranzlappen.gadget.core.widgetkit.config.BackgroundMode
+import dev.ranzlappen.gadget.core.widgetkit.config.IconTint
+import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.config.ToggleFeedback
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconKeys
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconSource
-import dev.ranzlappen.gadget.feature.torch.widget.customization.iconTintArgb
+import dev.ranzlappen.gadget.core.widgetkit.render.iconTintArgb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -511,7 +514,7 @@ private fun IconPickerRow(
             }
         }
     }
-    val customSelected = selectedKey.startsWith(WidgetIconCatalog.CUSTOM_PREFIX)
+    val customSelected = selectedKey.startsWith(WidgetIconKeys.CUSTOM_PREFIX)
     Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
         Text(
             text = label,
