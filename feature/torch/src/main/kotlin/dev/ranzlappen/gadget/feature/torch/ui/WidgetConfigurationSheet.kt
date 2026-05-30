@@ -54,10 +54,12 @@ import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.GadgetBottomSheet
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
+import dev.ranzlappen.gadget.core.ui.component.GadgetColorPicker
 import dev.ranzlappen.gadget.core.ui.component.GadgetPrimaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
 import dev.ranzlappen.gadget.core.ui.component.GadgetTertiaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
+import dev.ranzlappen.gadget.core.widgetkit.ui.WidgetAppearancePreview
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType

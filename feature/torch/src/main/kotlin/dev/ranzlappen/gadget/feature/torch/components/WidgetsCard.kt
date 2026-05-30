@@ -29,7 +29,7 @@ import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.component.GlassSurface
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.SavedTorchWidget
-import dev.ranzlappen.gadget.feature.torch.ui.WidgetAppearancePreview
+import dev.ranzlappen.gadget.core.widgetkit.ui.WidgetAppearancePreview
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 
 @Composable

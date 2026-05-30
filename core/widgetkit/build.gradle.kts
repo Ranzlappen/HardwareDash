@@ -14,6 +14,7 @@
 
 plugins {
     id("gadget.android.library")
+    id("gadget.android.library.compose")
     id("gadget.android.hilt")
     alias(libs.plugins.kotlin.serialization)
 }
@@ -27,6 +28,9 @@ dependencies {
     // DataStore-backed per-feature collection the kit's
     // WidgetConfigStore / PendingWidgetConfigs wrap.
     api(project(":core:datastore"))
+    // :core:designsystem — LocalGadgetTheme tokens consumed by the
+    // kit's Compose surfaces (WidgetAppearancePreview etc.).
+    api(project(":core:designsystem"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
