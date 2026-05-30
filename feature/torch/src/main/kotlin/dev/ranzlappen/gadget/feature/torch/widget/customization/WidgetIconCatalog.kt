@@ -13,7 +13,7 @@ import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconKeys
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetIconResolver
 import dev.ranzlappen.gadget.feature.torch.R
-import dev.ranzlappen.gadget.feature.torch.widget.PendingTorchWidgetConfigs
+import dev.ranzlappen.gadget.feature.torch.widget.TorchPinLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayInputStream
@@ -115,12 +115,12 @@ class WidgetIconCatalog @Inject constructor(
             // was silently failing on real devices.
             val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
             if (bytes == null || bytes.isEmpty()) {
-                Log.w(PendingTorchWidgetConfigs.TAG, "importCustomIcon: empty/unreadable stream for $uri")
+                Log.w(TorchPinLog.TAG, "importCustomIcon: empty/unreadable stream for $uri")
                 return@withContext null
             }
             val decoded = decodeDownscaled(bytes, MAX_ICON_PX)
             if (decoded == null) {
-                Log.w(PendingTorchWidgetConfigs.TAG, "importCustomIcon: undecodable image for $uri")
+                Log.w(TorchPinLog.TAG, "importCustomIcon: undecodable image for $uri")
                 return@withContext null
             }
             // Gallery photos carry their rotation in EXIF, which the
@@ -130,10 +130,10 @@ class WidgetIconCatalog @Inject constructor(
             val file = File(customDir, "${UUID.randomUUID()}.png")
             FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, PNG_QUALITY, out) }
             bitmap.recycle()
-            Log.d(PendingTorchWidgetConfigs.TAG, "importCustomIcon: wrote ${file.name}")
+            Log.d(TorchPinLog.TAG, "importCustomIcon: wrote ${file.name}")
             WidgetIconKeys.CUSTOM_PREFIX + file.name
         } catch (t: Throwable) {
-            Log.w(PendingTorchWidgetConfigs.TAG, "importCustomIcon failed for $uri", t)
+            Log.w(TorchPinLog.TAG, "importCustomIcon failed for $uri", t)
             null
         }
     }
@@ -199,7 +199,7 @@ class WidgetIconCatalog @Inject constructor(
             if (rotated !== bitmap) bitmap.recycle()
             rotated
         } catch (e: OutOfMemoryError) {
-            Log.w(PendingTorchWidgetConfigs.TAG, "applyExifOrientation OOM — using unrotated icon", e)
+            Log.w(TorchPinLog.TAG, "applyExifOrientation OOM — using unrotated icon", e)
             bitmap
         }
     }

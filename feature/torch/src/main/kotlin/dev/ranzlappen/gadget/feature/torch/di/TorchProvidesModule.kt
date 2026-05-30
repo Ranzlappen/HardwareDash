@@ -6,8 +6,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dev.ranzlappen.gadget.core.datastore.FeaturePreferencesFactory
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackConfig
+import dev.ranzlappen.gadget.core.widgetkit.pin.PendingEntry
+import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
+import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.torch.R
+import dev.ranzlappen.gadget.feature.torch.widget.TorchPinLog
+import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import javax.inject.Singleton
 
 /**
@@ -51,4 +57,52 @@ object TorchProvidesModule {
         smallIcon = R.drawable.ic_strobe,
         notificationIdBase = 0x57_46_00_00, // "WF" — matches legacy WidgetFeedbackDispatcher
     )
+
+    /**
+     * Torch's persisted widget-config store. Wraps a [FeaturePreferences]
+     * created off the kit's [FeaturePreferencesFactory] with the
+     * filename + key prefix that the legacy `TorchWidgetConfigRepository`
+     * used (`torch_widgets` / `widget_`) so existing on-disk configs
+     * keep loading unchanged.
+     *
+     * No [Migrator] is bound yet — `TorchWidgetConfig.schemaVersion` is
+     * 1 and no fields have shifted shape. When the first migration is
+     * needed, bump `schemaVersion` and add a `Migrator<TorchWidgetConfig>`
+     * provider here.
+     */
+    @Provides
+    @Singleton
+    fun provideTorchWidgetConfigStore(
+        factory: FeaturePreferencesFactory,
+    ): WidgetConfigStore<TorchWidgetConfig> {
+        val prefs = factory.create(
+            fileName = "torch_widgets",
+            keyPrefix = "widget_",
+            serializer = TorchWidgetConfig.serializer(),
+        )
+        return WidgetConfigStore(prefs)
+    }
+
+    /**
+     * Torch's persistent pin-flow bridge. Backs the kit's generic
+     * [PendingWidgetConfigs] with the legacy filename / key prefix
+     * (`torch_pending_widgets` / `pending_`) so any in-flight pin
+     * dialogs across the upgrade decode correctly.
+     *
+     * Note the serializer composition: each entry is a
+     * `PendingEntry<TorchWidgetConfig>`, so the factory call passes
+     * `PendingEntry.serializer(TorchWidgetConfig.serializer())`.
+     */
+    @Provides
+    @Singleton
+    fun provideTorchPendingWidgetConfigs(
+        factory: FeaturePreferencesFactory,
+    ): PendingWidgetConfigs<TorchWidgetConfig> {
+        val prefs = factory.create(
+            fileName = "torch_pending_widgets",
+            keyPrefix = "pending_",
+            serializer = PendingEntry.serializer(TorchWidgetConfig.serializer()),
+        )
+        return PendingWidgetConfigs(prefs, tag = TorchPinLog.TAG)
+    }
 }

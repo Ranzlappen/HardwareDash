@@ -23,9 +23,15 @@ android {
 }
 
 dependencies {
+    // FeaturePreferences<T> + FeaturePreferencesFactory — the
+    // DataStore-backed per-feature collection the kit's
+    // WidgetConfigStore / PendingWidgetConfigs wrap.
+    api(project(":core:datastore"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     api(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

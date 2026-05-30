@@ -14,12 +14,13 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.render.hasPressFrame
 import dev.ranzlappen.gadget.core.widgetkit.render.playTapPressFrame
+import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
-import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
 import dev.ranzlappen.gadget.core.widgetkit.R as WidgetKitR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,7 +73,7 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
 
     /**
      * Render every [appWidgetIds] instance from its persisted config.
-     * Reads via the DataStore-backed [TorchWidgetConfigRepository.getAll]
+     * Reads via the DataStore-backed [WidgetConfigStore.getAll]
      * (not the hot `all.value` cache) so a cold process — empty cache —
      * still paints the saved appearance instead of self-healing a default
      * over it. Self-heal only fires when the config is genuinely absent.
@@ -92,10 +93,10 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
                     type = WidgetType.Flashlight,
                     displayName = context.getString(R.string.torch_widget_default_name_flashlight),
                 )
-                Log.w(PendingTorchWidgetConfigs.TAG, "FlashlightWidget self-heal id=$id")
+                Log.w(TorchPinLog.TAG, "FlashlightWidget self-heal id=$id")
                 // saveIfAbsent (not save) so a concurrent pin-success
                 // write of the real config is never clobbered by this
-                // default. See TorchWidgetConfigRepository.saveIfAbsent.
+                // default. See WidgetConfigStore.saveIfAbsent.
                 repo.saveIfAbsent(id, default)
                 default
             }
@@ -130,7 +131,7 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
                     null
                 }
                 Log.d(
-                    PendingTorchWidgetConfigs.TAG,
+                    TorchPinLog.TAG,
                     "FlashlightWidget tap id=$appWidgetId on=$newState config=${config != null} " +
                         "fb=${config?.appearance?.feedback?.let { it::class.simpleName }} " +
                         "anim=${config?.appearance?.tap?.animation}",
@@ -166,7 +167,7 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
                     )
                 }
             } catch (t: Throwable) {
-                Log.e(PendingTorchWidgetConfigs.TAG, "FlashlightWidget onReceive failed", t)
+                Log.e(TorchPinLog.TAG, "FlashlightWidget onReceive failed", t)
             } finally {
                 pendingResult.finish()
             }
@@ -249,7 +250,7 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
     @InstallIn(SingletonComponent::class)
     interface FlashlightWidgetEntryPoint {
         fun torchController(): TorchController
-        fun widgetRepository(): TorchWidgetConfigRepository
+        fun widgetRepository(): WidgetConfigStore<TorchWidgetConfig>
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
     }

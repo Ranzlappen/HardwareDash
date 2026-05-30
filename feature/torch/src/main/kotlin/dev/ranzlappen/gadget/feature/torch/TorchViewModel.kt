@@ -11,10 +11,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
 import dev.ranzlappen.gadget.core.monitoring.CollapseStateRepository
 import dev.ranzlappen.gadget.core.widgetkit.WidgetPinResult
+import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeRuntime
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
-import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfigRepository
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetCreator
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import dev.ranzlappen.gadget.feature.torch.widget.broadcastTorchWidgetUpdate
@@ -41,7 +41,7 @@ import javax.inject.Inject
  * - [UserPreferencesRepository.flow.map { it.defaultStrobeRateHz }] —
  *   the persisted slider value that becomes the default rate at
  *   widget-pin time.
- * - [TorchWidgetConfigRepository.all] — every persisted widget config.
+ * - [WidgetConfigStore.all] — every persisted widget config.
  * - [StrobeRuntime.running] — the live strobe-running signal published
  *   by the [StrobeService] lifecycle (no polling); drives the in-app
  *   strobe toggle button label / pressed state.
@@ -68,7 +68,7 @@ class TorchViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val controller: TorchController,
     private val userPreferences: UserPreferencesRepository,
-    private val widgetRepository: TorchWidgetConfigRepository,
+    private val widgetRepository: WidgetConfigStore<TorchWidgetConfig>,
     private val widgetCreator: TorchWidgetCreator,
     private val iconCatalog: WidgetIconCatalog,
     private val rootCapabilities: TorchRootCapabilities,

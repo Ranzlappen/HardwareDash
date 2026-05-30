@@ -15,13 +15,14 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.render.hasPressFrame
 import dev.ranzlappen.gadget.core.widgetkit.render.playTapPressFrame
+import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeRuntime
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
-import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
 import dev.ranzlappen.gadget.core.widgetkit.R as WidgetKitR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,7 +64,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
 
     /**
      * Render every [appWidgetIds] instance from its persisted config,
-     * read via the DataStore-backed [TorchWidgetConfigRepository.getAll]
+     * read via the DataStore-backed [WidgetConfigStore.getAll]
      * (not the hot `all.value` cache) so a cold process still paints the
      * saved appearance instead of self-healing a default over it.
      */
@@ -82,7 +83,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                     type = WidgetType.Strobe,
                     displayName = context.getString(R.string.torch_widget_default_name_strobe),
                 )
-                Log.w(PendingTorchWidgetConfigs.TAG, "StrobeWidget self-heal id=$id")
+                Log.w(TorchPinLog.TAG, "StrobeWidget self-heal id=$id")
                 // saveIfAbsent (not save) so a concurrent pin-success
                 // write of the real config — including its Morse text —
                 // is never clobbered by this default. This is the fix
@@ -131,7 +132,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                 // lands outside an allowed FGS-start window. Degrade
                 // gracefully — a stray launcher tap must never crash the
                 // home-screen process.
-                Log.w(PendingTorchWidgetConfigs.TAG, "Strobe FGS start refused", e)
+                Log.w(TorchPinLog.TAG, "Strobe FGS start refused", e)
                 android.widget.Toast.makeText(
                     context,
                     context.getString(R.string.strobe_widget_start_failed),
@@ -152,7 +153,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                     null
                 }
                 Log.d(
-                    PendingTorchWidgetConfigs.TAG,
+                    TorchPinLog.TAG,
                     "StrobeWidget tap id=$appWidgetId running->$willBeRunning " +
                         "config=${config != null} morse=${config?.morseMode} " +
                         "fb=${config?.appearance?.feedback?.let { it::class.simpleName }} " +
@@ -187,7 +188,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
                     )
                 }
             } catch (t: Throwable) {
-                Log.e(PendingTorchWidgetConfigs.TAG, "StrobeWidget onReceive failed", t)
+                Log.e(TorchPinLog.TAG, "StrobeWidget onReceive failed", t)
             } finally {
                 pendingResult.finish()
             }
@@ -256,7 +257,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface StrobeWidgetEntryPoint {
-        fun widgetRepository(): TorchWidgetConfigRepository
+        fun widgetRepository(): WidgetConfigStore<TorchWidgetConfig>
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
         fun strobeRuntime(): StrobeRuntime

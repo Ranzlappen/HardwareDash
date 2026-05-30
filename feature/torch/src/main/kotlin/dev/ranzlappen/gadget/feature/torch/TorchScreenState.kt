@@ -12,7 +12,7 @@ import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
  * the screen depends on:
  * - [TorchController.state] (live torch hardware snapshot)
  * - [UserPreferencesRepository.flow.map { it.defaultStrobeRateHz }]
- * - [TorchWidgetConfigRepository.all] (saved widget configs)
+ * - [WidgetConfigStore.all] (saved widget configs)
  * - [StrobeRuntime.running] (live strobe-running signal, no polling)
  *
  * `@Immutable` so Compose skips recompositions when the structural

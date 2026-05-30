@@ -15,8 +15,8 @@ import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
+import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
-import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfigRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -71,7 +71,7 @@ class StrobeService : Service() {
     lateinit var torchController: TorchController
 
     @Inject
-    lateinit var widgetRepository: TorchWidgetConfigRepository
+    lateinit var widgetRepository: WidgetConfigStore<TorchWidgetConfig>
 
     @Inject
     lateinit var strobeRuntime: StrobeRuntime

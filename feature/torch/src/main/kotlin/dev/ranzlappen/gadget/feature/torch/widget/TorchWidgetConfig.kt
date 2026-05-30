@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  *
  * One [TorchWidgetConfig] persists per `appWidgetId` inside the
  * `torch_widgets` Preferences DataStore (see
- * [TorchWidgetConfigRepository]). The widget provider reads the
+ * [WidgetConfigStore]). The widget provider reads the
  * config in `onUpdate` / `onReceive` to drive both the RemoteViews
  * presentation and (for strobe widgets) the Intent extras passed to
  * [dev.ranzlappen.gadget.feature.torch.strobe.StrobeService].
