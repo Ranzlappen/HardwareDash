@@ -1,30 +1,13 @@
 package dev.ranzlappen.gadget.feature.torch.ui
 
-import android.graphics.BitmapFactory
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -33,67 +16,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.GadgetBottomSheet
-import dev.ranzlappen.gadget.core.ui.component.GadgetChip
-import dev.ranzlappen.gadget.core.ui.component.GadgetColorPicker
 import dev.ranzlappen.gadget.core.ui.component.GadgetPrimaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
 import dev.ranzlappen.gadget.core.ui.component.GadgetTertiaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
-import dev.ranzlappen.gadget.core.widgetkit.ui.WidgetAppearancePreview
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconChoice
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.ui.WidgetAppearanceSection
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
-import dev.ranzlappen.gadget.core.widgetkit.config.BackgroundMode
-import dev.ranzlappen.gadget.core.widgetkit.config.IconTint
-import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
-import dev.ranzlappen.gadget.core.widgetkit.config.ToggleFeedback
-import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconKeys
-import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
-import dev.ranzlappen.gadget.core.widgetkit.render.iconTintArgb
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Modal sheet for creating or editing a [TorchWidgetConfig].
  *
- * Captures every customisation surface for a single widget:
- *  - Name
- *  - (Strobe only) Rate Hz + SOS mode
- *  - Appearance: background mode + (light) icon style + tint
- *  - Tap behaviour: animation + enabled flag
- *  - Toggle feedback: kind (None/Toast/Notification) + templates
+ * Captures the torch-specific surface (name + strobe-only fields) and
+ * delegates everything generic — background mode, icon style, tint, tap
+ * behaviour, toggle feedback, live preview — to the kit-side
+ * [WidgetAppearanceSection]. The kit section owns its own labels +
+ * helper composables (chip rows, color picker fields, icon swatches,
+ * the add-custom-icon flow), so this file shrinks to the torch-only
+ * shell.
  *
  * State is hoisted to local `remember`d variables, keyed by [initial]
- * so the sheet rebuilds cleanly when switching between widgets in
- * the in-app list. Only [onConfirm] propagates the captured values
- * to the caller; cancel / swipe-down dismisses silently.
- *
- * Pickers are built from design-system primitives ([GadgetChip] rows
- * acting as segmented selectors plus M3 [Switch] for binary toggles)
- * so every selectable surface in the sheet inherits the same theme
- * tokens as the rest of the app.
+ * so the sheet rebuilds cleanly when switching between widgets. Only
+ * [onConfirm] propagates the captured values to the caller.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,7 +58,7 @@ fun WidgetConfigurationSheet(
     onConfirm: (TorchWidgetConfig) -> Unit,
     resolveIcon: (String) -> WidgetIconSource,
     onImportCustomIcon: suspend (Uri) -> String?,
-    iconChoices: List<WidgetIconCatalog.Entry>,
+    iconChoices: List<WidgetIconChoice>,
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
@@ -124,248 +78,40 @@ fun WidgetConfigurationSheet(
             else R.string.torch_widget_config_title_new,
         ),
     ) {
-        // verticalScroll keeps the Create CTA reachable when the form
-        // outgrows the sheet's vertical bounds (the Strobe variant
-        // adds rate + SOS + animation rows that push the footer off
-        // the bottom edge on Compact widths).
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(spacing.medium),
         ) {
+            // ─── Torch-specific fields ────────────────────────────
             GadgetTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = stringResource(R.string.torch_widget_config_name_label),
                 modifier = Modifier.fillMaxWidth(),
             )
-
             if (initial.type == WidgetType.Strobe) {
-                GadgetSlider(
-                    value = rateHz,
-                    onValueChange = { rateHz = it },
-                    valueRange = TorchWidgetConfig.MIN_RATE_HZ..TorchWidgetConfig.MAX_RATE_HZ,
-                    steps = (TorchWidgetConfig.MAX_RATE_HZ - TorchWidgetConfig.MIN_RATE_HZ).toInt() - 1,
-                    label = stringResource(R.string.torch_strobe_rate_label),
-                    suffix = "Hz",
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(spacing.small),
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.torch_widget_config_morse_mode_label),
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                        Text(
-                            text = stringResource(R.string.torch_widget_config_morse_mode_supporting),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Switch(checked = morseMode, onCheckedChange = { morseMode = it })
-                }
-                GadgetTextField(
-                    value = morseText,
-                    onValueChange = { morseText = it },
-                    label = stringResource(R.string.torch_widget_config_morse_label),
-                    supportingText = stringResource(R.string.torch_widget_config_morse_supporting),
-                    modifier = Modifier.fillMaxWidth(),
+                StrobeSpecificFields(
+                    rateHz = rateHz,
+                    onRateChange = { rateHz = it },
+                    morseMode = morseMode,
+                    onMorseModeChange = { morseMode = it },
+                    morseText = morseText,
+                    onMorseTextChange = { morseText = it },
                 )
             }
 
-            // ─── Appearance section ──────────────────────────────────
-            SheetSectionHeader(stringResource(R.string.torch_widget_config_section_appearance))
-            ChipRow(
-                label = stringResource(R.string.torch_widget_config_background_label),
-                selected = appearance.background,
-                options = BackgroundMode.values().toList(),
-                labelFor = { backgroundModeLabel(it) },
-                onSelect = { appearance = appearance.copy(background = it) },
-            )
-            if (appearance.background == BackgroundMode.Solid) {
-                ColorPickerField(
-                    label = stringResource(R.string.torch_widget_config_solid_color_label),
-                    argb = appearance.solidColor,
-                    onArgbChange = { appearance = appearance.copy(solidColor = it) },
-                )
-            }
-            ChipRow(
-                label = stringResource(R.string.torch_widget_config_tint_label),
-                selected = appearance.iconStyle.tint,
-                options = IconTint.values().toList(),
-                labelFor = { iconTintLabel(it) },
-                onSelect = {
-                    appearance = appearance.copy(
-                        iconStyle = appearance.iconStyle.copy(tint = it),
-                    )
-                },
-            )
-            if (appearance.iconStyle.tint == IconTint.Custom) {
-                ColorPickerField(
-                    label = stringResource(R.string.torch_widget_config_tint_custom_color),
-                    argb = appearance.iconStyle.customTintArgb,
-                    onArgbChange = {
-                        appearance = appearance.copy(
-                            iconStyle = appearance.iconStyle.copy(customTintArgb = it),
-                        )
-                    },
-                )
-            }
-            val iconTint = iconTintArgb(LocalContext.current, appearance.iconStyle)
-            IconPickerRow(
-                label = stringResource(R.string.torch_widget_config_icon_active_label),
-                selectedKey = appearance.iconStyle.activeKey,
-                choices = iconChoices,
-                tintArgb = iconTint,
+            // ─── Kit-generic appearance / tap / feedback / preview ──
+            WidgetAppearanceSection(
+                appearance = appearance,
+                onAppearanceChange = { appearance = it },
+                iconChoices = iconChoices,
                 resolveIcon = resolveIcon,
                 onImportCustomIcon = onImportCustomIcon,
-                onSelect = { key ->
-                    appearance = appearance.copy(iconStyle = appearance.iconStyle.copy(activeKey = key))
-                },
-            )
-            IconPickerRow(
-                label = stringResource(R.string.torch_widget_config_icon_inactive_label),
-                selectedKey = appearance.iconStyle.inactiveKey,
-                choices = iconChoices,
-                tintArgb = iconTint,
-                resolveIcon = resolveIcon,
-                onImportCustomIcon = onImportCustomIcon,
-                onSelect = { key ->
-                    appearance = appearance.copy(iconStyle = appearance.iconStyle.copy(inactiveKey = key))
-                },
             )
 
-            // ─── Tap behaviour section ───────────────────────────────
-            SheetSectionHeader(stringResource(R.string.torch_widget_config_section_tap))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(spacing.small),
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.torch_widget_config_tap_enabled_label),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                    Text(
-                        text = stringResource(R.string.torch_widget_config_tap_disabled_supporting),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Switch(
-                    checked = appearance.tap.enabled,
-                    onCheckedChange = {
-                        appearance = appearance.copy(
-                            tap = appearance.tap.copy(enabled = it),
-                        )
-                    },
-                )
-            }
-            ChipRow(
-                label = stringResource(R.string.torch_widget_config_tap_animation_label),
-                selected = appearance.tap.animation,
-                options = TapAnimation.values().toList(),
-                labelFor = { tapAnimationLabel(it) },
-                onSelect = {
-                    appearance = appearance.copy(
-                        tap = appearance.tap.copy(animation = it),
-                    )
-                },
-            )
-
-            // ─── Toggle feedback section ─────────────────────────────
-            SheetSectionHeader(stringResource(R.string.torch_widget_config_section_feedback))
-            val feedbackKind = remember(appearance.feedback) {
-                when (appearance.feedback) {
-                    ToggleFeedback.None -> FeedbackKind.None
-                    is ToggleFeedback.Toast -> FeedbackKind.Toast
-                    is ToggleFeedback.Notification -> FeedbackKind.Notification
-                }
-            }
-            ChipRow(
-                label = stringResource(R.string.torch_widget_config_feedback_kind_label),
-                selected = feedbackKind,
-                options = FeedbackKind.values().toList(),
-                labelFor = { feedbackKindLabel(it) },
-                onSelect = { kind ->
-                    appearance = appearance.copy(feedback = kind.defaultPayload())
-                },
-            )
-            when (val feedback = appearance.feedback) {
-                ToggleFeedback.None -> Unit
-                is ToggleFeedback.Toast -> {
-                    GadgetTextField(
-                        value = feedback.template,
-                        onValueChange = {
-                            appearance = appearance.copy(
-                                feedback = ToggleFeedback.Toast(it),
-                            )
-                        },
-                        label = stringResource(R.string.torch_widget_config_feedback_toast_template_label),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Text(
-                        text = stringResource(R.string.torch_widget_config_feedback_template_help),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                is ToggleFeedback.Notification -> {
-                    GadgetTextField(
-                        value = feedback.titleTemplate,
-                        onValueChange = {
-                            appearance = appearance.copy(
-                                feedback = feedback.copy(titleTemplate = it),
-                            )
-                        },
-                        label = stringResource(R.string.torch_widget_config_feedback_notification_title_label),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    GadgetTextField(
-                        value = feedback.bodyTemplate,
-                        onValueChange = {
-                            appearance = appearance.copy(
-                                feedback = feedback.copy(bodyTemplate = it),
-                            )
-                        },
-                        label = stringResource(R.string.torch_widget_config_feedback_notification_body_label),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Text(
-                        text = stringResource(R.string.torch_widget_config_feedback_template_help),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-
-            // ─── Live preview ────────────────────────────────────────
-            SheetSectionHeader(stringResource(R.string.torch_widget_config_section_preview))
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                WidgetAppearancePreview(
-                    appearance = appearance,
-                    icon = resolveIcon(appearance.iconStyle.activeKey),
-                    interactive = true,
-                )
-            }
-            if (appearance.tap.enabled && appearance.tap.animation != TapAnimation.None) {
-                Text(
-                    text = stringResource(R.string.torch_widget_config_preview_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-
-            // ─── Footer actions ──────────────────────────────────────
+            // ─── Footer actions ──────────────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(spacing.small),
@@ -399,297 +145,46 @@ fun WidgetConfigurationSheet(
 }
 
 @Composable
-private fun SheetSectionHeader(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
+private fun StrobeSpecificFields(
+    rateHz: Float,
+    onRateChange: (Float) -> Unit,
+    morseMode: Boolean,
+    onMorseModeChange: (Boolean) -> Unit,
+    morseText: String,
+    onMorseTextChange: (String) -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    GadgetSlider(
+        value = rateHz,
+        onValueChange = onRateChange,
+        valueRange = TorchWidgetConfig.MIN_RATE_HZ..TorchWidgetConfig.MAX_RATE_HZ,
+        steps = (TorchWidgetConfig.MAX_RATE_HZ - TorchWidgetConfig.MIN_RATE_HZ).toInt() - 1,
+        label = stringResource(R.string.torch_strobe_rate_label),
+        suffix = "Hz",
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(spacing.small),
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.torch_widget_config_morse_mode_label),
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Text(
+                text = stringResource(R.string.torch_widget_config_morse_mode_supporting),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(checked = morseMode, onCheckedChange = onMorseModeChange)
+    }
+    GadgetTextField(
+        value = morseText,
+        onValueChange = onMorseTextChange,
+        label = stringResource(R.string.torch_widget_config_morse_label),
+        supportingText = stringResource(R.string.torch_widget_config_morse_supporting),
         modifier = Modifier.fillMaxWidth(),
     )
 }
-
-/**
- * Light-weight segmented selector built from a flow of [GadgetChip]s.
- * Chips wrap to a new line when their combined intrinsic width exceeds
- * the row — the previous rigid [Row] squeezed the trailing chip until
- * its label wrapped vertically (e.g. the four-option Tint row
- * truncating "Black" to "Bl/ac/k"). [FlowRow] reflows instead of
- * clipping.
- */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun <T> ChipRow(
-    label: String,
-    selected: T,
-    options: List<T>,
-    labelFor: @Composable (T) -> String,
-    onSelect: (T) -> Unit,
-) {
-    val spacing = LocalGadgetTheme.current.spacing
-    Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(spacing.tiny),
-            verticalArrangement = Arrangement.spacedBy(spacing.tiny),
-        ) {
-            options.forEach { option ->
-                GadgetChip(
-                    selected = selected == option,
-                    onClick = { onSelect(option) },
-                    label = labelFor(option),
-                )
-            }
-        }
-    }
-}
-
-/** A labelled [GadgetColorPicker] row used for the solid background fill
- *  and the custom icon tint. */
-@Composable
-private fun ColorPickerField(
-    label: String,
-    argb: Long,
-    onArgbChange: (Long) -> Unit,
-) {
-    val spacing = LocalGadgetTheme.current.spacing
-    Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        GadgetColorPicker(argb = argb, onArgbChange = onArgbChange)
-    }
-}
-
-/** Fixed swatch geometry. 48 dp is the Material accessibility minimum
- *  touch target; the ring widths are cosmetic selected / unselected
- *  affordances. Per-file design-token constants per the repo's no-raw-dp
- *  rule. */
-private object SwatchDefaults {
-    val Diameter = 48.dp
-    val SelectedRing = 3.dp
-    val UnselectedRing = 1.dp
-}
-
-/**
- * Segmented icon picker — a flow of tappable icon swatches from
- * [WidgetIconCatalog], the currently-selected custom icon (if any), plus
- * an "add custom" swatch that opens the system document picker so the
- * user can pick an image from their file manager. Built-in icons preview
- * in the widget's current [tintArgb]; a custom image renders untinted.
- * Selection is conveyed visually (a primary-tinted ring) and semantically.
- */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun IconPickerRow(
-    label: String,
-    selectedKey: String,
-    choices: List<WidgetIconCatalog.Entry>,
-    tintArgb: Int,
-    resolveIcon: (String) -> WidgetIconSource,
-    onImportCustomIcon: suspend (Uri) -> String?,
-    onSelect: (String) -> Unit,
-) {
-    val spacing = LocalGadgetTheme.current.spacing
-    val scope = rememberCoroutineScope()
-    var importError by remember { mutableStateOf(false) }
-    // GetContent (ACTION_GET_CONTENT) reliably returns a single image
-    // from the file manager or gallery; we copy the bytes into app
-    // storage immediately, so the one-shot read grant is enough — no
-    // persistable Uri permission needed.
-    val picker = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent(),
-    ) { uri ->
-        if (uri != null) {
-            importError = false
-            scope.launch {
-                val key = onImportCustomIcon(uri)
-                if (key != null) onSelect(key) else importError = true
-            }
-        }
-    }
-    val customSelected = selectedKey.startsWith(WidgetIconKeys.CUSTOM_PREFIX)
-    Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(spacing.small),
-            verticalArrangement = Arrangement.spacedBy(spacing.tiny),
-        ) {
-            choices.forEach { entry ->
-                IconSwatch(
-                    source = WidgetIconSource.Resource(entry.drawable),
-                    tintArgb = tintArgb,
-                    selected = entry.key == selectedKey,
-                    contentDescription = entry.displayName,
-                    onClick = { onSelect(entry.key) },
-                )
-            }
-            if (customSelected) {
-                IconSwatch(
-                    source = resolveIcon(selectedKey),
-                    tintArgb = null,
-                    selected = true,
-                    contentDescription = stringResource(R.string.torch_widget_config_icon_custom),
-                    onClick = { picker.launch(IMAGE_MIME_TYPE) },
-                )
-            }
-            AddCustomSwatch(onClick = { picker.launch(IMAGE_MIME_TYPE) })
-        }
-        if (importError) {
-            Text(
-                text = stringResource(R.string.torch_widget_config_icon_import_error),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
-    }
-}
-
-/** One icon swatch — a circular, ring-selectable button rendering either a
- *  bundled drawable (tinted via [tintArgb]) or a custom image file
- *  (untinted, decoded off the main thread). */
-@Composable
-private fun IconSwatch(
-    source: WidgetIconSource,
-    tintArgb: Int?,
-    selected: Boolean,
-    contentDescription: String,
-    onClick: () -> Unit,
-) {
-    val spacing = LocalGadgetTheme.current.spacing
-    Box(
-        modifier = Modifier
-            .defaultMinSize(SwatchDefaults.Diameter, SwatchDefaults.Diameter)
-            .size(SwatchDefaults.Diameter)
-            .clip(CircleShape)
-            .border(
-                width = if (selected) SwatchDefaults.SelectedRing else SwatchDefaults.UnselectedRing,
-                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                shape = CircleShape,
-            )
-            .clickable(role = Role.RadioButton, onClickLabel = contentDescription, onClick = onClick)
-            .semantics { this.selected = selected }
-            .padding(spacing.small),
-        contentAlignment = Alignment.Center,
-    ) {
-        when (source) {
-            is WidgetIconSource.Resource -> Image(
-                painter = painterResource(source.resId),
-                contentDescription = contentDescription,
-                colorFilter = tintArgb?.let { ColorFilter.tint(Color(it)) },
-                modifier = Modifier.fillMaxSize(),
-            )
-            is WidgetIconSource.CustomFile -> {
-                val bitmap by produceState<ImageBitmap?>(initialValue = null, source.path) {
-                    value = withContext(Dispatchers.IO) {
-                        runCatching { BitmapFactory.decodeFile(source.path)?.asImageBitmap() }.getOrNull()
-                    }
-                }
-                bitmap?.let {
-                    Image(
-                        bitmap = it,
-                        contentDescription = contentDescription,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
-            }
-        }
-    }
-}
-
-/** Trailing "+" swatch that opens the file picker to import a custom
- *  icon. */
-@Composable
-private fun AddCustomSwatch(onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .defaultMinSize(SwatchDefaults.Diameter, SwatchDefaults.Diameter)
-            .size(SwatchDefaults.Diameter)
-            .clip(CircleShape)
-            .border(SwatchDefaults.UnselectedRing, MaterialTheme.colorScheme.outline, CircleShape)
-            .clickable(
-                role = Role.Button,
-                onClickLabel = stringResource(R.string.torch_widget_config_icon_add_custom),
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.AddPhotoAlternate,
-            contentDescription = stringResource(R.string.torch_widget_config_icon_add_custom),
-            tint = MaterialTheme.colorScheme.primary,
-        )
-    }
-}
-
-/** Mime filter for the custom-icon ACTION_GET_CONTENT picker. */
-private const val IMAGE_MIME_TYPE = "image/*"
-
-/** Compact discriminator for the feedback-kind chip row. The real
- *  payload is built lazily on selection via [FeedbackKind
- *  .defaultPayload]. */
-private enum class FeedbackKind { None, Toast, Notification }
-
-private fun FeedbackKind.defaultPayload(): ToggleFeedback = when (this) {
-    FeedbackKind.None -> ToggleFeedback.None
-    FeedbackKind.Toast -> ToggleFeedback.Toast(template = DEFAULT_TOAST_TEMPLATE)
-    FeedbackKind.Notification -> ToggleFeedback.Notification(
-        titleTemplate = DEFAULT_NOTIFICATION_TITLE,
-        bodyTemplate = DEFAULT_NOTIFICATION_BODY,
-    )
-}
-
-@Composable
-private fun backgroundModeLabel(mode: BackgroundMode): String = stringResource(
-    when (mode) {
-        BackgroundMode.GlassSurface -> R.string.torch_widget_config_background_glass
-        BackgroundMode.Solid -> R.string.torch_widget_config_background_solid
-        BackgroundMode.Transparent -> R.string.torch_widget_config_background_transparent
-    },
-)
-
-@Composable
-private fun iconTintLabel(tint: IconTint): String = stringResource(
-    when (tint) {
-        IconTint.ThemeAccent -> R.string.torch_widget_config_tint_accent
-        IconTint.ThemeOnSurface -> R.string.torch_widget_config_tint_on_surface
-        IconTint.MonochromeWhite -> R.string.torch_widget_config_tint_white
-        IconTint.MonochromeBlack -> R.string.torch_widget_config_tint_black
-        IconTint.Custom -> R.string.torch_widget_config_tint_custom
-    },
-)
-
-@Composable
-private fun tapAnimationLabel(animation: TapAnimation): String = stringResource(
-    when (animation) {
-        TapAnimation.None -> R.string.torch_widget_config_tap_animation_none
-        TapAnimation.Ripple -> R.string.torch_widget_config_tap_animation_ripple
-        TapAnimation.Pulse -> R.string.torch_widget_config_tap_animation_pulse
-        TapAnimation.Scale -> R.string.torch_widget_config_tap_animation_scale
-        TapAnimation.Flash -> R.string.torch_widget_config_tap_animation_flash
-    },
-)
-
-@Composable
-private fun feedbackKindLabel(kind: FeedbackKind): String = stringResource(
-    when (kind) {
-        FeedbackKind.None -> R.string.torch_widget_config_feedback_none
-        FeedbackKind.Toast -> R.string.torch_widget_config_feedback_toast
-        FeedbackKind.Notification -> R.string.torch_widget_config_feedback_notification
-    },
-)
-
-private const val DEFAULT_TOAST_TEMPLATE = "{name} is now {state}"
-private const val DEFAULT_NOTIFICATION_TITLE = "{name}"
-private const val DEFAULT_NOTIFICATION_BODY = "Now {state}"

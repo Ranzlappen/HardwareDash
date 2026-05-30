@@ -18,6 +18,7 @@ import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetCreator
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import dev.ranzlappen.gadget.feature.torch.widget.broadcastTorchWidgetUpdate
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconChoice
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -390,8 +391,17 @@ class TorchViewModel @Inject constructor(
      *  return its stable custom icon key, or `null` on failure. */
     suspend fun importCustomIcon(uri: Uri): String? = iconCatalog.importCustomIcon(uri)
 
-    /** Icons the configuration sheet offers in its icon picker. */
-    val iconChoices: List<WidgetIconCatalog.Entry> = iconCatalog.entries
+    /** Icons the configuration sheet offers in its icon picker. Mapped
+     *  into the kit's generic [WidgetIconChoice] shape so the sheet's
+     *  kit-side appearance section can render them without knowing
+     *  about torch's catalog. */
+    val iconChoices: List<WidgetIconChoice> = iconCatalog.entries.map { entry ->
+        WidgetIconChoice(
+            key = entry.key,
+            drawable = entry.drawable,
+            displayName = entry.displayName,
+        )
+    }
 
     fun onSheetDismissed() {
         _sheetTarget.value = null

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Kit-owned strings for the WidgetAppearanceSection (the chip-row +
+  icon-picker + tap-animation + feedback-template UI a widget-bearing
+  feature drops into its configuration sheet via WidgetAppearanceSection).
+
+  Lifted from torch's strings.xml in refactor-2026 Phase 2 / C6b so every
+  widget-bearing feature shares one localised copy. Torch-specific strings
+  (sheet title / save / cancel / morse / preview hint) stay in
+  feature/torch/.../strings.xml.
+
+  Naming: widget_kit_appearance_* prefix so a feature consuming the kit
+  can grep its own res for "widget_kit_*" and instantly see what it's
+  reusing.
+-->
+<resources>
+    <!-- Section headers inside the appearance section. -->
+    <string name="widget_kit_appearance_section_appearance">Appearance</string>
+    <string name="widget_kit_appearance_section_tap">Tap behaviour</string>
+    <string name="widget_kit_appearance_section_feedback">Toggle feedback</string>
+    <string name="widget_kit_appearance_section_preview">Preview</string>
+    <string name="widget_kit_appearance_preview_hint">Tap the preview to try the tap animation.</string>
+
+    <!-- Background-mode chip row + the solid-fill colour picker. -->
+    <string name="widget_kit_appearance_background_label">Background</string>
+    <string name="widget_kit_appearance_background_glass">Glass</string>
+    <string name="widget_kit_appearance_background_solid">Solid</string>
+    <string name="widget_kit_appearance_background_transparent">Transparent</string>
+    <string name="widget_kit_appearance_solid_color_label">Solid colour</string>
+
+    <!-- Icon picker. -->
+    <string name="widget_kit_appearance_icon_active_label">Active icon</string>
+    <string name="widget_kit_appearance_icon_inactive_label">Inactive icon</string>
+    <string name="widget_kit_appearance_icon_add_custom">Add custom icon from files</string>
+    <string name="widget_kit_appearance_icon_custom">Custom icon</string>
+    <string name="widget_kit_appearance_icon_import_error">Couldn\'t use that image — try another.</string>
+
+    <!-- Tint chip row + custom colour picker. -->
+    <string name="widget_kit_appearance_tint_label">Tint</string>
+    <string name="widget_kit_appearance_tint_accent">Accent</string>
+    <string name="widget_kit_appearance_tint_on_surface">Foreground</string>
+    <string name="widget_kit_appearance_tint_white">White</string>
+    <string name="widget_kit_appearance_tint_black">Black</string>
+    <string name="widget_kit_appearance_tint_custom">Custom</string>
+    <string name="widget_kit_appearance_tint_custom_color">Custom colour</string>
+
+    <!-- Tap behaviour. -->
+    <string name="widget_kit_appearance_tap_enabled_label">Tap to toggle</string>
+    <string name="widget_kit_appearance_tap_disabled_supporting">When off the widget renders display-only.</string>
+    <string name="widget_kit_appearance_tap_animation_label">Animation</string>
+    <string name="widget_kit_appearance_tap_animation_none">None</string>
+    <string name="widget_kit_appearance_tap_animation_ripple">Ripple</string>
+    <string name="widget_kit_appearance_tap_animation_pulse">Pulse</string>
+    <string name="widget_kit_appearance_tap_animation_scale">Scale</string>
+    <string name="widget_kit_appearance_tap_animation_flash">Flash</string>
+
+    <!-- Toggle feedback. -->
+    <string name="widget_kit_appearance_feedback_kind_label">Feedback</string>
+    <string name="widget_kit_appearance_feedback_none">None</string>
+    <string name="widget_kit_appearance_feedback_toast">Toast</string>
+    <string name="widget_kit_appearance_feedback_notification">Notification</string>
+    <string name="widget_kit_appearance_feedback_toast_template_label">Toast template</string>
+    <string name="widget_kit_appearance_feedback_notification_title_label">Notification title</string>
+    <string name="widget_kit_appearance_feedback_notification_body_label">Notification body</string>
+    <string name="widget_kit_appearance_feedback_template_help">Use {name} for the widget name and {state} for on/off.</string>
+    <string name="widget_kit_appearance_feedback_default_toast_template">{name} is now {state}</string>
+    <string name="widget_kit_appearance_feedback_default_notification_title">{name}</string>
+    <string name="widget_kit_appearance_feedback_default_notification_body">Now {state}</string>
+</resources>

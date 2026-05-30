@@ -93,53 +93,10 @@
     <string name="torch_widget_config_save_existing">Save</string>
     <string name="torch_widget_config_cancel">Cancel</string>
 
-    <!-- Appearance / customization sub-sections inside the sheet. -->
-    <string name="torch_widget_config_section_appearance">Appearance</string>
-    <string name="torch_widget_config_section_tap">Tap behaviour</string>
-    <string name="torch_widget_config_section_feedback">Toggle feedback</string>
-    <string name="torch_widget_config_section_preview">Preview</string>
-    <string name="torch_widget_config_preview_hint">Tap the preview to try the tap animation.</string>
-
-    <string name="torch_widget_config_background_label">Background</string>
-    <string name="torch_widget_config_background_glass">Glass</string>
-    <string name="torch_widget_config_background_solid">Solid</string>
-    <string name="torch_widget_config_background_transparent">Transparent</string>
-    <string name="torch_widget_config_solid_color_label">Solid colour</string>
-    <string name="torch_widget_config_solid_color_select">Select fill colour</string>
-
-    <string name="torch_widget_config_icon_active_label">Active icon</string>
-    <string name="torch_widget_config_icon_inactive_label">Inactive icon</string>
-    <string name="torch_widget_config_icon_add_custom">Add custom icon from files</string>
-    <string name="torch_widget_config_icon_custom">Custom icon</string>
-    <string name="torch_widget_config_icon_import_error">Couldn\'t use that image — try another.</string>
-    <string name="torch_widget_config_tint_label">Tint</string>
-    <string name="torch_widget_config_tint_accent">Accent</string>
-    <string name="torch_widget_config_tint_on_surface">Foreground</string>
-    <string name="torch_widget_config_tint_white">White</string>
-    <string name="torch_widget_config_tint_black">Black</string>
-    <string name="torch_widget_config_tint_custom">Custom</string>
-    <string name="torch_widget_config_tint_custom_color">Custom colour</string>
-
-    <string name="torch_widget_config_tap_animation_label">Animation</string>
-    <string name="torch_widget_config_tap_animation_none">None</string>
-    <string name="torch_widget_config_tap_animation_ripple">Ripple</string>
-    <string name="torch_widget_config_tap_animation_pulse">Pulse</string>
-    <string name="torch_widget_config_tap_animation_scale">Scale</string>
-    <string name="torch_widget_config_tap_animation_flash">Flash</string>
-    <string name="torch_widget_config_tap_enabled_label">Tap to toggle</string>
-    <string name="torch_widget_config_tap_disabled_supporting">When off, the widget renders display-only and ignores taps.</string>
-
-    <string name="torch_widget_config_feedback_kind_label">Confirmation</string>
-    <string name="torch_widget_config_feedback_none">None</string>
-    <string name="torch_widget_config_feedback_toast">Toast</string>
-    <string name="torch_widget_config_feedback_notification">Notification</string>
-    <string name="torch_widget_config_feedback_toast_template_label">Toast template</string>
-    <string name="torch_widget_config_feedback_notification_title_label">Notification title</string>
-    <string name="torch_widget_config_feedback_notification_body_label">Notification body</string>
-    <string name="torch_widget_config_feedback_template_help">Use {name} for the widget name and {state} for on/off.</string>
-    <string name="torch_widget_config_feedback_default_toast_template">{name} is now {state}</string>
-    <string name="torch_widget_config_feedback_default_notification_title">{name}</string>
-    <string name="torch_widget_config_feedback_default_notification_body">Now {state}</string>
+    <!-- Appearance / tap / feedback / preview sub-sections moved to
+         :core:widgetkit (refactor-2026 Phase 2 / C6b). 38 strings
+         relocated under widget_kit_appearance_* prefix; the kit's
+         WidgetAppearanceSection composable is the single consumer. -->
 
     <!-- Module-blueprint OS-compatibility notes (rendered by ModuleCompatibilitySection) -->
     <string name="torch_module_perm_notifications_label">Notifications</string>
