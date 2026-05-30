@@ -1,4 +1,4 @@
-package com.gadget.root
+package dev.ranzlappen.gadget.feature.standard.root
 
 import dev.ranzlappen.gadget.core.root.*
 import dev.ranzlappen.gadget.core.root.core.RootDetection

@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
  * confirms once, [dev.ranzlappen.gadget.core.root.RootPrefKeys.RootedAcknowledged] is
  * persisted and the dialog never re-shows.
  *
- * The standard flavor's [com.gadget.root.NoOpRootFeatureToggles] reports
+ * The standard flavor's [dev.ranzlappen.gadget.feature.standard.root.NoOpRootFeatureToggles] reports
  * `isRootedAcknowledged()` as `flowOf(true)`, so this Composable is a
  * no-op there — standard APK rendering is unchanged.
  */

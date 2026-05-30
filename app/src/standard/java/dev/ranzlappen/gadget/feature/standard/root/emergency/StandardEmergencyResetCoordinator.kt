@@ -1,4 +1,4 @@
-package com.gadget.root.emergency
+package dev.ranzlappen.gadget.feature.standard.root.emergency
 
 import dev.ranzlappen.gadget.core.root.emergency.*
 import javax.inject.Inject

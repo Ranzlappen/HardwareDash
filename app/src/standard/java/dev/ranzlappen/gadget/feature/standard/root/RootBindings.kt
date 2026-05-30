@@ -1,4 +1,4 @@
-package com.gadget.root
+package dev.ranzlappen.gadget.feature.standard.root
 
 import dev.ranzlappen.gadget.core.root.*
 import dev.ranzlappen.gadget.core.root.companion.CompanionModuleDetector
@@ -39,8 +39,8 @@ import com.gadget.nfc.StandardNfcController
 import com.gadget.notification.NotificationController
 import com.gadget.notification.StandardNotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
-import com.gadget.root.emergency.StandardEmergencyResetCoordinator
-import com.gadget.root.sysfs.StandardSysfsMutationLog
+import dev.ranzlappen.gadget.feature.standard.root.emergency.StandardEmergencyResetCoordinator
+import dev.ranzlappen.gadget.feature.standard.root.sysfs.StandardSysfsMutationLog
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.SensorsController
 import com.gadget.sensors.StandardSensorsController
@@ -67,7 +67,7 @@ import javax.inject.Singleton
  * `BuildConfig.IS_ROOTED`.
  *
  * The fully-qualified class name MUST match the rooted flavor's binding file
- * (`com.gadget.root.RootBindings`) — Gradle source-set merging picks one of
+ * (`dev.ranzlappen.gadget.feature.standard.root.RootBindings`) — Gradle source-set merging picks one of
  * the two based on the active product flavor, so a name mismatch would let
  * both compile into the rooted APK and cause a duplicate-binding crash.
  */

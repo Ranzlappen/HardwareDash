@@ -1,4 +1,4 @@
-package com.gadget.root.sysfs
+package dev.ranzlappen.gadget.feature.standard.root.sysfs
 
 import dev.ranzlappen.gadget.core.root.sysfs.*
 import javax.inject.Inject
