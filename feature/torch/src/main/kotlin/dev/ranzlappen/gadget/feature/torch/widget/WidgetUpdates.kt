@@ -29,10 +29,7 @@ internal fun broadcastTorchWidgetUpdate(
     type: WidgetType,
     appWidgetId: Int,
 ) {
-    val providerClass = when (type) {
-        WidgetType.Flashlight -> FlashlightWidgetProvider::class.java
-        WidgetType.Strobe -> StrobeWidgetProvider::class.java
-    }
+    val providerClass = type.providerClass
     val intent = Intent(
         AppWidgetManager.ACTION_APPWIDGET_UPDATE,
         null,

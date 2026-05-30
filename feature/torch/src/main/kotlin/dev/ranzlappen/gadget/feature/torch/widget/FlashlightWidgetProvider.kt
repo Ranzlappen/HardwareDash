@@ -15,16 +15,13 @@ import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
+import dev.ranzlappen.gadget.core.widgetkit.provider.BaseGadgetWidgetProvider
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
-import dev.ranzlappen.gadget.core.widgetkit.render.hasPressFrame
-import dev.ranzlappen.gadget.core.widgetkit.render.playTapPressFrame
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
 import dev.ranzlappen.gadget.core.widgetkit.R as WidgetKitR
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Home-screen flashlight widget — 1×1 cell.
@@ -32,77 +29,47 @@ import kotlinx.coroutines.withContext
  * Each pinned instance has its own [TorchWidgetConfig] entry keyed by
  * `appWidgetId`. The config carries the per-widget appearance
  * (background mode, icon style, tap animation, feedback). The widget
- * provider reads the config in `onUpdate` and `onReceive` to drive
+ * provider reads the config in `onUpdate` / `onReceive` to drive
  * both the RemoteViews paint and the optional toast / notification
  * fired on toggle.
  *
  * Click flow:
  *   1. User taps the widget; launcher fires the [PendingIntent]
- *      attached in [onUpdate] with action [ACTION_FLASHLIGHT_TOGGLE]
+ *      attached in [buildRemoteViews] with action [ACTION_FLASHLIGHT_TOGGLE]
  *      and the per-widget `appWidgetId` as an extra.
- *   2. [onReceive] catches the action, runs `controller.toggle()`,
- *      then dispatches the widget's configured feedback variant.
- *   3. We then schedule an immediate self-update so the icon flips.
+ *   2. [onReceive] catches the action, runs `controller.toggle()`
+ *      synchronously on the receiver thread, then delegates to
+ *      [BaseGadgetWidgetProvider.handleTapAfterAction] for feedback +
+ *      repaint + press-frame.
  *
- * **Self-heal:** if `onUpdate` runs for an `appWidgetId` with no
- * saved config (a race between the launcher's pin completion and
- * our pin-success receiver, or a config evicted by an over-eager
- * cleanup), the provider persists a default config keyed by that
- * ID so the in-app widget list still surfaces the widget and the
- * user can configure it without re-pinning.
- *
- * [onDeleted] purges the config so dragging the widget off the home
- * screen doesn't leak a record into the repository.
+ * **Lifecycle skeleton inherited** from [BaseGadgetWidgetProvider]:
+ *  - `onUpdate` → `renderAll` with the self-heal fallback to
+ *    [defaultConfig].
+ *  - `onDeleted` → per-id `WidgetConfigStore.delete`.
  */
-class FlashlightWidgetProvider : AppWidgetProvider() {
+class FlashlightWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
 
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray,
-    ) {
-        val pendingResult = goAsync()
-        WidgetReceiverScope.scope.launch {
-            try {
-                renderAll(context, appWidgetManager, appWidgetIds)
-            } finally {
-                pendingResult.finish()
-            }
-        }
-    }
+    override val logTag: String = TorchPinLog.TAG
 
-    /**
-     * Render every [appWidgetIds] instance from its persisted config.
-     * Reads via the DataStore-backed [WidgetConfigStore.getAll]
-     * (not the hot `all.value` cache) so a cold process — empty cache —
-     * still paints the saved appearance instead of self-healing a default
-     * over it. Self-heal only fires when the config is genuinely absent.
-     */
-    private suspend fun renderAll(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray,
-    ) {
-        val ep = entry(context)
-        val isOn = ep.torchController().state.value.isOn
-        val repo = ep.widgetRepository()
-        val configs = repo.getAll()
-        appWidgetIds.forEach { id ->
-            val config = configs[id] ?: run {
-                val default = TorchWidgetConfig(
-                    type = WidgetType.Flashlight,
-                    displayName = context.getString(R.string.torch_widget_default_name_flashlight),
-                )
-                Log.w(TorchPinLog.TAG, "FlashlightWidget self-heal id=$id")
-                // saveIfAbsent (not save) so a concurrent pin-success
-                // write of the real config is never clobbered by this
-                // default. See WidgetConfigStore.saveIfAbsent.
-                repo.saveIfAbsent(id, default)
-                default
-            }
-            appWidgetManager.updateAppWidget(id, buildRemoteViews(context, id, isOn, config))
-        }
-    }
+    override val providerClass: Class<out AppWidgetProvider> =
+        FlashlightWidgetProvider::class.java
+
+    override fun configStore(context: Context): WidgetConfigStore<TorchWidgetConfig> =
+        entry(context).widgetRepository()
+
+    override fun appearanceRenderer(context: Context): WidgetAppearanceRenderer =
+        entry(context).appearanceRenderer()
+
+    override fun feedbackDispatcher(context: Context): WidgetFeedbackDispatcher =
+        entry(context).feedbackDispatcher()
+
+    override fun defaultConfig(context: Context): TorchWidgetConfig = TorchWidgetConfig(
+        type = WidgetType.Flashlight,
+        displayName = context.getString(R.string.torch_widget_default_name_flashlight),
+    )
+
+    override suspend fun activeState(context: Context): Boolean =
+        entry(context).torchController().state.value.isOn
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
@@ -111,74 +78,22 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID,
         )
-        val ep = entry(context)
         // Toggle immediately on the receiver thread — the TorchCallback
         // synchronously updates the shared TorchState so the torch reacts
-        // without waiting on the config read below.
-        val controller = ep.torchController()
+        // without waiting on the config read in handleTapAfterAction.
+        val controller = entry(context).torchController()
         controller.toggle()
         val newState = controller.state.value.isOn
 
         val pendingResult = goAsync()
         WidgetReceiverScope.scope.launch {
             try {
-                // DataStore-backed read so a cold process still sees the
-                // per-widget feedback + animation config (the hot cache is
-                // empty until its first async emission).
-                val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                    ep.widgetRepository().get(appWidgetId)
-                } else {
-                    null
-                }
-                Log.d(
-                    TorchPinLog.TAG,
-                    "FlashlightWidget tap id=$appWidgetId on=$newState config=${config != null} " +
-                        "fb=${config?.appearance?.feedback?.let { it::class.simpleName }} " +
-                        "anim=${config?.appearance?.tap?.animation}",
-                )
-                if (config != null) {
-                    // Toast needs a Looper — dispatch on the main thread.
-                    withContext(Dispatchers.Main) {
-                        ep.feedbackDispatcher().dispatch(
-                            displayName = config.displayName,
-                            newState = newState,
-                            feedback = config.appearance.feedback,
-                        )
-                    }
-                }
-
-                // Repaint every instance (resting state).
-                val appWidgetManager = AppWidgetManager.getInstance(context)
-                val componentName = ComponentName(context, FlashlightWidgetProvider::class.java)
-                val ids = appWidgetManager.getAppWidgetIds(componentName)
-                if (ids.isNotEmpty()) renderAll(context, appWidgetManager, ids)
-
-                // Overlay the held tap-press frame on the tapped instance.
-                if (config != null &&
-                    appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID &&
-                    config.appearance.tap.enabled &&
-                    config.appearance.tap.animation.hasPressFrame()
-                ) {
-                    playTapPressFrame(
-                        manager = appWidgetManager,
-                        appWidgetId = appWidgetId,
-                        pressedViews = buildRemoteViews(context, appWidgetId, newState, config, pressed = true),
-                        restingViews = buildRemoteViews(context, appWidgetId, newState, config, pressed = false),
-                    )
-                }
+                handleTapAfterAction(context, appWidgetId, newState)
             } catch (t: Throwable) {
-                Log.e(TorchPinLog.TAG, "FlashlightWidget onReceive failed", t)
+                Log.e(logTag, "FlashlightWidget onReceive failed", t)
             } finally {
                 pendingResult.finish()
             }
-        }
-    }
-
-    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
-        super.onDeleted(context, appWidgetIds)
-        val repo = entry(context).widgetRepository()
-        WidgetReceiverScope.scope.launch {
-            appWidgetIds.forEach { repo.delete(it) }
         }
     }
 
@@ -188,20 +103,20 @@ class FlashlightWidgetProvider : AppWidgetProvider() {
      * + icon swap; the provider just attaches the click PendingIntent
      * if taps are enabled.
      */
-    private fun buildRemoteViews(
+    override fun buildRemoteViews(
         context: Context,
         appWidgetId: Int,
-        torchOn: Boolean,
+        active: Boolean,
         config: TorchWidgetConfig,
-        pressed: Boolean = false,
+        pressed: Boolean,
     ): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_flashlight).apply {
-            val renderer = entry(context).appearanceRenderer()
+            val renderer = appearanceRenderer(context)
             renderer.apply(
                 context = context,
                 views = this,
                 appearance = config.appearance,
-                active = torchOn,
+                active = active,
             )
             if (config.removed) {
                 // Deleted in-app but still hosted by the launcher: dim it

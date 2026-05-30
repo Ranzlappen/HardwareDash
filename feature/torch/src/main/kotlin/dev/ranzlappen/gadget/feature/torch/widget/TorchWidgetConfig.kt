@@ -55,7 +55,7 @@ data class TorchWidgetConfig(
     @SerialName("sosMode")
     val morseMode: Boolean = false,
     val morseText: String = "",
-    val appearance: WidgetAppearance = WidgetAppearance(),
+    override val appearance: WidgetAppearance = WidgetAppearance(),
     override val removed: Boolean = false,
     override val schemaVersion: Int = SCHEMA_VERSION,
 ) : WidgetKitConfig {

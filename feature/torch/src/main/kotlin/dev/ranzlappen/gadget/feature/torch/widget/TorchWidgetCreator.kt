@@ -79,12 +79,7 @@ class TorchWidgetCreator @Inject constructor(
             return WidgetPinResult.LauncherUnsupported
         }
 
-        val provider = when (config.type) {
-            WidgetType.Flashlight ->
-                ComponentName(context, FlashlightWidgetProvider::class.java)
-            WidgetType.Strobe ->
-                ComponentName(context, StrobeWidgetProvider::class.java)
-        }
+        val provider = ComponentName(context, config.type.providerClass)
 
         // Per-kind cap: count the currently-placed instances of this
         // provider so a user (or a pathological loop) can't pin unbounded

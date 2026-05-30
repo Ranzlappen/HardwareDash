@@ -1,5 +1,6 @@
 package dev.ranzlappen.gadget.feature.torch.widget
 
+import android.appwidget.AppWidgetProvider
 import kotlinx.serialization.Serializable
 
 /**
@@ -10,9 +11,19 @@ import kotlinx.serialization.Serializable
  * `TorchController.toggle()`) and [StrobeWidgetProvider] (foreground-
  * service-backed strobe).
  *
- * `@Serializable` so the type roundtrips through
- * `kotlinx.serialization` JSON inside [FeaturePreferences]'s
- * encoded values.
+ * Each variant carries the backing [AppWidgetProvider] subclass via
+ * [providerClass] so call sites that previously needed `when (type)`
+ * switches (`broadcastTorchWidgetUpdate`, `TorchWidgetCreator
+ * .requestPin`) can read the class directly off the type (P2-17).
+ *
+ * **kotlinx.serialization note.** The `providerClass` property is
+ * `@kotlinx.serialization.Transient`-free because the generated enum
+ * serializer encodes the discriminator by name only; constructor args
+ * outside the serialized form are ignored automatically (the JSON
+ * value is just `"Flashlight"` or `"Strobe"`).
  */
 @Serializable
-enum class WidgetType { Flashlight, Strobe }
+enum class WidgetType(val providerClass: Class<out AppWidgetProvider>) {
+    Flashlight(FlashlightWidgetProvider::class.java),
+    Strobe(StrobeWidgetProvider::class.java),
+}
