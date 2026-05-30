@@ -34,6 +34,35 @@ import dagger.hilt.components.SingletonComponent
  * `EntryPointAccessors.fromApplication(...)` rather than `@Inject`, since
  * `@Composable` functions can't take constructor parameters.
  *
+ * **Why this file (and its `ui/` siblings) stay in `:app/src/main/`
+ * (refactor-2026 Phase 2 / D4 policy).** The safety + capability
+ * framework (`RootSafetyGate`, `RootCapabilityRegistry`,
+ * `RootFeatureToggles`, `RootSafetyEvent`, `EmergencyResetCoordinator`,
+ * …) moved to `:core:root` in D1. The flavor impls under both
+ * `app/src/{standard,rooted}/java/com/gadget/root/` re-packaged to
+ * `dev.ranzlappen.gadget.feature.{standard,rooted}.root.*` in D2 + D3.
+ *
+ * This file (and the 13 `ui/Rooted*` Compose composables that reach it)
+ * stays at its legacy `com.gadget.root.*` location for one specific
+ * reason: it depends on **22 legacy non-modular feature controllers**
+ * (TorchController via `com.gadget.torch.TorchController`,
+ * VibrationController via `com.gadget.vibration.VibrationController`,
+ * …, each still in `app/src/main/java/com/gadget/<feature>/`). Pulling
+ * the entry-point into `:core:root` would force `:core:root` to depend
+ * on every one of those legacy controllers, defeating the purpose of
+ * the extraction.
+ *
+ * **Replacement plan.** Once each feature controller migrates to its
+ * own `:feature:<name>` module (the modular torch / vibration / etc.
+ * controllers already exist as the standard tier), this entry point
+ * becomes obsolete: the UI sites would consume the modular controllers
+ * directly via Hilt `@Inject` (since they'd live in feature modules
+ * with their own composables), and the few cross-feature aggregations
+ * the entry-point still provides could migrate to a kit-style
+ * `Map<FeatureId, ?>` multibinding (the pattern `:core:automation`'s
+ * `ModuleActionRegistry` already established). Tracked at
+ * https://github.com/Ranzlappen/HardwareDash/issues/94.
+ *
  * Mirrors the `AppsEntryPoint` shape.
  */
 @EntryPoint
