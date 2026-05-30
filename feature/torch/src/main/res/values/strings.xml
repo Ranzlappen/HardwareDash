@@ -20,6 +20,8 @@
     <string name="strobe_notification_channel_name">Strobe service</string>
     <string name="strobe_notification_title">Strobe active</string>
     <string name="strobe_notification_text">Tap the widget to stop.</string>
+    <string name="strobe_notification_stop">Stop</string>
+    <string name="strobe_widget_start_failed">Couldn\'t start strobe — open the app</string>
 
     <!-- ─── Widget toggle-feedback channel ──────────────────────── -->
     <string name="widget_feedback_channel_name">Widget feedback</string>
@@ -69,6 +71,8 @@
     <string name="torch_widget_add_strobe">Add strobe widget</string>
     <string name="torch_widget_pin_unsupported">Your launcher doesn\'t support adding widgets directly. Long-press the home screen to add one manually.</string>
     <string name="torch_widget_removed_hint">Removed from your list. To clear it from the home screen, long-press the widget there and remove it.</string>
+    <string name="torch_widget_cap_reached">You can pin at most %1$d widgets of each kind. Remove one first.</string>
+    <string name="torch_widget_quick_pin_hint">Long-press to pin with the default look.</string>
     <string name="torch_widget_default_name_flashlight">Flashlight</string>
     <string name="torch_widget_default_name_strobe">Strobe</string>
     <string name="torch_widget_list_empty_title">No widgets yet</string>

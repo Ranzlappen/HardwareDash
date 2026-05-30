@@ -18,14 +18,23 @@ import javax.inject.Singleton
  * are deferred — they need `RootCapabilityRegistry` + `RootSafetyGate`
  * to land first.
  *
- * Future flavor-specific binding pattern: rooted-only torch surface
- * ships as a sibling `:feature:torch-rooted` Gradle module (mirroring
+ * Flavor-specific binding pattern: rooted-only torch surface ships as
+ * the sibling `:feature:torch-rooted` Gradle module (mirroring
  * `:feature:lock-rooted` / `:feature:diagnostics-rooted` etc.) wired
- * into `:app` via `rootedImplementation`. The sibling module ships
- * its own Hilt module that supersedes this binding for the rooted
- * variant. The standard APK is physically unable to compile against
- * the rooted module — see CLAUDE.md's "Standard-APK leak gate"
- * section.
+ * into `:app` via `rootedImplementation`. The standard APK is
+ * physically unable to compile against the rooted module — see
+ * CLAUDE.md's "Standard-APK leak gate" section.
+ *
+ * The standard no-op for the modular root seam
+ * ([dev.ranzlappen.gadget.feature.torch.standard.StandardTorchRootCapabilities],
+ * bound in the standard flavor's `RootBindings`) now lives under the
+ * modular `dev.ranzlappen.gadget.feature.torch.standard` namespace
+ * rather than the legacy `com.gadget.torch`. It still physically
+ * resides in `app/src/standard/` (and the rooted impl in
+ * `app/src/rooted/`) because the rooted side depends on the
+ * `com.gadget.root.*` safety framework that has not yet been extracted
+ * to a `:core:root` module; once that lands, both bindings relocate to
+ * the sibling modules.
  *
  * In-module `src/standard/` + `src/rooted/` source sets are NOT used
  * for feature-level rooted code — the codebase convention is sibling

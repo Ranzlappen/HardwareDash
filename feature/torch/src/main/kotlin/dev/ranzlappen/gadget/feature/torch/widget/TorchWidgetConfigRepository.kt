@@ -50,11 +50,17 @@ class TorchWidgetConfigRepository @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     /** Reactive snapshot of every saved widget config, keyed by
-     *  `appWidgetId`. Hot — shared across UI subscribers AND
-     *  synchronously peek-able by widget providers via `.value`. */
+     *  `appWidgetId`. The original justification for `Eagerly` was
+     *  synchronous `.value` peeks from widget providers — but providers in
+     *  fact read via the suspend `getAll()` / `get()` path (so a cold
+     *  process sees on-disk state, not the empty hot cache). So
+     *  `WhileSubscribed(Long.MAX_VALUE)` is the right shape: defer the
+     *  upstream collection until the screen (the only subscriber) actually
+     *  observes, then stay warm forever — bounds per-feature idle cost as
+     *  the module count grows. */
     val all: StateFlow<Map<Int, TorchWidgetConfig>> = prefs.all.stateIn(
         scope = scope,
-        started = SharingStarted.Eagerly,
+        started = SharingStarted.WhileSubscribed(Long.MAX_VALUE),
         initialValue = emptyMap(),
     )
 

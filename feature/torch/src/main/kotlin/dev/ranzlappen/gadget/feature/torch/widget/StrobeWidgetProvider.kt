@@ -13,14 +13,14 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.feature.torch.R
+import dev.ranzlappen.gadget.feature.torch.strobe.StrobeRuntime
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
 import dev.ranzlappen.gadget.feature.torch.widget.customization.TapAnimation
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.feature.torch.widget.feedback.WidgetFeedbackDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -28,7 +28,7 @@ import kotlinx.coroutines.withContext
  * Home-screen strobe widget — 1×1 cell.
  *
  * Tapping the widget toggles [StrobeService]:
- * - If the service isn't running ([StrobeService.isRunning] == false),
+ * - If the service isn't running ([StrobeRuntime.running] == false),
  *   start it via `startForegroundService` carrying the widget's
  *   per-instance [TorchWidgetConfig] as Intent extras (rate Hz +
  *   SOS flag).
@@ -49,7 +49,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray,
     ) {
         val pendingResult = goAsync()
-        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+        WidgetReceiverScope.scope.launch {
             try {
                 renderAll(context, appWidgetManager, appWidgetIds)
             } finally {
@@ -69,9 +69,10 @@ class StrobeWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
-        val repo = entry(context).widgetRepository()
+        val ep = entry(context)
+        val repo = ep.widgetRepository()
         val configs = repo.getAll()
-        val running = StrobeService.isRunning
+        val running = ep.strobeRuntime().running.value
         appWidgetIds.forEach { id ->
             val config = configs[id] ?: run {
                 val default = TorchWidgetConfig(
@@ -105,7 +106,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
         // We pass only the appWidgetId — the service reads that widget's
         // rate / SOS config itself.
         val willBeRunning: Boolean
-        if (StrobeService.isRunning) {
+        if (ep.strobeRuntime().running.value) {
             context.startService(
                 Intent(context, StrobeService::class.java).setAction(StrobeService.ACTION_STOP),
             )
@@ -114,18 +115,33 @@ class StrobeWidgetProvider : AppWidgetProvider() {
             val startIntent = Intent(context, StrobeService::class.java).apply {
                 putExtra(StrobeService.EXTRA_APPWIDGET_ID, appWidgetId)
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(startIntent)
-            } else {
-                context.startService(startIntent)
+            willBeRunning = try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(startIntent)
+                } else {
+                    context.startService(startIntent)
+                }
+                true
+            } catch (e: IllegalStateException) {
+                // ForegroundServiceStartNotAllowedException (API 31+) is an
+                // IllegalStateException subtype thrown when the broadcast
+                // lands outside an allowed FGS-start window. Degrade
+                // gracefully — a stray launcher tap must never crash the
+                // home-screen process.
+                Log.w(PendingTorchWidgetConfigs.TAG, "Strobe FGS start refused", e)
+                android.widget.Toast.makeText(
+                    context,
+                    context.getString(R.string.strobe_widget_start_failed),
+                    android.widget.Toast.LENGTH_SHORT,
+                ).show()
+                false
             }
-            willBeRunning = true
         }
 
         // Feedback + animation + repaint run off the FGS path (no service
         // start here), so an FGS exception can never abort them.
         val pendingResult = goAsync()
-        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+        WidgetReceiverScope.scope.launch {
             try {
                 val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
                     ep.widgetRepository().get(appWidgetId)
@@ -178,8 +194,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         super.onDeleted(context, appWidgetIds)
         val repo = entry(context).widgetRepository()
-        val purgeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-        purgeScope.launch {
+        WidgetReceiverScope.scope.launch {
             appWidgetIds.forEach { repo.delete(it) }
         }
     }
@@ -241,6 +256,7 @@ class StrobeWidgetProvider : AppWidgetProvider() {
         fun widgetRepository(): TorchWidgetConfigRepository
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
+        fun strobeRuntime(): StrobeRuntime
     }
 
     companion object {

@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.SystemClock
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.monitoring.MonitorWidgetNotifier
 import dev.ranzlappen.gadget.feature.torch.widget.MonitorChartWidgetProvider
@@ -28,7 +29,20 @@ class TorchMonitorWidgetNotifier @Inject constructor(
 
     override val metricKey: String = TorchMetricSource.METRIC_KEY
 
+    /** Last repaint timestamp (elapsedRealtime) — guards the throttle. */
+    @Volatile
+    private var lastRepaintMs: Long = 0L
+
     override fun onSample(value: Float) {
+        // Self-throttle so a future high-rate metric reusing this notifier
+        // verbatim can't pelt the launcher with RemoteViews broadcasts (each
+        // one is a Binder transaction). MonitorService already coalesces, but
+        // a per-notifier floor is cheap defence-in-depth. A dropped repaint is
+        // harmless: each widget re-reads the full window / latest sample on
+        // its next paint.
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastRepaintMs < MIN_REPAINT_INTERVAL_MS) return
+        lastRepaintMs = now
         repaint(MonitorWidgetProvider::class.java)
         repaint(MonitorChartWidgetProvider::class.java)
     }
@@ -45,5 +59,10 @@ class TorchMonitorWidgetNotifier @Inject constructor(
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
             },
         )
+    }
+
+    private companion object {
+        /** Minimum gap between widget repaint broadcasts (ms). */
+        const val MIN_REPAINT_INTERVAL_MS = 250L
     }
 }

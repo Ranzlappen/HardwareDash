@@ -27,8 +27,12 @@ import javax.inject.Singleton
  * Registers a [CameraManager.TorchCallback] so OS-level torch state
  * changes (notification-panel tile toggled by another app, the
  * legacy stock QS tile, etc.) flow into [state]. The callback runs
- * for the singleton's lifetime — there's no `unregister` because
- * `@Singleton` instances live for the process.
+ * for the singleton's lifetime; in production the `@Singleton`
+ * instance lives for the whole process, so there's no automatic
+ * unregister. The class implements [java.io.Closeable] purely so a
+ * unit test (which constructs a controller directly) can release the
+ * CameraManager subscription via [close] and not leak a callback
+ * across tests.
  *
  * Rooted-flavor extras (DutyCycleStrobe / MultiLed / Thermal
  * override) ship in a sibling `:feature:torch-rooted` module
@@ -38,7 +42,7 @@ import javax.inject.Singleton
 @Singleton
 class StandardTorchController @Inject constructor(
     @ApplicationContext context: Context,
-) : TorchController {
+) : TorchController, java.io.Closeable {
 
     private val cameraManager: CameraManager =
         context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -106,6 +110,15 @@ class StandardTorchController @Inject constructor(
     private fun mapException(e: CameraAccessException): TorchError = when (e.reason) {
         CameraAccessException.CAMERA_DISABLED -> TorchError.PermissionDenied
         else -> TorchError.HardwareError
+    }
+
+    /**
+     * Release the OS torch-callback subscription. Not called in
+     * production (the singleton is process-lived), but lets a test that
+     * builds a controller directly avoid leaking the callback.
+     */
+    override fun close() {
+        cameraManager.unregisterTorchCallback(torchCallback)
     }
 
     private companion object {

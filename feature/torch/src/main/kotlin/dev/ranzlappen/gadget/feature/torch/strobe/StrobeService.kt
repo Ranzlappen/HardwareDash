@@ -3,6 +3,7 @@ package dev.ranzlappen.gadget.feature.torch.strobe
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.appwidget.AppWidgetManager
 import android.content.Context
@@ -43,18 +44,19 @@ import kotlin.math.min
  *   as Morse. The rate tunes the dot unit via [morseUnitMillis].
  *
  * Lifecycle:
- * - [isRunning] companion-level flag flips `true` once the
- *   foreground notification has been posted, and `false` in
- *   [stopStrobing] / [onDestroy]. [StrobeWidgetProvider] reads it
- *   to decide whether a widget tap starts a new run or stops the
- *   existing one. The flag is a heuristic — if the OS kills the
- *   service without notifying us, the flag stays stale until the
- *   next user tap, which goes through `startForegroundService` →
- *   `onStartCommand` and re-syncs.
+ * - Live strobing state is published to the injected [StrobeRuntime]
+ *   `StateFlow` (`setRunning(true)` once the loop launches, `false`
+ *   in [stopStrobing] / [onDestroy] / [onTimeout]). The screen folds
+ *   it into its state and `StrobeWidgetProvider` reads it to decide
+ *   whether a widget tap starts a new run or stops the existing one —
+ *   no polling, and no stale-after-kill (the runtime dies with the
+ *   process, so a cold read is always correct).
  *
  * Foreground-service contract:
- * - `foregroundServiceType="camera"` in the manifest so the OS
- *   permits flash access while in foreground state on API 34+.
+ * - `foregroundServiceType="shortService"` in the manifest so the OS
+ *   permits flash access while in foreground state on API 34+ without
+ *   a camera-typed FGS; the ~3-minute cap is an acceptable safety
+ *   bound for a strobe session.
  * - Posts a notification on a dedicated low-importance channel so
  *   the OS shows it without a sound / vibration interruption.
  *
@@ -71,6 +73,9 @@ class StrobeService : Service() {
     @Inject
     lateinit var widgetRepository: TorchWidgetConfigRepository
 
+    @Inject
+    lateinit var strobeRuntime: StrobeRuntime
+
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Default + serviceJob)
     private var strobeLoop: Job? = null
@@ -86,7 +91,10 @@ class StrobeService : Service() {
             }
             else -> startSession(intent)
         }
-        return START_STICKY
+        // NOT_STICKY: a user-initiated flashlight strobe must not be silently
+        // resurrected by the OS after a process kill — the user asked for it
+        // once. (Legacy behaviour; START_STICKY here was a regression.)
+        return START_NOT_STICKY
     }
 
     override fun onDestroy() {
@@ -111,7 +119,7 @@ class StrobeService : Service() {
         // UX can replace the loop without stopping by cancelling
         // the existing strobeLoop and relaunching).
         if (strobeLoop?.isActive == true) return
-        isRunning = true
+        strobeRuntime.setRunning(true)
 
         val appWidgetId = intent?.getIntExtra(EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
             ?: AppWidgetManager.INVALID_APPWIDGET_ID
@@ -178,7 +186,7 @@ class StrobeService : Service() {
         strobeLoop = null
         // Final off — synchronous, no coroutine needed.
         torchController.setOn(false)
-        isRunning = false
+        strobeRuntime.setRunning(false)
     }
 
     private fun promoteToForeground() {
@@ -209,7 +217,7 @@ class StrobeService : Service() {
      * elapses (~3 min by spec). Stop strobing + tear down the
      * service rather than letting Android force-kill us — a clean
      * stop means widget state flips back to "off" via the
-     * StrobeService.isRunning flag.
+     * [StrobeRuntime] signal.
      */
     override fun onTimeout(startId: Int) {
         stopStrobing()
@@ -223,7 +231,13 @@ class StrobeService : Service() {
             NOTIFICATION_CHANNEL_ID,
             getString(R.string.strobe_notification_channel_name),
             NotificationManager.IMPORTANCE_LOW,
-        )
+        ).apply {
+            // Explicitly silence — IMPORTANCE_LOW already suppresses sound on
+            // AOSP, but some OEM skins still play the default channel sound
+            // unless it's nulled out. Belt-and-braces for a service channel.
+            setSound(null, null)
+            enableVibration(false)
+        }
         manager.createNotificationChannel(channel)
     }
 
@@ -235,6 +249,14 @@ class StrobeService : Service() {
             .setOngoing(true)
             .setSilent(true)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            // A "Stop" action so the strobe is controllable from the
+            // notification shade, not only via the widget — a discoverability
+            // gap the reviews flagged.
+            .addAction(
+                R.drawable.ic_strobe,
+                getString(R.string.strobe_notification_stop),
+                buildStopIntent(),
+            )
             // A foreground service MUST post a notification on API 26+
             // (OS requirement — it can't be suppressed in the standard
             // flavor). DEFERRED lets the OS hold it back ~10s, so a brief
@@ -243,6 +265,18 @@ class StrobeService : Service() {
             // running the strobe outside an FGS.
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFERRED)
             .build()
+
+    /** PendingIntent that delivers [ACTION_STOP] back to this service when the
+     *  notification's Stop action is tapped. */
+    private fun buildStopIntent(): PendingIntent {
+        val intent = Intent(this, StrobeService::class.java).setAction(ACTION_STOP)
+        return PendingIntent.getService(
+            this,
+            /* requestCode = */ 0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
 
     companion object {
         /** Notification channel ID — stable across app versions. */
@@ -271,24 +305,6 @@ class StrobeService : Service() {
         /** Fallback Morse message for a widget left in Morse mode with
          *  an empty message box. */
         const val DEFAULT_MORSE_TEXT = "SOS"
-
-        /**
-         * Heuristic flag indicating whether a strobe loop is
-         * currently running.
-         *
-         * Set `true` once the foreground notification is posted and
-         * the loop launches; set `false` in [stopStrobing] /
-         * [onDestroy]. Read by [dev.ranzlappen.gadget.feature.torch.widget.StrobeWidgetProvider]
-         * to branch between "start" and "stop" intents on a widget
-         * tap.
-         *
-         * `@Volatile` so cross-thread reads from the widget
-         * provider's `onReceive` (broadcast receiver thread) see
-         * the most recent write from the service.
-         */
-        @Volatile
-        var isRunning: Boolean = false
-            private set
 
         /**
          * Compute the half-period (ms) for a given Hz value. A

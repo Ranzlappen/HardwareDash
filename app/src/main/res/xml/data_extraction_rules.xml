@@ -4,16 +4,16 @@
    for details.
 -->
 <data-extraction-rules>
+    <!-- Torch widget configs key on appWidgetId (device-specific) and the
+         pin-flow bridge is transient, so exclude both from cloud backup and
+         device-to-device transfer — a restore can't map old widget IDs onto
+         the new device's launcher. -->
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <exclude domain="file" path="datastore/torch_widgets.preferences_pb" />
+        <exclude domain="file" path="datastore/torch_pending_widgets.preferences_pb" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="file" path="datastore/torch_widgets.preferences_pb" />
+        <exclude domain="file" path="datastore/torch_pending_widgets.preferences_pb" />
     </device-transfer>
-    -->
 </data-extraction-rules>

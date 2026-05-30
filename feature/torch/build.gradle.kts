@@ -27,12 +27,23 @@ plugins {
 
 android {
     namespace = "dev.ranzlappen.gadget.feature.torch"
+
+    defaultConfig {
+        // Keep rules for this module's @Serializable types — merged into
+        // :app's release R8 run so minified builds don't strip the
+        // generated serializers. See consumer-rules.pro.
+        consumerProguardFiles("consumer-rules.pro")
+    }
 }
 
 dependencies {
     // :core:ui transitively brings :core:designsystem (DashCard,
     // GadgetFab, the design-system component library).
     implementation(project(":core:ui"))
+    // :core:widgetkit — the reusable home-screen widget framework. Torch is
+    // its first consumer (WidgetKitConfig contract, shared receiver scope,
+    // pin cap/result types).
+    implementation(project(":core:widgetkit"))
     // :core:monitoring — the reusable monitoring container + MetricSource
     // seam (api-exposes :core:ui and :core:model). Torch is its first
     // consumer: it charts torch intensity and contributes a MetricSource.

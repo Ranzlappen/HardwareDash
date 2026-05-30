@@ -42,6 +42,9 @@ import javax.inject.Singleton
  * file falls back to the [UserPreferences] defaults rather than
  * crashing the app.
  */
+/** Upper bound on persisted Morse-message length — see [UserPreferencesRepository.setMorseText]. */
+private const val MAX_MORSE_TEXT_LENGTH = 2048
+
 @Singleton
 class UserPreferencesRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>,
@@ -75,7 +78,10 @@ class UserPreferencesRepository @Inject constructor(
     }
 
     suspend fun setMorseText(text: String) {
-        dataStore.edit { it[UserPreferencesKeys.MORSE_TEXT] = text }
+        // Clamp length so a pasted novel can't bloat the preferences file
+        // (re-encoded on every commit). 2048 chars is far more than any real
+        // Morse message and keeps the DataStore write cheap.
+        dataStore.edit { it[UserPreferencesKeys.MORSE_TEXT] = text.take(MAX_MORSE_TEXT_LENGTH) }
     }
 
     private fun Preferences.readFrom(): UserPreferences = UserPreferences(

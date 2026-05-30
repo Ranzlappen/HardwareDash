@@ -123,7 +123,7 @@ object RootBindings {
     @Provides
     @Singleton
     fun provideTorchRootCapabilities(
-        impl: com.gadget.torch.StandardTorchRootCapabilities,
+        impl: dev.ranzlappen.gadget.feature.torch.standard.StandardTorchRootCapabilities,
     ): dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities = impl
 
     @Provides

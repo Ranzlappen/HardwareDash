@@ -13,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
 import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
+import dev.ranzlappen.gadget.core.widgetkit.WidgetPinPolicy
 import dev.ranzlappen.gadget.feature.torch.monitor.TorchMetricSource
 import dev.ranzlappen.gadget.feature.torch.ui.WidgetConfigurationSheet
 
@@ -50,6 +51,10 @@ fun TorchScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val pinUnsupportedMessage = stringResource(R.string.torch_widget_pin_unsupported)
     val widgetRemovedMessage = stringResource(R.string.torch_widget_removed_hint)
+    val capReachedMessage = stringResource(
+        R.string.torch_widget_cap_reached,
+        WidgetPinPolicy.MAX_WIDGETS_PER_KIND,
+    )
     val rootResultOk = stringResource(R.string.torch_root_result_ok)
     val rootResultUnsupported = stringResource(R.string.torch_root_result_unsupported)
     val rootResultOptedOut = stringResource(R.string.torch_root_result_opted_out)
@@ -70,6 +75,15 @@ fun TorchScreen(
             snackbarHostState.showSnackbar(
                 message = widgetRemovedMessage,
                 duration = SnackbarDuration.Long,
+            )
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.pinCapReachedEvents.collect {
+            snackbarHostState.showSnackbar(
+                message = capReachedMessage,
+                duration = SnackbarDuration.Short,
             )
         }
     }

@@ -406,25 +406,40 @@ success
 [`PendingIntent`](https://developer.android.com/reference/android/app/PendingIntent).
 The Torch feature's pattern (which any future feature can mirror):
 
-1. **In-app UI** calls a per-feature `<Feature>WidgetCreator`
-   (singleton) with the desired `<Feature>WidgetConfig`.
-2. **Creator** stashes the config in an in-memory
-   `Pending<Feature>WidgetConfigs` singleton, receives back a
-   stable token, and calls `requestPinAppWidget(...)` with a
-   success `PendingIntent` carrying the token.
+1. **In-app UI** invokes a per-feature `<Feature>WidgetCreator`
+   (singleton) from a `viewModelScope.launch { … }` (the creator's
+   `requestPin` is **suspend** — DataStore writes can't run on the
+   UI thread).
+2. **Creator** persists the config to a `Pending<Feature>WidgetConfigs`
+   bridge backed by `FeaturePreferences` (so it **survives process
+   death** between pin-request and the success callback), receives
+   back a stable token, and calls `requestPinAppWidget(...)` with a
+   success `PendingIntent` carrying the token and an explicit
+   `ComponentName` for the receiver (implicit intents fail silently on
+   some OEM launchers). Per-kind count cap enforced via
+   `WidgetPinPolicy` (`:core:widgetkit`); the call returns a
+   `WidgetPinResult` (`Requested` / `LauncherUnsupported` / `CapReached`)
+   so the UI can show the right message.
 3. **User** accepts the launcher's pin dialog.
 4. **OS** fires the success `PendingIntent`, which routes into a
    manifest-declared `BroadcastReceiver` (e.g.
    [`WidgetPinSuccessReceiver`](../feature/torch/src/main/kotlin/dev/ranzlappen/gadget/feature/torch/widget/WidgetPinSuccessReceiver.kt)).
-5. **Receiver** claims the pending config by token, persists it
-   to the feature's `FeaturePreferences`-backed repository keyed
-   by the new `appWidgetId`, then broadcasts
-   `ACTION_APPWIDGET_UPDATE` so the widget renders with its
-   config immediately.
+5. **Receiver** claims the pending config by token from the DataStore
+   bridge (`claim` removes it atomically), persists it to the
+   feature's `FeaturePreferences`-backed repository keyed by the new
+   `appWidgetId`, then broadcasts `ACTION_APPWIDGET_UPDATE` so the
+   widget renders with its config immediately. Receiver async work runs
+   on `WidgetReceiverScope` (`:core:widgetkit`) — one shared scope, not
+   a new `CoroutineScope` per `onReceive`.
 
 Reverse path: `AppWidgetProvider.onDeleted` is the canonical
-"widget left the home screen" signal — purge the config there
-to keep the repository tidy.
+"widget left the home screen" signal — purge the config there to
+keep the repository tidy. **In-app delete** of an already-placed
+widget can't pull the instance off a third-party launcher, so set
+`removed = true` on the config instead of deleting it (the provider
+self-heal would otherwise recreate it). The placed widget then
+repaints inert; `onDeleted` purges the config for real when the
+user drags it off.
 
 For older launchers without pin support
 (`isRequestPinAppWidgetSupported() == false`), surface a
@@ -453,8 +468,12 @@ inherit:
    aware controller via Hilt and let the build pick the right
    implementation per flavor.
 6. **Foreground services without typed `foregroundServiceType`**.
-   Camera-using services need `foregroundServiceType="camera"`,
-   etc. Required on API 34+.
+   Required on API 34+. Use `shortService` (3-min OS cap) for brief
+   user-initiated tasks like `setTorchMode` — no camera-typed FGS
+   permission needed. Wrap every `startForegroundService` in try/catch
+   for `IllegalStateException` (the
+   `ForegroundServiceStartNotAllowedException` supertype, API 31+) and
+   degrade gracefully — never crash on a stray broadcast.
 7. **Imports from `com.gadget.**` in new code**. Hard
    review-blocker.
 8. **`@Composable` accessor reads inside non-composable callbacks**.
@@ -502,19 +521,22 @@ study when doing the next migration:
 | `feature/torch/.../TorchController.kt` | Interface shape — `StateFlow<TorchState>` + non-suspend setters wrapping fast binder calls. |
 | `feature/torch/.../StandardTorchController.kt` | Hilt-injected implementation with Camera2 + `TorchCallback`. |
 | `feature/torch/.../TorchScreen.kt` | Thin Hilt-wrapped entry point — observes flows, owns the sheet visibility, delegates rendering to `TorchScreenContent`. |
-| `feature/torch/.../TorchScreenContent.kt` | Stateless screen — three `DashCard` sections (toggle / strobe defaults / widgets list). Testable without Hilt. |
-| `feature/torch/.../TorchViewModel.kt` | `combine(...)` over three flows into a single `TorchScreenState`; debounced rate-slider commit; sheet-target state. |
+| `feature/torch/.../TorchScreenContent.kt` | Stateless screen — toggle card, strobe defaults, monitor + live-monitor slots, widgets card, optional root-tools card. Each section wrapped in `GadgetExpandableCard` (persisted collapse via `:core:monitoring`'s `CollapseStateRepository`). Testable without Hilt. |
+| `feature/torch/.../TorchViewModel.kt` | `combine(...)` over five flows into `TorchScreenState`, folded with rooted-availability + collapse-state. The live strobe-running signal comes from `StrobeRuntime` (singleton `StateFlow`) — no polling. |
 | `feature/torch/.../TorchNavigation.kt` | `NavGraphBuilder.torchScreen()` registration — no `onBack` because Torch isn't a sub-route. |
 | `feature/torch/.../tile/FlashlightTileService.kt` | `EntryPointAccessors.fromApplication(...)` pattern for non-Hilt components. |
-| `feature/torch/.../widget/FlashlightWidgetProvider.kt` | `AppWidgetProvider` with config-aware `onUpdate` + icon-state feedback + `onDeleted` config purge. |
-| `feature/torch/.../widget/StrobeWidgetProvider.kt` | Same shape; additionally forwards per-instance `rateHz` + `sosMode` to the service via Intent extras. |
-| `feature/torch/.../widget/TorchWidgetCreator.kt` | `AppWidgetManager.requestPinAppWidget` flow with the in-memory pending-config bridge. |
-| `feature/torch/.../widget/WidgetPinSuccessReceiver.kt` | `goAsync()`-based receiver that claims the pending config and saves it to the repository. |
-| `feature/torch/.../widget/TorchWidgetConfigRepository.kt` | `FeaturePreferences<TorchWidgetConfig>` wrapper — the typed surface other code sees. |
+| `feature/torch/.../widget/FlashlightWidgetProvider.kt` | `AppWidgetProvider` with config-aware `onUpdate`, **live** state-reflecting icon (reads `TorchController.state.value`), `onDeleted` purge, soft-delete (`removed = true`) handling, `saveIfAbsent` self-heal, `WidgetReceiverScope` for async work. |
+| `feature/torch/.../widget/StrobeWidgetProvider.kt` | Same shape; passes only `EXTRA_APPWIDGET_ID` to the service, which reads that widget's persisted config itself (rate / Morse mode + text); `startForegroundService` wrapped in try/catch for `ForegroundServiceStartNotAllowedException`. |
+| `feature/torch/.../widget/TorchWidgetCreator.kt` | `AppWidgetManager.requestPinAppWidget` flow with the **DataStore-backed** pending-config bridge (survives process death); `suspend` API; per-kind cap (`WidgetPinPolicy.MAX_WIDGETS_PER_KIND`) returning a typed `WidgetPinResult`. |
+| `feature/torch/.../widget/WidgetPinSuccessReceiver.kt` | `goAsync()`-based receiver that claims the pending config and saves it to the repository on `WidgetReceiverScope`. |
+| `feature/torch/.../widget/TorchWidgetConfigRepository.kt` | `FeaturePreferences<TorchWidgetConfig>` wrapper — typed surface; `.all` is `WhileSubscribed(Long.MAX_VALUE)`. |
 | `feature/torch/.../ui/WidgetConfigurationSheet.kt` | `GadgetBottomSheet` form for new/edit flows. |
-| `feature/torch/.../strobe/StrobeService.kt` | Foreground service with `FOREGROUND_SERVICE_CAMERA` type, per-tap Intent-extra config, and `isRunning` state flag. |
+| `feature/torch/.../strobe/StrobeService.kt` | Foreground service with `foregroundServiceType="shortService"` on API 34+ (no camera-typed FGS needed for `setTorchMode`); `onTimeout` clean shutdown on the OS cap; returns `START_NOT_STICKY`; notification carries a **Stop** action; channel `setSound(null,null)`; live state published to `StrobeRuntime` singleton. |
+| `feature/torch/.../strobe/StrobeRuntime.kt` | `@Singleton` `StateFlow<Boolean>` source of truth for "is the strobe running?" — replaces the old `@Volatile companion` flag the VM had to poll. |
 | `feature/torch/src/main/AndroidManifest.xml` | All entry-point declarations co-located in the feature module — no `CAMERA` permission. |
-| `core/datastore/.../FeaturePreferences.kt` + `FeaturePreferencesFactory.kt` | Generic per-feature persistence basis that any future module should consume. |
+| `core/datastore/.../FeaturePreferences.kt` + `FeaturePreferencesFactory.kt` | Generic per-feature persistence basis — `ReplaceFileCorruptionHandler` so a single bad write can't permanently brick a feature's storage. |
+| `core/widgetkit/.../*` | Reusable widget-framework foundation: `WidgetKitConfig` contract, shared `WidgetReceiverScope`, `WidgetPinPolicy` + `WidgetPinResult`. The deeper appearance/render/store layers move here in a follow-up that needs a compiler in the loop. |
+| `feature/torch/consumer-rules.pro` | R8 keep rules for the module's `@Serializable` types so minified release builds don't strip the synthetic serializers into a runtime `SerializationException`. |
 
 The next feature migration (Sensors / Actuators / Camera / etc.)
 follows this exact shape — only the controller's underlying
