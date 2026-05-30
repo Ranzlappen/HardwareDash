@@ -72,6 +72,11 @@ class FlashlightWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
         entry(context).torchController().state.value.isOn
 
     override fun onReceive(context: Context, intent: Intent) {
+        // Start watching for OS-level torch changes (QS tile / other apps) so a
+        // placed widget repaints on external toggles. Idempotent + lazy, and
+        // re-arms here after a process restart since onReceive is the catch-all
+        // every widget broadcast flows through.
+        entry(context).torchWidgetStateObserver().ensureStarted()
         super.onReceive(context, intent)
         if (intent.action != ACTION_FLASHLIGHT_TOGGLE) return
         val appWidgetId = intent.getIntExtra(
@@ -165,6 +170,7 @@ class FlashlightWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
     @InstallIn(SingletonComponent::class)
     interface FlashlightWidgetEntryPoint {
         fun torchController(): TorchController
+        fun torchWidgetStateObserver(): TorchWidgetStateObserver
         fun widgetRepository(): WidgetConfigStore<TorchWidgetConfig>
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
