@@ -1,7 +1,6 @@
 package dev.ranzlappen.gadget.feature.torch.rooted
 
-import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController
-import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult
+import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsController
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.feature.torch.TorchRootAvailability
 import dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities
@@ -15,15 +14,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
-import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult as LegacyResult
+import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsControllerResult as SysfsResult
 import dev.ranzlappen.gadget.feature.torch.TorchController as ModularTorchController
 
 /**
  * Rooted-flavor adapter that surfaces the new modular Torch screen's root
- * capabilities by delegating to the existing legacy rooted Torch controller
- * (`RootedTorchController`, injected via the rooted-bound [LegacyTorchController]).
+ * capabilities by delegating to the rooted sysfs Torch controller
+ * (`RootedTorchController`, injected via the rooted-bound [TorchSysfsController]).
  * This reuses the battle-tested sysfs / libsu paths and the `RootSafetyGate`
- * gating rather than re-implementing them, and maps the legacy result tiers
+ * gating rather than re-implementing them, and maps the sysfs result tiers
  * onto the modular [TorchRootResult].
  *
  * It also tracks the live commanded brightness: a successful boost records
@@ -35,7 +34,7 @@ import dev.ranzlappen.gadget.feature.torch.TorchController as ModularTorchContro
 @Singleton
 class RootedTorchRootCapabilities @Inject constructor(
     private val registry: RootCapabilityRegistry,
-    private val legacy: LegacyTorchController,
+    private val sysfs: TorchSysfsController,
     private val paths: TorchSysfsPaths,
     modularController: ModularTorchController,
 ) : TorchRootCapabilities {
@@ -75,7 +74,7 @@ class RootedTorchRootCapabilities @Inject constructor(
     }
 
     override suspend fun boostBrightness(percent: Int): TorchRootResult =
-        legacy.boostBrightness(percent).toModular().also { result ->
+        sysfs.boostBrightness(percent).toModular().also { result ->
             if (result is TorchRootResult.Ok) {
                 _commandedBrightnessPercent.value = percent.coerceIn(0, maxBrightnessPercent)
             }
@@ -85,26 +84,26 @@ class RootedTorchRootCapabilities @Inject constructor(
         frequencyHz: Int,
         dutyPercent: Int,
         durationMillis: Long,
-    ): TorchRootResult = legacy.dutyCycleStrobe(frequencyHz, dutyPercent, durationMillis).toModular()
+    ): TorchRootResult = sysfs.dutyCycleStrobe(frequencyHz, dutyPercent, durationMillis).toModular()
 
     override suspend fun multiLedActivate(
         durationMillis: Long,
         includeScreen: Boolean,
-    ): TorchRootResult = legacy.multiLedActivate(durationMillis, includeScreen).toModular()
+    ): TorchRootResult = sysfs.multiLedActivate(durationMillis, includeScreen).toModular()
 
     override suspend fun thermalOverrideStrobe(
         frequencyHz: Int,
         dutyPercent: Int,
         durationMillis: Long,
-    ): TorchRootResult = legacy.withThermalOverride(durationMillis) {
-        legacy.dutyCycleStrobe(frequencyHz, dutyPercent, durationMillis)
+    ): TorchRootResult = sysfs.withThermalOverride(durationMillis) {
+        sysfs.dutyCycleStrobe(frequencyHz, dutyPercent, durationMillis)
     }.toModular()
 
-    private fun LegacyResult.toModular(): TorchRootResult = when (this) {
-        LegacyResult.Ok -> TorchRootResult.Ok
-        LegacyResult.Unsupported -> TorchRootResult.Unsupported
-        LegacyResult.OptedOut -> TorchRootResult.OptedOut
-        is LegacyResult.RateLimited -> TorchRootResult.RateLimited(retryAfterMillis)
-        is LegacyResult.HardwareError -> TorchRootResult.Error(message)
+    private fun SysfsResult.toModular(): TorchRootResult = when (this) {
+        SysfsResult.Ok -> TorchRootResult.Ok
+        SysfsResult.Unsupported -> TorchRootResult.Unsupported
+        SysfsResult.OptedOut -> TorchRootResult.OptedOut
+        is SysfsResult.RateLimited -> TorchRootResult.RateLimited(retryAfterMillis)
+        is SysfsResult.HardwareError -> TorchRootResult.Error(message)
     }
 }

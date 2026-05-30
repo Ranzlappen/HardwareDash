@@ -1,7 +1,7 @@
-package dev.ranzlappen.gadget.feature.torch.legacy
+package dev.ranzlappen.gadget.feature.torch.sysfs
 
 /**
- * Result returned by every [TorchController] extreme-tier method.
+ * Result returned by every [TorchSysfsController] extreme-tier method.
  *
  * `Ok` — the operation completed successfully.
  * `Unsupported` — running on standard flavor, missing root, or no
@@ -12,10 +12,10 @@ package dev.ranzlappen.gadget.feature.torch.legacy
  * `HardwareError` — sysfs write or shell exec failed for a device-
  *   specific reason; [message] is human-readable.
  */
-sealed class LegacyTorchControllerResult {
-    data object Ok : LegacyTorchControllerResult()
-    data object Unsupported : LegacyTorchControllerResult()
-    data class RateLimited(val retryAfterMillis: Long) : LegacyTorchControllerResult()
-    data object OptedOut : LegacyTorchControllerResult()
-    data class HardwareError(val message: String) : LegacyTorchControllerResult()
+sealed class TorchSysfsControllerResult {
+    data object Ok : TorchSysfsControllerResult()
+    data object Unsupported : TorchSysfsControllerResult()
+    data class RateLimited(val retryAfterMillis: Long) : TorchSysfsControllerResult()
+    data object OptedOut : TorchSysfsControllerResult()
+    data class HardwareError(val message: String) : TorchSysfsControllerResult()
 }

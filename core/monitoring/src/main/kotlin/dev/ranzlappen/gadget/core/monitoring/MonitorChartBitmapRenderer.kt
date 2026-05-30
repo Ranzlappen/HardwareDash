@@ -16,14 +16,27 @@ import android.graphics.Path
  * widget provider's background thread. Feed it an already-downsampled value
  * list (peak-per-bucket) so the point count is bounded regardless of window
  * length. Reusable by any feature that adds a monitor chart widget.
+ *
+ * **Memory.** Bitmaps come from a size-keyed [BitmapPool] and are allocated
+ * [Bitmap.Config.RGB_565]: a chart panel is opaque (the caller supplies an
+ * opaque [render] `backgroundColor`), so `ARGB_8888`'s alpha channel was dead
+ * weight — `RGB_565` halves both the heap footprint and the RemoteViews/Binder
+ * transaction size. Pass each rendered bitmap back to [release] once it is no
+ * longer referenced (for a widget, after `updateAppWidget` returns) so the next
+ * repaint reuses it instead of allocating + GC-ing a fresh one every ~second.
  */
 object MonitorChartBitmapRenderer {
 
+    private val pool = BitmapPool()
+
     /**
      * Draw [values] (oldest-first, already downsampled) as a line/area/column
-     * sparkline pinned to `0..yMax`, into a [widthPx] x [heightPx] bitmap.
-     * Returns a transparent bitmap with no plot when fewer than two points
-     * are available (the widget shows a "collecting" label over it).
+     * sparkline pinned to `0..yMax`, into a [widthPx] x [heightPx] bitmap
+     * filled with the opaque [backgroundColor]. Returns a background-only
+     * bitmap with no plot when fewer than two points are available (the widget
+     * hides the image and shows a "collecting" label instead).
+     *
+     * The returned bitmap is pooled — hand it to [release] when done.
      */
     fun render(
         values: List<Float>,
@@ -32,12 +45,16 @@ object MonitorChartBitmapRenderer {
         heightPx: Int,
         lineColor: Int,
         fillColor: Int,
+        backgroundColor: Int,
         layout: MonitorChartLayout,
         strokeWidthPx: Float,
     ): Bitmap {
         val width = widthPx.coerceAtLeast(1)
         val height = heightPx.coerceAtLeast(1)
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val bitmap = pool.obtain(width, height)
+        // RGB_565 has no alpha, so fill an opaque base before plotting —
+        // this also clears any stale pixels from a previous pooled render.
+        bitmap.eraseColor(backgroundColor)
         if (values.size < 2) return bitmap
 
         val canvas = Canvas(bitmap)
@@ -89,6 +106,14 @@ object MonitorChartBitmapRenderer {
         }
         return bitmap
     }
+
+    /**
+     * Return a [render]ed bitmap to the pool for reuse. Call this only once the
+     * bitmap is no longer referenced — for a RemoteViews widget that means
+     * **after** `AppWidgetManager.updateAppWidget` returns (it copies the
+     * pixels into the Binder parcel synchronously, so reuse is then safe).
+     */
+    fun release(bitmap: Bitmap) = pool.release(bitmap)
 
     private const val BAR_WIDTH_FRACTION = 0.7f
 }

@@ -1,7 +1,6 @@
 package dev.ranzlappen.gadget.feature.torch.rooted
 
-import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController
-import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult
+import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsControllerResult
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -35,12 +34,12 @@ class ThermalOverrideController @Inject constructor(
     suspend fun withOverride(
         timeoutMillis: Long,
         block: suspend () -> Unit,
-    ): LegacyTorchControllerResult = coroutineScope {
+    ): TorchSysfsControllerResult = coroutineScope {
         val effectiveTimeout = timeoutMillis.coerceAtMost(THERMAL_OVERRIDE_HARD_CEILING_MILLIS)
         val zone = locateLedThermalZone()
-            ?: return@coroutineScope LegacyTorchControllerResult.Unsupported
+            ?: return@coroutineScope TorchSysfsControllerResult.Unsupported
         val originalMode = readMode(zone)
-            ?: return@coroutineScope LegacyTorchControllerResult.HardwareError("read mode failed")
+            ?: return@coroutineScope TorchSysfsControllerResult.HardwareError("read mode failed")
         val tripPoint = readTripPoint(zone)
 
         var abortReason: String? = null
@@ -59,7 +58,7 @@ class ThermalOverrideController @Inject constructor(
                 }
             }
             withTimeoutOrNull(effectiveTimeout) { block() }
-            abortReason?.let { LegacyTorchControllerResult.HardwareError(it) } ?: LegacyTorchControllerResult.Ok
+            abortReason?.let { TorchSysfsControllerResult.HardwareError(it) } ?: TorchSysfsControllerResult.Ok
         } finally {
             withContext(NonCancellable + Dispatchers.IO) {
                 monitor?.cancel()

@@ -133,20 +133,36 @@ remaining review items that are *localized and safe* are completed in Batches
   so the eager subscription paid for nothing. Bounds per-feature idle cost as
   the module count grows.
 
-### Skipped (with analysis)
-- **P2-22 (RGB_565 + BitmapPool for `MonitorChartBitmapRenderer`)** — R4
-  asserted "the chart has no alpha", but it actively does: the bitmap starts
-  *transparent* (the widget background shows through) and the Area layout uses
-  a *translucent* `fillColor` (alpha `0x33` for torch). `RGB_565` drops both,
-  which would replace transparency with solid black/junk and turn the
-  translucent fill opaque. Keep ARGB_8888. Bitmap pooling + `recycle()` after
-  `setImageViewBitmap` is also unsafe — RemoteViews marshals the bitmap into
-  IPC asynchronously; recycling too early can crash the launcher process. The
-  size cap (600×280 ≈ 0.67 MB, already documented) keeps it well under the
-  Binder transaction limit.
-- **P3-29 (WEBP_LOSSY for custom icons)** — would regress transparency on
-  user-imported PNG icons (lossy WEBP doesn't preserve alpha well). Custom
-  icons are user images; alpha matters. Keep PNG.
+### Previously skipped — revisited and **implemented** in the final-polish batch
+The two items below were skipped in Batch 9 with the analysis preserved here;
+the final-polish batch revisited both and shipped them. The original concerns
+were real and are addressed head-on rather than ignored:
+
+- **P2-22 (RGB_565 + BitmapPool for `MonitorChartBitmapRenderer`)** — ✅ done.
+  - *"The chart has alpha" concern:* true — the old bitmap was transparent so
+    the glass card showed through, and the Area fill is translucent
+    (`0x33`). The fix makes the chart panel **opaque on purpose**: `render`
+    now takes a `backgroundColor` and the provider passes
+    `R.color.widget_chart_bg` (`#FF222222`, the alpha-dropped twin of the
+    widget's `#33222222` glass fill), so the panel reads as a dark glass-toned
+    surface and the translucent teal fill composites over it once. A minor,
+    deliberate aesthetic change traded for halving the bitmap.
+  - *"Async marshalling makes reuse unsafe" concern:* `updateAppWidget` parcels
+    the RemoteViews (and copies the bitmap's pixels) **synchronously** before
+    it returns. We don't recycle mid-flight: the bitmap is returned to the
+    `BitmapPool` only **after** `updateAppWidget` returns, and a pooled bitmap
+    is reused only on the **next** same-size render — i.e. after another full
+    synchronous update cycle. So a bitmap is never overwritten while the
+    framework still references it. `obtain` also removes the instance from the
+    free list, so overlapping repaints get distinct bitmaps.
+  - Net: `RGB_565` halves heap + Binder payload (600×280 → ~0.34 MB) and the
+    pool removes the ~1 Hz per-widget allocation churn the reviews flagged.
+- **P3-29 (WEBP_LOSSY for custom icons)** — ✅ done. The alpha concern is
+  unfounded for this encoder: Android's `WEBP_LOSSY` keeps the alpha channel
+  (WebP stores alpha separately from the lossy RGB), so icon-shaped
+  transparency survives. Saved at q80 (visually lossless at ≤192 px) with a
+  deprecated-`WEBP` fallback below API 30. Existing `.png` icons keep decoding
+  (format is sniffed, not inferred from the extension).
 
 ## Batch 10 — Safe new unit tests ✅
 Three additive JVM test files (no integration setup required):
@@ -306,13 +322,11 @@ Each is a clean follow-up once a compiler is in the loop:
    `:app/src/rooted/`) to a `:core:root` module — a repo-wide change
    touching 20+ feature controllers, out of scope and unsafe to do blind.
    Sibling module + namespace relocation + CI guard shipped now.
-7. **P2-22 `RGB_565` + `BitmapPool` for the chart renderer** — R4 was
-   incorrect that the chart has no alpha; it uses both a transparent
-   background and a translucent area fill, so `RGB_565` would visually
-   regress it. `Bitmap.recycle()` after `setImageViewBitmap` is also unsafe
-   (RemoteViews marshals asynchronously over IPC). Analysis in Batch 9.
-8. **P3-29 WEBP_LOSSY for custom icons** — would regress alpha on
-   user-imported PNG icons. Keep PNG.
+7. **P2-22 `RGB_565` + `BitmapPool` for the chart renderer** — ✅ shipped in
+   the final-polish batch. The alpha + reuse-safety concerns were addressed
+   rather than worked around — see "Previously skipped — revisited" above.
+8. **P3-29 WEBP_LOSSY for custom icons** — ✅ shipped in the final-polish
+   batch (`WEBP_LOSSY` preserves alpha; see above).
 
 ### Scope note (important)
 A *fully-wired* `:feature:torch-rooted` (real `RootedTorchRootCapabilities`

@@ -1,13 +1,13 @@
 package dev.ranzlappen.gadget.feature.standard.torch
 
-import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController
-import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult
+import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsController
+import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsControllerResult
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Standard-flavor Torch controller. Every extreme-tier method returns
- * [LegacyTorchControllerResult.Unsupported] — the standard APK has no privileged
+ * Standard-flavor Torch sysfs controller. Every extreme-tier method returns
+ * [TorchSysfsControllerResult.Unsupported] — the standard APK has no privileged
  * shell, so there is no way to write to `/sys/class/leds/...` no matter how
  * hard the user tries.
  *
@@ -16,25 +16,25 @@ import javax.inject.Singleton
  * controller and trusts the answer.
  */
 @Singleton
-class LegacyStandardTorchController @Inject constructor() : LegacyTorchController {
+class StandardTorchSysfsController @Inject constructor() : TorchSysfsController {
 
-    override suspend fun boostBrightness(percent: Int): LegacyTorchControllerResult =
-        LegacyTorchControllerResult.Unsupported
+    override suspend fun boostBrightness(percent: Int): TorchSysfsControllerResult =
+        TorchSysfsControllerResult.Unsupported
 
     override suspend fun dutyCycleStrobe(
         frequencyHz: Int,
         dutyPercent: Int,
         durationMillis: Long,
         phaseOffsetMillis: Long,
-    ): LegacyTorchControllerResult = LegacyTorchControllerResult.Unsupported
+    ): TorchSysfsControllerResult = TorchSysfsControllerResult.Unsupported
 
     override suspend fun multiLedActivate(
         durationMillis: Long,
         includeScreen: Boolean,
-    ): LegacyTorchControllerResult = LegacyTorchControllerResult.Unsupported
+    ): TorchSysfsControllerResult = TorchSysfsControllerResult.Unsupported
 
     override suspend fun withThermalOverride(
         durationMillis: Long,
         block: suspend () -> Unit,
-    ): LegacyTorchControllerResult = LegacyTorchControllerResult.Unsupported
+    ): TorchSysfsControllerResult = TorchSysfsControllerResult.Unsupported
 }

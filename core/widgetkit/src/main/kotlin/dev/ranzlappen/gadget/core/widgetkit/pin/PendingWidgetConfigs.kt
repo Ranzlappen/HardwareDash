@@ -130,14 +130,23 @@ class PendingWidgetConfigs<T : WidgetKitConfig>(
      * UI's pin dialog completes in seconds; entries older than an
      * hour (the default cutoff) are almost certainly abandoned
      * cancellations.
+     *
+     * Runs under [enqueueMutex] — the same lock [enqueue] holds while
+     * allocating its monotonic key. Without it, a purge that deletes the
+     * current max entry *between* [nextKey]'s `maxOrNull()` read and the
+     * matching `store.save` could let the next enqueue reuse a key that
+     * collides with a still-in-flight pin. The lock keeps the
+     * read-max-then-write counter invariant intact.
      */
     suspend fun purgeStale() {
-        val cutoff = System.currentTimeMillis() - staleThresholdMs
-        val snapshot = store.getAll()
-        val stale = snapshot.filterValues { it.savedAtMs < cutoff }.keys
-        if (stale.isEmpty()) return
-        Log.d(tag, "purgeStale dropping ${stale.size} expired entries")
-        stale.forEach { store.delete(it) }
+        enqueueMutex.withLock {
+            val cutoff = System.currentTimeMillis() - staleThresholdMs
+            val snapshot = store.getAll()
+            val stale = snapshot.filterValues { it.savedAtMs < cutoff }.keys
+            if (stale.isEmpty()) return@withLock
+            Log.d(tag, "purgeStale dropping ${stale.size} expired entries")
+            stale.forEach { store.delete(it) }
+        }
     }
 
     /** Monotonic-counter key allocator: `maxExistingKey + 1`, or 1
