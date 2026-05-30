@@ -1,6 +1,6 @@
 package com.gadget.root.sysfs
 
-import com.gadget.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.core.RootShell
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton

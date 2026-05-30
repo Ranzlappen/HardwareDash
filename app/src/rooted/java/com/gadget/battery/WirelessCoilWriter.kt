@@ -1,6 +1,6 @@
 package com.gadget.battery
 
-import com.gadget.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

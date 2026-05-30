@@ -1,6 +1,6 @@
 package com.gadget.root
 
-import com.gadget.root.core.RootDetection
+import dev.ranzlappen.gadget.core.root.core.RootDetection
 
 /**
  * Standard-flavor [RootCapabilityRegistry]: every capability is reported as

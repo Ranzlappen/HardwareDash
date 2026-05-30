@@ -1,7 +1,7 @@
 package com.gadget.root
 
-import com.gadget.root.core.RootService
-import com.gadget.root.core.RootServiceHandle
+import dev.ranzlappen.gadget.core.root.core.RootService
+import dev.ranzlappen.gadget.core.root.core.RootServiceHandle
 
 class NoOpRootService : RootService {
     override suspend fun bind(): RootServiceHandle? = null

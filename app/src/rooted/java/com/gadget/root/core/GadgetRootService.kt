@@ -10,7 +10,7 @@ import android.os.IBinder
  * shipping a manifest change.
  *
  * Note: the supertype is referenced fully-qualified to avoid colliding with
- * the local [com.gadget.root.core.RootService] interface in this package.
+ * the local [dev.ranzlappen.gadget.core.root.core.RootService] interface in this package.
  */
 class GadgetRootService : com.topjohnwu.superuser.ipc.RootService() {
     override fun onBind(intent: Intent): IBinder? = null

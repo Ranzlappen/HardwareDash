@@ -1,6 +1,6 @@
 package com.gadget.storage
 
-import com.gadget.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.core.RootShell
 import javax.inject.Inject
 import javax.inject.Singleton
 

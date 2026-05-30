@@ -5,7 +5,7 @@ package com.gadget.torch
  * always returns [TorchControllerResult.Unsupported] so shared UI can use one
  * code path for both flavors.
  *
- * Every method routes through [com.gadget.root.RootSafetyGate] before doing
+ * Every method routes through [dev.ranzlappen.gadget.core.root.RootSafetyGate] before doing
  * anything privileged — there is no "fast path" that bypasses the gate.
  */
 interface TorchController {

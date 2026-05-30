@@ -1,10 +1,10 @@
 package com.gadget.root
 
-import com.gadget.root.companion.CompanionModuleDetector
-import com.gadget.root.core.RootDetector
-import com.gadget.root.core.RootService
-import com.gadget.root.core.RootShell
-import com.gadget.root.launch.LaunchGate
+import dev.ranzlappen.gadget.core.root.companion.CompanionModuleDetector
+import dev.ranzlappen.gadget.core.root.core.RootDetector
+import dev.ranzlappen.gadget.core.root.core.RootService
+import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.launch.LaunchGate
 import com.gadget.adbdebug.AdbDebuggingController
 import com.gadget.adbdebug.StandardAdbDebuggingController
 import com.gadget.audio.AudioRoutingController
@@ -37,10 +37,10 @@ import com.gadget.nfc.NfcController
 import com.gadget.nfc.StandardNfcController
 import com.gadget.notification.NotificationController
 import com.gadget.notification.StandardNotificationController
-import com.gadget.root.emergency.EmergencyResetCoordinator
-import com.gadget.root.emergency.StandardEmergencyResetCoordinator
-import com.gadget.root.sysfs.StandardSysfsMutationLog
-import com.gadget.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
+import dev.ranzlappen.gadget.core.root.emergency.StandardEmergencyResetCoordinator
+import dev.ranzlappen.gadget.core.root.sysfs.StandardSysfsMutationLog
+import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import com.gadget.sensors.SensorsController
 import com.gadget.sensors.StandardSensorsController
 import com.gadget.storage.StandardStorageController

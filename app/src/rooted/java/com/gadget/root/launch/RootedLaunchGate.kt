@@ -1,7 +1,7 @@
 package com.gadget.root.launch
 
-import com.gadget.root.RootCapabilityRegistry
-import com.gadget.root.core.RootDetection
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.root.core.RootDetection
 import javax.inject.Inject
 import javax.inject.Singleton
 

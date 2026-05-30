@@ -29,8 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
-import com.gadget.root.emergency.EmergencyResetCoordinatorResult
-import com.gadget.root.emergency.EmergencyResetOptions
+import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinatorResult
+import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetOptions
 import kotlinx.coroutines.launch
 
 /**

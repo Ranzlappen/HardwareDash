@@ -36,12 +36,12 @@ import javax.inject.Singleton
  * ([dev.ranzlappen.gadget.feature.torch.standard.StandardTorchRootCapabilities],
  * bound in the standard flavor's `RootBindings`) now lives under the
  * modular `dev.ranzlappen.gadget.feature.torch.standard` namespace
- * rather than the legacy `com.gadget.torch`. It still physically
- * resides in `app/src/standard/` (and the rooted impl in
- * `app/src/rooted/`) because the rooted side depends on the
- * `com.gadget.root.*` safety framework that has not yet been extracted
- * to a `:core:root` module; once that lands, both bindings relocate to
- * the sibling modules.
+ * rather than the legacy `com.gadget.torch`. The root-safety framework
+ * (`RootSafetyGate`, `RootCapabilityRegistry`, etc.) extracted to
+ * `:core:root` in refactor-2026 D1, so the next step (E2) relocates the
+ * standard binding into `:feature:torch-rooted` and the rooted impl into
+ * the sibling module proper. Both standard + rooted bindings physically
+ * reside in `app/src/{standard,rooted}/` until that lands.
  *
  * In-module `src/standard/` + `src/rooted/` source sets are NOT used
  * for feature-level rooted code — the codebase convention is sibling

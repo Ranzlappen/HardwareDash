@@ -17,7 +17,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
 import android.view.Surface
-import com.gadget.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.core.RootShell
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.suspendCancellableCoroutine

@@ -3,9 +3,9 @@ package com.gadget.root.emergency
 import android.content.Context
 import com.gadget.keepalive.KeepAliveController
 import com.gadget.keepalive.KeepAliveControllerResult
-import com.gadget.root.RootFeatureToggles
-import com.gadget.root.core.RootShell
-import com.gadget.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.core.root.RootFeatureToggles
+import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
@@ -16,7 +16,7 @@ private const val KEEP_ALIVE_PREFS = "gadget_keep_alive"
 private const val KEY_KEEP_ALIVE_ENABLED = "keep_alive_enabled"
 
 /**
- * Rooted-flavor global emergency reset. Bypasses [com.gadget.root.RootSafetyGate]
+ * Rooted-flavor global emergency reset. Bypasses [dev.ranzlappen.gadget.core.root.RootSafetyGate]
  * intentionally — the gate check itself depends on state this method is
  * meant to repair, so gating the reset would be a footgun.
  *

@@ -1,8 +1,8 @@
 package com.gadget.display
 
 import android.os.Build
-import com.gadget.root.core.RootShell
-import com.gadget.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import javax.inject.Inject
 import javax.inject.Singleton
 

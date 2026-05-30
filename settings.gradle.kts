@@ -88,6 +88,7 @@ include(
     ":core:domain",
     ":core:navigation",
     ":core:permissions",
+    ":core:root",
     ":core:surfaces",
     ":core:automation",
     ":core:hardware",

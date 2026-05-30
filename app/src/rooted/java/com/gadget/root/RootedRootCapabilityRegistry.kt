@@ -1,7 +1,7 @@
 package com.gadget.root
 
-import com.gadget.root.core.RootDetection
-import com.gadget.root.core.RootDetector
+import dev.ranzlappen.gadget.core.root.core.RootDetection
+import dev.ranzlappen.gadget.core.root.core.RootDetector
 import javax.inject.Inject
 import javax.inject.Singleton
 

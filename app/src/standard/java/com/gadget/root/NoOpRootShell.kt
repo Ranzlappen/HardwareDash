@@ -1,7 +1,7 @@
 package com.gadget.root
 
-import com.gadget.root.core.RootShell
-import com.gadget.root.core.RootShellResult
+import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.core.RootShellResult
 
 /**
  * Returns [RootShellResult.UNSUPPORTED] for every call. Shared code that

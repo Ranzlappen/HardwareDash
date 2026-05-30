@@ -1,9 +1,9 @@
 package com.gadget.adbdebug
 
-import com.gadget.root.RootFeatureKey
-import com.gadget.root.RootGateDecision
-import com.gadget.root.RootSafetyGate
-import com.gadget.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.core.root.RootFeatureKey
+import dev.ranzlappen.gadget.core.root.RootGateDecision
+import dev.ranzlappen.gadget.core.root.RootSafetyGate
+import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import javax.inject.Inject
 import javax.inject.Singleton
 

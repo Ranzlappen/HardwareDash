@@ -7,7 +7,7 @@ import android.view.Gravity
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.gadget.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable

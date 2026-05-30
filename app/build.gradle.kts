@@ -178,6 +178,11 @@ dependencies {
     // Phase 2 / Batch 1 — first real-feature migrations from
     // legacy-main per docs/migration-guide.md.
     implementation(project(":core:datastore"))
+    // refactor-2026 Phase 2 / D1: root-safety framework — every rooted
+    // controller routes its privileged mutations through RootSafetyGate +
+    // RootCapabilityRegistry living in this module. Legacy
+    // app/src/{standard,rooted}/java/com/gadget/root/* impls bind it.
+    implementation(project(":core:root"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:torch"))
 

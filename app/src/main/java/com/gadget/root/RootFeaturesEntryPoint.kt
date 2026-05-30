@@ -16,7 +16,7 @@ import com.gadget.keepalive.KeepAliveController
 import com.gadget.microphone.MicrophoneController
 import com.gadget.nfc.NfcController
 import com.gadget.notification.NotificationController
-import com.gadget.root.emergency.EmergencyResetCoordinator
+import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
 import com.gadget.sensors.SensorsController
 import com.gadget.storage.StorageController
 import com.gadget.torch.TorchController

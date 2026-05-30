@@ -1,6 +1,6 @@
 package com.gadget.torch
 
-import com.gadget.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.feature.torch.TorchRootAvailability
 import dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities
 import dev.ranzlappen.gadget.feature.torch.TorchRootResult

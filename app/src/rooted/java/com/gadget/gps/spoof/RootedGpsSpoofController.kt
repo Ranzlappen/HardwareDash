@@ -2,12 +2,12 @@ package com.gadget.gps.spoof
 
 import android.content.Context
 import android.content.pm.PackageManager
-import com.gadget.root.RootCapabilityRegistry
-import com.gadget.root.RootFeatureKey
-import com.gadget.root.RootGateDecision
-import com.gadget.root.RootSafetyGate
-import com.gadget.root.core.RootShell
-import com.gadget.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.root.RootFeatureKey
+import dev.ranzlappen.gadget.core.root.RootGateDecision
+import dev.ranzlappen.gadget.core.root.RootSafetyGate
+import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject

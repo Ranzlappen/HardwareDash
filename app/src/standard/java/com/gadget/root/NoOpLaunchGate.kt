@@ -1,7 +1,7 @@
 package com.gadget.root
 
-import com.gadget.root.launch.LaunchGate
-import com.gadget.root.launch.LaunchGateOutcome
+import dev.ranzlappen.gadget.core.root.launch.LaunchGate
+import dev.ranzlappen.gadget.core.root.launch.LaunchGateOutcome
 
 /**
  * Standard-flavor [LaunchGate]: always allows the launch instantly. The

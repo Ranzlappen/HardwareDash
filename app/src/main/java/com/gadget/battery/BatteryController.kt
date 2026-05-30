@@ -5,7 +5,7 @@ package com.gadget.battery
  * implementation always returns [BatteryControllerResult.Unsupported] so
  * shared UI uses one code path for both flavors.
  *
- * Every method routes through `com.gadget.root.RootSafetyGate` before
+ * Every method routes through `dev.ranzlappen.gadget.core.root.RootSafetyGate` before
  * doing anything privileged. Hard cutoffs (active windows, thermal-zone
  * breach abort) are enforced inside the impl and cannot be extended by
  * callers.

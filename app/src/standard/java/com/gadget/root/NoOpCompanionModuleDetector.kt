@@ -1,8 +1,8 @@
 package com.gadget.root
 
-import com.gadget.root.companion.CompanionModuleConstants
-import com.gadget.root.companion.CompanionModuleDetector
-import com.gadget.root.companion.CompanionModuleStatus
+import dev.ranzlappen.gadget.core.root.companion.CompanionModuleConstants
+import dev.ranzlappen.gadget.core.root.companion.CompanionModuleDetector
+import dev.ranzlappen.gadget.core.root.companion.CompanionModuleStatus
 
 class NoOpCompanionModuleDetector : CompanionModuleDetector {
     override suspend fun status(): CompanionModuleStatus = CompanionModuleStatus.NotInstalled

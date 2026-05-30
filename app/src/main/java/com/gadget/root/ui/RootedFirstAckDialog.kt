@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
  * root is granted AND the user has not yet tapped "I understand". Place
  * this Composable at the top of [com.gadget.ui.screens.SettingsScreen] so
  * the dialog overlays the entire Settings surface. After the user
- * confirms once, [com.gadget.root.RootPrefKeys.RootedAcknowledged] is
+ * confirms once, [dev.ranzlappen.gadget.core.root.RootPrefKeys.RootedAcknowledged] is
  * persisted and the dialog never re-shows.
  *
  * The standard flavor's [com.gadget.root.NoOpRootFeatureToggles] reports

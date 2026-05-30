@@ -5,7 +5,7 @@ package com.gadget.camera
  * always returns [CameraControllerResult.Unsupported] so shared UI uses one
  * code path for both flavors.
  *
- * Every method routes through `com.gadget.root.RootSafetyGate` before doing
+ * Every method routes through `dev.ranzlappen.gadget.core.root.RootSafetyGate` before doing
  * anything privileged. Hard cutoffs (FPS duration, multi-camera duration,
  * RAW frame count, etc.) are enforced inside the impl and cannot be
  * extended by callers.
