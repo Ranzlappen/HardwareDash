@@ -24,8 +24,11 @@ private const val THERMAL_MONITOR_INTERVAL_MILLIS = 500L
  *
  * Restoration is wrapped in a `NonCancellable` finally so the original
  * mode is always written back even on coroutine cancellation. A monitor
- * coroutine reads the zone temperature every 500 ms and aborts the block
- * if the trip point is breached.
+ * coroutine reads the zone temperature every 500 ms and, on a trip-point
+ * breach, **cancels the privileged block immediately** (rather than letting
+ * it run to its timeout) so the LED stops the instant the zone gets hot —
+ * the block's own `NonCancellable` cleanup (e.g. strobe LED-off) still runs,
+ * then the thermal mode is restored.
  */
 @Singleton
 class ThermalOverrideController @Inject constructor(
@@ -47,17 +50,21 @@ class ThermalOverrideController @Inject constructor(
 
         try {
             shell.exec("echo disabled > \"${zone.path}/mode\"")
+            // Run the privileged work in its own child job so the monitor can
+            // cancel it the moment a thermal trip is breached.
+            val blockJob = launch { withTimeoutOrNull(effectiveTimeout) { block() } }
             monitor = launch(Dispatchers.IO) {
                 while (isActive) {
                     delay(THERMAL_MONITOR_INTERVAL_MILLIS)
                     val temp = readTemp(zone) ?: continue
                     if (tripPoint != null && temp >= tripPoint) {
                         abortReason = "Thermal trip breached: ${temp}m°C ≥ ${tripPoint}m°C"
+                        blockJob.cancel()
                         return@launch
                     }
                 }
             }
-            withTimeoutOrNull(effectiveTimeout) { block() }
+            blockJob.join()
             abortReason?.let { TorchSysfsControllerResult.HardwareError(it) } ?: TorchSysfsControllerResult.Ok
         } finally {
             withContext(NonCancellable + Dispatchers.IO) {
