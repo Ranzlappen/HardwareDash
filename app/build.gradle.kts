@@ -265,6 +265,12 @@ dependencies {
     // gate asserts this on every push.
     "rootedImplementation"(libs.libsu.core)
     "rootedImplementation"(libs.libsu.service)
+    // refactor-2026 Phase 2 / E2: rooted Torch capability module. Hosts
+    // RootedTorchController (libsu sysfs writes) + RootedTorchRootCapabilities
+    // (modular TorchRootCapabilities adapter) + the three helper coroutine
+    // workers. Standard APK never sees this module — sourceSet scoping
+    // physically prevents the dep from reaching the standard variant.
+    "rootedImplementation"(project(":feature:torch-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

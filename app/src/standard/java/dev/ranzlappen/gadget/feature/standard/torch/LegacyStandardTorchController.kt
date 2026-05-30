@@ -1,11 +1,13 @@
-package com.gadget.torch
+package dev.ranzlappen.gadget.feature.standard.torch
 
+import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController
+import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * Standard-flavor Torch controller. Every extreme-tier method returns
- * [TorchControllerResult.Unsupported] — the standard APK has no privileged
+ * [LegacyTorchControllerResult.Unsupported] — the standard APK has no privileged
  * shell, so there is no way to write to `/sys/class/leds/...` no matter how
  * hard the user tries.
  *
@@ -14,25 +16,25 @@ import javax.inject.Singleton
  * controller and trusts the answer.
  */
 @Singleton
-class StandardTorchController @Inject constructor() : TorchController {
+class LegacyStandardTorchController @Inject constructor() : LegacyTorchController {
 
-    override suspend fun boostBrightness(percent: Int): TorchControllerResult =
-        TorchControllerResult.Unsupported
+    override suspend fun boostBrightness(percent: Int): LegacyTorchControllerResult =
+        LegacyTorchControllerResult.Unsupported
 
     override suspend fun dutyCycleStrobe(
         frequencyHz: Int,
         dutyPercent: Int,
         durationMillis: Long,
         phaseOffsetMillis: Long,
-    ): TorchControllerResult = TorchControllerResult.Unsupported
+    ): LegacyTorchControllerResult = LegacyTorchControllerResult.Unsupported
 
     override suspend fun multiLedActivate(
         durationMillis: Long,
         includeScreen: Boolean,
-    ): TorchControllerResult = TorchControllerResult.Unsupported
+    ): LegacyTorchControllerResult = LegacyTorchControllerResult.Unsupported
 
     override suspend fun withThermalOverride(
         durationMillis: Long,
         block: suspend () -> Unit,
-    ): TorchControllerResult = TorchControllerResult.Unsupported
+    ): LegacyTorchControllerResult = LegacyTorchControllerResult.Unsupported
 }

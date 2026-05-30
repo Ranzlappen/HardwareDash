@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
-import com.gadget.torch.TorchControllerResult
+import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult
 import com.gadget.vibration.PwmPulse
 import com.gadget.vibration.VibrationControllerResult
 import kotlinx.coroutines.launch
@@ -233,13 +233,13 @@ fun VibrationRootExtrasSection(modifier: Modifier = Modifier) {
     }
 }
 
-private fun describeTorchResult(result: TorchControllerResult): String = when (result) {
-    TorchControllerResult.Ok -> "OK"
-    TorchControllerResult.Unsupported -> "Unsupported on this device"
-    TorchControllerResult.OptedOut -> "Disabled — enable in Settings"
-    is TorchControllerResult.RateLimited ->
+private fun describeTorchResult(result: LegacyTorchControllerResult): String = when (result) {
+    LegacyTorchControllerResult.Ok -> "OK"
+    LegacyTorchControllerResult.Unsupported -> "Unsupported on this device"
+    LegacyTorchControllerResult.OptedOut -> "Disabled — enable in Settings"
+    is LegacyTorchControllerResult.RateLimited ->
         "Cooling down — try again in ${result.retryAfterMillis / 1000}s"
-    is TorchControllerResult.HardwareError -> "Hardware error: ${result.message}"
+    is LegacyTorchControllerResult.HardwareError -> "Hardware error: ${result.message}"
 }
 
 private fun describeVibrationResult(result: VibrationControllerResult): String = when (result) {

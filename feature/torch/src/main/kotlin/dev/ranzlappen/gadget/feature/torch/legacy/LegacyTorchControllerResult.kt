@@ -1,4 +1,4 @@
-package com.gadget.torch
+package dev.ranzlappen.gadget.feature.torch.legacy
 
 /**
  * Result returned by every [TorchController] extreme-tier method.
@@ -12,10 +12,10 @@ package com.gadget.torch
  * `HardwareError` — sysfs write or shell exec failed for a device-
  *   specific reason; [message] is human-readable.
  */
-sealed class TorchControllerResult {
-    data object Ok : TorchControllerResult()
-    data object Unsupported : TorchControllerResult()
-    data class RateLimited(val retryAfterMillis: Long) : TorchControllerResult()
-    data object OptedOut : TorchControllerResult()
-    data class HardwareError(val message: String) : TorchControllerResult()
+sealed class LegacyTorchControllerResult {
+    data object Ok : LegacyTorchControllerResult()
+    data object Unsupported : LegacyTorchControllerResult()
+    data class RateLimited(val retryAfterMillis: Long) : LegacyTorchControllerResult()
+    data object OptedOut : LegacyTorchControllerResult()
+    data class HardwareError(val message: String) : LegacyTorchControllerResult()
 }

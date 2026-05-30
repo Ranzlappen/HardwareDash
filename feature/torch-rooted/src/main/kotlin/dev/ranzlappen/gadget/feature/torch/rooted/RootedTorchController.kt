@@ -1,5 +1,7 @@
-package com.gadget.torch
+package dev.ranzlappen.gadget.feature.torch.rooted
 
+import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController
+import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
@@ -27,9 +29,9 @@ class RootedTorchController @Inject constructor(
     private val multiLed: MultiLedOrchestrator,
     private val strobe: DutyCycleStrobe,
     private val thermal: ThermalOverrideController,
-) : TorchController {
+) : LegacyTorchController {
 
-    override suspend fun boostBrightness(percent: Int): TorchControllerResult =
+    override suspend fun boostBrightness(percent: Int): LegacyTorchControllerResult =
         runGated(RootFeatureKey.TorchExtremeBrightness) {
             writeBoostedBrightness(percent)
         }
@@ -39,55 +41,55 @@ class RootedTorchController @Inject constructor(
         dutyPercent: Int,
         durationMillis: Long,
         phaseOffsetMillis: Long,
-    ): TorchControllerResult = runGated(RootFeatureKey.TorchHighFrequencyStrobe) {
-        val node = paths.resolvePrimary() ?: return@runGated TorchControllerResult.Unsupported
+    ): LegacyTorchControllerResult = runGated(RootFeatureKey.TorchHighFrequencyStrobe) {
+        val node = paths.resolvePrimary() ?: return@runGated LegacyTorchControllerResult.Unsupported
         strobe.run(node, frequencyHz, dutyPercent, durationMillis, phaseOffsetMillis)
-        TorchControllerResult.Ok
+        LegacyTorchControllerResult.Ok
     }
 
     override suspend fun multiLedActivate(
         durationMillis: Long,
         includeScreen: Boolean,
-    ): TorchControllerResult = runGated(RootFeatureKey.TorchMultiLed) {
+    ): LegacyTorchControllerResult = runGated(RootFeatureKey.TorchMultiLed) {
         multiLed.activate(durationMillis, includeScreen)
-        TorchControllerResult.Ok
+        LegacyTorchControllerResult.Ok
     }
 
     override suspend fun withThermalOverride(
         durationMillis: Long,
         block: suspend () -> Unit,
-    ): TorchControllerResult = runGated(RootFeatureKey.TorchThermalOverride) {
+    ): LegacyTorchControllerResult = runGated(RootFeatureKey.TorchThermalOverride) {
         thermal.withOverride(durationMillis, block)
     }
 
-    private suspend fun writeBoostedBrightness(percent: Int): TorchControllerResult {
-        val node = paths.resolvePrimary() ?: return TorchControllerResult.Unsupported
+    private suspend fun writeBoostedBrightness(percent: Int): LegacyTorchControllerResult {
+        val node = paths.resolvePrimary() ?: return LegacyTorchControllerResult.Unsupported
         val maxResult = shell.exec("cat \"${node.maxBrightnessPath}\"")
         val max = maxResult.stdout.firstOrNull()?.trim()?.toIntOrNull()
-            ?: return TorchControllerResult.HardwareError(
+            ?: return LegacyTorchControllerResult.HardwareError(
                 "Could not read max_brightness for ${node.label}",
             )
         val boostCeiling = (max.toLong() * BRIGHTNESS_BOOST_CAP_PERCENT) / PERCENT_DENOMINATOR
         val target = (max.toLong() * percent / PERCENT_DENOMINATOR).coerceIn(0L, boostCeiling)
         val write = shell.exec("echo $target > \"${node.brightnessPath}\"")
         return if (write.isSuccess) {
-            TorchControllerResult.Ok
+            LegacyTorchControllerResult.Ok
         } else {
             val stderr = write.stderr.firstOrNull().orEmpty()
-            TorchControllerResult.HardwareError("brightness write failed: $stderr")
+            LegacyTorchControllerResult.HardwareError("brightness write failed: $stderr")
         }
     }
 
     private suspend inline fun runGated(
         feature: RootFeatureKey,
-        crossinline block: suspend () -> TorchControllerResult,
-    ): TorchControllerResult = when (val gate = safetyGate.check(feature)) {
+        crossinline block: suspend () -> LegacyTorchControllerResult,
+    ): LegacyTorchControllerResult = when (val gate = safetyGate.check(feature)) {
         RootGateDecision.Allowed -> block().also {
-            if (it is TorchControllerResult.Ok) safetyGate.recordInvocation(feature)
+            if (it is LegacyTorchControllerResult.Ok) safetyGate.recordInvocation(feature)
         }
-        RootGateDecision.BlockedByUser -> TorchControllerResult.OptedOut
+        RootGateDecision.BlockedByUser -> LegacyTorchControllerResult.OptedOut
         is RootGateDecision.BlockedByLimiter ->
-            TorchControllerResult.RateLimited(gate.retryAfterMillis)
-        RootGateDecision.Unsupported -> TorchControllerResult.Unsupported
+            LegacyTorchControllerResult.RateLimited(gate.retryAfterMillis)
+        RootGateDecision.Unsupported -> LegacyTorchControllerResult.Unsupported
     }
 }

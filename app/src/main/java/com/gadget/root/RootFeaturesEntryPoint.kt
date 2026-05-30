@@ -20,7 +20,7 @@ import com.gadget.notification.NotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
 import com.gadget.sensors.SensorsController
 import com.gadget.storage.StorageController
-import com.gadget.torch.TorchController
+import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController
 import com.gadget.usbdebug.UsbDebuggingController
 import com.gadget.vibration.VibrationController
 import com.gadget.wifi.WifiController
@@ -45,7 +45,7 @@ import dagger.hilt.components.SingletonComponent
  * This file (and the 13 `ui/Rooted*` Compose composables that reach it)
  * stays at its legacy `com.gadget.root.*` location for one specific
  * reason: it depends on **22 legacy non-modular feature controllers**
- * (TorchController via `com.gadget.torch.TorchController`,
+ * (LegacyTorchController via `dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController`,
  * VibrationController via `com.gadget.vibration.VibrationController`,
  * …, each still in `app/src/main/java/com/gadget/<feature>/`). Pulling
  * the entry-point into `:core:root` would force `:core:root` to depend
@@ -72,10 +72,10 @@ interface RootFeaturesEntryPoint {
     fun featureRegistry(): RootFeatureRegistry
     fun featureToggles(): RootFeatureToggles
     /**
-     * Returns the **legacy** `com.gadget.torch.TorchController` —
+     * Returns the **legacy** `dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController` —
      * the one still wired into the rooted-extras card. Phase 2
      * migrated standard-tier torch control to
-     * `dev.ranzlappen.gadget.feature.torch.TorchController`, but
+     * `dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController`, but
      * the rooted extras (DutyCycleStrobe / MultiLed / Thermal) live
      * on the legacy controller until they're ported under issue
      * https://github.com/Ranzlappen/HardwareDash/issues/94. The
@@ -85,7 +85,7 @@ interface RootFeaturesEntryPoint {
      * would otherwise generate two methods with the same name and
      * different return types on the singleton component).
      */
-    fun legacyTorchController(): TorchController
+    fun legacyTorchController(): LegacyTorchController
     fun vibrationController(): VibrationController
     fun cameraController(): CameraController
     fun microphoneController(): MicrophoneController

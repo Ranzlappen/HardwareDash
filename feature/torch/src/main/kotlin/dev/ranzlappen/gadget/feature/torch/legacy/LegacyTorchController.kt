@@ -1,14 +1,14 @@
-package com.gadget.torch
+package dev.ranzlappen.gadget.feature.torch.legacy
 
 /**
  * Rooted-only Torch capability surface. The standard-flavor implementation
- * always returns [TorchControllerResult.Unsupported] so shared UI can use one
+ * always returns [LegacyTorchControllerResult.Unsupported] so shared UI can use one
  * code path for both flavors.
  *
  * Every method routes through [dev.ranzlappen.gadget.core.root.RootSafetyGate] before doing
  * anything privileged — there is no "fast path" that bypasses the gate.
  */
-interface TorchController {
+interface LegacyTorchController {
 
     /**
      * Drives the LED brightness sysfs node directly. [percent] is interpreted
@@ -16,7 +16,7 @@ interface TorchController {
      * 100 push past the stock cap up to a hard ceiling enforced by the
      * implementation (currently 150 %).
      */
-    suspend fun boostBrightness(percent: Int): TorchControllerResult
+    suspend fun boostBrightness(percent: Int): LegacyTorchControllerResult
 
     /**
      * Strobes the LED with independent on/off durations, allowing low-duty
@@ -30,7 +30,7 @@ interface TorchController {
         dutyPercent: Int,
         durationMillis: Long,
         phaseOffsetMillis: Long = 0L,
-    ): TorchControllerResult
+    ): LegacyTorchControllerResult
 
     /**
      * Lights every available emitter at once: front + back LEDs, notification
@@ -40,7 +40,7 @@ interface TorchController {
     suspend fun multiLedActivate(
         durationMillis: Long,
         includeScreen: Boolean = false,
-    ): TorchControllerResult
+    ): LegacyTorchControllerResult
 
     /**
      * Disables OS thermal throttling for the LED driver thermal zone for the
@@ -52,5 +52,5 @@ interface TorchController {
     suspend fun withThermalOverride(
         durationMillis: Long,
         block: suspend () -> Unit,
-    ): TorchControllerResult
+    ): LegacyTorchControllerResult
 }

@@ -48,8 +48,8 @@ import com.gadget.storage.StandardStorageController
 import com.gadget.storage.StorageController
 import com.gadget.wifi.StandardWifiController
 import com.gadget.wifi.WifiController
-import com.gadget.torch.StandardTorchController
-import com.gadget.torch.TorchController
+import dev.ranzlappen.gadget.feature.standard.torch.LegacyStandardTorchController
+import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController
 import com.gadget.usbdebug.StandardUsbDebuggingController
 import com.gadget.usbdebug.UsbDebuggingController
 import com.gadget.vibration.StandardVibrationController
@@ -119,7 +119,7 @@ object RootBindings {
 
     @Provides
     @Singleton
-    fun provideTorchController(impl: StandardTorchController): TorchController = impl
+    fun provideTorchController(impl: LegacyStandardTorchController): LegacyTorchController = impl
 
     @Provides
     @Singleton

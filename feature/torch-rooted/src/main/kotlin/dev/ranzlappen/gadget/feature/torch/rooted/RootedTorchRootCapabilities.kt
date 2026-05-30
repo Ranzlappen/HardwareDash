@@ -1,5 +1,7 @@
-package com.gadget.torch
+package dev.ranzlappen.gadget.feature.torch.rooted
 
+import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController
+import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.feature.torch.TorchRootAvailability
 import dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities
@@ -13,13 +15,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
-import com.gadget.torch.TorchControllerResult as LegacyResult
+import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult as LegacyResult
 import dev.ranzlappen.gadget.feature.torch.TorchController as ModularTorchController
 
 /**
  * Rooted-flavor adapter that surfaces the new modular Torch screen's root
  * capabilities by delegating to the existing legacy rooted Torch controller
- * (`RootedTorchController`, injected via the rooted-bound [TorchController]).
+ * (`RootedTorchController`, injected via the rooted-bound [LegacyTorchController]).
  * This reuses the battle-tested sysfs / libsu paths and the `RootSafetyGate`
  * gating rather than re-implementing them, and maps the legacy result tiers
  * onto the modular [TorchRootResult].
@@ -33,7 +35,7 @@ import dev.ranzlappen.gadget.feature.torch.TorchController as ModularTorchContro
 @Singleton
 class RootedTorchRootCapabilities @Inject constructor(
     private val registry: RootCapabilityRegistry,
-    private val legacy: TorchController,
+    private val legacy: LegacyTorchController,
     private val paths: TorchSysfsPaths,
     modularController: ModularTorchController,
 ) : TorchRootCapabilities {

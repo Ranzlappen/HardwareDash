@@ -53,8 +53,6 @@ import com.gadget.storage.RootedStorageController
 import com.gadget.storage.StorageController
 import com.gadget.wifi.RootedWifiController
 import com.gadget.wifi.WifiController
-import com.gadget.torch.RootedTorchController
-import com.gadget.torch.TorchController
 import com.gadget.usbdebug.RootedUsbDebuggingController
 import com.gadget.usbdebug.UsbDebuggingController
 import com.gadget.vibration.RootedVibrationController
@@ -108,14 +106,13 @@ abstract class RootBindings {
     abstract fun bindCompanionModuleDetector(impl: RootedCompanionModuleDetector): CompanionModuleDetector
 
     // ──── Batch 3: feature controllers ────
-
-    @Binds @Singleton
-    abstract fun bindTorchController(impl: RootedTorchController): TorchController
-
-    @Binds @Singleton
-    abstract fun bindTorchRootCapabilities(
-        impl: com.gadget.torch.RootedTorchRootCapabilities,
-    ): dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities
+    //
+    // Torch bindings (LegacyTorchController + TorchRootCapabilities)
+    // moved to :feature:torch-rooted's RootedTorchModule in
+    // refactor-2026 Phase 2 / E2. The remaining cross-feature
+    // controllers stay here until each feature follows the same
+    // migration (tracked at
+    // https://github.com/Ranzlappen/HardwareDash/issues/94).
 
     @Binds @Singleton
     abstract fun bindVibrationController(impl: RootedVibrationController): VibrationController
