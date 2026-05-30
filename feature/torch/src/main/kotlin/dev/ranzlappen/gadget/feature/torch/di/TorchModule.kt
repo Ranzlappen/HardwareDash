@@ -4,8 +4,10 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dev.ranzlappen.gadget.core.widgetkit.render.WidgetIconResolver
 import dev.ranzlappen.gadget.feature.torch.StandardTorchController
 import dev.ranzlappen.gadget.feature.torch.TorchController
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
 import javax.inject.Singleton
 
 /**
@@ -55,4 +57,21 @@ abstract class TorchModule {
     abstract fun bindTorchController(
         impl: StandardTorchController,
     ): TorchController
+
+    /**
+     * Surface torch's [WidgetIconCatalog] as the kit-side
+     * [WidgetIconResolver]. The kit's [WidgetAppearanceRenderer]
+     * injects the resolver interface (not the concrete catalog) so the
+     * renderer can live in `:core:widgetkit` without knowing about any
+     * particular feature's bundled drawables.
+     *
+     * As more widget-bearing features land, this binding will become a
+     * multibinding keyed by feature id (planned for C5's provider
+     * registry batch).
+     */
+    @Binds
+    @Singleton
+    abstract fun bindWidgetIconResolver(
+        impl: WidgetIconCatalog,
+    ): WidgetIconResolver
 }

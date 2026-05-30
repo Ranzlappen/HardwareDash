@@ -11,6 +11,7 @@ import androidx.exifinterface.media.ExifInterface
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconKeys
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.render.WidgetIconResolver
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.widget.PendingTorchWidgetConfigs
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,7 @@ import kotlin.math.max
 @Singleton
 class WidgetIconCatalog @Inject constructor(
     @ApplicationContext private val context: Context,
-) {
+) : WidgetIconResolver {
 
     /**
      * One built-in icon in the catalog.
@@ -64,7 +65,7 @@ class WidgetIconCatalog @Inject constructor(
     private val customDir: File by lazy { File(context.filesDir, CUSTOM_DIR_NAME) }
 
     /** True iff [key] denotes a user-supplied custom icon. */
-    fun isCustom(key: String): Boolean = key.startsWith(WidgetIconKeys.CUSTOM_PREFIX)
+    override fun isCustom(key: String): Boolean = key.startsWith(WidgetIconKeys.CUSTOM_PREFIX)
 
     /**
      * Resolve a key to its [WidgetIconSource]. Unknown built-in keys fall
@@ -82,7 +83,7 @@ class WidgetIconCatalog @Inject constructor(
     /** Resolve a built-in key to its drawable, falling back to the default
      *  active icon for unknown / custom keys. */
     @DrawableRes
-    fun resolve(key: String): Int =
+    override fun resolve(key: String): Int =
         entries.firstOrNull { it.key == key }?.drawable
             ?: entries.first().drawable
 
@@ -95,7 +96,7 @@ class WidgetIconCatalog @Inject constructor(
      * to the default drawable). The stored file is already downscaled, so
      * this is a cheap decode safe to call on the provider's IO coroutine.
      */
-    fun loadCustomBitmap(key: String): Bitmap? {
+    override fun loadCustomBitmap(key: String): Bitmap? {
         if (!isCustom(key)) return null
         val path = File(customDir, key.removePrefix(WidgetIconKeys.CUSTOM_PREFIX)).absolutePath
         return runCatching { BitmapFactory.decodeFile(path) }.getOrNull()

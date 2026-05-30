@@ -1,13 +1,11 @@
-package dev.ranzlappen.gadget.feature.torch.widget.customization
+package dev.ranzlappen.gadget.core.widgetkit.render
 
 import android.content.Context
 import android.widget.RemoteViews
+import dev.ranzlappen.gadget.core.widgetkit.R
 import dev.ranzlappen.gadget.core.widgetkit.config.BackgroundMode
-import dev.ranzlappen.gadget.core.widgetkit.config.IconStyle
 import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance
-import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
-import dev.ranzlappen.gadget.feature.torch.R
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,37 +33,40 @@ private val FLASH_COLOR = 0xFFFFFFFF.toInt()
 /**
  * Applies a [WidgetAppearance] to a [RemoteViews] tree.
  *
- * Centralises the RemoteViews paint logic so the two existing widget
- * providers + future Container slot rendering all share one
- * implementation. RemoteViews has a narrow programmatic surface
- * (`setInt`, `setImageViewResource`, `setColorFilter`, …), so this
- * helper holds the mapping from semantic appearance fields to those
- * primitive calls.
+ * Centralises the RemoteViews paint logic so every feature's widget
+ * providers share one implementation. RemoteViews has a narrow
+ * programmatic surface (`setInt`, `setImageViewResource`,
+ * `setColorFilter`, …), so this helper holds the mapping from semantic
+ * appearance fields to those primitive calls.
  *
  * Layout contract: the host layout MUST contain
- *  - a background view with id `@+id/widget_background`
- *  - an icon view with id `@+id/widget_icon`
+ *  - a background view with id `@id/widget_background`
+ *  - an icon view with id `@id/widget_icon`
  *
- * Layouts ship with both views; providers that want to opt out of a
- * field can simply not include the corresponding id (RemoteViews
- * silently no-ops calls against missing ids).
+ * The kit declares both ids in `values/ids.xml` so feature layouts
+ * reference them with `@id/` (no `+`) and resource merging makes them
+ * resolvable from the kit's R. Layouts that opt out of a field can
+ * simply omit the corresponding id (RemoteViews silently no-ops calls
+ * against missing ids).
  *
- * Tap-animation primitive is split into a `prepare` call that
- * primes the visual into its "pressed" state and a `revert` call
- * the provider schedules ~150 ms later. The simple animations
- * (Pulse/Scale/Flash) are approximations — see
- * [TapAnimation]'s KDoc.
+ * Icon resolution is delegated to a per-feature [WidgetIconResolver]
+ * (bound from the feature's Hilt module) so the kit's renderer never
+ * has to know about a specific feature's bundled drawables.
+ *
+ * Tap-animation primitive is split into a `prepare` call that primes
+ * the visual into its "pressed" state and a `revert` call the provider
+ * schedules ~150 ms later. The simple animations (Pulse/Scale/Flash)
+ * are approximations — see [TapAnimation]'s KDoc.
  */
 @Singleton
 class WidgetAppearanceRenderer @Inject constructor(
-    private val iconCatalog: WidgetIconCatalog,
+    private val iconResolver: WidgetIconResolver,
 ) {
 
     /**
-     * Apply [appearance] to [views] for a widget in the given
-     * `active` state. The icon swaps between
-     * `appearance.iconStyle.activeKey` and `inactiveKey` based on
-     * the boolean.
+     * Apply [appearance] to [views] for a widget in the given `active`
+     * state. The icon swaps between `appearance.iconStyle.activeKey` and
+     * `inactiveKey` based on the boolean.
      */
     fun apply(
         context: Context,
@@ -107,7 +108,7 @@ class WidgetAppearanceRenderer @Inject constructor(
         active: Boolean,
     ) {
         val key = if (active) appearance.iconStyle.activeKey else appearance.iconStyle.inactiveKey
-        val customBitmap = if (iconCatalog.isCustom(key)) iconCatalog.loadCustomBitmap(key) else null
+        val customBitmap = if (iconResolver.isCustom(key)) iconResolver.loadCustomBitmap(key) else null
         if (customBitmap != null) {
             views.setImageViewBitmap(R.id.widget_icon, customBitmap)
             // A user image carries its own colours — a tint would recolour
@@ -115,7 +116,7 @@ class WidgetAppearanceRenderer @Inject constructor(
             // no-op) rather than applying the icon-style tint.
             views.setInt(R.id.widget_icon, "setColorFilter", TRANSPARENT)
         } else {
-            views.setImageViewResource(R.id.widget_icon, iconCatalog.resolve(key))
+            views.setImageViewResource(R.id.widget_icon, iconResolver.resolve(key))
             // Pre-31 fallback uses setColorFilter; API 31+ also supports
             // it for backwards compat. SRC_IN preserves the alpha channel
             // of the source drawable.
@@ -131,10 +132,10 @@ class WidgetAppearanceRenderer @Inject constructor(
     }
 
     /**
-     * Overlay the transient "pressed" look for [TapBehavior.animation] on
-     * top of an already-[apply]'d [views]. RemoteViews can't truly animate,
-     * so each effect is a single mutated frame the provider holds for
-     * ~150 ms before re-rendering the resting state:
+     * Overlay the transient "pressed" look for `appearance.tap.animation`
+     * on top of an already-[apply]'d [views]. RemoteViews can't truly
+     * animate, so each effect is a single mutated frame the provider
+     * holds for ~150 ms before re-rendering the resting state:
      *  - [TapAnimation.Flash] — recolour the icon bright white.
      *  - [TapAnimation.Pulse] — drop the icon alpha.
      *  - [TapAnimation.Scale] — grow the icon padding so it shrinks.

@@ -14,6 +14,7 @@
 
 plugins {
     id("gadget.android.library")
+    id("gadget.android.hilt")
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -22,6 +23,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     api(libs.kotlinx.serialization.json)
 

@@ -15,8 +15,8 @@ import javax.inject.Singleton
 
 /**
  * Dispatches the optional confirmation surface configured on a
- * widget's [dev.ranzlappen.gadget.feature.torch.widget.customization
- * .WidgetAppearance.feedback] when the widget's toggle action fires.
+ * widget's [dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance.feedback]
+ * when the widget's toggle action fires.
  *
  * Variants:
  * - [ToggleFeedback.None] — no-op.

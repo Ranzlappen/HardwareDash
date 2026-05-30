@@ -68,7 +68,7 @@ import dev.ranzlappen.gadget.core.widgetkit.config.ToggleFeedback
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconKeys
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
-import dev.ranzlappen.gadget.feature.torch.widget.customization.iconTintArgb
+import dev.ranzlappen.gadget.core.widgetkit.render.iconTintArgb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

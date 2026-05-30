@@ -36,14 +36,14 @@ import dev.ranzlappen.gadget.core.widgetkit.config.BackgroundMode
 import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
-import dev.ranzlappen.gadget.feature.torch.widget.customization.iconTintArgb
+import dev.ranzlappen.gadget.core.widgetkit.render.iconTintArgb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
  * Approximate, live render of how a 1×1 torch widget will look with the
  * given [appearance]. Drawn in pure Compose (not RemoteViews) but mirrors
- * the [dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearanceRenderer]
+ * the [dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer]
  * mapping — same background shapes/colours and the shared [iconTintArgb]
  * tint — so the preview tracks the placed widget.
  *

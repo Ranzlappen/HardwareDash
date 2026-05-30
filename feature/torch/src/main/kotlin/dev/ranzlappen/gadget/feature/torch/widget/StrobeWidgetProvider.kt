@@ -14,11 +14,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
+import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
+import dev.ranzlappen.gadget.core.widgetkit.render.hasPressFrame
+import dev.ranzlappen.gadget.core.widgetkit.render.playTapPressFrame
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeRuntime
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
-import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.feature.torch.widget.feedback.WidgetFeedbackDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
