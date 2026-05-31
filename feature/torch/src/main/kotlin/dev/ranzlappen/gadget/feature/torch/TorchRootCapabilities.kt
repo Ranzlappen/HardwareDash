@@ -22,18 +22,22 @@ interface TorchRootCapabilities {
     val isRootedFlavor: Boolean
 
     /**
-     * The torch's full-scale brightness ceiling as a percent of the stock
-     * `max_brightness`. `100` on standard (binary on/off); the rooted boost
-     * cap (currently 150) on the rooted flavor. The monitoring metric uses
-     * this as its descriptor max so the chart y-axis / progress widgets scale
-     * to the real ceiling instead of a hardcoded 100.
+     * The torch's full-scale brightness ceiling as a **live** percent of the
+     * stock `max_brightness`. A constant `100` on standard (binary on/off). On
+     * the rooted flavor it starts at `100` and rises to the rooted boost cap
+     * (currently 150) only once [probe] confirms root access **and** a usable
+     * LED sysfs node — so the ceiling never claims a boost the device can't
+     * actually deliver. The monitoring metric folds this into its descriptor's
+     * `maxFlow` so the chart y-axis / progress widgets scale to the real
+     * ceiling instead of a hardcoded 100.
      */
-    val maxBrightnessPercent: Int
+    val maxBrightnessPercentFlow: StateFlow<Int>
 
     /**
      * Live last-commanded brightness as a percent of the stock max: `0` while
-     * the torch is off, `100` at a normal on, up to [maxBrightnessPercent]
-     * after a [boostBrightness]. Standard reports a constant `0` (it can't
+     * the torch is off, `100` at a normal on, up to the boost cap reported by
+     * [maxBrightnessPercentFlow] after a [boostBrightness]. Standard reports a
+     * constant `0` (it can't
      * boost). Resets to `0` when the torch turns off (a fresh normal on then
      * reads as 100, not a stale boost). Drives the monitoring metric's live
      * value on the rooted flavor.

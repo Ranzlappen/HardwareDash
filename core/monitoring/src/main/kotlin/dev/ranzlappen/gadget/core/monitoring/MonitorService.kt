@@ -14,6 +14,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.core.data.MonitorSampleRepository
 import dev.ranzlappen.gadget.core.model.MetricDescriptor
 import dev.ranzlappen.gadget.core.model.MetricSource
+import dev.ranzlappen.gadget.core.model.currentMax
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -184,7 +185,7 @@ class MonitorService : Service() {
 
     private fun postMetricNotification(metricKey: String, descriptor: MetricDescriptor, value: Float) {
         if (!canPostNotifications()) return
-        val span = (descriptor.max - descriptor.min).takeIf { it > 0f } ?: 1f
+        val span = (descriptor.currentMax() - descriptor.min).takeIf { it > 0f } ?: 1f
         val progress = (((value - descriptor.min) / span) * 100f).roundToInt().coerceIn(0, 100)
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_view)

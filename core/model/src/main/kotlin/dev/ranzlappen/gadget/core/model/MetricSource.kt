@@ -1,6 +1,7 @@
 package dev.ranzlappen.gadget.core.model
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * A module's readable signal — the single seam for **both** monitoring
@@ -57,6 +58,15 @@ interface MetricSource {
 /**
  * Describes a [MetricSource] for the monitoring UI and (later) the
  * automation rule builder — so neither has to hardcode per-metric copy.
+ *
+ * The full-scale ceiling can be **static** ([max]) or **live** ([maxFlow]).
+ * A capability-driven source (e.g. the torch, whose ceiling jumps from 100 to
+ * the rooted boost cap of 150 only once `TorchRootCapabilities.probe()`
+ * confirms root + a usable LED node) publishes a [maxFlow] so render-time
+ * consumers can scale to the *real* ceiling instead of clipping at the static
+ * default. Resolve the effective ceiling through [currentMax] everywhere a
+ * RemoteViews/non-Compose path reads the bound (Compose paths can collect
+ * [maxFlow] directly). [maxFlow] is `null` for the common static case.
  */
 data class MetricDescriptor(
     val metricKey: String,
@@ -65,7 +75,15 @@ data class MetricDescriptor(
     val min: Float = 0f,
     val max: Float = 100f,
     val category: MetricCategory = MetricCategory.Other,
+    val maxFlow: StateFlow<Float>? = null,
 )
+
+/**
+ * The metric's effective full-scale ceiling right now: the live [maxFlow]'s
+ * current value when present, else the static [max]. Use this at every
+ * render-time consumer that reads the ceiling synchronously.
+ */
+fun MetricDescriptor.currentMax(): Float = maxFlow?.value ?: max
 
 enum class MetricCategory {
     Battery,

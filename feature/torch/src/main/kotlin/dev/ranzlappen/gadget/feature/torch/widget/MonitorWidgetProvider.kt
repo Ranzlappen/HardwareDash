@@ -14,6 +14,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.model.MetricSource
+import dev.ranzlappen.gadget.core.model.currentMax
 import dev.ranzlappen.gadget.core.monitoring.MonitorConfigRepository
 import dev.ranzlappen.gadget.core.monitoring.MonitorController
 import dev.ranzlappen.gadget.core.data.MonitorSampleRepository
@@ -84,7 +85,7 @@ class MonitorWidgetProvider : AppWidgetProvider() {
         val ep = entry(context)
         val value = ep.sampleRepository().observeLatest(METRIC_KEY).first()?.value ?: 0f
         val enabled = ep.configRepository().get(METRIC_KEY).enabled
-        val max = ep.metricSources()[METRIC_KEY]?.descriptor?.max ?: DEFAULT_MAX
+        val max = ep.metricSources()[METRIC_KEY]?.descriptor?.currentMax() ?: DEFAULT_MAX
         appWidgetIds.forEach { id ->
             appWidgetManager.updateAppWidget(id, buildRemoteViews(context, value, max, enabled))
         }
