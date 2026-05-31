@@ -41,7 +41,12 @@ class RootedTorchRootCapabilities @Inject constructor(
 
     override val isRootedFlavor: Boolean get() = registry.isRootedFlavor
 
-    override val maxBrightnessPercent: Int = BRIGHTNESS_BOOST_CAP_PERCENT
+    // Starts at the stock 100% ceiling and only rises to the boost cap once a
+    // probe confirms root access AND a usable LED sysfs node — so the metric's
+    // descriptor never advertises a boost the device can't actually deliver.
+    private val _maxBrightnessPercent = MutableStateFlow(NORMAL_MAX_PERCENT)
+    override val maxBrightnessPercentFlow: StateFlow<Int> =
+        _maxBrightnessPercent.asStateFlow()
 
     private val _commandedBrightnessPercent = MutableStateFlow(0)
     override val commandedBrightnessPercent: StateFlow<Int> =
@@ -66,6 +71,10 @@ class RootedTorchRootCapabilities @Inject constructor(
         registry.probe()
         val rootAccess = registry.hasRootAccess()
         val ledNodeFound = rootAccess && paths.resolvePrimary() != null
+        // Raise the live ceiling to the boost cap only when the boost path is
+        // actually reachable; otherwise leave it at the stock 100%.
+        _maxBrightnessPercent.value =
+            if (ledNodeFound) BRIGHTNESS_BOOST_CAP_PERCENT else NORMAL_MAX_PERCENT
         return TorchRootAvailability(
             rootedFlavor = registry.isRootedFlavor,
             rootAccess = rootAccess,
@@ -76,7 +85,7 @@ class RootedTorchRootCapabilities @Inject constructor(
     override suspend fun boostBrightness(percent: Int): TorchRootResult =
         sysfs.boostBrightness(percent).toModular().also { result ->
             if (result is TorchRootResult.Ok) {
-                _commandedBrightnessPercent.value = percent.coerceIn(0, maxBrightnessPercent)
+                _commandedBrightnessPercent.value = percent.coerceIn(0, BRIGHTNESS_BOOST_CAP_PERCENT)
             }
         }
 
@@ -105,5 +114,10 @@ class RootedTorchRootCapabilities @Inject constructor(
         SysfsResult.OptedOut -> TorchRootResult.OptedOut
         is SysfsResult.RateLimited -> TorchRootResult.RateLimited(retryAfterMillis)
         is SysfsResult.HardwareError -> TorchRootResult.Error(message)
+    }
+
+    private companion object {
+        /** Stock ceiling before a successful probe unlocks the boost cap. */
+        const val NORMAL_MAX_PERCENT = 100
     }
 }

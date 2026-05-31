@@ -18,6 +18,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.data.MonitorSampleRepository
 import dev.ranzlappen.gadget.core.model.MetricSource
+import dev.ranzlappen.gadget.core.model.currentMax
 import dev.ranzlappen.gadget.core.monitoring.MonitorChartBitmapRenderer
 import dev.ranzlappen.gadget.core.monitoring.MonitorConfigRepository
 import dev.ranzlappen.gadget.core.monitoring.MonitorController
@@ -87,7 +88,7 @@ class MonitorChartWidgetProvider : AppWidgetProvider() {
         if (appWidgetIds.isEmpty()) return
         val ep = entry(context)
         val config = ep.configRepository().get(METRIC_KEY)
-        val yMax = ep.metricSources()[METRIC_KEY]?.descriptor?.max ?: DEFAULT_MAX
+        val yMax = ep.metricSources()[METRIC_KEY]?.descriptor?.currentMax() ?: DEFAULT_MAX
 
         val windowMs = config.windowSeconds.toLong() * 1_000L
         val bucketMs = MonitorDownsampling.bucketMs(windowMs, config.pollIntervalMs, WIDGET_MAX_POINTS)

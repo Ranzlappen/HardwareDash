@@ -15,6 +15,12 @@ import dev.ranzlappen.gadget.core.monitoring.MonitorWidgetNotifier
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
 import dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,10 +30,12 @@ import javax.inject.Singleton
  *
  * Intensity is reported as a percent of the stock max: `0` when off, `100`
  * at a normal on, and up to the rooted boost ceiling (≈150) when the rooted
- * flavor has driven [TorchRootCapabilities.boostBrightness]. The descriptor
- * max is the flavor's ceiling ([TorchRootCapabilities.maxBrightnessPercent]),
- * so the chart y-axis and the progress widgets scale to the real range — 100
- * on standard (binary), 150 on the rooted boost flavor.
+ * flavor has driven [TorchRootCapabilities.boostBrightness]. The descriptor's
+ * `maxFlow` tracks the flavor's **live** ceiling
+ * ([TorchRootCapabilities.maxBrightnessPercentFlow]) — a constant 100 on
+ * standard (binary), rising to 150 on the rooted flavor only after a probe
+ * confirms the boost path — so the chart y-axis and the progress widgets
+ * scale to the real range instead of clipping a boost at 100.
  *
  * Polled (not push): a continuously-displayed chart needs a sample in every
  * downsample bucket, so [sample] is read on the monitor cadence rather than
@@ -40,12 +48,17 @@ class TorchMetricSource @Inject constructor(
     private val rootCapabilities: TorchRootCapabilities,
 ) : MetricSource {
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
     override val descriptor: MetricDescriptor = MetricDescriptor(
         metricKey = METRIC_KEY,
         displayName = context.getString(R.string.torch_monitor_metric_name),
         unit = "%",
         min = 0f,
-        max = rootCapabilities.maxBrightnessPercent.toFloat(),
+        max = NORMAL_ON_PERCENT,
+        maxFlow = rootCapabilities.maxBrightnessPercentFlow
+            .map { it.toFloat() }
+            .stateIn(scope, SharingStarted.Eagerly, NORMAL_ON_PERCENT),
         category = MetricCategory.Actuator,
     )
 

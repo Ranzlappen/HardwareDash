@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ranzlappen.gadget.core.data.MonitorBucket
 import dev.ranzlappen.gadget.core.data.MonitorSampleRepository
 import dev.ranzlappen.gadget.core.model.MetricSource
+import dev.ranzlappen.gadget.core.model.currentMax
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -46,7 +47,7 @@ class MonitorViewModel @Inject constructor(
      * default for an unbound key.
      */
     fun maxValue(metricKey: String): Float =
-        metricSources[metricKey]?.descriptor?.max ?: MonitorConfig().yMax
+        metricSources[metricKey]?.descriptor?.currentMax() ?: MonitorConfig().yMax
 
     /**
      * Downsampled, windowed sample history. The window lower-bound slides on
