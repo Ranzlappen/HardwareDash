@@ -129,7 +129,7 @@
 
     <!-- Root tools card (rooted app version only) -->
     <string name="torch_root_tools_title">Root tools</string>
-    <string name="torch_root_tools_subtitle">Privileged flashlight controls. Each routes through the root safety gate (rate-limited; can be turned off in settings).</string>
+    <string name="torch_root_tools_subtitle">Privileged flashlight controls, rate-limited by the root safety gate. Each tool ships OFF — enable it (and turn off Safety mode) in Settings → Rooted feature toggles before use.</string>
     <string name="torch_root_action_brightness">Run boost</string>
     <string name="torch_root_action_strobe">Run strobe</string>
     <string name="torch_root_action_multiled">Run burst</string>
@@ -149,7 +149,8 @@
     <string name="torch_root_no_boost_headroom">No brightness headroom on this device — no boostable LED node was found.</string>
     <string name="torch_root_result_ok">Done.</string>
     <string name="torch_root_result_unsupported">Not available on this device.</string>
-    <string name="torch_root_result_opted_out">This feature is turned off in settings.</string>
+    <string name="torch_root_result_opted_out">Turned off in Settings → Rooted feature toggles (check Safety mode too).</string>
+    <string name="torch_root_opted_out_action">Settings</string>
     <string name="torch_root_result_rate_limited">Rate-limited — try again shortly.</string>
     <string name="torch_root_result_error">Failed: %1$s</string>
 </resources>

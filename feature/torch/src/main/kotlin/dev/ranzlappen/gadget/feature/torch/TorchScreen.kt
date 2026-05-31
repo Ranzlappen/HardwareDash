@@ -3,10 +3,12 @@ package dev.ranzlappen.gadget.feature.torch
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -16,6 +18,7 @@ import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
 import dev.ranzlappen.gadget.core.widgetkit.WidgetPinPolicy
 import dev.ranzlappen.gadget.feature.torch.monitor.TorchMetricSource
 import dev.ranzlappen.gadget.feature.torch.ui.WidgetConfigurationSheet
+import kotlinx.coroutines.launch
 
 /**
  * Torch / flashlight screen — Hilt-wrapped stateful entry point.
@@ -45,6 +48,7 @@ import dev.ranzlappen.gadget.feature.torch.ui.WidgetConfigurationSheet
 fun TorchScreen(
     modifier: Modifier = Modifier,
     viewModel: TorchViewModel = hiltViewModel(),
+    onNavigateToSettings: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val sheetTarget by viewModel.sheetTarget.collectAsStateWithLifecycle()
@@ -60,6 +64,8 @@ fun TorchScreen(
     val rootResultOptedOut = stringResource(R.string.torch_root_result_opted_out)
     val rootResultRateLimited = stringResource(R.string.torch_root_result_rate_limited)
     val rootResultErrorFmt = stringResource(R.string.torch_root_result_error)
+    val rootOptedOutAction = stringResource(R.string.torch_root_opted_out_action)
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.pinUnsupportedEvents.collect {
@@ -97,7 +103,25 @@ fun TorchScreen(
                 is TorchRootResult.RateLimited -> rootResultRateLimited
                 is TorchRootResult.Error -> rootResultErrorFmt.format(result.message)
             }
-            snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Short)
+            // For the "turned off in settings" case, offer an action that
+            // deep-links to the Settings screen where the per-feature opt-in
+            // (and the safety-mode master switch) live — otherwise the toast
+            // points at settings the user can't find their way to. Launch the
+            // long-duration action snackbar in a separate coroutine so the
+            // collector doesn't block (and drop) subsequent tool results while
+            // it's shown.
+            if (result == TorchRootResult.OptedOut) {
+                scope.launch {
+                    val outcome = snackbarHostState.showSnackbar(
+                        message = message,
+                        actionLabel = rootOptedOutAction,
+                        duration = SnackbarDuration.Long,
+                    )
+                    if (outcome == SnackbarResult.ActionPerformed) onNavigateToSettings()
+                }
+            } else {
+                snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Short)
+            }
         }
     }
 

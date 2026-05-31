@@ -1115,6 +1115,25 @@ torch is the hardened reference for every future migration:
   `provider/` notes above (`claimSolePending` + `reconcilePendingConfig`):
   a strobe widget pinned with Morse on a flaky-callback launcher now reliably
   plays Morse on the first tap instead of only after a manual re-edit.
+- **Rooted opt-in UI re-wired** — the rooted tools toasted "turned off in
+  settings" with no reachable way to enable them: the opt-in UI
+  (`RootedFeatureTogglesCard` — safety-mode master switch + per-feature
+  toggles + risk-confirm dialog) was **orphaned** by the modular refactor
+  (it lives in `:app/src/main` because it depends on the legacy
+  `RootFeaturesEntryPoint` + 22 controllers, and the new modular
+  `:feature:settings` `SettingsScreen` never placed it). Fixed by adding a
+  `rootFeatureToggles: @Composable () -> Unit = {}` **slot** to
+  `SettingsScreen` / `settingsScreen()` that `:app` fills with
+  `RootedFeatureTogglesCard()` (the card self-hides on standard / no-root via
+  its `hasRootAccess()` guard, so the slot stays Hilt-free + flavor-safe), and
+  an `onNavigateToSettings` callback on `torchScreen()` so the `OptedOut`
+  snackbar offers a **"Settings"** action that deep-links to the toggles. The
+  gate is two-stage: a global **Safety mode** master switch (default ON, blocks
+  every `isWriteCapable` feature) **and** each feature's own toggle (default
+  OFF, `requiresExplicitConfirm`). This is the seam every future rooted feature
+  (vibration next) reuses; the slot pattern is the leaf-module-can't-see-`:app`
+  workaround until `RootFeaturesEntryPoint` is replaced by per-feature
+  `@Inject` (issue #94).
 
 ### Preview matrix policy
 

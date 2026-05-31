@@ -27,6 +27,7 @@ import com.gadget.root.ui.FatalLaunchScreen
 import com.gadget.ui.logbook.LogbookReminderWorker
 import com.gadget.ui.theme.AccessibilityPreferencesManager
 import com.gadget.ui.theme.GadgetTheme
+import com.gadget.root.ui.RootedFeatureTogglesCard
 import com.gadget.ui.theme.ThemePreferencesManager
 import com.gadget.widget.WidgetUpdateWorker
 import com.gadget.widget.folder.FolderWidgetController
@@ -111,8 +112,19 @@ class MainActivity : ComponentActivity() {
                         placeholderScreen(GadgetDestination.Sensors)
                         placeholderScreen(GadgetDestination.Actuators)
                         placeholderScreen(GadgetDestination.Automation)
-                        settingsScreen()
-                        torchScreen()
+                        settingsScreen(
+                            // The rooted opt-in toggles live in :app (they
+                            // reach the legacy RootFeaturesEntryPoint); the
+                            // card self-hides on standard / no-root.
+                            rootFeatureToggles = { RootedFeatureTogglesCard() },
+                        )
+                        torchScreen(
+                            // Deep-link the "turned off in settings" snackbar
+                            // action to the Settings screen.
+                            onNavigateToSettings = {
+                                navController.navigateTopLevel(GadgetDestination.Settings)
+                            },
+                        )
                     }
                 }
                 is LaunchGateOutcome.DeniedFatal -> GadgetTheme {
