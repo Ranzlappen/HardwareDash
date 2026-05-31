@@ -118,6 +118,8 @@ include(
     ":feature:torch-rooted",
     ":feature:torch-standard",
     ":feature:vibration",
+    ":feature:vibration-rooted",
+    ":feature:vibration-standard",
     ":feature:gps",
     ":feature:motion",
     ":feature:ambient",

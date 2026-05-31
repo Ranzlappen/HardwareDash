@@ -1,2 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<!--
+  :feature:vibration — surfaces for the haptic / vibration feature.
+
+  Permissions, the four AppWidget receivers (vibrate toggle, pattern,
+  monitor bar, monitor chart), the dynamic-widget pin-success receiver, and
+  the VibrationPlaybackService foreground service are all co-located here.
+  The app's manifest merger picks them into the final manifest automatically.
+
+  Standard-flavor surface only. Rooted-flavor extreme-tier capabilities ship
+  as the sibling :feature:vibration-rooted Gradle module per the codebase's
+  convention for feature-level rooted surfaces.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Standard-tier haptics drive android.os.Vibrator / VibratorManager. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!--
+      FOREGROUND_SERVICE for VibrationPlaybackService (widget-tap pattern /
+      rumble playback). shortService on API 34+ needs no special runtime
+      permission and the ~3-minute cap is an acceptable safety bound for a
+      vibration session.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_SHORT_SERVICE" />
+
+    <!--
+      POST_NOTIFICATIONS required on API 33+ for the playback service's
+      foreground notification. Runtime-prompted; the feature works without it.
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+
+        <!--
+          Home-screen vibrate widget — one-tap fires the configured one-shot /
+          pattern via VibrationPlaybackService. exported=true required for the
+          AppWidget host (launcher) to deliver broadcasts.
+        -->
+        <receiver
+            android:name=".widget.VibrateWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_vibrate_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="dev.ranzlappen.gadget.feature.vibration.ACTION_VIBRATE_TAP" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_vibrate_info" />
+        </receiver>
+
+        <!--
+          Home-screen pattern widget — plays a saved VibrationPattern via
+          VibrationPlaybackService.
+        -->
+        <receiver
+            android:name=".widget.PatternWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_pattern_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="dev.ranzlappen.gadget.feature.vibration.ACTION_PATTERN_TAP" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_pattern_info" />
+        </receiver>
+
+        <!--
+          Home-screen monitor widget — renders the latest vibration_amplitude
+          sample as a determinate ProgressBar. Updates pushed by MonitorService
+          via VibrationMonitorWidgetNotifier.
+        -->
+        <receiver
+            android:name=".widget.MonitorWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_vibration_monitor_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="dev.ranzlappen.gadget.feature.vibration.ACTION_MONITOR_TOGGLE" />
+                <action android:name="dev.ranzlappen.gadget.feature.vibration.ACTION_MONITOR_RELOAD" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_monitor_info" />
+        </receiver>
+
+        <!--
+          Home-screen monitor chart widget — renders the windowed
+          vibration_amplitude history as a live sparkline Bitmap.
+        -->
+        <receiver
+            android:name=".widget.MonitorChartWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_vibration_monitor_chart_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="dev.ranzlappen.gadget.feature.vibration.ACTION_CHART_TOGGLE" />
+                <action android:name="dev.ranzlappen.gadget.feature.vibration.ACTION_CHART_RELOAD" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_monitor_chart_info" />
+        </receiver>
+
+        <!--
+          Pin-success callback receiver for AppWidgetManager.requestPinAppWidget.
+          exported=true because the OS dispatches the success PendingIntent
+          from the system process.
+        -->
+        <receiver
+            android:name=".widget.WidgetPinSuccessReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="dev.ranzlappen.gadget.feature.vibration.ACTION_WIDGET_PIN_SUCCESS" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+          Vibration playback foreground service. exported=false — only the
+          widget providers + the in-app screen start it. shortService (API 34+)
+          allows a user-initiated FGS with a 3-minute cap.
+        -->
+        <service
+            android:name=".VibrationPlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="shortService" />
+
+    </application>
+</manifest>
