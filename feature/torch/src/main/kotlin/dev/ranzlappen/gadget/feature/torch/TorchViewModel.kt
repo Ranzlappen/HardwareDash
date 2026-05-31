@@ -75,6 +75,7 @@ class TorchViewModel @Inject constructor(
     private val rootCapabilities: TorchRootCapabilities,
     private val collapseRepo: CollapseStateRepository,
     private val strobeRuntime: StrobeRuntime,
+    private val rootToolsRepo: RootToolsConfigRepository,
 ) : ViewModel() {
 
     /** Live availability of the rooted Torch capabilities (probed once on
@@ -96,6 +97,31 @@ class TorchViewModel @Inject constructor(
     /** Latest slider value the user landed on; written through to
      *  DataStore by [onRateCommit]. */
     private val pendingRateHz = MutableStateFlow<Float?>(null)
+
+    /** Optimistic in-flight edit of the rooted-tool parameters. Overlays the
+     *  persisted [RootToolsConfigRepository] value so sliders move live; cleared
+     *  on [onRootToolsCommit] once the value reaches DataStore. */
+    private val pendingRootTools = MutableStateFlow<TorchRootToolsConfig?>(null)
+
+    /** Derived rooted-tool view-state: the effective config (pending overlay on
+     *  persisted, clamped to the live ceiling) paired with that ceiling. Folded
+     *  as a single source into [state] so the outer combine stays within the
+     *  typed-arity cap. */
+    private val rootToolsState: kotlinx.coroutines.flow.Flow<RootToolsState> = combine(
+        rootToolsRepo.config,
+        pendingRootTools,
+        rootCapabilities.maxBrightnessPercentFlow,
+    ) { persisted, pending, maxBrightness ->
+        RootToolsState(
+            config = (pending ?: persisted).coercedTo(maxBrightness),
+            maxBrightnessPercent = maxBrightness,
+        )
+    }
+
+    private data class RootToolsState(
+        val config: TorchRootToolsConfig,
+        val maxBrightnessPercent: Int,
+    )
 
     /** Live strobe-running signal, owned by [StrobeRuntime] and updated by
      *  the [StrobeService] lifecycle. Folded into the screen state below —
@@ -127,7 +153,8 @@ class TorchViewModel @Inject constructor(
         inputs,
         rootAvailability,
         collapseRepo.expandedStates(TorchSectionId.hoisted),
-    ) { i, root, expanded ->
+        rootToolsState,
+    ) { i, root, expanded, rootTools ->
         TorchScreenState(
             torch = i.torch,
             defaultStrobeRateHz = pendingRateHz.value ?: i.defaultRateHz,
@@ -140,6 +167,8 @@ class TorchViewModel @Inject constructor(
             strobeRunning = i.strobeRunning,
             morseText = i.morseText,
             rootAvailability = root,
+            rootTools = rootTools.config,
+            maxBrightnessPercent = rootTools.maxBrightnessPercent,
             expandedSections = expanded,
         )
     }.stateIn(
@@ -206,6 +235,8 @@ class TorchViewModel @Inject constructor(
             TorchUiEvent.RootDutyStrobe -> onRootDutyCycleStrobe()
             TorchUiEvent.RootMultiLed -> onRootMultiLed()
             TorchUiEvent.RootThermal -> onRootThermalOverride()
+            is TorchUiEvent.RootToolsChange -> onRootToolsChange(event.config)
+            TorchUiEvent.RootToolsCommit -> onRootToolsCommit()
             is TorchUiEvent.SectionToggle -> onSectionToggle(event.id)
         }
     }
@@ -272,26 +303,52 @@ class TorchViewModel @Inject constructor(
     }
 
     // ─── Rooted tools ────────────────────────────────────────────────
-    // One-tap presets for the rooted controls. Each routes through the
-    // rooted implementation's RootSafetyGate (capability + opt-out +
-    // rate-limit); the result is surfaced via [rootToolEvents]. No-ops on
-    // the standard flavor (the seam reports Unsupported and the controls
-    // aren't shown).
+    // Each run uses the user's persisted parameters (TorchRootToolsConfig,
+    // edited via the screen's sliders) and routes through the rooted
+    // implementation's RootSafetyGate (capability + opt-out + rate-limit);
+    // the result is surfaced via [rootToolEvents]. No-ops on the standard
+    // flavor (the seam reports Unsupported and the controls aren't shown).
 
     fun onRootBoostBrightness() = runRootTool {
-        rootCapabilities.boostBrightness(ROOT_BRIGHTNESS_PERCENT)
+        rootCapabilities.boostBrightness(currentRootTools().boostBrightnessPercent)
     }
 
     fun onRootDutyCycleStrobe() = runRootTool {
-        rootCapabilities.dutyCycleStrobe(ROOT_STROBE_HZ, ROOT_STROBE_DUTY_PERCENT, ROOT_STROBE_DURATION_MS)
+        val c = currentRootTools()
+        rootCapabilities.dutyCycleStrobe(c.dutyFrequencyHz, c.dutyPercent, c.dutyDurationMs)
     }
 
     fun onRootMultiLed() = runRootTool {
-        rootCapabilities.multiLedActivate(ROOT_MULTILED_DURATION_MS, includeScreen = false)
+        val c = currentRootTools()
+        rootCapabilities.multiLedActivate(c.multiLedDurationMs, c.multiLedIncludeScreen)
     }
 
     fun onRootThermalOverride() = runRootTool {
-        rootCapabilities.thermalOverrideStrobe(ROOT_STROBE_HZ, ROOT_STROBE_DUTY_PERCENT, ROOT_THERMAL_DURATION_MS)
+        val c = currentRootTools()
+        rootCapabilities.thermalOverrideStrobe(c.thermalFrequencyHz, c.thermalDutyPercent, c.thermalDurationMs)
+    }
+
+    /** The parameters a run should use: the optimistic in-flight edit if the
+     *  user is mid-drag, else the current persisted view-state value. Clamped
+     *  to the live ceiling so a run can never exceed the hardware limit. */
+    private fun currentRootTools(): TorchRootToolsConfig =
+        (pendingRootTools.value ?: state.value.rootTools)
+            .coercedTo(state.value.maxBrightnessPercent)
+
+    /** Slider-drag / toggle handler — keeps the optimistic pending value in
+     *  sync so the card reflects the edit live. Persists nothing. */
+    fun onRootToolsChange(updated: TorchRootToolsConfig) {
+        pendingRootTools.value = updated.coercedTo(state.value.maxBrightnessPercent)
+    }
+
+    /** Slider-release / toggle-flip handler — persists the last optimistic
+     *  value to DataStore and clears the pending shadow. */
+    fun onRootToolsCommit() {
+        val config = pendingRootTools.value ?: return
+        viewModelScope.launch {
+            rootToolsRepo.save(config)
+            pendingRootTools.value = null
+        }
     }
 
     private fun runRootTool(action: suspend () -> TorchRootResult) {
@@ -458,15 +515,5 @@ class TorchViewModel @Inject constructor(
          *  last UI subscriber leaves. 5 s matches the convention
          *  used in `:feature:settings`. */
         const val SubscriptionTimeoutMillis: Long = 5_000L
-
-        // ─── Rooted-tool one-tap presets ─────────────────────────────
-        /** Brightness boost target as a percent of `max_brightness`
-         *  (the rooted impl hard-ceilings at 150 %). */
-        const val ROOT_BRIGHTNESS_PERCENT: Int = 150
-        const val ROOT_STROBE_HZ: Int = 30
-        const val ROOT_STROBE_DUTY_PERCENT: Int = 20
-        const val ROOT_STROBE_DURATION_MS: Long = 5_000L
-        const val ROOT_MULTILED_DURATION_MS: Long = 3_000L
-        const val ROOT_THERMAL_DURATION_MS: Long = 5_000L
     }
 }

@@ -130,10 +130,23 @@
     <!-- Root tools card (rooted app version only) -->
     <string name="torch_root_tools_title">Root tools</string>
     <string name="torch_root_tools_subtitle">Privileged flashlight controls. Each routes through the root safety gate (rate-limited; can be turned off in settings).</string>
-    <string name="torch_root_action_brightness">Boost brightness</string>
-    <string name="torch_root_action_strobe">Duty-cycle strobe</string>
-    <string name="torch_root_action_multiled">Multi-LED burst</string>
-    <string name="torch_root_action_thermal">Thermal-override strobe</string>
+    <string name="torch_root_action_brightness">Run boost</string>
+    <string name="torch_root_action_strobe">Run strobe</string>
+    <string name="torch_root_action_multiled">Run burst</string>
+    <string name="torch_root_action_thermal">Run thermal strobe</string>
+    <!-- Rooted-tool section headers -->
+    <string name="torch_root_section_brightness">Boost brightness</string>
+    <string name="torch_root_section_strobe">Duty-cycle strobe</string>
+    <string name="torch_root_section_multiled">Multi-LED burst</string>
+    <string name="torch_root_section_thermal">Thermal-override strobe</string>
+    <!-- Rooted-tool slider / control labels -->
+    <string name="torch_root_brightness_label">Brightness</string>
+    <string name="torch_root_freq_label">Frequency</string>
+    <string name="torch_root_duty_label">Duty</string>
+    <string name="torch_root_duration_label">Duration</string>
+    <string name="torch_root_include_screen_label">Include screen</string>
+    <string name="torch_root_thermal_ceiling_note">Thermal override is capped at 45 seconds.</string>
+    <string name="torch_root_no_boost_headroom">No brightness headroom on this device — no boostable LED node was found.</string>
     <string name="torch_root_result_ok">Done.</string>
     <string name="torch_root_result_unsupported">Not available on this device.</string>
     <string name="torch_root_result_opted_out">This feature is turned off in settings.</string>

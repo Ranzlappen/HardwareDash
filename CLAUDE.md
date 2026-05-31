@@ -896,14 +896,30 @@ contract (`displayName`, `removed`, `schemaVersion`, `appearance`),
   legacy collision-prone `token.hashCode().absoluteValue`) +
   `BaseWidgetPinSuccessReceiver<T>` abstract base. Feature receivers
   subclass + plug in the action / extra-key / EntryPoint accessors.
+  Also exposes `claimSolePending(predicate)` — the **broken-callback
+  recovery seam**: `requestPinAppWidget`'s success `PendingIntent` is
+  optional and silently never fires on some OEM launchers, so a first-pin
+  config would otherwise be stranded in the bridge while the placed widget
+  self-heals a blank default (the bug where a strobe widget lost its Morse
+  setting until manually re-edited). It pops the **sole** unclaimed entry
+  matching the predicate — deliberately **defers (returns null) when 2+
+  match**, since without the callback's token a specific `appWidgetId`
+  can't be correlated to a specific pending entry and guessing would
+  **swap** two same-type widgets' configs. Idempotent against `claim`
+  (both delete under the same mutex).
 - **`provider/`** — `BaseGadgetWidgetProvider<T : WidgetKitConfig>`
   capturing the `onUpdate` / `onDeleted` / `renderAll` / post-tap chain
   every feature provider used to copy. Feature subclasses only own the
   Hilt EntryPoint shape + `buildRemoteViews` + the synchronous
-  feature-specific part of `onReceive`. Monitor / chart providers do
-  **not** follow this pattern (they read a shared metric config, not a
-  per-`appWidgetId` `WidgetKitConfig`) and stay as standalone
-  `AppWidgetProvider`s.
+  feature-specific part of `onReceive`. `renderAll`'s missing-config
+  self-heal first calls the overridable `reconcilePendingConfig(context)`
+  hook (default null) — torch's providers override it to
+  `claimSolePending { it.type == … }` so a freshly-pinned widget recovers
+  its real config even when the OS callback never fires; the rescued config
+  is written with `saveIfAbsent` so a racing authoritative callback `save`
+  still wins. Monitor / chart providers do **not** follow this pattern
+  (they read a shared metric config, not a per-`appWidgetId`
+  `WidgetKitConfig`) and stay as standalone `AppWidgetProvider`s.
 - **`boot/`** — `BootCompletedReceiver` + `BootRearmHandler` `fun
   interface`. Features bind a `BootRearmHandler` into a
   `Map<FeatureId, BootRearmHandler>` Hilt multibinding; the kit
@@ -1083,6 +1099,22 @@ torch is the hardened reference for every future migration:
   `app/src/standard` into a new `:feature:torch-standard` module (mirror of
   `:feature:torch-rooted`), bound by `StandardTorchModule` and pulled in via
   `standardImplementation`. Neither flavor's Torch impls live in `:app` now.
+- **Rooted-tool parameter controls** — the four rooted tools used to fire
+  hardcoded one-tap presets (no way to tune them — the settings were
+  "nowhere to be found"). They now read a persisted `TorchRootToolsConfig`
+  (`RootToolsConfigRepository`, single-record DataStore mirroring
+  `MonitorConfigRepository`) edited via sliders + an include-screen toggle in
+  `RootToolsCard`, committed on slider release (the `pendingRateHz`
+  optimistic-commit pattern). The boost-brightness slider's max is the **live**
+  `maxBrightnessPercentFlow` ceiling (hidden entirely when the device has no
+  boost headroom — a 100..100 range would NaN the M3 `Slider`), and the
+  duration sliders render seconds while storing ms (with a matching
+  `valueParser` so the editable field round-trips). `coercedTo(ceiling)` clamps
+  every run to the live hardware limit + the 45 s thermal ceiling.
+- **First-pin config reliability** — see the `:core:widgetkit` `pin/` +
+  `provider/` notes above (`claimSolePending` + `reconcilePendingConfig`):
+  a strobe widget pinned with Morse on a flaky-callback launcher now reliably
+  plays Morse on the first tap instead of only after a manual re-edit.
 
 ### Preview matrix policy
 

@@ -38,10 +38,19 @@ sealed interface TorchUiEvent {
     data class EditWidget(val widget: SavedTorchWidget) : TorchUiEvent
     data class DeleteWidget(val widget: SavedTorchWidget) : TorchUiEvent
 
+    /** Run a rooted tool with the currently-saved parameters. */
     data object RootBoostBrightness : TorchUiEvent
     data object RootDutyStrobe : TorchUiEvent
     data object RootMultiLed : TorchUiEvent
     data object RootThermal : TorchUiEvent
+
+    /** Live edit of the rooted-tool parameters (slider drag / toggle).
+     *  Optimistic — the persisted value follows on [RootToolsCommit]. */
+    data class RootToolsChange(val config: TorchRootToolsConfig) : TorchUiEvent
+
+    /** Persist the last-edited rooted-tool parameters (slider release /
+     *  toggle flip). */
+    data object RootToolsCommit : TorchUiEvent
 
     data class SectionToggle(val id: String) : TorchUiEvent
 }
