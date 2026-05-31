@@ -15,6 +15,7 @@ import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
+import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.provider.BaseGadgetWidgetProvider
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
@@ -70,6 +71,15 @@ class FlashlightWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
 
     override suspend fun activeState(context: Context): Boolean =
         entry(context).torchController().state.value.isOn
+
+    // Rescue a freshly-pinned flashlight widget whose OS success callback
+    // never landed: pull the sole unclaimed pending Flashlight config (filtered
+    // by type so it can't grab a pending Strobe; sole-match so two flashlights
+    // pinned at once can't have their configs swapped). Keeps a first-pin
+    // appearance (icon / background / tap feedback) reliable on the first
+    // render rather than self-healing a blank default.
+    override suspend fun reconcilePendingConfig(context: Context): TorchWidgetConfig? =
+        entry(context).pendingConfigs().claimSolePending { it.type == WidgetType.Flashlight }
 
     override fun onReceive(context: Context, intent: Intent) {
         // Start watching for OS-level torch changes (QS tile / other apps) so a
@@ -174,6 +184,7 @@ class FlashlightWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
         fun widgetRepository(): WidgetConfigStore<TorchWidgetConfig>
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
+        fun pendingConfigs(): PendingWidgetConfigs<TorchWidgetConfig>
     }
 
     companion object {
