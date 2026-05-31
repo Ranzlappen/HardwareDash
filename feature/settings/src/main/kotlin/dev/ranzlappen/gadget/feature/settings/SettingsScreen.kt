@@ -17,6 +17,12 @@ import dev.ranzlappen.gadget.feature.settings.components.AppearanceCard
  *   2. **Appearance** — dark-theme mode + dynamic colour.
  *   3. **Accessibility** — reduced motion override, reduce
  *      transparency, large text override.
+ *   4. **Rooted feature toggles** ([rootFeatureToggles] slot) — the
+ *      per-feature opt-in switches + safety-mode master switch. Supplied
+ *      by `:app` (it depends on the legacy `RootFeaturesEntryPoint` +
+ *      22 controllers, which a leaf feature module can't see) and renders
+ *      nothing on the standard flavor / when root isn't granted. Defaults
+ *      to an empty slot so the screen + its previews stay Hilt-free.
  *
  * State is hoisted to [SettingsViewModel]. Each card receives
  * the current [UserPreferences] snapshot + per-field callbacks.
@@ -31,6 +37,7 @@ import dev.ranzlappen.gadget.feature.settings.components.AppearanceCard
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
+    rootFeatureToggles: @Composable () -> Unit = {},
 ) {
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
     ModuleScreenScaffold(
@@ -49,6 +56,9 @@ fun SettingsScreen(
                 onReducedTransparencyChange = viewModel::setReducedTransparency,
                 onLargeTextOverrideChange = viewModel::setLargeTextOverride,
             )
+            // Rooted-only — empty on standard / no-root (the slot's own
+            // composable returns early). Supplied by :app.
+            rootFeatureToggles()
         },
     )
 }

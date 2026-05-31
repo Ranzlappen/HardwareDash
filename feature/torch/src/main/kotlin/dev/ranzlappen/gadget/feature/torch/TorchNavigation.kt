@@ -12,10 +12,15 @@ import dev.ranzlappen.gadget.core.navigation.GadgetDestination
  * ```kotlin
  * GadgetApp {
  *     dashboardScreen(onNavigate = …)
- *     settingsScreen()
- *     torchScreen()
+ *     settingsScreen(rootFeatureToggles = { RootedFeatureTogglesCard() })
+ *     torchScreen(onNavigateToSettings = { navController.navigateTopLevel(Settings) })
  * }
  * ```
+ *
+ * [onNavigateToSettings] lets the rooted Root-tools card deep-link to the
+ * Settings screen where a tool's opt-in lives (the "Enable" action on the
+ * "turned off in settings" snackbar). The default no-op keeps the route
+ * usable without navigation wiring (previews / tests).
  *
  * Torch is a module entry in [GadgetDestination.modules], so the nav
  * rail renders its icon in the scrollable module region and the route
@@ -25,8 +30,10 @@ import dev.ranzlappen.gadget.core.navigation.GadgetDestination
  *   directly).
  * - Home-screen widget (doesn't go through this route either).
  */
-fun NavGraphBuilder.torchScreen() {
+fun NavGraphBuilder.torchScreen(
+    onNavigateToSettings: () -> Unit = {},
+) {
     composable(route = GadgetDestination.Torch.route) {
-        TorchScreen()
+        TorchScreen(onNavigateToSettings = onNavigateToSettings)
     }
 }
