@@ -26,6 +26,11 @@ data class TorchScreenState(
     val strobeRunning: Boolean = false,
     val morseText: String = "",
     val rootAvailability: TorchRootAvailability = TorchRootAvailability.Unavailable,
+    /** User-tuned parameters for the rooted tools (sliders + toggle). */
+    val rootTools: TorchRootToolsConfig = TorchRootToolsConfig(),
+    /** Live boost-brightness ceiling driving the brightness slider's max:
+     *  100 stock, up to 150 on rooted + LED node found. */
+    val maxBrightnessPercent: Int = TorchRootToolsConfig.MIN_BRIGHTNESS_PERCENT,
     /** Persisted expanded/collapsed state per [TorchSectionId]; missing =
      *  expanded. */
     val expandedSections: Map<String, Boolean> = emptyMap(),

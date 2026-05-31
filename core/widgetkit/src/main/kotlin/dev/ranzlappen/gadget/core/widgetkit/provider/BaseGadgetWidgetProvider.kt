@@ -83,6 +83,26 @@ abstract class BaseGadgetWidgetProvider<T : WidgetKitConfig> : AppWidgetProvider
      *  strobeRuntime.running.value (strobe). */
     protected abstract suspend fun activeState(context: Context): Boolean
 
+    /**
+     * Rescue a brand-new `appWidgetId` that has no persisted config yet by
+     * consuming the sole unclaimed pending config for this provider type (see
+     * [dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs.claimSolePending]).
+     *
+     * The default returns `null` — a feature opts in by overriding and
+     * delegating to its [PendingWidgetConfigs] with a type predicate. When
+     * non-`null`, [renderAll] persists the rescued config via
+     * `saveIfAbsent` (never `save`) so a racing — but slower — authoritative
+     * pin-success callback `save` still wins the final value.
+     *
+     * Why this exists: `requestPinAppWidget`'s success callback is optional
+     * and unreliable on some OEM launchers; without this, a first-pin whose
+     * callback never fires would strand the user on a self-healed default
+     * (e.g. a strobe widget losing its Morse setting until manually
+     * re-edited). The next `onUpdate` the OS always fires for a newly-placed
+     * widget reconciles the real config here instead.
+     */
+    protected open suspend fun reconcilePendingConfig(context: Context): T? = null
+
     /** Build the feature-specific [RemoteViews] for one widget instance.
      *  Should call [WidgetAppearanceRenderer.apply] for the background /
      *  icon paint, attach the tap PendingIntent when
@@ -126,8 +146,16 @@ abstract class BaseGadgetWidgetProvider<T : WidgetKitConfig> : AppWidgetProvider
      * Render every [appWidgetIds] instance from its persisted config.
      * Reads via [WidgetConfigStore.getAll] (not the hot `all.value`
      * cache) so a cold process — empty cache — still paints the saved
-     * appearance instead of self-healing a default over it. Self-heal
-     * only fires when the config is genuinely absent.
+     * appearance instead of self-healing a default over it.
+     *
+     * When a config is genuinely absent (a brand-new `appWidgetId` whose
+     * pin-success callback hasn't landed — or never will on a flaky
+     * launcher), [reconcilePendingConfig] gets first refusal to rescue the
+     * user's real pre-pin config; only if that misses do we self-heal a
+     * [defaultConfig]. Either fallback is written with `saveIfAbsent` so a
+     * concurrent authoritative pin-success `save` always wins; we then
+     * render the freshly-read value so the painted RemoteViews reflect that
+     * winner rather than a stale local copy.
      */
     protected suspend fun renderAll(
         context: Context,
@@ -139,13 +167,23 @@ abstract class BaseGadgetWidgetProvider<T : WidgetKitConfig> : AppWidgetProvider
         val active = activeState(context)
         appWidgetIds.forEach { id ->
             val config = configs[id] ?: run {
-                val default = defaultConfig(context)
-                Log.w(logTag, "self-heal id=$id")
-                // saveIfAbsent (not save) so a concurrent pin-success
-                // write of the real config is never clobbered by this
-                // default. See WidgetConfigStore.saveIfAbsent.
-                store.saveIfAbsent(id, default)
-                default
+                // Prefer the user's stranded pre-pin config over a blank
+                // default. reconcilePendingConfig is null unless the feature
+                // opts in (see its KDoc).
+                val rescued = reconcilePendingConfig(context)
+                val fallback = rescued ?: defaultConfig(context)
+                if (rescued != null) {
+                    Log.d(logTag, "reconcile rescued id=$id")
+                } else {
+                    Log.w(logTag, "self-heal id=$id")
+                }
+                // saveIfAbsent (not save) so a concurrent pin-success write
+                // of the real config is never clobbered. See
+                // WidgetConfigStore.saveIfAbsent. Re-read so we paint the
+                // authoritative value if that callback landed between our
+                // miss above and this write.
+                store.saveIfAbsent(id, fallback)
+                store.getFresh(id) ?: fallback
             }
             appWidgetManager.updateAppWidget(
                 id,

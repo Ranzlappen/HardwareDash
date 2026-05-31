@@ -97,6 +97,10 @@ fun TorchScreenContent(
             // rooted app version reports a usable root shell.
             if (state.rootAvailability.rootReady) {
                 RootToolsCard(
+                    config = state.rootTools,
+                    maxBrightnessPercent = state.maxBrightnessPercent,
+                    onConfigChange = { onEvent(TorchUiEvent.RootToolsChange(it)) },
+                    onConfigCommit = { onEvent(TorchUiEvent.RootToolsCommit) },
                     onBoostBrightness = { onEvent(TorchUiEvent.RootBoostBrightness) },
                     onDutyStrobe = { onEvent(TorchUiEvent.RootDutyStrobe) },
                     onMultiLed = { onEvent(TorchUiEvent.RootMultiLed) },

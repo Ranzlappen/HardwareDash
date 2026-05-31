@@ -16,6 +16,7 @@ import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
+import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.provider.BaseGadgetWidgetProvider
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
@@ -74,6 +75,14 @@ class StrobeWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
 
     override suspend fun activeState(context: Context): Boolean =
         entry(context).strobeRuntime().running.value
+
+    // Rescue a freshly-pinned strobe widget whose OS success callback never
+    // landed: pull the sole unclaimed pending Strobe config (filtered by type
+    // so it can't grab a pending Flashlight; sole-match so two strobes pinned
+    // at once can't have their configs swapped). This is what makes a
+    // first-pin Morse setting reliably apply on the very first tap.
+    override suspend fun reconcilePendingConfig(context: Context): TorchWidgetConfig? =
+        entry(context).pendingConfigs().claimSolePending { it.type == WidgetType.Strobe }
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
@@ -194,6 +203,7 @@ class StrobeWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
         fun strobeRuntime(): StrobeRuntime
+        fun pendingConfigs(): PendingWidgetConfigs<TorchWidgetConfig>
     }
 
     companion object {
