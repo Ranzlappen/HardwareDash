@@ -43,7 +43,7 @@ class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
     override val providerClass: Class<out AppWidgetProvider> = VibrateWidgetProvider::class.java
 
     override fun configStore(context: Context): WidgetConfigStore<VibrationWidgetConfig> =
-        entry(context).widgetRepository()
+        entry(context).vibrationWidgetRepository()
 
     override fun appearanceRenderer(context: Context): WidgetAppearanceRenderer =
         entry(context).appearanceRenderer()
@@ -61,7 +61,7 @@ class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
     override suspend fun activeState(context: Context): Boolean = false
 
     override suspend fun reconcilePendingConfig(context: Context): VibrationWidgetConfig? =
-        entry(context).pendingConfigs().claimSolePending { it.type == WidgetType.Vibrate }
+        entry(context).vibrationPendingConfigs().claimSolePending { it.type == WidgetType.Vibrate }
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
@@ -134,10 +134,10 @@ class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface VibrateWidgetEntryPoint {
-        fun widgetRepository(): WidgetConfigStore<VibrationWidgetConfig>
+        fun vibrationWidgetRepository(): WidgetConfigStore<VibrationWidgetConfig>
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
-        fun pendingConfigs(): PendingWidgetConfigs<VibrationWidgetConfig>
+        fun vibrationPendingConfigs(): PendingWidgetConfigs<VibrationWidgetConfig>
     }
 
     companion object {
