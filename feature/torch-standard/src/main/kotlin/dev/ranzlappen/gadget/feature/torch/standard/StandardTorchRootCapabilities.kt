@@ -21,12 +21,12 @@ import javax.inject.Singleton
  * [commandedBrightnessPercent] stays a constant 0 (the metric falls back to
  * its Camera2 on/off reading).
  *
- * **Namespace:** this no-op lives under `dev.ranzlappen.gadget.feature.torch
- * .standard` (not the legacy `com.gadget.torch`) so the blueprint's flavor
- * seam matches the modular package convention. The root-safety framework
- * extracted to `:core:root` in refactor-2026 D1; the follow-up E2 moves this
- * no-op into `:feature:torch-rooted` (and the rooted impl alongside it). It
- * still physically resides in `app/src/standard/` until that lands.
+ * **Namespace:** this no-op lives in `:feature:torch-standard` under
+ * `dev.ranzlappen.gadget.feature.torch.standard`, wired into the standard
+ * variant via `standardImplementation` and bound by `StandardTorchModule`. It
+ * mirrors `:feature:torch-rooted`'s `RootedTorchRootCapabilities`, so neither
+ * flavor's Torch impls live in `:app`. The root-safety framework it would
+ * otherwise lean on lives in `:core:root`.
  */
 @Singleton
 class StandardTorchRootCapabilities @Inject constructor() : TorchRootCapabilities {
