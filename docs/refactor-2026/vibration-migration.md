@@ -1,5 +1,31 @@
 # Vibration migration plan (`:feature:vibration`)
 
+> **Status: SHIPPED — single comprehensive PR, commit-stacked.** Executed as
+> one PR mirroring torch 1:1, not the phased Follow-ups this doc originally
+> proposed. Two decisions superseded the original plan:
+> (1) the legacy `:app` vibration code is **left inert** (not renamed to
+> `Legacy*` / deleted) — the new modular `dev.ranzlappen.gadget.feature.vibration.*`
+> lives alongside it with distinct FQNs, so there is **no Hilt entry-point
+> collision** and no rename was needed (verified: legacy
+> `RootFeaturesEntryPoint.vibrationController()` returns the legacy FQN; the
+> modular interface is separate). Legacy retirement is a tracked follow-up
+> after on-device verification.
+> (2) Full scope: 4-widget parity + a full freehand draw-canvas pattern builder.
+>
+> What shipped: `:feature:vibration` (+ `-rooted` / `-standard`) with the
+> standard `VibrationController` (`VibratorManager`/`VibrationEffect`), the
+> `VibrationRuntime` modelled-decay **poll** signal (the non-pollable-actuator
+> answer to the `MetricSource` contract), `VibrationRootCapabilities` (the
+> legacy rooted controller ported verbatim, gated by `RootSafetyGate` + the 4
+> `RootFeatureKey.Vibration*` with their hard caps + `NonCancellable` cleanup),
+> `VibrationMetricSource`, both monitor containers, `VibrationActionHandler`,
+> the 4 widgets (vibrate / pattern / monitor / chart) with the
+> `claimSolePending` first-pin fix, the full screen + pattern-builder canvas,
+> and the test suite. The original per-row checklist below is retained as the
+> historical sizing reference.
+
+---
+
 > Successor to the torch blueprint. The torch port (refactor-2026 Phase 2 /
 > Batches 1–E) is the reference; this doc describes what the equivalent
 > vibration migration needs to touch, sized against the blueprint pieces

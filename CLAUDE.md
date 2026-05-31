@@ -983,7 +983,30 @@ interface ActionHandler {
 > **automation + monitoring** tool, the modular successor to the legacy
 > `Link` module — can discover and drive the module with **zero central
 > hardcoding**. Treat this as the acceptance checklist for a new feature
-> module. Torch is the worked example of every item.
+> module. Torch is the worked example of every item; **`:feature:vibration` is
+> the validated second consumer** (same contract, a non-pollable actuator
+> signal + a 4-capability rooted tier + a freehand draw-canvas pattern builder),
+> so torch + vibration are the canonical blueprint pair. New seam additions
+> should keep both green.
+
+### Vibration migration notes (second blueprint consumer)
+
+`:feature:vibration` (+ `-rooted` / `-standard`) mirrors torch 1:1. Two
+worth-knowing specifics:
+
+- **Modelled poll signal.** Vibration is fire-and-forget — the OS exposes no
+  "currently vibrating at X%" query. `VibrationRuntime` (`@Singleton`,
+  mirror of `StrobeRuntime`) holds the commanded amplitude + a replace-on-new
+  decay coroutine that zeroes it after the command duration;
+  `VibrationMetricSource` polls it (`stream()`=null) → a filled plateau that
+  decays to 0. This is the reference answer for the next non-pollable
+  (sensor) signals.
+- **Legacy left inert (no rename needed).** The legacy `:app`
+  `com.gadget.vibration.*` controller/service/widget + the
+  `RootFeaturesEntryPoint.vibrationController()` getter stay as-is — distinct
+  FQNs from the modular `dev.ranzlappen.gadget.feature.vibration.*`, so (unlike
+  torch's sysfs-controller case) **no entry-point getter rename was required**.
+  Retirement is a follow-up after on-device verification.
 
 1. **Design system** — every token from `LocalGadgetTheme.current`; no
    raw `dp` at call sites (per-file `Defaults` for fixed sizes); modifier
