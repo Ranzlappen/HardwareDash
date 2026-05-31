@@ -23,10 +23,10 @@ class WidgetPinSuccessReceiver : BaseWidgetPinSuccessReceiver<VibrationWidgetCon
     override val logTag: String = VibrationPinLog.TAG
 
     override fun pendingConfigs(context: Context): PendingWidgetConfigs<VibrationWidgetConfig> =
-        entry(context).pendingConfigs()
+        entry(context).vibrationPendingConfigs()
 
     override fun configStore(context: Context): WidgetConfigStore<VibrationWidgetConfig> =
-        entry(context).configStore()
+        entry(context).vibrationConfigStore()
 
     override suspend fun afterSave(context: Context, appWidgetId: Int, config: VibrationWidgetConfig) {
         broadcastVibrationWidgetUpdate(context, config.type, appWidgetId)
@@ -38,7 +38,7 @@ class WidgetPinSuccessReceiver : BaseWidgetPinSuccessReceiver<VibrationWidgetCon
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface VibrationPinEntryPoint {
-        fun pendingConfigs(): PendingWidgetConfigs<VibrationWidgetConfig>
-        fun configStore(): WidgetConfigStore<VibrationWidgetConfig>
+        fun vibrationPendingConfigs(): PendingWidgetConfigs<VibrationWidgetConfig>
+        fun vibrationConfigStore(): WidgetConfigStore<VibrationWidgetConfig>
     }
 }
