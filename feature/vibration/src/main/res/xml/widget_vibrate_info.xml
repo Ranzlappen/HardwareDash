@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AppWidget metadata for the vibrate widget — a 1×1 tap target, no periodic
+     refresh (updatePeriodMillis=0). See torch's widget_flashlight_info.xml. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_vibrate"
+    android:previewLayout="@layout/widget_vibrate"
+    android:previewImage="@drawable/ic_vibration_on"
+    android:description="@string/widget_vibrate_description"
+    android:widgetCategory="home_screen"
+    android:resizeMode="none" />

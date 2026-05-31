@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AppWidget metadata for the pattern widget — a 1×1 tap target. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_pattern"
+    android:previewLayout="@layout/widget_pattern"
+    android:previewImage="@drawable/ic_vibration_pattern"
+    android:description="@string/widget_pattern_description"
+    android:widgetCategory="home_screen"
+    android:resizeMode="none" />

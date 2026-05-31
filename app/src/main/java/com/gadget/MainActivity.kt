@@ -43,6 +43,7 @@ import dev.ranzlappen.gadget.core.navigation.placeholderScreen
 import dev.ranzlappen.gadget.feature.dashboard.dashboardScreen
 import dev.ranzlappen.gadget.feature.settings.settingsScreen
 import dev.ranzlappen.gadget.feature.torch.torchScreen
+import dev.ranzlappen.gadget.feature.vibration.vibrationScreen
 import org.osmdroid.config.Configuration
 import java.io.File
 import javax.inject.Inject
@@ -121,6 +122,11 @@ class MainActivity : ComponentActivity() {
                         torchScreen(
                             // Deep-link the "turned off in settings" snackbar
                             // action to the Settings screen.
+                            onNavigateToSettings = {
+                                navController.navigateTopLevel(GadgetDestination.Settings)
+                            },
+                        )
+                        vibrationScreen(
                             onNavigateToSettings = {
                                 navController.navigateTopLevel(GadgetDestination.Settings)
                             },

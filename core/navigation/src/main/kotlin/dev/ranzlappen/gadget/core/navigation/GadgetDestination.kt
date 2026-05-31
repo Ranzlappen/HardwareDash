@@ -7,12 +7,14 @@ import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -100,6 +102,19 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.FlashlightOn
     }
 
+    /**
+     * Vibration / haptics feature module — the second real module after
+     * [Torch], a first-class entry in the scrollable [modules] region. Ships
+     * the full module blueprint (ModuleInfo + monitoring + automation + a
+     * 4-widget surface + a rooted extreme-tier).
+     */
+    data object Vibration : GadgetDestination {
+        override val route = "vibration"
+        override val label = "Vibration"
+        override val iconFilled = Icons.Filled.Vibration
+        override val iconOutlined = Icons.Outlined.Vibration
+    }
+
     companion object {
         /**
          * Destinations pinned to the **top** of the rail, above the
@@ -120,7 +135,7 @@ sealed interface GadgetDestination {
          * migrated modules here.
          */
         val modules: List<GadgetDestination> = listOf(
-            Torch, Sensors, Actuators, Automation,
+            Torch, Vibration, Sensors, Actuators, Automation,
         )
 
         /**

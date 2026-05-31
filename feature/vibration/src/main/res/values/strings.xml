@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Screen -->
+    <string name="vibration_screen_title">Vibration</string>
+
+    <!-- Controls card -->
+    <string name="vibration_controls_title">Haptics</string>
+    <string name="vibration_controls_no_motor">This device has no vibration motor.</string>
+    <string name="vibration_controls_predefined">Predefined effects</string>
+    <string name="vibration_effect_click">Click</string>
+    <string name="vibration_effect_tick">Tick</string>
+    <string name="vibration_effect_double_click">Double-click</string>
+    <string name="vibration_effect_heavy_click">Heavy click</string>
+    <string name="vibration_controls_amplitude">Amplitude</string>
+    <string name="vibration_controls_no_amplitude">This device can\'t vary amplitude — effects play at full strength.</string>
+    <string name="vibration_controls_duration">Duration</string>
+    <string name="vibration_controls_play">Play</string>
+    <string name="vibration_controls_stop">Stop</string>
+
+    <!-- Pattern builder card -->
+    <string name="vibration_builder_title">Pattern builder</string>
+    <string name="vibration_builder_instructions">Draw with your finger: left→right is time (0–2 s), up is intensity (0–100%).</string>
+    <string name="vibration_builder_loop">Loop pattern</string>
+    <string name="vibration_builder_play">Play</string>
+    <string name="vibration_builder_clear">Clear</string>
+    <string name="vibration_builder_name">Pattern name</string>
+    <string name="vibration_builder_save">Save pattern</string>
+
+    <!-- Saved patterns card -->
+    <string name="vibration_patterns_title">Saved patterns</string>
+    <string name="vibration_patterns_empty_title">No saved patterns yet</string>
+    <string name="vibration_patterns_empty_subtitle">Draw a pattern above and save it to replay later.</string>
+    <string name="vibration_patterns_duration">%1$d ms</string>
+    <string name="vibration_patterns_play">Play pattern</string>
+    <string name="vibration_patterns_delete">Delete pattern</string>
+
+    <!-- Widgets card -->
+    <string name="vibration_section_widgets_title">Your widgets</string>
+    <string name="vibration_widget_add_vibrate">Add vibrate widget</string>
+    <string name="vibration_widget_add_pattern">Add pattern widget</string>
+    <string name="vibration_widget_quick_pin_vibrate">Pin vibrate widget with default settings</string>
+    <string name="vibration_widget_list_empty_title">No widgets yet</string>
+    <string name="vibration_widget_list_empty_subtitle">Add a home-screen widget to vibrate with one tap.</string>
+    <string name="vibration_widget_list_action_edit">Edit widget</string>
+    <string name="vibration_widget_list_action_delete">Delete widget</string>
+
+    <!-- Widget config sheet -->
+    <string name="vibration_widget_config_title_new">New widget</string>
+    <string name="vibration_widget_config_title_edit">Edit widget</string>
+    <string name="vibration_widget_config_pattern_note">This widget plays your first saved pattern. Save a pattern in the builder above to choose one.</string>
+    <string name="vibration_widget_config_cancel">Cancel</string>
+    <string name="vibration_widget_config_save_new">Add widget</string>
+    <string name="vibration_widget_config_save_existing">Save</string>
+
+    <!-- Widget labels / descriptions -->
+    <string name="widget_vibrate_label">Vibrate</string>
+    <string name="widget_pattern_label">Vibration pattern</string>
+    <string name="widget_vibration_monitor_label">Vibration monitor</string>
+    <string name="widget_vibration_monitor_chart_label">Vibration chart</string>
+    <string name="vibration_widget_default_name_vibrate">Vibrate</string>
+    <string name="vibration_widget_default_name_pattern">Pattern</string>
+    <string name="vibration_widget_description">One-tap vibration buzz.</string>
+    <string name="vibration_widget_pin_unsupported">This launcher can\'t pin widgets from inside the app.</string>
+    <string name="vibration_widget_removed_hint">Removed from the app. Drag the widget off your home screen to delete it fully.</string>
+    <string name="vibration_widget_cap_reached">You\'ve reached the limit of %1$d widgets of this kind.</string>
+    <string name="widget_vibrate_description">Tap to vibrate.</string>
+    <string name="widget_pattern_description">Tap to play a saved vibration pattern.</string>
+    <string name="widget_vibration_monitor_description">Live vibration amplitude as a bar.</string>
+    <string name="widget_vibration_monitor_chart_description">Live vibration amplitude as a chart.</string>
+
+    <!-- Shared monitor-widget strings (mirror torch's widget_monitor_* keys) -->
+    <string name="widget_monitor_label">Vibration</string>
+    <string name="widget_monitor_value">%1$d%%</string>
+    <string name="widget_monitor_toggle_on">Monitoring on</string>
+    <string name="widget_monitor_toggle_off">Monitoring off</string>
+    <string name="widget_monitor_reload">Reload</string>
+    <string name="widget_monitor_chart_label">Vibration</string>
+    <string name="widget_monitor_chart_empty">Collecting…</string>
+
+    <!-- Widget feedback channel -->
+    <string name="vibration_widget_feedback_channel_name">Vibration widget feedback</string>
+    <string name="vibration_widget_feedback_channel_description">Toast / notification confirmations when a vibration widget is tapped.</string>
+
+    <!-- Playback service -->
+    <string name="vibration_notification_channel_name">Vibration playback</string>
+    <string name="vibration_notification_title">Vibration active</string>
+    <string name="vibration_notification_text">Playing a vibration pattern.</string>
+    <string name="vibration_notification_stop">Stop</string>
+
+    <!-- Monitoring -->
+    <string name="vibration_monitor_title">Amplitude history</string>
+    <string name="vibration_live_monitor_title">Live amplitude</string>
+    <string name="vibration_monitor_metric_name">Vibration amplitude</string>
+
+    <!-- Module info: permissions -->
+    <string name="vibration_module_perm_vibrate_label">Vibrate</string>
+    <string name="vibration_module_perm_vibrate_rationale">Lets the app drive the vibration motor. Granted automatically at install.</string>
+    <string name="vibration_module_compat_note_effects">Predefined haptic effects need Android 10 (API 29) or newer.</string>
+    <string name="vibration_module_compat_note_manager">Per-actuator control + richer effects use VibratorManager on Android 12 (API 31) and newer.</string>
+
+    <!-- Module info: capabilities -->
+    <string name="vibration_cap_no_motor">No vibration motor on this device.</string>
+    <string name="vibration_cap_needs_root">Requires the rooted app version.</string>
+    <string name="vibration_cap_basic_name">Basic vibrate</string>
+    <string name="vibration_cap_basic_detail">One-shot buzz + predefined effects.</string>
+    <string name="vibration_cap_basic_ok">Available.</string>
+    <string name="vibration_cap_amplitude_name">Amplitude control</string>
+    <string name="vibration_cap_amplitude_detail">Vary the buzz strength.</string>
+    <string name="vibration_cap_amplitude_ok">Supported.</string>
+    <string name="vibration_cap_amplitude_none">This device plays at fixed strength.</string>
+    <string name="vibration_cap_patterns_name">Pattern playback</string>
+    <string name="vibration_cap_patterns_detail">Draw + play custom waveforms.</string>
+    <string name="vibration_cap_patterns_ok">Available.</string>
+    <string name="vibration_cap_root_amplitude_name">Extreme amplitude (rooted)</string>
+    <string name="vibration_cap_root_amplitude_detail">Direct PWM over-drive of the motor.</string>
+    <string name="vibration_cap_root_pwm_name">Direct PWM (rooted)</string>
+    <string name="vibration_cap_root_pwm_detail">Arbitrary micro-pulse patterns.</string>
+    <string name="vibration_cap_root_dual_name">Dual actuator (rooted)</string>
+    <string name="vibration_cap_root_dual_detail">Phased LRA + ERM drive.</string>
+    <string name="vibration_cap_root_rumble_name">Sustained rumble (rooted)</string>
+    <string name="vibration_cap_root_rumble_detail">Long rumble with battery + thermal guards.</string>
+    <string name="vibration_cap_root_ready">Available on this rooted device.</string>
+    <string name="vibration_cap_root_no_dual">Single actuator — dual-motor drive unavailable on this device.</string>
+    <string name="vibration_cap_root_rumble_caveat">Aborts early on battery-drain / motor-temp breach.</string>
+
+    <!-- Root tools card -->
+    <string name="vibration_root_tools_title">Root tools</string>
+    <string name="vibration_root_tools_subtitle">Privileged motor control, rate-limited by the root safety gate. Each tool ships OFF — enable it (and turn off Safety mode) in Settings → Rooted feature toggles before use.</string>
+    <string name="vibration_root_section_amplitude">Extreme amplitude</string>
+    <string name="vibration_root_section_pwm">Direct PWM</string>
+    <string name="vibration_root_section_dual">Dual actuator</string>
+    <string name="vibration_root_section_rumble">Sustained rumble</string>
+    <string name="vibration_root_amplitude_label">Amplitude</string>
+    <string name="vibration_root_duration_label">Duration</string>
+    <string name="vibration_root_pwm_on_label">Pulse on</string>
+    <string name="vibration_root_pwm_off_label">Pulse off</string>
+    <string name="vibration_root_pwm_pulses_label">Pulses</string>
+    <string name="vibration_root_dual_phase_label">Phase offset</string>
+    <string name="vibration_root_burst_ceiling_note">Extreme-amplitude bursts are capped at 3 seconds.</string>
+    <string name="vibration_root_rumble_ceiling_note">Sustained rumble is capped at 5 minutes.</string>
+    <string name="vibration_root_no_dual">This device has a single actuator — dual-motor drive is unavailable.</string>
+    <string name="vibration_root_action_amplitude">Run buzz</string>
+    <string name="vibration_root_action_pwm">Run PWM</string>
+    <string name="vibration_root_action_dual">Run dual</string>
+    <string name="vibration_root_action_rumble">Run rumble</string>
+
+    <!-- Rooted-tool result snackbars -->
+    <string name="vibration_root_result_ok">Done.</string>
+    <string name="vibration_root_result_unsupported">Not available on this device.</string>
+    <string name="vibration_root_result_opted_out">Turned off in Settings → Rooted feature toggles (check Safety mode too).</string>
+    <string name="vibration_root_result_rate_limited">Rate-limited — try again shortly.</string>
+    <string name="vibration_root_result_error">Failed: %1$s</string>
+    <string name="vibration_root_opted_out_action">Settings</string>
+
+</resources>
