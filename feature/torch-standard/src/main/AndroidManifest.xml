@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  :feature:torch-standard — no components, just Hilt bindings + no-op
+  controllers. An (almost) empty manifest keeps the module a pure code
+  contribution merged into the standard APK. Mirror of :feature:torch-rooted.
+-->
+<manifest />

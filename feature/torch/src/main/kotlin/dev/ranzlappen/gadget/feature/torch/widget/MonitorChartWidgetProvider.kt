@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -18,7 +19,6 @@ import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.data.MonitorSampleRepository
 import dev.ranzlappen.gadget.core.model.MetricSource
 import dev.ranzlappen.gadget.core.monitoring.MonitorChartBitmapRenderer
-import dev.ranzlappen.gadget.core.monitoring.MonitorChartLayout
 import dev.ranzlappen.gadget.core.monitoring.MonitorConfigRepository
 import dev.ranzlappen.gadget.core.monitoring.MonitorController
 import dev.ranzlappen.gadget.core.monitoring.MonitorDownsampling
@@ -98,12 +98,34 @@ class MonitorChartWidgetProvider : AppWidgetProvider() {
             .map { it.maxValue }
 
         val density = context.resources.displayMetrics.density
+        val lineColor = ContextCompat.getColor(context, R.color.widget_chart_line)
+        val fillColor = ContextCompat.getColor(context, R.color.widget_chart_fill)
+        val bgColor = ContextCompat.getColor(context, R.color.widget_chart_bg)
         appWidgetIds.forEach { id ->
             val (wPx, hPx) = chartSizePx(appWidgetManager.getAppWidgetOptions(id), density)
+            val bitmap = if (values.size >= 2) {
+                MonitorChartBitmapRenderer.render(
+                    values = values,
+                    yMax = yMax,
+                    widthPx = wPx,
+                    heightPx = hPx,
+                    lineColor = lineColor,
+                    fillColor = fillColor,
+                    backgroundColor = bgColor,
+                    layout = config.chartLayout,
+                    strokeWidthPx = STROKE_WIDTH_DP * density,
+                )
+            } else {
+                null
+            }
             appWidgetManager.updateAppWidget(
                 id,
-                buildRemoteViews(context, values, yMax, config.chartLayout, config.enabled, wPx, hPx, density),
+                buildRemoteViews(context, bitmap, config.enabled),
             )
+            // updateAppWidget copies the bitmap into the Binder parcel
+            // synchronously, so it's safe to recycle/reuse the moment it
+            // returns — hand it back to the pool for the next repaint.
+            bitmap?.let { MonitorChartBitmapRenderer.release(it) }
         }
     }
 
@@ -115,29 +137,14 @@ class MonitorChartWidgetProvider : AppWidgetProvider() {
 
     private fun buildRemoteViews(
         context: Context,
-        values: List<Float>,
-        yMax: Float,
-        layout: MonitorChartLayout,
+        bitmap: Bitmap?,
         monitoringEnabled: Boolean,
-        widthPx: Int,
-        heightPx: Int,
-        density: Float,
     ): RemoteViews = RemoteViews(context.packageName, R.layout.widget_monitor_chart).apply {
         setTextViewText(R.id.widget_chart_label, context.getString(R.string.widget_monitor_chart_label))
-        if (values.size < 2) {
+        if (bitmap == null) {
             setViewVisibility(R.id.widget_chart_image, View.GONE)
             setViewVisibility(R.id.widget_chart_empty, View.VISIBLE)
         } else {
-            val bitmap = MonitorChartBitmapRenderer.render(
-                values = values,
-                yMax = yMax,
-                widthPx = widthPx,
-                heightPx = heightPx,
-                lineColor = ContextCompat.getColor(context, R.color.widget_chart_line),
-                fillColor = ContextCompat.getColor(context, R.color.widget_chart_fill),
-                layout = layout,
-                strokeWidthPx = STROKE_WIDTH_DP * density,
-            )
             setViewVisibility(R.id.widget_chart_empty, View.GONE)
             setViewVisibility(R.id.widget_chart_image, View.VISIBLE)
             setImageViewBitmap(R.id.widget_chart_image, bitmap)
@@ -192,10 +199,12 @@ class MonitorChartWidgetProvider : AppWidgetProvider() {
         private const val STROKE_WIDTH_DP = 2f
 
         // Default render size before the launcher reports the real cells, and
-        // a hard px cap so the ARGB_8888 bitmap stays well under the ~1MB
-        // RemoteViews/Binder transaction limit (600x280x4 ≈ 0.67MB) even on
-        // high-density displays — the sparkline is stretched to fit (fitXY),
-        // so a modest resolution is imperceptible.
+        // a hard px cap so the bitmap stays well under the ~1MB RemoteViews/
+        // Binder transaction limit. The bitmap is RGB_565 (2 bytes/px), so the
+        // cap is 600x280x2 ≈ 0.34MB even on high-density displays — and it's
+        // pooled across repaints (see MonitorChartBitmapRenderer). The
+        // sparkline is stretched to fit (fitXY), so a modest resolution is
+        // imperceptible.
         private const val DEFAULT_WIDTH_DP = 250
         private const val DEFAULT_HEIGHT_DP = 110
         private const val MAX_WIDTH_PX = 600

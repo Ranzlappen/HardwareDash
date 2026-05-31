@@ -623,18 +623,33 @@ feature without breaking flavor isolation or the Hilt graph:
    feature module's `src/main` (e.g. `TorchRootCapabilities`,
    `TorchRootResult`, `TorchRootAvailability`). The feature stays
    flavor-agnostic and never imports libsu or `com.gadget.root.*`.
-2. Bind it in **`:app`'s flavor source sets** (not the feature module):
-   a no-op impl in `app/src/standard/.../<feature>/` (reports
-   everything unavailable) and a real impl in `app/src/rooted/.../<feature>/`.
-   Add both to the matching flavor `RootBindings` (`@Provides` in
-   standard, `@Binds` in rooted). This mirrors how
-   `RootCapabilityRegistry` / `RootSafetyGate` are split and avoids the
-   Hilt duplicate-binding trap (the feature module never binds it).
-3. The rooted impl should **reuse the existing legacy rooted controller**
-   (`com.gadget.<feature>.Rooted*Controller`) where one exists — adapt
-   its result type rather than re-implementing sysfs/libsu. All
-   privileged calls must route through `RootSafetyGate`
-   (capability + opt-out + rate-limit) and use a `RootFeatureKey`.
+2. Bind the no-op (standard) and real (rooted) impls from **sibling
+   per-flavor feature modules**, each pulled into only its own variant:
+   `:feature:<name>-rooted` via `rootedImplementation` and
+   `:feature:<name>-standard` via `standardImplementation`. Each sibling
+   carries its impls **plus** a small Hilt `@Binds` module
+   (`RootedTorchModule` / `StandardTorchModule`). Because each module is on
+   exactly one variant's classpath, exactly one `@Binds` per interface is
+   ever present — no Hilt duplicate-binding clash, and **no flavor's impls
+   live in `:app`**. Torch is the reference (`:feature:torch-rooted` +
+   `:feature:torch-standard`).
+   *Older variant (still used by un-migrated features):* bind from
+   `:app`'s flavor source sets instead — a no-op in
+   `app/src/standard/.../<feature>/` + a real impl in
+   `app/src/rooted/.../<feature>/`, both added to the matching flavor
+   `RootBindings`. Prefer the sibling-module pattern for new work; the
+   feature module itself still never binds the impl either way.
+3. The rooted impl should **reuse the existing privileged sysfs
+   controller** (the feature's `<Feature>SysfsController` surface, e.g.
+   torch's `TorchSysfsController` implemented by `RootedTorchController`)
+   where one exists — adapt its result type rather than re-implementing
+   sysfs/libsu. All privileged calls must route through `RootSafetyGate`
+   (capability + opt-out + rate-limit) and use a `RootFeatureKey`, and
+   must be hardware-safe by construction: clamp to a hard ceiling
+   (torch's 150 % brightness cap), bound any override with an absolute
+   time ceiling, and always restore device state in a `NonCancellable`
+   `finally` so a cancelled coroutine can't leave throttling disabled or
+   an LED latched on.
 4. The feature's `@HiltViewModel` injects the interface directly; Hilt
    resolves the binding at `:app` assembly. Probe availability once and
    fold it into the screen state; show root controls only when
@@ -644,8 +659,8 @@ feature without breaking flavor isolation or the Hilt graph:
 
    Reference impl: `TorchRootCapabilities` (interface) +
    `StandardTorchRootCapabilities` / `RootedTorchRootCapabilities`
-   (app flavor bindings, the latter delegating to the legacy
-   `RootedTorchController`).
+   (app flavor bindings, the latter delegating to `RootedTorchController`,
+   the rooted `TorchSysfsController` impl).
 
 ---
 
@@ -1027,7 +1042,47 @@ Self-Driving Documentation** batch:
 | 1.1.4 | `eb41adf` | Glass consistency for `GadgetSecondaryButton` |
 | 1.1.5 | `f4bc3da` | Shimmer `BoxWithConstraints`-aware width |
 | 1.1.6 | `01cd935` | Preview matrix expansion (RTL / LargeFont / SizeClasses) |
-| 1.1.7 | (this commit) | Catalog verification + status refresh |
+| 1.1.7 | `01cd935`+ | Catalog verification + status refresh |
+
+### Torch blueprint final-polish batch
+
+A short series of commits closing the last items from three external reviews so
+torch is the hardened reference for every future migration:
+
+- **Perf** — `MonitorChartBitmapRenderer` now allocates `RGB_565` (half the
+  heap + Binder payload of `ARGB_8888`) from a size-keyed `BitmapPool`
+  (`:core:monitoring`), and `MonitorChartWidgetProvider` releases each bitmap
+  back after `updateAppWidget`. Eliminates the per-repaint allocation churn.
+- **Concurrency** — `PendingWidgetConfigs.purgeStale` now runs under the same
+  `enqueueMutex` as the key allocator, closing the counter-key race.
+- **Naming** — the privileged sysfs surface `LegacyTorchController` →
+  `TorchSysfsController` (package `…torch.sysfs`), `LegacyStandardTorchController`
+  → `StandardTorchSysfsController`, entry-point getter `legacyTorchController()`
+  → `torchSysfsController()`. "Legacy" framing dropped — it is the current
+  rooted-tier contract, not deprecated code.
+- **Storage** — custom widget icons save as `WEBP_LOSSY` (API 30+, q80) instead
+  of PNG@100.
+- **Docs** — "flawless precedent" → "hardened reference implementation"; the
+  migration guide's `:core:widgetkit` row reflects the already-extracted
+  appearance/render/store layers; new **minimal-vs-advanced module template**
+  section so simple features aren't overbuilt into torches.
+- **Safety** — every rooted sysfs write is gated (`RootSafetyGate` +
+  `RootFeatureKey`), brightness is hard-capped at 150 %, thermal override has a
+  45 s absolute ceiling, and both thermal + strobe restore device state in a
+  `NonCancellable finally`. Hardened further: the thermal monitor now **cancels
+  the privileged block immediately** on a trip-point breach (the block's own
+  `NonCancellable` LED-off cleanup still runs) instead of waiting for the
+  timeout — the LED stops the instant the zone gets hot.
+- **External-state widget refresh** — `TorchWidgetStateObserver` repaints placed
+  flashlight widgets when the torch is toggled from outside the widget (system
+  QS tile, other apps, OEM gestures) by watching `TorchController.state`
+  (already fed by `CameraManager.TorchCallback`). Lazily + idempotently armed
+  from the provider's `onReceive`; `distinctUntilChanged().drop(1)` + empty-id
+  early-return keep an idle/widget-less app at zero cost.
+- **Flavor-seam symmetry (E2)** — the standard no-ops moved out of
+  `app/src/standard` into a new `:feature:torch-standard` module (mirror of
+  `:feature:torch-rooted`), bound by `StandardTorchModule` and pulled in via
+  `standardImplementation`. Neither flavor's Torch impls live in `:app` now.
 
 ### Preview matrix policy
 

@@ -1,7 +1,5 @@
 package dev.ranzlappen.gadget.feature.torch.rooted
 
-import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController
-import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay

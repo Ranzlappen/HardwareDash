@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
-import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult
+import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsControllerResult
 import com.gadget.vibration.PwmPulse
 import com.gadget.vibration.VibrationControllerResult
 import kotlinx.coroutines.launch
@@ -61,7 +61,7 @@ fun TorchRootExtrasSection(modifier: Modifier = Modifier) {
     }
     if (!rootAvailable) return
 
-    val torch = entryPoint.legacyTorchController()
+    val torch = entryPoint.torchSysfsController()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val lang = LocalizationManager.loadLanguage(context)
@@ -233,13 +233,13 @@ fun VibrationRootExtrasSection(modifier: Modifier = Modifier) {
     }
 }
 
-private fun describeTorchResult(result: LegacyTorchControllerResult): String = when (result) {
-    LegacyTorchControllerResult.Ok -> "OK"
-    LegacyTorchControllerResult.Unsupported -> "Unsupported on this device"
-    LegacyTorchControllerResult.OptedOut -> "Disabled — enable in Settings"
-    is LegacyTorchControllerResult.RateLimited ->
+private fun describeTorchResult(result: TorchSysfsControllerResult): String = when (result) {
+    TorchSysfsControllerResult.Ok -> "OK"
+    TorchSysfsControllerResult.Unsupported -> "Unsupported on this device"
+    TorchSysfsControllerResult.OptedOut -> "Disabled — enable in Settings"
+    is TorchSysfsControllerResult.RateLimited ->
         "Cooling down — try again in ${result.retryAfterMillis / 1000}s"
-    is LegacyTorchControllerResult.HardwareError -> "Hardware error: ${result.message}"
+    is TorchSysfsControllerResult.HardwareError -> "Hardware error: ${result.message}"
 }
 
 private fun describeVibrationResult(result: VibrationControllerResult): String = when (result) {

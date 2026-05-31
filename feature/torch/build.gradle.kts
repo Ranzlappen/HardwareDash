@@ -4,8 +4,8 @@
 // TorchScreen + QS tile + home-screen toggle widget + strobe widget
 // (foreground service).
 //
-// Phase 2 / Batch 1.1 polished the migration into a flawless precedent
-// for every future feature port:
+// Phase 2 / Batch 1.1 polished the migration into a hardened reference
+// implementation for every future feature port:
 //   * Dynamic flashlight/strobe widget creation from inside the app
 //     via AppWidgetManager.requestPinAppWidget.
 //   * Per-widget persisted config (TorchWidgetConfig) backed by the

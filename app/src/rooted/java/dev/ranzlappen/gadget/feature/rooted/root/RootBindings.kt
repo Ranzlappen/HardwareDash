@@ -107,7 +107,7 @@ abstract class RootBindings {
 
     // ──── Batch 3: feature controllers ────
     //
-    // Torch bindings (LegacyTorchController + TorchRootCapabilities)
+    // Torch bindings (TorchSysfsController + TorchRootCapabilities)
     // moved to :feature:torch-rooted's RootedTorchModule in
     // refactor-2026 Phase 2 / E2. The remaining cross-feature
     // controllers stay here until each feature follows the same

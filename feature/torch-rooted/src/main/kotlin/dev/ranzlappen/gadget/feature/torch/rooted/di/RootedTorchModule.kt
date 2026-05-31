@@ -5,7 +5,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.feature.torch.TorchRootCapabilities
-import dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchController
+import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsController
 import dev.ranzlappen.gadget.feature.torch.rooted.RootedTorchController
 import dev.ranzlappen.gadget.feature.torch.rooted.RootedTorchRootCapabilities
 import javax.inject.Singleton
@@ -14,9 +14,9 @@ import javax.inject.Singleton
  * Hilt module that wires the rooted-flavor Torch implementations.
  *
  * Two bindings:
- *  - [LegacyTorchController] -> [RootedTorchController]: the libsu-backed
- *    sysfs controller the legacy rooted-extras UI consumes via
- *    `RootFeaturesEntryPoint.legacyTorchController()`.
+ *  - [TorchSysfsController] -> [RootedTorchController]: the libsu-backed
+ *    sysfs controller the rooted-extras UI consumes via
+ *    `RootFeaturesEntryPoint.torchSysfsController()`.
  *  - [TorchRootCapabilities] -> [RootedTorchRootCapabilities]: the
  *    modular adapter the new `:feature:torch` screen consumes for its
  *    rooted-tier extras (DutyCycleStrobe, MultiLed, ThermalOverride
@@ -39,9 +39,9 @@ abstract class RootedTorchModule {
 
     @Binds
     @Singleton
-    abstract fun bindLegacyTorchController(
+    abstract fun bindTorchSysfsController(
         impl: RootedTorchController,
-    ): LegacyTorchController
+    ): TorchSysfsController
 
     @Binds
     @Singleton

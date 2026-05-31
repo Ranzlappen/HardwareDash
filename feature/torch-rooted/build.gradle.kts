@@ -29,8 +29,8 @@ android {
 }
 
 dependencies {
-    // Modular Torch interfaces this module implements + the legacy
-    // LegacyTorchController interface the rooted impl satisfies.
+    // Modular Torch interfaces this module implements + the
+    // TorchSysfsController interface the rooted impl satisfies.
     implementation(project(":feature:torch"))
     // Root-safety framework (RootSafetyGate, RootCapabilityRegistry,
     // RootFeatureKey, RootShell, RootGateDecision) the controller routes

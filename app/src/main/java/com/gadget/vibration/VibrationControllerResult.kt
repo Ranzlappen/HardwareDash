@@ -2,7 +2,7 @@ package com.gadget.vibration
 
 /**
  * Result returned by every [VibrationController] extreme-tier method. Same
- * shape as [dev.ranzlappen.gadget.feature.torch.legacy.LegacyTorchControllerResult] — a separate type lets
+ * shape as [dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsControllerResult] — a separate type lets
  * each surface evolve independently and gives compile-time errors if a
  * caller passes a torch result to a vibration handler by mistake.
  */

@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.exifinterface.media.ExifInterface
@@ -30,7 +31,7 @@ import kotlin.math.max
  *
  * Built-in entries pair a stable [Entry.key] (persisted in IconStyle)
  * with a [DrawableRes]. Custom icons are persisted as keys of the form
- * `custom:<uuid>.png` pointing at a downscaled copy in
+ * `custom:<uuid>.webp` pointing at a downscaled copy in
  * `filesDir/widget_icons/` — configs never store a raw content Uri (those
  * are revocable), so a picked image keeps working across reboots and
  * permission changes. The catalog is the single resolution surface for
@@ -127,8 +128,19 @@ class WidgetIconCatalog @Inject constructor(
             // decoder ignores — apply it so the icon isn't sideways.
             val bitmap = applyExifOrientation(decoded, bytes)
             customDir.mkdirs()
-            val file = File(customDir, "${UUID.randomUUID()}.png")
-            FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, PNG_QUALITY, out) }
+            val file = File(customDir, "${UUID.randomUUID()}.webp")
+            // WEBP_LOSSY (API 30+) gives a fraction of PNG's size at a quality
+            // indistinguishable for a ≤192 px home-screen icon; fall back to
+            // the deprecated WEBP format below 30. Decoding is format-sniffed
+            // by BitmapFactory, so the file extension is cosmetic and existing
+            // `.png` icons from older installs keep decoding unchanged.
+            val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Bitmap.CompressFormat.WEBP_LOSSY
+            } else {
+                @Suppress("DEPRECATION")
+                Bitmap.CompressFormat.WEBP
+            }
+            FileOutputStream(file).use { out -> bitmap.compress(format, ICON_QUALITY, out) }
             bitmap.recycle()
             Log.d(TorchPinLog.TAG, "importCustomIcon: wrote ${file.name}")
             WidgetIconKeys.CUSTOM_PREFIX + file.name
@@ -212,6 +224,9 @@ class WidgetIconCatalog @Inject constructor(
          *  home-screen cell. */
         private const val MAX_ICON_PX = 192
 
-        private const val PNG_QUALITY = 100
+        /** Lossy quality for saved custom icons. 80 is visually lossless at
+         *  ≤192 px while keeping the file (and the RemoteViews Binder payload
+         *  that ships it) small. */
+        private const val ICON_QUALITY = 80
     }
 }

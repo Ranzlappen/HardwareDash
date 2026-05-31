@@ -116,6 +116,7 @@ include(
     ":feature:camera",
     ":feature:torch",
     ":feature:torch-rooted",
+    ":feature:torch-standard",
     ":feature:vibration",
     ":feature:gps",
     ":feature:motion",

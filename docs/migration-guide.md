@@ -535,9 +535,58 @@ study when doing the next migration:
 | `feature/torch/.../strobe/StrobeRuntime.kt` | `@Singleton` `StateFlow<Boolean>` source of truth for "is the strobe running?" — replaces the old `@Volatile companion` flag the VM had to poll. |
 | `feature/torch/src/main/AndroidManifest.xml` | All entry-point declarations co-located in the feature module — no `CAMERA` permission. |
 | `core/datastore/.../FeaturePreferences.kt` + `FeaturePreferencesFactory.kt` | Generic per-feature persistence basis — `ReplaceFileCorruptionHandler` so a single bad write can't permanently brick a feature's storage. |
-| `core/widgetkit/.../*` | Reusable widget-framework foundation: `WidgetKitConfig` contract, shared `WidgetReceiverScope`, `WidgetPinPolicy` + `WidgetPinResult`. The deeper appearance/render/store layers move here in a follow-up that needs a compiler in the loop. |
+| `core/widgetkit/.../*` | Reusable widget-framework foundation — the generic half of the widget subsystem a feature plugs into: `WidgetKitConfig` contract + shared `WidgetReceiverScope` + `WidgetPinPolicy`/`WidgetPinResult`, **plus** the appearance value-types (`config/WidgetAppearance`), the RemoteViews `render/WidgetAppearanceRenderer` + `WidgetIconResolver`, the `store/WidgetConfigStore<T>` + `Migrator<T>`, `pin/PendingWidgetConfigs<T>` + `BaseWidgetPinSuccessReceiver<T>`, `provider/BaseGadgetWidgetProvider<T>`, `feedback/WidgetFeedbackDispatcher`, and `boot/BootCompletedReceiver`. A feature contributes one `WidgetKitConfig` + a config store and subclasses the base provider/receiver — it never re-hand-rolls the pin flow or appearance rendering. |
 | `feature/torch/consumer-rules.pro` | R8 keep rules for the module's `@Serializable` types so minified release builds don't strip the synthetic serializers into a runtime `SerializationException`. |
 
 The next feature migration (Sensors / Actuators / Camera / etc.)
 follows this exact shape — only the controller's underlying
 hardware API differs.
+
+## Two module templates: minimal vs. advanced
+
+Torch is the **advanced** reference: it exercises every seam at once —
+standard hardware control + QS tile + app widgets + dynamic pinning +
+foreground service + monitoring + automation + a rooted capability
+adapter. That breadth makes it the canonical proof that the architecture
+holds, but **most feature migrations should not start by copying all of
+it.** Pick the template that matches the feature's real surface and add
+seams only when the feature actually needs them.
+
+**Minimal feature migration** — the floor every module clears:
+
+- `Controller` interface + standard impl (Camera2 / sensor manager / etc.),
+  `@Singleton`, bound via the feature's Hilt `@Binds` module.
+- `@HiltViewModel` + a stateless `<Feature>ScreenContent` (Hilt-free, so
+  previews/instrumented tests stay simple) wired by a `<Feature>Screen`
+  Hilt route.
+- Built on `ModuleScreenScaffold` with a `ModuleInfo`
+  (permissions / OS compatibility) **and** a tri-state
+  `ModuleCapabilitiesSection`.
+- Navigation entry in `GadgetDestination.modules` + a route in `GadgetApp`.
+- Unit tests for any serialization/repo + one instrumented test of the
+  stateless content; the `@Preview` matrix.
+
+**Advanced (Torch-style) migration** — add these only as the feature
+demands them, reusing `:core:widgetkit` / `:core:monitoring` /
+`:core:automation` rather than hand-rolling:
+
+- **Widgets / QS tile / notifications**: contribute a `WidgetKitConfig`,
+  subclass `BaseGadgetWidgetProvider<T>` + `BaseWidgetPinSuccessReceiver<T>`,
+  and persist via `WidgetConfigStore<T>` — never re-implement the pin flow
+  or appearance rendering.
+- **Monitoring**: implement a `MetricSource` per readable signal and embed
+  `MonitorContainer` / `LiveMonitorContainer`.
+- **Automation**: expose an `ActionHandler` with `ModuleAction` metadata.
+- **Rooted extras**: a feature-side capability interface implemented by two
+  sibling per-flavor modules — a no-op `:feature:<name>-standard` (pulled in
+  via `standardImplementation`) and a real `:feature:<name>-rooted` (via
+  `rootedImplementation`), each with its own small Hilt `@Binds` module so
+  exactly one impl is on each variant's classpath. Every privileged call is
+  gated by `RootSafetyGate` + a `RootFeatureKey`. Torch is the reference
+  (`:feature:torch-rooted` + `:feature:torch-standard`).
+
+Rule of thumb: a torch (an actuator with widgets + monitoring +
+automation + rooted boost) is advanced; a read-only sensor readout is
+minimal. Both satisfy the same Module Authoring Contract — the advanced
+seams are just unused until the feature grows into them. Don't overbuild a
+simple feature into a torch.

@@ -1,14 +1,16 @@
-package dev.ranzlappen.gadget.feature.torch.legacy
+package dev.ranzlappen.gadget.feature.torch.sysfs
 
 /**
- * Rooted-only Torch capability surface. The standard-flavor implementation
- * always returns [LegacyTorchControllerResult.Unsupported] so shared UI can use one
- * code path for both flavors.
+ * Privileged sysfs Torch capability surface — the low-level LED-driver access
+ * the **rooted** flavor drives directly (`/sys/class/leds/...`). This is the
+ * *current* rooted-tier contract, not deprecated code: the standard-flavor
+ * implementation always returns [TorchSysfsControllerResult.Unsupported] so
+ * shared UI can use one code path for both flavors.
  *
  * Every method routes through [dev.ranzlappen.gadget.core.root.RootSafetyGate] before doing
  * anything privileged — there is no "fast path" that bypasses the gate.
  */
-interface LegacyTorchController {
+interface TorchSysfsController {
 
     /**
      * Drives the LED brightness sysfs node directly. [percent] is interpreted
@@ -16,7 +18,7 @@ interface LegacyTorchController {
      * 100 push past the stock cap up to a hard ceiling enforced by the
      * implementation (currently 150 %).
      */
-    suspend fun boostBrightness(percent: Int): LegacyTorchControllerResult
+    suspend fun boostBrightness(percent: Int): TorchSysfsControllerResult
 
     /**
      * Strobes the LED with independent on/off durations, allowing low-duty
@@ -30,7 +32,7 @@ interface LegacyTorchController {
         dutyPercent: Int,
         durationMillis: Long,
         phaseOffsetMillis: Long = 0L,
-    ): LegacyTorchControllerResult
+    ): TorchSysfsControllerResult
 
     /**
      * Lights every available emitter at once: front + back LEDs, notification
@@ -40,7 +42,7 @@ interface LegacyTorchController {
     suspend fun multiLedActivate(
         durationMillis: Long,
         includeScreen: Boolean = false,
-    ): LegacyTorchControllerResult
+    ): TorchSysfsControllerResult
 
     /**
      * Disables OS thermal throttling for the LED driver thermal zone for the
@@ -52,5 +54,5 @@ interface LegacyTorchController {
     suspend fun withThermalOverride(
         durationMillis: Long,
         block: suspend () -> Unit,
-    ): LegacyTorchControllerResult
+    ): TorchSysfsControllerResult
 }

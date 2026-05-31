@@ -258,6 +258,15 @@ dependencies {
     // coordinates (`com.github.mik3y:usb-serial-for-android`) are unchanged.
     implementation(libs.usb.serial.android)
 
+    // ════════════════════ STANDARD-ONLY DEPENDENCIES ════════════════════
+    // refactor-2026 Phase 2 / E2: standard Torch capability module — the
+    // mirror of :feature:torch-rooted. Hosts the no-op StandardTorchSysfsController
+    // + StandardTorchRootCapabilities and their StandardTorchModule @Binds, so
+    // the standard variant has the same TorchSysfsController / TorchRootCapabilities
+    // bindings the rooted variant gets from :feature:torch-rooted. Contains no
+    // root code, so the leak gate has nothing to catch here.
+    "standardImplementation"(project(":feature:torch-standard"))
+
     // ════════════════════ ROOTED-ONLY DEPENDENCIES ════════════════════
     // libsu is the privileged-shell + RootService backend used by the
     // rooted flavor. NEVER promote these to plain `implementation` — the
