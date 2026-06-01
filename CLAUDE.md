@@ -948,12 +948,22 @@ contract (`displayName`, `removed`, `schemaVersion`, `appearance`),
   RemoteViews-rendered widget). `GadgetColorPicker` moved to `:core:ui`
   (P1-10).
 
-**Pending follow-up (deferred from C6):** the appearance-section UI
-(chip rows + icon picker + tap-animation chooser + feedback templates)
-still lives in torch's `WidgetConfigurationSheet`. Extracting it
-generically requires lifting ~30 labels into kit `strings.xml` plus a
-generic `WidgetIconChoice` type — scoped out of Phase 2 to keep diffs
-reviewable.
+**Appearance-section UI (C6 follow-up — shipped).** The generic
+appearance editor — `WidgetAppearanceSection` (`:core:widgetkit/ui`) —
+now owns every shared control (background/tint/tap-animation/feedback
+chip rows, the icon picker + custom-import flow, feedback templates, and
+the live `WidgetAppearancePreview`). It takes a generic `appearance` +
+`onAppearanceChange` plus the per-feature seam params `iconChoices:
+List<WidgetIconChoice>`, `resolveIcon`, and `onImportCustomIcon`. The
+~40 shared labels live in the kit (`widget_kit_appearance_*` in
+`core/widgetkit/.../res/values/strings.xml`) and `WidgetIconChoice`
+(`:core:widgetkit/config`) is the generic swatch type. Each feature's
+`ui/WidgetConfigurationSheet.kt` is now a thin shell that delegates to
+the section and only adds its **feature-specific** fields (torch's strobe
+rate / morse, vibration's amplitude / duration) — that residue is
+*meant* to stay feature-local. Torch + vibration are the reference
+consumers; future widget-bearing features build their config sheet the
+same way.
 
 **The "remove-but-keep-inert" widget pattern** (also documented in the
 migration guide): a non-host app can't pull a placed widget off a
