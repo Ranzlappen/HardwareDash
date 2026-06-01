@@ -1,5 +1,6 @@
 package dev.ranzlappen.gadget.core.ui.component
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,8 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.assertDoesNotExist
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -38,6 +37,7 @@ import org.junit.Test
  * stock `ComponentActivity` (via [createComposeRule]) hosts it without a
  * bespoke sheet-host activity.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 class ModalsTest {
 
     @get:Rule
