@@ -6,12 +6,15 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoMap
+import dagger.multibindings.StringKey
 import dev.ranzlappen.gadget.core.datastore.FeaturePreferencesFactory
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackConfig
 import dev.ranzlappen.gadget.core.widgetkit.pin.PendingEntry
 import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.torch.R
+import dev.ranzlappen.gadget.feature.torch.monitor.TorchBootRearmHandler
 import dev.ranzlappen.gadget.feature.torch.widget.TorchPinLog
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import javax.inject.Singleton
@@ -42,12 +45,14 @@ object TorchProvidesModule {
      * `WidgetFeedbackDispatcher`'s ID base so existing notifications
      * keep their ids on upgrade).
      *
-     * As the second widget-bearing feature lands, this will be
-     * promoted to a `Map<FeatureId, WidgetFeedbackConfig>`
-     * multibinding so a single dispatcher serves both.
+     * Contributed into the kit's `Map<String, WidgetFeedbackConfig>`
+     * multibinding under [TorchBootRearmHandler.FEATURE_ID] so the one
+     * `WidgetFeedbackDispatcher` singleton serves every feature; the
+     * provider passes that id to `dispatch(...)`.
      */
     @Provides
-    @Singleton
+    @IntoMap
+    @StringKey(TorchBootRearmHandler.FEATURE_ID)
     fun provideWidgetFeedbackConfig(
         @ApplicationContext context: Context,
     ): WidgetFeedbackConfig = WidgetFeedbackConfig(

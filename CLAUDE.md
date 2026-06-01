@@ -887,6 +887,24 @@ contract (`displayName`, `removed`, `schemaVersion`, `appearance`),
   icon / notification-id base). Channel id pinned to legacy
   `"widget_feedback"` so system-settings overrides users already set
   carry across the migration.
+- **Per-feature multibinding contract (renderer + dispatcher).** Both
+  `WidgetAppearanceRenderer` (consuming `WidgetIconResolver`) and
+  `WidgetFeedbackDispatcher` (consuming `WidgetFeedbackConfig`) are **one
+  app-wide `@Singleton`** serving every feature via a
+  `Map<String, X>` multibinding keyed by the feature's stable id (the
+  same `<Feature>BootRearmHandler.FEATURE_ID` used for the boot-rearm
+  + automation maps). Every widget-bearing feature MUST bind both as
+  `@Binds/@Provides @IntoMap @StringKey(FEATURE_ID)` and have its
+  `BaseGadgetWidgetProvider` subclass override `featureId` so
+  `renderer.apply(…, featureId)` / `dispatcher.dispatch(…, featureId)`
+  select the right entry. **Why a map and not one shared resolver:** icon
+  keys (`default_active`, `custom:…`) are shared constants, so a single
+  resolver would resolve to the wrong feature's drawables — the feature
+  id, not the key, picks the catalog. Binding either as a **bare**
+  `@Binds @Singleton X` works for the *first* feature but a second bare
+  bind is a `[Dagger/DuplicateBindings]` clash in `SingletonC` (torch
+  shipped bare; vibration, the second consumer, forced the migration).
+  Torch + vibration are the reference.
 - **`store/`** — `WidgetConfigStore<T : WidgetKitConfig>` (hot-StateFlow
   cache + `Migrator<T>` seam) replaces every per-feature
   `<Feature>WidgetConfigRepository`. Bind once per feature from the

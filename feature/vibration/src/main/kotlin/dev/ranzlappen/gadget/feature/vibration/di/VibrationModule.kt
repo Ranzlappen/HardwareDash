@@ -34,7 +34,8 @@ abstract class VibrationModule {
     abstract fun bindVibrationController(impl: StandardVibrationController): VibrationController
 
     @Binds
-    @Singleton
+    @IntoMap
+    @StringKey(VibrationBootRearmHandler.FEATURE_ID)
     abstract fun bindWidgetIconResolver(impl: VibrationIconCatalog): WidgetIconResolver
 
     @Binds

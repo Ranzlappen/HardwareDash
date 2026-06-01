@@ -18,6 +18,7 @@ import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
 import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.provider.BaseGadgetWidgetProvider
+import dev.ranzlappen.gadget.feature.torch.monitor.TorchBootRearmHandler
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.torch.R
@@ -58,6 +59,8 @@ class StrobeWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
 
     override val providerClass: Class<out AppWidgetProvider> =
         StrobeWidgetProvider::class.java
+
+    override val featureId: String = TorchBootRearmHandler.FEATURE_ID
 
     override fun configStore(context: Context): WidgetConfigStore<TorchWidgetConfig> =
         entry(context).widgetRepository()
@@ -159,6 +162,7 @@ class StrobeWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
                 views = this,
                 appearance = config.appearance,
                 active = active,
+                featureId = featureId,
             )
             if (config.removed) {
                 // Deleted in-app but still hosted by the launcher: dim it

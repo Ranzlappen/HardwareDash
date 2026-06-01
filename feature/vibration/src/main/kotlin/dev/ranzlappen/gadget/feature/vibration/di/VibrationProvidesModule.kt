@@ -6,12 +6,15 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoMap
+import dagger.multibindings.StringKey
 import dev.ranzlappen.gadget.core.datastore.FeaturePreferencesFactory
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackConfig
 import dev.ranzlappen.gadget.core.widgetkit.pin.PendingEntry
 import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.vibration.R
+import dev.ranzlappen.gadget.feature.vibration.monitor.VibrationBootRearmHandler
 import dev.ranzlappen.gadget.feature.vibration.widget.VibrationPinLog
 import dev.ranzlappen.gadget.feature.vibration.widget.VibrationWidgetConfig
 import javax.inject.Singleton
@@ -31,9 +34,14 @@ object VibrationProvidesModule {
      * Vibration's per-feature [WidgetFeedbackConfig]. The channel id is
      * **vibration-prefixed** (`"vibration_widget_feedback"`) so it never
      * collides with torch's legacy `"widget_feedback"` channel.
+     *
+     * Contributed into the kit's `Map<String, WidgetFeedbackConfig>`
+     * multibinding under [VibrationBootRearmHandler.FEATURE_ID] so the
+     * one `WidgetFeedbackDispatcher` singleton serves every feature.
      */
     @Provides
-    @Singleton
+    @IntoMap
+    @StringKey(VibrationBootRearmHandler.FEATURE_ID)
     fun provideWidgetFeedbackConfig(
         @ApplicationContext context: Context,
     ): WidgetFeedbackConfig = WidgetFeedbackConfig(

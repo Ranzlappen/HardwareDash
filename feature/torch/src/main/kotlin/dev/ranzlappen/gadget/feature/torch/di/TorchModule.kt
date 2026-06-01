@@ -72,17 +72,16 @@ abstract class TorchModule {
 
     /**
      * Surface torch's [WidgetIconCatalog] as the kit-side
-     * [WidgetIconResolver]. The kit's `WidgetAppearanceRenderer`
-     * injects the resolver interface (not the concrete catalog) so the
-     * renderer can live in `:core:widgetkit` without knowing about any
-     * particular feature's bundled drawables.
-     *
-     * As more widget-bearing features land, this binding will become a
-     * multibinding keyed by feature id (planned for C5's provider
-     * registry batch).
+     * [WidgetIconResolver]. The kit's `WidgetAppearanceRenderer` injects
+     * a `Map<String, WidgetIconResolver>` (not the concrete catalog) so
+     * one renderer singleton in `:core:widgetkit` serves every feature
+     * without knowing about any particular feature's bundled drawables;
+     * the provider passes [TorchBootRearmHandler.FEATURE_ID] to
+     * `apply(...)` to select this entry.
      */
     @Binds
-    @Singleton
+    @IntoMap
+    @StringKey(TorchBootRearmHandler.FEATURE_ID)
     abstract fun bindWidgetIconResolver(
         impl: WidgetIconCatalog,
     ): WidgetIconResolver

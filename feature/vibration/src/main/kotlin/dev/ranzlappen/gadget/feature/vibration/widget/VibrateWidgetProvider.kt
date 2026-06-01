@@ -18,6 +18,7 @@ import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
 import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.provider.BaseGadgetWidgetProvider
+import dev.ranzlappen.gadget.feature.vibration.monitor.VibrationBootRearmHandler
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.vibration.R
@@ -41,6 +42,8 @@ class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
     override val logTag: String = VibrationPinLog.TAG
 
     override val providerClass: Class<out AppWidgetProvider> = VibrateWidgetProvider::class.java
+
+    override val featureId: String = VibrationBootRearmHandler.FEATURE_ID
 
     override fun configStore(context: Context): WidgetConfigStore<VibrationWidgetConfig> =
         entry(context).vibrationWidgetRepository()
@@ -106,7 +109,13 @@ class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
     ): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_vibrate).apply {
             val renderer = appearanceRenderer(context)
-            renderer.apply(context = context, views = this, appearance = config.appearance, active = active)
+            renderer.apply(
+                context = context,
+                views = this,
+                appearance = config.appearance,
+                active = active,
+                featureId = featureId,
+            )
             if (config.removed) {
                 setInt(WidgetKitR.id.widget_icon, "setImageAlpha", REMOVED_WIDGET_ICON_ALPHA)
                 setInt(R.id.widget_vibrate_button, "setBackgroundResource", android.R.color.transparent)
