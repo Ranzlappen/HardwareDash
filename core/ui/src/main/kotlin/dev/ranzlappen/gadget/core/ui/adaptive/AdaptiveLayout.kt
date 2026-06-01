@@ -2,6 +2,7 @@ package dev.ranzlappen.gadget.core.ui.adaptive
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -144,6 +145,7 @@ enum class GadgetPosture {
  * }
  * ```
  */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun rememberPosture(): GadgetPosture {
     val posture = currentWindowAdaptiveInfo().windowPosture
