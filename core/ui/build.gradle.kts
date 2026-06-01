@@ -25,6 +25,11 @@ dependencies {
     // rejected. The artefact name itself is unchanged.
     api(libs.androidx.material3.windowsizeclass)
 
+    // material3-adaptive backs rememberPosture() (foldable hinge/posture).
+    // `implementation`, not `api`: the public seam exposes only our own
+    // GadgetPosture enum — no material3-adaptive type leaks into a signature.
+    implementation(libs.androidx.material3.adaptive)
+
     // activity-compose powers `rememberLauncherForActivityResult`, used by
     // the module-blueprint permissions section to fire a runtime
     // permission request. The compose-library convention plugin doesn't

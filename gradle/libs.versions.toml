@@ -9,6 +9,10 @@ espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.10.1"
 composeBom = "2024.04.01"
+# material3-adaptive ships outside the Compose BOM on its own version line.
+# Pinned to the 1.0.0-alpha07 (Apr-2024) series that targets Compose 1.6.x —
+# the 1.0.0 stable line requires Compose 1.7+ and would force a BOM bump.
+material3Adaptive = "1.0.0-alpha07"
 serializationJson = "1.6.0"
 datastorePreferences = "1.0.0"
 ksp = "1.9.10-1.0.13"
@@ -61,6 +65,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material3-windowsizeclass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
+androidx-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "material3Adaptive" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serializationJson" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }

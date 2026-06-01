@@ -146,10 +146,15 @@ What every component **must** do for accessibility:
     slot rendered to the right of the primary column when
     `rememberLayoutMode()` is `TwoPane` / `ThreePane`. Wired
     ahead of need — no Phase-1 consumer yet.
-14. Foldable-posture detection (hinge / tabletop) is **deferred**
-    until a real consumer needs it — see open issue
-    [#89](https://github.com/Ranzlappen/HardwareDash/issues/89).
-    Don't pull in `material3-adaptive` ad-hoc.
+14. Foldable-posture detection (hinge / tabletop) has a **stable seam**
+    (closes #89): `GadgetPosture` + `rememberPosture()` in
+    `core/ui/adaptive/AdaptiveLayout.kt`, backed by `material3-adaptive`'s
+    `currentWindowAdaptiveInfo()`. Like `rememberLayoutMode()` it returns
+    the Gadget enum (`Flat` / `Tabletop` / `Book`), never a
+    `material3-adaptive` type — read it for posture, `rememberLayoutMode()`
+    for width (they're orthogonal). It's **wired ahead of need** (no
+    Phase-1 consumer; `Flat` on non-folding devices), so still **don't**
+    pull `material3-adaptive` into a feature ad-hoc — go through the seam.
 
 ### Performance & stability
 
@@ -1207,11 +1212,15 @@ Multi-preview annotations are defined in
 
 Open follow-up issues (Phase 2+ pickup):
 - [#89](https://github.com/Ranzlappen/HardwareDash/issues/89) —
-  `material3-adaptive` foldable hinge utility.
+  `material3-adaptive` foldable hinge utility — **addressed**:
+  `GadgetPosture` / `rememberPosture()` (see rule #14).
 - [#91](https://github.com/Ranzlappen/HardwareDash/issues/91) —
-  `GadgetBottomSheet` instrumented tests + sheet-host activity.
+  `GadgetBottomSheet` instrumented tests — **addressed**: covered in
+  `core/ui`'s `ModalsTest` (the ui-test-manifest activity hosts the
+  sheet; no bespoke host activity needed).
 - [#92](https://github.com/Ranzlappen/HardwareDash/issues/92) —
-  CI emulator workflow for `connectedDebugAndroidTest`.
+  CI emulator workflow for `connectedDebugAndroidTest` — **addressed**:
+  `.github/workflows/instrumented-tests.yml`.
 
 ---
 
