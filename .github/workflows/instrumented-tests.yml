@@ -1,0 +1,126 @@
+name: Instrumented Tests
+
+# Runs the on-device (`connectedDebugAndroidTest`) instrumented suites on a
+# headless emulator so the Compose UI tests — which have never executed in CI
+# before — gate every PR. Closes
+# https://github.com/Ranzlappen/HardwareDash/issues/92.
+#
+# Scope (MVP): the three Hilt-free, library/feature instrumented modules
+#   * :core:ui            — design-system component contracts (Modals, …)
+#   * :feature:torch      — TorchScreenContent (stateless screen)
+#   * :feature:vibration  — VibrationScreenContent (stateless screen)
+# Only :app declares product flavors, so these modules use the unqualified
+# `connectedDebugAndroidTest` task. A flavor/API-level matrix (and :app's own
+# connected tests) can be layered on later if the need arises — kept to one
+# config here to bound emulator runner cost.
+
+on:
+  pull_request:
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - '.gitignore'
+      - '.gitattributes'
+      - '.idea/**'
+
+# Emulator runs are expensive; cancel a superseded run when new commits land.
+concurrency:
+  group: instrumented-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  instrumented:
+    name: connectedDebugAndroidTest (API 30 emulator)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          # Same Gradle caching layout as build-apk.yml / ci-refactor.yml.
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # Hardware acceleration: the Linux runner exposes /dev/kvm, but the
+      # default udev rules don't grant the runner user access. This is the
+      # documented android-emulator-runner prerequisite on ubuntu-latest.
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # Cache the AVD + its cold-boot snapshot so subsequent runs skip the
+      # multi-minute system-image download and boot. Keyed on the API level
+      # so a bump invalidates cleanly.
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api30-x86_64-google_apis
+
+      - name: Create AVD + generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          target: google_apis
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Run instrumented tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          target: google_apis
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          # Compose UI tests assert against a settled tree — animations off.
+          disable-animations: true
+          script: |
+            ./gradlew \
+              :core:ui:connectedDebugAndroidTest \
+              :feature:torch:connectedDebugAndroidTest \
+              :feature:vibration:connectedDebugAndroidTest \
+              --stacktrace
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instrumented-test-reports
+          path: |
+            **/build/reports/androidTests/connected/**
+            **/build/outputs/androidTest-results/connected/**
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Test summary
+        if: always()
+        run: |
+          {
+            echo "## Instrumented tests (API 30 emulator)"
+            echo ""
+            if [ "${{ job.status }}" = "success" ]; then
+              echo "✅ **connectedDebugAndroidTest passed** for :core:ui, :feature:torch, :feature:vibration."
+            else
+              echo "❌ **Instrumented tests failed.** See the uploaded \`instrumented-test-reports\` artifact."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
