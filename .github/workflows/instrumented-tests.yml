@@ -94,12 +94,10 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           # Compose UI tests assert against a settled tree — animations off.
           disable-animations: true
-          script: |
-            ./gradlew \
-              :core:ui:connectedDebugAndroidTest \
-              :feature:torch:connectedDebugAndroidTest \
-              :feature:vibration:connectedDebugAndroidTest \
-              --stacktrace
+          # Single line: android-emulator-runner's `script` input does not
+          # reliably honor backslash-newline continuations (the `\` leaks
+          # through as a literal Gradle task → "Task '\' not found").
+          script: ./gradlew :core:ui:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest --stacktrace
 
       - name: Upload test reports
         if: always()
