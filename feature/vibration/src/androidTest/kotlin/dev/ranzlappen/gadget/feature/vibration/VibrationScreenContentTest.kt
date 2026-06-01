@@ -11,10 +11,10 @@ import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import dev.ranzlappen.gadget.feature.vibration.widget.VibrationWidgetConfig
 import dev.ranzlappen.gadget.feature.vibration.widget.WidgetType
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertTrue
 
 /**
  * Instrumented tests for the stateless [VibrationScreenContent] — exercised

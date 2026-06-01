@@ -13,11 +13,11 @@ import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
  * Instrumented tests for [TorchScreenContent].

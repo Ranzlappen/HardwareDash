@@ -11,11 +11,12 @@ import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 /**
  * Instrumented tests for [WidgetConfigurationSheet]. Gated on the CI
@@ -133,7 +134,7 @@ class WidgetConfigurationSheetTest {
         } catch (_: AssertionError) {
             failed = true
         }
-        assertEquals(true, failed, "SOS toggle should NOT render for flashlight widgets")
+        assertTrue("SOS toggle should NOT render for flashlight widgets", failed)
     }
 
     @Test
