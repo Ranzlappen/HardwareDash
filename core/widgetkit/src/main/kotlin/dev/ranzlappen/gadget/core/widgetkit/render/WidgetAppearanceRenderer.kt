@@ -51,7 +51,14 @@ private val FLASH_COLOR = 0xFFFFFFFF.toInt()
  *
  * Icon resolution is delegated to a per-feature [WidgetIconResolver]
  * (bound from the feature's Hilt module) so the kit's renderer never
- * has to know about a specific feature's bundled drawables.
+ * has to know about a specific feature's bundled drawables. Each
+ * widget-bearing feature contributes its resolver into a
+ * `Map<String, WidgetIconResolver>` multibinding keyed by its stable
+ * feature id (the same id the provider passes to [apply]); the renderer
+ * stays one app-wide singleton serving every feature. (Icon keys like
+ * [dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconKeys.DEFAULT_ACTIVE]
+ * are shared across features, so the feature id — not the key — is what
+ * selects the right catalog.)
  *
  * Tap-animation primitive is split into a `prepare` call that primes
  * the visual into its "pressed" state and a `revert` call the provider
@@ -60,22 +67,24 @@ private val FLASH_COLOR = 0xFFFFFFFF.toInt()
  */
 @Singleton
 class WidgetAppearanceRenderer @Inject constructor(
-    private val iconResolver: WidgetIconResolver,
+    private val iconResolvers: Map<String, @JvmSuppressWildcards WidgetIconResolver>,
 ) {
 
     /**
      * Apply [appearance] to [views] for a widget in the given `active`
      * state. The icon swaps between `appearance.iconStyle.activeKey` and
-     * `inactiveKey` based on the boolean.
+     * `inactiveKey` based on the boolean. [featureId] selects the calling
+     * feature's [WidgetIconResolver] from the multibinding.
      */
     fun apply(
         context: Context,
         views: RemoteViews,
         appearance: WidgetAppearance,
         active: Boolean,
+        featureId: String,
     ) {
         applyBackground(views, appearance)
-        applyIcon(context, views, appearance, active)
+        applyIcon(context, views, appearance, active, featureId)
     }
 
     private fun applyBackground(views: RemoteViews, appearance: WidgetAppearance) {
@@ -106,7 +115,12 @@ class WidgetAppearanceRenderer @Inject constructor(
         views: RemoteViews,
         appearance: WidgetAppearance,
         active: Boolean,
+        featureId: String,
     ) {
+        val iconResolver = requireNotNull(iconResolvers[featureId]) {
+            "No WidgetIconResolver bound for feature id '$featureId' — bind one " +
+                "@IntoMap @StringKey(\"$featureId\") in the feature's Hilt module."
+        }
         val key = if (active) appearance.iconStyle.activeKey else appearance.iconStyle.inactiveKey
         val customBitmap = if (iconResolver.isCustom(key)) iconResolver.loadCustomBitmap(key) else null
         if (customBitmap != null) {

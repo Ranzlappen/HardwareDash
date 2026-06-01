@@ -9,22 +9,25 @@ import androidx.annotation.DrawableRes
  * (typically named `<Feature>WidgetIconCatalog`) that knows about its
  * bundled drawables + the user-imported custom-icon path.
  *
- * Bind it from the feature's Hilt module so the kit's renderer (which
- * has an `@Inject` constructor) resolves the right per-feature catalog
- * at `:app` assembly:
+ * Each feature contributes its impl into a
+ * `Map<String, WidgetIconResolver>` multibinding keyed by its stable
+ * feature id, so the kit's renderer (one app-wide `@Inject` singleton)
+ * resolves the right per-feature catalog at `:app` assembly. The
+ * provider passes that same id to [WidgetAppearanceRenderer.apply], which
+ * selects the entry — icon keys (e.g.
+ * [dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconKeys.DEFAULT_ACTIVE])
+ * are shared across features, so the feature id, not the key, picks the
+ * catalog:
  *
  * ```kotlin
  * @Module @InstallIn(SingletonComponent::class)
  * abstract class TorchModule {
- *   @Binds @Singleton
+ *   @Binds @IntoMap @StringKey(TorchBootRearmHandler.FEATURE_ID)
  *   abstract fun bindWidgetIconResolver(
  *       impl: WidgetIconCatalog,
  *   ): WidgetIconResolver
  * }
  * ```
- *
- * If an app has multiple widget-bearing features, multibindings or
- * qualifiers will be added in C5's provider registry batch.
  */
 interface WidgetIconResolver {
     /**

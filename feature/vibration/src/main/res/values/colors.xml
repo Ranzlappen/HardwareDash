@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Monitor-chart widget colors. The Compose chart pulls accent /
+      surface from the live theme; the RemoteViews-backed widget can't,
+      so we approximate teal (line) + 20% teal (area fill). A future
+      values-night/ split could match a light-widget variant.
+
+      The two `widget_tint_*` entries (accent + on_surface) used to live
+      here too; they moved to :core:widgetkit (refactor-2026 / C2) so
+      every widget-bearing feature inherits the same defaults via the
+      kit's R class.
+    -->
+    <color name="widget_chart_line">#FF26C6DA</color>
+    <color name="widget_chart_fill">#3326C6DA</color>
+    <!--
+      Opaque chart-panel base. The chart bitmap is RGB_565 (no alpha), so it
+      can't be transparent over the glass card the way the old ARGB_8888 bitmap
+      was — instead it paints this opaque base, the alpha-dropped twin of the
+      widget's glass fill (#33222222), so the panel reads as a dark glass-toned
+      surface with the teal line/fill drawn over it.
+    -->
+    <color name="widget_chart_bg">#FF222222</color>
+</resources>

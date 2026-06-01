@@ -185,6 +185,7 @@ dependencies {
     implementation(project(":core:root"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:torch"))
+    implementation(project(":feature:vibration"))
 
     // ─── Compose UI components ───────────────────────────────────
     // The Compose BOM + ui-tooling-preview + ui-tooling are pulled in by
@@ -266,6 +267,8 @@ dependencies {
     // bindings the rooted variant gets from :feature:torch-rooted. Contains no
     // root code, so the leak gate has nothing to catch here.
     "standardImplementation"(project(":feature:torch-standard"))
+    // Standard Vibration capability module — no-op VibrationRootCapabilities.
+    "standardImplementation"(project(":feature:vibration-standard"))
 
     // ════════════════════ ROOTED-ONLY DEPENDENCIES ════════════════════
     // libsu is the privileged-shell + RootService backend used by the
@@ -280,6 +283,10 @@ dependencies {
     // workers. Standard APK never sees this module — sourceSet scoping
     // physically prevents the dep from reaching the standard variant.
     "rootedImplementation"(project(":feature:torch-rooted"))
+    // Rooted Vibration capability module — RootedVibrationRootCapabilities
+    // (libsu sysfs PWM) + the dual-actuator / rumble-monitor helpers. Standard
+    // APK never sees this module (sourceSet scoping).
+    "rootedImplementation"(project(":feature:vibration-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

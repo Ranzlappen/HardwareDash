@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Vibrate widget layout. Backing surface (@id/widget_background) +
+  icon (@id/widget_icon) on top, with a clickable ImageButton
+  (@id/widget_vibrate_button) the provider attaches a PendingIntent to.
+  @id/widget_background + @id/widget_icon are the WidgetAppearanceRenderer
+  contract surface (declared in :core:widgetkit ids.xml). RemoteViews-safe
+  views only.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="4dp">
+
+    <ImageView
+        android:id="@id/widget_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:contentDescription="@null" />
+
+    <ImageButton
+        android:id="@+id/widget_vibrate_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/widget_vibrate_label"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@android:color/transparent" />
+
+    <ImageView
+        android:id="@id/widget_icon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_vibration_on" />
+
+</FrameLayout>

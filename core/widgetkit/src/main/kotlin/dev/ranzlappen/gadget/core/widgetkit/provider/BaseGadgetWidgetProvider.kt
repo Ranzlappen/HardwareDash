@@ -62,6 +62,13 @@ abstract class BaseGadgetWidgetProvider<T : WidgetKitConfig> : AppWidgetProvider
      *  [AppWidgetManager.getAppWidgetIds]. */
     protected abstract val providerClass: Class<out AppWidgetProvider>
 
+    /** Stable feature id selecting this feature's [WidgetIconResolver] +
+     *  [WidgetFeedbackConfig] from the kit's per-feature multibindings.
+     *  Same id the feature keys its other kit multibindings under
+     *  (e.g. `BootRearmHandler`). Passed to the renderer/dispatcher so one
+     *  app-wide singleton can serve every feature. */
+    protected abstract val featureId: String
+
     /** Hilt-resolved per-feature config store. Implementations typically
      *  delegate to `EntryPointAccessors.fromApplication(...)`. */
     protected abstract fun configStore(context: Context): WidgetConfigStore<T>
@@ -244,6 +251,7 @@ abstract class BaseGadgetWidgetProvider<T : WidgetKitConfig> : AppWidgetProvider
                     displayName = config.displayName,
                     newState = newState,
                     feedback = config.appearance.feedback,
+                    featureId = featureId,
                 )
             }
         }

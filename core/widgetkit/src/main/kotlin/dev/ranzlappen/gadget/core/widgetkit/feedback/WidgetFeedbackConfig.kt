@@ -17,12 +17,13 @@ import androidx.annotation.DrawableRes
  * prevents two features' hashed-template IDs from colliding inside
  * `NotificationManagerCompat.notify`.
  *
- * **Multibinding note.** As more widget-bearing features ship, this
- * pattern will move to a `Map<FeatureId, WidgetFeedbackConfig>`
- * multibinding so a single dispatcher instance serves every feature.
- * Torch is the first consumer; the type stays a simple per-feature
- * provide until the second feature lands and the multibinding
- * collision becomes real.
+ * **Multibinding.** Each widget-bearing feature contributes its config
+ * into a `Map<String, WidgetFeedbackConfig>` multibinding keyed by its
+ * stable feature id, so one [WidgetFeedbackDispatcher] singleton serves
+ * every feature; the provider passes that id to
+ * [WidgetFeedbackDispatcher.dispatch]. (Until vibration landed as the
+ * second consumer this was a single per-feature provide — two bare
+ * binds then collided in `SingletonC`.)
  */
 data class WidgetFeedbackConfig(
     /** Stable notification channel ID. Must be feature-prefixed

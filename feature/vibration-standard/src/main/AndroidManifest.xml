@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  :feature:vibration-standard — no components, just Hilt bindings + the no-op
+  VibrationRootCapabilities. Empty manifest keeps it a pure code contribution.
+  Mirror of :feature:vibration-rooted.
+-->
+<manifest />

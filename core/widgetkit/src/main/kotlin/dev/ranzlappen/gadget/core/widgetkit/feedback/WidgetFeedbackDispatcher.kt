@@ -34,14 +34,24 @@ import javax.inject.Singleton
  * the runtime permission is missing we still build the notification
  * but [NotificationManagerCompat.notify] silently drops it (the
  * permission check happens inside the compat layer).
+ *
+ * One app-wide singleton serves every widget-bearing feature: each
+ * feature contributes its [WidgetFeedbackConfig] into a
+ * `Map<String, WidgetFeedbackConfig>` multibinding keyed by its stable
+ * feature id, and the provider passes that id to [dispatch] so the
+ * right channel / small icon / notification-id base is used.
  */
 @Singleton
 class WidgetFeedbackDispatcher @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val config: WidgetFeedbackConfig,
+    private val configs: Map<String, @JvmSuppressWildcards WidgetFeedbackConfig>,
     private val channelRegistry: NotificationChannelRegistry,
 ) {
-    private val channelSpec by lazy {
+    private val notificationManager: NotificationManagerCompat by lazy {
+        NotificationManagerCompat.from(context)
+    }
+
+    private fun channelSpec(config: WidgetFeedbackConfig) =
         ChannelSpec(
             id = config.channelId,
             displayName = config.channelName,
@@ -49,10 +59,6 @@ class WidgetFeedbackDispatcher @Inject constructor(
             importance = ChannelSpec.Importance.Low,
             silent = true,
         )
-    }
-    private val notificationManager: NotificationManagerCompat by lazy {
-        NotificationManagerCompat.from(context).also { channelRegistry.ensure(channelSpec) }
-    }
 
     /**
      * Fire the feedback for a widget toggle.
@@ -60,8 +66,9 @@ class WidgetFeedbackDispatcher @Inject constructor(
      * @param displayName the widget's user-facing label (for `{name}`).
      * @param newState the post-toggle state (for `{state}` → on/off).
      * @param feedback the configured feedback variant.
+     * @param featureId selects the calling feature's [WidgetFeedbackConfig].
      */
-    fun dispatch(displayName: String, newState: Boolean, feedback: ToggleFeedback) {
+    fun dispatch(displayName: String, newState: Boolean, feedback: ToggleFeedback, featureId: String) {
         when (feedback) {
             ToggleFeedback.None -> Unit
             is ToggleFeedback.Toast ->
@@ -73,6 +80,10 @@ class WidgetFeedbackDispatcher @Inject constructor(
             is ToggleFeedback.Notification -> postNotification(
                 title = render(feedback.titleTemplate, displayName, newState),
                 body = render(feedback.bodyTemplate, displayName, newState),
+                config = requireNotNull(configs[featureId]) {
+                    "No WidgetFeedbackConfig bound for feature id '$featureId' — bind one " +
+                        "@IntoMap @StringKey(\"$featureId\") in the feature's Hilt module."
+                },
             )
         }
     }
@@ -85,7 +96,10 @@ class WidgetFeedbackDispatcher @Inject constructor(
                 if (state) ON_LITERAL else OFF_LITERAL,
             )
 
-    private fun postNotification(title: String, body: String) {
+    private fun postNotification(title: String, body: String, config: WidgetFeedbackConfig) {
+        // Idempotent — safe to ensure the channel on every post (the
+        // registry no-ops if it already exists, preserving user overrides).
+        channelRegistry.ensure(channelSpec(config))
         val notification = NotificationCompat.Builder(context, config.channelId)
             .setContentTitle(title)
             .setContentText(body)

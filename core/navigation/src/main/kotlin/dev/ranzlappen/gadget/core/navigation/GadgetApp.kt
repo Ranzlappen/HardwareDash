@@ -170,6 +170,7 @@ fun ComingSoonScreen(
         GadgetDestination.Automation -> "Automation rules coming in Phase 2"
         GadgetDestination.Settings -> "Settings coming in Phase 2"
         GadgetDestination.Torch -> "Torch is wired to its own screen"
+        GadgetDestination.Vibration -> "Vibration is wired to its own screen"
     }
     ModuleScreenScaffold(
         title = destination.label,

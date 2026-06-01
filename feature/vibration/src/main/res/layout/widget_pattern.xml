@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Pattern widget layout — identical structure to widget_vibrate.xml; the
+  clickable button id is @id/widget_pattern_button. RemoteViews-safe views only.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="4dp">
+
+    <ImageView
+        android:id="@id/widget_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:contentDescription="@null" />
+
+    <ImageButton
+        android:id="@+id/widget_pattern_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/widget_pattern_label"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@android:color/transparent" />
+
+    <ImageView
+        android:id="@id/widget_icon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_vibration_pattern" />
+
+</FrameLayout>
