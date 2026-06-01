@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
@@ -67,6 +68,7 @@ class VibrationScreenContentTest {
         setContent(VibrationScreenState.Initial)
         composeTestRule
             .onNodeWithText(res.getString(R.string.vibration_widget_list_empty_title))
+            .performScrollTo()
             .assertIsDisplayed()
     }
 
@@ -79,7 +81,7 @@ class VibrationScreenContentTest {
             ),
         )
         setContent(VibrationScreenState.Initial.copy(widgets = saved))
-        composeTestRule.onNodeWithContentDescription("Quick buzz").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Quick buzz").performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -91,6 +93,7 @@ class VibrationScreenContentTest {
         val events = setContent(VibrationScreenState.Initial.copy(widgets = listOf(widget)))
         composeTestRule
             .onNodeWithContentDescription(res.getString(R.string.vibration_widget_list_action_delete))
+            .performScrollTo()
             .performClick()
         assertTrue(events.contains(VibrationUiEvent.DeleteWidget(widget)))
     }
