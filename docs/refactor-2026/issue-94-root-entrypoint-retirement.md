@@ -1,10 +1,13 @@
 # Issue #94 — retiring `RootFeaturesEntryPoint` → per-feature `@Inject`
 
-> **Status: IN PROGRESS — 94-A (vibration) shipped.** 94-A (deleting the
-> legacy vibration controller tree, the orphaned `VibrationRootExtrasSection`
-> card, both flavors' `RootBindings` entries, and the
-> `RootFeaturesEntryPoint.vibrationController()` getter) has landed. 94-B onward
-> (torch sysfs next) remain, each as its own reviewable, device-verified slice.
+> **Status: IN PROGRESS — 94-A (vibration) + 94-B (torch sysfs) shipped.**
+> 94-A (deleting the legacy vibration controller tree, the orphaned
+> `VibrationRootExtrasSection` card, both flavors' `RootBindings` entries, and
+> the `RootFeaturesEntryPoint.vibrationController()` getter) and 94-B (deleting
+> the orphaned `TorchRootExtrasSection` card — the whole `RootedExtrasSections.kt`
+> file — and the `RootFeaturesEntryPoint.torchSysfsController()` getter) have
+> landed. The remaining features (radios / sensors / battery / diagnostics / av /
+> …) follow the same shape, each as its own reviewable, device-verified slice.
 > CI compile-checks every slice; on-device verification of the modular
 > replacement is still recommended before merge.
 
@@ -71,12 +74,27 @@ guards regressions, but CLAUDE.md requires legacy rooted retirement to be
 screen's rooted tools still work and nothing reached the deleted card before
 deleting. Keep it one commit, surfaced for review.
 
-## 94-B … (remaining features)
+## 94-B — torch sysfs (`torchSysfsController()` + `TorchRootExtrasSection`) — ✅ shipped
 
-Repeat the 94-A shape per feature — torch's sysfs surface
-(`torchSysfsController()` + `TorchRootExtrasSection`), then radios / sensors /
-battery / diagnostics / av / etc. — one batch each, each gated on the feature's
-modular replacement existing + device verification. When the last getter is
-gone, delete `RootFeaturesEntryPoint` + the now-empty legacy `RootBindings`, and
-fold any still-needed cross-feature aggregation into a `Map<FeatureId, X>`
+The cleanest possible slice — identical shape to 94-A:
+
+- The `TorchSysfsController` interface already lives in `:feature:torch/sysfs`,
+  and both flavor impls are bound by the feature modules' own Hilt modules
+  (`RootedTorchModule` / `StandardTorchModule`) — **not** by `:app`'s
+  `RootBindings`. The modular `RootedTorchRootCapabilities` injects
+  `TorchSysfsController` **directly**, so those bindings stay untouched.
+- The only consumer of `RootFeaturesEntryPoint.torchSysfsController()` was the
+  `TorchRootExtrasSection` card, which **nothing rendered** (orphaned, exactly
+  like vibration's). Deleted the whole `RootedExtrasSections.kt` file (the card
+  + `describeTorchResult` + demo constants) and dropped the entry-point getter
+  + its KDoc + the now-unused import. Refreshed three stale doc references
+  (`RootedTorchModule`, `RootedAvExtrasSections`, CLAUDE.md naming note).
+
+## 94-C … (remaining features)
+
+Repeat the 94-A/B shape per feature — radios / sensors / battery /
+diagnostics / av / etc. — one batch each, each gated on the feature's modular
+replacement existing + device verification. When the last getter is gone,
+delete `RootFeaturesEntryPoint` + the now-empty legacy `RootBindings`, and fold
+any still-needed cross-feature aggregation into a `Map<FeatureId, X>`
 multibinding.

@@ -1135,9 +1135,12 @@ torch is the hardened reference for every future migration:
   `enqueueMutex` as the key allocator, closing the counter-key race.
 - **Naming** — the privileged sysfs surface `LegacyTorchController` →
   `TorchSysfsController` (package `…torch.sysfs`), `LegacyStandardTorchController`
-  → `StandardTorchSysfsController`, entry-point getter `legacyTorchController()`
-  → `torchSysfsController()`. "Legacy" framing dropped — it is the current
-  rooted-tier contract, not deprecated code.
+  → `StandardTorchSysfsController`. "Legacy" framing dropped — it is the current
+  rooted-tier contract, not deprecated code. (The transitional
+  `RootFeaturesEntryPoint.torchSysfsController()` getter — and the orphaned
+  `TorchRootExtrasSection` card that was its only consumer — were later removed
+  in 94-B once the modular `RootedTorchRootCapabilities` injected the controller
+  directly; see issue #94.)
 - **Storage** — custom widget icons save as `WEBP_LOSSY` (API 30+, q80) instead
   of PNG@100.
 - **Docs** — "flawless precedent" → "hardened reference implementation"; the

@@ -20,7 +20,6 @@ import com.gadget.notification.NotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
 import com.gadget.sensors.SensorsController
 import com.gadget.storage.StorageController
-import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsController
 import com.gadget.usbdebug.UsbDebuggingController
 import com.gadget.wifi.WifiController
 import dagger.hilt.EntryPoint
@@ -43,9 +42,9 @@ import dagger.hilt.components.SingletonComponent
  *
  * This file (and the 13 `ui/Rooted*` Compose composables that reach it)
  * stays at its legacy `com.gadget.root.*` location for one specific
- * reason: it depends on **21 legacy non-modular feature controllers**
- * (the rooted `TorchSysfsController` via `dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsController`,
- * …, each still in `app/src/main/java/com/gadget/<feature>/`). Pulling
+ * reason: it depends on **20 legacy non-modular feature controllers**
+ * (`CameraController`, `MicrophoneController`, …, each still in
+ * `app/src/main/java/com/gadget/<feature>/`). Pulling
  * the entry-point into `:core:root` would force `:core:root` to depend
  * on every one of those legacy controllers, defeating the purpose of
  * the extraction.
@@ -69,20 +68,6 @@ interface RootFeaturesEntryPoint {
     fun capabilityRegistry(): RootCapabilityRegistry
     fun featureRegistry(): RootFeatureRegistry
     fun featureToggles(): RootFeatureToggles
-    /**
-     * Returns the privileged `dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsController`
-     * — the low-level sysfs surface still wired into the rooted-extras
-     * card. Phase 2 migrated standard-tier torch control to the modular
-     * `dev.ranzlappen.gadget.feature.torch.TorchController`, but the rooted
-     * extras (DutyCycleStrobe / MultiLed / Thermal) live on this sysfs
-     * controller until they're ported under issue
-     * https://github.com/Ranzlappen/HardwareDash/issues/94. The accessor
-     * name is intentionally distinct from the modular feature's
-     * `torchController()` entry point so the two don't collide on the
-     * singleton component (same method name, different return types would
-     * fail Hilt's `Found conflicting entry point declarations`).
-     */
-    fun torchSysfsController(): TorchSysfsController
     fun cameraController(): CameraController
     fun microphoneController(): MicrophoneController
     fun sensorsController(): SensorsController

@@ -186,7 +186,8 @@ private fun CameraExtrasDialog(onDismiss: () -> Unit) {
 
 /**
  * Card for the Microphone "Root extras" surface. Fits inside MicScreen's
- * vertically scrolling Column, mirroring `TorchRootExtrasSection`.
+ * vertically scrolling Column, mirroring the sibling `Rooted*ExtrasSection`
+ * cards.
  */
 @Composable
 fun MicrophoneRootExtrasSection(modifier: Modifier = Modifier) {
