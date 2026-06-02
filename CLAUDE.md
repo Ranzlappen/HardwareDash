@@ -1034,12 +1034,18 @@ worth-knowing specifics:
   `VibrationMetricSource` polls it (`stream()`=null) → a filled plateau that
   decays to 0. This is the reference answer for the next non-pollable
   (sensor) signals.
-- **Legacy left inert (no rename needed).** The legacy `:app`
-  `com.gadget.vibration.*` controller/service/widget + the
-  `RootFeaturesEntryPoint.vibrationController()` getter stay as-is — distinct
-  FQNs from the modular `dev.ranzlappen.gadget.feature.vibration.*`, so (unlike
-  torch's sysfs-controller case) **no entry-point getter rename was required**.
-  Retirement is a follow-up after on-device verification.
+- **Legacy controller + getter retired (94-A, issue #94).** The legacy `:app`
+  `com.gadget.vibration.*` controller tree (interface + result + `PwmPulse`,
+  the standard/rooted impls, and the sysfs/driver helpers), the orphaned
+  `VibrationRootExtrasSection` card, both flavors' `RootBindings` vibration
+  entries, and the `RootFeaturesEntryPoint.vibrationController()` getter are now
+  **deleted** — the modular `:feature:vibration` (+ `-rooted`/`-standard`) fully
+  supersedes them. Distinct FQNs from the modular
+  `dev.ranzlappen.gadget.feature.vibration.*` meant **no entry-point getter
+  rename was required** (unlike torch's sysfs-controller case). This is the
+  first executed slice of the `RootFeaturesEntryPoint` retirement; the remaining
+  features (torch sysfs next) follow the same shape — see
+  `docs/refactor-2026/issue-94-root-entrypoint-retirement.md`.
 
 1. **Design system** — every token from `LocalGadgetTheme.current`; no
    raw `dp` at call sites (per-file `Defaults` for fixed sizes); modifier

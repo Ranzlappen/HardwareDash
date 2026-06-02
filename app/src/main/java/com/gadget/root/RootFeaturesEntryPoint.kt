@@ -22,7 +22,6 @@ import com.gadget.sensors.SensorsController
 import com.gadget.storage.StorageController
 import dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsController
 import com.gadget.usbdebug.UsbDebuggingController
-import com.gadget.vibration.VibrationController
 import com.gadget.wifi.WifiController
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -44,9 +43,8 @@ import dagger.hilt.components.SingletonComponent
  *
  * This file (and the 13 `ui/Rooted*` Compose composables that reach it)
  * stays at its legacy `com.gadget.root.*` location for one specific
- * reason: it depends on **22 legacy non-modular feature controllers**
+ * reason: it depends on **21 legacy non-modular feature controllers**
  * (the rooted `TorchSysfsController` via `dev.ranzlappen.gadget.feature.torch.sysfs.TorchSysfsController`,
- * VibrationController via `com.gadget.vibration.VibrationController`,
  * …, each still in `app/src/main/java/com/gadget/<feature>/`). Pulling
  * the entry-point into `:core:root` would force `:core:root` to depend
  * on every one of those legacy controllers, defeating the purpose of
@@ -85,7 +83,6 @@ interface RootFeaturesEntryPoint {
      * fail Hilt's `Found conflicting entry point declarations`).
      */
     fun torchSysfsController(): TorchSysfsController
-    fun vibrationController(): VibrationController
     fun cameraController(): CameraController
     fun microphoneController(): MicrophoneController
     fun sensorsController(): SensorsController

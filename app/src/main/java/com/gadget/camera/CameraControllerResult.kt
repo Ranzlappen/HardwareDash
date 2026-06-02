@@ -3,7 +3,7 @@ package com.gadget.camera
 /**
  * Result returned by every [CameraController] extreme-tier method.
  *
- * Same shape as `TorchControllerResult` and `VibrationControllerResult` —
+ * Same shape as `TorchControllerResult` —
  * a separate type per surface lets each evolve independently and gives
  * compile-time safety against passing a torch result to a camera handler.
  */

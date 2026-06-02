@@ -1,8 +1,12 @@
 # Issue #94 — retiring `RootFeaturesEntryPoint` → per-feature `@Inject`
 
-> **Status: ROADMAP (not started).** This doc records the plan + the
-> investigation done while clearing the other deferred follow-ups, so the
-> deletion work can land as its own reviewable, device-verified PR(s).
+> **Status: IN PROGRESS — 94-A (vibration) shipped.** 94-A (deleting the
+> legacy vibration controller tree, the orphaned `VibrationRootExtrasSection`
+> card, both flavors' `RootBindings` entries, and the
+> `RootFeaturesEntryPoint.vibrationController()` getter) has landed. 94-B onward
+> (torch sysfs next) remain, each as its own reviewable, device-verified slice.
+> CI compile-checks every slice; on-device verification of the modular
+> replacement is still recommended before merge.
 
 ## Why this exists
 
@@ -29,9 +33,10 @@ two per-flavor `RootBindings.kt`. Each controller must modularize before its
 getter can go. So this is a **per-feature batch series**, each batch deleting one
 feature's legacy controller + getter once its modular replacement is verified.
 
-## 94-A — vibration (the worked first slice)
+## 94-A — vibration (the worked first slice) — ✅ shipped
 
-Vibration is the cleanest starting point and was fully investigated:
+Vibration was the cleanest starting point and was fully investigated, then
+executed (the deletion set below all landed):
 
 - The modular `:feature:vibration` screen **already supersedes** the legacy
   vibration rooted tools — `components/VibrationRootToolsCard.kt` +
