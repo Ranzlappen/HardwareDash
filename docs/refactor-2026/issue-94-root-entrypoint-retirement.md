@@ -1,15 +1,19 @@
 # Issue #94 — retiring `RootFeaturesEntryPoint` → per-feature `@Inject`
 
-> **Status: IN PROGRESS — 94-A (vibration) + 94-B (torch sysfs) shipped.**
+> **Status: PAUSED — 94-A (vibration) + 94-B (torch sysfs) shipped; the
+> remaining 18 getters are blocked on modular migration.**
 > 94-A (deleting the legacy vibration controller tree, the orphaned
 > `VibrationRootExtrasSection` card, both flavors' `RootBindings` entries, and
 > the `RootFeaturesEntryPoint.vibrationController()` getter) and 94-B (deleting
 > the orphaned `TorchRootExtrasSection` card — the whole `RootedExtrasSections.kt`
 > file — and the `RootFeaturesEntryPoint.torchSysfsController()` getter) have
-> landed. The remaining features (radios / sensors / battery / diagnostics / av /
-> …) follow the same shape, each as its own reviewable, device-verified slice.
-> CI compile-checks every slice; on-device verification of the modular
-> replacement is still recommended before merge.
+> landed. Torch + vibration were the only features already migrated to a
+> `:feature:<name>` module, which is exactly what made their getters deletable.
+> The remaining 18 getters have **no modular replacement yet** and so are
+> blocked per the roadmap's own gate (see the 94-C audit below); further
+> deletion is deferred until each feature is actually migrated. CI
+> compile-checks every slice; on-device verification of the modular replacement
+> is still recommended before merge.
 
 ## Why this exists
 
@@ -90,11 +94,41 @@ The cleanest possible slice — identical shape to 94-A:
   + its KDoc + the now-unused import. Refreshed three stale doc references
   (`RootedTorchModule`, `RootedAvExtrasSections`, CLAUDE.md naming note).
 
-## 94-C … (remaining features)
+## 94-C … (remaining 18 getters) — BLOCKED on modular migration
 
-Repeat the 94-A/B shape per feature — radios / sensors / battery /
-diagnostics / av / etc. — one batch each, each gated on the feature's modular
-replacement existing + device verification. When the last getter is gone,
-delete `RootFeaturesEntryPoint` + the now-empty legacy `RootBindings`, and fold
-any still-needed cross-feature aggregation into a `Map<FeatureId, X>`
-multibinding.
+**Audit (2026-06, after 94-A/B):** the entry point is down to 20 controller
+getters. A sweep of every remaining getter's consumers shows the rest are **not
+ready for a 94-style deletion** — torch + vibration were the only two features
+that were ready, *because they were the only two already migrated to a modular
+`:feature:<name>` module*. The roadmap's gate ("each slice is gated on the
+feature's modular replacement existing") therefore blocks all 18 remaining
+getters today. Detail:
+
+- **Live — must not delete (3).** These have a real, *reachable* consumer beyond
+  an orphaned card:
+  - `automationController` — its `AutomationRootExtrasSection` card **is**
+    rendered in the legacy `app/src/main/java/com/gadget/ui/link/LinkScreen.kt`.
+    Blocked until the deferred `:feature:automation-ui` supersedes Link.
+  - `gpsSpoofController` — used by `LocationSpoofService` + `SpoofEngine`.
+  - `keepAliveController` — used by `PersistentKeepAliveService` +
+    `RootedEmergencyResetCoordinator`.
+- **Orphaned card, but no modular replacement (17).** camera, microphone,
+  sensors, battery, wifi, bluetooth, nfc, ir, cell, gps, notification, storage,
+  display, audioRouting, adbDebugging, usbDebugging, diagnostics. Each is a
+  fully-isolated tree (interface + 2 flavor impls + result + 2 `RootBindings`
+  entries + getter + a `*RootExtrasSection` card that **nothing renders**). The
+  cards are already unreachable by users, but the controllers are real
+  *un-migrated* rooted functionality — deleting them now would drop the feature,
+  not migrate it. Unlike torch/vibration there is no modular tier to fall back
+  on, so they stay until each feature is actually migrated to a
+  `:feature:<name>` module (at which point it follows the exact 94-A/B shape:
+  orphaned card + getter + legacy tree removed once the modular replacement
+  ships).
+
+**Decision:** stop the deletion work here. 94-A/B shipped the two
+migration-ready features; the rest is gated on feature-by-feature modular
+migration, which is a separate, larger effort — not a mechanical getter sweep.
+When a feature does migrate, repeat 94-A/B: drop its orphaned card + getter +
+legacy controller tree. When the last getter is gone, delete
+`RootFeaturesEntryPoint` + the now-empty legacy `RootBindings`, and fold any
+still-needed cross-feature aggregation into a `Map<FeatureId, X>` multibinding.
