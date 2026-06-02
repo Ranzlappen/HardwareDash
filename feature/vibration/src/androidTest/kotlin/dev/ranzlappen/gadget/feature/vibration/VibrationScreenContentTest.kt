@@ -1,7 +1,10 @@
 package dev.ranzlappen.gadget.feature.vibration
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.filterToOne
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -59,7 +62,13 @@ class VibrationScreenContentTest {
         val events = setContent(
             VibrationScreenState.Initial.copy(vibration = VibrationState(isAvailable = true)),
         )
-        composeTestRule.onNodeWithText(res.getString(R.string.vibration_controls_play)).performClick()
+        // Both the controls card and the pattern builder expose a "Play"
+        // button. The builder's is disabled until a pattern is drawn (none in
+        // Initial), so select the enabled one — the one-shot control.
+        composeTestRule
+            .onAllNodesWithText(res.getString(R.string.vibration_controls_play))
+            .filterToOne(isEnabled())
+            .performClick()
         assertTrue(events.contains(VibrationUiEvent.OneShot))
     }
 
