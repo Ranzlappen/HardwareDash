@@ -36,4 +36,21 @@
         android:scaleType="fitCenter"
         android:src="@drawable/ic_strobe" />
 
+    <!--
+      Adaptive name label — see widget_flashlight.xml for the rationale.
+      @id/widget_label is declared in :core:widgetkit ids.xml.
+    -->
+    <TextView
+        android:id="@id/widget_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="2dp"
+        android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="11sp"
+        android:textColor="@android:color/white"
+        android:visibility="gone" />
+
 </FrameLayout>

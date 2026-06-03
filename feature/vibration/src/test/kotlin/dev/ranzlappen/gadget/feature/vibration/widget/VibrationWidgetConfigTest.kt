@@ -1,25 +1,30 @@
 package dev.ranzlappen.gadget.feature.vibration.widget
 
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
+import dev.ranzlappen.gadget.feature.vibration.automation.VibrationActionHandler
 import kotlinx.serialization.json.Json
 import org.junit.Test
 import kotlin.test.assertEquals
 
 /**
- * Serialization round-trip for [VibrationWidgetConfig] (pins the JSON shape so
- * a field rename surfaces as a test failure, not a silent on-disk
- * incompatibility). Mirror of torch's `TorchWidgetConfigTest`.
+ * Serialization round-trip for the v2 [VibrationWidgetConfig] (pins the JSON
+ * shape so a field rename surfaces as a test failure, not a silent on-disk
+ * incompatibility). The v1→v2 fold is covered by [migration.VibrationWidgetMigratorTest].
  */
 class VibrationWidgetConfigTest {
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
     @Test
-    fun `vibrate config round-trips`() {
+    fun `oneshot config round-trips`() {
         val original = VibrationWidgetConfig(
-            type = WidgetType.Vibrate,
             displayName = "Buzz",
-            amplitudePercent = 75,
-            durationMillis = 400L,
+            actionKey = VibrationWidgetConfig.FUNCTION_ONESHOT,
+            params = mapOf(
+                VibrationActionHandler.PARAM_AMPLITUDE to "75",
+                VibrationActionHandler.PARAM_DURATION_MS to "400",
+            ),
+            sizePreset = WidgetSizePreset.Large,
         )
         val decoded = json.decodeFromString(
             VibrationWidgetConfig.serializer(),
@@ -29,11 +34,11 @@ class VibrationWidgetConfigTest {
     }
 
     @Test
-    fun `pattern config round-trips with a patternId`() {
+    fun `pattern config round-trips with a pattern_id param`() {
         val original = VibrationWidgetConfig(
-            type = WidgetType.Pattern,
             displayName = "SOS pattern",
-            patternId = "pattern-123",
+            actionKey = VibrationWidgetConfig.FUNCTION_PATTERN,
+            params = mapOf(VibrationActionHandler.PARAM_PATTERN_ID to "pattern-123"),
         )
         val decoded = json.decodeFromString(
             VibrationWidgetConfig.serializer(),
@@ -44,9 +49,17 @@ class VibrationWidgetConfigTest {
 
     @Test
     fun `decoding tolerates unknown fields`() {
-        val withExtra = """{"type":"Vibrate","displayName":"X","futureField":42}"""
+        val withExtra = """{"displayName":"X","actionKey":"oneshot","futureField":42}"""
         val decoded = json.decodeFromString(VibrationWidgetConfig.serializer(), withExtra)
-        assertEquals(WidgetType.Vibrate, decoded.type)
         assertEquals("X", decoded.displayName)
+        assertEquals(VibrationWidgetConfig.FUNCTION_ONESHOT, decoded.actionKey)
+    }
+
+    @Test
+    fun `defaults to oneshot at the current schema version`() {
+        val config = VibrationWidgetConfig(displayName = "Y")
+        assertEquals(VibrationWidgetConfig.FUNCTION_ONESHOT, config.actionKey)
+        assertEquals(VibrationWidgetConfig.SCHEMA_VERSION, config.schemaVersion)
+        assertEquals(WidgetSizePreset.Medium, config.sizePreset)
     }
 }

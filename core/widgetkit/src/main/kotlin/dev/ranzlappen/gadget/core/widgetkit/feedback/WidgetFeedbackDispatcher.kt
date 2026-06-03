@@ -26,7 +26,9 @@ import javax.inject.Singleton
  *
  * Placeholder grammar inside templates (documented in [ToggleFeedback]):
  *  - `{name}` — the widget's display name.
- *  - `{state}` — `"on"` or `"off"` after the toggle.
+ *  - `{state}` — resolved from the tap's [WidgetFeedbackState]: `"on"`/`"off"`
+ *    for a toggle, `"triggered"` for a momentary function, or the failure
+ *    reason when the action failed.
  *
  * The dispatcher's notification path needs `POST_NOTIFICATIONS` on
  * API 33+. The caller (UI configuration sheet) is responsible for
@@ -61,25 +63,25 @@ class WidgetFeedbackDispatcher @Inject constructor(
         )
 
     /**
-     * Fire the feedback for a widget toggle.
+     * Fire the feedback for a widget tap.
      *
      * @param displayName the widget's user-facing label (for `{name}`).
-     * @param newState the post-toggle state (for `{state}` → on/off).
+     * @param state the tap outcome (for `{state}` — see [WidgetFeedbackState]).
      * @param feedback the configured feedback variant.
      * @param featureId selects the calling feature's [WidgetFeedbackConfig].
      */
-    fun dispatch(displayName: String, newState: Boolean, feedback: ToggleFeedback, featureId: String) {
+    fun dispatch(displayName: String, state: WidgetFeedbackState, feedback: ToggleFeedback, featureId: String) {
         when (feedback) {
             ToggleFeedback.None -> Unit
             is ToggleFeedback.Toast ->
                 Toast.makeText(
                     context,
-                    render(feedback.template, displayName, newState),
+                    render(feedback.template, displayName, state),
                     Toast.LENGTH_SHORT,
                 ).show()
             is ToggleFeedback.Notification -> postNotification(
-                title = render(feedback.titleTemplate, displayName, newState),
-                body = render(feedback.bodyTemplate, displayName, newState),
+                title = render(feedback.titleTemplate, displayName, state),
+                body = render(feedback.bodyTemplate, displayName, state),
                 config = requireNotNull(configs[featureId]) {
                     "No WidgetFeedbackConfig bound for feature id '$featureId' — bind one " +
                         "@IntoMap @StringKey(\"$featureId\") in the feature's Hilt module."
@@ -88,13 +90,16 @@ class WidgetFeedbackDispatcher @Inject constructor(
         }
     }
 
-    private fun render(template: String, name: String, state: Boolean): String =
+    private fun render(template: String, name: String, state: WidgetFeedbackState): String =
         template
             .replace("{name}", name)
-            .replace(
-                "{state}",
-                if (state) ON_LITERAL else OFF_LITERAL,
-            )
+            .replace("{state}", state.literal())
+
+    private fun WidgetFeedbackState.literal(): String = when (this) {
+        is WidgetFeedbackState.Toggle -> if (active) ON_LITERAL else OFF_LITERAL
+        WidgetFeedbackState.Triggered -> TRIGGERED_LITERAL
+        is WidgetFeedbackState.Failed -> reason
+    }
 
     private fun postNotification(title: String, body: String, config: WidgetFeedbackConfig) {
         // Idempotent — safe to ensure the channel on every post (the
@@ -125,5 +130,6 @@ class WidgetFeedbackDispatcher @Inject constructor(
 
         private const val ON_LITERAL = "on"
         private const val OFF_LITERAL = "off"
+        private const val TRIGGERED_LITERAL = "triggered"
     }
 }

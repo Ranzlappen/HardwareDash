@@ -49,7 +49,7 @@ class WidgetPinSuccessReceiver : BaseWidgetPinSuccessReceiver<TorchWidgetConfig>
         appWidgetId: Int,
         config: TorchWidgetConfig,
     ) {
-        broadcastTorchWidgetUpdate(context, config.type, appWidgetId)
+        broadcastTorchWidgetUpdate(context, appWidgetId)
     }
 
     private fun entry(context: Context): TorchPinEntryPoint =

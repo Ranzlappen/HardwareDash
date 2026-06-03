@@ -6,11 +6,16 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import dev.ranzlappen.gadget.core.automation.ActionParam
+import dev.ranzlappen.gadget.core.automation.ActionParamType
 import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
+import dev.ranzlappen.gadget.core.widgetkit.R as WidgetKitR
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunction
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunctionBehavior
+import dev.ranzlappen.gadget.core.widgetkit.ui.WidgetCustomizationResult
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
-import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
-import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,9 +23,14 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 /**
- * Instrumented tests for [WidgetConfigurationSheet]. Gated on the CI
- * emulator workflow at
+ * Instrumented tests for the torch [WidgetConfigurationSheet] shell over the
+ * kit-generic `WidgetCustomizationSheet`. Gated on the CI emulator workflow at
  * https://github.com/Ranzlappen/HardwareDash/issues/92.
+ *
+ * The torch shell only maps a [TorchWidgetConfig] into the kit sheet's
+ * `initial*` params and the [WidgetCustomizationResult] back out — these tests
+ * confirm the right footer label paints (new vs edit) and that confirm fires
+ * with the bound function's action key.
  */
 @RunWith(AndroidJUnit4::class)
 class WidgetConfigurationSheetTest {
@@ -30,88 +40,34 @@ class WidgetConfigurationSheetTest {
 
     private val res = InstrumentationRegistry.getInstrumentation().targetContext.resources
 
-    private val strobeInitial = TorchWidgetConfig(
-        type = WidgetType.Strobe,
-        displayName = "Test strobe",
-        rateHz = 5f,
-        morseMode = false,
+    // A small stand-in for the real TorchWidgetFunctionCatalog list.
+    private val functions = listOf(
+        WidgetFunction(
+            id = TorchWidgetConfig.FUNCTION_FLASHLIGHT,
+            label = "Flashlight",
+            behavior = WidgetFunctionBehavior.Toggle("torch_on", "torch_off", "torch_power"),
+        ),
+        WidgetFunction(
+            id = TorchWidgetConfig.FUNCTION_STROBE,
+            label = "Strobe",
+            params = listOf(ActionParam("rate_hz", ActionParamType.Float, "5", 1f, 20f)),
+            behavior = WidgetFunctionBehavior.Toggle("strobe_start", "strobe_stop", "strobe_running"),
+        ),
     )
 
     private val flashlightInitial = TorchWidgetConfig(
-        type = WidgetType.Flashlight,
         displayName = "Test flashlight",
+        actionKey = TorchWidgetConfig.FUNCTION_FLASHLIGHT,
     )
 
     @Test
-    fun newStrobeSheetShowsCreateLabel() {
-        composeTestRule.setContent {
-            GadgetTestTheme {
-                WidgetConfigurationSheet(
-                    initial = strobeInitial,
-                    isExisting = false,
-                    onDismiss = {},
-                    onConfirm = {},
-                    resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
-                    onImportCustomIcon = { null },
-                    iconChoices = emptyList(),
-                )
-            }
-        }
-
-        composeTestRule
-            .onNodeWithText(res.getString(R.string.torch_widget_config_save_new))
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun editStrobeSheetShowsSaveLabel() {
-        composeTestRule.setContent {
-            GadgetTestTheme {
-                WidgetConfigurationSheet(
-                    initial = strobeInitial,
-                    isExisting = true,
-                    onDismiss = {},
-                    onConfirm = {},
-                    resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
-                    onImportCustomIcon = { null },
-                    iconChoices = emptyList(),
-                )
-            }
-        }
-
-        composeTestRule
-            .onNodeWithText(res.getString(R.string.torch_widget_config_save_existing))
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun strobeSheetExposesSosToggle() {
-        composeTestRule.setContent {
-            GadgetTestTheme {
-                WidgetConfigurationSheet(
-                    initial = strobeInitial,
-                    isExisting = false,
-                    onDismiss = {},
-                    onConfirm = {},
-                    resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
-                    onImportCustomIcon = { null },
-                    iconChoices = emptyList(),
-                )
-            }
-        }
-
-        composeTestRule
-            .onNodeWithText(res.getString(R.string.torch_widget_config_morse_mode_label))
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun flashlightSheetHidesSosToggle() {
+    fun newSheetShowsCreateLabel() {
         composeTestRule.setContent {
             GadgetTestTheme {
                 WidgetConfigurationSheet(
                     initial = flashlightInitial,
                     isExisting = false,
+                    functions = functions,
                     onDismiss = {},
                     onConfirm = {},
                     resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
@@ -121,29 +77,63 @@ class WidgetConfigurationSheetTest {
             }
         }
 
-        // Compose's onNodeWithText returns an unattached node when the
-        // text is absent; calling `fetchSemanticsNode()` on such a node
-        // would throw. Using `assertExists` would also throw. We
-        // confirm absence via a try/catch on `assertIsDisplayed`.
-        var failed = false
-        try {
-            composeTestRule
-                .onNodeWithText(res.getString(R.string.torch_widget_config_morse_mode_label))
-                .assertIsDisplayed()
-        } catch (_: AssertionError) {
-            failed = true
-        }
-        assertEquals(true, failed, "SOS toggle should NOT render for flashlight widgets")
+        composeTestRule
+            .onNodeWithText(res.getString(WidgetKitR.string.widget_kit_create))
+            .assertIsDisplayed()
     }
 
     @Test
-    fun confirmCallbackReceivesUpdatedConfig() {
-        var captured: TorchWidgetConfig? = null
+    fun editSheetShowsSaveLabel() {
         composeTestRule.setContent {
             GadgetTestTheme {
                 WidgetConfigurationSheet(
-                    initial = strobeInitial,
+                    initial = flashlightInitial,
+                    isExisting = true,
+                    functions = functions,
+                    onDismiss = {},
+                    onConfirm = {},
+                    resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
+                    onImportCustomIcon = { null },
+                    iconChoices = emptyList(),
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithText(res.getString(WidgetKitR.string.widget_kit_save))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun functionPickerListsTheBoundFunctions() {
+        composeTestRule.setContent {
+            GadgetTestTheme {
+                WidgetConfigurationSheet(
+                    initial = flashlightInitial,
                     isExisting = false,
+                    functions = functions,
+                    onDismiss = {},
+                    onConfirm = {},
+                    resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
+                    onImportCustomIcon = { null },
+                    iconChoices = emptyList(),
+                )
+            }
+        }
+
+        // With more than one function the picker renders a chip per function.
+        composeTestRule.onNodeWithText("Strobe").assertIsDisplayed()
+    }
+
+    @Test
+    fun confirmCallbackReceivesResultWithSelectedActionKey() {
+        var captured: WidgetCustomizationResult? = null
+        composeTestRule.setContent {
+            GadgetTestTheme {
+                WidgetConfigurationSheet(
+                    initial = flashlightInitial,
+                    isExisting = false,
+                    functions = functions,
                     onDismiss = {},
                     onConfirm = { captured = it },
                     resolveIcon = { WidgetIconSource.Resource(R.drawable.ic_flashlight_on) },
@@ -154,10 +144,10 @@ class WidgetConfigurationSheetTest {
         }
 
         composeTestRule
-            .onNodeWithText(res.getString(R.string.torch_widget_config_save_new))
+            .onNodeWithText(res.getString(WidgetKitR.string.widget_kit_create))
             .performClick()
 
         assertNotNull(captured)
-        assertEquals(strobeInitial.type, captured!!.type)
+        assertEquals(TorchWidgetConfig.FUNCTION_FLASHLIGHT, captured!!.actionKey)
     }
 }

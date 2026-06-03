@@ -10,6 +10,10 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="40dp"
     android:minHeight="40dp"
+    android:minResizeWidth="40dp"
+    android:minResizeHeight="40dp"
+    android:maxResizeWidth="250dp"
+    android:maxResizeHeight="250dp"
     android:targetCellWidth="1"
     android:targetCellHeight="1"
     android:updatePeriodMillis="0"
@@ -18,4 +22,4 @@
     android:previewImage="@drawable/ic_strobe"
     android:description="@string/widget_strobe_description"
     android:widgetCategory="home_screen"
-    android:resizeMode="none" />
+    android:resizeMode="horizontal|vertical" />

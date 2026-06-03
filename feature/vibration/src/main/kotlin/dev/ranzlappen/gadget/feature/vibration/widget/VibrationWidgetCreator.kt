@@ -34,13 +34,15 @@ class VibrationWidgetCreator @Inject constructor(
             return WidgetPinResult.LauncherUnsupported
         }
 
-        val provider = ComponentName(context, config.type.providerClass)
+        // New pins always go through the designated generic provider; the
+        // chosen function lives in the config's actionKey, not a provider type.
+        val provider = ComponentName(context, VibrateWidgetProvider::class.java)
         val currentCount = appWidgetManager.getAppWidgetIds(provider).size
         if (!WidgetPinPolicy.canPin(currentCount)) {
-            Log.w(VibrationPinLog.TAG, "requestPin → cap reached ($currentCount) type=${config.type}")
+            Log.w(VibrationPinLog.TAG, "requestPin → cap reached ($currentCount) action=${config.actionKey}")
             return WidgetPinResult.CapReached
         }
-        Log.d(VibrationPinLog.TAG, "requestPin → type=${config.type}")
+        Log.d(VibrationPinLog.TAG, "requestPin → action=${config.actionKey}")
 
         val token = pending.enqueue(config)
 

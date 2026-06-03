@@ -16,11 +16,13 @@ import dev.ranzlappen.gadget.feature.torch.strobe.StrobeRuntime
 import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetCreator
-import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
+import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetFunctionCatalog
 import dev.ranzlappen.gadget.feature.torch.widget.broadcastTorchWidgetUpdate
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconChoice
-import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunction
+import dev.ranzlappen.gadget.core.widgetkit.ui.WidgetCustomizationResult
+import dev.ranzlappen.gadget.feature.torch.widget.customization.WidgetIconCatalog
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -58,8 +60,8 @@ import javax.inject.Inject
  *   needed because the slider commits exactly once per release.
  * - [onStrobeToggle] — start / stop [StrobeService] using the
  *   current slider value. Mirrors the strobe widget tap path.
- * - [onAddFlashlight] / [onAddStrobeRequested] — kick off the
- *   [TorchWidgetCreator] pin flow.
+ * - [onAddWidget] — open the customization sheet for a new widget; confirm
+ *   kicks off the [TorchWidgetCreator] pin flow.
  * - [onEditWidget] / [onSheetConfirmed] / [onSheetDismissed] —
  *   widget configuration sheet round-trip.
  * - [onDeleteWidget] — purge a saved config.
@@ -71,6 +73,7 @@ class TorchViewModel @Inject constructor(
     private val userPreferences: UserPreferencesRepository,
     private val widgetRepository: WidgetConfigStore<TorchWidgetConfig>,
     private val widgetCreator: TorchWidgetCreator,
+    private val widgetFunctionCatalog: TorchWidgetFunctionCatalog,
     private val iconCatalog: WidgetIconCatalog,
     private val rootCapabilities: TorchRootCapabilities,
     private val collapseRepo: CollapseStateRepository,
@@ -225,10 +228,7 @@ class TorchViewModel @Inject constructor(
             is TorchUiEvent.MorseTextChange -> onMorseTextChange(event.text)
             is TorchUiEvent.RateChange -> onRateChange(event.rateHz)
             TorchUiEvent.RateCommit -> onRateCommit()
-            TorchUiEvent.AddFlashlight -> onAddFlashlight()
-            TorchUiEvent.AddStrobe -> onAddStrobeRequested()
-            TorchUiEvent.QuickPinFlashlight -> onQuickPinFlashlight()
-            TorchUiEvent.QuickPinStrobe -> onQuickPinStrobe()
+            TorchUiEvent.AddWidget -> onAddWidget()
             is TorchUiEvent.EditWidget -> onEditWidget(event.widget)
             is TorchUiEvent.DeleteWidget -> onDeleteWidget(event.widget)
             TorchUiEvent.RootBoostBrightness -> onRootBoostBrightness()
@@ -386,41 +386,19 @@ class TorchViewModel @Inject constructor(
         )
     }
 
-    fun onAddFlashlight() {
-        // Both Add flows open the configuration sheet now that
-        // appearance + tap + feedback are per-widget knobs — having
-        // flashlight pin directly while strobe opens a sheet was an
-        // inconsistency users noticed (the appearance picker would
-        // never reach the flashlight path).
-        _sheetTarget.value = SheetTarget.New(defaultFlashlightConfig())
+    /** Open the customization sheet for a brand-new widget, seeded with the
+     *  flashlight function + the default name. The user picks the function
+     *  (flashlight / strobe / morse), tunes its params, and styles it inside
+     *  the sheet; confirm requests the pin. */
+    fun onAddWidget() {
+        _sheetTarget.value = SheetTarget.New(defaultNewConfig())
     }
 
-    fun onAddStrobeRequested() {
-        _sheetTarget.value = SheetTarget.New(defaultStrobeConfig())
-    }
-
-    /** Skip the sheet — pin a flashlight widget with the default look. */
-    fun onQuickPinFlashlight() {
-        requestPin(defaultFlashlightConfig())
-    }
-
-    /** Skip the sheet — pin a strobe widget with the default look. */
-    fun onQuickPinStrobe() {
-        requestPin(defaultStrobeConfig())
-    }
-
-    private fun defaultFlashlightConfig(): TorchWidgetConfig = TorchWidgetConfig(
-        type = WidgetType.Flashlight,
+    /** The seed config a new-widget sheet opens with: the flashlight power
+     *  toggle, default look, default size. */
+    private fun defaultNewConfig(): TorchWidgetConfig = TorchWidgetConfig(
         displayName = context.getString(R.string.torch_widget_default_name_flashlight),
-    )
-
-    private fun defaultStrobeConfig(): TorchWidgetConfig = TorchWidgetConfig(
-        type = WidgetType.Strobe,
-        displayName = context.getString(R.string.torch_widget_default_name_strobe),
-        rateHz = state.value.defaultStrobeRateHz,
-        // Pre-fill the Morse box so flipping on Morse mode plays
-        // "SOS" out of the box without the user typing anything.
-        morseText = StrobeService.DEFAULT_MORSE_TEXT,
+        actionKey = TorchWidgetConfig.FUNCTION_FLASHLIGHT,
     )
 
     /** Drive the same pin path the sheet's confirm uses, mapping the
@@ -460,26 +438,57 @@ class TorchViewModel @Inject constructor(
         )
     }
 
+    /**
+     * The widget functions the customization sheet offers, flavor-filtered:
+     * any `requiresRoot` function is dropped when root isn't available so the
+     * picker only lists runnable functions. Torch has no rooted widget
+     * functions today (so this is a no-op filter), but the filter is wired for
+     * parity with the contract — `rootAvailability` flips on the rooted flavor
+     * once it reports a usable shell.
+     */
+    val functions: List<WidgetFunction>
+        get() = widgetFunctionCatalog.functions.filter {
+            !it.requiresRoot || rootAvailability.value.rootReady
+        }
+
     fun onSheetDismissed() {
         _sheetTarget.value = null
     }
 
-    fun onSheetConfirmed(updated: TorchWidgetConfig) {
+    /**
+     * Commit the customization sheet's [result] into a v2 [TorchWidgetConfig].
+     * A new widget pins (the function the user picked rides in `actionKey` +
+     * `params`); an edit saves and repaints the placed instance.
+     */
+    fun onSheetConfirmed(result: WidgetCustomizationResult) {
         when (val target = _sheetTarget.value) {
-            is SheetTarget.New -> requestPin(updated)
+            is SheetTarget.New -> requestPin(result.toConfig(target.config))
             is SheetTarget.Existing -> {
+                val updated = result.toConfig(target.config)
                 viewModelScope.launch {
                     widgetRepository.save(target.appWidgetId, updated)
                     // Repaint the placed widget now — saving alone leaves
                     // the launcher's cached RemoteViews stale until the
                     // next tap.
-                    broadcastTorchWidgetUpdate(context, updated.type, target.appWidgetId)
+                    broadcastTorchWidgetUpdate(context, target.appWidgetId)
                 }
             }
             null -> Unit
         }
         _sheetTarget.value = null
     }
+
+    /** Map the generic sheet result onto a v2 config, preserving the
+     *  non-customizable fields ([TorchWidgetConfig.removed] / schema) from the
+     *  config the sheet opened with. */
+    private fun WidgetCustomizationResult.toConfig(base: TorchWidgetConfig): TorchWidgetConfig =
+        base.copy(
+            displayName = name.ifBlank { base.displayName },
+            actionKey = actionKey,
+            params = params,
+            sizePreset = sizePreset,
+            appearance = appearance,
+        )
 
     fun onDeleteWidget(widget: SavedTorchWidget) {
         viewModelScope.launch {
@@ -493,7 +502,7 @@ class TorchViewModel @Inject constructor(
                 widget.appWidgetId,
                 widget.config.copy(removed = true),
             )
-            broadcastTorchWidgetUpdate(context, widget.config.type, widget.appWidgetId)
+            broadcastTorchWidgetUpdate(context, widget.appWidgetId)
             _widgetRemovedEvents.tryEmit(Unit)
         }
     }

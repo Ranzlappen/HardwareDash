@@ -29,7 +29,7 @@ class WidgetPinSuccessReceiver : BaseWidgetPinSuccessReceiver<VibrationWidgetCon
         entry(context).vibrationConfigStore()
 
     override suspend fun afterSave(context: Context, appWidgetId: Int, config: VibrationWidgetConfig) {
-        broadcastVibrationWidgetUpdate(context, config.type, appWidgetId)
+        broadcastVibrationWidgetUpdate(context, appWidgetId)
     }
 
     private fun entry(context: Context): VibrationPinEntryPoint =

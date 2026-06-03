@@ -150,6 +150,7 @@ fun TorchScreen(
         WidgetConfigurationSheet(
             initial = target.config,
             isExisting = target is TorchViewModel.SheetTarget.Existing,
+            functions = viewModel.functions,
             onDismiss = viewModel::onSheetDismissed,
             onConfirm = viewModel::onSheetConfirmed,
             resolveIcon = viewModel::resolveWidgetIcon,

@@ -948,12 +948,33 @@ contract (`displayName`, `removed`, `schemaVersion`, `appearance`),
   RemoteViews-rendered widget). `GadgetColorPicker` moved to `:core:ui`
   (P1-10).
 
-**Pending follow-up (deferred from C6):** the appearance-section UI
-(chip rows + icon picker + tap-animation chooser + feedback templates)
-still lives in torch's `WidgetConfigurationSheet`. Extracting it
-generically requires lifting ~30 labels into kit `strings.xml` plus a
-generic `WidgetIconChoice` type — scoped out of Phase 2 to keep diffs
-reviewable.
+**Function-driven widgets (the comprehensive customization model).** A
+widget no longer hardcodes its action in its provider class. Each per-instance
+config stores `{ displayName, actionKey, params: Map<String,String>,
+sizePreset, appearance }`; `actionKey` names a **`WidgetFunction`**
+(`:core:widgetkit` `function/`) the user picks in the **single** comprehensive
+`WidgetCustomizationSheet` (name → function picker → auto-generated param
+editor from each function's `ActionParam` schema → size → appearance/preview).
+A tap resolves the bound function and dispatches it through
+`WidgetFunctionDispatcher` → `:core:automation`'s `ModuleActionRegistry`, so a
+widget runs the *same* actions as in-app controls (and feeds the same
+runtime/monitoring). Functions are **Toggle** (two paired actions + a live
+`WidgetStateSource` keyed `"<featureId>:<stateKey>"`, drives the active/inactive
+icon swap, reports on/off) or **Momentary** (one action, resting icon + press
+frame, reports "triggered"). `BaseGadgetWidgetProvider` is now generic over the
+function — it owns the whole tap→dispatch→feedback→repaint chain plus adaptive
+density (`onAppWidgetOptionsChanged` + resizable info-XML + a
+`@id/widget_label` shown at larger sizes); a feature provides only
+`resolveFunction`/`paramsOf`/`sizePresetOf`/`buildRemoteViews`. Each feature has
+ONE designated new-pin provider (torch→`FlashlightWidgetProvider`,
+vibration→`VibrateWidgetProvider`); the other per-type provider classes stay
+registered only to keep already-placed legacy widgets alive, and a
+`Migrator<T>` folds the old `type`-based v1 config into v2 (`schemaVersion=2`;
+v1 fields kept as decode-only `@Deprecated` carriers because `sharedJson` uses
+`ignoreUnknownKeys`). Rooted functions are flavor-filtered out of the picker on
+standard. Feedback is `WidgetFeedbackState` (Toggle/Triggered/Failed) — the fix
+for the vibration widget's misleading always-"off" toast. Torch + vibration are
+the reference consumers.
 
 **The "remove-but-keep-inert" widget pattern** (also documented in the
 migration guide): a non-host app can't pull a placed widget off a

@@ -14,6 +14,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
+import dev.ranzlappen.gadget.feature.vibration.automation.VibrationActionHandler
 import dev.ranzlappen.gadget.feature.vibration.widget.VibrationWidgetConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,15 +26,16 @@ import javax.inject.Inject
 
 /**
  * Foreground service that plays a widget's configured vibration — a one-shot
- * buzz ([VibrationWidgetConfig] for [dev.ranzlappen.gadget.feature.vibration.widget.WidgetType.Vibrate])
- * or a saved [VibrationPattern] ([WidgetType.Pattern]).
+ * buzz (the [VibrationWidgetConfig.FUNCTION_ONESHOT] function) or a saved
+ * [VibrationPattern] (the [VibrationWidgetConfig.FUNCTION_PATTERN] function).
  *
- * Mirror of torch's `StrobeService`:
- * - **Widget taps** pass only [EXTRA_APPWIDGET_ID]; the service reads that
- *   widget's persisted [VibrationWidgetConfig] itself (via `getFresh`, not the
- *   hot cache, so a just-pinned widget plays correctly on the first tap).
- * - All playback flows through [VibrationController], which folds the commanded
- *   amplitude into [VibrationRuntime] (the monitored signal).
+ * **Widget taps no longer use this service** — they dispatch through the
+ * function-driven provider → action handler. The service is retained for any
+ * non-widget caller that still starts it with an [EXTRA_APPWIDGET_ID]; it reads
+ * that widget's persisted [VibrationWidgetConfig] itself (via `getFresh`, not
+ * the hot cache) and branches on the config's `actionKey` + `params`.
+ * All playback flows through [VibrationController], which folds the commanded
+ * amplitude into [VibrationRuntime] (the monitored signal).
  *
  * `foregroundServiceType="shortService"` (API 34+) permits a user-initiated FGS
  * with a ~3-minute cap — an acceptable safety bound for a vibration session.
@@ -88,10 +90,14 @@ class VibrationPlaybackService : Service() {
             } else {
                 null
             }
-            when (config?.type) {
-                dev.ranzlappen.gadget.feature.vibration.widget.WidgetType.Pattern -> {
-                    val pattern = config.patternId.takeIf { it.isNotBlank() }
-                        ?.let { patternRepository.get(it) }
+            // Widget taps now dispatch through the action handler, so this
+            // service is only reached by any non-widget callers. It branches on
+            // the function-driven `actionKey` + `params` (the v2 config shape).
+            when (config?.actionKey) {
+                VibrationWidgetConfig.FUNCTION_PATTERN -> {
+                    val patternId = config.params[VibrationActionHandler.PARAM_PATTERN_ID]
+                        ?.takeIf { it.isNotBlank() }
+                    val pattern = patternId?.let { patternRepository.get(it) }
                     if (pattern != null) {
                         controller.playPattern(
                             timingsMillis = pattern.timingsMillis.toLongArray(),
@@ -101,15 +107,16 @@ class VibrationPlaybackService : Service() {
                     }
                 }
                 else -> {
-                    // Default + Vibrate variant: a one-shot at the configured
+                    // Default + one-shot function: a buzz at the configured
                     // strength/duration (falls back to defaults for an in-app
                     // start with no config).
-                    controller.oneShot(
-                        amplitudePercent = config?.amplitudePercent
-                            ?: VibrationWidgetConfig.DEFAULT_AMPLITUDE_PERCENT,
-                        durationMillis = config?.durationMillis
-                            ?: VibrationWidgetConfig.DEFAULT_DURATION_MS,
-                    )
+                    val amplitude = config?.params
+                        ?.get(VibrationActionHandler.PARAM_AMPLITUDE)?.toIntOrNull()
+                        ?: VibrationWidgetConfig.DEFAULT_AMPLITUDE_PERCENT
+                    val duration = config?.params
+                        ?.get(VibrationActionHandler.PARAM_DURATION_MS)?.toLongOrNull()
+                        ?: VibrationWidgetConfig.DEFAULT_DURATION_MS
+                    controller.oneShot(amplitudePercent = amplitude, durationMillis = duration)
                 }
             }
             // One-shots / non-looping patterns are fire-and-forget — the

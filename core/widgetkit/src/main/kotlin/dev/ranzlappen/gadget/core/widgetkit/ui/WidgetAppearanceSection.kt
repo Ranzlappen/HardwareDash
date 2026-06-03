@@ -90,6 +90,11 @@ import kotlinx.coroutines.withContext
  *                            file picker, copies + downscales the
  *                            chosen image into app storage, returns
  *                            the new custom-icon key.
+ * @param iconMode whether to expose separate active/inactive icon pickers
+ *                 ([WidgetIconPickerMode.ActiveInactive], for a stateful
+ *                 toggle function) or a single icon picker
+ *                 ([WidgetIconPickerMode.Single], for a momentary function —
+ *                 both keys are set to the same value).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -100,6 +105,7 @@ fun WidgetAppearanceSection(
     resolveIcon: (String) -> WidgetIconSource,
     onImportCustomIcon: suspend (Uri) -> String?,
     modifier: Modifier = Modifier,
+    iconMode: WidgetIconPickerMode = WidgetIconPickerMode.ActiveInactive,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
     // Pre-resolve the default feedback templates here, in @Composable
@@ -154,32 +160,54 @@ fun WidgetAppearanceSection(
             )
         }
         val iconTint = iconTintArgb(LocalContext.current, appearance.iconStyle)
-        IconPickerRow(
-            label = stringResource(R.string.widget_kit_appearance_icon_active_label),
-            selectedKey = appearance.iconStyle.activeKey,
-            choices = iconChoices,
-            tintArgb = iconTint,
-            resolveIcon = resolveIcon,
-            onImportCustomIcon = onImportCustomIcon,
-            onSelect = { key ->
-                onAppearanceChange(
-                    appearance.copy(iconStyle = appearance.iconStyle.copy(activeKey = key)),
+        when (iconMode) {
+            WidgetIconPickerMode.Single ->
+                // Momentary functions have no on/off state, so one icon serves
+                // both — write the chosen key to both slots.
+                IconPickerRow(
+                    label = stringResource(R.string.widget_kit_appearance_icon_label),
+                    selectedKey = appearance.iconStyle.activeKey,
+                    choices = iconChoices,
+                    tintArgb = iconTint,
+                    resolveIcon = resolveIcon,
+                    onImportCustomIcon = onImportCustomIcon,
+                    onSelect = { key ->
+                        onAppearanceChange(
+                            appearance.copy(
+                                iconStyle = appearance.iconStyle.copy(activeKey = key, inactiveKey = key),
+                            ),
+                        )
+                    },
                 )
-            },
-        )
-        IconPickerRow(
-            label = stringResource(R.string.widget_kit_appearance_icon_inactive_label),
-            selectedKey = appearance.iconStyle.inactiveKey,
-            choices = iconChoices,
-            tintArgb = iconTint,
-            resolveIcon = resolveIcon,
-            onImportCustomIcon = onImportCustomIcon,
-            onSelect = { key ->
-                onAppearanceChange(
-                    appearance.copy(iconStyle = appearance.iconStyle.copy(inactiveKey = key)),
+            WidgetIconPickerMode.ActiveInactive -> {
+                IconPickerRow(
+                    label = stringResource(R.string.widget_kit_appearance_icon_active_label),
+                    selectedKey = appearance.iconStyle.activeKey,
+                    choices = iconChoices,
+                    tintArgb = iconTint,
+                    resolveIcon = resolveIcon,
+                    onImportCustomIcon = onImportCustomIcon,
+                    onSelect = { key ->
+                        onAppearanceChange(
+                            appearance.copy(iconStyle = appearance.iconStyle.copy(activeKey = key)),
+                        )
+                    },
                 )
-            },
-        )
+                IconPickerRow(
+                    label = stringResource(R.string.widget_kit_appearance_icon_inactive_label),
+                    selectedKey = appearance.iconStyle.inactiveKey,
+                    choices = iconChoices,
+                    tintArgb = iconTint,
+                    resolveIcon = resolveIcon,
+                    onImportCustomIcon = onImportCustomIcon,
+                    onSelect = { key ->
+                        onAppearanceChange(
+                            appearance.copy(iconStyle = appearance.iconStyle.copy(inactiveKey = key)),
+                        )
+                    },
+                )
+            }
+        }
 
         // ─── Tap behaviour ────────────────────────────────────────
         SectionHeader(stringResource(R.string.widget_kit_appearance_section_tap))
@@ -262,6 +290,13 @@ fun WidgetAppearanceSection(
         }
     }
 }
+
+/**
+ * Whether [WidgetAppearanceSection] exposes one icon picker or a separate
+ * active/inactive pair — chosen by the dialog from the selected function's
+ * behavior (toggle → [ActiveInactive], momentary → [Single]).
+ */
+enum class WidgetIconPickerMode { Single, ActiveInactive }
 
 @Composable
 private fun SectionHeader(text: String) {

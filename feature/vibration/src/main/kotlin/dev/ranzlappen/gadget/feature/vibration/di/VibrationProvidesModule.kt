@@ -17,6 +17,7 @@ import dev.ranzlappen.gadget.feature.vibration.R
 import dev.ranzlappen.gadget.feature.vibration.monitor.VibrationBootRearmHandler
 import dev.ranzlappen.gadget.feature.vibration.widget.VibrationPinLog
 import dev.ranzlappen.gadget.feature.vibration.widget.VibrationWidgetConfig
+import dev.ranzlappen.gadget.feature.vibration.widget.migration.VibrationWidgetMigrator
 import javax.inject.Singleton
 
 /**
@@ -62,7 +63,7 @@ object VibrationProvidesModule {
             keyPrefix = "widget_",
             serializer = VibrationWidgetConfig.serializer(),
         )
-        return WidgetConfigStore(prefs)
+        return WidgetConfigStore(prefs, VibrationWidgetMigrator())
     }
 
     @Provides

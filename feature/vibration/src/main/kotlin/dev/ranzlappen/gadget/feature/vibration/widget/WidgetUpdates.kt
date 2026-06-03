@@ -12,23 +12,25 @@ internal const val REMOVED_WIDGET_ICON_ALPHA: Int = 70
 
 /**
  * Fire an [AppWidgetManager.ACTION_APPWIDGET_UPDATE] broadcast at the provider
- * backing [type], scoped to a single [appWidgetId], so a fresh-pin or in-app
- * edit repaints the placed widget immediately.
+ * actually hosting [appWidgetId] so a fresh-pin or in-app edit repaints the
+ * placed widget immediately.
+ *
+ * The provider class is resolved from the live
+ * [AppWidgetManager.getAppWidgetInfo] (so a legacy pattern widget repaints via
+ * [PatternWidgetProvider] and everything else via the designated
+ * [VibrateWidgetProvider]); it falls back to [VibrateWidgetProvider] when the
+ * info isn't available yet (e.g. a just-pinned id the host hasn't surfaced).
  */
 internal fun broadcastVibrationWidgetUpdate(
     context: Context,
-    type: WidgetType,
     appWidgetId: Int,
 ) {
-    val providerClass = type.providerClass
-    val intent = Intent(
-        AppWidgetManager.ACTION_APPWIDGET_UPDATE,
-        null,
-        context,
-        providerClass,
-    ).apply {
+    val manager = AppWidgetManager.getInstance(context)
+    val provider = manager?.getAppWidgetInfo(appWidgetId)?.provider
+        ?: ComponentName(context, VibrateWidgetProvider::class.java)
+    val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
         putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
-        component = ComponentName(context, providerClass)
+        component = provider
     }
     context.sendBroadcast(intent)
 }

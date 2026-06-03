@@ -11,6 +11,7 @@ import dev.ranzlappen.gadget.core.automation.ActionParam
 import dev.ranzlappen.gadget.core.automation.ActionParamType
 import dev.ranzlappen.gadget.core.automation.ActionResult
 import dev.ranzlappen.gadget.core.automation.ModuleAction
+import dev.ranzlappen.gadget.feature.vibration.PatternRepository
 import dev.ranzlappen.gadget.feature.vibration.PwmPulse
 import dev.ranzlappen.gadget.feature.vibration.VibrationController
 import dev.ranzlappen.gadget.feature.vibration.VibrationRootCapabilities
@@ -30,6 +31,7 @@ import javax.inject.Singleton
 class VibrationActionHandler @Inject constructor(
     private val controller: VibrationController,
     private val rootCapabilities: VibrationRootCapabilities,
+    private val patternRepository: PatternRepository,
 ) : ActionHandler {
 
     override val featureId: String = FEATURE_ID
@@ -44,6 +46,11 @@ class VibrationActionHandler @Inject constructor(
             ),
         ),
         ModuleAction(ACTION_STOP, "Stop vibration"),
+        ModuleAction(
+            key = ACTION_PATTERN_PLAY,
+            label = "Play saved pattern",
+            params = listOf(ActionParam(PARAM_PATTERN_ID, ActionParamType.Text)),
+        ),
         ModuleAction(
             key = ACTION_EXTREME_AMPLITUDE,
             label = "Extreme amplitude (rooted)",
@@ -84,6 +91,20 @@ class VibrationActionHandler @Inject constructor(
                 ActionResult.Success
             }
             ACTION_STOP -> { controller.stop(); ActionResult.Success }
+            ACTION_PATTERN_PLAY -> {
+                val id = params[PARAM_PATTERN_ID]?.takeIf { it.isNotBlank() }
+                val pattern = id?.let { patternRepository.get(it) }
+                if (pattern != null) {
+                    controller.playPattern(
+                        timingsMillis = pattern.timingsMillis.toLongArray(),
+                        amplitudes = pattern.amplitudes.toIntArray(),
+                        loop = false,
+                    )
+                    ActionResult.Success
+                } else {
+                    ActionResult.Failure("pattern not found")
+                }
+            }
             ACTION_EXTREME_AMPLITUDE -> rootCapabilities.extremeAmplitude(
                 amplitudePercent = params.intOr(PARAM_AMPLITUDE, 100),
                 durationMillis = params.longOr(PARAM_DURATION_MS, 1_000),
@@ -119,11 +140,13 @@ class VibrationActionHandler @Inject constructor(
         const val FEATURE_ID = "vibration"
         const val ACTION_ONESHOT = "oneshot"
         const val ACTION_STOP = "stop"
+        const val ACTION_PATTERN_PLAY = "pattern_play"
         const val ACTION_EXTREME_AMPLITUDE = "extreme_amplitude"
         const val ACTION_DIRECT_PWM = "direct_pwm"
         const val ACTION_SUSTAINED_RUMBLE = "sustained_rumble"
         const val PARAM_AMPLITUDE = "amplitude"
         const val PARAM_DURATION_MS = "duration_ms"
+        const val PARAM_PATTERN_ID = "pattern_id"
         const val PARAM_PWM_ON_MICROS = "pwm_on_micros"
         const val PARAM_PWM_OFF_MICROS = "pwm_off_micros"
         const val PARAM_PWM_PULSES = "pwm_pulses"

@@ -37,21 +37,22 @@
 
     <!-- Widgets card -->
     <string name="vibration_section_widgets_title">Your widgets</string>
-    <string name="vibration_widget_add_vibrate">Add vibrate widget</string>
-    <string name="vibration_widget_add_pattern">Add pattern widget</string>
-    <string name="vibration_widget_quick_pin_vibrate">Pin vibrate widget with default settings</string>
+    <string name="vibration_widget_add">Add widget</string>
     <string name="vibration_widget_list_empty_title">No widgets yet</string>
     <string name="vibration_widget_list_empty_subtitle">Add a home-screen widget to vibrate with one tap.</string>
     <string name="vibration_widget_list_action_edit">Edit widget</string>
     <string name="vibration_widget_list_action_delete">Delete widget</string>
 
-    <!-- Widget config sheet -->
-    <string name="vibration_widget_config_title_new">New widget</string>
-    <string name="vibration_widget_config_title_edit">Edit widget</string>
-    <string name="vibration_widget_config_pattern_note">This widget plays your first saved pattern. Save a pattern in the builder above to choose one.</string>
-    <string name="vibration_widget_config_cancel">Cancel</string>
-    <string name="vibration_widget_config_save_new">Add widget</string>
-    <string name="vibration_widget_config_save_existing">Save</string>
+    <!-- Widget config sheet (feature-specific bits; the rest are kit strings) -->
+    <string name="vibration_widget_config_pattern_label">Saved pattern</string>
+    <string name="vibration_widget_config_pattern_note">No saved patterns yet. Save a pattern in the builder above to choose one.</string>
+
+    <!-- Widget function labels (the customization sheet's function picker) -->
+    <string name="vibration_widget_function_oneshot">One-shot buzz</string>
+    <string name="vibration_widget_function_pattern">Saved pattern</string>
+    <string name="vibration_widget_function_extreme_amplitude">Extreme amplitude (rooted)</string>
+    <string name="vibration_widget_function_direct_pwm">Direct PWM (rooted)</string>
+    <string name="vibration_widget_function_sustained_rumble">Sustained rumble (rooted)</string>
 
     <!-- Widget labels / descriptions -->
     <string name="widget_vibrate_label">Vibrate</string>

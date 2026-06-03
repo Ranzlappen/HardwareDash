@@ -6,52 +6,43 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
-import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunction
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunctionDispatcher
 import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.provider.BaseGadgetWidgetProvider
-import dev.ranzlappen.gadget.feature.torch.monitor.TorchBootRearmHandler
+import dev.ranzlappen.gadget.core.widgetkit.provider.WidgetRenderDensity
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.torch.R
-import dev.ranzlappen.gadget.feature.torch.strobe.StrobeRuntime
-import dev.ranzlappen.gadget.feature.torch.strobe.StrobeService
+import dev.ranzlappen.gadget.feature.torch.monitor.TorchBootRearmHandler
 import dev.ranzlappen.gadget.core.widgetkit.R as WidgetKitR
-import kotlinx.coroutines.launch
 
 /**
- * Home-screen strobe widget — 1×1 cell.
+ * **Legacy-only** torch widget provider — kept registered solely so
+ * already-placed strobe widgets from before the function-driven migration stay
+ * alive and tappable. **No new widget pins here**; the designated new-pin
+ * provider is [FlashlightWidgetProvider] (one generic provider now serves every
+ * function), so [reconcilePendingConfig] returns `null`.
  *
- * Tapping the widget toggles [StrobeService]:
- * - If the service isn't running ([StrobeRuntime.running] == false),
- *   start it via `startForegroundService` carrying the widget's
- *   per-instance [TorchWidgetConfig] as Intent extras (rate Hz +
- *   SOS flag).
- * - If the service IS running, fire an [StrobeService.ACTION_STOP]
- *   intent so the service shuts down cleanly.
+ * It is the same generic [BaseGadgetWidgetProvider] subclass as
+ * [FlashlightWidgetProvider] — a tap resolves the placed config's bound
+ * [WidgetFunction] (strobe / morse, for these legacy instances) from
+ * [TorchWidgetFunctionCatalog] and dispatches it through the kit's
+ * [WidgetFunctionDispatcher]. The dispatch's strobe-start runs inside the
+ * broadcast's FGS-allowlist window (the base launches it from `goAsync`), so
+ * no bespoke synchronous service-start path is needed any more.
  *
- * Each pinned instance owns a [TorchWidgetConfig] keyed by
- * `appWidgetId`. The config drives rate, SOS, and the visual
- * appearance (background mode, icon style, tap animation, toggle
- * feedback). Self-heal applies if a config goes missing — see
+ * **Lifecycle skeleton inherited** from [BaseGadgetWidgetProvider] — see
  * [FlashlightWidgetProvider] for the canonical write-up.
- *
- * **Lifecycle skeleton inherited** from [BaseGadgetWidgetProvider]:
- *  - `onUpdate` → `renderAll` with the self-heal fallback to
- *    [defaultConfig].
- *  - `onDeleted` → per-id `WidgetConfigStore.delete`.
- *  - The post-action chain (feedback + repaint + press-frame) is the
- *    base's `handleTapAfterAction`; this class only owns the
- *    synchronous service-start path that has to run before
- *    `goAsync()` for FGS-safety.
  */
 class StrobeWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
 
@@ -62,6 +53,8 @@ class StrobeWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
 
     override val featureId: String = TorchBootRearmHandler.FEATURE_ID
 
+    override val tapAction: String = ACTION_STROBE_TOGGLE
+
     override fun configStore(context: Context): WidgetConfigStore<TorchWidgetConfig> =
         entry(context).widgetRepository()
 
@@ -71,88 +64,31 @@ class StrobeWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
     override fun feedbackDispatcher(context: Context): WidgetFeedbackDispatcher =
         entry(context).feedbackDispatcher()
 
+    override fun functionDispatcher(context: Context): WidgetFunctionDispatcher =
+        entry(context).widgetFunctionDispatcher()
+
+    override fun resolveFunction(context: Context, config: TorchWidgetConfig): WidgetFunction? =
+        entry(context).widgetFunctionCatalog().functionFor(config.actionKey)
+
+    override fun paramsOf(config: TorchWidgetConfig): Map<String, String> = config.params
+
+    override fun sizePresetOf(config: TorchWidgetConfig): WidgetSizePreset = config.sizePreset
+
     override fun defaultConfig(context: Context): TorchWidgetConfig = TorchWidgetConfig(
-        type = WidgetType.Strobe,
         displayName = context.getString(R.string.torch_widget_default_name_strobe),
+        actionKey = TorchWidgetConfig.FUNCTION_STROBE,
     )
 
-    override suspend fun activeState(context: Context): Boolean =
-        entry(context).strobeRuntime().running.value
-
-    // Rescue a freshly-pinned strobe widget whose OS success callback never
-    // landed: pull the sole unclaimed pending Strobe config (filtered by type
-    // so it can't grab a pending Flashlight; sole-match so two strobes pinned
-    // at once can't have their configs swapped). This is what makes a
-    // first-pin Morse setting reliably apply on the very first tap.
-    override suspend fun reconcilePendingConfig(context: Context): TorchWidgetConfig? =
-        entry(context).pendingConfigs().claimSolePending { it.type == WidgetType.Strobe }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-        if (intent.action != ACTION_STROBE_TOGGLE) return
-        val appWidgetId = intent.getIntExtra(
-            AppWidgetManager.EXTRA_APPWIDGET_ID,
-            AppWidgetManager.INVALID_APPWIDGET_ID,
-        )
-        val ep = entry(context)
-
-        // Start / stop the service SYNCHRONOUSLY in the foreground broadcast
-        // context. Deferring the start into the goAsync coroutine below
-        // risks ForegroundServiceStartNotAllowedException on Android 12+.
-        // We pass only the appWidgetId — the service reads that widget's
-        // rate / SOS config itself.
-        val willBeRunning: Boolean
-        if (ep.strobeRuntime().running.value) {
-            context.startService(
-                Intent(context, StrobeService::class.java).setAction(StrobeService.ACTION_STOP),
-            )
-            willBeRunning = false
-        } else {
-            val startIntent = Intent(context, StrobeService::class.java).apply {
-                putExtra(StrobeService.EXTRA_APPWIDGET_ID, appWidgetId)
-            }
-            willBeRunning = try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(startIntent)
-                } else {
-                    context.startService(startIntent)
-                }
-                true
-            } catch (e: IllegalStateException) {
-                // ForegroundServiceStartNotAllowedException (API 31+) is an
-                // IllegalStateException subtype thrown when the broadcast
-                // lands outside an allowed FGS-start window. Degrade
-                // gracefully — a stray launcher tap must never crash the
-                // home-screen process.
-                Log.w(logTag, "Strobe FGS start refused", e)
-                android.widget.Toast.makeText(
-                    context,
-                    context.getString(R.string.strobe_widget_start_failed),
-                    android.widget.Toast.LENGTH_SHORT,
-                ).show()
-                false
-            }
-        }
-
-        // Feedback + animation + repaint run off the FGS path (no service
-        // start here), so an FGS exception can never abort them.
-        val pendingResult = goAsync()
-        WidgetReceiverScope.scope.launch {
-            try {
-                handleTapAfterAction(context, appWidgetId, willBeRunning)
-            } catch (t: Throwable) {
-                Log.e(logTag, "StrobeWidget onReceive failed", t)
-            } finally {
-                pendingResult.finish()
-            }
-        }
-    }
+    // No new strobe pins land here (FlashlightWidgetProvider is the designated
+    // new-pin provider), so there is nothing to reconcile.
+    override suspend fun reconcilePendingConfig(context: Context): TorchWidgetConfig? = null
 
     override fun buildRemoteViews(
         context: Context,
         appWidgetId: Int,
         active: Boolean,
         config: TorchWidgetConfig,
+        density: WidgetRenderDensity,
         pressed: Boolean,
     ): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_strobe).apply {
@@ -171,8 +107,15 @@ class StrobeWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
                 setInt(WidgetKitR.id.widget_icon, "setImageAlpha", REMOVED_WIDGET_ICON_ALPHA)
                 setInt(R.id.widget_strobe_button, "setBackgroundResource", android.R.color.transparent)
                 setOnClickPendingIntent(R.id.widget_strobe_button, null)
+                setViewVisibility(WidgetKitR.id.widget_label, View.GONE)
                 return@apply
             }
+            // Adaptive name label — painted only at the expanded density.
+            setTextViewText(WidgetKitR.id.widget_label, config.displayName)
+            setViewVisibility(
+                WidgetKitR.id.widget_label,
+                if (density.showLabel) View.VISIBLE else View.GONE,
+            )
             if (pressed) renderer.applyPressedFrame(context, this, config.appearance)
             // Ripple is the launcher's stock press effect — set it as the
             // click target's background only when selected, transparent
@@ -206,7 +149,8 @@ class StrobeWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
         fun widgetRepository(): WidgetConfigStore<TorchWidgetConfig>
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
-        fun strobeRuntime(): StrobeRuntime
+        fun widgetFunctionDispatcher(): WidgetFunctionDispatcher
+        fun widgetFunctionCatalog(): TorchWidgetFunctionCatalog
         fun pendingConfigs(): PendingWidgetConfigs<TorchWidgetConfig>
     }
 
