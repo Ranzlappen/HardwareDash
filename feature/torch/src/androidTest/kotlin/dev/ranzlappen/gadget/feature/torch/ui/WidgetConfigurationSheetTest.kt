@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
@@ -11,11 +12,12 @@ import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 /**
  * Instrumented tests for [WidgetConfigurationSheet]. Gated on the CI
@@ -60,6 +62,7 @@ class WidgetConfigurationSheetTest {
 
         composeTestRule
             .onNodeWithText(res.getString(R.string.torch_widget_config_save_new))
+            .performScrollTo()
             .assertIsDisplayed()
     }
 
@@ -81,6 +84,7 @@ class WidgetConfigurationSheetTest {
 
         composeTestRule
             .onNodeWithText(res.getString(R.string.torch_widget_config_save_existing))
+            .performScrollTo()
             .assertIsDisplayed()
     }
 
@@ -133,7 +137,7 @@ class WidgetConfigurationSheetTest {
         } catch (_: AssertionError) {
             failed = true
         }
-        assertEquals(true, failed, "SOS toggle should NOT render for flashlight widgets")
+        assertTrue("SOS toggle should NOT render for flashlight widgets", failed)
     }
 
     @Test
@@ -155,6 +159,7 @@ class WidgetConfigurationSheetTest {
 
         composeTestRule
             .onNodeWithText(res.getString(R.string.torch_widget_config_save_new))
+            .performScrollTo()
             .performClick()
 
         assertNotNull(captured)

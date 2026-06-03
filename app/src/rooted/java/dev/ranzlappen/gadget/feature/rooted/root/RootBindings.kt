@@ -55,8 +55,6 @@ import com.gadget.wifi.RootedWifiController
 import com.gadget.wifi.WifiController
 import com.gadget.usbdebug.RootedUsbDebuggingController
 import com.gadget.usbdebug.UsbDebuggingController
-import com.gadget.vibration.RootedVibrationController
-import com.gadget.vibration.VibrationController
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -113,9 +111,6 @@ abstract class RootBindings {
     // controllers stay here until each feature follows the same
     // migration (tracked at
     // https://github.com/Ranzlappen/HardwareDash/issues/94).
-
-    @Binds @Singleton
-    abstract fun bindVibrationController(impl: RootedVibrationController): VibrationController
 
     @Binds @Singleton
     abstract fun bindCameraController(impl: RootedCameraController): CameraController

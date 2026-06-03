@@ -2,6 +2,8 @@ package dev.ranzlappen.gadget.core.ui.adaptive
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -92,5 +94,64 @@ fun BoxWithConstraintsAdaptive(
     val mode = rememberLayoutMode()
     BoxWithConstraints(modifier = modifier) {
         content(mode)
+    }
+}
+
+/**
+ * Foldable **posture** signal — orthogonal to [GadgetLayoutMode].
+ *
+ * `GadgetLayoutMode` answers "how wide is the window?"; `GadgetPosture`
+ * answers "is the window folded, and how?" A device can be `TwoPane`
+ * **and** `Tabletop` at once (a half-opened foldable held landscape), so
+ * a posture-aware screen reads both.
+ *
+ * - [Flat] — no separating hinge: a regular phone/tablet, or a foldable
+ *   opened flat. The overwhelming default; treat everything as one plane.
+ * - [Tabletop] — a **horizontal** half-opened hinge splits the window
+ *   into a top and bottom half (laptop-like). Good for "content on top,
+ *   controls on the bottom half" layouts.
+ * - [Book] — a **vertical** half-opened hinge splits the window into a
+ *   left and right page. Good for a two-page / list-detail split that
+ *   avoids straddling the fold.
+ */
+@Immutable
+enum class GadgetPosture {
+    Flat,
+    Tabletop,
+    Book,
+}
+
+/**
+ * Resolves the active [GadgetPosture] from `material3-adaptive`'s
+ * [currentWindowAdaptiveInfo].
+ *
+ * Like [rememberLayoutMode], this is the **stable** seam — it returns the
+ * Gadget enum, never a `material3-adaptive` `Posture`/`HingeInfo` type, so
+ * the adaptive library's API churn stays contained to this file.
+ *
+ * **Wired ahead of need.** No Phase-1 screen branches on posture yet
+ * (mirroring `ModuleScreenScaffold.secondaryPane` and the recognised-but-
+ * unused `ThreePane`). It exists so the first foldable-aware consumer has
+ * a ready seam instead of reaching for `material3-adaptive` ad-hoc. On a
+ * non-folding device it always returns [Flat], so adopting it is free.
+ *
+ * Example (future consumer):
+ *
+ * ```kotlin
+ * when (rememberPosture()) {
+ *     Book -> TwoPageDetail()          // avoid straddling a vertical fold
+ *     Tabletop -> TopContentBottomControls()
+ *     Flat -> rememberLayoutMode().let { … }  // fall back to width tiers
+ * }
+ * ```
+ */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+fun rememberPosture(): GadgetPosture {
+    val posture = currentWindowAdaptiveInfo().windowPosture
+    return when {
+        posture.hingeList.isEmpty() -> GadgetPosture.Flat
+        posture.isTabletop -> GadgetPosture.Tabletop
+        else -> GadgetPosture.Book
     }
 }

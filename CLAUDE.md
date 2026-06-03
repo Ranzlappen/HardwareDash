@@ -146,10 +146,15 @@ What every component **must** do for accessibility:
     slot rendered to the right of the primary column when
     `rememberLayoutMode()` is `TwoPane` / `ThreePane`. Wired
     ahead of need — no Phase-1 consumer yet.
-14. Foldable-posture detection (hinge / tabletop) is **deferred**
-    until a real consumer needs it — see open issue
-    [#89](https://github.com/Ranzlappen/HardwareDash/issues/89).
-    Don't pull in `material3-adaptive` ad-hoc.
+14. Foldable-posture detection (hinge / tabletop) has a **stable seam**
+    (closes #89): `GadgetPosture` + `rememberPosture()` in
+    `core/ui/adaptive/AdaptiveLayout.kt`, backed by `material3-adaptive`'s
+    `currentWindowAdaptiveInfo()`. Like `rememberLayoutMode()` it returns
+    the Gadget enum (`Flat` / `Tabletop` / `Book`), never a
+    `material3-adaptive` type — read it for posture, `rememberLayoutMode()`
+    for width (they're orthogonal). It's **wired ahead of need** (no
+    Phase-1 consumer; `Flat` on non-folding devices), so still **don't**
+    pull `material3-adaptive` into a feature ad-hoc — go through the seam.
 
 ### Performance & stability
 
@@ -948,12 +953,22 @@ contract (`displayName`, `removed`, `schemaVersion`, `appearance`),
   RemoteViews-rendered widget). `GadgetColorPicker` moved to `:core:ui`
   (P1-10).
 
-**Pending follow-up (deferred from C6):** the appearance-section UI
-(chip rows + icon picker + tap-animation chooser + feedback templates)
-still lives in torch's `WidgetConfigurationSheet`. Extracting it
-generically requires lifting ~30 labels into kit `strings.xml` plus a
-generic `WidgetIconChoice` type — scoped out of Phase 2 to keep diffs
-reviewable.
+**Appearance-section UI (C6 follow-up — shipped).** The generic
+appearance editor — `WidgetAppearanceSection` (`:core:widgetkit/ui`) —
+now owns every shared control (background/tint/tap-animation/feedback
+chip rows, the icon picker + custom-import flow, feedback templates, and
+the live `WidgetAppearancePreview`). It takes a generic `appearance` +
+`onAppearanceChange` plus the per-feature seam params `iconChoices:
+List<WidgetIconChoice>`, `resolveIcon`, and `onImportCustomIcon`. The
+~40 shared labels live in the kit (`widget_kit_appearance_*` in
+`core/widgetkit/.../res/values/strings.xml`) and `WidgetIconChoice`
+(`:core:widgetkit/config`) is the generic swatch type. Each feature's
+`ui/WidgetConfigurationSheet.kt` is now a thin shell that delegates to
+the section and only adds its **feature-specific** fields (torch's strobe
+rate / morse, vibration's amplitude / duration) — that residue is
+*meant* to stay feature-local. Torch + vibration are the reference
+consumers; future widget-bearing features build their config sheet the
+same way.
 
 **The "remove-but-keep-inert" widget pattern** (also documented in the
 migration guide): a non-host app can't pull a placed widget off a
@@ -1019,12 +1034,18 @@ worth-knowing specifics:
   `VibrationMetricSource` polls it (`stream()`=null) → a filled plateau that
   decays to 0. This is the reference answer for the next non-pollable
   (sensor) signals.
-- **Legacy left inert (no rename needed).** The legacy `:app`
-  `com.gadget.vibration.*` controller/service/widget + the
-  `RootFeaturesEntryPoint.vibrationController()` getter stay as-is — distinct
-  FQNs from the modular `dev.ranzlappen.gadget.feature.vibration.*`, so (unlike
-  torch's sysfs-controller case) **no entry-point getter rename was required**.
-  Retirement is a follow-up after on-device verification.
+- **Legacy controller + getter retired (94-A, issue #94).** The legacy `:app`
+  `com.gadget.vibration.*` controller tree (interface + result + `PwmPulse`,
+  the standard/rooted impls, and the sysfs/driver helpers), the orphaned
+  `VibrationRootExtrasSection` card, both flavors' `RootBindings` vibration
+  entries, and the `RootFeaturesEntryPoint.vibrationController()` getter are now
+  **deleted** — the modular `:feature:vibration` (+ `-rooted`/`-standard`) fully
+  supersedes them. Distinct FQNs from the modular
+  `dev.ranzlappen.gadget.feature.vibration.*` meant **no entry-point getter
+  rename was required** (unlike torch's sysfs-controller case). This is the
+  first executed slice of the `RootFeaturesEntryPoint` retirement; the remaining
+  features (torch sysfs next) follow the same shape — see
+  `docs/refactor-2026/issue-94-root-entrypoint-retirement.md`.
 
 1. **Design system** — every token from `LocalGadgetTheme.current`; no
    raw `dp` at call sites (per-file `Defaults` for fixed sizes); modifier
@@ -1114,9 +1135,12 @@ torch is the hardened reference for every future migration:
   `enqueueMutex` as the key allocator, closing the counter-key race.
 - **Naming** — the privileged sysfs surface `LegacyTorchController` →
   `TorchSysfsController` (package `…torch.sysfs`), `LegacyStandardTorchController`
-  → `StandardTorchSysfsController`, entry-point getter `legacyTorchController()`
-  → `torchSysfsController()`. "Legacy" framing dropped — it is the current
-  rooted-tier contract, not deprecated code.
+  → `StandardTorchSysfsController`. "Legacy" framing dropped — it is the current
+  rooted-tier contract, not deprecated code. (The transitional
+  `RootFeaturesEntryPoint.torchSysfsController()` getter — and the orphaned
+  `TorchRootExtrasSection` card that was its only consumer — were later removed
+  in 94-B once the modular `RootedTorchRootCapabilities` injected the controller
+  directly; see issue #94.)
 - **Storage** — custom widget icons save as `WEBP_LOSSY` (API 30+, q80) instead
   of PNG@100.
 - **Docs** — "flawless precedent" → "hardened reference implementation"; the
@@ -1197,11 +1221,15 @@ Multi-preview annotations are defined in
 
 Open follow-up issues (Phase 2+ pickup):
 - [#89](https://github.com/Ranzlappen/HardwareDash/issues/89) —
-  `material3-adaptive` foldable hinge utility.
+  `material3-adaptive` foldable hinge utility — **addressed**:
+  `GadgetPosture` / `rememberPosture()` (see rule #14).
 - [#91](https://github.com/Ranzlappen/HardwareDash/issues/91) —
-  `GadgetBottomSheet` instrumented tests + sheet-host activity.
+  `GadgetBottomSheet` instrumented tests — **addressed**: covered in
+  `core/ui`'s `ModalsTest` (the ui-test-manifest activity hosts the
+  sheet; no bespoke host activity needed).
 - [#92](https://github.com/Ranzlappen/HardwareDash/issues/92) —
-  CI emulator workflow for `connectedDebugAndroidTest`.
+  CI emulator workflow for `connectedDebugAndroidTest` — **addressed**:
+  `.github/workflows/instrumented-tests.yml`.
 
 ---
 

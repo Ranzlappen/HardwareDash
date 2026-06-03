@@ -50,8 +50,6 @@ import com.gadget.wifi.StandardWifiController
 import com.gadget.wifi.WifiController
 import com.gadget.usbdebug.StandardUsbDebuggingController
 import com.gadget.usbdebug.UsbDebuggingController
-import com.gadget.vibration.StandardVibrationController
-import com.gadget.vibration.VibrationController
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -120,10 +118,6 @@ object RootBindings {
     // sibling of :feature:torch-rooted's RootedTorchModule — pulled in via
     // standardImplementation. The remaining cross-feature no-ops stay here
     // until each feature follows the same migration.
-
-    @Provides
-    @Singleton
-    fun provideVibrationController(impl: StandardVibrationController): VibrationController = impl
 
     @Provides
     @Singleton

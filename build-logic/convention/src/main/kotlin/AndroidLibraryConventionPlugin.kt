@@ -32,6 +32,15 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 configureKotlinAndroid(this)
                 defaultConfig.targetSdk = 35
                 testOptions.targetSdk = 35
+                // Instrumented (androidTest) sources use AndroidX Test +
+                // Compose UI tests (@RunWith(AndroidJUnit4)). Without this the
+                // module falls back to the legacy
+                // android.test.InstrumentationTestRunner, which discovers zero
+                // tests ("Starting 0 tests on emulator"). Only :app set it
+                // before; every core/feature library needs it too. The runner
+                // class ships transitively via :core:testing's ui-test-junit4.
+                defaultConfig.testInstrumentationRunner =
+                    "androidx.test.runner.AndroidJUnitRunner"
             }
         }
     }
