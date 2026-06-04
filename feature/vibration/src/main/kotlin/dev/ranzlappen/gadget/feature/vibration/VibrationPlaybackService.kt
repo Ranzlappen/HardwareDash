@@ -29,11 +29,14 @@ import javax.inject.Inject
  * buzz (the [VibrationWidgetConfig.FUNCTION_ONESHOT] function) or a saved
  * [VibrationPattern] (the [VibrationWidgetConfig.FUNCTION_PATTERN] function).
  *
- * **Widget taps no longer use this service** — they dispatch through the
- * function-driven provider → action handler. The service is retained for any
- * non-widget caller that still starts it with an [EXTRA_APPWIDGET_ID]; it reads
- * that widget's persisted [VibrationWidgetConfig] itself (via `getFresh`, not
- * the hot cache) and branches on the config's `actionKey` + `params`.
+ * **This is the foreground context every widget-tap vibration runs in.** A
+ * widget tap is a background broadcast, and a plain `Vibrator.vibrate()` from
+ * the background is silently dropped by the OS (Android 12+). So
+ * [VibrationActionHandler] starts this service with the already-resolved
+ * [EXTRA_ACTION_KEY] + params and the buzz plays from here (mirroring how
+ * torch's strobe runs through its own FGS). The legacy [EXTRA_APPWIDGET_ID]
+ * path — the service reading a widget's persisted [VibrationWidgetConfig] via
+ * `getFresh` — is retained for any caller that still starts it that way.
  * All playback flows through [VibrationController], which folds the commanded
  * amplitude into [VibrationRuntime] (the monitored signal).
  *
@@ -85,27 +88,28 @@ class VibrationPlaybackService : Service() {
             ?: AppWidgetManager.INVALID_APPWIDGET_ID
 
         playbackJob = serviceScope.launch {
+            val directAction = intent?.getStringExtra(EXTRA_ACTION_KEY)
+            if (directAction != null) {
+                // Started by VibrationActionHandler (widget tap / automation):
+                // the action + params are already resolved, so play them from
+                // this foreground-service context — a plain Vibrator.vibrate()
+                // on the background broadcast path is silently dropped by the
+                // OS (Android 12+ background-vibration policy).
+                playDirect(directAction, intent)
+                stopSelf()
+                return@launch
+            }
             val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
                 widgetRepository.getFresh(appWidgetId)
             } else {
                 null
             }
-            // Widget taps now dispatch through the action handler, so this
-            // service is only reached by any non-widget callers. It branches on
-            // the function-driven `actionKey` + `params` (the v2 config shape).
+            // Legacy path: a non-widget caller that passes only an appWidgetId.
+            // It branches on the function-driven `actionKey` + `params` (the v2
+            // config shape).
             when (config?.actionKey) {
-                VibrationWidgetConfig.FUNCTION_PATTERN -> {
-                    val patternId = config.params[VibrationActionHandler.PARAM_PATTERN_ID]
-                        ?.takeIf { it.isNotBlank() }
-                    val pattern = patternId?.let { patternRepository.get(it) }
-                    if (pattern != null) {
-                        controller.playPattern(
-                            timingsMillis = pattern.timingsMillis.toLongArray(),
-                            amplitudes = pattern.amplitudes.toIntArray(),
-                            loop = false,
-                        )
-                    }
-                }
+                VibrationWidgetConfig.FUNCTION_PATTERN ->
+                    playPatternById(config.params[VibrationActionHandler.PARAM_PATTERN_ID])
                 else -> {
                     // Default + one-shot function: a buzz at the configured
                     // strength/duration (falls back to defaults for an in-app
@@ -123,6 +127,34 @@ class VibrationPlaybackService : Service() {
             // VibrationRuntime decay models the tail; tear the FGS down.
             stopSelf()
         }
+    }
+
+    /** Play the already-resolved [actionKey] + extras from this foreground
+     *  context (the VibrationActionHandler dispatch path). */
+    private suspend fun playDirect(actionKey: String, intent: Intent) {
+        when (actionKey) {
+            VibrationActionHandler.ACTION_PATTERN_PLAY ->
+                playPatternById(intent.getStringExtra(EXTRA_PATTERN_ID))
+            else -> controller.oneShot(
+                amplitudePercent = intent.getIntExtra(
+                    EXTRA_AMPLITUDE,
+                    VibrationWidgetConfig.DEFAULT_AMPLITUDE_PERCENT,
+                ),
+                durationMillis = intent.getLongExtra(
+                    EXTRA_DURATION_MS,
+                    VibrationWidgetConfig.DEFAULT_DURATION_MS,
+                ),
+            )
+        }
+    }
+
+    private suspend fun playPatternById(patternId: String?) {
+        val pattern = patternId?.takeIf { it.isNotBlank() }?.let { patternRepository.get(it) } ?: return
+        controller.playPattern(
+            timingsMillis = pattern.timingsMillis.toLongArray(),
+            amplitudes = pattern.amplitudes.toIntArray(),
+            loop = false,
+        )
     }
 
     private fun stopPlayback() {
@@ -189,5 +221,19 @@ class VibrationPlaybackService : Service() {
         /** Int extra carrying the tapped widget's `appWidgetId`. When present
          *  the service reads that widget's persisted config itself. */
         const val EXTRA_APPWIDGET_ID = "dev.ranzlappen.gadget.feature.vibration.EXTRA_APPWIDGET_ID"
+
+        /** String extra naming the already-resolved action to play
+         *  ([VibrationActionHandler.ACTION_ONESHOT] /
+         *  [VibrationActionHandler.ACTION_PATTERN_PLAY]) — the dispatch path. */
+        const val EXTRA_ACTION_KEY = "dev.ranzlappen.gadget.feature.vibration.EXTRA_ACTION_KEY"
+
+        /** One-shot amplitude percent (Int) for an [EXTRA_ACTION_KEY] start. */
+        const val EXTRA_AMPLITUDE = "dev.ranzlappen.gadget.feature.vibration.EXTRA_AMPLITUDE"
+
+        /** One-shot duration ms (Long) for an [EXTRA_ACTION_KEY] start. */
+        const val EXTRA_DURATION_MS = "dev.ranzlappen.gadget.feature.vibration.EXTRA_DURATION_MS"
+
+        /** Saved-pattern id (String) for an [EXTRA_ACTION_KEY] pattern start. */
+        const val EXTRA_PATTERN_ID = "dev.ranzlappen.gadget.feature.vibration.EXTRA_PATTERN_ID"
     }
 }

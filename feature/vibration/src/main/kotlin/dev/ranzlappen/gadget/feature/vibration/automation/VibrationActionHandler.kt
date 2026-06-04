@@ -1,8 +1,12 @@
 package dev.ranzlappen.gadget.feature.vibration.automation
 
+import android.content.Context
+import android.content.Intent
+import androidx.core.content.ContextCompat
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoMap
 import dagger.multibindings.StringKey
@@ -14,21 +18,28 @@ import dev.ranzlappen.gadget.core.automation.ModuleAction
 import dev.ranzlappen.gadget.feature.vibration.PatternRepository
 import dev.ranzlappen.gadget.feature.vibration.PwmPulse
 import dev.ranzlappen.gadget.feature.vibration.VibrationController
+import dev.ranzlappen.gadget.feature.vibration.VibrationPlaybackService
 import dev.ranzlappen.gadget.feature.vibration.VibrationRootCapabilities
 import dev.ranzlappen.gadget.feature.vibration.VibrationRootResult
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Vibration's invocable-action surface for the future automation tool. Reuses
- * the existing [VibrationController] (standard tier) and
- * [VibrationRootCapabilities] (extreme tier) rather than re-implementing
- * hardware control. The four rooted actions carry `requiresRoot = true` so the
- * rule builder can gate them; they map a rooted `Unsupported`/`OptedOut`
- * outcome onto [ActionResult.Failure] with a readable reason.
+ * Vibration's invocable-action surface for widgets + the future automation
+ * tool. The standard buzz/pattern actions start [VibrationPlaybackService] (a
+ * foreground service) rather than calling [VibrationController] directly,
+ * because a widget tap (and an automation trigger) dispatches on a background
+ * broadcast where `Vibrator.vibrate()` is silently dropped by the OS
+ * (Android 12+ background-vibration policy) — the FGS gives it a foreground
+ * context (the same pattern torch's strobe uses via its own service). The four
+ * rooted actions reach [VibrationRootCapabilities] directly (privileged sysfs
+ * writes aren't subject to that policy) and carry `requiresRoot = true` so the
+ * rule builder can gate them, mapping a rooted `Unsupported`/`OptedOut` outcome
+ * onto [ActionResult.Failure] with a readable reason.
  */
 @Singleton
 class VibrationActionHandler @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val controller: VibrationController,
     private val rootCapabilities: VibrationRootCapabilities,
     private val patternRepository: PatternRepository,
@@ -84,21 +95,31 @@ class VibrationActionHandler @Inject constructor(
     override suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult =
         when (actionKey) {
             ACTION_ONESHOT -> {
-                controller.oneShot(
-                    amplitudePercent = params.intOr(PARAM_AMPLITUDE, 60),
-                    durationMillis = params.longOr(PARAM_DURATION_MS, 300),
+                // Play through the FGS, never the bare controller: a widget tap
+                // dispatches on a background broadcast, where Vibrator.vibrate()
+                // is silently dropped by the OS (Android 12+). The service runs
+                // it in a foreground context (mirrors torch's StrobeService).
+                startPlayback(
+                    Intent(context, VibrationPlaybackService::class.java).apply {
+                        putExtra(VibrationPlaybackService.EXTRA_ACTION_KEY, ACTION_ONESHOT)
+                        putExtra(VibrationPlaybackService.EXTRA_AMPLITUDE, params.intOr(PARAM_AMPLITUDE, 60))
+                        putExtra(VibrationPlaybackService.EXTRA_DURATION_MS, params.longOr(PARAM_DURATION_MS, 300))
+                    },
                 )
                 ActionResult.Success
             }
             ACTION_STOP -> { controller.stop(); ActionResult.Success }
             ACTION_PATTERN_PLAY -> {
+                // Validate the pattern up front so feedback can report a missing
+                // one; the FGS re-reads + plays it from a foreground context.
                 val id = params[PARAM_PATTERN_ID]?.takeIf { it.isNotBlank() }
                 val pattern = id?.let { patternRepository.get(it) }
                 if (pattern != null) {
-                    controller.playPattern(
-                        timingsMillis = pattern.timingsMillis.toLongArray(),
-                        amplitudes = pattern.amplitudes.toIntArray(),
-                        loop = false,
+                    startPlayback(
+                        Intent(context, VibrationPlaybackService::class.java).apply {
+                            putExtra(VibrationPlaybackService.EXTRA_ACTION_KEY, ACTION_PATTERN_PLAY)
+                            putExtra(VibrationPlaybackService.EXTRA_PATTERN_ID, id)
+                        },
                     )
                     ActionResult.Success
                 } else {
@@ -129,6 +150,8 @@ class VibrationActionHandler @Inject constructor(
         is VibrationRootResult.RateLimited -> ActionResult.Failure("rate-limited; retry in ${retryAfterMillis}ms")
         is VibrationRootResult.Error -> ActionResult.Failure(message)
     }
+
+    private fun startPlayback(intent: Intent) = ContextCompat.startForegroundService(context, intent)
 
     private fun Map<String, String>.intOr(key: String, fallback: Int): Int =
         this[key]?.toIntOrNull() ?: fallback
