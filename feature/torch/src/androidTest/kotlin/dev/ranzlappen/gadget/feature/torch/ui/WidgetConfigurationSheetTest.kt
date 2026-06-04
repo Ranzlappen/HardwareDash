@@ -17,11 +17,11 @@ import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunctionBehavior
 import dev.ranzlappen.gadget.core.widgetkit.ui.WidgetCustomizationResult
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 /**
  * Instrumented tests for the torch [WidgetConfigurationSheet] shell over the
