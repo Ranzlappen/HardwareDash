@@ -1,80 +1,42 @@
 package dev.ranzlappen.gadget.feature.vibration.automation
 
+import android.content.Context
 import dev.ranzlappen.gadget.core.automation.ActionResult
 import dev.ranzlappen.gadget.feature.vibration.PatternRepository
 import dev.ranzlappen.gadget.feature.vibration.PwmPulse
 import dev.ranzlappen.gadget.feature.vibration.VibrationController
-import dev.ranzlappen.gadget.feature.vibration.VibrationPattern
 import dev.ranzlappen.gadget.feature.vibration.VibrationRootCapabilities
 import dev.ranzlappen.gadget.feature.vibration.VibrationRootResult
-import io.mockk.Runs
 import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+/**
+ * Unit tests for [VibrationActionHandler].
+ *
+ * The standard buzz / pattern-play branches now start
+ * [dev.ranzlappen.gadget.feature.vibration.VibrationPlaybackService] via
+ * `Context.startForegroundService` (so a background widget tap vibrates from a
+ * foreground context). Like `TorchActionHandlerTest`'s strobe/morse branches,
+ * those happy paths construct an `Intent` and need a real Android runtime, so
+ * they live behind instrumented tests. The branches pinned here reach no
+ * `Intent`: the pattern-validation failures, the rooted tier (which goes
+ * straight to [VibrationRootCapabilities]), and the action metadata.
+ */
 class VibrationActionHandlerTest {
 
+    private val context = mockk<Context>(relaxed = true)
     private val controller = mockk<VibrationController>(relaxed = true)
     private val caps = mockk<VibrationRootCapabilities>(relaxed = true)
     private val patterns = mockk<PatternRepository>(relaxed = true)
-    private val handler = VibrationActionHandler(controller, caps, patterns)
-
-    @Test
-    fun `oneshot parses params and delegates to the controller`() = runBlocking {
-        every { controller.oneShot(any(), any()) } just Runs
-        val result = handler.dispatch(
-            VibrationActionHandler.ACTION_ONESHOT,
-            mapOf(
-                VibrationActionHandler.PARAM_AMPLITUDE to "80",
-                VibrationActionHandler.PARAM_DURATION_MS to "500",
-            ),
-        )
-        assertEquals(ActionResult.Success, result)
-        verify { controller.oneShot(80, 500L) }
-    }
-
-    @Test
-    fun `oneshot falls back to defaults on bad params`() = runBlocking {
-        every { controller.oneShot(any(), any()) } just Runs
-        handler.dispatch(VibrationActionHandler.ACTION_ONESHOT, mapOf(VibrationActionHandler.PARAM_AMPLITUDE to "x"))
-        verify { controller.oneShot(60, 300L) }
-    }
+    private val handler = VibrationActionHandler(context, controller, caps, patterns)
 
     @Test
     fun `unknown action is unsupported`() = runBlocking {
         assertEquals(ActionResult.Unsupported, handler.dispatch("nope", emptyMap()))
-    }
-
-    @Test
-    fun `pattern_play loads the pattern and plays it`() = runBlocking {
-        val pattern = VibrationPattern(
-            id = "p1",
-            name = "SOS",
-            timingsMillis = listOf(0L, 100L, 50L),
-            amplitudes = listOf(0, 200, 0),
-        )
-        coEvery { patterns.get("p1") } returns pattern
-        every { controller.playPattern(any(), any(), any()) } just Runs
-
-        val result = handler.dispatch(
-            VibrationActionHandler.ACTION_PATTERN_PLAY,
-            mapOf(VibrationActionHandler.PARAM_PATTERN_ID to "p1"),
-        )
-
-        assertEquals(ActionResult.Success, result)
-        verify {
-            controller.playPattern(
-                longArrayOf(0L, 100L, 50L),
-                intArrayOf(0, 200, 0),
-                false,
-            )
-        }
     }
 
     @Test
