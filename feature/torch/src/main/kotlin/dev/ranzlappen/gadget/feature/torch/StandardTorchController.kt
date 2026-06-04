@@ -6,10 +6,12 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -58,6 +60,13 @@ class StandardTorchController @Inject constructor(
     )
     override val state: StateFlow<TorchState> = _state.asStateFlow()
 
+    // Completed the first time the OS torch callback delivers state for our
+    // camera after registration (Android invokes the callback with the current
+    // mode for every flash-capable camera right after registerTorchCallback).
+    // currentState() awaits this so a cold-process caller (a widget tap) reads
+    // the real hardware state instead of the seeded `isOn = false`.
+    private val firstStateDelivered = CompletableDeferred<Unit>()
+
     // Declared before the `init` block that registers it — Kotlin
     // runs `init` blocks and property initializers in declaration
     // order, so forward-referencing `torchCallback` from `init`
@@ -66,6 +75,7 @@ class StandardTorchController @Inject constructor(
         override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
             if (cameraId == flashCameraId) {
                 _state.update { current -> current.copy(isOn = enabled, error = null) }
+                firstStateDelivered.complete(Unit)
             }
         }
 
@@ -74,6 +84,7 @@ class StandardTorchController @Inject constructor(
                 _state.update { current ->
                     current.copy(isAvailable = false, error = TorchError.HardwareError)
                 }
+                firstStateDelivered.complete(Unit)
             }
         }
     }
@@ -107,6 +118,16 @@ class StandardTorchController @Inject constructor(
         }
     }
 
+    override suspend fun currentState(): TorchState {
+        // On a flashless device the callback never fires for our (null) camera,
+        // so don't wait. Otherwise await the first authoritative delivery,
+        // bounded so a misbehaving OEM can never stall the widget broadcast.
+        if (flashCameraId != null) {
+            withTimeoutOrNull(STATE_READY_TIMEOUT_MS) { firstStateDelivered.await() }
+        }
+        return _state.value
+    }
+
     private fun mapException(e: CameraAccessException): TorchError = when (e.reason) {
         CameraAccessException.CAMERA_DISABLED -> TorchError.PermissionDenied
         else -> TorchError.HardwareError
@@ -122,6 +143,15 @@ class StandardTorchController @Inject constructor(
     }
 
     private companion object {
+        /**
+         * Upper bound on how long [currentState] waits for the first OS torch
+         * callback. The callback is posted to the main thread right after
+         * registration and normally lands within a few ms; this ceiling only
+         * guards a pathological device so it can never hang a widget broadcast
+         * (well inside the broadcast's ~10s goAsync window).
+         */
+        const val STATE_READY_TIMEOUT_MS = 500L
+
         /**
          * Find the first back-facing camera that advertises a flash
          * unit. Returns `null` on flashless devices / emulators.
