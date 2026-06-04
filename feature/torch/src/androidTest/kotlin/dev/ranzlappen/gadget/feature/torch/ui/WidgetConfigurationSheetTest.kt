@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ranzlappen.gadget.core.automation.ActionParam
@@ -79,6 +80,7 @@ class WidgetConfigurationSheetTest {
 
         composeTestRule
             .onNodeWithText(res.getString(WidgetKitR.string.widget_kit_create))
+            .performScrollTo()
             .assertIsDisplayed()
     }
 
@@ -101,6 +103,7 @@ class WidgetConfigurationSheetTest {
 
         composeTestRule
             .onNodeWithText(res.getString(WidgetKitR.string.widget_kit_save))
+            .performScrollTo()
             .assertIsDisplayed()
     }
 
@@ -145,6 +148,7 @@ class WidgetConfigurationSheetTest {
 
         composeTestRule
             .onNodeWithText(res.getString(WidgetKitR.string.widget_kit_create))
+            .performScrollTo()
             .performClick()
 
         assertNotNull(captured)

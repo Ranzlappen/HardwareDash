@@ -7,16 +7,17 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
  * Instrumented tests for [TorchScreenContent].
@@ -116,6 +117,7 @@ class TorchScreenContentTest {
         setContent(TorchScreenState.Initial)
         composeTestRule
             .onNodeWithText(res.getString(R.string.torch_widget_list_empty_title))
+            .performScrollTo()
             .assertIsDisplayed()
     }
 
@@ -134,7 +136,7 @@ class TorchScreenContentTest {
         setContent(TorchScreenState.Initial.copy(widgets = saved))
         // The row shows the live preview (no title text); the widget name
         // is carried as the preview's content description.
-        composeTestRule.onNodeWithContentDescription("Loud strobe").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Loud strobe").performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -151,6 +153,7 @@ class TorchScreenContentTest {
         )
         composeTestRule
             .onNodeWithContentDescription(res.getString(R.string.torch_widget_list_action_delete))
+            .performScrollTo()
             .performClick()
         assertTrue(events.contains(TorchUiEvent.DeleteWidget(widget)))
     }

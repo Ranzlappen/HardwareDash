@@ -15,8 +15,8 @@ import javax.inject.Singleton
  *
  * Two bindings:
  *  - [TorchSysfsController] -> [RootedTorchController]: the libsu-backed
- *    sysfs controller the rooted-extras UI consumes via
- *    `RootFeaturesEntryPoint.torchSysfsController()`.
+ *    sysfs controller that [RootedTorchRootCapabilities] injects to drive
+ *    the modular `:feature:torch` screen's rooted-tier tools.
  *  - [TorchRootCapabilities] -> [RootedTorchRootCapabilities]: the
  *    modular adapter the new `:feature:torch` screen consumes for its
  *    rooted-tier extras (DutyCycleStrobe, MultiLed, ThermalOverride
@@ -25,7 +25,7 @@ import javax.inject.Singleton
  * Lives in `:feature:torch-rooted` (not `app/src/rooted/.../root/RootBindings.kt`)
  * so the rooted-Torch graph is self-contained inside the feature module,
  * matching the established `:feature:torch` blueprint pattern.
- * `RootBindings` keeps the remaining cross-feature bindings (audio, vibration,
+ * `RootBindings` keeps the remaining cross-feature bindings (audio,
  * camera, …) until each feature follows the same migration.
  *
  * **InstallIn(SingletonComponent::class)** so both controllers stay alive
