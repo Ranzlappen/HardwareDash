@@ -47,7 +47,12 @@ class WidgetFunctionDispatcher @Inject constructor(
     ): WidgetDispatchOutcome =
         when (val behavior = function.behavior) {
             is WidgetFunctionBehavior.Toggle -> {
-                val wasActive = stateActive(featureId, behavior.stateKey)
+                // Await the source's authoritative state (not the cheap cached
+                // read): on a cold broadcast process an async-backed source
+                // (torch) hasn't received its first delivery yet, so a sync read
+                // would always say "inactive" and every tap would dispatch the
+                // on-action.
+                val wasActive = awaitStateActive(featureId, behavior.stateKey)
                 val actionKey = if (wasActive) behavior.offActionKey else behavior.onActionKey
                 val result = registry.dispatch(featureId, actionKey, params)
                 // Only commit the flipped state when the action succeeded;
@@ -64,6 +69,9 @@ class WidgetFunctionDispatcher @Inject constructor(
 
     private fun stateActive(featureId: String, stateKey: String): Boolean =
         stateSources["$featureId:$stateKey"]?.isActive() ?: false
+
+    private suspend fun awaitStateActive(featureId: String, stateKey: String): Boolean =
+        stateSources["$featureId:$stateKey"]?.awaitActive() ?: false
 }
 
 /** The result of dispatching a widget function: the post-tap active state used

@@ -40,6 +40,22 @@ interface TorchController {
 
     /** Set the torch to a specific on/off state. No-op if not available. */
     fun setOn(on: Boolean)
+
+    /**
+     * The torch's **authoritative** current state, awaiting the first real
+     * hardware delivery if it hasn't arrived yet.
+     *
+     * [state] is seeded `isOn = false` and only corrected once the OS torch
+     * callback fires (asynchronously, on the main thread). A synchronous
+     * `state.value` read on a freshly-spawned process — e.g. a home-screen
+     * widget tap, whose broadcast can run in a brand-new process — can therefore
+     * still see the stale initial `false`. Callers that must branch on the
+     * *real* state (deciding a toggle's direction) await this instead.
+     * Implementations bound the wait so it can never stall a broadcast; the
+     * default returns the cached [state] value for impls whose state is
+     * synchronously accurate.
+     */
+    suspend fun currentState(): TorchState = state.value
 }
 
 /**

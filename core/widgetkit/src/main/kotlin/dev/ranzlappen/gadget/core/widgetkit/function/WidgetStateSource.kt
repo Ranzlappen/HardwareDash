@@ -16,4 +16,19 @@ package dev.ranzlappen.gadget.core.widgetkit.function
  */
 fun interface WidgetStateSource {
     fun isActive(): Boolean
+
+    /**
+     * Authoritative active state used to decide a **toggle tap's** direction,
+     * awaited on the (possibly cold) widget broadcast process. Defaults to the
+     * synchronous [isActive]; a source whose backing state is populated
+     * **asynchronously** — e.g. the torch reads its real on/off from
+     * `CameraManager.TorchCallback`, delivered on the main thread shortly after
+     * registration — overrides this to await its first authoritative delivery.
+     *
+     * Without it, a freshly-spawned widget process reads the source's stale
+     * *initial* value (torch: `false`) and so always dispatches the "on"
+     * action — the "toggle on works, off doesn't" bug. Implementations must
+     * keep the wait **bounded** so it can never stall the broadcast.
+     */
+    suspend fun awaitActive(): Boolean = isActive()
 }

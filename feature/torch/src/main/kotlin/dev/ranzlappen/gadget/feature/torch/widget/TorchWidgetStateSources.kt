@@ -22,7 +22,14 @@ import javax.inject.Inject
 class TorchPowerStateSource @Inject constructor(
     private val controller: TorchController,
 ) : WidgetStateSource {
+    // Cheap cached read for painting the resting icon.
     override fun isActive(): Boolean = controller.state.value.isOn
+
+    // Authoritative read for the toggle decision: on a cold widget-tap process
+    // the camera callback hasn't delivered yet, so a cached read would always
+    // say "off" and every tap would turn the torch on. currentState() awaits the
+    // first real delivery (bounded), so the second tap correctly turns it off.
+    override suspend fun awaitActive(): Boolean = controller.currentState().isOn
 }
 
 /**
