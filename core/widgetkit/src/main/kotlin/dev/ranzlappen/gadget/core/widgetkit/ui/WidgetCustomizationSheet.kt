@@ -100,7 +100,6 @@ fun WidgetCustomizationSheet(
                 ?: functions.firstOrNull()?.id.orEmpty(),
         )
     }
-    var sizePreset by remember { mutableStateOf(initialSizePreset) }
     var appearance by remember { mutableStateOf(initialAppearance) }
 
     val function = functions.firstOrNull { it.id == selectedId } ?: functions.firstOrNull()
@@ -178,24 +177,14 @@ fun WidgetCustomizationSheet(
                 }
             }
 
-            // ─── Size ─────────────────────────────────────────────────
-            SheetSectionHeader(stringResource(R.string.widget_kit_section_size))
-            LabeledChipRow(label = stringResource(R.string.widget_kit_size_label)) {
-                WidgetSizePreset.values().forEach { preset ->
-                    GadgetChip(
-                        selected = preset == sizePreset,
-                        onClick = { sizePreset = preset },
-                        label = sizePresetLabel(preset),
-                    )
-                }
-            }
-            Text(
-                text = stringResource(R.string.widget_kit_size_help),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
             // ─── Appearance + preview ─────────────────────────────────
+            // No size picker: Android won't let an app pin a widget at an
+            // exact footprint, so the widget instead auto-adapts its content
+            // (icon scale + name label) to whatever cell size the user drags
+            // it to on the home screen — see BaseGadgetWidgetProvider's
+            // density-from-launcher-size logic. The persisted sizePreset is
+            // kept only as the cold-start density fallback before the launcher
+            // reports a size.
             WidgetAppearanceSection(
                 appearance = appearance,
                 onAppearanceChange = { appearance = it },
@@ -222,7 +211,7 @@ fun WidgetCustomizationSheet(
                                 name = name,
                                 actionKey = selectedId,
                                 params = params.toMap(),
-                                sizePreset = sizePreset,
+                                sizePreset = initialSizePreset,
                                 appearance = appearance,
                             ),
                         )
@@ -321,15 +310,6 @@ private fun LabeledChipRow(label: String, content: @Composable FlowRowScope.() -
         )
     }
 }
-
-@Composable
-private fun sizePresetLabel(preset: WidgetSizePreset): String = stringResource(
-    when (preset) {
-        WidgetSizePreset.Small -> R.string.widget_kit_size_small
-        WidgetSizePreset.Medium -> R.string.widget_kit_size_medium
-        WidgetSizePreset.Large -> R.string.widget_kit_size_large
-    },
-)
 
 /** Turn a snake_case param name into a readable label ("rate_hz" → "Rate hz").
  *  Param labels are developer-facing keys; this keeps the dialog tidy without
