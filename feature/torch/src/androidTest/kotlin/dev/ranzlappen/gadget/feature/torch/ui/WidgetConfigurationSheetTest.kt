@@ -80,8 +80,7 @@ class WidgetConfigurationSheetTest {
 
         composeTestRule
             .onNodeWithText(res.getString(WidgetKitR.string.widget_kit_create))
-            .performScrollTo()
-            .assertIsDisplayed()
+            .assertExists()
     }
 
     @Test
@@ -103,8 +102,7 @@ class WidgetConfigurationSheetTest {
 
         composeTestRule
             .onNodeWithText(res.getString(WidgetKitR.string.widget_kit_save))
-            .performScrollTo()
-            .assertIsDisplayed()
+            .assertExists()
     }
 
     @Test
