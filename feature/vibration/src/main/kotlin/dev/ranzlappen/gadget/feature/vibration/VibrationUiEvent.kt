@@ -28,13 +28,13 @@ sealed interface VibrationUiEvent {
     data class PatternDelete(val pattern: VibrationPattern) : VibrationUiEvent
 
     // ─── Widgets ─────────────────────────────────────────────────────────
-    data object AddVibrate : VibrationUiEvent
-    data object AddPattern : VibrationUiEvent
-    data object QuickPinVibrate : VibrationUiEvent
+    /** Open the customization sheet to create a brand-new widget. */
+    data object AddWidget : VibrationUiEvent
     data class EditWidget(val widget: SavedVibrationWidget) : VibrationUiEvent
     data class DeleteWidget(val widget: SavedVibrationWidget) : VibrationUiEvent
-    data class SheetConfirmed(val config: dev.ranzlappen.gadget.feature.vibration.widget.VibrationWidgetConfig) :
-        VibrationUiEvent
+    data class SheetConfirmed(
+        val result: dev.ranzlappen.gadget.core.widgetkit.ui.WidgetCustomizationResult,
+    ) : VibrationUiEvent
     data object SheetDismissed : VibrationUiEvent
 
     // ─── Rooted tools ────────────────────────────────────────────────────

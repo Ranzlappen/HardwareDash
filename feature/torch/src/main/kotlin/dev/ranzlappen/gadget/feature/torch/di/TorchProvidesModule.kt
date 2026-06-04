@@ -17,6 +17,7 @@ import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.monitor.TorchBootRearmHandler
 import dev.ranzlappen.gadget.feature.torch.widget.TorchPinLog
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
+import dev.ranzlappen.gadget.feature.torch.widget.migration.TorchWidgetMigrator
 import javax.inject.Singleton
 
 /**
@@ -70,10 +71,11 @@ object TorchProvidesModule {
      * used (`torch_widgets` / `widget_`) so existing on-disk configs
      * keep loading unchanged.
      *
-     * No [Migrator] is bound yet — `TorchWidgetConfig.schemaVersion` is
-     * 1 and no fields have shifted shape. When the first migration is
-     * needed, bump `schemaVersion` and add a `Migrator<TorchWidgetConfig>`
-     * provider here.
+     * [TorchWidgetMigrator] upgrades the legacy **v1** shape (a `type`
+     * discriminator + per-strobe `rateHz` / `sosMode` / `morseText` fields) to
+     * the function-driven **v2** shape (`actionKey` + generic `params`) on every
+     * read, so existing on-disk widgets keep working across the migration
+     * without the providers ever seeing the legacy fields.
      */
     @Provides
     @Singleton
@@ -85,7 +87,7 @@ object TorchProvidesModule {
             keyPrefix = "widget_",
             serializer = TorchWidgetConfig.serializer(),
         )
-        return WidgetConfigStore(prefs)
+        return WidgetConfigStore(prefs, TorchWidgetMigrator())
     }
 
     /**

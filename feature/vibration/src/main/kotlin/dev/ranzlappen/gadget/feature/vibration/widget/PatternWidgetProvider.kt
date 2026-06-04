@@ -6,36 +6,37 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
-import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunction
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunctionDispatcher
 import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.provider.BaseGadgetWidgetProvider
-import dev.ranzlappen.gadget.feature.vibration.monitor.VibrationBootRearmHandler
+import dev.ranzlappen.gadget.core.widgetkit.provider.WidgetRenderDensity
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.vibration.R
-import dev.ranzlappen.gadget.feature.vibration.VibrationPlaybackService
+import dev.ranzlappen.gadget.feature.vibration.monitor.VibrationBootRearmHandler
 import dev.ranzlappen.gadget.core.widgetkit.R as WidgetKitR
-import kotlinx.coroutines.launch
 
 /**
- * Home-screen pattern widget — tapping plays the configured saved
- * [dev.ranzlappen.gadget.feature.vibration.VibrationPattern] once via
- * [VibrationPlaybackService] (which reads the widget's `patternId` from its
- * persisted [VibrationWidgetConfig]).
+ * Home-screen pattern widget — **registered only for already-placed legacy
+ * pattern widgets** (new pins go through the designated [VibrateWidgetProvider],
+ * whose function picker offers the saved-pattern function too). Tapping resolves
+ * the config's bound [WidgetFunction] and dispatches it through the kit's
+ * [WidgetFunctionDispatcher] → action handler, which plays the saved pattern.
  *
- * Mirror of torch's `StrobeWidgetProvider` minus the running-state toggle (a
- * pattern is a one-shot play, not a sustained on/off). Overrides
- * [reconcilePendingConfig] with `claimSolePending` so the chosen pattern
- * applies on the first tap even when the OS pin-success callback never fires.
+ * Same function-driven base as [VibrateWidgetProvider]; differs only in its
+ * layout, tap action, and default config (pattern-bound). [reconcilePendingConfig]
+ * returns `null` — this provider never originates a pin, so it has no pending
+ * entry to rescue.
  */
 class PatternWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() {
 
@@ -44,6 +45,8 @@ class PatternWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
     override val providerClass: Class<out AppWidgetProvider> = PatternWidgetProvider::class.java
 
     override val featureId: String = VibrationBootRearmHandler.FEATURE_ID
+
+    override val tapAction: String = ACTION_PATTERN_TAP
 
     override fun configStore(context: Context): WidgetConfigStore<VibrationWidgetConfig> =
         entry(context).vibrationWidgetRepository()
@@ -54,53 +57,27 @@ class PatternWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
     override fun feedbackDispatcher(context: Context): WidgetFeedbackDispatcher =
         entry(context).feedbackDispatcher()
 
+    override fun functionDispatcher(context: Context): WidgetFunctionDispatcher =
+        entry(context).widgetFunctionDispatcher()
+
+    override fun resolveFunction(context: Context, config: VibrationWidgetConfig): WidgetFunction? =
+        entry(context).vibrationWidgetFunctionCatalog().functionFor(config.actionKey)
+
+    override fun paramsOf(config: VibrationWidgetConfig): Map<String, String> = config.params
+
+    override fun sizePresetOf(config: VibrationWidgetConfig): WidgetSizePreset = config.sizePreset
+
     override fun defaultConfig(context: Context): VibrationWidgetConfig = VibrationWidgetConfig(
-        type = WidgetType.Pattern,
         displayName = context.getString(R.string.vibration_widget_default_name_pattern),
+        actionKey = VibrationWidgetConfig.FUNCTION_PATTERN,
     )
-
-    override suspend fun activeState(context: Context): Boolean = false
-
-    override suspend fun reconcilePendingConfig(context: Context): VibrationWidgetConfig? =
-        entry(context).vibrationPendingConfigs().claimSolePending { it.type == WidgetType.Pattern }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-        if (intent.action != ACTION_PATTERN_TAP) return
-        val appWidgetId = intent.getIntExtra(
-            AppWidgetManager.EXTRA_APPWIDGET_ID,
-            AppWidgetManager.INVALID_APPWIDGET_ID,
-        )
-        val startIntent = Intent(context, VibrationPlaybackService::class.java).apply {
-            putExtra(VibrationPlaybackService.EXTRA_APPWIDGET_ID, appWidgetId)
-        }
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(startIntent)
-            } else {
-                context.startService(startIntent)
-            }
-        } catch (e: IllegalStateException) {
-            Log.w(logTag, "Pattern FGS start refused", e)
-        }
-
-        val pendingResult = goAsync()
-        WidgetReceiverScope.scope.launch {
-            try {
-                handleTapAfterAction(context, appWidgetId, newState = false)
-            } catch (t: Throwable) {
-                Log.e(logTag, "PatternWidget onReceive failed", t)
-            } finally {
-                pendingResult.finish()
-            }
-        }
-    }
 
     override fun buildRemoteViews(
         context: Context,
         appWidgetId: Int,
         active: Boolean,
         config: VibrationWidgetConfig,
+        density: WidgetRenderDensity,
         pressed: Boolean,
     ): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_pattern).apply {
@@ -111,6 +88,11 @@ class PatternWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
                 appearance = config.appearance,
                 active = active,
                 featureId = featureId,
+            )
+            setTextViewText(WidgetKitR.id.widget_label, config.displayName)
+            setViewVisibility(
+                WidgetKitR.id.widget_label,
+                if (density.showLabel && !config.removed) View.VISIBLE else View.GONE,
             )
             if (config.removed) {
                 setInt(WidgetKitR.id.widget_icon, "setImageAlpha", REMOVED_WIDGET_ICON_ALPHA)
@@ -142,6 +124,8 @@ class PatternWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
         fun vibrationWidgetRepository(): WidgetConfigStore<VibrationWidgetConfig>
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
+        fun widgetFunctionDispatcher(): WidgetFunctionDispatcher
+        fun vibrationWidgetFunctionCatalog(): VibrationWidgetFunctionCatalog
         fun vibrationPendingConfigs(): PendingWidgetConfigs<VibrationWidgetConfig>
     }
 

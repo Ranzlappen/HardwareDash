@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- AppWidget metadata for the vibrate widget — a 1×1 tap target, no periodic
-     refresh (updatePeriodMillis=0). See torch's widget_flashlight_info.xml. -->
+<!-- AppWidget metadata for the vibrate widget — a 1×1 tap target that resizes
+     up so the adaptive render can show the name label. No periodic refresh
+     (updatePeriodMillis=0). See torch's widget_flashlight_info.xml. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="40dp"
     android:minHeight="40dp"
+    android:minResizeWidth="40dp"
+    android:minResizeHeight="40dp"
+    android:maxResizeWidth="250dp"
+    android:maxResizeHeight="250dp"
     android:targetCellWidth="1"
     android:targetCellHeight="1"
     android:updatePeriodMillis="0"
@@ -12,4 +17,4 @@
     android:previewImage="@drawable/ic_vibration_on"
     android:description="@string/widget_vibrate_description"
     android:widgetCategory="home_screen"
-    android:resizeMode="none" />
+    android:resizeMode="horizontal|vertical" />

@@ -26,14 +26,10 @@ sealed interface TorchUiEvent {
     data class RateChange(val rateHz: Float) : TorchUiEvent
     data object RateCommit : TorchUiEvent
 
-    data object AddFlashlight : TorchUiEvent
-    data object AddStrobe : TorchUiEvent
-
-    /** "Pin with the default look" — skip the configuration sheet and
-     *  immediately request a pin with the same default config the Add
-     *  buttons would have started the sheet with. */
-    data object QuickPinFlashlight : TorchUiEvent
-    data object QuickPinStrobe : TorchUiEvent
+    /** Open the customization sheet for a brand-new widget. One entry point
+     *  now that the function (flashlight / strobe / morse) is a picker inside
+     *  the sheet rather than a per-kind Add button. */
+    data object AddWidget : TorchUiEvent
 
     data class EditWidget(val widget: SavedTorchWidget) : TorchUiEvent
     data class DeleteWidget(val widget: SavedTorchWidget) : TorchUiEvent

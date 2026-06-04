@@ -6,47 +6,50 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
-import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunction
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunctionDispatcher
 import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.provider.BaseGadgetWidgetProvider
-import dev.ranzlappen.gadget.feature.torch.monitor.TorchBootRearmHandler
+import dev.ranzlappen.gadget.core.widgetkit.provider.WidgetRenderDensity
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.torch.R
-import dev.ranzlappen.gadget.feature.torch.TorchController
+import dev.ranzlappen.gadget.feature.torch.monitor.TorchBootRearmHandler
 import dev.ranzlappen.gadget.core.widgetkit.R as WidgetKitR
-import kotlinx.coroutines.launch
 
 /**
- * Home-screen flashlight widget — 1×1 cell.
+ * The designated generic torch home-screen widget provider — every **new**
+ * torch widget pins here. One generic provider serves every function the user
+ * can pick (flashlight / strobe / morse); a tap resolves the config's bound
+ * [WidgetFunction] from [TorchWidgetFunctionCatalog] and dispatches it through
+ * the kit's [WidgetFunctionDispatcher], so routing a widget tap flows through
+ * the same `:core:automation` actions (and therefore the same strobe runtime /
+ * monitoring) as the in-app controls.
  *
  * Each pinned instance has its own [TorchWidgetConfig] entry keyed by
- * `appWidgetId`. The config carries the per-widget appearance
- * (background mode, icon style, tap animation, feedback). The widget
- * provider reads the config in `onUpdate` / `onReceive` to drive
- * both the RemoteViews paint and the optional toast / notification
- * fired on toggle.
+ * `appWidgetId`, carrying the bound function (`actionKey`), its params, the
+ * starting-size preset, and the per-widget appearance.
  *
- * Click flow:
- *   1. User taps the widget; launcher fires the [PendingIntent]
- *      attached in [buildRemoteViews] with action [ACTION_FLASHLIGHT_TOGGLE]
- *      and the per-widget `appWidgetId` as an extra.
- *   2. [onReceive] catches the action, runs `controller.toggle()`
- *      synchronously on the receiver thread, then delegates to
- *      [BaseGadgetWidgetProvider.handleTapAfterAction] for feedback +
- *      repaint + press-frame.
+ * **Tap flow** (owned by [BaseGadgetWidgetProvider]):
+ *   1. User taps; the launcher fires the [ACTION_FLASHLIGHT_TOGGLE]
+ *      [PendingIntent] attached in [buildRemoteViews] with the per-widget
+ *      `appWidgetId`.
+ *   2. The base's `onReceive` (final) runs [onBeforeReceive] (arms the
+ *      external-state observer), then on the [tapAction] match calls
+ *      `dispatchTap` → resolve function → dispatch → feedback → repaint.
  *
  * **Lifecycle skeleton inherited** from [BaseGadgetWidgetProvider]:
- *  - `onUpdate` → `renderAll` with the self-heal fallback to
- *    [defaultConfig].
+ *  - `onUpdate` → `renderAll` with reconcile/self-heal fallback.
+ *  - `onAppWidgetOptionsChanged` → adaptive re-render on resize.
  *  - `onDeleted` → per-id `WidgetConfigStore.delete`.
  */
 class FlashlightWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
@@ -58,6 +61,8 @@ class FlashlightWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
 
     override val featureId: String = TorchBootRearmHandler.FEATURE_ID
 
+    override val tapAction: String = ACTION_FLASHLIGHT_TOGGLE
+
     override fun configStore(context: Context): WidgetConfigStore<TorchWidgetConfig> =
         entry(context).widgetRepository()
 
@@ -67,65 +72,51 @@ class FlashlightWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
     override fun feedbackDispatcher(context: Context): WidgetFeedbackDispatcher =
         entry(context).feedbackDispatcher()
 
+    override fun functionDispatcher(context: Context): WidgetFunctionDispatcher =
+        entry(context).widgetFunctionDispatcher()
+
+    override fun resolveFunction(context: Context, config: TorchWidgetConfig): WidgetFunction? =
+        entry(context).widgetFunctionCatalog().functionFor(config.actionKey)
+
+    override fun paramsOf(config: TorchWidgetConfig): Map<String, String> = config.params
+
+    override fun sizePresetOf(config: TorchWidgetConfig): WidgetSizePreset = config.sizePreset
+
     override fun defaultConfig(context: Context): TorchWidgetConfig = TorchWidgetConfig(
-        type = WidgetType.Flashlight,
         displayName = context.getString(R.string.torch_widget_default_name_flashlight),
+        actionKey = TorchWidgetConfig.FUNCTION_FLASHLIGHT,
     )
 
-    override suspend fun activeState(context: Context): Boolean =
-        entry(context).torchController().state.value.isOn
-
-    // Rescue a freshly-pinned flashlight widget whose OS success callback
-    // never landed: pull the sole unclaimed pending Flashlight config (filtered
-    // by type so it can't grab a pending Strobe; sole-match so two flashlights
-    // pinned at once can't have their configs swapped). Keeps a first-pin
-    // appearance (icon / background / tap feedback) reliable on the first
-    // render rather than self-healing a blank default.
-    override suspend fun reconcilePendingConfig(context: Context): TorchWidgetConfig? =
-        entry(context).pendingConfigs().claimSolePending { it.type == WidgetType.Flashlight }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        // Start watching for OS-level torch changes (QS tile / other apps) so a
-        // placed widget repaints on external toggles. Idempotent + lazy, and
-        // re-arms here after a process restart since onReceive is the catch-all
-        // every widget broadcast flows through.
+    // Start watching for OS-level torch changes (QS tile / other apps) so a
+    // placed widget repaints on external toggles. Idempotent + lazy, and
+    // re-arms here after a process restart since this runs on every widget
+    // broadcast.
+    override fun onBeforeReceive(context: Context, intent: Intent) {
         entry(context).torchWidgetStateObserver().ensureStarted()
-        super.onReceive(context, intent)
-        if (intent.action != ACTION_FLASHLIGHT_TOGGLE) return
-        val appWidgetId = intent.getIntExtra(
-            AppWidgetManager.EXTRA_APPWIDGET_ID,
-            AppWidgetManager.INVALID_APPWIDGET_ID,
-        )
-        // Toggle immediately on the receiver thread — the TorchCallback
-        // synchronously updates the shared TorchState so the torch reacts
-        // without waiting on the config read in handleTapAfterAction.
-        val controller = entry(context).torchController()
-        controller.toggle()
-        val newState = controller.state.value.isOn
-
-        val pendingResult = goAsync()
-        WidgetReceiverScope.scope.launch {
-            try {
-                handleTapAfterAction(context, appWidgetId, newState)
-            } catch (t: Throwable) {
-                Log.e(logTag, "FlashlightWidget onReceive failed", t)
-            } finally {
-                pendingResult.finish()
-            }
-        }
     }
+
+    // Rescue a freshly-pinned widget whose OS success callback never landed:
+    // pull the sole unclaimed pending config. All new torch pins land on this
+    // provider, so the predicate is unconditional — sole-match still guards
+    // against two simultaneous pins having their configs swapped. Keeps a
+    // first-pin appearance (icon / background / tap feedback) and the picked
+    // function reliable on the first render rather than self-healing a blank
+    // flashlight default.
+    override suspend fun reconcilePendingConfig(context: Context): TorchWidgetConfig? =
+        entry(context).pendingConfigs().claimSolePending { true }
 
     /**
      * Build the [RemoteViews] for one widget instance. The
-     * [WidgetAppearanceRenderer] does the heavy lifting of background
-     * + icon swap; the provider just attaches the click PendingIntent
-     * if taps are enabled.
+     * [WidgetAppearanceRenderer] does the heavy lifting of background + icon
+     * swap; the provider attaches the click PendingIntent, paints the inert
+     * removed-state, and shows the name label at [WidgetRenderDensity.Expanded].
      */
     override fun buildRemoteViews(
         context: Context,
         appWidgetId: Int,
         active: Boolean,
         config: TorchWidgetConfig,
+        density: WidgetRenderDensity,
         pressed: Boolean,
     ): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_flashlight).apply {
@@ -144,8 +135,15 @@ class FlashlightWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
                 setInt(WidgetKitR.id.widget_icon, "setImageAlpha", REMOVED_WIDGET_ICON_ALPHA)
                 setInt(R.id.widget_flashlight_button, "setBackgroundResource", android.R.color.transparent)
                 setOnClickPendingIntent(R.id.widget_flashlight_button, null)
+                setViewVisibility(WidgetKitR.id.widget_label, View.GONE)
                 return@apply
             }
+            // Adaptive name label — painted only at the expanded density.
+            setTextViewText(WidgetKitR.id.widget_label, config.displayName)
+            setViewVisibility(
+                WidgetKitR.id.widget_label,
+                if (density.showLabel) View.VISIBLE else View.GONE,
+            )
             if (pressed) renderer.applyPressedFrame(context, this, config.appearance)
             // Ripple is the launcher's stock press effect — set it as the
             // click target's background only when selected, transparent
@@ -163,9 +161,8 @@ class FlashlightWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
                     togglePendingIntent(context, appWidgetId),
                 )
             } else {
-                // Tap disabled — explicitly clear any previously
-                // attached PendingIntent so the widget renders
-                // display-only.
+                // Tap disabled — explicitly clear any previously attached
+                // PendingIntent so the widget renders display-only.
                 setOnClickPendingIntent(R.id.widget_flashlight_button, null)
             }
         }
@@ -183,11 +180,12 @@ class FlashlightWidgetProvider : BaseGadgetWidgetProvider<TorchWidgetConfig>() {
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface FlashlightWidgetEntryPoint {
-        fun torchController(): TorchController
         fun torchWidgetStateObserver(): TorchWidgetStateObserver
         fun widgetRepository(): WidgetConfigStore<TorchWidgetConfig>
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
+        fun widgetFunctionDispatcher(): WidgetFunctionDispatcher
+        fun widgetFunctionCatalog(): TorchWidgetFunctionCatalog
         fun pendingConfigs(): PendingWidgetConfigs<TorchWidgetConfig>
     }
 

@@ -79,17 +79,20 @@ class TorchWidgetCreator @Inject constructor(
             return WidgetPinResult.LauncherUnsupported
         }
 
-        val provider = ComponentName(context, config.type.providerClass)
+        // Every new torch widget pins to the single designated generic
+        // provider — the function the user picked rides along in the config's
+        // actionKey, not in a per-kind provider class.
+        val provider = ComponentName(context, FlashlightWidgetProvider::class.java)
 
         // Per-kind cap: count the currently-placed instances of this
         // provider so a user (or a pathological loop) can't pin unbounded
         // widgets and grow the per-feature DataStore without limit.
         val currentCount = appWidgetManager.getAppWidgetIds(provider).size
         if (!WidgetPinPolicy.canPin(currentCount)) {
-            Log.w(TorchPinLog.TAG, "requestPin → cap reached ($currentCount) type=${config.type}")
+            Log.w(TorchPinLog.TAG, "requestPin → cap reached ($currentCount) action=${config.actionKey}")
             return WidgetPinResult.CapReached
         }
-        Log.d(TorchPinLog.TAG, "requestPin → type=${config.type}")
+        Log.d(TorchPinLog.TAG, "requestPin → action=${config.actionKey}")
 
         // Persist the pending config before requesting the pin so the
         // success-callback token is guaranteed to resolve when the OS

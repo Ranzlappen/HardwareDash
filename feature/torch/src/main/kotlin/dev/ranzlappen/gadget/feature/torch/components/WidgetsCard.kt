@@ -8,15 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FlashlightOn
-import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -36,10 +34,7 @@ import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 internal fun WidgetsCard(
     widgets: List<SavedTorchWidget>,
     onResolveIcon: (String) -> WidgetIconSource,
-    onAddFlashlight: () -> Unit,
-    onAddStrobe: () -> Unit,
-    onQuickPinFlashlight: () -> Unit,
-    onQuickPinStrobe: () -> Unit,
+    onAddWidget: () -> Unit,
     onEditWidget: (SavedTorchWidget) -> Unit,
     onDeleteWidget: (SavedTorchWidget) -> Unit,
     expanded: Boolean,
@@ -58,21 +53,14 @@ internal fun WidgetsCard(
                 .padding(top = spacing.small),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
-            // Each Add line pairs the full-width sheet-opening button with a
-            // bolt icon button that pins the widget at default settings.
-            AddWidgetRow(
-                addText = stringResource(R.string.torch_widget_add_flashlight),
-                addIcon = Icons.Outlined.FlashlightOn,
-                onAdd = onAddFlashlight,
-                onQuickPin = onQuickPinFlashlight,
-                quickPinContentDescription = stringResource(R.string.torch_widget_quick_pin_flashlight),
-            )
-            AddWidgetRow(
-                addText = stringResource(R.string.torch_widget_add_strobe),
-                addIcon = Icons.Outlined.Bolt,
-                onAdd = onAddStrobe,
-                onQuickPin = onQuickPinStrobe,
-                quickPinContentDescription = stringResource(R.string.torch_widget_quick_pin_strobe),
+            // One "Add widget" button now that the function (flashlight /
+            // strobe / morse) is a picker inside the customization sheet rather
+            // than a per-kind Add button.
+            GadgetSecondaryButton(
+                onClick = onAddWidget,
+                text = stringResource(R.string.torch_widget_add),
+                leadingIcon = Icons.Outlined.Add,
+                modifier = Modifier.fillMaxWidth(),
             )
             if (widgets.isEmpty()) {
                 GadgetEmptyState(
@@ -92,40 +80,6 @@ internal fun WidgetsCard(
                 }
             }
         }
-    }
-}
-
-/**
- * A single "Add … widget" row: the sheet-opening
- * [GadgetSecondaryButton] on the left + a 48dp [GadgetIconButton]
- * on the right that pins the widget at default settings without
- * opening the configuration sheet (R4 #29 / P2-15).
- */
-@Composable
-private fun AddWidgetRow(
-    addText: String,
-    addIcon: ImageVector,
-    onAdd: () -> Unit,
-    onQuickPin: () -> Unit,
-    quickPinContentDescription: String,
-) {
-    val spacing = LocalGadgetTheme.current.spacing
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(spacing.small),
-    ) {
-        GadgetSecondaryButton(
-            onClick = onAdd,
-            text = addText,
-            leadingIcon = addIcon,
-            modifier = Modifier.weight(1f),
-        )
-        GadgetIconButton(
-            onClick = onQuickPin,
-            icon = Icons.Outlined.PushPin,
-            contentDescription = quickPinContentDescription,
-        )
     }
 }
 

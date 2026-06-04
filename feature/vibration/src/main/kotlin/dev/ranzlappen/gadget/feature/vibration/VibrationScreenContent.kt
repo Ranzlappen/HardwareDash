@@ -71,9 +71,7 @@ fun VibrationScreenContent(
             WidgetsCard(
                 widgets = state.widgets,
                 onResolveIcon = onResolveIcon,
-                onAddVibrate = { onEvent(VibrationUiEvent.AddVibrate) },
-                onAddPattern = { onEvent(VibrationUiEvent.AddPattern) },
-                onQuickPinVibrate = { onEvent(VibrationUiEvent.QuickPinVibrate) },
+                onAddWidget = { onEvent(VibrationUiEvent.AddWidget) },
                 onEditWidget = { onEvent(VibrationUiEvent.EditWidget(it)) },
                 onDeleteWidget = { onEvent(VibrationUiEvent.DeleteWidget(it)) },
                 expanded = expanded(VibrationSectionId.Widgets),

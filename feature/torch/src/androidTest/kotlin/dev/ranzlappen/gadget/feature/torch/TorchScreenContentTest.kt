@@ -12,7 +12,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
-import dev.ranzlappen.gadget.feature.torch.widget.WidgetType
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -128,10 +127,9 @@ class TorchScreenContentTest {
             SavedTorchWidget(
                 appWidgetId = 1,
                 config = TorchWidgetConfig(
-                    type = WidgetType.Strobe,
                     displayName = "Loud strobe",
-                    rateHz = 12f,
-                    morseMode = false,
+                    actionKey = TorchWidgetConfig.FUNCTION_STROBE,
+                    params = mapOf("rate_hz" to "12.0"),
                 ),
             ),
         )
@@ -146,8 +144,8 @@ class TorchScreenContentTest {
         val widget = SavedTorchWidget(
             appWidgetId = 7,
             config = TorchWidgetConfig(
-                type = WidgetType.Flashlight,
                 displayName = "Test",
+                actionKey = TorchWidgetConfig.FUNCTION_FLASHLIGHT,
             ),
         )
         val events = setContent(

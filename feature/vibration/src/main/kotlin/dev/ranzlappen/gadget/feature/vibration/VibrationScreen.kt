@@ -115,6 +115,8 @@ fun VibrationScreen(
         WidgetConfigurationSheet(
             initial = target.config,
             isExisting = target is VibrationViewModel.SheetTarget.Existing,
+            functions = viewModel.functions,
+            savedPatterns = state.savedPatterns,
             onDismiss = viewModel::onSheetDismissed,
             onConfirm = { viewModel.onEvent(VibrationUiEvent.SheetConfirmed(it)) },
             resolveIcon = viewModel::resolveWidgetIcon,

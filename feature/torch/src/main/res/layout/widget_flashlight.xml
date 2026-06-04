@@ -44,4 +44,23 @@
         android:scaleType="fitCenter"
         android:src="@drawable/ic_flashlight_on" />
 
+    <!--
+      Adaptive name label — painted under the icon only at the expanded
+      density (≈2 cells tall). The provider toggles visibility per
+      WidgetRenderDensity; @id/widget_label is declared in :core:widgetkit
+      ids.xml (referenced with @id/, no +). TextView is RemoteViews-safe.
+    -->
+    <TextView
+        android:id="@id/widget_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="2dp"
+        android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="11sp"
+        android:textColor="@android:color/white"
+        android:visibility="gone" />
+
 </FrameLayout>

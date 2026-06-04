@@ -84,10 +84,7 @@ fun TorchScreenContent(
             WidgetsCard(
                 widgets = state.widgets,
                 onResolveIcon = onResolveIcon,
-                onAddFlashlight = { onEvent(TorchUiEvent.AddFlashlight) },
-                onAddStrobe = { onEvent(TorchUiEvent.AddStrobe) },
-                onQuickPinFlashlight = { onEvent(TorchUiEvent.QuickPinFlashlight) },
-                onQuickPinStrobe = { onEvent(TorchUiEvent.QuickPinStrobe) },
+                onAddWidget = { onEvent(TorchUiEvent.AddWidget) },
                 onEditWidget = { onEvent(TorchUiEvent.EditWidget(it)) },
                 onDeleteWidget = { onEvent(TorchUiEvent.DeleteWidget(it)) },
                 expanded = expanded(TorchSectionId.Widgets),

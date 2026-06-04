@@ -6,36 +6,41 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
-import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
 import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunction
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunctionDispatcher
 import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.provider.BaseGadgetWidgetProvider
-import dev.ranzlappen.gadget.feature.vibration.monitor.VibrationBootRearmHandler
+import dev.ranzlappen.gadget.core.widgetkit.provider.WidgetRenderDensity
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.vibration.R
-import dev.ranzlappen.gadget.feature.vibration.VibrationPlaybackService
+import dev.ranzlappen.gadget.feature.vibration.monitor.VibrationBootRearmHandler
 import dev.ranzlappen.gadget.core.widgetkit.R as WidgetKitR
-import kotlinx.coroutines.launch
 
 /**
- * Home-screen vibrate widget — 1×1 cell. Tapping fires a one-shot buzz at the
- * configured amplitude/duration via [VibrationPlaybackService] (which folds the
- * commanded amplitude into the monitored signal).
+ * Home-screen vibrate widget — the **designated new-pin** generic provider.
+ * Tapping resolves the config's bound [WidgetFunction] (a momentary buzz or,
+ * if the user picked it, a saved-pattern play) and dispatches it through the
+ * kit's [WidgetFunctionDispatcher] → [dev.ranzlappen.gadget.feature.vibration.automation.VibrationActionHandler],
+ * which folds the commanded amplitude into the monitored signal. The provider
+ * never starts a hardware service itself — the base owns the
+ * tap → dispatch → feedback → repaint chain.
  *
- * Lifecycle skeleton inherited from [BaseGadgetWidgetProvider] (onUpdate →
- * renderAll with self-heal, onDeleted purge, the post-tap feedback/animation
- * chain). Overrides [reconcilePendingConfig] with `claimSolePending` so a
- * freshly-pinned widget reliably applies its config on the first tap even when
- * the OS pin-success callback never fires (the first-pin reliability fix).
+ * Inherits the [BaseGadgetWidgetProvider] lifecycle (onUpdate → renderAll
+ * self-heal, onDeleted purge, adaptive density on resize). Overrides
+ * [reconcilePendingConfig] with `claimSolePending` so a freshly-pinned widget
+ * reliably applies its config on the first tap even when the OS pin-success
+ * callback never fires (the first-pin reliability fix). Since this is the only
+ * provider used for new pins, the predicate matches any pending entry.
  */
 class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() {
 
@@ -44,6 +49,8 @@ class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
     override val providerClass: Class<out AppWidgetProvider> = VibrateWidgetProvider::class.java
 
     override val featureId: String = VibrationBootRearmHandler.FEATURE_ID
+
+    override val tapAction: String = ACTION_VIBRATE_TAP
 
     override fun configStore(context: Context): WidgetConfigStore<VibrationWidgetConfig> =
         entry(context).vibrationWidgetRepository()
@@ -54,57 +61,30 @@ class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
     override fun feedbackDispatcher(context: Context): WidgetFeedbackDispatcher =
         entry(context).feedbackDispatcher()
 
+    override fun functionDispatcher(context: Context): WidgetFunctionDispatcher =
+        entry(context).widgetFunctionDispatcher()
+
+    override fun resolveFunction(context: Context, config: VibrationWidgetConfig): WidgetFunction? =
+        entry(context).vibrationWidgetFunctionCatalog().functionFor(config.actionKey)
+
+    override fun paramsOf(config: VibrationWidgetConfig): Map<String, String> = config.params
+
+    override fun sizePresetOf(config: VibrationWidgetConfig): WidgetSizePreset = config.sizePreset
+
     override fun defaultConfig(context: Context): VibrationWidgetConfig = VibrationWidgetConfig(
-        type = WidgetType.Vibrate,
         displayName = context.getString(R.string.vibration_widget_default_name_vibrate),
+        actionKey = VibrationWidgetConfig.FUNCTION_ONESHOT,
     )
 
-    // A vibrate widget has no persistent on/off state — each tap is a discrete
-    // buzz — so the icon never shows an "active" variant.
-    override suspend fun activeState(context: Context): Boolean = false
-
     override suspend fun reconcilePendingConfig(context: Context): VibrationWidgetConfig? =
-        entry(context).vibrationPendingConfigs().claimSolePending { it.type == WidgetType.Vibrate }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-        if (intent.action != ACTION_VIBRATE_TAP) return
-        val appWidgetId = intent.getIntExtra(
-            AppWidgetManager.EXTRA_APPWIDGET_ID,
-            AppWidgetManager.INVALID_APPWIDGET_ID,
-        )
-        // Start the playback FGS synchronously in the broadcast context to stay
-        // inside the allowed FGS-start window on Android 12+.
-        val startIntent = Intent(context, VibrationPlaybackService::class.java).apply {
-            putExtra(VibrationPlaybackService.EXTRA_APPWIDGET_ID, appWidgetId)
-        }
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(startIntent)
-            } else {
-                context.startService(startIntent)
-            }
-        } catch (e: IllegalStateException) {
-            Log.w(logTag, "Vibrate FGS start refused", e)
-        }
-
-        val pendingResult = goAsync()
-        WidgetReceiverScope.scope.launch {
-            try {
-                handleTapAfterAction(context, appWidgetId, newState = false)
-            } catch (t: Throwable) {
-                Log.e(logTag, "VibrateWidget onReceive failed", t)
-            } finally {
-                pendingResult.finish()
-            }
-        }
-    }
+        entry(context).vibrationPendingConfigs().claimSolePending { true }
 
     override fun buildRemoteViews(
         context: Context,
         appWidgetId: Int,
         active: Boolean,
         config: VibrationWidgetConfig,
+        density: WidgetRenderDensity,
         pressed: Boolean,
     ): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_vibrate).apply {
@@ -115,6 +95,11 @@ class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
                 appearance = config.appearance,
                 active = active,
                 featureId = featureId,
+            )
+            setTextViewText(WidgetKitR.id.widget_label, config.displayName)
+            setViewVisibility(
+                WidgetKitR.id.widget_label,
+                if (density.showLabel && !config.removed) View.VISIBLE else View.GONE,
             )
             if (config.removed) {
                 setInt(WidgetKitR.id.widget_icon, "setImageAlpha", REMOVED_WIDGET_ICON_ALPHA)
@@ -146,6 +131,8 @@ class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
         fun vibrationWidgetRepository(): WidgetConfigStore<VibrationWidgetConfig>
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
+        fun widgetFunctionDispatcher(): WidgetFunctionDispatcher
+        fun vibrationWidgetFunctionCatalog(): VibrationWidgetFunctionCatalog
         fun vibrationPendingConfigs(): PendingWidgetConfigs<VibrationWidgetConfig>
     }
 

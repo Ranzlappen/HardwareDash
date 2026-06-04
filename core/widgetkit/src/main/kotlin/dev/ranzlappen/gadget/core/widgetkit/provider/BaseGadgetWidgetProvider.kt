@@ -5,11 +5,19 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
+import dev.ranzlappen.gadget.core.automation.ActionResult
 import dev.ranzlappen.gadget.core.widgetkit.WidgetKitConfig
 import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
 import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackDispatcher
+import dev.ranzlappen.gadget.core.widgetkit.feedback.WidgetFeedbackState
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetDispatchOutcome
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunction
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunctionBehavior
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunctionDispatcher
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.render.hasPressFrame
 import dev.ranzlappen.gadget.core.widgetkit.render.playTapPressFrame
@@ -19,109 +27,113 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Reusable [AppWidgetProvider] base for the kit-built per-instance
- * widget pattern. Lifts the four lifecycle skeletons that
- * `FlashlightWidgetProvider` and `StrobeWidgetProvider` had ~80%
- * identical:
- *  - **[onUpdate]** — `goAsync` + receiver scope + [renderAll].
- *  - **[onDeleted]** — `goAsync` + per-id `configStore.delete`.
- *  - **[renderAll]** — load configs, self-heal via [defaultConfig] +
- *    `saveIfAbsent`, paint each instance with [buildRemoteViews].
- *  - **[handleTapAfterAction]** — the common post-action chain a
- *    feature's `onReceive` runs **after** its feature-specific
- *    synchronous action: read the tapped widget's config, dispatch the
- *    configured [WidgetFeedbackDispatcher] feedback, repaint every
- *    instance (resting state), and play the held tap-press frame on
- *    the tapped instance.
+ * Reusable [AppWidgetProvider] base for the kit-built **function-driven**
+ * per-instance widget pattern. A single generic provider per feature serves
+ * every function the user can pick: the tap resolves the config's bound
+ * [WidgetFunction] and dispatches it through [WidgetFunctionDispatcher], so the
+ * provider never hardcodes a hardware action.
  *
- * The feature subclass only owns:
- *  - the Hilt EntryPoint shape (each feature returns differently-typed
- *    stores / catalogues, so the entry-point interface itself is per-
- *    feature; the base reaches the kit instances via the abstract
- *    accessors below),
- *  - the feature-specific synchronous part of [onReceive] (e.g. tap →
- *    `torchController.toggle()`),
- *  - [buildRemoteViews] for its own layout file,
- *  - [activeState] (e.g. `torchController.state.value.isOn`),
- *  - [defaultConfig] (the value `renderAll` falls back to on self-heal).
+ * The base owns:
+ *  - **[onReceive]** — feature pre-hook ([onBeforeReceive]) + tap-action filter
+ *    + [dispatchTap].
+ *  - **[onUpdate]** / **[onDeleted]** / **[onAppWidgetOptionsChanged]** — the
+ *    lifecycle skeletons (render-all, purge, adaptive re-render on resize).
+ *  - **[dispatchTap]** — resolve the function, dispatch it, then run the
+ *    post-tap chain ([handleTapAfterAction]): feedback + repaint + press-frame.
+ *  - **active-state + density** — computed generically from the function's
+ *    [WidgetStateSource] and the launcher-reported size, so the feature only
+ *    paints its own layout.
  *
- * **Monitor / chart providers don't fit this pattern.** They read a
- * shared metric config, not a per-`appWidgetId` [WidgetKitConfig]; they
- * stay as standalone `AppWidgetProvider`s.
+ * The feature subclass owns:
+ *  - the Hilt EntryPoint shape + the kit-instance accessors below,
+ *  - [resolveFunction] (look up its `WidgetFunctionCatalog` by the config's
+ *    action key) + [paramsOf] + [sizePresetOf],
+ *  - [buildRemoteViews] for its own layout file + the [tapAction] string,
+ *  - [defaultConfig] (the self-heal fallback).
+ *
+ * **Monitor / chart providers don't fit this pattern.** They read a shared
+ * metric config, not a per-`appWidgetId` [WidgetKitConfig]; they stay as
+ * standalone `AppWidgetProvider`s.
  */
 abstract class BaseGadgetWidgetProvider<T : WidgetKitConfig> : AppWidgetProvider() {
 
-    /** Logcat tag for this provider's lifecycle traces. Threaded through
-     *  [PendingWidgetConfigs] and [BaseWidgetPinSuccessReceiver] as the
-     *  same per-feature tag so the whole flow is filterable by one
-     *  string (`adb logcat -s <tag>:D`). */
+    /** Logcat tag for this provider's lifecycle traces. */
     protected abstract val logTag: String
 
-    /** The concrete provider's class — used by [handleTapAfterAction]
-     *  to enumerate currently-placed instances via
-     *  [AppWidgetManager.getAppWidgetIds]. */
+    /** The concrete provider's class — used to enumerate placed instances. */
     protected abstract val providerClass: Class<out AppWidgetProvider>
 
-    /** Stable feature id selecting this feature's [WidgetIconResolver] +
-     *  [WidgetFeedbackConfig] from the kit's per-feature multibindings.
-     *  Same id the feature keys its other kit multibindings under
-     *  (e.g. `BootRearmHandler`). Passed to the renderer/dispatcher so one
-     *  app-wide singleton can serve every feature. */
+    /** Stable feature id selecting this feature's kit multibindings
+     *  (icon resolver / feedback config / state sources). */
     protected abstract val featureId: String
 
-    /** Hilt-resolved per-feature config store. Implementations typically
-     *  delegate to `EntryPointAccessors.fromApplication(...)`. */
+    /** The custom broadcast action a tap on this provider's widgets fires
+     *  (declared in the manifest `<intent-filter>`). */
+    protected abstract val tapAction: String
+
+    /** Hilt-resolved per-feature config store. */
     protected abstract fun configStore(context: Context): WidgetConfigStore<T>
 
     /** Hilt-resolved kit appearance renderer. */
     protected abstract fun appearanceRenderer(context: Context): WidgetAppearanceRenderer
 
-    /** Hilt-resolved kit feedback dispatcher (carries the feature's
-     *  channel + small-icon config via its constructor). */
+    /** Hilt-resolved kit feedback dispatcher. */
     protected abstract fun feedbackDispatcher(context: Context): WidgetFeedbackDispatcher
 
-    /** The default config used for self-healing missing entries — a
-     *  race-safe fallback the user can tweak in the in-app list once
-     *  the real config catches up. */
-    protected abstract fun defaultConfig(context: Context): T
+    /** Hilt-resolved kit function dispatcher (routes taps to automation). */
+    protected abstract fun functionDispatcher(context: Context): WidgetFunctionDispatcher
 
-    /** Current active state used to drive the icon-style active/inactive
-     *  swap. Examples: torchController.state.value.isOn (flashlight),
-     *  strobeRuntime.running.value (strobe). */
-    protected abstract suspend fun activeState(context: Context): Boolean
+    /** Resolve the [WidgetFunction] this [config] is bound to (its
+     *  `actionKey`) from the feature's `WidgetFunctionCatalog`, or `null` if
+     *  the stored key is unknown (a removed/renamed function). */
+    protected abstract fun resolveFunction(context: Context, config: T): WidgetFunction?
+
+    /** The action params persisted on this [config], passed to dispatch. */
+    protected abstract fun paramsOf(config: T): Map<String, String>
+
+    /** The starting-size hint persisted on this [config], used as the
+     *  fallback density before the launcher reports an actual size. */
+    protected abstract fun sizePresetOf(config: T): WidgetSizePreset
+
+    /** The default config used for self-healing missing entries. */
+    protected abstract fun defaultConfig(context: Context): T
 
     /**
      * Rescue a brand-new `appWidgetId` that has no persisted config yet by
-     * consuming the sole unclaimed pending config for this provider type (see
+     * consuming the sole unclaimed pending config (see
      * [dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs.claimSolePending]).
-     *
-     * The default returns `null` — a feature opts in by overriding and
-     * delegating to its [PendingWidgetConfigs] with a type predicate. When
-     * non-`null`, [renderAll] persists the rescued config via
-     * `saveIfAbsent` (never `save`) so a racing — but slower — authoritative
-     * pin-success callback `save` still wins the final value.
-     *
-     * Why this exists: `requestPinAppWidget`'s success callback is optional
-     * and unreliable on some OEM launchers; without this, a first-pin whose
-     * callback never fires would strand the user on a self-healed default
-     * (e.g. a strobe widget losing its Morse setting until manually
-     * re-edited). The next `onUpdate` the OS always fires for a newly-placed
-     * widget reconciles the real config here instead.
+     * Default returns `null`; the designated new-pin provider overrides it.
      */
     protected open suspend fun reconcilePendingConfig(context: Context): T? = null
 
-    /** Build the feature-specific [RemoteViews] for one widget instance.
-     *  Should call [WidgetAppearanceRenderer.apply] for the background /
-     *  icon paint, attach the tap PendingIntent when
-     *  `config.appearance.tap.enabled`, and optionally call
+    /** Feature pre-hook run on **every** broadcast before the tap filter —
+     *  e.g. arm an external-state observer. Default no-op. */
+    protected open fun onBeforeReceive(context: Context, intent: Intent) = Unit
+
+    /** Build the feature-specific [RemoteViews] for one widget instance at the
+     *  resolved [density]. Should paint via [WidgetAppearanceRenderer.apply],
+     *  attach the tap PendingIntent when `config.appearance.tap.enabled`, show
+     *  the name label per [WidgetRenderDensity.showLabel], and optionally call
      *  [WidgetAppearanceRenderer.applyPressedFrame] when `pressed`. */
     protected abstract fun buildRemoteViews(
         context: Context,
         appWidgetId: Int,
         active: Boolean,
         config: T,
+        density: WidgetRenderDensity,
         pressed: Boolean,
     ): RemoteViews
+
+    final override fun onReceive(context: Context, intent: Intent) {
+        onBeforeReceive(context, intent)
+        super.onReceive(context, intent)
+        if (intent.action != tapAction) return
+        val appWidgetId = intent.getIntExtra(
+            AppWidgetManager.EXTRA_APPWIDGET_ID,
+            AppWidgetManager.INVALID_APPWIDGET_ID,
+        )
+        dispatchTap(context, appWidgetId)
+    }
 
     override fun onUpdate(
         context: Context,
@@ -149,20 +161,65 @@ abstract class BaseGadgetWidgetProvider<T : WidgetKitConfig> : AppWidgetProvider
         }
     }
 
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle?,
+    ) {
+        // The launcher reports a new size (placement or user resize) — repaint
+        // this one instance so the adaptive density (label visibility) tracks
+        // the actual cell footprint.
+        val pendingResult = goAsync()
+        WidgetReceiverScope.scope.launch {
+            try {
+                renderAll(context, appWidgetManager, intArrayOf(appWidgetId))
+            } finally {
+                pendingResult.finish()
+            }
+        }
+    }
+
     /**
-     * Render every [appWidgetIds] instance from its persisted config.
-     * Reads via [WidgetConfigStore.getAll] (not the hot `all.value`
-     * cache) so a cold process — empty cache — still paints the saved
-     * appearance instead of self-healing a default over it.
-     *
-     * When a config is genuinely absent (a brand-new `appWidgetId` whose
-     * pin-success callback hasn't landed — or never will on a flaky
-     * launcher), [reconcilePendingConfig] gets first refusal to rescue the
-     * user's real pre-pin config; only if that misses do we self-heal a
-     * [defaultConfig]. Either fallback is written with `saveIfAbsent` so a
-     * concurrent authoritative pin-success `save` always wins; we then
-     * render the freshly-read value so the painted RemoteViews reflect that
-     * winner rather than a stale local copy.
+     * Resolve the tapped widget's function and dispatch it through
+     * [WidgetFunctionDispatcher], then run [handleTapAfterAction]. Runs in the
+     * receiver's `goAsync` window; the dispatch may start a foreground service
+     * (strobe / morse) — that start happens inside the broadcast's temporary
+     * FGS-allowlist window, which extends across `goAsync`.
+     */
+    protected fun dispatchTap(context: Context, appWidgetId: Int) {
+        val pendingResult = goAsync()
+        WidgetReceiverScope.scope.launch {
+            try {
+                val store = configStore(context)
+                val config = (
+                    if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                        store.get(appWidgetId)
+                    } else {
+                        null
+                    }
+                    ) ?: defaultConfig(context)
+                val function = resolveFunction(context, config)
+                val outcome = if (function != null && !config.removed) {
+                    functionDispatcher(context).dispatch(featureId, function, paramsOf(config))
+                } else {
+                    WidgetDispatchOutcome(active = false, result = ActionResult.Unsupported)
+                }
+                handleTapAfterAction(context, appWidgetId, function, outcome)
+            } catch (t: Throwable) {
+                Log.e(logTag, "widget tap dispatch failed", t)
+            } finally {
+                pendingResult.finish()
+            }
+        }
+    }
+
+    /**
+     * Render every [appWidgetIds] instance from its persisted config. Reads via
+     * [WidgetConfigStore.getAll] (not the hot cache) so a cold process paints
+     * the saved appearance. A genuinely-absent config is rescued by
+     * [reconcilePendingConfig], else self-healed to [defaultConfig] — both via
+     * `saveIfAbsent` so a concurrent authoritative pin-success `save` wins.
      */
     protected suspend fun renderAll(
         context: Context,
@@ -171,12 +228,8 @@ abstract class BaseGadgetWidgetProvider<T : WidgetKitConfig> : AppWidgetProvider
     ) {
         val store = configStore(context)
         val configs = store.getAll()
-        val active = activeState(context)
         appWidgetIds.forEach { id ->
             val config = configs[id] ?: run {
-                // Prefer the user's stranded pre-pin config over a blank
-                // default. reconcilePendingConfig is null unless the feature
-                // opts in (see its KDoc).
                 val rescued = reconcilePendingConfig(context)
                 val fallback = rescued ?: defaultConfig(context)
                 if (rescued != null) {
@@ -184,52 +237,35 @@ abstract class BaseGadgetWidgetProvider<T : WidgetKitConfig> : AppWidgetProvider
                 } else {
                     Log.w(logTag, "self-heal id=$id")
                 }
-                // saveIfAbsent (not save) so a concurrent pin-success write
-                // of the real config is never clobbered. See
-                // WidgetConfigStore.saveIfAbsent. Re-read so we paint the
-                // authoritative value if that callback landed between our
-                // miss above and this write.
                 store.saveIfAbsent(id, fallback)
                 store.getFresh(id) ?: fallback
             }
+            val active = activeFor(context, config)
+            val density = densityFor(appWidgetManager, id, config)
             appWidgetManager.updateAppWidget(
                 id,
-                buildRemoteViews(context, id, active, config, pressed = false),
+                buildRemoteViews(context, id, active, config, density, pressed = false),
             )
         }
     }
 
+    /** The live active state for [config]'s function — the toggle's
+     *  [WidgetStateSource] reading, or `false` for a momentary function. */
+    protected fun activeFor(context: Context, config: T): Boolean {
+        val function = resolveFunction(context, config) ?: return false
+        return functionDispatcher(context).isActive(featureId, function)
+    }
+
     /**
-     * Common post-action chain a feature's `onReceive` runs **after**
-     * its synchronous feature action (`controller.toggle()`,
-     * `service.start()`, etc.) completes:
-     *
-     *  1. Load the tapped widget's config (DataStore-backed read, not
-     *     the hot cache — so a cold process still sees per-widget
-     *     feedback + animation config).
-     *  2. Dispatch the configured [WidgetFeedbackDispatcher] feedback on
-     *     the main thread (Toast needs a Looper).
-     *  3. Repaint every instance (resting state) so the icon swap
-     *     reflects the new global state.
-     *  4. Overlay the held tap-press frame on the tapped instance for
-     *     ~280 ms via [playTapPressFrame] (no-op for None / Ripple
-     *     animations).
-     *
-     * Call from inside the feature's own `goAsync` coroutine — the base
-     * does not open its own; the caller already owns the
-     * `pendingResult.finish()` lifecycle.
-     *
-     * @param appWidgetId the id of the tapped instance (may be
-     *                    [AppWidgetManager.INVALID_APPWIDGET_ID] if the
-     *                    extra was missing — feedback / press-frame
-     *                    silently no-op in that case).
-     * @param newState the post-action active state used by the icon
-     *                 paint + the `{state}` template substitution.
+     * Post-dispatch chain: confirmation feedback (toast / notification on the
+     * main thread), repaint every instance, then overlay the held tap-press
+     * frame on the tapped instance.
      */
     protected suspend fun handleTapAfterAction(
         context: Context,
         appWidgetId: Int,
-        newState: Boolean,
+        function: WidgetFunction?,
+        outcome: WidgetDispatchOutcome,
     ) {
         val store = configStore(context)
         val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -239,55 +275,79 @@ abstract class BaseGadgetWidgetProvider<T : WidgetKitConfig> : AppWidgetProvider
         }
         Log.d(
             logTag,
-            "tap id=$appWidgetId state=$newState config=${config != null} " +
-                "fb=${config?.appearance?.feedback?.let { it::class.simpleName }} " +
-                "anim=${config?.appearance?.tap?.animation}",
+            "tap id=$appWidgetId active=${outcome.active} result=${outcome.result::class.simpleName} " +
+                "config=${config != null}",
         )
 
         if (config != null) {
-            // Toast needs a Looper — dispatch on the main thread.
+            val feedbackState = feedbackStateFor(function, outcome)
             withContext(Dispatchers.Main) {
                 feedbackDispatcher(context).dispatch(
                     displayName = config.displayName,
-                    newState = newState,
+                    state = feedbackState,
                     feedback = config.appearance.feedback,
                     featureId = featureId,
                 )
             }
         }
 
-        // Repaint every instance (resting state).
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val componentName = ComponentName(context, providerClass)
         val ids = appWidgetManager.getAppWidgetIds(componentName)
         if (ids.isNotEmpty()) renderAll(context, appWidgetManager, ids)
 
-        // Overlay the held tap-press frame on the tapped instance.
         if (config != null &&
             appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID &&
             config.appearance.tap.enabled &&
             config.appearance.tap.animation.hasPressFrame()
         ) {
+            val density = densityFor(appWidgetManager, appWidgetId, config)
             playTapPressFrame(
                 manager = appWidgetManager,
                 appWidgetId = appWidgetId,
-                pressedViews = buildRemoteViews(context, appWidgetId, newState, config, pressed = true),
-                restingViews = buildRemoteViews(context, appWidgetId, newState, config, pressed = false),
+                pressedViews = buildRemoteViews(context, appWidgetId, outcome.active, config, density, pressed = true),
+                restingViews = buildRemoteViews(context, appWidgetId, outcome.active, config, density, pressed = false),
             )
         }
     }
 
-    /** Build the broadcast [Intent] used to repaint a single placed
-     *  instance via [AppWidgetManager.ACTION_APPWIDGET_UPDATE]. Features
-     *  can use this directly or wrap it in a helper. */
-    protected fun appWidgetUpdateIntent(context: Context, appWidgetId: Int): Intent =
-        Intent(
-            AppWidgetManager.ACTION_APPWIDGET_UPDATE,
-            null,
-            context,
-            providerClass,
-        ).apply {
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
-            component = ComponentName(context, providerClass)
+    private fun feedbackStateFor(function: WidgetFunction?, outcome: WidgetDispatchOutcome): WidgetFeedbackState =
+        when (val result = outcome.result) {
+            is ActionResult.Failure -> WidgetFeedbackState.Failed(result.reason)
+            ActionResult.Unsupported -> WidgetFeedbackState.Failed("unavailable")
+            ActionResult.Success ->
+                if (function?.behavior is WidgetFunctionBehavior.Toggle) {
+                    WidgetFeedbackState.Toggle(outcome.active)
+                } else {
+                    WidgetFeedbackState.Triggered
+                }
         }
+
+    /** Resolve the render density from the launcher-reported size, falling
+     *  back to the config's starting-size preset before any size is reported. */
+    private fun densityFor(
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        config: T,
+    ): WidgetRenderDensity {
+        val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+        val minHeight = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) ?: 0
+        val minWidth = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0) ?: 0
+        return when {
+            minHeight <= 0 && minWidth <= 0 ->
+                WidgetRenderDensity.fromPreset(sizePresetOf(config))
+            minHeight >= LABEL_MIN_HEIGHT_DP -> WidgetRenderDensity.Expanded
+            minHeight < COMPACT_MAX_DP && minWidth < COMPACT_MAX_DP -> WidgetRenderDensity.Compact
+            else -> WidgetRenderDensity.Regular
+        }
+    }
+
+    companion object {
+        /** Min reported height (dp ≈ 2 cells) at which the name label paints. */
+        private const val LABEL_MIN_HEIGHT_DP = 110
+
+        /** Below this reported size (dp ≈ 1 cell) the paint is the compact
+         *  icon-only frame. */
+        private const val COMPACT_MAX_DP = 72
+    }
 }

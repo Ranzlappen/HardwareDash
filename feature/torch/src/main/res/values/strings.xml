@@ -67,31 +67,26 @@
 
     <!-- ─── Widgets management section ──────────────────────────── -->
     <string name="torch_section_widgets_title">Your widgets</string>
-    <string name="torch_widget_add_flashlight">Add flashlight widget</string>
-    <string name="torch_widget_add_strobe">Add strobe widget</string>
+    <!-- Single "Add widget" entry point — the function (flashlight / strobe /
+         morse) is picked inside the customization sheet. -->
+    <string name="torch_widget_add">Add widget</string>
     <string name="torch_widget_pin_unsupported">Your launcher doesn\'t support adding widgets directly. Long-press the home screen to add one manually.</string>
     <string name="torch_widget_removed_hint">Removed from your list. To clear it from the home screen, long-press the widget there and remove it.</string>
     <string name="torch_widget_cap_reached">You can pin at most %1$d widgets of each kind. Remove one first.</string>
-    <string name="torch_widget_quick_pin_flashlight">Quick-pin flashlight widget with default look</string>
-    <string name="torch_widget_quick_pin_strobe">Quick-pin strobe widget with default look</string>
     <string name="torch_widget_default_name_flashlight">Flashlight</string>
     <string name="torch_widget_default_name_strobe">Strobe</string>
     <string name="torch_widget_list_empty_title">No widgets yet</string>
-    <string name="torch_widget_list_empty_subtitle">Use the buttons above to add a flashlight or strobe widget to your home screen.</string>
+    <string name="torch_widget_list_empty_subtitle">Use the button above to add a widget to your home screen.</string>
     <string name="torch_widget_list_action_edit">Edit widget</string>
     <string name="torch_widget_list_action_delete">Remove widget</string>
 
-    <!-- ─── Widget configuration sheet ──────────────────────────── -->
-    <string name="torch_widget_config_title_new">New widget</string>
-    <string name="torch_widget_config_title_edit">Edit widget</string>
-    <string name="torch_widget_config_name_label">Name</string>
-    <string name="torch_widget_config_morse_mode_label">Morse mode</string>
-    <string name="torch_widget_config_morse_mode_supporting">Plays the Morse message below instead of a constant strobe.</string>
-    <string name="torch_widget_config_morse_label">Morse message</string>
-    <string name="torch_widget_config_morse_supporting">Looped as Morse when Morse mode is on. Defaults to SOS if left blank.</string>
-    <string name="torch_widget_config_save_new">Add to home screen</string>
-    <string name="torch_widget_config_save_existing">Save</string>
-    <string name="torch_widget_config_cancel">Cancel</string>
+    <!-- ─── Widget customization sheet (function picker) ─────────── -->
+    <!-- The customization sheet chrome (name / size / appearance / footer
+         labels) now lives in :core:widgetkit. Torch only contributes the
+         function labels the picker offers. -->
+    <string name="torch_widget_function_flashlight">Flashlight</string>
+    <string name="torch_widget_function_strobe">Strobe</string>
+    <string name="torch_widget_function_morse">Morse / SOS</string>
 
     <!-- Appearance / tap / feedback / preview sub-sections moved to
          :core:widgetkit (refactor-2026 Phase 2 / C6b). 38 strings

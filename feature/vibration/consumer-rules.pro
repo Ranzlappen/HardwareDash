@@ -3,7 +3,7 @@
 # These are merged into :app's release R8 run. Without them, R8 strips the
 # synthetic `Companion.serializer()` / `$$serializer` members that
 # kotlinx.serialization generates for this module's @Serializable types
-# (VibrationWidgetConfig, VibrationPattern, VibrationRootToolsConfig, WidgetType,
+# (VibrationWidgetConfig, VibrationPattern, VibrationRootToolsConfig,
 # PendingEntry<VibrationWidgetConfig>) — which surfaces as a
 # SerializationException crash only in minified release builds (CI builds
 # `assembleStandardRelease`, so this is reachable). Package-scoped so every

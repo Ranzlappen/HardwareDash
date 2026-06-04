@@ -16,4 +16,9 @@
 <resources>
     <item name="widget_background" type="id" />
     <item name="widget_icon" type="id" />
+    <!-- Optional name label painted under the icon at larger widget sizes
+         (the adaptive/resizable render). Feature layouts add a <TextView
+         android:id="@id/widget_label"> (RemoteViews-safe); the provider
+         toggles its visibility per WidgetRenderDensity. -->
+    <item name="widget_label" type="id" />
 </resources>

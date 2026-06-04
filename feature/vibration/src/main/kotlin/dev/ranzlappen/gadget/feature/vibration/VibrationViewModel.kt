@@ -10,10 +10,12 @@ import dev.ranzlappen.gadget.core.monitoring.CollapseStateRepository
 import dev.ranzlappen.gadget.core.widgetkit.WidgetPinResult
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconChoice
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import dev.ranzlappen.gadget.core.widgetkit.function.WidgetFunction
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
+import dev.ranzlappen.gadget.core.widgetkit.ui.WidgetCustomizationResult
 import dev.ranzlappen.gadget.feature.vibration.widget.VibrationWidgetConfig
 import dev.ranzlappen.gadget.feature.vibration.widget.VibrationWidgetCreator
-import dev.ranzlappen.gadget.feature.vibration.widget.WidgetType
+import dev.ranzlappen.gadget.feature.vibration.widget.VibrationWidgetFunctionCatalog
 import dev.ranzlappen.gadget.feature.vibration.widget.broadcastVibrationWidgetUpdate
 import dev.ranzlappen.gadget.feature.vibration.widget.customization.VibrationIconCatalog
 import kotlinx.coroutines.flow.Flow
@@ -47,6 +49,7 @@ class VibrationViewModel @Inject constructor(
     private val rootToolsRepo: RootToolsConfigRepository,
     private val widgetRepository: WidgetConfigStore<VibrationWidgetConfig>,
     private val widgetCreator: VibrationWidgetCreator,
+    private val functionCatalog: VibrationWidgetFunctionCatalog,
     private val iconCatalog: VibrationIconCatalog,
     private val collapseRepo: CollapseStateRepository,
 ) : ViewModel() {
@@ -166,13 +169,11 @@ class VibrationViewModel @Inject constructor(
             is VibrationUiEvent.PatternPlaySaved -> playPattern(event.pattern)
             is VibrationUiEvent.PatternDelete -> viewModelScope.launch { patternRepository.delete(event.pattern.id) }
 
-            VibrationUiEvent.AddVibrate -> _sheetTarget.value = SheetTarget.New(defaultVibrateConfig())
-            VibrationUiEvent.AddPattern -> _sheetTarget.value = SheetTarget.New(defaultPatternConfig())
-            VibrationUiEvent.QuickPinVibrate -> requestPin(defaultVibrateConfig())
+            VibrationUiEvent.AddWidget -> _sheetTarget.value = SheetTarget.New(defaultWidgetConfig())
             is VibrationUiEvent.EditWidget ->
                 _sheetTarget.value = SheetTarget.Existing(event.widget.appWidgetId, event.widget.config)
             is VibrationUiEvent.DeleteWidget -> onDeleteWidget(event.widget)
-            is VibrationUiEvent.SheetConfirmed -> onSheetConfirmed(event.config)
+            is VibrationUiEvent.SheetConfirmed -> onSheetConfirmed(event.result)
             VibrationUiEvent.SheetDismissed -> _sheetTarget.value = null
 
             VibrationUiEvent.RootExtremeAmplitude -> runRootTool {
@@ -267,15 +268,17 @@ class VibrationViewModel @Inject constructor(
 
     // ─── Widgets ────────────────────────────────────────────────────────
 
-    private fun defaultVibrateConfig() = VibrationWidgetConfig(
-        type = WidgetType.Vibrate,
-        displayName = context.getString(R.string.vibration_widget_default_name_vibrate),
-    )
+    /**
+     * The widget functions offered in the customization sheet, **flavor-
+     * filtered**: a `requiresRoot` function is dropped unless root is ready on
+     * this device, so the standard flavor only ever lists runnable functions.
+     */
+    val functions: List<WidgetFunction>
+        get() = functionCatalog.functions.filter { !it.requiresRoot || rootAvailability.value.rootReady }
 
-    private fun defaultPatternConfig() = VibrationWidgetConfig(
-        type = WidgetType.Pattern,
-        displayName = context.getString(R.string.vibration_widget_default_name_pattern),
-        patternId = state.value.savedPatterns.firstOrNull()?.id.orEmpty(),
+    private fun defaultWidgetConfig() = VibrationWidgetConfig(
+        displayName = context.getString(R.string.vibration_widget_default_name_vibrate),
+        actionKey = VibrationWidgetConfig.FUNCTION_ONESHOT,
     )
 
     private fun requestPin(config: VibrationWidgetConfig) {
@@ -288,22 +291,37 @@ class VibrationViewModel @Inject constructor(
         }
     }
 
-    private fun onSheetConfirmed(updated: VibrationWidgetConfig) {
+    private fun onSheetConfirmed(result: WidgetCustomizationResult) {
         when (val target = _sheetTarget.value) {
-            is SheetTarget.New -> requestPin(updated)
-            is SheetTarget.Existing -> viewModelScope.launch {
-                widgetRepository.save(target.appWidgetId, updated)
-                broadcastVibrationWidgetUpdate(context, updated.type, target.appWidgetId)
+            is SheetTarget.New -> requestPin(target.config.applied(result))
+            is SheetTarget.Existing -> {
+                val updated = target.config.applied(result)
+                viewModelScope.launch {
+                    widgetRepository.save(target.appWidgetId, updated)
+                    broadcastVibrationWidgetUpdate(context, target.appWidgetId)
+                }
             }
             null -> Unit
         }
         _sheetTarget.value = null
     }
 
+    /** Fold a [WidgetCustomizationResult] into this base config, producing the
+     *  v2 widget config the sheet just edited (name/function/params/size/
+     *  appearance), preserving the `removed` flag + schema version. */
+    private fun VibrationWidgetConfig.applied(result: WidgetCustomizationResult): VibrationWidgetConfig =
+        copy(
+            displayName = result.name.ifBlank { displayName },
+            actionKey = result.actionKey,
+            params = result.params,
+            sizePreset = result.sizePreset,
+            appearance = result.appearance,
+        )
+
     private fun onDeleteWidget(widget: SavedVibrationWidget) {
         viewModelScope.launch {
             widgetRepository.save(widget.appWidgetId, widget.config.copy(removed = true))
-            broadcastVibrationWidgetUpdate(context, widget.config.type, widget.appWidgetId)
+            broadcastVibrationWidgetUpdate(context, widget.appWidgetId)
             _widgetRemovedEvents.tryEmit(Unit)
         }
     }

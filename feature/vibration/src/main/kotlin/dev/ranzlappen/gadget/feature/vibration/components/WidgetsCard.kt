@@ -10,13 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Gesture
-import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -33,17 +30,16 @@ import dev.ranzlappen.gadget.feature.vibration.R
 import dev.ranzlappen.gadget.feature.vibration.SavedVibrationWidget
 
 /**
- * The in-app vibration widget list: add a one-tap vibrate / pattern widget
- * (with a quick-pin shortcut), plus edit / delete for each placed widget.
- * Mirror of torch's `WidgetsCard`.
+ * The in-app vibration widget list: a single "Add widget" button that opens the
+ * generic customization sheet (where the user picks the function — one-shot or
+ * saved pattern — plus size + appearance), plus edit / delete for each placed
+ * widget. Mirror of torch's `WidgetsCard`.
  */
 @Composable
 internal fun WidgetsCard(
     widgets: List<SavedVibrationWidget>,
     onResolveIcon: (String) -> WidgetIconSource,
-    onAddVibrate: () -> Unit,
-    onAddPattern: () -> Unit,
-    onQuickPinVibrate: () -> Unit,
+    onAddWidget: () -> Unit,
     onEditWidget: (SavedVibrationWidget) -> Unit,
     onDeleteWidget: (SavedVibrationWidget) -> Unit,
     expanded: Boolean,
@@ -61,19 +57,11 @@ internal fun WidgetsCard(
             modifier = Modifier.fillMaxWidth().padding(top = spacing.small),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
-            AddWidgetRow(
-                addText = stringResource(R.string.vibration_widget_add_vibrate),
-                addIcon = Icons.Outlined.Vibration,
-                onAdd = onAddVibrate,
-                onQuickPin = onQuickPinVibrate,
-                quickPinContentDescription = stringResource(R.string.vibration_widget_quick_pin_vibrate),
-            )
-            AddWidgetRow(
-                addText = stringResource(R.string.vibration_widget_add_pattern),
-                addIcon = Icons.Outlined.Gesture,
-                onAdd = onAddPattern,
-                onQuickPin = onAddPattern,
-                quickPinContentDescription = stringResource(R.string.vibration_widget_add_pattern),
+            GadgetSecondaryButton(
+                onClick = onAddWidget,
+                text = stringResource(R.string.vibration_widget_add),
+                leadingIcon = Icons.Outlined.Vibration,
+                modifier = Modifier.fillMaxWidth(),
             )
             if (widgets.isEmpty()) {
                 GadgetEmptyState(
@@ -93,34 +81,6 @@ internal fun WidgetsCard(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun AddWidgetRow(
-    addText: String,
-    addIcon: ImageVector,
-    onAdd: () -> Unit,
-    onQuickPin: () -> Unit,
-    quickPinContentDescription: String,
-) {
-    val spacing = LocalGadgetTheme.current.spacing
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(spacing.small),
-    ) {
-        GadgetSecondaryButton(
-            onClick = onAdd,
-            text = addText,
-            leadingIcon = addIcon,
-            modifier = Modifier.weight(1f),
-        )
-        GadgetIconButton(
-            onClick = onQuickPin,
-            icon = Icons.Outlined.PushPin,
-            contentDescription = quickPinContentDescription,
-        )
     }
 }
 

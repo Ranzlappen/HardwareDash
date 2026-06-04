@@ -35,4 +35,20 @@
         android:scaleType="fitCenter"
         android:src="@drawable/ic_vibration_pattern" />
 
+    <!-- Adaptive name label — the provider toggles its visibility per
+         WidgetRenderDensity. The id comes from :core:widgetkit's
+         values/ids.xml; RemoteViews-safe TextView. -->
+    <TextView
+        android:id="@id/widget_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="2dp"
+        android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="11sp"
+        android:textColor="@android:color/white"
+        android:visibility="gone" />
+
 </FrameLayout>

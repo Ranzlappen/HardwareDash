@@ -38,6 +38,11 @@ dependencies {
     // :core:notifications — NotificationChannelRegistry the
     // WidgetFeedbackDispatcher uses to ensure its feedback channel.
     implementation(project(":core:notifications"))
+    // :core:automation — ModuleActionRegistry + ActionParam/ActionResult the
+    // WidgetFunctionDispatcher routes widget taps through, and the dialog's
+    // param editor renders from. One-way: automation never depends on
+    // widgetkit (no cycle).
+    api(project(":core:automation"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)

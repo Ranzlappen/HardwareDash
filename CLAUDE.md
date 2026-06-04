@@ -953,22 +953,50 @@ contract (`displayName`, `removed`, `schemaVersion`, `appearance`),
   RemoteViews-rendered widget). `GadgetColorPicker` moved to `:core:ui`
   (P1-10).
 
-**Appearance-section UI (C6 follow-up — shipped).** The generic
-appearance editor — `WidgetAppearanceSection` (`:core:widgetkit/ui`) —
-now owns every shared control (background/tint/tap-animation/feedback
-chip rows, the icon picker + custom-import flow, feedback templates, and
-the live `WidgetAppearancePreview`). It takes a generic `appearance` +
-`onAppearanceChange` plus the per-feature seam params `iconChoices:
-List<WidgetIconChoice>`, `resolveIcon`, and `onImportCustomIcon`. The
-~40 shared labels live in the kit (`widget_kit_appearance_*` in
+**Function-driven widgets (the comprehensive customization model).** A
+widget no longer hardcodes its action in its provider class. Each per-instance
+config stores `{ displayName, actionKey, params: Map<String,String>,
+sizePreset, appearance }`; `actionKey` names a **`WidgetFunction`**
+(`:core:widgetkit` `function/`) the user picks in the **single** comprehensive
+`WidgetCustomizationSheet` (name → function picker → auto-generated param
+editor from each function's `ActionParam` schema → size → appearance/preview).
+A tap resolves the bound function and dispatches it through
+`WidgetFunctionDispatcher` → `:core:automation`'s `ModuleActionRegistry`, so a
+widget runs the *same* actions as in-app controls (and feeds the same
+runtime/monitoring). Functions are **Toggle** (two paired actions + a live
+`WidgetStateSource` keyed `"<featureId>:<stateKey>"`, drives the active/inactive
+icon swap, reports on/off) or **Momentary** (one action, resting icon + press
+frame, reports "triggered"). `BaseGadgetWidgetProvider` is now generic over the
+function — it owns the whole tap→dispatch→feedback→repaint chain plus adaptive
+density (`onAppWidgetOptionsChanged` + resizable info-XML + a
+`@id/widget_label` shown at larger sizes); a feature provides only
+`resolveFunction`/`paramsOf`/`sizePresetOf`/`buildRemoteViews`. Each feature has
+ONE designated new-pin provider (torch→`FlashlightWidgetProvider`,
+vibration→`VibrateWidgetProvider`); the other per-type provider classes stay
+registered only to keep already-placed legacy widgets alive, and a
+`Migrator<T>` folds the old `type`-based v1 config into v2 (`schemaVersion=2`;
+v1 fields kept as decode-only `@Deprecated` carriers because `sharedJson` uses
+`ignoreUnknownKeys`). Rooted functions are flavor-filtered out of the picker on
+standard. Feedback is `WidgetFeedbackState` (Toggle/Triggered/Failed) — the fix
+for the vibration widget's misleading always-"off" toast. Torch + vibration are
+the reference consumers.
+
+**Appearance editor (kit-generic).** The shared appearance editor —
+`WidgetAppearanceSection` (`:core:widgetkit/ui`) — owns every shared control
+(background/tint/tap-animation/feedback chip rows, the icon picker +
+custom-import flow, and the live `WidgetAppearancePreview`) and is rendered
+*inside* the generic `WidgetCustomizationSheet`. It takes a generic
+`appearance` + `onAppearanceChange` plus the per-feature seam params
+`iconChoices: List<WidgetIconChoice>`, `resolveIcon`, and `onImportCustomIcon`;
+the ~40 shared labels live in the kit (`widget_kit_appearance_*` in
 `core/widgetkit/.../res/values/strings.xml`) and `WidgetIconChoice`
-(`:core:widgetkit/config`) is the generic swatch type. Each feature's
-`ui/WidgetConfigurationSheet.kt` is now a thin shell that delegates to
-the section and only adds its **feature-specific** fields (torch's strobe
-rate / morse, vibration's amplitude / duration) — that residue is
-*meant* to stay feature-local. Torch + vibration are the reference
-consumers; future widget-bearing features build their config sheet the
-same way.
+(`:core:widgetkit/config`) is the generic swatch type. With the function-driven
+model above, each feature's `ui/WidgetConfigurationSheet.kt` is now a **thin
+mapping shell** — it only maps the feature config in/out of the kit dialog. The
+old feature-specific fields (torch's strobe rate / morse, vibration's amplitude
+/ duration) are **gone**, replaced by params auto-generated from each function's
+`ActionParam` schema. Torch + vibration are the reference consumers; future
+widget-bearing features build their config sheet the same way.
 
 **The "remove-but-keep-inert" widget pattern** (also documented in the
 migration guide): a non-host app can't pull a placed widget off a

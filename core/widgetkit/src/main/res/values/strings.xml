@@ -29,6 +29,7 @@
     <string name="widget_kit_appearance_solid_color_label">Solid colour</string>
 
     <!-- Icon picker. -->
+    <string name="widget_kit_appearance_icon_label">Icon</string>
     <string name="widget_kit_appearance_icon_active_label">Active icon</string>
     <string name="widget_kit_appearance_icon_inactive_label">Inactive icon</string>
     <string name="widget_kit_appearance_icon_add_custom">Add custom icon from files</string>
@@ -66,4 +67,24 @@
     <string name="widget_kit_appearance_feedback_default_toast_template">{name} is now {state}</string>
     <string name="widget_kit_appearance_feedback_default_notification_title">{name}</string>
     <string name="widget_kit_appearance_feedback_default_notification_body">Now {state}</string>
+
+    <!-- Generic customization dialog (WidgetCustomizationSheet): name,
+         function picker, params, size. -->
+    <string name="widget_kit_section_name">Name</string>
+    <string name="widget_kit_name_label">Widget name</string>
+    <string name="widget_kit_section_function">Function</string>
+    <string name="widget_kit_function_label">What this widget does</string>
+    <string name="widget_kit_section_params">Settings</string>
+    <string name="widget_kit_section_size">Size</string>
+    <string name="widget_kit_size_label">Starting size</string>
+    <string name="widget_kit_size_small">Small</string>
+    <string name="widget_kit_size_medium">Medium</string>
+    <string name="widget_kit_size_large">Large</string>
+    <string name="widget_kit_size_help">Sets the starting size and shows the name when large. The widget is resizable — drag its handles on the home screen to change the footprint.</string>
+    <string name="widget_kit_param_enabled">On</string>
+    <string name="widget_kit_create">Add widget</string>
+    <string name="widget_kit_save">Save changes</string>
+    <string name="widget_kit_cancel">Cancel</string>
+    <string name="widget_kit_dialog_title_new">New widget</string>
+    <string name="widget_kit_dialog_title_edit">Edit widget</string>
 </resources>

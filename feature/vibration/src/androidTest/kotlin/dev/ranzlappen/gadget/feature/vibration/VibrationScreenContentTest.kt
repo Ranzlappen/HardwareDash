@@ -14,7 +14,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import dev.ranzlappen.gadget.feature.vibration.widget.VibrationWidgetConfig
-import dev.ranzlappen.gadget.feature.vibration.widget.WidgetType
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -86,7 +85,7 @@ class VibrationScreenContentTest {
         val saved = listOf(
             SavedVibrationWidget(
                 appWidgetId = 1,
-                config = VibrationWidgetConfig(type = WidgetType.Vibrate, displayName = "Quick buzz"),
+                config = VibrationWidgetConfig(displayName = "Quick buzz"),
             ),
         )
         setContent(VibrationScreenState.Initial.copy(widgets = saved))
@@ -97,7 +96,7 @@ class VibrationScreenContentTest {
     fun deleteButtonDispatchesDeleteWidget() {
         val widget = SavedVibrationWidget(
             appWidgetId = 7,
-            config = VibrationWidgetConfig(type = WidgetType.Vibrate, displayName = "Test"),
+            config = VibrationWidgetConfig(displayName = "Test"),
         )
         val events = setContent(VibrationScreenState.Initial.copy(widgets = listOf(widget)))
         composeTestRule

@@ -1,18 +1,31 @@
 package dev.ranzlappen.gadget.feature.torch.widget
 
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
+import dev.ranzlappen.gadget.feature.torch.automation.TorchActionHandler
+import dev.ranzlappen.gadget.feature.torch.widget.migration.TorchWidgetMigrator
 import kotlinx.serialization.json.Json
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
- * Smoke test for [TorchWidgetConfig]'s `@Serializable` round-trip.
+ * Decode + migration tests for [TorchWidgetConfig] across the v1 → v2
+ * (function-driven) schema bump.
  *
- * The repository's actual disk persistence goes through
- * [dev.ranzlappen.gadget.core.datastore.FeaturePreferences] which has
- * its own integration test using a real DataStore on a tmpdir. This
- * test pins the JSON shape so an accidental field rename or default-
- * value drift surfaces immediately instead of as a silent on-disk
- * incompatibility for users upgrading across batches.
+ * The real disk persistence goes through
+ * [dev.ranzlappen.gadget.core.datastore.FeaturePreferences] (its own
+ * integration test). These tests pin two things that would otherwise surface
+ * only as a silent on-disk incompatibility for upgrading users:
+ *  1. v1 JSON (the legacy `type` / `rateHz` / `sosMode` / `morseText` shape)
+ *     still **decodes** — the deprecated decode-only fields survive the lenient
+ *     decoder so [TorchWidgetMigrator] can read them.
+ *  2. [TorchWidgetMigrator] folds each v1 variant into the right v2
+ *     `actionKey` + `params`, preserves `appearance`/`displayName`, and nulls
+ *     the legacy fields.
+ *
+ * The decoder mirrors `FeaturePreferencesFactory.sharedJson`
+ * (`ignoreUnknownKeys = true`).
  */
 class TorchWidgetConfigTest {
 
@@ -21,70 +34,85 @@ class TorchWidgetConfigTest {
         encodeDefaults = true
     }
 
+    private val migrator = TorchWidgetMigrator()
+
+    private fun decode(raw: String): TorchWidgetConfig =
+        json.decodeFromString(TorchWidgetConfig.serializer(), raw)
+
     @Test
-    fun `flashlight config encodes and decodes losslessly`() {
+    fun `v2 flashlight config round-trips losslessly`() {
         val original = TorchWidgetConfig(
-            type = WidgetType.Flashlight,
             displayName = "My flashlight",
+            actionKey = TorchWidgetConfig.FUNCTION_FLASHLIGHT,
         )
-
         val encoded = json.encodeToString(TorchWidgetConfig.serializer(), original)
-        val decoded = json.decodeFromString(TorchWidgetConfig.serializer(), encoded)
-
-        assertEquals(original, decoded)
+        val decoded = decode(encoded)
+        // Already v2 → migrator is a no-op passthrough.
+        assertEquals(original, migrator.migrate(decoded))
     }
 
     @Test
-    fun `strobe config with custom rate and Morse mode round-trips`() {
-        val original = TorchWidgetConfig(
-            type = WidgetType.Strobe,
-            displayName = "Bright SOS",
-            rateHz = 12f,
-            morseMode = true,
+    fun `v1 flashlight json migrates to the power toggle function`() {
+        val migrated = migrator.migrate(
+            decode("""{"type":"Flashlight","displayName":"x","schemaVersion":1}"""),
         )
-
-        val encoded = json.encodeToString(TorchWidgetConfig.serializer(), original)
-        val decoded = json.decodeFromString(TorchWidgetConfig.serializer(), encoded)
-
-        assertEquals(original, decoded)
+        assertEquals(TorchWidgetConfig.FUNCTION_FLASHLIGHT, migrated.actionKey)
+        assertEquals(emptyMap(), migrated.params)
+        assertEquals(TorchWidgetConfig.SCHEMA_VERSION, migrated.schemaVersion)
+        assertEquals(WidgetSizePreset.Medium, migrated.sizePreset)
+        assertEquals("x", migrated.displayName)
+        // Legacy fields nulled after the fold.
+        @Suppress("DEPRECATION")
+        assertNull(migrated.type)
     }
 
     @Test
-    fun `morseMode persists under the legacy sosMode json key`() {
-        val encoded = json.encodeToString(
-            TorchWidgetConfig.serializer(),
-            TorchWidgetConfig(
-                type = WidgetType.Strobe,
-                displayName = "Legacy",
-                morseMode = true,
-            ),
+    fun `v1 strobe json migrates to the strobe toggle with the persisted rate`() {
+        val migrated = migrator.migrate(
+            decode("""{"type":"Strobe","displayName":"Loud","rateHz":12.0,"sosMode":false,"schemaVersion":1}"""),
         )
-        // The wire key stays `sosMode` so existing on-disk configs and
-        // older app versions stay compatible across the rename.
-        assertEquals(true, encoded.contains("\"sosMode\":true"))
+        assertEquals(TorchWidgetConfig.FUNCTION_STROBE, migrated.actionKey)
+        assertEquals("12.0", migrated.params[TorchActionHandler.PARAM_RATE_HZ])
+        assertEquals(TorchWidgetConfig.SCHEMA_VERSION, migrated.schemaVersion)
+    }
 
-        val decodedLegacy = json.decodeFromString(
-            TorchWidgetConfig.serializer(),
-            """{"type":"Strobe","displayName":"Legacy","rateHz":5.0,"sosMode":true}""",
+    @Test
+    fun `v1 sosMode strobe migrates to the morse momentary with text and rate`() {
+        val migrated = migrator.migrate(
+            decode("""{"type":"Strobe","displayName":"SOS","rateHz":5.0,"sosMode":true,"morseText":"HELP","schemaVersion":1}"""),
         )
-        assertEquals(true, decodedLegacy.morseMode)
+        assertEquals(TorchWidgetConfig.FUNCTION_MORSE, migrated.actionKey)
+        assertEquals("HELP", migrated.params[TorchActionHandler.PARAM_TEXT])
+        assertEquals("5.0", migrated.params[TorchActionHandler.PARAM_RATE_HZ])
+    }
+
+    @Test
+    fun `v1 sosMode strobe with blank morse text defaults to SOS`() {
+        val migrated = migrator.migrate(
+            decode("""{"type":"Strobe","displayName":"SOS","sosMode":true,"morseText":"","schemaVersion":1}"""),
+        )
+        assertEquals(TorchWidgetConfig.FUNCTION_MORSE, migrated.actionKey)
+        assertEquals("SOS", migrated.params[TorchActionHandler.PARAM_TEXT])
+    }
+
+    @Test
+    fun `migration preserves appearance and removed flag`() {
+        // A v1 record carrying an appearance + removed flag must keep both
+        // through the fold (only the function-routing fields change).
+        val raw = """{"type":"Flashlight","displayName":"keep","removed":true,"schemaVersion":1}"""
+        val migrated = migrator.migrate(decode(raw))
+        assertTrue(migrated.removed)
+        assertEquals("keep", migrated.displayName)
     }
 
     @Test
     fun `decoding json with unknown fields tolerates them`() {
-        // Forward-compatibility: a future batch that adds a field
-        // should still be able to load older on-disk JSON without
-        // failing. Test exercises that the decoder configuration
-        // (`ignoreUnknownKeys = true`) is plumbed in.
-        val withExtra = """
-            {"type":"Flashlight","displayName":"Old","rateHz":5.0,"sosMode":false,"futureField":42}
-        """.trimIndent()
-
-        val decoded = json.decodeFromString(TorchWidgetConfig.serializer(), withExtra)
-
-        assertEquals(
-            TorchWidgetConfig(type = WidgetType.Flashlight, displayName = "Old"),
-            decoded,
+        // Forward-compatibility: a future field must not break loading older
+        // on-disk JSON (the `ignoreUnknownKeys = true` decoder config).
+        val decoded = decode(
+            """{"displayName":"Old","actionKey":"torch_power","futureField":42}""",
         )
+        assertEquals(TorchWidgetConfig.FUNCTION_FLASHLIGHT, decoded.actionKey)
+        assertEquals("Old", decoded.displayName)
     }
 }

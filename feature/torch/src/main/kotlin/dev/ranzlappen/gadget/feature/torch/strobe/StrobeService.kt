@@ -15,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchController
+import dev.ranzlappen.gadget.feature.torch.automation.TorchActionHandler
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 import kotlinx.coroutines.CoroutineScope
@@ -32,16 +33,18 @@ import kotlin.math.min
  * Foreground service that strobes the torch at a configurable rate.
  *
  * Configuration source depends on the caller:
- * - **Widget taps** pass only [EXTRA_APPWIDGET_ID]; the service reads
- *   that widget's persisted [TorchWidgetConfig] (rate + Morse mode /
- *   message) itself, straight from DataStore. A widget in Morse mode
- *   loops its message through [MorseCodec] (defaulting to
- *   [DEFAULT_MORSE_TEXT] = "SOS" when the box is blank); otherwise it
- *   runs a constant strobe.
- * - **In-app controls** pass the values directly via [EXTRA_RATE_HZ]
- *   (Hz, clamped to `TorchWidgetConfig.MIN_RATE_HZ..MAX_RATE_HZ`) and an
- *   optional [EXTRA_MORSE_TEXT]; when present the loop plays that text
- *   as Morse. The rate tunes the dot unit via [morseUnitMillis].
+ * - **In-app controls and widget taps** (the latter dispatched through
+ *   `TorchActionHandler` since the function-driven widget migration) pass the
+ *   values directly via [EXTRA_RATE_HZ] (Hz, clamped to
+ *   `TorchWidgetConfig.MIN_RATE_HZ..MAX_RATE_HZ`) and an optional
+ *   [EXTRA_MORSE_TEXT]; when present the loop plays that text as Morse. The
+ *   rate tunes the dot unit via [morseUnitMillis].
+ * - **Legacy direct widget start** may still pass [EXTRA_APPWIDGET_ID]; the
+ *   service then reads that widget's migrated [TorchWidgetConfig] straight from
+ *   DataStore and derives the rate / Morse text from its function `params`. A
+ *   Morse-function widget loops its message through [MorseCodec] (defaulting to
+ *   [DEFAULT_MORSE_TEXT] = "SOS" when blank); otherwise it runs a constant
+ *   strobe.
  *
  * Lifecycle:
  * - Live strobing state is published to the injected [StrobeRuntime]
@@ -128,26 +131,41 @@ class StrobeService : Service() {
         val explicitMorse = intent?.getStringExtra(EXTRA_MORSE_TEXT)
 
         strobeLoop = serviceScope.launch {
-            // A widget tap passes only EXTRA_APPWIDGET_ID; read that
-            // widget's persisted config straight from DataStore
-            // (getFresh, not the hot cache) so a just-pinned widget plays
-            // its Morse message on the very first tap. In-app callers
-            // pass the values directly via the extras.
+            // Configuration source:
+            //  - In-app controls + widget taps (dispatched through
+            //    TorchActionHandler) pass the values directly via the extras
+            //    (EXTRA_RATE_HZ + optional EXTRA_MORSE_TEXT) — the common path.
+            //  - A legacy direct widget start may still pass EXTRA_APPWIDGET_ID;
+            //    read that widget's migrated config (getFresh, not the hot
+            //    cache) and derive rate / morse from its function params so a
+            //    just-pinned widget plays correctly on the very first tap.
             val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
                 widgetRepository.getFresh(appWidgetId)
             } else {
                 null
             }
-            val rateHz = (config?.rateHz ?: explicitRate)
+            val configRate = config?.params
+                ?.get(TorchActionHandler.PARAM_RATE_HZ)
+                ?.toFloatOrNull()
+            val rateHz = (configRate ?: explicitRate)
                 .coerceIn(TorchWidgetConfig.MIN_RATE_HZ, TorchWidgetConfig.MAX_RATE_HZ)
             // Morse resolution:
-            //  - in-app Morse button passes EXTRA_MORSE_TEXT directly;
-            //  - a widget in Morse mode plays its message, defaulting to
-            //    "SOS" when the box was left blank;
+            //  - an explicit EXTRA_MORSE_TEXT (in-app / action-handler Morse)
+            //    plays that text;
+            //  - a legacy Morse-function widget plays its `text` param,
+            //    defaulting to "SOS" when blank;
             //  - otherwise it's a plain constant strobe.
+            val configMorse = config
+                ?.takeIf { it.actionKey == TorchWidgetConfig.FUNCTION_MORSE }
+                ?.params
+                ?.get(TorchActionHandler.PARAM_TEXT)
+                ?.ifBlank { DEFAULT_MORSE_TEXT }
+                ?: DEFAULT_MORSE_TEXT.takeIf {
+                    config?.actionKey == TorchWidgetConfig.FUNCTION_MORSE
+                }
             val morse = when {
                 !explicitMorse.isNullOrBlank() -> explicitMorse
-                config != null && config.morseMode -> config.morseText.ifBlank { DEFAULT_MORSE_TEXT }
+                !configMorse.isNullOrBlank() -> configMorse
                 else -> null
             }
             if (morse != null) runMorse(morse, rateHz) else runConstant(rateHz)
