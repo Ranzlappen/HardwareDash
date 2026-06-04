@@ -65,7 +65,7 @@ class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
         entry(context).widgetFunctionDispatcher()
 
     override fun resolveFunction(context: Context, config: VibrationWidgetConfig): WidgetFunction? =
-        entry(context).widgetFunctionCatalog().functionFor(config.actionKey)
+        entry(context).vibrationWidgetFunctionCatalog().functionFor(config.actionKey)
 
     override fun paramsOf(config: VibrationWidgetConfig): Map<String, String> = config.params
 
@@ -132,7 +132,7 @@ class VibrateWidgetProvider : BaseGadgetWidgetProvider<VibrationWidgetConfig>() 
         fun appearanceRenderer(): WidgetAppearanceRenderer
         fun feedbackDispatcher(): WidgetFeedbackDispatcher
         fun widgetFunctionDispatcher(): WidgetFunctionDispatcher
-        fun widgetFunctionCatalog(): VibrationWidgetFunctionCatalog
+        fun vibrationWidgetFunctionCatalog(): VibrationWidgetFunctionCatalog
         fun vibrationPendingConfigs(): PendingWidgetConfigs<VibrationWidgetConfig>
     }
 
