@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -103,11 +104,7 @@ class VibrationPlaybackService : Service() {
                 // this foreground-service context — a plain Vibrator.vibrate()
                 // on the background broadcast path is silently dropped by the
                 // OS (Android 12+ background-vibration policy).
-                playDirect(directAction, intent)
-                // A continuous ("perma") buzz loops until ACTION_STOP, so the
-                // FGS (and process) must stay alive to keep the vibration going;
-                // one-shots / patterns are fire-and-forget.
-                if (directAction != VibrationActionHandler.ACTION_VIBRATE_CONTINUOUS) stopSelf()
+                finishAfter(playDirect(directAction, intent))
                 return@launch
             }
             val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -118,7 +115,7 @@ class VibrationPlaybackService : Service() {
             // Legacy path: a non-widget caller that passes only an appWidgetId.
             // It branches on the function-driven `actionKey` + `params` (the v2
             // config shape).
-            when (config?.actionKey) {
+            val keepAliveMs = when (config?.actionKey) {
                 VibrationWidgetConfig.FUNCTION_PATTERN ->
                     playPatternById(config.params[VibrationActionHandler.PARAM_PATTERN_ID])
                 else -> {
@@ -132,44 +129,67 @@ class VibrationPlaybackService : Service() {
                         ?.get(VibrationActionHandler.PARAM_DURATION_MS)?.toLongOrNull()
                         ?: VibrationWidgetConfig.DEFAULT_DURATION_MS
                     controller.oneShot(amplitudePercent = amplitude, durationMillis = duration)
+                    duration
                 }
             }
-            // One-shots / non-looping patterns are fire-and-forget — the
-            // VibrationRuntime decay models the tail; tear the FGS down.
-            stopSelf()
+            finishAfter(keepAliveMs)
         }
+    }
+
+    /**
+     * Tear the FGS down once playback is done. [keepAliveMs] `null` means a
+     * continuous buzz that holds until ACTION_STOP; otherwise keep the service
+     * foreground for the playback's duration (plus a small tail) **before**
+     * stopping, so the process stays alive and the OS doesn't reclaim it
+     * mid-vibration — which cancels the in-flight effect (the bug where a
+     * multi-second pattern played from a widget never buzzed while the
+     * always-alive continuous buzz did).
+     */
+    private suspend fun finishAfter(keepAliveMs: Long?) {
+        if (keepAliveMs == null) return
+        if (keepAliveMs > 0) delay(keepAliveMs + PLAYBACK_TAIL_MS)
+        stopSelf()
     }
 
     /** Play the already-resolved [actionKey] + extras from this foreground
-     *  context (the VibrationActionHandler dispatch path). */
-    private suspend fun playDirect(actionKey: String, intent: Intent) {
+     *  context (the VibrationActionHandler dispatch path). Returns the ms to
+     *  keep the FGS alive, or `null` for a continuous buzz (held until stop). */
+    private suspend fun playDirect(actionKey: String, intent: Intent): Long? =
         when (actionKey) {
             VibrationActionHandler.ACTION_PATTERN_PLAY ->
                 playPatternById(intent.getStringExtra(EXTRA_PATTERN_ID))
-            VibrationActionHandler.ACTION_VIBRATE_CONTINUOUS ->
+            VibrationActionHandler.ACTION_VIBRATE_CONTINUOUS -> {
                 controller.startContinuous(
                     intent.getIntExtra(EXTRA_AMPLITUDE, VibrationWidgetConfig.DEFAULT_AMPLITUDE_PERCENT),
                 )
-            else -> controller.oneShot(
-                amplitudePercent = intent.getIntExtra(
-                    EXTRA_AMPLITUDE,
-                    VibrationWidgetConfig.DEFAULT_AMPLITUDE_PERCENT,
-                ),
-                durationMillis = intent.getLongExtra(
+                null
+            }
+            else -> {
+                val duration = intent.getLongExtra(
                     EXTRA_DURATION_MS,
                     VibrationWidgetConfig.DEFAULT_DURATION_MS,
-                ),
-            )
+                )
+                controller.oneShot(
+                    amplitudePercent = intent.getIntExtra(
+                        EXTRA_AMPLITUDE,
+                        VibrationWidgetConfig.DEFAULT_AMPLITUDE_PERCENT,
+                    ),
+                    durationMillis = duration,
+                )
+                duration
+            }
         }
-    }
 
-    private suspend fun playPatternById(patternId: String?) {
-        val pattern = patternId?.takeIf { it.isNotBlank() }?.let { patternRepository.get(it) } ?: return
+    /** Play the saved pattern [patternId] once; returns its total play time (ms)
+     *  to keep the FGS alive for, or 0 if the pattern is missing/blank. */
+    private suspend fun playPatternById(patternId: String?): Long {
+        val pattern = patternId?.takeIf { it.isNotBlank() }?.let { patternRepository.get(it) } ?: return 0L
         controller.playPattern(
             timingsMillis = pattern.timingsMillis.toLongArray(),
             amplitudes = pattern.amplitudes.toIntArray(),
             loop = false,
         )
+        return pattern.totalMillis
     }
 
     private fun stopPlayback() {
@@ -229,6 +249,11 @@ class VibrationPlaybackService : Service() {
     }
 
     companion object {
+        /** Extra time the FGS stays foreground past a timed vibration's end, so
+         *  the process is never reclaimed in the instant before the effect
+         *  finishes (which would cancel it). */
+        const val PLAYBACK_TAIL_MS = 250L
+
         const val NOTIFICATION_CHANNEL_ID = "vibration_playback"
         const val NOTIFICATION_ID = 0x56_42_5F_53 // "VB_S"
         const val ACTION_STOP = "dev.ranzlappen.gadget.feature.vibration.PLAYBACK_STOP"
