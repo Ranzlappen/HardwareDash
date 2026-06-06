@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Best-effort favicon fetch for user-added web-link "apps"
+         (FaviconFetcher). Direct <host>/favicon.ico|png only — never a
+         third-party indexing service. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+</manifest>

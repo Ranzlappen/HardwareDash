@@ -41,13 +41,20 @@ Decisions taken:
 
 ## Phases
 
-- **A — Apps data layer → `:core:data`.** `AppsDatabase` (Room) + entities +
+- **A — Apps data layer → `:core:data`. ✅** `AppsDatabase` (Room) + entities +
   `AppsDao` + DI. Identical table/column names to legacy for row-for-row
-  import. Separate from `MonitoringDatabase`. **(this commit)**
-- **B — Apps domain logic → `:feature:apps`.** Repositories, scanner, launchers,
-  favicon fetcher, pin helper, lock manager, rules, icon loader. Replace
-  `AppsEntryPoint` with per-class `@Inject` + feature Hilt module. Standard/
-  rooted split if any privileged behavior exists.
+  import. Separate from `MonitoringDatabase`.
+- **B — Apps domain logic → `:feature:apps`. ✅** Repositories, scanner,
+  launchers, favicon fetcher, lock manager, rules, icon loader + the `AppIcon`
+  composable, ported onto the `:core:data` `AppsDao`. New feature `AppsEntryPoint`
+  (for non-injectable consumers). `RuleEngineTest` ported. `PinFolderHelper`
+  deferred to Phase E (it references the not-yet-moved widget provider).
+  **`:app` does not depend on `:feature:apps` yet**, so the feature builds in
+  isolation and the legacy domain keeps working — this avoids the Hilt
+  entry-point getter collision (legacy + modular `AppsEntryPoint` share method
+  names with different return types) until Phase G removes legacy. The 6
+  `ic_symbol_*` drawables are duplicated into the feature (legacy still
+  references its own copies).
 - **C — In-app screens → `:feature:apps`.** `AppsViewModel`, folder editor,
   folder popup. Re-skin onto `ModuleScreenScaffold` + design-system tokens +
   a11y contract. Register route in `GadgetApp`/`GadgetDestination`.
