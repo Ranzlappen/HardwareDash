@@ -58,6 +58,25 @@ Decisions taken:
 - **C — In-app screens → `:feature:apps`.** `AppsViewModel`, folder editor,
   folder popup. Re-skin onto `ModuleScreenScaffold` + design-system tokens +
   a11y contract. Register route in `GadgetApp`/`GadgetDestination`.
+  - **Discovered during B:** the legacy in-app screens (`AppsScreen` grid +
+    `FolderEditorScreen`) are **orphaned** — referenced nowhere outside their
+    own package and **not wired into navigation** (no `GadgetDestination.Apps`,
+    not in the rail `modules` list). The earlier modularization left only the
+    folder **widget**, the **popup**, and the `AppRepository` scan live (via
+    `MainActivity`). So Phase C is partly *rebuild-and-rewire*: add
+    `GadgetDestination.Apps` + an `appsScreen()` route + a rail entry, not a
+    1:1 port.
+  - **Localization migration:** the legacy screens use the Kotlin `S.apps.*` /
+    `S.common.*` system (`Strings.kt`, 4 languages via `m()`, ~40 apps
+    strings). These move to resource strings
+    (`res/values{,-de,-es,-fr}/strings.xml`) + `stringResource(...)`.
+  - **Dependency order:** `FolderEditorViewModel.pinToHome()` → `PinFolderHelper`
+    → the folder widget provider (Phase E). So build the **popup path first**
+    (`AppsViewModel` + `FolderPopup{ViewModel,Content,Activity}` — the popup is
+    also what the widget launches), then the editor + `PinFolderHelper` after
+    the provider exists in Phase E.
+  - Theme: legacy `com.gadget.ui.theme.GadgetTheme` + `Theme.Gadget.Translucent`
+    → modular `:core:designsystem` `GadgetTheme` + a feature translucent style.
 - **D — Launcher/content archetype in `:core:widgetkit`.** A content-render +
   activity-launch widget seam alongside Toggle/Momentary; a content-source →
   repaint observer (mirrors `MonitorWidgetNotifier`); an `APPWIDGET_CONFIGURE`
