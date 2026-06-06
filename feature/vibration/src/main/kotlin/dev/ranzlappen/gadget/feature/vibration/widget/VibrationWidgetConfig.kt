@@ -70,6 +70,11 @@ data class VibrationWidgetConfig(
          *  [dev.ranzlappen.gadget.feature.vibration.automation.VibrationActionHandler.ACTION_PATTERN_PLAY]. */
         const val FUNCTION_PATTERN: String = "pattern_play"
 
+        /** Continuous ("perma") vibrate **toggle** function id. Distinct from
+         *  its paired on/off action keys (a toggle binds two actions), like
+         *  torch's flashlight/strobe toggles. */
+        const val FUNCTION_CONTINUOUS: String = "continuous"
+
         const val DEFAULT_AMPLITUDE_PERCENT: Int = 60
         const val DEFAULT_DURATION_MS: Long = 300L
 

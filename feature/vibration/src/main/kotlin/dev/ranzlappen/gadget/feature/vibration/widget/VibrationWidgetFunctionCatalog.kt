@@ -13,9 +13,11 @@ import javax.inject.Singleton
 
 /**
  * Vibration's [WidgetFunction] catalog — the widget-side projection of
- * [VibrationActionHandler.actions]. Every vibration function is **momentary**
- * (a discrete buzz / pattern play / rooted burst), so none carry a
- * [WidgetFunctionBehavior.Toggle] and the kit binds no `WidgetStateSource`.
+ * [VibrationActionHandler.actions]. Most functions are **momentary** (a discrete
+ * buzz / pattern play / rooted burst); the **continuous ("perma") vibrate** is a
+ * [WidgetFunctionBehavior.Toggle] (start/stop) whose live on/off comes from the
+ * `"vibration:vibration_running"` `WidgetStateSource` (bound in
+ * [VibrationWidgetStateModule]).
  *
  * The generic customization sheet filters this list by flavor (a
  * `requiresRoot` function is dropped when root is unavailable), and the generic
@@ -39,6 +41,18 @@ class VibrationWidgetFunctionCatalog @Inject constructor(
                 ActionParam(VibrationActionHandler.PARAM_DURATION_MS, ActionParamType.Int, "300", 10f, 5_000f),
             ),
             behavior = WidgetFunctionBehavior.Momentary(VibrationActionHandler.ACTION_ONESHOT),
+        ),
+        WidgetFunction(
+            id = VibrationWidgetConfig.FUNCTION_CONTINUOUS,
+            label = context.getString(R.string.vibration_widget_function_continuous),
+            params = listOf(
+                ActionParam(VibrationActionHandler.PARAM_AMPLITUDE, ActionParamType.Int, "60", 1f, 100f),
+            ),
+            behavior = WidgetFunctionBehavior.Toggle(
+                onActionKey = VibrationActionHandler.ACTION_VIBRATE_CONTINUOUS,
+                offActionKey = VibrationActionHandler.ACTION_STOP,
+                stateKey = STATE_VIBRATION_RUNNING,
+            ),
         ),
         WidgetFunction(
             id = VibrationWidgetConfig.FUNCTION_PATTERN,
@@ -84,4 +98,11 @@ class VibrationWidgetFunctionCatalog @Inject constructor(
 
     /** The function bound to [actionKey], or `null` for a removed/renamed key. */
     fun functionFor(actionKey: String): WidgetFunction? = functions.firstOrNull { it.id == actionKey }
+
+    companion object {
+        /** State-source key for the continuous ("perma") vibrate toggle.
+         *  Combined with the feature id yields the `"vibration:vibration_running"`
+         *  multibinding key bound in [VibrationWidgetStateModule]. */
+        const val STATE_VIBRATION_RUNNING: String = "vibration_running"
+    }
 }
