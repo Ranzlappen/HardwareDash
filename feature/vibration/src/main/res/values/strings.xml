@@ -49,6 +49,7 @@
 
     <!-- Widget function labels (the customization sheet's function picker) -->
     <string name="vibration_widget_function_oneshot">One-shot buzz</string>
+    <string name="vibration_widget_function_continuous">Continuous</string>
     <string name="vibration_widget_function_pattern">Saved pattern</string>
     <string name="vibration_widget_function_extreme_amplitude">Extreme amplitude (rooted)</string>
     <string name="vibration_widget_function_direct_pwm">Direct PWM (rooted)</string>

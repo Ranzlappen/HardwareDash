@@ -68,7 +68,8 @@ class VibrationRuntime @Inject constructor() {
     fun setCommand(amplitudePercent: Int, durationMillis: Long, ceiling: Int = MAX_PERCENT) {
         val clamped = amplitudePercent.coerceIn(0, ceiling)
         decayJob?.cancel()
-        _state.value = _state.value.copy(amplitudePercent = clamped, isActive = clamped > 0)
+        // A timed command is never "sustained" — it decays.
+        _state.value = _state.value.copy(amplitudePercent = clamped, isActive = clamped > 0, isSustained = false)
         if (clamped > 0 && durationMillis > 0) {
             decayJob = scope.launch {
                 delay(durationMillis)
@@ -85,7 +86,11 @@ class VibrationRuntime @Inject constructor() {
         val clamped = amplitudePercent.coerceIn(0, ceiling)
         decayJob?.cancel()
         decayJob = null
-        _state.value = _state.value.copy(amplitudePercent = clamped, isActive = clamped > 0)
+        _state.value = _state.value.copy(
+            amplitudePercent = clamped,
+            isActive = clamped > 0,
+            isSustained = clamped > 0,
+        )
     }
 
     /** Mark whether *something* is actively playing without changing the
@@ -98,7 +103,7 @@ class VibrationRuntime @Inject constructor() {
     fun clear() {
         decayJob?.cancel()
         decayJob = null
-        _state.value = _state.value.copy(amplitudePercent = 0, isActive = false)
+        _state.value = _state.value.copy(amplitudePercent = 0, isActive = false, isSustained = false)
     }
 
     companion object {

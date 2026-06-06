@@ -98,10 +98,31 @@ class StandardVibrationController @Inject constructor(
         runtime.clear()
     }
 
+    override fun startContinuous(amplitudePercent: Int) {
+        val vib = vibrator ?: return
+        if (!available) return
+        val percent = amplitudePercent.coerceIn(1, MAX_PERCENT)
+        // A 0 ms off + long on segment, looped from index 0, is a continuous
+        // buzz; the leading 0 ms off keeps the no-amplitude-control path (which
+        // alternates off/on from index 0) playing the on-segment.
+        val timings = longArrayOf(0L, CONTINUOUS_SEGMENT_MS)
+        val effect = if (amplitudeControl) {
+            VibrationEffect.createWaveform(timings, intArrayOf(0, percentToRaw(percent)), /* repeat = */ 0)
+        } else {
+            VibrationEffect.createWaveform(timings, /* repeat = */ 0)
+        }
+        vib.vibrate(effect)
+        runtime.setSustained(percent)
+    }
+
     private companion object {
         const val MAX_PERCENT = 100
         const val RAW_MAX = 255
         const val PATTERN_FALLBACK_PERCENT = 100
+
+        /** One loop segment of the continuous ("perma") buzz. Looping a single
+         *  1 s on-segment yields an unbroken vibration until `stop()`. */
+        const val CONTINUOUS_SEGMENT_MS = 1_000L
 
         fun percentToRaw(percent: Int): Int = (percent * RAW_MAX / MAX_PERCENT).coerceIn(1, RAW_MAX)
         fun rawToPercent(raw: Int): Int =

@@ -73,6 +73,14 @@ class VibrationPlaybackService : Service() {
         return START_NOT_STICKY
     }
 
+    // A continuous ("perma") buzz holds the shortService open; API 34+ caps a
+    // shortService at ~3 min and calls this. Stop cleanly instead of being
+    // force-killed (mirrors StrobeService).
+    override fun onTimeout(startId: Int) {
+        stopPlayback()
+        stopSelf(startId)
+    }
+
     override fun onDestroy() {
         stopPlayback()
         controller.stop()
@@ -96,7 +104,10 @@ class VibrationPlaybackService : Service() {
                 // on the background broadcast path is silently dropped by the
                 // OS (Android 12+ background-vibration policy).
                 playDirect(directAction, intent)
-                stopSelf()
+                // A continuous ("perma") buzz loops until ACTION_STOP, so the
+                // FGS (and process) must stay alive to keep the vibration going;
+                // one-shots / patterns are fire-and-forget.
+                if (directAction != VibrationActionHandler.ACTION_VIBRATE_CONTINUOUS) stopSelf()
                 return@launch
             }
             val config = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -135,6 +146,10 @@ class VibrationPlaybackService : Service() {
         when (actionKey) {
             VibrationActionHandler.ACTION_PATTERN_PLAY ->
                 playPatternById(intent.getStringExtra(EXTRA_PATTERN_ID))
+            VibrationActionHandler.ACTION_VIBRATE_CONTINUOUS ->
+                controller.startContinuous(
+                    intent.getIntExtra(EXTRA_AMPLITUDE, VibrationWidgetConfig.DEFAULT_AMPLITUDE_PERCENT),
+                )
             else -> controller.oneShot(
                 amplitudePercent = intent.getIntExtra(
                     EXTRA_AMPLITUDE,

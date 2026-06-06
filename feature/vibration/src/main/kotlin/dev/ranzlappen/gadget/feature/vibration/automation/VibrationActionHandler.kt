@@ -58,6 +58,11 @@ class VibrationActionHandler @Inject constructor(
         ),
         ModuleAction(ACTION_STOP, "Stop vibration"),
         ModuleAction(
+            key = ACTION_VIBRATE_CONTINUOUS,
+            label = "Continuous vibrate",
+            params = listOf(ActionParam(PARAM_AMPLITUDE, ActionParamType.Int, "60", 1f, 100f)),
+        ),
+        ModuleAction(
             key = ACTION_PATTERN_PLAY,
             label = "Play saved pattern",
             params = listOf(ActionParam(PARAM_PATTERN_ID, ActionParamType.Text)),
@@ -108,7 +113,29 @@ class VibrationActionHandler @Inject constructor(
                 )
                 ActionResult.Success
             }
-            ACTION_STOP -> { controller.stop(); ActionResult.Success }
+            ACTION_VIBRATE_CONTINUOUS -> {
+                // A continuous ("perma") buzz loops until stopped, so the FGS
+                // stays alive (keeping the process + vibration) rather than
+                // self-stopping like the one-shot/pattern fire-and-forget.
+                startPlayback(
+                    Intent(context, VibrationPlaybackService::class.java).apply {
+                        putExtra(VibrationPlaybackService.EXTRA_ACTION_KEY, ACTION_VIBRATE_CONTINUOUS)
+                        putExtra(VibrationPlaybackService.EXTRA_AMPLITUDE, params.intOr(PARAM_AMPLITUDE, 60))
+                    },
+                )
+                ActionResult.Success
+            }
+            ACTION_STOP -> {
+                // Tear down the continuous FGS if it's running; fall back to a
+                // direct cancel (safe from the background) when none is up.
+                runCatching {
+                    context.startService(
+                        Intent(context, VibrationPlaybackService::class.java)
+                            .setAction(VibrationPlaybackService.ACTION_STOP),
+                    )
+                }.onFailure { controller.stop() }
+                ActionResult.Success
+            }
             ACTION_PATTERN_PLAY -> {
                 // Validate the pattern up front so feedback can report a missing
                 // one; the FGS re-reads + plays it from a foreground context.
@@ -163,6 +190,7 @@ class VibrationActionHandler @Inject constructor(
         const val FEATURE_ID = "vibration"
         const val ACTION_ONESHOT = "oneshot"
         const val ACTION_STOP = "stop"
+        const val ACTION_VIBRATE_CONTINUOUS = "vibrate_continuous"
         const val ACTION_PATTERN_PLAY = "pattern_play"
         const val ACTION_EXTREME_AMPLITUDE = "extreme_amplitude"
         const val ACTION_DIRECT_PWM = "direct_pwm"

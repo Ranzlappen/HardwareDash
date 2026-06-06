@@ -53,6 +53,14 @@ interface VibrationController {
     /** Cancel any in-flight vibration and reset the runtime signal to idle. */
     fun stop()
 
+    /**
+     * Start a **continuous** ("perma") vibration at [amplitudePercent] (1–100)
+     * that loops until [stop]. Marks the runtime sustained (no decay) so the
+     * widget toggle and the monitor read it as on until stopped. On devices
+     * without amplitude control the percent is ignored (fixed strength).
+     */
+    fun startContinuous(amplitudePercent: Int)
+
     companion object {
         /** Sentinel amplitude meaning "use the device's default strength"
          *  (maps to `VibrationEffect.DEFAULT_AMPLITUDE`). */
@@ -68,6 +76,10 @@ interface VibrationController {
  *   scale; `0` while idle. The monitoring metric polls this.
  * - [isActive] — whether a command is currently playing (a timed command
  *   flips this back to false on expiry; a looping one stays true until [stop]).
+ * - [isSustained] — whether a **continuous/looping** command is held (perma
+ *   vibrate / sustained rumble). A transient one-shot or pattern flips
+ *   [isActive] but not this, so the continuous-toggle widget reads the real
+ *   on/off state without a one-shot falsely reading as "on".
  * - [isAvailable] — `false` when the device has no vibrator.
  * - [hasAmplitudeControl] — whether the hardware honours per-segment
  *   amplitude (`Vibrator.hasAmplitudeControl()`); drives the amplitude
@@ -77,6 +89,7 @@ interface VibrationController {
 data class VibrationState(
     val amplitudePercent: Int = 0,
     val isActive: Boolean = false,
+    val isSustained: Boolean = false,
     val isAvailable: Boolean = false,
     val hasAmplitudeControl: Boolean = false,
 )
