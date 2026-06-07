@@ -9,6 +9,7 @@ name: Instrumented Tests
 #   * :core:ui            — design-system component contracts (Modals, …)
 #   * :feature:torch      — TorchScreenContent (stateless screen)
 #   * :feature:vibration  — VibrationScreenContent (stateless screen)
+#   * :feature:apps       — AppsScreenContent (stateless screen)
 # Only :app declares product flavors, so these modules use the unqualified
 # `connectedDebugAndroidTest` task. A flavor/API-level matrix (and :app's own
 # connected tests) can be layered on later if the need arises — kept to one
@@ -97,7 +98,7 @@ jobs:
           # Single line: android-emulator-runner's `script` input does not
           # reliably honor backslash-newline continuations (the `\` leaks
           # through as a literal Gradle task → "Task '\' not found").
-          script: ./gradlew :core:ui:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest --stacktrace
+          script: ./gradlew :core:ui:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest :feature:apps:connectedDebugAndroidTest --stacktrace
 
       - name: Upload test reports
         if: always()
@@ -117,7 +118,7 @@ jobs:
             echo "## Instrumented tests (API 30 emulator)"
             echo ""
             if [ "${{ job.status }}" = "success" ]; then
-              echo "✅ **connectedDebugAndroidTest passed** for :core:ui, :feature:torch, :feature:vibration."
+              echo "✅ **connectedDebugAndroidTest passed** for :core:ui, :feature:torch, :feature:vibration, :feature:apps."
             else
               echo "❌ **Instrumented tests failed.** See the uploaded \`instrumented-test-reports\` artifact."
             fi

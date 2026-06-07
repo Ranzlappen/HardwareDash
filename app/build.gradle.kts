@@ -186,6 +186,7 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:torch"))
     implementation(project(":feature:vibration"))
+    implementation(project(":feature:apps"))
 
     // ─── Compose UI components ───────────────────────────────────
     // The Compose BOM + ui-tooling-preview + ui-tooling are pulled in by

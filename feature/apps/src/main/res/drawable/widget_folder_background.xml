@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Folder-widget background: a rounded, semi-transparent dark tile echoing the
+  in-app glass DashCard aesthetic. Feature-local (not the kit's
+  widget_background_glass) so the folder widget owns its own surface and stays
+  self-contained.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="20dp" />
+    <solid android:color="#CC1C1C1E" />
+    <stroke
+        android:width="1dp"
+        android:color="#22FFFFFF" />
+</shape>

@@ -282,16 +282,9 @@
                 android:resource="@xml/nfc_hce_aid" />
         </service>
 
-        <!-- ── Folder Popup (App-Organizer) ──────────────────────── -->
-        <!-- Translucent floating activity launched on widget short-tap.
-             Closes itself when the user taps outside the floating Card. -->
-        <activity
-            android:name=".ui.folder.FolderPopupActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Gadget.Translucent"
-            android:excludeFromRecents="true"
-            android:launchMode="singleTop"
-            android:taskAffinity="" />
+        <!-- The App-Organizer folder popup + folder widget now live in
+             :feature:apps (modular migration); their manifest entries moved
+             with them. -->
 
         <!-- ── Batch-7: Persistent keep-alive foreground service ─────── -->
         <service

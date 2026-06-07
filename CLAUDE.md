@@ -943,6 +943,25 @@ contract (`displayName`, `removed`, `schemaVersion`, `appearance`),
   still wins. Monitor / chart providers do **not** follow this pattern
   (they read a shared metric config, not a per-`appWidgetId`
   `WidgetKitConfig`) and stay as standalone `AppWidgetProvider`s.
+- **`provider/` (content/launcher archetype)** — `BaseContentWidgetProvider<T :
+  WidgetKitConfig>` is the **second** archetype alongside the function-driven
+  `BaseGadgetWidgetProvider`. A content widget **renders dynamic content**
+  (a live preview painted from the feature's own data) and, on tap,
+  **launches an Activity** rather than dispatching a `WidgetFunction` — so it
+  has no function / feedback / toggle / active-state machinery. The base owns
+  the `onUpdate` / `onDeleted` / `onAppWidgetOptionsChanged` lifecycle +
+  `renderAll` (config read, `saveIfAbsent` self-heal, `reconcilePendingConfig`
+  rescue, adaptive density) + a `launchPendingIntent` tap helper; `buildRemoteViews`
+  is **suspend** (content widgets load their preview from the data layer). The
+  feature subclass supplies `buildRemoteViews` / `launchIntent` / `sizePresetOf`
+  / `defaultConfig`. Content-source → repaint is driven by `ContentWidgetUpdater
+  .requestUpdate(context, providerClass)` (an explicit `ACTION_APPWIDGET_UPDATE`
+  self-broadcast) from a feature `@Singleton` observer — the analogue of the
+  monitoring widget-notifier seam. **Reference consumer:** `:feature:apps`'s
+  `FolderWidgetProvider` (the App-Organizer folder widget — renders a folder
+  cover / app-preview grid, opens the floating `FolderPopupActivity` on tap),
+  with `FolderWidgetController` driving repaints and `FolderWidgetConfigActivity`
+  / `PinFolderHelper` the two placement paths (tray-drop configure + in-app pin).
 - **`boot/`** — `BootCompletedReceiver` + `BootRearmHandler` `fun
   interface`. Features bind a `BootRearmHandler` into a
   `Map<FeatureId, BootRearmHandler>` Hilt multibinding; the kit

@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.navigation.compose.rememberNavController
-import com.gadget.apps.AppRepository
 import com.gadget.localization.LocalizationManager
 import dev.ranzlappen.gadget.core.root.companion.CompanionModuleDetector
 import dev.ranzlappen.gadget.core.root.launch.LaunchGate
@@ -30,8 +29,10 @@ import com.gadget.ui.theme.GadgetTheme
 import com.gadget.root.ui.RootedFeatureTogglesCard
 import com.gadget.ui.theme.ThemePreferencesManager
 import com.gadget.widget.WidgetUpdateWorker
-import com.gadget.widget.folder.FolderWidgetController
 import dagger.hilt.android.AndroidEntryPoint
+import dev.ranzlappen.gadget.feature.apps.AppRepository
+import dev.ranzlappen.gadget.feature.apps.appsScreen
+import dev.ranzlappen.gadget.feature.apps.widget.FolderWidgetController
 import dev.ranzlappen.gadget.core.datastore.DarkThemeMode
 import dev.ranzlappen.gadget.core.datastore.TriStatePreference
 import dev.ranzlappen.gadget.core.datastore.UserPreferences
@@ -56,6 +57,10 @@ class MainActivity : ComponentActivity() {
     // Eager-injected so its init { } collects Room flows and re-renders folder
     // widgets reactively for the lifetime of the process.
     @Inject lateinit var folderWidgetController: FolderWidgetController
+
+    // Eager-injected so its init { } runs the one-shot legacy gadget_db ->
+    // apps.db import (in-place upgrade + legacy backup restore continuity).
+    @Inject lateinit var legacyAppsImporter: dev.ranzlappen.gadget.feature.apps.LegacyAppsImporter
 
     @Inject lateinit var launchGate: LaunchGate
     @Inject lateinit var companionDetector: CompanionModuleDetector
@@ -131,6 +136,7 @@ class MainActivity : ComponentActivity() {
                                 navController.navigateTopLevel(GadgetDestination.Settings)
                             },
                         )
+                        appsScreen(navController)
                     }
                 }
                 is LaunchGateOutcome.DeniedFatal -> GadgetTheme {

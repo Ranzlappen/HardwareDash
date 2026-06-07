@@ -85,6 +85,20 @@ class BackupManager @Inject constructor(
                 }
             }
 
+            // 2b. Modular Room databases (apps.db = App-Organizer, monitoring.db
+            //     = metric history) live in the same databases/ dir but aren't
+            //     owned by this manager's GadgetDatabase reference. Sweep them
+            //     (+ their -wal/-shm) under databases/ so v2 backups carry that
+            //     data. gadget_db* is already captured above and is skipped here.
+            val databasesDir = dbPath?.let { File(it).parentFile }
+            if (databasesDir != null && databasesDir.isDirectory) {
+                databasesDir.listFiles()?.forEach { file ->
+                    if (file.isFile && !file.name.startsWith("gadget_db")) {
+                        addFileToZip(zip, file, "databases/${file.name}")
+                    }
+                }
+            }
+
             // 3. SharedPreferences XML files
             val sharedPrefsDir = File(context.filesDir.parent, "shared_prefs")
             if (sharedPrefsDir.exists() && sharedPrefsDir.isDirectory) {
@@ -135,6 +149,22 @@ class BackupManager @Inject constructor(
             File("$dbPath-shm").delete()
         }
 
+        // Same for the modular Room DBs (apps.db / monitoring.db): their open
+        // singletons can't be closed from here, so the restore takes effect on
+        // the next app launch ("restart to apply"); clearing their stale
+        // WAL/SHM up front keeps the restored main files from being shadowed.
+        val databasesDir = dbPath?.let { File(it).parentFile }
+        if (databasesDir != null && databasesDir.isDirectory) {
+            databasesDir.listFiles()?.forEach { file ->
+                if (file.isFile &&
+                    !file.name.startsWith("gadget_db") &&
+                    (file.name.endsWith("-wal") || file.name.endsWith("-shm"))
+                ) {
+                    file.delete()
+                }
+            }
+        }
+
         // Pre-resolve asset prefix → target subdir for cheap O(1) restore-side
         // dispatch matching the createBackup mapping.
         val assetPrefixToSubdir: Map<String, String> = filesDirAssetSweeps
@@ -157,6 +187,24 @@ class BackupManager @Inject constructor(
                                 val targetFile = File("$dbPath$suffix")
                                 targetFile.outputStream().use { out -> zip.copyTo(out) }
                                 Timber.i("Restored database file: $name")
+                            }
+                        }
+
+                        name.startsWith("databases/") -> {
+                            // Modular Room DBs (apps.db / monitoring.db). Written
+                            // into the same databases/ dir as gadget_db; applied
+                            // on next launch. A legacy backup (no databases/
+                            // entries) instead restores gadget_db, and the
+                            // LegacyAppsImporter lifts its apps_* rows into
+                            // apps.db on that launch.
+                            val fileName = name.removePrefix("databases/")
+                            val targetDir = dbPath?.let { File(it).parentFile }
+                            if (targetDir != null) {
+                                targetDir.mkdirs()
+                                File(targetDir, fileName).outputStream().use { out ->
+                                    zip.copyTo(out)
+                                }
+                                Timber.i("Restored database file: $fileName")
                             }
                         }
 
@@ -247,7 +295,10 @@ class BackupManager @Inject constructor(
          * informational — useful when triaging backups from future builds.
          *  - 1: original (db + shared_prefs + datastore)
          *  - 2: + folder_covers/ + apps_favicons/ asset sweeps
+         *  - 3: + databases/ sweep (modular apps.db / monitoring.db); a legacy
+         *       backup without these restores gadget_db and the
+         *       LegacyAppsImporter migrates its apps_* rows into apps.db.
          */
-        const val BACKUP_FORMAT_VERSION = 2
+        const val BACKUP_FORMAT_VERSION = 3
     }
 }

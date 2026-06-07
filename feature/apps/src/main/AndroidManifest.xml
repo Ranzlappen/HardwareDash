@@ -1,2 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Best-effort favicon fetch for user-added web-link "apps"
+         (FaviconFetcher). Direct <host>/favicon.ico|png only — never a
+         third-party indexing service. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application>
+        <!-- Floating folder popup launched from the folder home-screen widget
+             (and via PendingIntent). Not exported: only this app starts it. -->
+        <activity
+            android:name=".ui.folder.FolderPopupActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/Theme.GadgetApps.FolderPopup" />
+
+        <!-- Folder home-screen widget (content/launcher archetype). Renders a
+             folder preview; tap opens FolderPopupActivity. -->
+        <receiver
+            android:name=".widget.FolderWidgetProvider"
+            android:exported="true"
+            android:label="@string/apps_widget_folder_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_folder_info" />
+        </receiver>
+
+        <!-- requestPinAppWidget success callback for the in-app "pin to home"
+             flow. Explicit-component broadcast from our own PendingIntent, so
+             not exported. -->
+        <receiver
+            android:name=".widget.FolderWidgetPinReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="dev.ranzlappen.gadget.feature.apps.FOLDER_PIN_CALLBACK" />
+            </intent-filter>
+        </receiver>
+
+        <!-- APPWIDGET_CONFIGURE folder picker, started by the launcher after a
+             tray drop (exported so the launcher process can launch it). -->
+        <activity
+            android:name=".widget.FolderWidgetConfigActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:label="@string/apps_widget_folder_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

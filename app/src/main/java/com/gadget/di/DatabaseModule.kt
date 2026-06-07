@@ -6,8 +6,8 @@ import com.gadget.data.db.GadgetDatabase
 import com.gadget.data.db.MIGRATION_1_2
 import com.gadget.data.db.MIGRATION_2_3
 import com.gadget.data.db.MIGRATION_3_4
+import com.gadget.data.db.MIGRATION_4_5
 import com.gadget.data.db.MetricDao
-import com.gadget.data.db.apps.AppsDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,13 +29,10 @@ object DatabaseModule {
             GadgetDatabase::class.java,
             "gadget_db"
         )
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .build()
     }
 
     @Provides
     fun provideMetricDao(db: GadgetDatabase): MetricDao = db.metricDao()
-
-    @Provides
-    fun provideAppsDao(db: GadgetDatabase): AppsDao = db.appsDao()
 }
