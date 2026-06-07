@@ -31,6 +31,17 @@
                 android:resource="@xml/widget_folder_info" />
         </receiver>
 
+        <!-- requestPinAppWidget success callback for the in-app "pin to home"
+             flow. Explicit-component broadcast from our own PendingIntent, so
+             not exported. -->
+        <receiver
+            android:name=".widget.FolderWidgetPinReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="dev.ranzlappen.gadget.feature.apps.FOLDER_PIN_CALLBACK" />
+            </intent-filter>
+        </receiver>
+
         <!-- APPWIDGET_CONFIGURE folder picker, started by the launcher after a
              tray drop (exported so the launcher process can launch it). -->
         <activity
