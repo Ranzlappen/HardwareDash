@@ -56,19 +56,39 @@ import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 import dev.ranzlappen.gadget.feature.apps.R
 
 /**
- * Top-level App-Organizer screen: a grid of folders. Tap opens the folder
- * editor; long-press deletes (with confirm). The FAB creates a folder. Each
- * folder can be exposed as a home-screen widget from its editor.
+ * Top-level App-Organizer screen (Hilt route): a grid of folders. Tap opens the
+ * folder editor; long-press deletes (with confirm). The FAB creates a folder.
+ * Each folder can be exposed as a home-screen widget from its editor.
+ *
+ * Thin wrapper over the Hilt-free [AppsScreenContent] (instrumented-tested).
  */
 @Composable
 fun AppsScreen(onOpenFolder: (Long) -> Unit) {
     val viewModel = hiltViewModel<AppsViewModel>()
     val folders by viewModel.folders.collectAsState()
+    AppsScreenContent(
+        folders = folders,
+        onOpenFolder = onOpenFolder,
+        onCreateFolder = { name -> viewModel.createFolder(name, DEFAULT_FOLDER_COLOR) },
+        onDeleteFolder = viewModel::deleteFolder,
+    )
+}
 
+/** Stateless folder-grid content. Holds only ephemeral dialog UI state; no
+ *  ViewModel/Hilt, so it's preview- and instrumented-test-friendly. */
+@Composable
+fun AppsScreenContent(
+    folders: List<Folder>,
+    onOpenFolder: (Long) -> Unit,
+    onCreateFolder: (String) -> Unit,
+    onDeleteFolder: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var showCreate by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<Folder?>(null) }
 
     Scaffold(
+        modifier = modifier,
         topBar = { TopAppBar(title = { Text(stringResource(R.string.apps_title)) }) },
         floatingActionButton = {
             GadgetFab(
@@ -107,7 +127,7 @@ fun AppsScreen(onOpenFolder: (Long) -> Unit) {
         CreateFolderDialog(
             onDismiss = { showCreate = false },
             onConfirm = { name ->
-                viewModel.createFolder(name, DEFAULT_FOLDER_COLOR)
+                onCreateFolder(name)
                 showCreate = false
             },
         )
@@ -120,7 +140,7 @@ fun AppsScreen(onOpenFolder: (Long) -> Unit) {
             text = folder.name,
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteFolder(folder.id)
+                    onDeleteFolder(folder.id)
                     pendingDelete = null
                 }) { Text(stringResource(R.string.apps_delete)) }
             },
