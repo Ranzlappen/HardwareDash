@@ -13,11 +13,11 @@ import javax.inject.Singleton
 
 /**
  * Vibration's [WidgetFunction] catalog — the widget-side projection of
- * [VibrationActionHandler.actions]. Most functions are **momentary** (a discrete
- * buzz / pattern play / rooted burst); the **continuous ("perma") vibrate** is a
- * [WidgetFunctionBehavior.Toggle] (start/stop) whose live on/off comes from the
- * `"vibration:vibration_running"` `WidgetStateSource` (bound in
- * [VibrationWidgetStateModule]).
+ * [VibrationActionHandler.actions]. The one-shot buzz and the rooted bursts are
+ * **momentary**; the **continuous ("perma") vibrate** and the **saved pattern**
+ * are [WidgetFunctionBehavior.Toggle]s (start/stop) — both loop until tapped off
+ * and share the single `"vibration:vibration_running"` `WidgetStateSource`
+ * (bound in [VibrationWidgetStateModule]; one motor → one sustained vibration).
  *
  * The generic customization sheet filters this list by flavor (a
  * `requiresRoot` function is dropped when root is unavailable), and the generic
@@ -60,7 +60,15 @@ class VibrationWidgetFunctionCatalog @Inject constructor(
             params = listOf(
                 ActionParam(VibrationActionHandler.PARAM_PATTERN_ID, ActionParamType.Text),
             ),
-            behavior = WidgetFunctionBehavior.Momentary(VibrationActionHandler.ACTION_PATTERN_PLAY),
+            // A pattern loops until tapped off, so it's a Toggle (not momentary):
+            // on plays the saved pattern looping, off stops it. Shares the single
+            // "vibration_running" state with the continuous toggle — there's one
+            // motor, so only one sustained vibration runs at a time.
+            behavior = WidgetFunctionBehavior.Toggle(
+                onActionKey = VibrationActionHandler.ACTION_PATTERN_PLAY,
+                offActionKey = VibrationActionHandler.ACTION_STOP,
+                stateKey = STATE_VIBRATION_RUNNING,
+            ),
         ),
         // ─── Rooted functions — filtered out by the VM on standard ──────────
         WidgetFunction(

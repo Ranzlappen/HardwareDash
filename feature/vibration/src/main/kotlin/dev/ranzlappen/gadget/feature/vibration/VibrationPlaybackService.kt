@@ -180,16 +180,17 @@ class VibrationPlaybackService : Service() {
             }
         }
 
-    /** Play the saved pattern [patternId] once; returns its total play time (ms)
-     *  to keep the FGS alive for, or 0 if the pattern is missing/blank. */
-    private suspend fun playPatternById(patternId: String?): Long {
+    /** Play the saved pattern [patternId] **looping** until ACTION_STOP; returns
+     *  `null` (hold the FGS open like a continuous buzz), or 0 to stop now if the
+     *  pattern is missing/blank. */
+    private suspend fun playPatternById(patternId: String?): Long? {
         val pattern = patternId?.takeIf { it.isNotBlank() }?.let { patternRepository.get(it) } ?: return 0L
         controller.playPattern(
             timingsMillis = pattern.timingsMillis.toLongArray(),
             amplitudes = pattern.amplitudes.toIntArray(),
-            loop = false,
+            loop = true,
         )
-        return pattern.totalMillis
+        return null
     }
 
     private fun stopPlayback() {

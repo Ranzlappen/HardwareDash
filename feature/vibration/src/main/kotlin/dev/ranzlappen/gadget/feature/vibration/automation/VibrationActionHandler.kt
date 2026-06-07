@@ -64,7 +64,7 @@ class VibrationActionHandler @Inject constructor(
         ),
         ModuleAction(
             key = ACTION_PATTERN_PLAY,
-            label = "Play saved pattern",
+            label = "Loop saved pattern",
             params = listOf(ActionParam(PARAM_PATTERN_ID, ActionParamType.Text)),
         ),
         ModuleAction(
