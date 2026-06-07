@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AppWidget provider metadata for the App-Organizer folder widget.
+
+  Default 2x2 footprint (a folder name + 2x2 app-preview grid). Resizable to
+  1x1, where the adaptive renderer drops the name strip (WidgetRenderDensity).
+
+  android:configure launches the folder picker right after the user drops the
+  widget from the tray, so the placement binds to a chosen folder before it
+  paints. updatePeriodMillis=0: the widget refreshes only via the content
+  observer (FolderWidgetController -> ContentWidgetUpdater) and onAppWidget
+  OptionsChanged, never on a periodic tick.
+
+  previewLayout (API 31+) renders the real layout in the picker; previewImage
+  is the pre-31 fallback. targetCellWidth/Height declare the 2x2 footprint —
+  some OEM launchers refuse widgets without these.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="40dp"
+    android:minResizeHeight="40dp"
+    android:maxResizeWidth="250dp"
+    android:maxResizeHeight="250dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_folder"
+    android:previewLayout="@layout/widget_folder"
+    android:previewImage="@drawable/ic_symbol_folder"
+    android:configure="dev.ranzlappen.gadget.feature.apps.widget.FolderWidgetConfigActivity"
+    android:description="@string/apps_widget_folder_description"
+    android:widgetCategory="home_screen"
+    android:resizeMode="horizontal|vertical" />

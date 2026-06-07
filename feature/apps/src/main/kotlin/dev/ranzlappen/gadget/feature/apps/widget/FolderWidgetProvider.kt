@@ -1,0 +1,173 @@
+package dev.ranzlappen.gadget.feature.apps.widget
+
+import android.appwidget.AppWidgetProvider
+import android.content.Context
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.view.View
+import android.widget.RemoteViews
+import dagger.hilt.android.EntryPointAccessors
+import dev.ranzlappen.gadget.core.data.apps.AppsDao
+import dev.ranzlappen.gadget.core.data.apps.Folder
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
+import dev.ranzlappen.gadget.core.widgetkit.provider.BaseContentWidgetProvider
+import dev.ranzlappen.gadget.core.widgetkit.provider.WidgetRenderDensity
+import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
+import dev.ranzlappen.gadget.feature.apps.R
+import dev.ranzlappen.gadget.feature.apps.icons.AppIconLoader
+import dev.ranzlappen.gadget.feature.apps.icons.MaterialSymbol
+import dev.ranzlappen.gadget.feature.apps.ui.folder.FolderPopupActivity
+
+/**
+ * The App-Organizer folder home-screen widget — the reference consumer of the
+ * kit's content/launcher archetype ([BaseContentWidgetProvider]).
+ *
+ * Renders a folder's cover image / cover symbol / 2x2 app-preview grid and, on
+ * tap, opens the floating [FolderPopupActivity]. A single adaptive layout +
+ * [WidgetRenderDensity] replaces the legacy 1x1/2x2 provider pair: the folder
+ * name strip paints only at [WidgetRenderDensity.Expanded].
+ *
+ * Per-instance config is the kit [WidgetConfigStore]; the legacy Room
+ * `apps_widget_config` table is read only by the one-time import path.
+ */
+class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
+
+    override val logTag: String = "FolderWidget"
+
+    override fun configStore(context: Context): WidgetConfigStore<FolderWidgetConfig> =
+        entryPoint(context).folderWidgetConfigStore()
+
+    override fun sizePresetOf(config: FolderWidgetConfig): WidgetSizePreset = config.sizePreset
+
+    override fun defaultConfig(context: Context): FolderWidgetConfig = FolderWidgetConfig()
+
+    override fun launchIntent(context: Context, appWidgetId: Int, config: FolderWidgetConfig): Intent? {
+        if (config.folderId == FolderWidgetConfig.NO_FOLDER) return null
+        return FolderPopupActivity.intent(context, config.folderId)
+    }
+
+    override suspend fun buildRemoteViews(
+        context: Context,
+        appWidgetId: Int,
+        config: FolderWidgetConfig,
+        density: WidgetRenderDensity,
+    ): RemoteViews {
+        val ep = entryPoint(context)
+        val dao = ep.appsDao()
+        val folder = if (config.folderId != FolderWidgetConfig.NO_FOLDER) {
+            dao.getFolder(config.folderId)
+        } else {
+            null
+        } ?: return neutralViews(context)
+
+        val cover = folder.coverIcon
+        val views = when {
+            cover.startsWith("image:") -> renderCoverImage(context, folder)
+            cover.startsWith("symbol:") -> renderCoverSymbol(context, folder)
+            else -> null
+        } ?: renderPreviewGrid(context, folder, dao, ep.appIconLoader(), density)
+
+        views.setOnClickPendingIntent(
+            R.id.widget_folder_root,
+            launchPendingIntent(context, appWidgetId, config),
+        )
+        return views
+    }
+
+    // ── Render modes ────────────────────────────────────────────────────────
+
+    private fun renderCoverImage(context: Context, folder: Folder): RemoteViews? {
+        val path = folder.coverIcon.removePrefix("image:")
+        val bmp = runCatching { BitmapFactory.decodeFile(path) }.getOrNull() ?: return null
+        return baseViews(context).apply {
+            setViewVisibility(R.id.widget_folder_cover_image, View.VISIBLE)
+            setViewVisibility(R.id.widget_folder_cover_symbol, View.GONE)
+            setViewVisibility(R.id.widget_folder_grid_section, View.GONE)
+            setImageViewBitmap(R.id.widget_folder_cover_image, bmp)
+        }
+    }
+
+    private fun renderCoverSymbol(context: Context, folder: Folder): RemoteViews? {
+        val symbol = MaterialSymbol.fromId(folder.coverIcon.removePrefix("symbol:")) ?: return null
+        return baseViews(context).apply {
+            setViewVisibility(R.id.widget_folder_cover_image, View.GONE)
+            setViewVisibility(R.id.widget_folder_cover_symbol, View.VISIBLE)
+            setViewVisibility(R.id.widget_folder_grid_section, View.GONE)
+            setImageViewResource(R.id.widget_folder_cover_symbol, symbol.drawableRes)
+            // setColorFilter(int) defaults to SRC_IN — the right mode for a flat
+            // symbol tint. The image-cover view never gets this so photos render
+            // at their original colors.
+            setInt(R.id.widget_folder_cover_symbol, "setColorFilter", folder.baseColorArgb)
+        }
+    }
+
+    private suspend fun renderPreviewGrid(
+        context: Context,
+        folder: Folder,
+        dao: AppsDao,
+        loader: AppIconLoader,
+        density: WidgetRenderDensity,
+    ): RemoteViews {
+        val views = baseViews(context).apply {
+            setViewVisibility(R.id.widget_folder_cover_image, View.GONE)
+            setViewVisibility(R.id.widget_folder_cover_symbol, View.GONE)
+            setViewVisibility(R.id.widget_folder_grid_section, View.VISIBLE)
+        }
+        if (density.showLabel) {
+            views.setViewVisibility(R.id.widget_folder_name, View.VISIBLE)
+            views.setTextViewText(R.id.widget_folder_name, folder.name)
+            views.setTextColor(R.id.widget_folder_name, folder.baseColorArgb)
+        } else {
+            views.setViewVisibility(R.id.widget_folder_name, View.GONE)
+        }
+
+        val records = dao.getMembership(folder.id)
+            .sortedBy { it.sortOrder }
+            .take(TILE_IDS.size)
+            .mapNotNull { dao.getAppRecord(it.appKey) }
+
+        for ((index, tileId) in TILE_IDS.withIndex()) {
+            val record = records.getOrNull(index)
+            if (record != null) {
+                views.setViewVisibility(tileId, View.VISIBLE)
+                views.setImageViewBitmap(tileId, loader.loadBitmap(record, sizePx = TILE_SIZE_PX))
+            } else {
+                views.setViewVisibility(tileId, View.INVISIBLE)
+            }
+        }
+        return views
+    }
+
+    private fun neutralViews(context: Context): RemoteViews =
+        baseViews(context).apply {
+            setViewVisibility(R.id.widget_folder_cover_image, View.GONE)
+            setViewVisibility(R.id.widget_folder_cover_symbol, View.GONE)
+            setViewVisibility(R.id.widget_folder_grid_section, View.VISIBLE)
+            setViewVisibility(R.id.widget_folder_name, View.VISIBLE)
+            setTextViewText(R.id.widget_folder_name, context.getString(R.string.apps_widget_folder_label))
+            for (id in TILE_IDS) setViewVisibility(id, View.INVISIBLE)
+        }
+
+    private fun baseViews(context: Context): RemoteViews =
+        RemoteViews(context.packageName, R.layout.widget_folder)
+
+    private fun entryPoint(context: Context): FolderWidgetEntryPoint =
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            FolderWidgetEntryPoint::class.java,
+        )
+
+    companion object {
+        /** This provider's class, for `getAppWidgetIds` enumeration. */
+        val PROVIDER_CLASS: Class<out AppWidgetProvider> = FolderWidgetProvider::class.java
+
+        private const val TILE_SIZE_PX = 96
+
+        private val TILE_IDS = intArrayOf(
+            R.id.widget_folder_tile_0,
+            R.id.widget_folder_tile_1,
+            R.id.widget_folder_tile_2,
+            R.id.widget_folder_tile_3,
+        )
+    }
+}

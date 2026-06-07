@@ -48,4 +48,9 @@
     <string name="apps_cover_clear">Clear</string>
     <string name="apps_cover_none">Auto</string>
     <string name="apps_cancel">Cancel</string>
+
+    <!-- Folder home-screen widget. -->
+    <string name="apps_widget_folder_label">App Folder</string>
+    <string name="apps_widget_folder_description">A customizable home-screen folder of installed apps, PWAs, and web links.</string>
+    <string name="apps_widget_pick_folder">Pick a folder</string>
 </resources>

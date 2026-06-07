@@ -61,8 +61,10 @@ abstract class BaseContentWidgetProvider<T : WidgetKitConfig> : AppWidgetProvide
 
     /** Build the feature-specific [RemoteViews] for one widget instance at the
      *  resolved [density]. Paint the content and attach the tap target via
-     *  [launchPendingIntent] (typically on the layout's root view). */
-    protected abstract fun buildRemoteViews(
+     *  [launchPendingIntent] (typically on the layout's root view). `suspend`
+     *  because content widgets load their preview from the feature's data layer
+     *  (DB + icon decode) — it runs inside [renderAll]'s receiver coroutine. */
+    protected abstract suspend fun buildRemoteViews(
         context: Context,
         appWidgetId: Int,
         config: T,

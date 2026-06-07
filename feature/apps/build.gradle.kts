@@ -34,6 +34,13 @@ dependencies {
     // :core:navigation surfaces GadgetDestination.Apps + the
     // NavGraphBuilder.appsScreen() extension target (wired in Phase C).
     implementation(project(":core:navigation"))
+    // :core:widgetkit — the folder home-screen widget is built on the kit's
+    // content/launcher archetype (BaseContentWidgetProvider + WidgetConfigStore
+    // + ContentWidgetUpdater).
+    implementation(project(":core:widgetkit"))
+    // :core:datastore — FeaturePreferencesFactory backs the per-appWidgetId
+    // WidgetConfigStore<FolderWidgetConfig>.
+    implementation(project(":core:datastore"))
 
     // androidx.core for Drawable.toBitmap (icon resolution).
     implementation(libs.androidx.core.ktx)

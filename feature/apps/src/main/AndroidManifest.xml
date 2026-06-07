@@ -16,6 +16,32 @@
             android:launchMode="singleTop"
             android:taskAffinity=""
             android:theme="@style/Theme.GadgetApps.FolderPopup" />
+
+        <!-- Folder home-screen widget (content/launcher archetype). Renders a
+             folder preview; tap opens FolderPopupActivity. -->
+        <receiver
+            android:name=".widget.FolderWidgetProvider"
+            android:exported="true"
+            android:label="@string/apps_widget_folder_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_folder_info" />
+        </receiver>
+
+        <!-- APPWIDGET_CONFIGURE folder picker, started by the launcher after a
+             tray drop (exported so the launcher process can launch it). -->
+        <activity
+            android:name=".widget.FolderWidgetConfigActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:label="@string/apps_widget_folder_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
