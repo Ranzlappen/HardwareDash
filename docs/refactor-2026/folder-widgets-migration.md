@@ -77,14 +77,25 @@ Decisions taken:
     the provider exists in Phase E.
   - Theme: legacy `com.gadget.ui.theme.GadgetTheme` + `Theme.Gadget.Translucent`
     → modular `:core:designsystem` `GadgetTheme` + a feature translucent style.
-- **D — Launcher/content archetype in `:core:widgetkit`.** A content-render +
-  activity-launch widget seam alongside Toggle/Momentary; a content-source →
-  repaint observer (mirrors `MonitorWidgetNotifier`); an `APPWIDGET_CONFIGURE`
-  config-activity path on the base provider.
-- **E — Folder widget onto the archetype.** `FolderWidgetConfig` becomes a
-  `@Serializable WidgetKitConfig` persisted via `WidgetConfigStore`; collapse
-  the two bespoke providers into one `BaseGadgetWidgetProvider` subclass; add
-  the missing manifest receivers + `widget_folder_*_info.xml`.
+- **D — Launcher/content archetype in `:core:widgetkit`. ✅** Added
+  `BaseContentWidgetProvider<T : WidgetKitConfig>` — the second archetype
+  alongside the function-driven `BaseGadgetWidgetProvider`: renders dynamic
+  content + launches an Activity on tap (no function/feedback/toggle
+  machinery). Owns the `onUpdate`/`onDeleted`/`onAppWidgetOptionsChanged`
+  lifecycle + `renderAll` (config read + self-heal/reconcile + density) +
+  the `launchPendingIntent` tap helper. Added `ContentWidgetUpdater` as the
+  content-source → repaint seam (explicit `ACTION_APPWIDGET_UPDATE`
+  self-broadcast), the analogue of the monitoring widget-notifier. *(Decision:
+  the user chose the generic kit archetype over a feature-owned standalone
+  provider; folder is the first consumer, the future web-link widget the
+  likely second.)*
+- **E — Folder widget onto the archetype.** Folder config becomes a
+  `@Serializable WidgetKitConfig` (folderId + `WidgetSizePreset`) persisted via
+  `WidgetConfigStore`; **one** `BaseContentWidgetProvider` subclass with a
+  single adaptive layout (density decides name strip + tile count, replacing
+  the legacy two 1x1/2x2 providers); port `PinFolderHelper` + the configure
+  activity; add the missing manifest receivers + `widget_folder_*_info.xml`.
+  The Room `apps_widget_config` table stays only as the legacy-ingestion seam.
 - **F — Backup/restore v2 compatibility.** Migrated `BackupManager` sweeps the
   new modular DataStores + split DBs + asset dirs; a legacy-import path opens
   the old `gadget_db` read-only and imports `apps_*` rows (covers both ZIP
