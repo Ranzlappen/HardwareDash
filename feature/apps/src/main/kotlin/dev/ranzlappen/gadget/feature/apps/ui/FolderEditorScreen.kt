@@ -89,9 +89,8 @@ import dev.ranzlappen.gadget.feature.apps.ui.folder.FolderPopupActivity
 import kotlinx.coroutines.launch
 
 /**
- * Per-folder editor on the design system: rename, recolor, cover icon, smart
- * rules, lock, pin-to-home, manual membership, and inline web-links. All edits
- * persist immediately so a back-press never loses work.
+ * Per-folder editor (Hilt route). Thin wrapper over the Hilt-free
+ * [FolderEditorContent].
  */
 @Composable
 fun FolderEditorScreen(onBack: () -> Unit) {
@@ -103,6 +102,65 @@ fun FolderEditorScreen(onBack: () -> Unit) {
     val searchQuery by viewModel.searchQuery.collectAsState()
     val otherFolderMembership by viewModel.otherFolderMembership.collectAsState()
 
+    FolderEditorContent(
+        state = FolderEditorState(
+            folder = folder,
+            filteredApps = filteredApps,
+            membership = membership,
+            ruleSet = ruleSet,
+            searchQuery = searchQuery,
+            otherFolderMembership = otherFolderMembership,
+        ),
+        onBack = onBack,
+        onRename = viewModel::rename,
+        onSetColor = viewModel::setBaseColor,
+        onSetLocked = viewModel::setLocked,
+        onPinToHome = viewModel::pinToHome,
+        onToggleMember = viewModel::toggleMember,
+        onAddWebLink = viewModel::addWebLink,
+        onSetCoverSymbol = viewModel::setCoverSymbol,
+        onClearCover = viewModel::clearCover,
+        onSetCoverImage = viewModel::setCoverImageFromUri,
+        onAddOrReplaceRule = viewModel::addOrReplaceRule,
+        onRemoveRuleOfKind = viewModel::removeRuleOfKind,
+        onSearchChange = { viewModel.searchQuery.value = it },
+    )
+}
+
+/** Rendered state for [FolderEditorContent]. */
+data class FolderEditorState(
+    val folder: Folder?,
+    val filteredApps: List<AppRecord>,
+    val membership: Set<String>,
+    val ruleSet: FolderRuleSet,
+    val searchQuery: String,
+    val otherFolderMembership: Map<String, List<String>>,
+)
+
+/**
+ * Stateless folder editor: rename, recolor, cover icon, smart rules, lock,
+ * pin-to-home, manual membership, and inline web-links. No ViewModel/Hilt, so
+ * it's preview- and instrumented-test-friendly. All edits persist immediately
+ * via the callbacks so a back-press never loses work.
+ */
+@Composable
+fun FolderEditorContent(
+    state: FolderEditorState,
+    onBack: () -> Unit,
+    onRename: (String) -> Unit,
+    onSetColor: (Int) -> Unit,
+    onSetLocked: (Boolean) -> Unit,
+    onPinToHome: () -> Boolean,
+    onToggleMember: (String) -> Unit,
+    onAddWebLink: (String, String) -> Unit,
+    onSetCoverSymbol: (String) -> Unit,
+    onClearCover: () -> Unit,
+    onSetCoverImage: (Uri) -> Unit,
+    onAddOrReplaceRule: (FolderRule) -> Unit,
+    onRemoveRuleOfKind: ((FolderRule) -> Boolean) -> Unit,
+    onSearchChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var nameDraft by remember { mutableStateOf("") }
     var showWebLinkDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -111,16 +169,17 @@ fun FolderEditorScreen(onBack: () -> Unit) {
     val pinUnsupported = stringResource(R.string.apps_pin_unsupported)
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-    ) { uri -> uri?.let { viewModel.setCoverImageFromUri(it) } }
+    ) { uri -> uri?.let { onSetCoverImage(it) } }
 
-    LaunchedEffect(folder?.id, folder?.name) {
-        folder?.let { if (nameDraft != it.name) nameDraft = it.name }
+    LaunchedEffect(state.folder?.id, state.folder?.name) {
+        state.folder?.let { if (nameDraft != it.name) nameDraft = it.name }
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(folder?.name ?: stringResource(R.string.apps_title)) },
+                title = { Text(state.folder?.name ?: stringResource(R.string.apps_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -133,7 +192,7 @@ fun FolderEditorScreen(onBack: () -> Unit) {
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { padding ->
-        val current = folder
+        val current = state.folder
         if (current == null) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Text(stringResource(R.string.apps_title), style = MaterialTheme.typography.bodyLarge)
@@ -149,12 +208,12 @@ fun FolderEditorScreen(onBack: () -> Unit) {
             item {
                 GadgetTextField(
                     value = nameDraft,
-                    onValueChange = { nameDraft = it; viewModel.rename(it) },
+                    onValueChange = { nameDraft = it; onRename(it) },
                     label = stringResource(R.string.apps_folder_name),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            item { ColorPickerRow(current.baseColorArgb, viewModel::setBaseColor) }
+            item { ColorPickerRow(current.baseColorArgb, onSetColor) }
             item {
                 CoverIconSection(
                     folder = current,
@@ -163,15 +222,15 @@ fun FolderEditorScreen(onBack: () -> Unit) {
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                         )
                     },
-                    onPickSymbol = viewModel::setCoverSymbol,
-                    onClear = viewModel::clearCover,
+                    onPickSymbol = onSetCoverSymbol,
+                    onClear = onClearCover,
                 )
             }
             item {
                 RuleSection(
-                    ruleSet = ruleSet,
-                    onAddOrReplace = viewModel::addOrReplaceRule,
-                    onRemoveKind = viewModel::removeRuleOfKind,
+                    ruleSet = state.ruleSet,
+                    onAddOrReplace = onAddOrReplaceRule,
+                    onRemoveKind = onRemoveRuleOfKind,
                 )
             }
             item {
@@ -181,13 +240,13 @@ fun FolderEditorScreen(onBack: () -> Unit) {
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    Switch(checked = current.locked, onCheckedChange = viewModel::setLocked)
+                    Switch(checked = current.locked, onCheckedChange = onSetLocked)
                 }
             }
             item {
                 GadgetSecondaryButton(
                     onClick = {
-                        if (!viewModel.pinToHome()) {
+                        if (!onPinToHome()) {
                             scope.launch { snackbarHostState.showSnackbar(pinUnsupported) }
                         }
                     },
@@ -223,17 +282,17 @@ fun FolderEditorScreen(onBack: () -> Unit) {
             }
             item {
                 GadgetTextField(
-                    value = searchQuery,
-                    onValueChange = { viewModel.searchQuery.value = it },
+                    value = state.searchQuery,
+                    onValueChange = onSearchChange,
                     placeholder = stringResource(R.string.apps_search_apps_hint),
                     leadingIcon = Icons.Filled.Search,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            if (filteredApps.isEmpty()) {
+            if (state.filteredApps.isEmpty()) {
                 item {
                     Text(
-                        text = if (searchQuery.isBlank()) {
+                        text = if (state.searchQuery.isBlank()) {
                             stringResource(R.string.apps_no_apps)
                         } else {
                             stringResource(R.string.apps_no_search_matches)
@@ -243,12 +302,12 @@ fun FolderEditorScreen(onBack: () -> Unit) {
                     )
                 }
             } else {
-                items(filteredApps, key = { it.appKey }) { record ->
+                items(state.filteredApps, key = { it.appKey }) { record ->
                     AppRow(
                         record = record,
-                        selected = record.appKey in membership,
-                        otherFolders = otherFolderMembership[record.appKey].orEmpty(),
-                        onToggle = { viewModel.toggleMember(record.appKey) },
+                        selected = record.appKey in state.membership,
+                        otherFolders = state.otherFolderMembership[record.appKey].orEmpty(),
+                        onToggle = { onToggleMember(record.appKey) },
                     )
                 }
             }
@@ -259,7 +318,7 @@ fun FolderEditorScreen(onBack: () -> Unit) {
         AddWebLinkDialog(
             onDismiss = { showWebLinkDialog = false },
             onConfirm = { url, label ->
-                viewModel.addWebLink(url, label)
+                onAddWebLink(url, label)
                 showWebLinkDialog = false
             },
         )
