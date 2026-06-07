@@ -5,6 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.datastore.FeaturePreferencesFactory
+import dev.ranzlappen.gadget.core.widgetkit.pin.PendingEntry
+import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import javax.inject.Singleton
 
@@ -30,5 +32,25 @@ object AppsWidgetModule {
             serializer = FolderWidgetConfig.serializer(),
         )
         return WidgetConfigStore(prefs)
+    }
+
+    /**
+     * The folder widget's persistent pin-flow bridge — carries the user's
+     * pre-pin [FolderWidgetConfig] across the `requestPinAppWidget` round-trip
+     * so [FolderWidgetPinReceiver] (and the provider's `reconcilePendingConfig`
+     * rescue) can recover it once the OS assigns an `appWidgetId`. Each entry is
+     * a `PendingEntry<FolderWidgetConfig>`, hence the composed serializer.
+     */
+    @Provides
+    @Singleton
+    fun provideFolderPendingWidgetConfigs(
+        factory: FeaturePreferencesFactory,
+    ): PendingWidgetConfigs<FolderWidgetConfig> {
+        val prefs = factory.create(
+            fileName = "apps_pending_folder_widgets",
+            keyPrefix = "pending_",
+            serializer = PendingEntry.serializer(FolderWidgetConfig.serializer()),
+        )
+        return PendingWidgetConfigs(prefs, tag = PinFolderHelper.TAG)
     }
 }

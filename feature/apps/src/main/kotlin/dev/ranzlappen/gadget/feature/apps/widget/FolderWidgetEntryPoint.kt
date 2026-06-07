@@ -4,6 +4,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.data.apps.AppsDao
+import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.apps.icons.AppIconLoader
 
@@ -16,6 +17,7 @@ import dev.ranzlappen.gadget.feature.apps.icons.AppIconLoader
 @InstallIn(SingletonComponent::class)
 interface FolderWidgetEntryPoint {
     fun folderWidgetConfigStore(): WidgetConfigStore<FolderWidgetConfig>
+    fun folderPendingConfigs(): PendingWidgetConfigs<FolderWidgetConfig>
     fun appsDao(): AppsDao
     fun appIconLoader(): AppIconLoader
 }

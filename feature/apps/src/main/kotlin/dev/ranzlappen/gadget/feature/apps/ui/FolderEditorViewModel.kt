@@ -113,9 +113,17 @@ class FolderEditorViewModel @Inject constructor(
     }
 
     /** Returns true if the launcher accepted the pin request. */
+    /**
+     * Returns `true` synchronously when the launcher supports programmatic
+     * pinning (so the caller can show the "unsupported" snackbar on `false`),
+     * then drives the suspending pin request — which enqueues the pending
+     * config before calling `requestPinAppWidget` — on [viewModelScope].
+     */
     fun pinToHome(): Boolean {
         val f = folder.value ?: return false
-        return pinFolderHelper.requestPin(f.id)
+        if (!pinFolderHelper.isSupported()) return false
+        viewModelScope.launch { pinFolderHelper.requestPin(f) }
+        return true
     }
 
     fun toggleMember(appKey: String) {
