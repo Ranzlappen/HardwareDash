@@ -35,12 +35,20 @@ class PinFolderHelper @Inject constructor(
             action = FolderWidgetPinReceiver.ACTION_PIN_CALLBACK
             putExtra(FolderWidgetPinReceiver.EXTRA_FOLDER_ID, folderId)
         }
-        // The system fills in EXTRA_APPWIDGET_ID before firing the callback.
+        // MUST be FLAG_MUTABLE: the system delivers the new appWidgetId by
+        // *filling it into* this callback intent (EXTRA_APPWIDGET_ID), which an
+        // immutable PendingIntent forbids — the fill-in is silently dropped and
+        // the receiver would see INVALID_APPWIDGET_ID, never persisting the
+        // config (the placed widget then self-heals to NO_FOLDER: blank cover +
+        // dead tap). FLAG_MUTABLE is unknown/ignored below API 31, where
+        // PendingIntents are mutable by default anyway, so this is safe on
+        // minSdk 29. The explicit FolderWidgetPinReceiver component keeps it
+        // non-hijackable despite being mutable.
         val callback = PendingIntent.getBroadcast(
             context,
             folderId.toInt(),
             callbackIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
         )
         return manager.requestPinAppWidget(provider, null, callback)
     }
