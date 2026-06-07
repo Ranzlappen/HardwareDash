@@ -69,15 +69,32 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
             dao.getFolder(config.folderId)
         } else {
             null
-        } ?: return neutralViews(context)
+        }
 
-        val cover = folder.coverIcon
-        val views = when {
-            cover.startsWith("image:") -> renderCoverImage(context, folder)
-            cover.startsWith("symbol:") -> renderCoverSymbol(context, folder)
-            else -> null
-        } ?: renderPreviewGrid(context, folder, dao, ep.appIconLoader(), density)
+        val views = if (folder == null) {
+            neutralViews(context)
+        } else {
+            // Cover/name tint follows the folder's own colour unless the
+            // customizer set an explicit override.
+            val tint = if (config.coverTintArgb == FolderWidgetConfig.FOLLOW_FOLDER_COLOR) {
+                folder.baseColorArgb
+            } else {
+                config.coverTintArgb.toInt()
+            }
+            val cover = folder.coverIcon
+            when {
+                cover.startsWith("image:") -> renderCoverImage(context, folder)
+                cover.startsWith("symbol:") -> renderCoverSymbol(context, folder, tint)
+                else -> null
+            } ?: renderPreviewGrid(
+                context, folder, dao, ep.appIconLoader(), density, tint, config.showLabel,
+            )
+        }
 
+        // Shared kit chrome (glass / solid / transparent) — identical paint
+        // path as the function-driven widgets.
+        ep.widgetAppearanceRenderer().applyBackground(views, config.appearance)
+        // Null PendingIntent (unbound NO_FOLDER widget) clears the click target.
         views.setOnClickPendingIntent(
             R.id.widget_folder_root,
             launchPendingIntent(context, appWidgetId, config),
@@ -98,7 +115,7 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
         }
     }
 
-    private fun renderCoverSymbol(context: Context, folder: Folder): RemoteViews? {
+    private fun renderCoverSymbol(context: Context, folder: Folder, tintArgb: Int): RemoteViews? {
         val symbol = MaterialSymbol.fromId(folder.coverIcon.removePrefix("symbol:")) ?: return null
         return baseViews(context).apply {
             setViewVisibility(R.id.widget_folder_cover_image, View.GONE)
@@ -108,7 +125,7 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
             // setColorFilter(int) defaults to SRC_IN — the right mode for a flat
             // symbol tint. The image-cover view never gets this so photos render
             // at their original colors.
-            setInt(R.id.widget_folder_cover_symbol, "setColorFilter", folder.baseColorArgb)
+            setInt(R.id.widget_folder_cover_symbol, "setColorFilter", tintArgb)
         }
     }
 
@@ -118,16 +135,20 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
         dao: AppsDao,
         loader: AppIconLoader,
         density: WidgetRenderDensity,
+        tintArgb: Int,
+        showLabel: Boolean,
     ): RemoteViews {
         val views = baseViews(context).apply {
             setViewVisibility(R.id.widget_folder_cover_image, View.GONE)
             setViewVisibility(R.id.widget_folder_cover_symbol, View.GONE)
             setViewVisibility(R.id.widget_folder_grid_section, View.VISIBLE)
         }
-        if (density.showLabel) {
+        // Paint the name strip only when the user kept it on AND the resolved
+        // density is large enough to fit it.
+        if (showLabel && density.showLabel) {
             views.setViewVisibility(R.id.widget_folder_name, View.VISIBLE)
             views.setTextViewText(R.id.widget_folder_name, folder.name)
-            views.setTextColor(R.id.widget_folder_name, folder.baseColorArgb)
+            views.setTextColor(R.id.widget_folder_name, tintArgb)
         } else {
             views.setViewVisibility(R.id.widget_folder_name, View.GONE)
         }

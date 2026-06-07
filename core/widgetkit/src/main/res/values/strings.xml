@@ -81,4 +81,14 @@
     <string name="widget_kit_cancel">Cancel</string>
     <string name="widget_kit_dialog_title_new">New widget</string>
     <string name="widget_kit_dialog_title_edit">Edit widget</string>
+
+    <!-- Content/launcher-archetype customization (ContentWidgetCustomizationSheet). -->
+    <string name="widget_kit_content_section_content">Shows</string>
+    <string name="widget_kit_content_tint_label">Accent colour</string>
+    <string name="widget_kit_content_tint_custom">Use a custom colour</string>
+    <string name="widget_kit_content_label_show">Show name label</string>
+    <string name="widget_kit_content_size_label">Starting size</string>
+    <string name="widget_kit_content_size_small">Small</string>
+    <string name="widget_kit_content_size_medium">Medium</string>
+    <string name="widget_kit_content_size_large">Large</string>
 </resources>

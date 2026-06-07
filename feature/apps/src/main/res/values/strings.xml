@@ -56,4 +56,5 @@
     <string name="apps_widget_folder_label">App Folder</string>
     <string name="apps_widget_folder_description">A customizable home-screen folder of installed apps, PWAs, and web links.</string>
     <string name="apps_widget_pick_folder">Pick a folder</string>
+    <string name="apps_widget_folder_selected">Selected</string>
 </resources>

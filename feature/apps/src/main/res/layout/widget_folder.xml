@@ -17,9 +17,17 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_folder_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/widget_folder_background"
-    android:padding="8dp">
+    android:layout_height="match_parent">
+
+    <!-- Kit appearance chrome (glass / solid / transparent), painted by
+         WidgetAppearanceRenderer.applyBackground via the kit-declared
+         @id/widget_background. Backmost child so the cover / grid overlay it. -->
+    <ImageView
+        android:id="@id/widget_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="fitXY" />
 
     <ImageView
         android:id="@+id/widget_folder_cover_image"
@@ -41,7 +49,8 @@
         android:id="@+id/widget_folder_grid_section"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="8dp">
 
         <TextView
             android:id="@+id/widget_folder_name"

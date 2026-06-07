@@ -970,7 +970,16 @@ contract (`displayName`, `removed`, `schemaVersion`, `appearance`),
   placed and (b) monitoring is enabled.
 - **`ui/`** — `WidgetAppearancePreview` (the in-app live mock of the
   RemoteViews-rendered widget). `GadgetColorPicker` moved to `:core:ui`
-  (P1-10).
+  (P1-10). **Two customization sheets, one per archetype**:
+  `WidgetCustomizationSheet` (function-driven: name → function → params → size
+  → `WidgetAppearanceSection` → preview) and `ContentWidgetCustomizationSheet`
+  (content/launcher: name → content slot → background → accent/content tint →
+  label + size → preview slot; reuses the shared `WidgetAppearance.background`/
+  `solidColor` + `WidgetAppearanceRenderer.applyBackground` paint path, so
+  chrome is identical across archetypes, with no shared-type serialization
+  change). A new widget builds on the sheet matching its archetype rather than
+  hand-rolling a config screen — folder is the content reference. Design +
+  remaining slices (tap-animation for content widgets): `docs/widgets/content-widget-customization.md`.
 
 **Function-driven widgets (the comprehensive customization model).** A
 widget no longer hardcodes its action in its provider class. Each per-instance

@@ -27,6 +27,13 @@ import kotlinx.serialization.Serializable
 data class FolderWidgetConfig(
     val folderId: Long = NO_FOLDER,
     val sizePreset: WidgetSizePreset = WidgetSizePreset.Medium,
+    /** Whether the folder-name strip paints (when the widget is large enough);
+     *  user-toggled in the customizer. */
+    val showLabel: Boolean = true,
+    /** Cover symbol + name tint. [FOLLOW_FOLDER_COLOR] (the default) follows the
+     *  folder's own `baseColorArgb`; any other ARGB overrides it. New field, so
+     *  older on-disk configs decode with the follow default. */
+    val coverTintArgb: Long = FOLLOW_FOLDER_COLOR,
     override val displayName: String = "",
     override val removed: Boolean = false,
     override val schemaVersion: Int = 1,
@@ -34,5 +41,10 @@ data class FolderWidgetConfig(
 ) : WidgetKitConfig {
     companion object {
         const val NO_FOLDER: Long = -1L
+
+        /** Sentinel for [coverTintArgb]: follow the folder's `baseColorArgb`
+         *  rather than a fixed override. `0L` is fully-transparent black —
+         *  never a meaningful cover tint — so it's safe as the "follow" marker. */
+        const val FOLLOW_FOLDER_COLOR: Long = 0L
     }
 }

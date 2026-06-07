@@ -31,4 +31,5 @@
     android:configure="dev.ranzlappen.gadget.feature.apps.widget.FolderWidgetConfigActivity"
     android:description="@string/apps_widget_folder_description"
     android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable"
     android:resizeMode="horizontal|vertical" />
