@@ -1,6 +1,7 @@
 package dev.ranzlappen.gadget.core.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.FlashlightOn
@@ -8,6 +9,7 @@ import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Vibration
+import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.FlashlightOn
@@ -115,6 +117,19 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.Vibration
     }
 
+    /**
+     * App-Organizer feature module — folders of installed apps / PWAs / web
+     * links that double as designable home-screen folder widgets. Migrated out
+     * of the legacy monolith; a first-class entry in the scrollable [modules]
+     * region. Owns a top-level folder grid + a per-folder editor sub-route.
+     */
+    data object Apps : GadgetDestination {
+        override val route = "apps"
+        override val label = "Apps"
+        override val iconFilled = Icons.Filled.Apps
+        override val iconOutlined = Icons.Outlined.Apps
+    }
+
     companion object {
         /**
          * Destinations pinned to the **top** of the rail, above the
@@ -135,7 +150,7 @@ sealed interface GadgetDestination {
          * migrated modules here.
          */
         val modules: List<GadgetDestination> = listOf(
-            Torch, Vibration, Sensors, Actuators, Automation,
+            Torch, Vibration, Apps, Sensors, Actuators, Automation,
         )
 
         /**

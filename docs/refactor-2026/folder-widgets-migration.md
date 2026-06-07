@@ -115,10 +115,19 @@ Decisions taken:
   the modular `apps.db` / `monitoring.db` (format v3); restore writes them back
   ("restart to apply"). *(Kept `BackupManager` in `:app` rather than moving it
   to `:core:data` — lower-risk; the move is an optional follow-up.)*
-- **Remaining — C.2 (editor rebuild).** Rebuild the in-app Apps grid + folder
-  editor on the design system in one pass + wire nav (`GadgetDestination.Apps`
-  + `appsScreen()` + rail). These were orphaned in legacy, so this restores
-  in-app folder management; the widget itself is already live.
+- **C.2 — In-app Apps grid + folder editor rebuilt on the design system + nav. ✅**
+  `AppsScreen` (folder grid, FAB-create, long-press delete) + `FolderEditorScreen`
+  (name/color/cover/rules/lock/pin-to-home/membership/web-links) +
+  `FolderEditorViewModel` (ported) on design-system components
+  (`GlassSurface`/`GadgetTextField`/`GadgetSecondaryButton`/`GadgetFab`/
+  `GadgetEmptyState`/`GadgetDialog`; themed M3 for the few gaps —
+  Checkbox/Switch/AlertDialog-with-input). `PinFolderHelper` +
+  `FolderWidgetPinReceiver` power the in-app "pin to home". Added
+  `GadgetDestination.Apps` (+ rail entry + `ComingSoonScreen` branch) and the
+  `appsScreen(navController)` route extension (grid + `apps/editor/{folderId}`
+  sub-route), wired into `MainActivity`'s `GadgetApp` builder.
+
+**Migration complete (A–G + F + C.2).**
 
 ## CI-only traps to watch (no local Android SDK)
 

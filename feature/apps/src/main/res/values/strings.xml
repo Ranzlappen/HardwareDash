@@ -48,6 +48,9 @@
     <string name="apps_cover_clear">Clear</string>
     <string name="apps_cover_none">Auto</string>
     <string name="apps_cancel">Cancel</string>
+    <string name="apps_save">Save</string>
+    <string name="apps_delete">Delete</string>
+    <string name="apps_back">Back</string>
 
     <!-- Folder home-screen widget. -->
     <string name="apps_widget_folder_label">App Folder</string>

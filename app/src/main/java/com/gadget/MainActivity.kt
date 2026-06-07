@@ -31,6 +31,7 @@ import com.gadget.ui.theme.ThemePreferencesManager
 import com.gadget.widget.WidgetUpdateWorker
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.feature.apps.AppRepository
+import dev.ranzlappen.gadget.feature.apps.appsScreen
 import dev.ranzlappen.gadget.feature.apps.widget.FolderWidgetController
 import dev.ranzlappen.gadget.core.datastore.DarkThemeMode
 import dev.ranzlappen.gadget.core.datastore.TriStatePreference
@@ -135,6 +136,7 @@ class MainActivity : ComponentActivity() {
                                 navController.navigateTopLevel(GadgetDestination.Settings)
                             },
                         )
+                        appsScreen(navController)
                     }
                 }
                 is LaunchGateOutcome.DeniedFatal -> GadgetTheme {
