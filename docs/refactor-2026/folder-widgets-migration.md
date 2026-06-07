@@ -96,15 +96,29 @@ Decisions taken:
   the legacy two 1x1/2x2 providers); port `PinFolderHelper` + the configure
   activity; add the missing manifest receivers + `widget_folder_*_info.xml`.
   The Room `apps_widget_config` table stays only as the legacy-ingestion seam.
-- **F — Backup/restore v2 compatibility.** Migrated `BackupManager` sweeps the
-  new modular DataStores + split DBs + asset dirs; a legacy-import path opens
-  the old `gadget_db` read-only and imports `apps_*` rows (covers both ZIP
-  restore and in-place app upgrade). Round-trip + legacy-fixture tests.
-- **G — Cleanup + tests + CI traps.** Delete legacy `com.gadget.{apps,ui.apps,
-  ui.folder,widget.folder}.*` + the `FolderWidgetConfig` Room entity from
-  `:app`; resolve any Hilt entry-point name collisions; unit/instrumented
-  tests; `@Preview` matrix; verify the standard-APK leak gate + the
-  `import com.gadget.*` CI guard.
+- **G — Wire `:feature:apps` + remove legacy. ✅** `:app` depends on
+  `:feature:apps` (modular widget/popup/configure activity merge into the app
+  manifest; modular `AppRepository` + `FolderWidgetController` eager-injected).
+  Deleted the entire legacy `com.gadget.{apps,ui.apps,ui.folder,widget.folder}.*`
+  + `data.db.apps.*` + the legacy widget layouts/drawables + the in-app popup
+  manifest entry + the duplicated test — resolving the deferred Hilt
+  entry-point collision (only the modular `AppsEntryPoint` remains).
+  `GadgetDatabase` drops the apps entities (kept the metric tables), v4→v5 with
+  an empty `MIGRATION_4_5` (Room forgets the now-undeclared `apps_*` tables;
+  they stay physically present for the importer).
+- **F — Backup/restore v2 compatibility. ✅** `LegacyAppsImporter`
+  (`:feature:apps`) reads the legacy `gadget_db` `apps_*` tables via **raw
+  SQLite** and copies them into `apps.db` once (SharedPreferences-guarded),
+  covering **both** in-place upgrade and legacy-backup restore (`BackupManager`
+  already restores `gadget_db`, then the importer runs on next launch).
+  `BackupManager` extended with a `databases/` sweep so v2 backups also carry
+  the modular `apps.db` / `monitoring.db` (format v3); restore writes them back
+  ("restart to apply"). *(Kept `BackupManager` in `:app` rather than moving it
+  to `:core:data` — lower-risk; the move is an optional follow-up.)*
+- **Remaining — C.2 (editor rebuild).** Rebuild the in-app Apps grid + folder
+  editor on the design system in one pass + wire nav (`GadgetDestination.Apps`
+  + `appsScreen()` + rail). These were orphaned in legacy, so this restores
+  in-app folder management; the widget itself is already live.
 
 ## CI-only traps to watch (no local Android SDK)
 

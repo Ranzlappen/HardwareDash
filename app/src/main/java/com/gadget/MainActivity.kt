@@ -57,6 +57,10 @@ class MainActivity : ComponentActivity() {
     // widgets reactively for the lifetime of the process.
     @Inject lateinit var folderWidgetController: FolderWidgetController
 
+    // Eager-injected so its init { } runs the one-shot legacy gadget_db ->
+    // apps.db import (in-place upgrade + legacy backup restore continuity).
+    @Inject lateinit var legacyAppsImporter: dev.ranzlappen.gadget.feature.apps.LegacyAppsImporter
+
     @Inject lateinit var launchGate: LaunchGate
     @Inject lateinit var companionDetector: CompanionModuleDetector
 
