@@ -49,6 +49,10 @@ import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GadgetFab
 import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
 import dev.ranzlappen.gadget.core.ui.component.GlassSurface
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
+import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 import dev.ranzlappen.gadget.feature.apps.R
 
 /**
@@ -181,3 +185,23 @@ private fun CreateFolderDialog(onDismiss: () -> Unit, onConfirm: (String) -> Uni
 }
 
 private const val DEFAULT_FOLDER_COLOR: Int = 0xFF6750A4.toInt()
+
+@GadgetPreviewLightDark
+@GadgetPreviewLargeFont
+@GadgetPreviewRtl
+@Composable
+private fun FolderTilePreview() = GadgetThemedPreview {
+    FolderTile(
+        folder = Folder(
+            id = 1L,
+            name = "Games",
+            baseColorArgb = DEFAULT_FOLDER_COLOR,
+            coverIcon = "auto",
+            sortOrder = 0,
+            locked = false,
+            createdAt = 0L,
+        ),
+        onClick = {},
+        onLongClick = {},
+    )
+}

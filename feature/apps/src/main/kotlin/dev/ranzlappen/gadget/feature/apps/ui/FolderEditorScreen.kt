@@ -75,6 +75,10 @@ import dev.ranzlappen.gadget.core.data.apps.Folder
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.ui.component.GlassSurface
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
+import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
+import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
 import dev.ranzlappen.gadget.feature.apps.R
 import dev.ranzlappen.gadget.feature.apps.icons.AppIcon
@@ -576,6 +580,14 @@ private fun AppRow(
             Checkbox(checked = selected, onCheckedChange = { onToggle() })
         }
     }
+}
+
+@GadgetPreviewLightDark
+@GadgetPreviewLargeFont
+@GadgetPreviewRtl
+@Composable
+private fun ColorPickerRowPreview() = GadgetThemedPreview {
+    ColorPickerRow(selectedArgb = 0xFF1E88E5.toInt(), onSelect = {})
 }
 
 @Composable
