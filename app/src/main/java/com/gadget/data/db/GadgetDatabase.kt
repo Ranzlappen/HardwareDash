@@ -4,31 +4,24 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.gadget.data.db.apps.AppRecord
-import com.gadget.data.db.apps.AppsDao
-import com.gadget.data.db.apps.Folder
-import com.gadget.data.db.apps.FolderApp
-import com.gadget.data.db.apps.FolderRuleEntity
-import com.gadget.data.db.apps.FolderWidgetConfig
-import com.gadget.data.db.apps.WebLinkApp
 
+/**
+ * Legacy metric store (Link charts). The App-Organizer tables (`apps_*`) were
+ * migrated out to the modular `:core:data` `AppsDatabase` (`apps.db`); their
+ * entities no longer ship here. The physical `apps_*` tables remain in existing
+ * `gadget_db` files (Room ignores undeclared tables) and are read once by the
+ * legacy-apps importer before going unused — see `MIGRATION_4_5`.
+ */
 @Database(
     entities = [
         MetricReading::class,
         MetricSession::class,
-        Folder::class,
-        FolderApp::class,
-        AppRecord::class,
-        WebLinkApp::class,
-        FolderRuleEntity::class,
-        FolderWidgetConfig::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class GadgetDatabase : RoomDatabase() {
     abstract fun metricDao(): MetricDao
-    abstract fun appsDao(): AppsDao
 }
 
 /**
@@ -154,5 +147,19 @@ val MIGRATION_3_4: Migration = object : Migration(3, 4) {
             "ALTER TABLE `apps_record` ADD COLUMN `is_system_app` " +
                 "INTEGER NOT NULL DEFAULT 0",
         )
+    }
+}
+
+/**
+ * v4 → v5 drops the App-Organizer entities from this database's schema (they
+ * moved to the modular `:core:data` `AppsDatabase`). Deliberately a **no-op**
+ * at the SQL level: the `apps_*` tables stay physically present so the
+ * one-shot legacy-apps importer can still read existing folder/widget data out
+ * of `gadget_db` and copy it into `apps.db`. Room ignores the now-undeclared
+ * tables; the empty migration only realigns the stored schema identity hash.
+ */
+val MIGRATION_4_5: Migration = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // Intentionally empty — see KDoc.
     }
 }
