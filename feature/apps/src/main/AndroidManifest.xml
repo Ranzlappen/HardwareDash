@@ -6,4 +6,16 @@
          third-party indexing service. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <application>
+        <!-- Floating folder popup launched from the folder home-screen widget
+             (and via PendingIntent). Not exported: only this app starts it. -->
+        <activity
+            android:name=".ui.folder.FolderPopupActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/Theme.GadgetApps.FolderPopup" />
+    </application>
+
 </manifest>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App-Organizer feature strings. English-only, matching the modular
+         convention established by :feature:torch (the legacy 4-language
+         S.apps/m() system is retired by this migration; re-adding values-de/
+         es/fr is a follow-up if per-feature translation returns). -->
+
+    <string name="apps_title">Apps</string>
+    <string name="apps_description">Organize installed apps, PWAs, and web links into folders that double as designable home-screen widgets.</string>
+    <string name="apps_create_folder">Create folder</string>
+    <string name="apps_new_folder">New folder</string>
+    <string name="apps_folder_name">Folder name</string>
+    <string name="apps_delete_folder_confirm">Delete this folder?</string>
+    <string name="apps_no_folders">No folders yet — tap +</string>
+    <string name="apps_color">Color</string>
+    <string name="apps_apps_in_folder">Apps in this folder</string>
+    <string name="apps_add_web_link">Add web link</string>
+    <string name="apps_web_link_url">URL</string>
+    <string name="apps_web_link_label">Label (optional)</string>
+    <string name="apps_no_apps">No apps detected yet</string>
+    <string name="apps_pwa_badge">PWA</string>
+    <string name="apps_web_link_badge">Web</string>
+    <string name="apps_preview_folder">Preview</string>
+    <string name="apps_lock_folder">Lock folder</string>
+    <string name="apps_unlock_folder">Unlock folder</string>
+    <string name="apps_biometric_unavailable">Biometric unlock isn\'t set up on this device</string>
+    <string name="apps_pin_to_home">Pin to home</string>
+    <string name="apps_pin_unsupported">Your launcher doesn\'t support one-tap pinning. Long-press your home screen and pick the App Folder widget instead.</string>
+    <string name="apps_rule">Rules</string>
+    <string name="apps_rule_package_prefix">Package starts with</string>
+    <string name="apps_rule_recently_installed">Recently installed</string>
+    <string name="apps_rule_web_apks">Web PWAs only</string>
+    <string name="apps_rule_unused">Unused for</string>
+    <string name="apps_rule_on_internal_storage">On internal storage</string>
+    <string name="apps_rule_on_external_storage">On SD card</string>
+    <string name="apps_rule_system_apps">System apps</string>
+    <string name="apps_rule_user_apps">User-installed apps</string>
+    <string name="apps_rule_union_hint">Manual selections and rule matches are combined.</string>
+    <string name="apps_rule_days">days</string>
+    <string name="apps_rule_package_prefix_hint">e.g. com.google.</string>
+    <string name="apps_rule_usage_hint">Requires \"Usage access\" permission. Grant in Settings → Apps → Special access.</string>
+    <string name="apps_search_apps_hint">Search apps</string>
+    <string name="apps_no_search_matches">No apps match</string>
+    <string name="apps_already_in_folder">in:</string>
+    <string name="apps_cover_icon">Cover</string>
+    <string name="apps_cover_pick_image">Pick image</string>
+    <string name="apps_cover_pick_symbol">Pick symbol</string>
+    <string name="apps_cover_clear">Clear</string>
+    <string name="apps_cover_none">Auto</string>
+    <string name="apps_cancel">Cancel</string>
+</resources>
