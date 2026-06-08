@@ -23,6 +23,8 @@ class FolderWidgetConfigTest {
         val config = FolderWidgetConfig(
             folderId = 42L,
             sizePreset = WidgetSizePreset.Large,
+            showLabel = false,
+            coverTintArgb = 0xFF112233L,
             displayName = "Games",
             removed = true,
             schemaVersion = 1,
@@ -45,6 +47,9 @@ class FolderWidgetConfigTest {
         assertEquals("", decoded.displayName)
         assertEquals(false, decoded.removed)
         assertEquals(1, decoded.schemaVersion)
+        // New content-customizer fields fall back to their defaults.
+        assertEquals(true, decoded.showLabel)
+        assertEquals(FolderWidgetConfig.FOLLOW_FOLDER_COLOR, decoded.coverTintArgb)
     }
 
     @Test

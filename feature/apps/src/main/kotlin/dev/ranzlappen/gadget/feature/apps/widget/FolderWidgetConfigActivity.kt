@@ -7,17 +7,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -28,20 +33,27 @@ import dev.ranzlappen.gadget.core.data.apps.Folder
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.CompactCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
 import dev.ranzlappen.gadget.core.widgetkit.provider.ContentWidgetUpdater
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
+import dev.ranzlappen.gadget.core.widgetkit.ui.ContentWidgetCustomizationSheet
 import dev.ranzlappen.gadget.feature.apps.R
 import dev.ranzlappen.gadget.feature.apps.ui.AppsViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * `APPWIDGET_CONFIGURE` activity shown by the launcher right after the user
- * drops a folder widget from the tray. Lets them pick which folder the widget
- * binds to, writes the per-`appWidgetId` [FolderWidgetConfig] to the kit
- * [WidgetConfigStore], repaints, and finishes `RESULT_OK`.
+ * `APPWIDGET_CONFIGURE` activity shown by the launcher after a folder widget is
+ * dropped from the tray (and re-openable later via the launcher's reconfigure
+ * affordance — the provider declares `widgetFeatures="reconfigurable"`).
  *
- * Defaults to `RESULT_CANCELED` so a back-press / swipe-away discards the
+ * Hosts the kit's [ContentWidgetCustomizationSheet]: pick the folder + tune
+ * background / accent tint / name-label / starting size, then write the
+ * per-`appWidgetId` [FolderWidgetConfig] to the kit [WidgetConfigStore],
+ * repaint, and finish `RESULT_OK`.
+ *
+ * Defaults to `RESULT_CANCELED` so a back-press / swipe-away discards a
  * half-placed widget (no orphan bound to no folder).
  */
 @AndroidEntryPoint
@@ -65,20 +77,25 @@ class FolderWidgetConfigActivity : ComponentActivity() {
             return
         }
 
-        setContent {
-            GadgetTheme {
-                FolderPickerScreen(onPick = ::onFolderPicked)
+        lifecycleScope.launch {
+            // Seed from an existing config when re-configuring a placed widget;
+            // otherwise this is a fresh tray-drop with defaults.
+            val existing = configStore.get(appWidgetId)
+            setContent {
+                GadgetTheme {
+                    FolderWidgetConfigScreen(
+                        existing = existing,
+                        onCancel = { finish() },
+                        onConfirm = ::saveAndFinish,
+                    )
+                }
             }
         }
     }
 
-    private fun onFolderPicked(folder: Folder) {
+    private fun saveAndFinish(config: FolderWidgetConfig) {
         lifecycleScope.launch {
-            configStore.save(
-                appWidgetId,
-                FolderWidgetConfig(folderId = folder.id, displayName = folder.name),
-            )
-            // Repaint placed instances (including this freshly-bound one).
+            configStore.save(appWidgetId, config)
             ContentWidgetUpdater.requestUpdate(
                 this@FolderWidgetConfigActivity,
                 FolderWidgetProvider.PROVIDER_CLASS,
@@ -93,33 +110,114 @@ class FolderWidgetConfigActivity : ComponentActivity() {
 }
 
 @Composable
-private fun FolderPickerScreen(onPick: (Folder) -> Unit) {
+private fun FolderWidgetConfigScreen(
+    existing: FolderWidgetConfig?,
+    onCancel: () -> Unit,
+    onConfirm: (FolderWidgetConfig) -> Unit,
+) {
     val viewModel = hiltViewModel<AppsViewModel>()
     val folders by viewModel.folders.collectAsState()
 
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.apps_widget_pick_folder),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(bottom = 16.dp),
+    var folderId by remember { mutableStateOf(existing?.folderId ?: FolderWidgetConfig.NO_FOLDER) }
+    var name by remember { mutableStateOf(existing?.displayName.orEmpty()) }
+    var appearance by remember { mutableStateOf(existing?.appearance ?: WidgetAppearance()) }
+    var tintArgb by remember {
+        mutableStateOf(
+            existing?.coverTintArgb?.takeIf { it != FolderWidgetConfig.FOLLOW_FOLDER_COLOR },
+        )
+    }
+    var showLabel by remember { mutableStateOf(existing?.showLabel ?: true) }
+    var sizePreset by remember { mutableStateOf(existing?.sizePreset ?: WidgetSizePreset.Medium) }
+
+    val selectedFolder = folders.firstOrNull { it.id == folderId }
+
+    ContentWidgetCustomizationSheet(
+        name = name,
+        onNameChange = { name = it },
+        appearance = appearance,
+        onAppearanceChange = { appearance = it },
+        tintArgb = tintArgb,
+        onTintChange = { tintArgb = it },
+        showLabel = showLabel,
+        onShowLabelChange = { showLabel = it },
+        sizePreset = sizePreset,
+        onSizePresetChange = { sizePreset = it },
+        isExisting = existing != null,
+        confirmEnabled = folderId != FolderWidgetConfig.NO_FOLDER,
+        onDismiss = onCancel,
+        onConfirm = {
+            val folderName = selectedFolder?.name.orEmpty()
+            onConfirm(
+                FolderWidgetConfig(
+                    folderId = folderId,
+                    sizePreset = sizePreset,
+                    showLabel = showLabel,
+                    coverTintArgb = tintArgb ?: FolderWidgetConfig.FOLLOW_FOLDER_COLOR,
+                    displayName = name.ifBlank { folderName },
+                    appearance = appearance,
+                ),
             )
-            if (folders.isEmpty()) {
-                GadgetEmptyState(
-                    title = stringResource(R.string.apps_no_folders),
-                    modifier = Modifier.fillMaxSize(),
-                )
-            } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(folders, key = { it.id }) { folder ->
-                        CompactCard(
-                            title = folder.name,
-                            onClick = { onPick(folder) },
+        },
+        content = {
+            FolderPicker(
+                folders = folders,
+                selectedId = folderId,
+                onSelect = { folder ->
+                    folderId = folder.id
+                    if (name.isBlank()) name = folder.name
+                },
+            )
+        },
+        preview = { FolderWidgetPreview(folder = selectedFolder) },
+    )
+}
+
+@Composable
+private fun FolderPicker(
+    folders: List<Folder>,
+    selectedId: Long,
+    onSelect: (Folder) -> Unit,
+) {
+    if (folders.isEmpty()) {
+        GadgetEmptyState(
+            title = stringResource(R.string.apps_no_folders),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        return
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        folders.forEach { folder ->
+            CompactCard(
+                title = folder.name,
+                onClick = { onSelect(folder) },
+                trailingContent = if (folder.id == selectedId) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = stringResource(R.string.apps_widget_folder_selected),
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
-                }
-            }
+                } else {
+                    null
+                },
+            )
         }
+    }
+}
+
+@Composable
+private fun FolderWidgetPreview(folder: Folder?) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = folder?.name ?: stringResource(R.string.apps_widget_pick_folder),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }

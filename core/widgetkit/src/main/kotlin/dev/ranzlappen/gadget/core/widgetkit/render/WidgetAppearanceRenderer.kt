@@ -87,7 +87,15 @@ class WidgetAppearanceRenderer @Inject constructor(
         applyIcon(context, views, appearance, active, featureId)
     }
 
-    private fun applyBackground(views: RemoteViews, appearance: WidgetAppearance) {
+    /**
+     * Paint just the `@id/widget_background` chrome for [appearance] —
+     * the **content-widget** entry point (`BaseContentWidgetProvider`
+     * consumers), which have no `@id/widget_icon` and paint their own
+     * preview. Function widgets use [apply] instead, which also drives the
+     * icon. Both share this same background paint so glass/solid/transparent
+     * chrome is identical across archetypes.
+     */
+    fun applyBackground(views: RemoteViews, appearance: WidgetAppearance) {
         // Paint the surface through the @id/widget_background ImageView's
         // *image* (not its View background) so Solid mode can recolour a
         // rounded-rect shape via setColorFilter while keeping the corners.
