@@ -13,6 +13,7 @@
     <string name="apps_delete_folder_confirm">Delete this folder?</string>
     <string name="apps_no_folders">No folders yet — tap +</string>
     <string name="apps_color">Color</string>
+    <string name="apps_color_custom">Custom</string>
     <string name="apps_apps_in_folder">Apps in this folder</string>
     <string name="apps_add_web_link">Add web link</string>
     <string name="apps_web_link_url">URL</string>
