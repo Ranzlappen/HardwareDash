@@ -53,6 +53,11 @@ class BackupManager @Inject constructor(
     private val filesDirAssetSweeps: List<Pair<String, String>> = listOf(
         "folder_covers" to "folder_covers",
         "apps_favicons" to "apps_favicons",
+        // Custom widget icons imported in the torch / vibration widget
+        // customizers (downscaled WEBP under filesDir/widget_icons/, keyed
+        // "custom:<uuid>"). Without this sweep a restore loses every custom
+        // icon and the placed widgets fall back to their default glyph.
+        "widget_icons" to "widget_icons",
     )
 
     suspend fun createBackup(outputStream: OutputStream) = withContext(Dispatchers.IO) {
@@ -170,6 +175,14 @@ class BackupManager @Inject constructor(
         val assetPrefixToSubdir: Map<String, String> = filesDirAssetSweeps
             .associate { (subDir, prefix) -> prefix to subDir }
 
+        // Legacy-backup detection: a backup produced by the monolithic app (or
+        // before the apps.db split) carries the App-Organizer data inside
+        // gadget_db's apps_* tables and has NO databases/apps.db entry. We note
+        // both signals during the sweep and, if it's a legacy backup, hand the
+        // data off to LegacyAppsImporter on next launch (below).
+        var restoredLegacyDb = false
+        var restoredModularAppsDb = false
+
         try {
             ZipInputStream(inputStream).use { zip ->
                 var entry: ZipEntry? = zip.nextEntry
@@ -183,6 +196,7 @@ class BackupManager @Inject constructor(
 
                         name.startsWith("gadget_db") -> {
                             if (dbPath != null) {
+                                restoredLegacyDb = true
                                 val suffix = name.removePrefix("gadget_db")
                                 val targetFile = File("$dbPath$suffix")
                                 targetFile.outputStream().use { out -> zip.copyTo(out) }
@@ -191,6 +205,9 @@ class BackupManager @Inject constructor(
                         }
 
                         name.startsWith("databases/") -> {
+                            if (name.removePrefix("databases/").startsWith("apps.db")) {
+                                restoredModularAppsDb = true
+                            }
                             // Modular Room DBs (apps.db / monitoring.db). Written
                             // into the same databases/ dir as gadget_db; applied
                             // on next launch. A legacy backup (no databases/
@@ -248,6 +265,23 @@ class BackupManager @Inject constructor(
                     entry = zip.nextEntry
                 }
             }
+
+            // Legacy backup (gadget_db present, no modular apps.db): the
+            // App-Organizer data lives in gadget_db's apps_* tables. Wipe the
+            // current apps.db so it isn't merged with stale data, and reset
+            // LegacyAppsImporter's one-shot guard so it rebuilds apps.db from the
+            // restored gadget_db on next launch. Without the reset, an install
+            // that already ran the importer would skip it and silently lose the
+            // restored App-Organizer data (the importer guard is a SharedPrefs
+            // flag the legacy backup doesn't overwrite).
+            if (restoredLegacyDb && !restoredModularAppsDb) {
+                databasesDir?.listFiles()?.forEach { file ->
+                    if (file.isFile && file.name.startsWith("apps.db")) file.delete()
+                }
+                context.getSharedPreferences(LEGACY_APPS_IMPORT_PREFS, Context.MODE_PRIVATE)
+                    .edit().clear().commit()
+                Timber.i("Legacy backup detected — reset App-Organizer import guard")
+            }
         } finally {
             // Reopen the database
             database.openHelper.writableDatabase
@@ -298,7 +332,16 @@ class BackupManager @Inject constructor(
          *  - 3: + databases/ sweep (modular apps.db / monitoring.db); a legacy
          *       backup without these restores gadget_db and the
          *       LegacyAppsImporter migrates its apps_* rows into apps.db.
+         *  - 4: + widget_icons/ sweep (custom torch / vibration widget icons).
          */
-        const val BACKUP_FORMAT_VERSION = 3
+        const val BACKUP_FORMAT_VERSION = 4
+
+        /**
+         * SharedPreferences file backing `LegacyAppsImporter`'s one-shot import
+         * guard (`feature:apps`'s `LegacyAppsImporter.PREFS`). Cleared on a
+         * legacy-backup restore so the importer re-runs. Hardcoded rather than
+         * referenced to avoid a compile coupling to the feature module.
+         */
+        const val LEGACY_APPS_IMPORT_PREFS = "apps_migration"
     }
 }
