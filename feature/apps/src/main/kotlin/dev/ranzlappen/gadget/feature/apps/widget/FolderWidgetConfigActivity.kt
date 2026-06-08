@@ -144,6 +144,7 @@ private fun FolderWidgetConfigScreen(
         onSizePresetChange = { sizePreset = it },
         isExisting = existing != null,
         confirmEnabled = folderId != FolderWidgetConfig.NO_FOLDER,
+        showTapAnimation = true,
         onDismiss = onCancel,
         onConfirm = {
             val folderName = selectedFolder?.name.orEmpty()
