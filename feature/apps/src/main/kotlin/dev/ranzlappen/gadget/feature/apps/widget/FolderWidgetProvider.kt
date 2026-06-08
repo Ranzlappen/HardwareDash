@@ -41,6 +41,17 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
 
     override fun defaultConfig(context: Context): FolderWidgetConfig = FolderWidgetConfig()
 
+    /**
+     * Rescue a freshly-pinned widget whose OS success callback never fired (or
+     * missed after process death): claim the sole pending folder config from
+     * the bridge instead of self-healing to a blank `NO_FOLDER` default. There
+     * is only one folder widget kind, so the predicate just filters out any
+     * stray empty entry. Defers when 2+ are pending (see [claimSolePending]).
+     */
+    override suspend fun reconcilePendingConfig(context: Context): FolderWidgetConfig? =
+        entryPoint(context).folderPendingConfigs()
+            .claimSolePending { it.folderId != FolderWidgetConfig.NO_FOLDER }
+
     override fun launchIntent(context: Context, appWidgetId: Int, config: FolderWidgetConfig): Intent? {
         if (config.folderId == FolderWidgetConfig.NO_FOLDER) return null
         return FolderPopupActivity.intent(context, config.folderId)

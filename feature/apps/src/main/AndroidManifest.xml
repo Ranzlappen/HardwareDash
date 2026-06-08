@@ -32,11 +32,13 @@
         </receiver>
 
         <!-- requestPinAppWidget success callback for the in-app "pin to home"
-             flow. Explicit-component broadcast from our own PendingIntent, so
-             not exported. -->
+             flow. Exported because the OS fires the success callback from the
+             system process; the explicit ComponentName routes it straight here
+             and an unknown token simply misses the pending bridge (no-op), so
+             exporting carries no real surface. Mirrors torch's pin receiver. -->
         <receiver
             android:name=".widget.FolderWidgetPinReceiver"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="dev.ranzlappen.gadget.feature.apps.FOLDER_PIN_CALLBACK" />
             </intent-filter>

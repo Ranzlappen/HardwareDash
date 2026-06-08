@@ -1117,7 +1117,13 @@ worth-knowing specifics:
    provider + pin/launcher flow + **RemoteViews-safe** (`@RemoteView`)
    layouts only; determinate-progress FGS notification; atomic
    `saveIfAbsent` self-heal; inert "removed" handling on in-app delete;
-   custom-icon import (read-once + EXIF + `GetContent`). Patterns in
+   custom-icon import (read-once + EXIF + `GetContent`). **Pin
+   reliability is mandatory, not optional**: the in-app pin's
+   success callback MUST be `FLAG_MUTABLE` + explicit `ComponentName`,
+   the pre-pin config MUST ride the `PendingWidgetConfigs` bridge, and
+   the provider MUST override `reconcilePendingConfig` with
+   `claimSolePending` (see the pin-reliability pitfall below — skipping
+   either half ships a widget that pins blank + inert). Patterns in
    `:feature:torch/widget`.
 6. **Monitoring-ready** — implement a `MetricSource` per readable signal
    and bind it `@IntoMap`; embed `MonitorContainer` for the **persisted**
@@ -1409,6 +1415,44 @@ Rules of thumb:
   `widget_flashlight.xml` / `widget_strobe.xml` are the reference
   RemoteViews-safe layouts for follow-up modules and legacy
   migrations to copy.
+- **`requestPinAppWidget` success callback MUST be `FLAG_MUTABLE`, and
+  the pin flow MUST use the kit's pending-config rescue.** The OS
+  delivers the newly-assigned `appWidgetId` to the in-app pin flow by
+  **filling it into** the success-callback `PendingIntent`'s intent
+  (`EXTRA_APPWIDGET_ID`). A `FLAG_IMMUTABLE` callback **silently drops
+  that fill-in** — the receiver reads `INVALID_APPWIDGET_ID`, bails,
+  and never persists the per-`appWidgetId` `WidgetKitConfig`. The placed
+  widget then self-heals to its default config, so it renders blank /
+  inert **and** (for a content widget) returns before wiring its tap
+  `PendingIntent` — i.e. "the widget pinned but the picture didn't
+  apply and tapping does nothing". This is CI-invisible (runs only
+  inside the launcher round-trip on a device) and has bitten widget
+  work **more than once**. Two non-negotiable halves, both required for
+  **every** widget-bearing feature (function-driven *and* content
+  archetypes):
+  1. Build the success-callback `PendingIntent` with
+     `FLAG_UPDATE_CURRENT or FLAG_MUTABLE` and an **explicit
+     `ComponentName`** (mutability is safe because the explicit
+     component can't be hijacked; the flag is ignored < API 31, mutable
+     by default there, so minSdk 29 is unaffected).
+  2. Carry the pre-pin config through the `:core:widgetkit`
+     **`PendingWidgetConfigs`** bridge (token in the callback) **and**
+     override **`reconcilePendingConfig`** on the provider to
+     `claimSolePending { … }` — so a pin still binds correctly even on
+     the OEM launchers that never fire the callback at all (or fire it
+     into a freshly-spawned process after low-RAM death). The two
+     layers are complementary: the mutable callback gives a precise
+     `appWidgetId ↔ config` binding on compliant launchers; the
+     sole-pending rescue is the fallback when the callback is missing.
+  Torch (`TorchWidgetCreator` + `WidgetPinSuccessReceiver` +
+  `FlashlightWidgetProvider.reconcilePendingConfig`) is the reference;
+  the App-Organizer folder widget regressed by shipping an immutable
+  callback **and** skipping the rescue (both symptoms above) and was
+  fixed to match (PR #138 — `PinFolderHelper` + `FolderWidgetPinReceiver`
+  + `FolderWidgetProvider.reconcilePendingConfig`). The configure-activity
+  (tray-drop) path is exempt from half 1 — it gets the `appWidgetId`
+  straight from the launcher's `APPWIDGET_CONFIGURE` intent — but should
+  still write through the same store the rescue reads.
 - **`android.nonTransitiveRClass=true` + cross-module resource
   references.** With `nonTransitiveRClass=true` (set in
   `gradle.properties`), each module's `R` class contains only its
