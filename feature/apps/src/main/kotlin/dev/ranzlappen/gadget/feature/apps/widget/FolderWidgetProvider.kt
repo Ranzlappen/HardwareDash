@@ -34,6 +34,11 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
 
     override val logTag: String = "FolderWidget"
 
+    /** Routes taps through a broadcast (so a held press frame can paint) when
+     *  the user picked Flash/Pulse/Scale; None/Ripple launch the popup directly.
+     *  Explicit component intent, so no manifest filter is needed. */
+    override val tapAction: String = TAP_ACTION
+
     override fun configStore(context: Context): WidgetConfigStore<FolderWidgetConfig> =
         entryPoint(context).folderWidgetConfigStore()
 
@@ -62,6 +67,7 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
         appWidgetId: Int,
         config: FolderWidgetConfig,
         density: WidgetRenderDensity,
+        pressed: Boolean,
     ): RemoteViews {
         val ep = entryPoint(context)
         val dao = ep.appsDao()
@@ -94,10 +100,15 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
         // Shared kit chrome (glass / solid / transparent) — identical paint
         // path as the function-driven widgets.
         ep.widgetAppearanceRenderer().applyBackground(views, config.appearance)
+        // Held tap-press frame (Flash/Pulse/Scale) painted on @id/widget_background;
+        // plays concurrently with the floating popup opening behind it.
+        if (pressed) {
+            ep.widgetAppearanceRenderer().applyContentPressedFrame(context, views, config.appearance)
+        }
         // Null PendingIntent (unbound NO_FOLDER widget) clears the click target.
         views.setOnClickPendingIntent(
             R.id.widget_folder_root,
-            launchPendingIntent(context, appWidgetId, config),
+            tapPendingIntent(context, appWidgetId, config),
         )
         return views
     }
@@ -192,6 +203,10 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
     companion object {
         /** This provider's class, for `getAppWidgetIds` enumeration. */
         val PROVIDER_CLASS: Class<out AppWidgetProvider> = FolderWidgetProvider::class.java
+
+        /** Explicit-component broadcast action a tap fires when a held press
+         *  frame is configured (see [tapAction]). */
+        private const val TAP_ACTION = "dev.ranzlappen.gadget.feature.apps.widget.FOLDER_WIDGET_TAP"
 
         private const val TILE_SIZE_PX = 96
 

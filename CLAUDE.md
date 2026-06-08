@@ -978,8 +978,12 @@ contract (`displayName`, `removed`, `schemaVersion`, `appearance`),
   `solidColor` + `WidgetAppearanceRenderer.applyBackground` paint path, so
   chrome is identical across archetypes, with no shared-type serialization
   change). A new widget builds on the sheet matching its archetype rather than
-  hand-rolling a config screen — folder is the content reference. Design +
-  remaining slices (tap-animation for content widgets): `docs/widgets/content-widget-customization.md`.
+  hand-rolling a config screen — folder is the content reference. Content tap
+  animations route through `BaseContentWidgetProvider.tapAction` (broadcast →
+  launch-first, then a concurrent press frame via
+  `WidgetAppearanceRenderer.applyContentPressedFrame` on `@id/widget_background`,
+  since content widgets have no `@id/widget_icon`). Design:
+  `docs/widgets/content-widget-customization.md`.
 
 **Function-driven widgets (the comprehensive customization model).** A
 widget no longer hardcodes its action in its provider class. Each per-instance

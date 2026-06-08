@@ -1,10 +1,10 @@
 # Content-widget customization — design + contract
 
-> Status: in progress. Slice 1 (this PR) ships the reusable sheet + the
-> folder widget consuming it for **background**, **accent/cover tint**, and
-> **name label + size**. Slice 2 adds **tap-animation** rendering for content
-> widgets (needs a content press-frame). Tracked here so the next content
-> widget follows the same pattern instead of re-hand-rolling a config screen.
+> Status: shipped. Slice 1 delivered the reusable sheet + the folder widget
+> consuming it for **background**, **accent/cover tint**, and **name label +
+> size**. Slice 2 added **tap-animation** for content widgets (the content
+> press-frame). Kept here so the next content widget follows the same pattern
+> instead of re-hand-rolling a config screen.
 
 ## Why
 
@@ -43,8 +43,9 @@ configure activity owns the values). Sections, top to bottom:
    `WidgetSizePreset` starting-size hint (density adapts on resize as usual).
 6. **Preview** — a feature `@Composable` slot (content widgets paint their own
    preview from their data, unlike the function widget's generic icon preview).
-7. **Tap animation** *(slice 2)* — gated behind `showTapAnimation` (default
-   `false`) until the content press-frame lands.
+7. **Tap animation** — `WidgetAppearance.tap.animation`. Gated behind
+   `showTapAnimation` (default `false`; folder passes `true`). See the
+   press-frame section below.
 
 ### Why not reuse `WidgetAppearanceSection` directly
 
@@ -77,14 +78,34 @@ calls `WidgetAppearanceRenderer.applyBackground(views, appearance)` in
 `buildRemoteViews`. The folder layout adds that ImageView and drops its
 hardcoded root `android:background`.
 
-## Slice 2 — tap-animation for content widgets (follow-up)
+## Tap-animation for content widgets (the content press-frame)
 
-The kit's `applyPressedFrame` mutates `@id/widget_icon`; content widgets have no
-icon view. Slice 2 adds a **content press-frame** seam to
-`BaseContentWidgetProvider` (e.g. a root-level scale/flash frame held ~150 ms,
-mirroring the function-widget press chain) and flips `showTapAnimation = true`
-in the folder sheet. Until then the folder tap is the launcher's default
-highlight.
+The kit's `applyPressedFrame` mutates `@id/widget_icon`; a content widget has no
+icon view, and its tap **launches an Activity** rather than dispatching an
+action — so the provider never sees a direct `getActivity` tap. Two problems, one
+design:
+
+- **Launch must stay instant.** Holding a press frame *before* launching would
+  add ~280 ms of lag. So when a held animation (Flash/Pulse/Scale) is picked,
+  the tap routes through a broadcast (`BaseContentWidgetProvider.tapAction` →
+  `getBroadcast`); `handleContentTap` **starts the Activity first**, then plays
+  the frame **concurrently**. Because the folder's launch target
+  (`FolderPopupActivity`) is a *floating* popup, the widget stays visible behind
+  it and the frame reads cleanly. None/Ripple skip the broadcast entirely and
+  launch directly (launcher's native highlight).
+- **No icon to frame.** `WidgetAppearanceRenderer.applyContentPressedFrame`
+  paints on the always-present `@id/widget_background`: Flash = white recolour,
+  Pulse = alpha drop, Scale = inset. `applyBackground`'s resting render resets
+  every mutated prop so a recycled view reverts cleanly.
+
+`buildRemoteViews` gains a `pressed` flag; the provider builds a pressed +
+resting pair and hands them to the shared `playTapPressFrame`. BAL note: the
+Activity start happens in the widget-click broadcast's privilege window under
+`goAsync` (the same pattern the function base relies on for FGS starts).
+
+A content widget that wants this overrides `tapAction`, wires its root via
+`tapPendingIntent` (not `launchPendingIntent`), and applies
+`applyContentPressedFrame` when `pressed`. Folder is the reference.
 
 ## Future content widgets
 

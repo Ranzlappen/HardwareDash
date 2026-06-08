@@ -116,6 +116,12 @@ class WidgetAppearanceRenderer @Inject constructor(
                 views.setInt(R.id.widget_background, "setColorFilter", TRANSPARENT)
             }
         }
+        // Reset the two props a content-widget press frame mutates
+        // ([applyContentPressedFrame]) so a recycled host view reverts cleanly.
+        // Function widgets never frame the background, so these are no-ops there
+        // (the Flash colour filter is already reset by the when above).
+        views.setInt(R.id.widget_background, "setImageAlpha", OPAQUE)
+        views.setViewPadding(R.id.widget_background, 0, 0, 0, 0)
     }
 
     private fun applyIcon(
@@ -172,6 +178,36 @@ class WidgetAppearanceRenderer @Inject constructor(
             TapAnimation.Scale -> {
                 val pad = dp(context, SCALE_PRESSED_PADDING_DP)
                 views.setViewPadding(R.id.widget_icon, pad, pad, pad, pad)
+            }
+            TapAnimation.None, TapAnimation.Ripple -> Unit
+        }
+    }
+
+    /**
+     * Overlay the transient "pressed" look for a **content widget**
+     * ([dev.ranzlappen.gadget.core.widgetkit.provider.BaseContentWidgetProvider]
+     * consumers) on top of an already-[applyBackground]'d [views]. A content
+     * widget has no `@id/widget_icon`, so the frame paints on the always-present
+     * `@id/widget_background` instead:
+     *  - [TapAnimation.Flash] — recolour the background shape bright white.
+     *  - [TapAnimation.Pulse] — drop the background alpha so the tile dims.
+     *  - [TapAnimation.Scale] — inset the background so the tile visibly shrinks.
+     *  - [TapAnimation.None] / [TapAnimation.Ripple] — no frame (Ripple is the
+     *    launcher's stock highlight; the tap launches the Activity directly with
+     *    no broadcast hop).
+     *
+     * The press frame plays **concurrently** with the Activity launch (the
+     * provider starts the Activity first), so it's visible behind a floating
+     * launch target. [applyBackground]'s resting render resets every mutated
+     * prop, so a recycled view reverts cleanly.
+     */
+    fun applyContentPressedFrame(context: Context, views: RemoteViews, appearance: WidgetAppearance) {
+        when (appearance.tap.animation) {
+            TapAnimation.Flash -> views.setInt(R.id.widget_background, "setColorFilter", FLASH_COLOR)
+            TapAnimation.Pulse -> views.setInt(R.id.widget_background, "setImageAlpha", PULSE_ALPHA)
+            TapAnimation.Scale -> {
+                val pad = dp(context, SCALE_PRESSED_PADDING_DP)
+                views.setViewPadding(R.id.widget_background, pad, pad, pad, pad)
             }
             TapAnimation.None, TapAnimation.Ripple -> Unit
         }

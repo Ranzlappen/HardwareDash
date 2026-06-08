@@ -10,7 +10,10 @@ import android.util.Log
 import android.widget.RemoteViews
 import dev.ranzlappen.gadget.core.widgetkit.WidgetKitConfig
 import dev.ranzlappen.gadget.core.widgetkit.WidgetReceiverScope
+import dev.ranzlappen.gadget.core.widgetkit.config.TapAnimation
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
+import dev.ranzlappen.gadget.core.widgetkit.render.hasPressFrame
+import dev.ranzlappen.gadget.core.widgetkit.render.playTapPressFrame
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import kotlinx.coroutines.launch
 
@@ -61,14 +64,18 @@ abstract class BaseContentWidgetProvider<T : WidgetKitConfig> : AppWidgetProvide
 
     /** Build the feature-specific [RemoteViews] for one widget instance at the
      *  resolved [density]. Paint the content and attach the tap target via
-     *  [launchPendingIntent] (typically on the layout's root view). `suspend`
-     *  because content widgets load their preview from the feature's data layer
-     *  (DB + icon decode) — it runs inside [renderAll]'s receiver coroutine. */
+     *  [tapPendingIntent] (typically on the layout's root view). When [pressed]
+     *  is true, overlay the held tap-press frame via
+     *  [dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer.applyContentPressedFrame]
+     *  (only ever true for an animation with [hasPressFrame]). `suspend` because
+     *  content widgets load their preview from the feature's data layer (DB +
+     *  icon decode) — it runs inside [renderAll]'s receiver coroutine. */
     protected abstract suspend fun buildRemoteViews(
         context: Context,
         appWidgetId: Int,
         config: T,
         density: WidgetRenderDensity,
+        pressed: Boolean,
     ): RemoteViews
 
     /** The Activity intent a tap on this [config]'s widget should open, or
@@ -90,12 +97,35 @@ abstract class BaseContentWidgetProvider<T : WidgetKitConfig> : AppWidgetProvide
      */
     protected open suspend fun reconcilePendingConfig(context: Context): T? = null
 
+    /**
+     * The custom broadcast action a tap fires when a held tap-press frame
+     * ([TapAnimation.Flash] / [TapAnimation.Pulse] / [TapAnimation.Scale]) is
+     * configured, so this provider can paint the frame. `null` (the default)
+     * keeps taps as a direct `getActivity` launch with no broadcast hop — the
+     * right choice for a widget that wants no held frame. A feature that opts in
+     * overrides this with a unique action string; the tap intent is **explicit**
+     * (component-targeted), so no manifest `<intent-filter>` is needed (and none
+     * is added, to avoid widening the receiver's exported surface).
+     */
+    protected open val tapAction: String? = null
+
     /** Feature pre-hook run on every broadcast before the default handling —
      *  e.g. arm a content observer. Default no-op. */
     protected open fun onBeforeReceive(context: Context, intent: Intent) = Unit
 
     override fun onReceive(context: Context, intent: Intent) {
         onBeforeReceive(context, intent)
+        val action = tapAction
+        if (action != null && intent.action == action) {
+            val appWidgetId = intent.getIntExtra(
+                AppWidgetManager.EXTRA_APPWIDGET_ID,
+                AppWidgetManager.INVALID_APPWIDGET_ID,
+            )
+            if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                handleContentTap(context, appWidgetId)
+            }
+            return
+        }
         super.onReceive(context, intent)
     }
 
@@ -170,8 +200,70 @@ abstract class BaseContentWidgetProvider<T : WidgetKitConfig> : AppWidgetProvide
             val density = densityFor(appWidgetManager, id, config)
             appWidgetManager.updateAppWidget(
                 id,
-                buildRemoteViews(context, id, config, density),
+                buildRemoteViews(context, id, config, density, pressed = false),
             )
+        }
+    }
+
+    /**
+     * The tap target for [config]'s widget. When a held press frame is
+     * configured **and** the feature set a [tapAction], the tap routes through
+     * this provider (a [PendingIntent.getBroadcast] to [handleContentTap]) so
+     * the frame can paint; otherwise it's a direct Activity launch
+     * ([launchPendingIntent]) with no broadcast hop. Returns `null` when there's
+     * nothing to launch ([launchIntent] is `null`), so an unbound placeholder
+     * widget stays inert rather than playing a frame that opens nothing.
+     */
+    protected fun tapPendingIntent(context: Context, appWidgetId: Int, config: T): PendingIntent? {
+        val action = tapAction
+        if (action == null || !config.appearance.tap.animation.hasPressFrame()) {
+            return launchPendingIntent(context, appWidgetId, config)
+        }
+        if (launchIntent(context, appWidgetId, config) == null) return null
+        val intent = Intent(action)
+            .setClass(context, javaClass)
+            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        return PendingIntent.getBroadcast(
+            context,
+            appWidgetId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+
+    /**
+     * Handle a tap routed through [tapAction]: **launch the target Activity
+     * first** so the tap feels instant, then play the held press frame
+     * concurrently (visible behind a floating launch target). Runs on the
+     * shared [WidgetReceiverScope] under `goAsync` — the activity start happens
+     * within the widget-click broadcast's privilege window (the same pattern the
+     * function base relies on for FGS starts).
+     */
+    private fun handleContentTap(context: Context, appWidgetId: Int) {
+        val pendingResult = goAsync()
+        WidgetReceiverScope.scope.launch {
+            try {
+                val config = configStore(context).get(appWidgetId) ?: return@launch
+                launchIntent(context, appWidgetId, config)?.let { launch ->
+                    launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    runCatching { context.startActivity(launch) }
+                        .onFailure { Log.w(logTag, "content tap launch failed id=$appWidgetId", it) }
+                }
+                if (config.appearance.tap.animation.hasPressFrame()) {
+                    val appWidgetManager = AppWidgetManager.getInstance(context)
+                    val density = densityFor(appWidgetManager, appWidgetId, config)
+                    playTapPressFrame(
+                        manager = appWidgetManager,
+                        appWidgetId = appWidgetId,
+                        pressedViews = buildRemoteViews(context, appWidgetId, config, density, pressed = true),
+                        restingViews = buildRemoteViews(context, appWidgetId, config, density, pressed = false),
+                    )
+                }
+            } catch (t: Throwable) {
+                Log.e(logTag, "content tap failed id=$appWidgetId", t)
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 
