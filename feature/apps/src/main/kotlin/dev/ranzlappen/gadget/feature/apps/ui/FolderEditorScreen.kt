@@ -56,6 +56,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,6 +75,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ranzlappen.gadget.core.data.apps.AppRecord
 import dev.ranzlappen.gadget.core.data.apps.Folder
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
+import dev.ranzlappen.gadget.core.ui.component.GadgetChip
+import dev.ranzlappen.gadget.core.ui.component.GadgetColorPicker
 import dev.ranzlappen.gadget.core.ui.component.GlassSurface
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
@@ -214,7 +217,7 @@ fun FolderEditorContent(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            item { ColorPickerRow(current.baseColorArgb, onSetColor) }
+            item { FolderColorSection(current.baseColorArgb, onSetColor) }
             item {
                 CoverIconSection(
                     folder = current,
@@ -360,12 +363,13 @@ private fun CoverIconSection(
             }
         }
         if (showSymbols) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 MaterialSymbol.entries.forEach { sym ->
-                    IconButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = { onPickSymbol(sym.id); showSymbols = false },
-                    ) {
+                    IconButton(onClick = { onPickSymbol(sym.id); showSymbols = false }) {
                         Icon(sym.icon, contentDescription = sym.id, tint = accent)
                     }
                 }
@@ -550,42 +554,82 @@ private fun DaysField(value: Int, label: String, onChange: (Int) -> Unit) {
     )
 }
 
+/**
+ * Folder colour picker: a row of quick preset swatches for fast selection,
+ * plus a full HSV + hex [GadgetColorPicker] behind a "Custom" toggle for
+ * arbitrary colours. When a custom (non-preset) colour is active, a live
+ * indicator swatch leads the row (since no preset shows selected then).
+ */
 @Composable
-private fun ColorPickerRow(selectedArgb: Int, onSelect: (Int) -> Unit) {
+private fun FolderColorSection(selectedArgb: Int, onSelect: (Int) -> Unit) {
+    var showCustom by rememberSaveable { mutableStateOf(false) }
     val swatches = remember {
         listOf(
             Color(0xFF6750A4), Color(0xFF1E88E5), Color(0xFF43A047), Color(0xFFEF6C00),
             Color(0xFFE53935), Color(0xFF8E24AA), Color(0xFF00897B), Color(0xFF546E7A),
         )
     }
+    val isPreset = swatches.any { it.toArgb() == selectedArgb }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.apps_color), style = MaterialTheme.typography.titleSmall)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.apps_color),
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(1f),
+            )
+            GadgetChip(
+                selected = showCustom,
+                onClick = { showCustom = !showCustom },
+                label = stringResource(R.string.apps_color_custom),
+            )
+        }
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            if (!isPreset) {
+                ColorSwatch(
+                    color = Color(selectedArgb),
+                    selected = true,
+                    onClick = { showCustom = true },
+                )
+            }
             swatches.forEach { swatch ->
                 val argb = swatch.toArgb()
-                val isSelected = argb == selectedArgb
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(swatch)
-                        .border(
-                            width = if (isSelected) 3.dp else 1.dp,
-                            color = if (isSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.outline,
-                            shape = CircleShape,
-                        )
-                        .clickable { onSelect(argb) },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    if (isSelected) {
-                        Icon(Icons.Filled.Check, null, tint = Color.White, modifier = Modifier.size(16.dp))
-                    }
-                }
+                ColorSwatch(
+                    color = swatch,
+                    selected = argb == selectedArgb,
+                    onClick = { onSelect(argb) },
+                )
             }
+        }
+        if (showCustom) {
+            GadgetColorPicker(
+                argb = selectedArgb.toLong() and 0xFFFFFFFFL,
+                onArgbChange = { onSelect((it and 0xFFFFFFFFL).toInt()) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColorSwatch(color: Color, selected: Boolean, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(32.dp)
+            .clip(CircleShape)
+            .background(color)
+            .border(
+                width = if (selected) 3.dp else 1.dp,
+                color = if (selected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.outline,
+                shape = CircleShape,
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (selected) {
+            Icon(Icons.Filled.Check, null, tint = Color.White, modifier = Modifier.size(16.dp))
         }
     }
 }
@@ -646,8 +690,8 @@ private fun AppRow(
 @GadgetPreviewLargeFont
 @GadgetPreviewRtl
 @Composable
-private fun ColorPickerRowPreview() = GadgetThemedPreview {
-    ColorPickerRow(selectedArgb = 0xFF1E88E5.toInt(), onSelect = {})
+private fun FolderColorSectionPreview() = GadgetThemedPreview {
+    FolderColorSection(selectedArgb = 0xFF1E88E5.toInt(), onSelect = {})
 }
 
 @Composable
