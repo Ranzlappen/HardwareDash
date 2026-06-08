@@ -175,6 +175,10 @@ dependencies {
     // :core:navigation; :core:ui via :feature:dashboard.
     implementation(project(":core:navigation"))
     implementation(project(":feature:dashboard"))
+    // Direct :core:ui so :app's own composables (e.g. the Settings BackupCard
+    // dropped into :feature:settings' backupSection slot) can use the design
+    // system. Transitive-via-dashboard doesn't expose it at compile time.
+    implementation(project(":core:ui"))
     // Phase 2 / Batch 1 — first real-feature migrations from
     // legacy-main per docs/migration-guide.md.
     implementation(project(":core:datastore"))

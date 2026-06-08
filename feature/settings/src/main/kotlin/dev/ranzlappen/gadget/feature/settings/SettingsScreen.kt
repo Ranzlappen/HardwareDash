@@ -37,6 +37,7 @@ import dev.ranzlappen.gadget.feature.settings.components.AppearanceCard
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
+    backupSection: @Composable () -> Unit = {},
     rootFeatureToggles: @Composable () -> Unit = {},
 ) {
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
@@ -56,6 +57,10 @@ fun SettingsScreen(
                 onReducedTransparencyChange = viewModel::setReducedTransparency,
                 onLargeTextOverrideChange = viewModel::setLargeTextOverride,
             )
+            // Whole-app backup / restore. Empty default; supplied by :app
+            // (BackupManager depends on the legacy GadgetDatabase a leaf
+            // module can't see).
+            backupSection()
             // Rooted-only — empty on standard / no-root (the slot's own
             // composable returns early). Supplied by :app.
             rootFeatureToggles()

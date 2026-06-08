@@ -26,6 +26,7 @@ import com.gadget.root.ui.FatalLaunchScreen
 import com.gadget.ui.logbook.LogbookReminderWorker
 import com.gadget.ui.theme.AccessibilityPreferencesManager
 import com.gadget.ui.theme.GadgetTheme
+import com.gadget.backup.ui.BackupCard
 import com.gadget.root.ui.RootedFeatureTogglesCard
 import com.gadget.ui.theme.ThemePreferencesManager
 import com.gadget.widget.WidgetUpdateWorker
@@ -119,6 +120,10 @@ class MainActivity : ComponentActivity() {
                         placeholderScreen(GadgetDestination.Actuators)
                         placeholderScreen(GadgetDestination.Automation)
                         settingsScreen(
+                            // Backup/restore lives in :app (BackupManager
+                            // depends on the legacy GadgetDatabase a leaf
+                            // module can't see).
+                            backupSection = { BackupCard() },
                             // The rooted opt-in toggles live in :app (they
                             // reach the legacy RootFeaturesEntryPoint); the
                             // card self-hides on standard / no-root.

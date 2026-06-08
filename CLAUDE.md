@@ -1596,10 +1596,23 @@ mistake on PR.
 
 - Settings: `app/src/main/java/com/gadget/ui/screens/SettingsScreen.kt`
 - Radios (Sub-GHz / IR / NFC / WiFi / Cell): `…/ui/screens/RadiosScreen.kt`
-- Backup: `…/backup/BackupManager.kt` — ZIP of Room DB +
-  `shared_prefs/*.xml` + `datastore/*`. WAL must be checkpointed
-  via `query("PRAGMA wal_checkpoint(FULL)")`, not `execSQL` —
-  `execSQL` rejects statements that return rows.
+- Backup: `app/src/main/java/com/gadget/backup/BackupManager.kt` — whole-app
+  ZIP (format v4): legacy `gadget_db`, modular `databases/{apps,monitoring}.db`,
+  every `shared_prefs/*.xml` + `datastore/*`, and the asset sweeps
+  (`folder_covers/`, `apps_favicons/`, `widget_icons/`). WAL must be
+  checkpointed via `query("PRAGMA wal_checkpoint(FULL)")`, not `execSQL` —
+  `execSQL` rejects statements that return rows. **Legacy backwards-compat**: a
+  backup with `gadget_db` but no `databases/apps.db` is a legacy backup —
+  restore wipes the current `apps.db` and clears `LegacyAppsImporter`'s
+  `apps_migration` SharedPrefs guard so it rebuilds App-Organizer data from the
+  restored `gadget_db` on next launch (without the reset an already-imported
+  install would silently drop the backup's folders). Restore applies the
+  modular DBs only on the next process start, so it prompts a restart. Wired
+  into the modular `:feature:settings` via a `backupSection` slot that `:app`
+  fills with `BackupCard()` (reaches `BackupManager` through
+  `BackupManagerEntryPoint` — the leaf-module-can't-see-`:app` seam). When you
+  add a new asset dir under `filesDir`, append it to `filesDirAssetSweeps` and
+  bump `BACKUP_FORMAT_VERSION`. Design: `docs/backup.md`.
 - Flipper Zero connection: `…/flipper/` (USB CDC-ACM and BLE GATT)
   + `…/flipper/rpc/` (hand-rolled minimal protobuf encoder; field
   numbers track flipperzero-protobuf ≥0.80).

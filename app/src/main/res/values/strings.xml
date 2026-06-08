@@ -35,4 +35,20 @@
     <string name="widget_folder_desc">A customizable home-screen folder of installed apps, PWAs, and web links.</string>
     <string name="widget_folder_1x1_label">App Folder (small)</string>
     <string name="widget_folder_1x1_desc">A 1x1 cell version of the App Folder widget — handy when you want a single tap target for a folder.</string>
+
+    <!-- Backup & restore (Settings card). -->
+    <string name="backup_title">Backup &amp; restore</string>
+    <string name="backup_description">Export all app data to a file, or restore from one. Backups from older app versions are supported.</string>
+    <string name="backup_export">Export</string>
+    <string name="backup_restore">Restore</string>
+    <string name="backup_working">Working…</string>
+    <string name="backup_exported">Backup saved.</string>
+    <string name="backup_error">Failed: %1$s</string>
+    <string name="backup_restore_confirm_title">Restore backup?</string>
+    <string name="backup_restore_confirm_body">This replaces all current app data with the backup\'s contents. The app will restart to finish.</string>
+    <string name="backup_cancel">Cancel</string>
+    <string name="backup_restart_title">Restart required</string>
+    <string name="backup_restart_body">The backup was restored. Restart the app to apply it.</string>
+    <string name="backup_restart_now">Restart now</string>
+    <string name="backup_later">Later</string>
 </resources>
