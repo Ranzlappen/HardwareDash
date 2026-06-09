@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import com.gadget.data.db.GadgetDatabase
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.ranzlappen.gadget.feature.apps.LegacyAppsImporter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -267,20 +268,42 @@ class BackupManager @Inject constructor(
             }
 
             // Legacy backup (gadget_db present, no modular apps.db): the
-            // App-Organizer data lives in gadget_db's apps_* tables. Wipe the
-            // current apps.db so it isn't merged with stale data, and reset
-            // LegacyAppsImporter's one-shot guard so it rebuilds apps.db from the
-            // restored gadget_db on next launch. Without the reset, an install
-            // that already ran the importer would skip it and silently lose the
-            // restored App-Organizer data (the importer guard is a SharedPrefs
-            // flag the legacy backup doesn't overwrite).
-            if (restoredLegacyDb && !restoredModularAppsDb) {
+            // App-Organizer data lives in gadget_db's apps_* tables, and the
+            // restored gadget_db is an OLD schema the current GadgetDatabase
+            // can't migrate. Don't leave it on the live Room path — Room would
+            // crash trying to open it on reopen (below). Instead STAGE it for
+            // LegacyAppsImporter (raw SQLite, schema-agnostic) and remove the
+            // live file so Room recreates a fresh current-schema gadget_db.
+            if (restoredLegacyDb && !restoredModularAppsDb && dbPath != null) {
+                val live = File(dbPath)
+                val staging = File(
+                    context.filesDir,
+                    "${LegacyAppsImporter.RESTORE_STAGING_SUBDIR}/${LegacyAppsImporter.LEGACY_DB}",
+                )
+                staging.parentFile?.mkdirs()
+                staging.delete()
+                if (live.exists() && !live.renameTo(staging)) {
+                    // Cross-dir rename can fail on some devices — fall back to copy.
+                    live.inputStream().use { input ->
+                        staging.outputStream().use { output -> input.copyTo(output) }
+                    }
+                }
+                live.delete()
+                File("$dbPath-wal").delete()
+                File("$dbPath-shm").delete()
+
+                // Rebuild apps.db from the staged legacy DB rather than merging
+                // into stale data, and reset LegacyAppsImporter's one-shot guard
+                // so it re-runs on next launch. Without the reset, an install
+                // that already ran the importer would skip it and silently lose
+                // the restored folders (the guard is a SharedPrefs flag the
+                // legacy backup doesn't overwrite).
                 databasesDir?.listFiles()?.forEach { file ->
                     if (file.isFile && file.name.startsWith("apps.db")) file.delete()
                 }
                 context.getSharedPreferences(LEGACY_APPS_IMPORT_PREFS, Context.MODE_PRIVATE)
                     .edit().clear().commit()
-                Timber.i("Legacy backup detected — reset App-Organizer import guard")
+                Timber.i("Legacy backup staged for re-import; live gadget_db reset")
             }
         } finally {
             // Reopen the database

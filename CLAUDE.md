@@ -1606,11 +1606,16 @@ mistake on PR.
   (`folder_covers/`, `apps_favicons/`, `widget_icons/`). WAL must be
   checkpointed via `query("PRAGMA wal_checkpoint(FULL)")`, not `execSQL` —
   `execSQL` rejects statements that return rows. **Legacy backwards-compat**: a
-  backup with `gadget_db` but no `databases/apps.db` is a legacy backup —
-  restore wipes the current `apps.db` and clears `LegacyAppsImporter`'s
-  `apps_migration` SharedPrefs guard so it rebuilds App-Organizer data from the
-  restored `gadget_db` on next launch (without the reset an already-imported
-  install would silently drop the backup's folders). Restore applies the
+  backup with `gadget_db` but no `databases/apps.db` is a legacy backup — its
+  `gadget_db` is an old schema Room can't migrate, so restore **stages it to
+  `filesDir/legacy_restore/`** (off the live Room path — else Room crashes on
+  reopen: "migration from 1 to 5 not found"), deletes the live `gadget_db` (Room
+  recreates fresh), wipes `apps.db`, and clears `LegacyAppsImporter`'s
+  `apps_migration` SharedPrefs guard. `LegacyAppsImporter` then reads the staged
+  db via **raw SQLite** (schema-agnostic) on next launch, rebuilds App-Organizer
+  data, and deletes the staging dir (without the guard reset an already-imported
+  install would silently drop the backup's folders; legacy metric data isn't
+  recovered — it's vestigial). Restore applies the
   modular DBs only on the next process start, so it prompts a restart. Wired
   into the modular `:feature:settings` via a `backupSection` slot that `:app`
   fills with `BackupCard()` (reaches `BackupManager` through

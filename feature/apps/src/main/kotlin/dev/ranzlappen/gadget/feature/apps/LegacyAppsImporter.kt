@@ -55,7 +55,13 @@ class LegacyAppsImporter @Inject constructor(
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         if (prefs.getBoolean(KEY_DONE, false)) return
 
-        val dbFile = context.getDatabasePath(LEGACY_DB)
+        // A legacy-backup restore stages the old gadget_db here (BackupManager)
+        // so Room never tries to open — and fail to migrate — the old-schema
+        // file. Prefer the staged copy; an in-place upgrade has none and reads
+        // the live gadget_db (which Room migrated in place).
+        val staging = File(context.filesDir, "$RESTORE_STAGING_SUBDIR/$LEGACY_DB")
+        val fromStaging = staging.exists()
+        val dbFile = if (fromStaging) staging else context.getDatabasePath(LEGACY_DB)
         if (!dbFile.exists()) {
             // Fresh install with no legacy DB — nothing to import, ever.
             prefs.edit().putBoolean(KEY_DONE, true).apply()
@@ -71,6 +77,9 @@ class LegacyAppsImporter @Inject constructor(
         // leaves the flag unset so the next launch retries.
         if (imported || runCatching { !hasAppsTables(dbFile) }.getOrDefault(false)) {
             prefs.edit().putBoolean(KEY_DONE, true).apply()
+            // The staged restore DB is a one-time artifact — drop it so it can't
+            // re-import on a later launch.
+            if (fromStaging) staging.parentFile?.deleteRecursively()
         }
     }
 
@@ -193,9 +202,17 @@ class LegacyAppsImporter @Inject constructor(
         return if (idx < 0 || isNull(idx)) 0 else getInt(idx)
     }
 
-    private companion object {
+    companion object {
         const val LEGACY_DB = "gadget_db"
         const val PREFS = "apps_migration"
         const val KEY_DONE = "legacy_apps_imported"
+
+        /**
+         * Subdir under `filesDir` where `BackupManager` stages a restored legacy
+         * `gadget_db` for this importer to read via raw SQLite — keeping the
+         * old-schema file off the live Room path so `GadgetDatabase` never tries
+         * (and fails) to migrate it.
+         */
+        const val RESTORE_STAGING_SUBDIR = "legacy_restore"
     }
 }
