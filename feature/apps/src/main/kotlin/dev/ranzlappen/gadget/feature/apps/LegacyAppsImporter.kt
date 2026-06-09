@@ -53,14 +53,17 @@ class LegacyAppsImporter @Inject constructor(
 
     suspend fun importIfNeeded() {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (prefs.getBoolean(KEY_DONE, false)) return
 
         // A legacy-backup restore stages the old gadget_db here (BackupManager)
         // so Room never tries to open — and fail to migrate — the old-schema
-        // file. Prefer the staged copy; an in-place upgrade has none and reads
-        // the live gadget_db (which Room migrated in place).
+        // file. Its mere presence means a fresh legacy backup just landed, so it
+        // forces a re-import even if a prior launch already marked the one-shot
+        // guard done; the guard only gates the in-place-upgrade path (reading
+        // the live gadget_db).
         val staging = File(context.filesDir, "$RESTORE_STAGING_SUBDIR/$LEGACY_DB")
         val fromStaging = staging.exists()
+        if (!fromStaging && prefs.getBoolean(KEY_DONE, false)) return
+
         val dbFile = if (fromStaging) staging else context.getDatabasePath(LEGACY_DB)
         if (!dbFile.exists()) {
             // Fresh install with no legacy DB — nothing to import, ever.
@@ -81,6 +84,9 @@ class LegacyAppsImporter @Inject constructor(
             // re-import on a later launch.
             if (fromStaging) staging.parentFile?.deleteRecursively()
         }
+        Timber.i(
+            "LegacyAppsImporter: source=${if (fromStaging) "staged-restore" else "live"} imported=$imported",
+        )
     }
 
     private suspend fun importFrom(dbFile: File): Boolean {

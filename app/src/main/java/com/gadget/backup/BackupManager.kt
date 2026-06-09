@@ -2,6 +2,7 @@ package com.gadget.backup
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.database.sqlite.SQLiteDatabase
 import android.os.Build
 import com.gadget.data.db.GadgetDatabase
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -275,6 +276,16 @@ class BackupManager @Inject constructor(
             // LegacyAppsImporter (raw SQLite, schema-agnostic) and remove the
             // live file so Room recreates a fresh current-schema gadget_db.
             if (restoredLegacyDb && !restoredModularAppsDb && dbPath != null) {
+                // Older backups (e.g. 1.0.117) may not have checkpointed before
+                // export, leaving committed rows in the companion -wal. Merge the
+                // WAL into the main file via a raw (non-Room) connection so the
+                // staged copy is self-contained. TRUNCATE empties the WAL after.
+                runCatching {
+                    SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE).use { raw ->
+                        raw.rawQuery("PRAGMA wal_checkpoint(TRUNCATE)", null).use { it.moveToFirst() }
+                    }
+                }.onFailure { Timber.w(it, "legacy gadget_db WAL checkpoint failed") }
+
                 val live = File(dbPath)
                 val staging = File(
                     context.filesDir,
