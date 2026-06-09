@@ -50,20 +50,32 @@ confirm dialog.
 
 A backup produced by the monolithic app (or before the apps.db split) carries
 App-Organizer data inside `gadget_db`'s `apps_*` tables and has **no**
-`databases/apps.db` entry. Restore detects this (`restoredLegacyDb &&
-!restoredModularAppsDb`) and:
+`databases/apps.db` entry. The restored `gadget_db` is also an **old schema** the
+current `GadgetDatabase` (v5) can't migrate — leaving it on the live Room path
+crashes Room on reopen (`"A migration from 1 to 5 was required but not found"`).
+`LegacyAppsImporter` reads the legacy tables via **raw SQLite** (schema-agnostic),
+so the file should never reach Room at all.
 
-1. Deletes the current `apps.db*` so it isn't merged with stale data.
-2. Clears `LegacyAppsImporter`'s one-shot guard (the `apps_migration`
+Restore detects the legacy shape (`restoredLegacyDb && !restoredModularAppsDb`)
+and:
+
+1. **Stages** the restored `gadget_db` to `filesDir/legacy_restore/gadget_db`
+   (off the live Room path) and **deletes the live `gadget_db`** — so Room
+   recreates a fresh current-schema db on reopen instead of choking on the old
+   one.
+2. Deletes the current `apps.db*` so the import rebuilds cleanly rather than
+   merging into stale data.
+3. Clears `LegacyAppsImporter`'s one-shot guard (the `apps_migration`
    SharedPreferences file).
 
-So `LegacyAppsImporter` re-runs on next launch and rebuilds `apps.db` from the
-restored `gadget_db`. **Why the guard reset matters**: the guard is a SharedPrefs
-flag a legacy backup doesn't contain, so an install that already ran the importer
-once would otherwise keep the flag set, skip the import, and silently drop the
-backup's folders. The reset is the one place `BackupManager` knows a feature
-detail (the prefs file name) — hardcoded with a comment rather than coupling to
-`:feature:apps`.
+On next launch `LegacyAppsImporter` finds the staged file, lifts its `apps_*`
+rows into `apps.db` (raw SQLite), and deletes the staging dir. **Why the guard
+reset matters**: the guard is a SharedPrefs flag a legacy backup doesn't contain,
+so an install that already ran the importer once would otherwise keep the flag
+set, skip the import, and silently drop the backup's folders. The legacy
+`gadget_db`'s **metric** data is not recovered — Room can't migrate it — but it's
+vestigial (metrics moved to `monitoring.db`); the folders, which users care
+about, are.
 
 ## Wiring (leaf-module seam)
 
