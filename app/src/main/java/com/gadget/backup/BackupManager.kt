@@ -44,6 +44,7 @@ import javax.inject.Singleton
 class BackupManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val database: GadgetDatabase,
+    private val legacyAppsImporter: LegacyAppsImporter,
 ) {
 
     /**
@@ -303,18 +304,23 @@ class BackupManager @Inject constructor(
                 File("$dbPath-wal").delete()
                 File("$dbPath-shm").delete()
 
-                // Rebuild apps.db from the staged legacy DB rather than merging
-                // into stale data, and reset LegacyAppsImporter's one-shot guard
-                // so it re-runs on next launch. Without the reset, an install
-                // that already ran the importer would skip it and silently lose
-                // the restored folders (the guard is a SharedPrefs flag the
-                // legacy backup doesn't overwrite).
-                databasesDir?.listFiles()?.forEach { file ->
-                    if (file.isFile && file.name.startsWith("apps.db")) file.delete()
-                }
+                // Reset the importer's one-shot guard so a cold-start re-import
+                // can run as a fallback if the in-process import below doesn't
+                // complete. The guard is a SharedPrefs flag the legacy backup
+                // doesn't overwrite, so an already-imported install would
+                // otherwise skip it.
                 context.getSharedPreferences(LEGACY_APPS_IMPORT_PREFS, Context.MODE_PRIVATE)
                     .edit().clear().commit()
-                Timber.i("Legacy backup staged for re-import; live gadget_db reset")
+
+                // Import the staged App-Organizer data IN-PROCESS through the
+                // live apps.db connection so folders reappear WITHOUT a cold
+                // restart (the cross-process restart proved unreliable on some
+                // devices). The importer clears existing apps data first
+                // (restore replaces). We deliberately DON'T delete apps.db —
+                // that would orphan the open Room connection the import writes
+                // through.
+                legacyAppsImporter.importFromStaged()
+                Timber.i("Legacy backup staged + imported in-process")
             }
         } finally {
             // Reopen the database

@@ -59,23 +59,33 @@ so the file should never reach Room at all.
 Restore detects the legacy shape (`restoredLegacyDb && !restoredModularAppsDb`)
 and:
 
-1. **Stages** the restored `gadget_db` to `filesDir/legacy_restore/gadget_db`
-   (off the live Room path) and **deletes the live `gadget_db`** — so Room
-   recreates a fresh current-schema db on reopen instead of choking on the old
-   one.
-2. Deletes the current `apps.db*` so the import rebuilds cleanly rather than
-   merging into stale data.
-3. Clears `LegacyAppsImporter`'s one-shot guard (the `apps_migration`
+1. Checkpoints the legacy `gadget_db`'s WAL into its main file (older backups —
+   e.g. 1.0.117 — didn't checkpoint before export), then **stages** it to
+   `filesDir/legacy_restore/gadget_db` (off the live Room path) and **deletes
+   the live `gadget_db`** — so Room recreates a fresh current-schema db on
+   reopen instead of choking on the old one.
+2. Clears `LegacyAppsImporter`'s one-shot guard (the `apps_migration`
    SharedPreferences file).
+3. Calls `LegacyAppsImporter.importFromStaged()` **in-process**: it clears the
+   existing App-Organizer tables (restore replaces) and lifts the staged
+   `gadget_db`'s `apps_*` rows into `apps.db` via raw SQLite → the live
+   `AppsDao`, then sets the guard and drops the staging dir.
 
-On next launch `LegacyAppsImporter` finds the staged file, lifts its `apps_*`
-rows into `apps.db` (raw SQLite), and deletes the staging dir. **Why the guard
-reset matters**: the guard is a SharedPrefs flag a legacy backup doesn't contain,
-so an install that already ran the importer once would otherwise keep the flag
-set, skip the import, and silently drop the backup's folders. The legacy
-`gadget_db`'s **metric** data is not recovered — Room can't migrate it — but it's
-vestigial (metrics moved to `monitoring.db`); the folders, which users care
-about, are.
+**In-process, not restart-dependent.** Earlier the import only ran on the next
+cold start via the eager `LegacyAppsImporter` — but `exit(0)` restart proved
+unreliable on some devices, so folders never reappeared. Running it inside the
+restore (through the **live, open** `apps.db` connection — which is why restore
+must *not* delete the apps.db file) makes folders show immediately via the
+reactive observers, no restart needed. The cold-start `importIfNeeded()` stays as
+a **fallback**: a present staging file forces a re-import regardless of the
+guard, so a failed in-process import is retried on next launch.
+
+**Why the guard reset matters**: the guard is a SharedPrefs flag a legacy backup
+doesn't contain, so an install that already ran the importer once would otherwise
+keep the flag set and skip the import. The legacy `gadget_db`'s **metric** data
+is not recovered — Room can't migrate it — but it's vestigial (metrics moved to
+`monitoring.db`); the folders, which users care about, are. (Settings/datastore
+still apply on the next restart, so restore still prompts one.)
 
 ## Wiring (leaf-module seam)
 
