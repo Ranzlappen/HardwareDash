@@ -6,32 +6,32 @@
 //
 // Layout invariants enforced here:
 //   * `:app` is the single application module that aggregates feature/*.
-//     It still uses the legacy Groovy `app/build.gradle` — migration to
-//     Kotlin DSL + the new applicationId (dev.ranzlappen.gadget[.rooted])
-//     happens in a later Phase-0 batch.
+//     It uses the Kotlin-DSL `app/build.gradle.kts` and the new applicationId
+//     (dev.ranzlappen.gadget[.rooted]). The Kotlin `namespace` stays
+//     `com.gadget` until the last legacy package migrates out.
 //   * `core/*` holds reusable infrastructure (data, ui, domain, hardware …).
 //   * `feature/*` holds one user-facing capability per module. Rooted-only
 //     capability surface lives in a sibling `feature/<name>-rooted/` module
 //     that only the rooted flavor of `:app` pulls in (via
-//     `rootedImplementation` in a later batch). `:app`'s own dependency list
-//     never names a `*-rooted` module, so the standard APK is physically
-//     incapable of compiling against root code.
+//     `rootedImplementation`). `:app`'s own dependency list never names a
+//     `*-rooted` module in plain `implementation`, so the standard APK is
+//     physically incapable of compiling against root code.
 //   * `:benchmark` is the macrobenchmark host. Wired up properly in a later
 //     batch; Batch 0 ships only the skeleton.
 //   * `:lsposed-module` (existing) is only included when
 //     `-PenableLsposedModule=true` is set. Standard CI does not; rooted CI
 //     does.
-//   * `build-logic/` (composite build) lands in Batch 1 with the first
-//     convention plugin (`gadget.android.library`). Until then every
-//     skeleton module applies plugins inline via `libs.plugins.*` aliases.
+//   * `build-logic/` (composite build) hosts the convention plugins
+//     (`gadget.android.library`, `gadget.android.feature`, …) every module
+//     applies by id.
 
 pluginManagement {
-    // Composite-build hook for build-logic/. Batch 1 ships the convention
+    // Composite-build hook for build-logic/. build-logic/ ships the convention
     // plugins (gadget.android.application, gadget.android.library,
     // gadget.android.library.compose, gadget.android.application.compose,
     // gadget.android.feature, gadget.android.hilt, gadget.android.room,
     // gadget.jvm.library). Module build files apply them by id, e.g.
-    // `plugins { id("gadget.android.library") }`.
+    // `plugins { id("gadget.android.feature") }`.
     includeBuild("build-logic")
     repositories {
         google {
