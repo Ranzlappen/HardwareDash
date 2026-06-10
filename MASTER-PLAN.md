@@ -4,8 +4,11 @@
 HardwareDash (app name: Gadget) will become the definitive Android app for exploring every sensor and actuator, with sophisticated cross-automation, widgets, notification panels, granular permission management, and hardware-safety guardrails. The rooted version safely extends functionality while the standard version remains fully functional and safe.
 
 **Current State**
-- Branch `claude/refactor-2026`: Phase 0 + Phase 1 + Phase 1.1 hardening complete; Phase 2 (accelerated feature migration) **in progress** (May 2026)
-- Branch `legacy-main`: Full archive of the old single-module codebase — reference material only, never imported from new code
+- Branch `main`: canonical. Phase 0 + Phase 1 + Phase 1.1 hardening complete; Phase 2 (accelerated feature migration) **in progress** (June 2026). All work now lands on `main` via one PR per `claude/<topic>` batch branch — the long-lived `claude/refactor-2026` integration branch is retired.
+- **Migrated & live in the shell:** Torch (+ rooted/standard siblings), Vibration (+ rooted/standard siblings), App-Organizer (folders + folder widgets), Settings, Dashboard.
+- **Infrastructure landed:** `:core:root` (root-safety seam), `:core:widgetkit` (home-screen-widget framework), `:core:monitoring` (chart + persist framework), whole-app backup format v4, plus the `:core:automation` / `:core:hardware` contract seams. `:core:hardware` is reserved-but-empty pending the automation/sensors work (see Phase 3).
+- **Legacy surface shrinking:** ~195 legacy `com.gadget.*` `:app` files remain (down from the original single-module codebase); each migrates feature-by-feature, deleting the legacy package once its `:feature:*` module verifies.
+- Branch `legacy-main`: Full archive of the old single-module codebase — reference material only, never imported from new code.
 
 ---
 
@@ -30,19 +33,33 @@ HardwareDash (app name: Gadget) will become the definitive Android app for explo
 
 | Sub-track | Status | Notes |
 |---|---|---|
-| Settings v1 (About + Appearance + Accessibility) | 🚧 Batch 1 | `:core:datastore` + `:feature:settings` |
-| Torch / Flashlight (standard flavor) | 🚧 Batch 1 | `:feature:torch` + Camera2 controller |
-| Flashlight widgets (QS tile + 2× home widgets) | 🚧 Batch 1 | `FlashlightTileService`, `FlashlightWidgetProvider`, `StrobeWidgetProvider` + `StrobeService` |
-| Rooted torch extras (DutyCycle / MultiLed / Thermal) | ⏳ Next | After `RootCapabilityRegistry` infra lands |
-| Settings v2 — Backup / Restore | ⏳ Next | After Room DB + `BackupManager` port |
-| Settings v2 — Flipper Zero | ⏳ Next | After `FlipperConnectionManager` port |
-| Settings v2 — Keep-Alive / Metric logging / DND bypass | ⏳ Next | Each becomes its own batch |
-| Sensors / Actuators / Radios / Camera / etc. | ⏳ Phase 2 tail | One feature per batch, following the migration guide |
+| Settings v1 (About + Appearance + Accessibility) | ✅ Done | `:core:datastore` + `:feature:settings` |
+| Torch / Flashlight (standard flavor) | ✅ Done (PRs #108–#120) | `:feature:torch` + Camera2 controller |
+| Flashlight widgets (QS tile + 2× home widgets) | ✅ Done (PRs #108–#137) | `FlashlightWidgetProvider`, `StrobeWidgetProvider` + `StrobeService`, extracted into `:core:widgetkit` |
+| Rooted torch extras (DutyCycle / MultiLed / Thermal) | ✅ Done (PRs #126–#132) | `:feature:torch-rooted` + `:core:root` `RootCapabilityRegistry` / `RootSafetyGate` (closes #94) |
+| Vibration (standard + rooted) | ✅ Done | `:feature:vibration` (+ `-rooted`/`-standard`); second validated migration consumer |
+| App-Organizer + folder widgets | ✅ Done (PRs #138–#144) | `:feature:apps` (+ `-rooted`); content-widget archetype in `:core:widgetkit` |
+| Settings v2 — Backup / Restore | ✅ Done (PRs #142–#144) | Whole-app backup format v4 + legacy in-process import |
+| Settings v2 — Flipper Zero | ⏳ Phase 2 tail | After `FlipperConnectionManager` migration to `:feature:flipper` |
+| Sensors / Radios / GPS / Camera / Storage / etc. | ⏳ Phase 2 tail | One feature per batch, following the migration guide; sensors pairs with the automation engine's trigger source (`:core:hardware`) |
+| Cross-automation engine | ⏳ Phase 3 next | `:core:automation` contract seam landed (`ActionHandler` + `ModuleActionRegistry`); engine/UI build is the next major effort — see `docs/automation-engine.md` |
 
-**Phase 2 Outstanding Follow-up Issues**
-- [#89](https://github.com/Ranzlappen/HardwareDash/issues/89) — `material3-adaptive` foldable hinge utility (deferred until first adaptive consumer)
-- [#91](https://github.com/Ranzlappen/HardwareDash/issues/91) — `GadgetBottomSheet` instrumented tests + sheet-host activity (Phase 4 testing pass)
-- [#92](https://github.com/Ranzlappen/HardwareDash/issues/92) — CI emulator workflow for `:core:ui:connectedDebugAndroidTest` (Phase 4 CI/CD pass)
+**Phase 2 Outstanding Follow-up Issues** (reconciled against the live tracker, June 2026)
+
+Resolved & closed:
+- ✅ [#91](https://github.com/Ranzlappen/HardwareDash/issues/91) — `GadgetBottomSheet` instrumented tests — covered by `core/ui`'s `ModalsTest` (the ui-test-manifest activity hosts the sheet; no bespoke host activity needed).
+- ✅ [#92](https://github.com/Ranzlappen/HardwareDash/issues/92) — CI emulator workflow — shipped as `.github/workflows/instrumented-tests.yml`, gating every PR (`:core:ui` + `:feature:torch`/`vibration`/`apps`).
+- ✅ [#94](https://github.com/Ranzlappen/HardwareDash/issues/94) — Rooted torch extras (DutyCycle / MultiLed / Thermal) — `:feature:torch-rooted` (commit `c53d711`) on the extracted `:core:root` safety framework (commit `7110f96`).
+
+Still open:
+- [#89](https://github.com/Ranzlappen/HardwareDash/issues/89) — `material3-adaptive` foldable hinge utility — the `GadgetPosture` / `rememberPosture()` seam landed in `:core:ui`, but no screen consumes it yet, so the "no dead infrastructure" acceptance criterion is unmet. Kept open for the first adaptive consumer.
+- [#107](https://github.com/Ranzlappen/HardwareDash/issues/107) — delete dead legacy `com.gadget.widget` torch providers — folded into the per-feature clean-cut deletion step as each module's legacy package is removed.
+- [#95](https://github.com/Ranzlappen/HardwareDash/issues/95) — torch brightness control (`WRITE_SETTINGS` UX) — feature enhancement, pickup anytime.
+- Tech-debt: [#72](https://github.com/Ranzlappen/HardwareDash/issues/72) / [#68](https://github.com/Ranzlappen/HardwareDash/issues/68) detekt cleanup; [#101](https://github.com/Ranzlappen/HardwareDash/issues/101) floating/accessibility buttons exploration.
+
+**Phase 3 forward plan (new epics — see Workstreams 3/6 of the get-back-on-track plan):**
+- Automation engine: rule model + Room persistence + evaluator + scheduler/runtime, then `:feature:automation-ui` rule builder. `docs/automation-engine.md` carries the design.
+- `:core:hardware` registry: the symmetric read-side partner to the `ActionHandler` action registry — the trigger/condition source the engine and rule-builder enumerate without importing any feature.
 
 ---
 

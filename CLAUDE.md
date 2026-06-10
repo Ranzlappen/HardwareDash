@@ -3,7 +3,7 @@
 > **This file is the entry point for every Claude session on this
 > repository.** Read it once at the start and you'll know the
 > vision, every non-negotiable rule, the full component catalog
-> with usage examples, the live Phase-1 status checklist, and the
+> with usage examples, the live status checklist, and the
 > hard-won engineering pitfalls that don't show up in a local syntax
 > check. Updated after every sub-batch.
 
@@ -20,9 +20,18 @@ spacing / motion / glass alpha) flows through `LocalGadgetTheme.current`
 so a downstream "compact" or "high-contrast" theme overrides any
 slot without forking components.
 
-Master roadmap is in `MASTER-PLAN.md`. Current phase: **Phase 1
-(Light Preview / Skeleton)** — architecture, design system,
-navigation, mock screens; no real hardware code yet.
+Master roadmap is in `MASTER-PLAN.md`. Current phase: **Phase 2
+(Accelerated Feature Migration), in progress** — real hardware
+features are migrating one module at a time onto the Phase-1 design
+system. **Torch**, **Vibration**, and **App-Organizer** (folders +
+folder widgets) are migrated and live in the shell, alongside
+**Settings** and the **Dashboard**. The shared infrastructure layer
+has landed: `:core:root` (root-safety seam), `:core:widgetkit`
+(home-screen-widget framework), `:core:monitoring` (chart + persist
+framework, whole-app backup format v4), plus the `:core:automation` /
+`:core:hardware` contract seams the cross-automation engine will
+consume. The remaining legacy `com.gadget.*` capability still living
+in `:app` migrates feature-by-feature per `docs/migration-guide.md`.
 
 Tech: Kotlin 1.9.10 + Jetpack Compose (BOM 2024.04.01) + Hilt +
 Room. minSdk 29, targetSdk 35, Java/Kotlin target 17.
