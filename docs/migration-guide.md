@@ -87,6 +87,17 @@ slider, SOS pattern, multi-LED panic.
 
 ### Step 3 — Wire the module's `build.gradle.kts`
 
+> **Shortcut:** `scripts/new-feature.sh <name> [--rooted]` scaffolds the
+> whole module skeleton (build file, manifest, `<Name>Screen` /
+> `<Name>ViewModel` / `<Name>Navigation` on the design system, the
+> standard/rooted sibling pair with `--rooted`) and appends the
+> `:feature:<name>` include(s) to `settings.gradle.kts`. It compiles
+> standalone (`./gradlew :feature:<name>:assembleDebug`); the only manual
+> steps it leaves are the shared-file edits — adding the
+> `GadgetDestination` entry, calling `<name>Screen()` from `GadgetApp`,
+> and (for `--rooted`) the `app/build.gradle.kts` flavor-impl lines. Start
+> here, then resume the recipe at Step 4.
+
 The skeleton already has `id("gadget.android.feature")` (which
 brings Compose + Hilt + lifecycle + material3 + activity-compose
 via the convention plugin chain). Add only the project-level
