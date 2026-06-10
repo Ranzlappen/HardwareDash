@@ -28,10 +28,12 @@ folder widgets) are migrated and live in the shell, alongside
 **Settings** and the **Dashboard**. The shared infrastructure layer
 has landed: `:core:root` (root-safety seam), `:core:widgetkit`
 (home-screen-widget framework), `:core:monitoring` (chart + persist
-framework, whole-app backup format v4), plus the `:core:automation` /
-`:core:hardware` contract seams the cross-automation engine will
-consume. The remaining legacy `com.gadget.*` capability still living
-in `:app` migrates feature-by-feature per `docs/migration-guide.md`.
+framework, whole-app backup format v4), plus the `:core:automation`
+action-contract seam (`ActionHandler` / `ModuleActionRegistry`, shipped)
+and the reserved-but-empty `:core:hardware` module the engine's
+enumeration layer will fill (epic #146). The remaining legacy
+`com.gadget.*` capability still living in `:app` migrates
+feature-by-feature per `docs/migration-guide.md`.
 
 Tech: Kotlin 1.9.10 + Jetpack Compose (BOM 2024.04.01) + Hilt +
 Room. minSdk 29, targetSdk 35, Java/Kotlin target 17.
@@ -1552,8 +1554,9 @@ plan-mode session on this repo:
 
 The app ships as two product flavors built from one repo:
 
-- `standard` (applicationId `com.gadget`) — non-rooted behavior.
-- `rooted` (applicationId `com.gadget.root`) — adds root-only
+- `standard` (applicationId `dev.ranzlappen.gadget`) — non-rooted behavior.
+- `rooted` (applicationId `dev.ranzlappen.gadget.rooted`, via
+  `applicationIdSuffix = ".rooted"`) — adds root-only
   capabilities.
 
 Rules (full details in `docs/flavors.md`):

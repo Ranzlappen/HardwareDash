@@ -54,9 +54,11 @@ rules are enabled, mirroring `MonitorService`'s self-stop pattern.
 
 - Metric triggers subscribe to `MetricSource.stream()` (push; zero idle
   wakeups) with a bounded `sample()` poll fallback.
-- Schedule triggers use **`AlarmManager`** (exact-allow-while-idle where
-  justified), **not** `WorkManager` — WorkManager's 15-minute floor is too
-  coarse for "at 09:00 do X".
+- Schedule triggers use **`AlarmManager`** (windowed-inexact by default;
+  per-rule `exact` opt-in behind `SCHEDULE_EXACT_ALARM` with a documented
+  denied-fallback — see the degradation contract in the design doc),
+  **not** `WorkManager` — WorkManager's 15-minute floor is too coarse for
+  "at 09:00 do X".
 - System-event triggers use registered `BroadcastReceiver`s; `BootCompleted`
   re-arm reuses `:core:widgetkit`'s `BootRearmHandler` multibinding rather
   than adding a second boot receiver.
@@ -101,6 +103,17 @@ emulator. *Rejected:* an evaluator coupled to the service/coroutine
 runtime — it would push the cheapest-to-test logic behind the
 hardest-to-test boundary.
 
+### 8. Storms are bounded, not detected
+
+Chaining (an action moves a metric that is another rule's trigger) is a
+feature. Runaway firing is prevented structurally: (a) per-rule
+`cooldownSeconds`, persisted via `last_fired_at` so it survives restarts;
+(b) `MetricThreshold.clearValue` hysteresis so noise around a threshold
+can't re-fire on every sample; (c) a runtime `AutomationBudget`
+(per-cycle + rolling dispatch caps) with a user-visible throttle
+notification. *Rejected:* static cross-rule cycle detection — undecidable
+against real-world signals, and unnecessary once firing is budgeted.
+
 ## Consequences
 
 ### Positive
@@ -120,9 +133,11 @@ hardest-to-test boundary.
 - `:core:automation` gains Android dependencies (service, AlarmManager,
   Room-backed repository) beyond the pure-contract module it is today. The
   evaluator stays pure-Kotlin to preserve testability.
-- `AlarmManager` exactness depends on Doze/standby allowances; exact alarms
-  need the right permission posture on API 31+. Documented in the runtime
-  batch.
+- `AlarmManager` exactness depends on Doze/standby allowances and the
+  `SCHEDULE_EXACT_ALARM` permission. The degradation contract (inexact
+  default, `exact` opt-in, denied-fallback to windowed) is now specified at
+  design time; the only deferred piece is the settings-redirect UX polish in
+  3.3/3.4.
 
 ## Alternatives considered (summary)
 

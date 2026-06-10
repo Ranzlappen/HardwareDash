@@ -48,6 +48,28 @@ scaffolder:
 (engine core/runtime/UI), WS6 (`:core:hardware`), WS4.2 execution, WS5
 feature long-tail. Epics #145/#146/#147 track them.
 
+### Review fix-up (PR #148)
+
+One docs-only follow-up commit addressing the PR #148 review:
+- **P1-1** — fixed the CLAUDE.md applicationId contradiction (current install
+  IDs are `dev.ranzlappen.gadget` / `.rooted`, not the legacy `com.gadget*`).
+- **P1-2** — bounded automation storms in the v1 model (design doc + ADR
+  Decision 8): per-rule `cooldownSeconds` (persisted via `last_fired_at`),
+  `MetricThreshold.clearValue` hysteresis, and a runtime `AutomationBudget`
+  (16/cycle + 60/60 s) with a throttle notification; evaluator gains a
+  `sinceLastFiredMillis` param + cooldown/hysteresis tests.
+- **P2-5** — exact-alarm degradation contract (`Schedule.exact` flag, the
+  three-state table, `SCHEDULE_EXACT_ALARM` denied-by-default posture,
+  `USE_EXACT_ALARM` explicitly unused).
+- **P2-6** — `automation.db` joins the backup ZIP, bumping format v4 → v5.
+- **P2-7** — honest legacy-parity metric (310 across all `:app` source sets;
+  195 in `src/main`) with the canonical `find` command.
+- **P3** — CLAUDE.md `:core:hardware` reworded as reserved-but-empty;
+  settings.gradle.kts comment made present tense; MASTER-PLAN vibration row
+  gets PR refs (#130 + #134/#135/#137); migration-guide "compiles standalone"
+  softened to unverified; design-doc FGS-resident-only-for-stream-triggers
+  sentence added.
+
 ## Status: complete for this autonomous run ✅
 
 11 batches landed (1 docs + 10 code/docs). All P0 review items + the

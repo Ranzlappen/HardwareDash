@@ -26,12 +26,12 @@
 //     applies by id.
 
 pluginManagement {
-    // Composite-build hook for build-logic/. Batch 1 ships the convention
+    // Composite-build hook for build-logic/. build-logic/ ships the convention
     // plugins (gadget.android.application, gadget.android.library,
     // gadget.android.library.compose, gadget.android.application.compose,
     // gadget.android.feature, gadget.android.hilt, gadget.android.room,
     // gadget.jvm.library). Module build files apply them by id, e.g.
-    // `plugins { id("gadget.android.library") }`.
+    // `plugins { id("gadget.android.feature") }`.
     includeBuild("build-logic")
     repositories {
         google {

@@ -56,6 +56,7 @@ data class Rule(
     val conditions: List<Condition> = emptyList(),
     val conditionLogic: ConditionLogic = ConditionLogic.All,  // ALL (AND) | ANY (OR)
     val actions: List<RuleAction> = emptyList(),
+    val cooldownSeconds: Int = 0,         // min seconds between firings; 0 = none
 )
 
 enum class ConditionLogic { All, Any }   // AND / OR over the condition list
@@ -97,6 +98,7 @@ sealed interface Trigger {
         val op: ComparisonOp,             // LT, LTE, GT, GTE, EQ, NEQ
         val value: Float,
         val edge: Edge = Edge.Rising,     // fire on entering (Rising) / leaving (Falling) the predicate, not every sample
+        val clearValue: Float? = null,    // hysteresis: after firing, re-arm only once the metric crosses back past this on the opposite side of [op]; null = re-arm when the predicate goes false
     ) : Trigger
 
     /** Wall-clock schedule. Backed by AlarmManager (exact-ish), not WorkManager. */
@@ -104,6 +106,7 @@ sealed interface Trigger {
     data class Schedule(
         val timeOfDayMinutes: Int,        // 0..1439, local time
         val daysOfWeek: Set<DayOfWeek> = DayOfWeek.everyDay(),
+        val exact: Boolean = false,       // opt-in exact firing; see the degradation contract in Runtime host
     ) : Trigger
 
     /** System broadcast: boot, power connected/disconnected, connectivity changes. */
@@ -122,6 +125,14 @@ enum class SystemEventKind { BootCompleted, PowerConnected, PowerDisconnected, C
 enum class Edge { Rising, Falling }
 enum class ComparisonOp { Lt, Lte, Gt, Gte, Eq, Neq }
 ```
+
+**Hysteresis (`clearValue`).** A `MetricThreshold` of proximity `Lt 5` with
+`clearValue = 8` fires when the reading drops below 5 cm and then re-arms
+**only** after the reading exceeds 8 cm — so sensor noise dithering around
+the 5 cm threshold cannot machine-gun the rule. With `clearValue = null` the
+trigger simply re-arms when the predicate goes false (one sample back above
+5 cm), which is fine for clean digital signals but risky for noisy analog
+sensors — prefer a `clearValue` for the latter.
 
 ### Condition model
 
@@ -161,20 +172,37 @@ class RuleEvaluator {
         readings: Map<String, Float>,
         now: LocalTime,
         rootAvailable: Boolean,
+        sinceLastFiredMillis: Long?,      // ms since this rule last fired; null = never fired
     ): List<RuleAction>
 }
 ```
 
+The evaluator returns **empty** (the rule is in cooldown) when
+`cooldownSeconds > 0 && sinceLastFiredMillis != null &&
+sinceLastFiredMillis < cooldownSeconds * 1000L` — before any
+trigger/condition work, so a rule under cooldown can't dispatch regardless
+of how its trigger fired.
+
 Because it's a pure function, batch **3.2** unit-tests it exhaustively:
 threshold edges (rising vs falling, op boundaries), ALL/ANY folding,
-enabled/disabled, time windows that wrap midnight, and **root-gated actions
-filtered out when `rootAvailable == false`**. No emulator required.
+enabled/disabled, time windows that wrap midnight, **root-gated actions
+filtered out when `rootAvailable == false`**, the **cooldown boundary**
+(just-under / exactly-at / just-over `cooldownSeconds * 1000`), and
+**hysteresis arm/re-arm sequences** (fire at `value`, suppressed until the
+reading crosses `clearValue`, then re-arm). No emulator required.
 
 ## Runtime host
 
 **Decision (see ADR-0002): a dedicated `AutomationService` foreground
 service that self-stops when zero rules are enabled** — mirroring
 `MonitorService`'s self-stop pattern, not a second always-on process.
+
+The FGS is resident **only while ≥1 enabled rule has a metric-stream
+trigger** (the one trigger kind that needs a continuous subscription).
+Schedule-, broadcast-, and manual-only rule sets evaluate **one-shot**
+(alarm or receiver → start, evaluate, dispatch, stop) with no persistent
+service or notification — so a user who only has "at 09:00…" / "on power
+connected…" rules never sees an ongoing automation notification.
 
 Rationale, weighed against Android background limits:
 
@@ -183,10 +211,22 @@ Rationale, weighed against Android background limits:
   falling back to a bounded `sample()` poll. This reuses the exact seam
   monitoring already drives, so an idle device with only metric rules
   costs nothing.
-- **Schedule triggers** use `AlarmManager` (`setExactAndAllowWhileIdle`
-  where the rule justifies it, else inexact) — **not** `WorkManager`,
-  whose 15-minute floor is too coarse for "at 9:00 turn X on". An
-  `AutomationScheduler` (re)arms the next alarm per enabled `Schedule`.
+- **Schedule triggers** use `AlarmManager` — **not** `WorkManager`, whose
+  15-minute floor is too coarse for "at 9:00 turn X on". An
+  `AutomationScheduler` (re)arms the next alarm per enabled `Schedule`,
+  degrading by the per-rule `exact` flag and the live permission state:
+
+  | State | AlarmManager call | Builder UI |
+  |---|---|---|
+  | `exact = false` (default) | `setWindow` (±10 min) | "around 09:00" |
+  | `exact = true` and `canScheduleExactAlarms()` | `setExactAndAllowWhileIdle` | "at 09:00" |
+  | `exact = true` but permission denied | `setWindow` (±10 min) | "around 09:00" + badge "needs Alarms & reminders" linking `ACTION_REQUEST_SCHEDULE_EXACT_ALARM` |
+
+  The manifest declares `SCHEDULE_EXACT_ALARM` — a user-grantable special
+  permission that is **denied by default on Android 14+ fresh installs**
+  targeting SDK 33+, so the default path must be inexact and the `exact`
+  opt-in must tolerate denial. `USE_EXACT_ALARM` is **explicitly not used**:
+  Play restricts it to alarm-clock / calendar apps, which Gadget is not.
 - **System-event triggers** use registered `BroadcastReceiver`s
   (`ACTION_POWER_CONNECTED`, connectivity, etc.); `BootCompleted` re-arm
   reuses `:core:widgetkit`'s `BootRearmHandler` Hilt multibinding (one
@@ -210,6 +250,13 @@ The service flow per fired trigger: gather the `readings` snapshot (one
 actionKey, params)`. The dispatch path is already structured-concurrency
 safe and feeds the same runtime/monitoring as in-app controls.
 
+The service enforces an **`AutomationBudget`** so chaining (one rule's
+action moving a metric that triggers another rule) can't spin: at most **16
+action dispatches per trigger-evaluation cycle** and a global rolling cap of
+**60 dispatches / 60 s**. On breach it drops the overflow, logs it, and
+posts a single "Automation throttled" notification instead of silently
+machine-gunning. These constants are tunable at batch 3.3.
+
 ## Persistence
 
 A new Room database **`automation.db`** in `:core:data`, sibling to
@@ -218,8 +265,13 @@ A new Room database **`automation.db`** in `:core:data`, sibling to
 ```
 rules(id TEXT PK, name TEXT, enabled INTEGER, trigger_json TEXT,
       conditions_json TEXT, condition_logic TEXT, actions_json TEXT,
-      created_at INTEGER, updated_at INTEGER)
+      created_at INTEGER, updated_at INTEGER, last_fired_at INTEGER)
 ```
+
+`last_fired_at` (nullable) is persisted so per-rule cooldowns survive
+process death and reboot — a metric that is flapping across its threshold
+at restart cannot re-storm because the cooldown clock is restored, not
+reset.
 
 The sealed `Trigger`/`Condition`/`RuleAction` graphs are stored as
 **kotlinx-serialization JSON columns**, not normalized tables — this keeps
@@ -229,6 +281,14 @@ the relational schema flat and lets the sealed hierarchies evolve through
 `Flow<List<Rule>>`. `schemaVersion = 1`; the committed `schemas/` dir gets
 the exported schema, and any later bump ships a migration test (load old →
 migrate → assert) per the repo convention.
+
+`automation.db` joins the whole-app ZIP as `databases/automation.db`,
+bumping the backup format **v4 → v5** (the `BackupManager` change ships in
+batch 3.2 alongside the DB). Restore stages it off the live Room path with a
+WAL checkpoint, following the exact `apps.db` staging pattern hardened in
+PRs #143/#144. Rules restored from a **rooted** device's backup onto a
+standard install are then defanged by gating layer 2 (the evaluator's
+`rootAvailable` filter, already specified in § Safety).
 
 ## Safety — root gating
 
@@ -269,8 +329,9 @@ builder (batch 3.4).
 
 1. **3.1 — this doc + ADR-0002.** (done)
 2. **3.2 — engine core:** rule model + pinned `@SerialName`s + round-trip
-   tests; `automation.db` + `RuleRepository`; pure-Kotlin `RuleEvaluator`
-   + exhaustive JVM tests.
+   tests; `automation.db` + `RuleRepository` (+ backup v5 — `BackupManager`
+   adds `databases/automation.db`); pure-Kotlin `RuleEvaluator` + exhaustive
+   JVM tests.
 3. **3.3 — runtime:** `AutomationService` + `AutomationScheduler` + system
    receivers + boot re-arm; an integration test driving a rule →
    dispatch → torch controller.

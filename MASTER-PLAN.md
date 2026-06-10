@@ -7,7 +7,12 @@ HardwareDash (app name: Gadget) will become the definitive Android app for explo
 - Branch `main`: canonical. Phase 0 + Phase 1 + Phase 1.1 hardening complete; Phase 2 (accelerated feature migration) **in progress** (June 2026). All work now lands on `main` via one PR per `claude/<topic>` batch branch — the long-lived `claude/refactor-2026` integration branch is retired.
 - **Migrated & live in the shell:** Torch (+ rooted/standard siblings), Vibration (+ rooted/standard siblings), App-Organizer (folders + folder widgets), Settings, Dashboard.
 - **Infrastructure landed:** `:core:root` (root-safety seam), `:core:widgetkit` (home-screen-widget framework), `:core:monitoring` (chart + persist framework), whole-app backup format v4, plus the `:core:automation` / `:core:hardware` contract seams. `:core:hardware` is reserved-but-empty pending the automation/sensors work (see Phase 3).
-- **Legacy surface shrinking:** ~195 legacy `com.gadget.*` `:app` files remain (down from the original single-module codebase); each migrates feature-by-feature, deleting the legacy package once its `:feature:*` module verifies.
+- **Legacy surface shrinking:** 310 legacy `com.gadget.*` Kotlin files remain
+  across ALL `:app` source sets (195 in `src/main`; the rest in the
+  rooted/standard flavor + test source sets — the flavor trees are future
+  migration work too). Canonical metric, tracked per batch in
+  `docs/refactor-2026/progress.md`:
+  `find app/src -path "*com/gadget*" -name "*.kt" | wc -l`
 - Branch `legacy-main`: Full archive of the old single-module codebase — reference material only, never imported from new code.
 
 ---
@@ -37,7 +42,7 @@ HardwareDash (app name: Gadget) will become the definitive Android app for explo
 | Torch / Flashlight (standard flavor) | ✅ Done (PRs #108–#120) | `:feature:torch` + Camera2 controller |
 | Flashlight widgets (QS tile + 2× home widgets) | ✅ Done (PRs #108–#137) | `FlashlightWidgetProvider`, `StrobeWidgetProvider` + `StrobeService`, extracted into `:core:widgetkit` |
 | Rooted torch extras (DutyCycle / MultiLed / Thermal) | ✅ Done (PRs #126–#132) | `:feature:torch-rooted` + `:core:root` `RootCapabilityRegistry` / `RootSafetyGate` (closes #94) |
-| Vibration (standard + rooted) | ✅ Done | `:feature:vibration` (+ `-rooted`/`-standard`); second validated migration consumer |
+| Vibration (standard + rooted) | ✅ Done (PR #130, follow-ups #134/#135/#137) | `:feature:vibration` (+ `-rooted`/`-standard`); second validated migration consumer |
 | App-Organizer + folder widgets | ✅ Done (PRs #138–#144) | `:feature:apps` (+ `-rooted`); content-widget archetype in `:core:widgetkit` |
 | Settings v2 — Backup / Restore | ✅ Done (PRs #142–#144) | Whole-app backup format v4 + legacy in-process import |
 | Settings v2 — Flipper Zero | ⏳ Phase 2 tail | After `FlipperConnectionManager` migration to `:feature:flipper` |

@@ -91,9 +91,10 @@ slider, SOS pattern, multi-LED panic.
 > whole module skeleton (build file, manifest, `<Name>Screen` /
 > `<Name>ViewModel` / `<Name>Navigation` on the design system, the
 > standard/rooted sibling pair with `--rooted`) and appends the
-> `:feature:<name>` include(s) to `settings.gradle.kts`. It compiles
-> standalone (`./gradlew :feature:<name>:assembleDebug`); the only manual
-> steps it leaves are the shared-file edits — adding the
+> `:feature:<name>` include(s) to `settings.gradle.kts`. It is designed to
+> compile standalone — verify with `./gradlew :feature:<name>:assembleDebug`
+> on first use; the scaffolder's output has not yet been CI-exercised; the
+> only manual steps it leaves are the shared-file edits — adding the
 > `GadgetDestination` entry, calling `<name>Screen()` from `GadgetApp`,
 > and (for `--rooted`) the `app/build.gradle.kts` flavor-impl lines. Start
 > here, then resume the recipe at Step 4.
