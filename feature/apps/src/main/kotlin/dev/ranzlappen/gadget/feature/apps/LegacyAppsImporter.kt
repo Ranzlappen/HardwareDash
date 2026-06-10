@@ -53,14 +53,18 @@ class LegacyAppsImporter @Inject constructor(
 
     suspend fun importIfNeeded() {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (prefs.getBoolean(KEY_DONE, false)) return
 
         // A legacy-backup restore stages the old gadget_db here (BackupManager)
         // so Room never tries to open — and fail to migrate — the old-schema
-        // file. Prefer the staged copy; an in-place upgrade has none and reads
-        // the live gadget_db (which Room migrated in place).
-        val staging = File(context.filesDir, "$RESTORE_STAGING_SUBDIR/$LEGACY_DB")
+        // file. Its mere presence forces a re-import even if a prior launch
+        // already marked the one-shot guard done; the guard only gates the
+        // in-place-upgrade path (reading the live gadget_db). The in-process
+        // restore (BackupManager.importFromStaged) usually does this already —
+        // this is the cold-start fallback if that didn't complete.
+        val staging = stagingFile()
         val fromStaging = staging.exists()
+        if (!fromStaging && prefs.getBoolean(KEY_DONE, false)) return
+
         val dbFile = if (fromStaging) staging else context.getDatabasePath(LEGACY_DB)
         if (!dbFile.exists()) {
             // Fresh install with no legacy DB — nothing to import, ever.
@@ -68,7 +72,9 @@ class LegacyAppsImporter @Inject constructor(
             return
         }
 
-        val imported = runCatching { importFrom(dbFile) }
+        // A staged restore replaces current data; an in-place upgrade merges
+        // into the (empty-on-first-launch) modular DB.
+        val imported = runCatching { doImport(dbFile, clearFirst = fromStaging) }
             .onFailure { Timber.e(it, "LegacyAppsImporter: import failed") }
             .getOrDefault(false)
 
@@ -77,10 +83,57 @@ class LegacyAppsImporter @Inject constructor(
         // leaves the flag unset so the next launch retries.
         if (imported || runCatching { !hasAppsTables(dbFile) }.getOrDefault(false)) {
             prefs.edit().putBoolean(KEY_DONE, true).apply()
-            // The staged restore DB is a one-time artifact — drop it so it can't
-            // re-import on a later launch.
             if (fromStaging) staging.parentFile?.deleteRecursively()
         }
+        Timber.i(
+            "LegacyAppsImporter: source=${if (fromStaging) "staged-restore" else "live"} imported=$imported",
+        )
+    }
+
+    /**
+     * Import a staged legacy backup **in-process**, called by `BackupManager`
+     * right after a restore so folders reappear **without a cold restart** (the
+     * cross-process restart proved unreliable on some devices). Writes through
+     * the live [AppsDao] / `apps.db` connection — restore must therefore NOT
+     * delete the apps.db file — and clears existing App-Organizer data first
+     * (restore replaces). On success it sets the one-shot guard and drops the
+     * staged file so the cold-start [importIfNeeded] is a no-op. Returns whether
+     * data was imported.
+     */
+    suspend fun importFromStaged(): Boolean {
+        val staging = stagingFile()
+        if (!staging.exists()) return false
+        if (!runCatching { hasAppsTables(staging) }.getOrDefault(false)) {
+            staging.parentFile?.deleteRecursively()
+            return false
+        }
+        val ok = runCatching { doImport(staging, clearFirst = true) }
+            .onFailure { Timber.e(it, "LegacyAppsImporter: in-process restore import failed") }
+            .getOrDefault(false)
+        if (ok) {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .edit().putBoolean(KEY_DONE, true).apply()
+            staging.parentFile?.deleteRecursively()
+            Timber.i("LegacyAppsImporter: in-process restore import complete")
+        }
+        return ok
+    }
+
+    private fun stagingFile(): File =
+        File(context.filesDir, "$RESTORE_STAGING_SUBDIR/$LEGACY_DB")
+
+    private suspend fun doImport(dbFile: File, clearFirst: Boolean): Boolean {
+        if (clearFirst) clearAllAppsData()
+        return importFrom(dbFile)
+    }
+
+    private suspend fun clearAllAppsData() {
+        dao.clearAllMembership()
+        dao.clearRules()
+        dao.clearWidgetConfigs()
+        dao.clearWebLinks()
+        dao.clearFolders()
+        dao.clearAppRecords()
     }
 
     private suspend fun importFrom(dbFile: File): Boolean {

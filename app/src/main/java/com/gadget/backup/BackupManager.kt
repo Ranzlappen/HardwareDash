@@ -2,6 +2,7 @@ package com.gadget.backup
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.database.sqlite.SQLiteDatabase
 import android.os.Build
 import com.gadget.data.db.GadgetDatabase
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -43,6 +44,7 @@ import javax.inject.Singleton
 class BackupManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val database: GadgetDatabase,
+    private val legacyAppsImporter: LegacyAppsImporter,
 ) {
 
     /**
@@ -275,6 +277,16 @@ class BackupManager @Inject constructor(
             // LegacyAppsImporter (raw SQLite, schema-agnostic) and remove the
             // live file so Room recreates a fresh current-schema gadget_db.
             if (restoredLegacyDb && !restoredModularAppsDb && dbPath != null) {
+                // Older backups (e.g. 1.0.117) may not have checkpointed before
+                // export, leaving committed rows in the companion -wal. Merge the
+                // WAL into the main file via a raw (non-Room) connection so the
+                // staged copy is self-contained. TRUNCATE empties the WAL after.
+                runCatching {
+                    SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE).use { raw ->
+                        raw.rawQuery("PRAGMA wal_checkpoint(TRUNCATE)", null).use { it.moveToFirst() }
+                    }
+                }.onFailure { Timber.w(it, "legacy gadget_db WAL checkpoint failed") }
+
                 val live = File(dbPath)
                 val staging = File(
                     context.filesDir,
@@ -292,18 +304,23 @@ class BackupManager @Inject constructor(
                 File("$dbPath-wal").delete()
                 File("$dbPath-shm").delete()
 
-                // Rebuild apps.db from the staged legacy DB rather than merging
-                // into stale data, and reset LegacyAppsImporter's one-shot guard
-                // so it re-runs on next launch. Without the reset, an install
-                // that already ran the importer would skip it and silently lose
-                // the restored folders (the guard is a SharedPrefs flag the
-                // legacy backup doesn't overwrite).
-                databasesDir?.listFiles()?.forEach { file ->
-                    if (file.isFile && file.name.startsWith("apps.db")) file.delete()
-                }
+                // Reset the importer's one-shot guard so a cold-start re-import
+                // can run as a fallback if the in-process import below doesn't
+                // complete. The guard is a SharedPrefs flag the legacy backup
+                // doesn't overwrite, so an already-imported install would
+                // otherwise skip it.
                 context.getSharedPreferences(LEGACY_APPS_IMPORT_PREFS, Context.MODE_PRIVATE)
                     .edit().clear().commit()
-                Timber.i("Legacy backup staged for re-import; live gadget_db reset")
+
+                // Import the staged App-Organizer data IN-PROCESS through the
+                // live apps.db connection so folders reappear WITHOUT a cold
+                // restart (the cross-process restart proved unreliable on some
+                // devices). The importer clears existing apps data first
+                // (restore replaces). We deliberately DON'T delete apps.db —
+                // that would orphan the open Room connection the import writes
+                // through.
+                legacyAppsImporter.importFromStaged()
+                Timber.i("Legacy backup staged + imported in-process")
             }
         } finally {
             // Reopen the database

@@ -122,4 +122,23 @@ interface AppsDao {
 
     @Query("SELECT * FROM apps_widget_config WHERE folder_id = :folderId")
     suspend fun getWidgetConfigsForFolder(folderId: Long): List<FolderWidgetConfig>
+
+    // ── Bulk clear (restore: replace all App-Organizer data) ────────────
+    @Query("DELETE FROM apps_folder")
+    suspend fun clearFolders()
+
+    @Query("DELETE FROM apps_folder_app")
+    suspend fun clearAllMembership()
+
+    @Query("DELETE FROM apps_record")
+    suspend fun clearAppRecords()
+
+    @Query("DELETE FROM apps_weblink")
+    suspend fun clearWebLinks()
+
+    @Query("DELETE FROM apps_folder_rule")
+    suspend fun clearRules()
+
+    @Query("DELETE FROM apps_widget_config")
+    suspend fun clearWidgetConfigs()
 }

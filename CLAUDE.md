@@ -1610,12 +1610,17 @@ mistake on PR.
   `gadget_db` is an old schema Room can't migrate, so restore **stages it to
   `filesDir/legacy_restore/`** (off the live Room path — else Room crashes on
   reopen: "migration from 1 to 5 not found"), deletes the live `gadget_db` (Room
-  recreates fresh), wipes `apps.db`, and clears `LegacyAppsImporter`'s
-  `apps_migration` SharedPrefs guard. `LegacyAppsImporter` then reads the staged
-  db via **raw SQLite** (schema-agnostic) on next launch, rebuilds App-Organizer
-  data, and deletes the staging dir (without the guard reset an already-imported
+  recreates fresh) and clears `LegacyAppsImporter`'s `apps_migration` SharedPrefs
+  guard, then calls `LegacyAppsImporter.importFromStaged()` **in-process** (NOT a
+  restart-dependent next-launch import — `exit(0)` restart proved unreliable on
+  some devices): it clears the existing apps tables (restore replaces) and lifts
+  the staged db's `apps_*` rows into `apps.db` via **raw SQLite** → the **live,
+  open** `AppsDao` (so restore must NOT delete the apps.db file), making folders
+  reappear immediately via the reactive observers. The cold-start
+  `importIfNeeded()` stays as a fallback (a present staging file forces a
+  re-import regardless of the guard). Without the guard reset an already-imported
   install would silently drop the backup's folders; legacy metric data isn't
-  recovered — it's vestigial). Restore applies the
+  recovered — it's vestigial. Restore applies the remaining
   modular DBs only on the next process start, so it prompts a restart. Wired
   into the modular `:feature:settings` via a `backupSection` slot that `:app`
   fills with `BackupCard()` (reaches `BackupManager` through
