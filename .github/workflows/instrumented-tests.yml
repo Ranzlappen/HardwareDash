@@ -127,7 +127,7 @@ jobs:
           # Single line: android-emulator-runner's `script` input does not
           # reliably honor backslash-newline continuations (the `\` leaks
           # through as a literal Gradle task → "Task '\' not found").
-          script: ./gradlew :core:ui:connectedDebugAndroidTest :core:data:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest :feature:apps:connectedDebugAndroidTest --stacktrace
+          script: ./gradlew :core:ui:connectedDebugAndroidTest :core:data:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest :feature:apps:connectedDebugAndroidTest :feature:sensors:connectedDebugAndroidTest --stacktrace
 
       - name: Upload test reports
         if: always()
@@ -147,7 +147,7 @@ jobs:
             echo "## Instrumented tests (API 30 emulator)"
             echo ""
             if [ "${{ job.status }}" = "success" ]; then
-              echo "✅ **connectedDebugAndroidTest passed** for :core:ui, :core:data, :feature:torch, :feature:vibration, :feature:apps."
+              echo "✅ **connectedDebugAndroidTest passed** for :core:ui, :core:data, :feature:torch, :feature:vibration, :feature:apps, :feature:sensors."
             else
               echo "❌ **Instrumented tests failed.** See the uploaded \`instrumented-test-reports\` artifact."
             fi

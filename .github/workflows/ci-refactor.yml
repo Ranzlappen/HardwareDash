@@ -56,6 +56,7 @@ jobs:
           ./gradlew \
             :core:automation:testDebugUnitTest \
             :core:data:testDebugUnitTest \
+            :core:hardware:testDebugUnitTest \
             :core:widgetkit:testDebugUnitTest \
             --stacktrace
 
@@ -67,6 +68,7 @@ jobs:
           path: |
             core/automation/build/reports/tests/
             core/data/build/reports/tests/
+            core/hardware/build/reports/tests/
             core/widgetkit/build/reports/tests/
           retention-days: 7
 

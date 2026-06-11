@@ -18,7 +18,6 @@ import com.gadget.microphone.MicrophoneController
 import com.gadget.nfc.NfcController
 import com.gadget.notification.NotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
-import com.gadget.sensors.SensorsController
 import com.gadget.storage.StorageController
 import com.gadget.usbdebug.UsbDebuggingController
 import com.gadget.wifi.WifiController
@@ -70,7 +69,6 @@ interface RootFeaturesEntryPoint {
     fun featureToggles(): RootFeatureToggles
     fun cameraController(): CameraController
     fun microphoneController(): MicrophoneController
-    fun sensorsController(): SensorsController
     fun batteryController(): BatteryController
     fun wifiController(): WifiController
     fun bluetoothController(): BluetoothController

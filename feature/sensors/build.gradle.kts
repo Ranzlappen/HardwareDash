@@ -9,8 +9,16 @@ android {
 }
 
 dependencies {
-    // Added by scripts/new-feature.sh (skeleton-fill) so the generated screen
-    // compiles. :core:ui brings the design system; :core:navigation the routes.
+    // :core:ui brings the design system; :core:navigation the routes.
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
+    // :core:monitoring for the embedded MonitorContainer history charts; its
+    // `api` surface also brings :core:model (MetricSource — the signal
+    // contract the three sensor sources implement).
+    implementation(project(":core:monitoring"))
+
+    // Stateless-screen instrumented test (Compose UI test stack via the
+    // shared fixtures, the torch/vibration pattern).
+    androidTestImplementation(project(":core:testing"))
+    androidTestImplementation(libs.androidx.junit)
 }
