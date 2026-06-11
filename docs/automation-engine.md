@@ -230,11 +230,17 @@ Rationale, weighed against Android background limits:
   targeting SDK 33+, so the default path must be inexact and the `exact`
   opt-in must tolerate denial. `USE_EXACT_ALARM` is **explicitly not used**:
   Play restricts it to alarm-clock / calendar apps, which Gadget is not.
-- **System-event triggers** use registered `BroadcastReceiver`s
-  (`ACTION_POWER_CONNECTED`, connectivity, etc.); `BootCompleted` re-arm
-  reuses `:core:widgetkit`'s `BootRearmHandler` Hilt multibinding (one
-  more handler keyed by an automation `FEATURE_ID`) — **don't** add a
-  second boot receiver.
+- **System-event triggers** use manifest `BroadcastReceiver`s for the
+  power events (`ACTION_POWER_CONNECTED`/`_DISCONNECTED` are on the
+  implicit-broadcast exemption list). `BootCompleted` rules fire from the
+  boot-rearm path: `BootCompleted` re-arm reuses `:core:widgetkit`'s
+  `BootRearmHandler` Hilt multibinding (one more handler keyed by an
+  automation `FEATURE_ID`) — **don't** add a second boot receiver.
+  **Amendment (batch 3.3):** `SystemEventKind.Connectivity` is *modeled but
+  not yet armed* — connectivity broadcasts stopped being deliverable to
+  manifest receivers in Android N, so arming it needs a registered
+  `NetworkCallback` inside a resident component; queued behind the builder
+  UI batch (which should hide it from the trigger picker until then).
 - **Manual triggers** dispatch immediately via a one-shot path; they don't
   need the service running.
 

@@ -187,6 +187,12 @@ dependencies {
     // RootCapabilityRegistry living in this module. Legacy
     // app/src/{standard,rooted}/java/com/gadget/root/* impls bind it.
     implementation(project(":core:root"))
+    // Direct deps for the :app-level automation wiring
+    // (AutomationBootRearmHandler binds :core:widgetkit's BootRearmHandler to
+    // :core:automation's runtime — the two modules deliberately don't see
+    // each other; :app is the assembly point).
+    implementation(project(":core:automation"))
+    implementation(project(":core:widgetkit"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:torch"))
     implementation(project(":feature:vibration"))

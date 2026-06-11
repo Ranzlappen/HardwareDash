@@ -59,11 +59,40 @@ CI-only pitfalls.
     still imports NO `:feature` module. **Assemble-verified** (the FGS / Hilt
     wiring resolves at `:app`, which pulls `:core:automation` transitively via
     `:feature:torch`).
-  - **F2b-2 (next):** `AutomationScheduler` (AlarmManager, calling
-    `AlarmSchedulingDecision`) for `Schedule` triggers.
-  - **F2b-3 (next):** system-event receivers + `BootCompleted` re-arm via the
-    widgetkit `BootRearmHandler` multibinding (also the rule-save →
-    `ensureStarted` wiring).
+  - **F2b-2+3 (scheduler + receivers + boot re-arm, this push):**
+    - `RuleFireExecutor` — the fire→evaluate→budget→dispatch pipeline
+      **extracted from the service** so every trigger path (resident metric
+      streams, one-shot alarms/broadcasts, future manual) shares **one global
+      `AutomationBudget`**, confined to a `limitedParallelism(1)` lane
+      (documented; ADR-0002 Decision 8 budgets total pressure, not per-path).
+      `AutomationService` now only detects edges and delegates.
+    - `NextScheduleCalculator` (pure): next-occurrence math (strictly-after,
+      day-set filtering, `atStartOfDay+minutes` for DST sanity, empty set →
+      null) — JVM-tested against a fixed zone (later-today / roll-tomorrow /
+      exactly-now / Saturday-only / same-day-rolls-a-week / midnight / empty).
+    - `AutomationScheduler` — one one-shot AlarmManager alarm per enabled
+      Schedule rule (`setExactAndAllowWhileIdle` vs `setWindow(10 min)` per
+      `AlarmSchedulingDecision` + live `canScheduleExactAlarms()`, API-31
+      guard); same-rule PendingIntent slot (UPDATE_CURRENT|IMMUTABLE);
+      `rearmAll()` for boot. `AutomationAlarmReceiver` fires the rule then
+      arms the next occurrence — the design doc's one-shot path.
+    - `AutomationSystemEventReceiver` — manifest receiver for the power
+      events (implicit-broadcast exempt). **Design-doc amendment (no silent
+      drift):** `SystemEventKind.Connectivity` is modeled but NOT armed —
+      connectivity broadcasts aren't deliverable to manifest receivers since
+      Android N; needs a resident `NetworkCallback`, queued behind the UI
+      batch (hide it in the trigger picker).
+    - `AutomationBootRearmHandler` + `AutomationAppModule` in **`:app`**
+      (package `dev.ranzlappen.gadget.automation`): binds into the widgetkit
+      `BootRearmHandler` map (key `"automation"`) — boot fires
+      `BootCompleted` rules, re-arms all schedule alarms, and `ensureStarted`s
+      the service iff residency requires. Lives in `:app` because
+      `:core:automation` is deliberately Compose-free and must not pull
+      `:core:widgetkit`; `:app` gains explicit `:core:automation` +
+      `:core:widgetkit` deps.
+    - Manifest: both receivers + `SCHEDULE_EXACT_ALARM` (user-grantable
+      special permission; not on the leak-gate list; `USE_EXACT_ALARM`
+      deliberately unused).
 - **F3 — end-to-end instrumented test (rule → dispatch → TorchController)**,
   added to the instrumented-tests matrix. **Unblocked:** the emulator flake
   was fixed in PR #155 (merge `8b8a556`) — the instrumented gate is reliable.
