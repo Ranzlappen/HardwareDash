@@ -73,6 +73,36 @@ jobs:
             ~/.android/adb*
           key: avd-api30-x86_64-google_apis
 
+      # The recurring CI flake was `sdkmanager` failing with "Error on ZipFile
+      # unknown archive" while downloading the API-30 system image — a transient
+      # corrupt/partial download that aborts the emulator-runner before any test
+      # runs (job dies in ~100s with an orphaned adb). The image isn't
+      # pre-present on ubuntu-latest, so it's fetched every run. Pre-install it
+      # here with a 3-attempt retry that clears the partial download between
+      # tries; a clean re-fetch nearly always succeeds. The emulator-runner's
+      # own `sdkmanager --install` is idempotent, so once this leaves a valid
+      # image in place that step is a no-op (no second download to flake on).
+      - name: Pre-install system image (retry on corrupt download)
+        env:
+          SDK_PKG: "system-images;android-30;google_apis;x86_64"
+        run: |
+          set -u
+          for attempt in 1 2 3; do
+            echo "::group::sdkmanager install attempt $attempt/3"
+            if yes | sdkmanager --install "$SDK_PKG" --channel=0; then
+              echo "::endgroup::"
+              echo "system image present after attempt $attempt"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "attempt $attempt failed — clearing partial download, retrying"
+            rm -rf "${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/android-sdk}}/system-images/android-30" \
+                   "$HOME/.android/cache" || true
+            sleep $((attempt * 5))
+          done
+          echo "system image install failed after 3 attempts"
+          exit 1
+
       - name: Create AVD + generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
