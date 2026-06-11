@@ -58,6 +58,22 @@ useless worker, C2 = #107 deletion, C3 unregister inert components).
 **HARD STOP: the policy decision + WS5 ordering are Matthias's** — recorded
 in the doc's decision record when made; Batch G's migration scope waits on it
 (the sensors *stub* from Batch C is unaffected).
+**Resolved 2026-06-11:** strict clean-cut confirmed (PR #151, merge
+`11122a1`); WS5 default order confirmed; C1+C2 approved, C3 deferred.
+
+**Batch D follow-up — C1+C2 legacy-widget cleanup:** branch
+`claude/legacy-widget-cleanup`. C1: deleted `WidgetUpdateWorker` and replaced
+`MainActivity`'s `schedule(this)` with a one-shot
+`cancelUniqueWork("widget_periodic_update")` so upgraded installs stop the
+orphaned 15-minute wakeup (the KEEP-policy periodic work survives app
+updates; the cancel is what kills it). C2 (#107): deleted the unregistered
+legacy `com.gadget.widget.{Flashlight,Strobe}WidgetProvider` and their
+`NotifActionEntry.FLASHLIGHT/STROBE` enum entries (sole compile-time
+consumers; `BuilderPresetStore` decodes persisted entries via
+`runCatching { valueOf } .getOrNull()`, so stale presets degrade to null).
+`widget_action.xml` stays — 10 other (dead-but-compiled) providers reference
+it; it dies with the package per the audit's per-feature deletions. Parity
+310 → 307.
 
 ## 2026-06 — "Get back on track" plan (doc-resync + scaffold + automation design)
 
