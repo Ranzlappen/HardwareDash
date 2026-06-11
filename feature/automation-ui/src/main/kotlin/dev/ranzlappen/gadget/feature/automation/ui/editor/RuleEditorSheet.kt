@@ -19,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -85,6 +86,11 @@ internal fun RuleEditorSheet(
     GadgetBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
+        // A rule is a long form (trigger + conditions + actions + options):
+        // open fully expanded instead of M3's half state, where everything
+        // below the trigger section starts under the fold (also what the
+        // instrumented badge test scrolls to).
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         title = stringResource(
             if (isNew) R.string.automation_editor_title_new else R.string.automation_editor_title_edit,
         ),

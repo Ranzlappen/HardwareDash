@@ -193,6 +193,10 @@ dependencies {
     // each other; :app is the assembly point).
     implementation(project(":core:automation"))
     implementation(project(":core:widgetkit"))
+    // BackupManager injects :core:data's DatabaseCheckpointer to WAL-
+    // checkpoint the modular DBs before the backup sweep (issue #153) —
+    // transitive-via-features doesn't expose it at compile time.
+    implementation(project(":core:data"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:torch"))
     implementation(project(":feature:vibration"))
