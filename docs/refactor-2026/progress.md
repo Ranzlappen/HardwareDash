@@ -31,13 +31,24 @@ CI-only pitfalls.
   → Admission(allowed, throttled)`, overflow dropped not queued. Exhaustive
   JVM tests (per-cycle clamp, rolling clamp across cycles, exact-windowMs
   expiry, partial expiry, zero-request no-op, spec defaults).
-- **Next pushes (same PR):** F2 the Android runtime — `AutomationService`
-  (FGS, resident only while ≥1 enabled rule has a metric-stream trigger),
-  `AutomationScheduler` (AlarmManager degradation contract), system-event
-  receivers + boot re-arm via the widgetkit `BootRearmHandler` multibinding,
-  the throttle notification wired to `AutomationBudget`; F3 the end-to-end
-  instrumented test (rule → dispatch → TorchController) added to the
-  instrumented-tests matrix.
+- **F2a — pure runtime contracts (this push):** `AlarmSchedulingDecision`
+  (the exact/inexact degradation as a pure function — the design doc's
+  3-state table; `plan(exactRequested, canScheduleExactAlarms) →
+  ScheduleAlarmPlan(exactness, needsExactAlarmPermission)`) and
+  `AutomationServiceResidency` (pure predicate: the FGS is resident only while
+  ≥1 enabled rule has a `MetricThreshold` trigger; `streamingRules` returns
+  the subscription set). Both exhaustively JVM-tested — the Android
+  `AutomationScheduler` + `AutomationService` call these so their core logic
+  is verified without an emulator.
+- **F2b — Android runtime (next push):** `AutomationService` (FGS owning the
+  `AutomationBudget` on its single evaluation dispatcher — the confinement
+  KDoc lands with the service), `AutomationScheduler` (AlarmManager, calling
+  `AlarmSchedulingDecision`), system-event receivers + boot re-arm via the
+  widgetkit `BootRearmHandler` multibinding, the throttle notification wired
+  to `AutomationBudget`. Assemble-verified.
+- **F3 — end-to-end instrumented test (rule → dispatch → TorchController)**,
+  added to the instrumented-tests matrix; gated on the emulator-flake fix
+  (PR #155, `claude/ci-emulator-hardening`).
 
 
 **Batch A (merge + baseline):** PR #148 merged to `main` (merge `d461c89`);
