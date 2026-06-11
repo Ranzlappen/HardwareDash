@@ -238,11 +238,17 @@ Rationale, weighed against Android background limits:
 - **Manual triggers** dispatch immediately via a one-shot path; they don't
   need the service running.
 
-  **Open item for batch 3.3:** as evaluated today, Manual triggers obey the
-  rule's cooldown — a "run now" tap inside the window is silently swallowed.
-  Decide at runtime-build time whether Manual bypasses cooldown or the UI
-  surfaces "on cooldown" feedback; and document the runtime contract that
-  `evaluate` receives the rule's *own* trigger instance as `firedTrigger`.
+  **Cooldown vs. Manual (decided, batch 3.3):** cooldown bounds *automated*
+  storms, so a `Trigger.Manual` "run now" tap **bypasses the cooldown
+  check** — an explicit tap is consent and is already human-rate-limited.
+  But the runtime **still calls `markFired`** after a manual dispatch, so a
+  manual run *delays the next automatic fire* (which is the intuitive
+  behaviour). The bypass lives in `RuleEvaluator` (`rule.trigger is
+  Trigger.Manual`), not the runtime, so it's JVM-tested. **Runtime
+  contract:** `evaluate` always receives the rule's *own* trigger instance
+  as `firedTrigger` (the runtime resolves which rule a fired event belongs
+  to before calling the evaluator); `firedTrigger != rule.trigger` is the
+  evaluator's defensive guard, not a routing mechanism.
 
 Why a separate FGS and not folding into `MonitorService`: monitoring's
 "one shared FGS for the whole app" rule is about not spawning a service

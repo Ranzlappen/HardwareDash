@@ -23,7 +23,10 @@ import javax.inject.Singleton
  *  1. disabled rule → empty
  *  2. **cooldown** (ADR-0002 Decision 8): `cooldownSeconds > 0` and the
  *     rule fired less than `cooldownSeconds * 1000` ms ago → empty, before
- *     any trigger/condition work
+ *     any trigger/condition work. **[Trigger.Manual] rules bypass this
+ *     check** — an explicit "run now" tap is consent, not an automated
+ *     storm — though the runtime still records the fire (`markFired`), so a
+ *     manual run delays the next automatic fire.
  *  3. fired trigger must equal the rule's trigger → else empty
  *  4. conditions fold per [ConditionLogic] (vacuously true when the list
  *     is empty, for ALL and ANY alike)
@@ -49,7 +52,13 @@ class RuleEvaluator @Inject constructor() {
         sinceLastFiredMillis: Long?,
     ): List<RuleAction> {
         if (!rule.enabled) return emptyList()
-        if (rule.cooldownSeconds > 0 &&
+        // Cooldown gates AUTOMATED triggers only. A Manual "run now" is
+        // explicit, human-rate-limited consent, so it bypasses the cooldown
+        // *check* — but the runtime still calls markFired afterwards, so a
+        // manual run delays the next automatic fire (ADR-0002 Decision 8 /
+        // the Batch-F decision; see docs/automation-engine.md § Runtime host).
+        val cooldownApplies = rule.cooldownSeconds > 0 && rule.trigger !is Trigger.Manual
+        if (cooldownApplies &&
             sinceLastFiredMillis != null &&
             sinceLastFiredMillis < rule.cooldownSeconds * 1_000L
         ) {
