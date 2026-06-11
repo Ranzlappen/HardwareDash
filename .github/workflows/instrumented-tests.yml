@@ -87,17 +87,33 @@ jobs:
           SDK_PKG: "system-images;android-30;google_apis;x86_64"
         run: |
           set -u
+          sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          # `sdkmanager` is NOT on PATH in a bare run step (the emulator-runner
+          # action sets that up internally — the first attempt of this fix hit
+          # "sdkmanager: command not found"), so resolve the binary explicitly:
+          # the cmdline-tools install first, then PATH, then any copy under the
+          # SDK root.
+          sdkmanager="$sdk_root/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$sdkmanager" ]; then
+            sdkmanager="$(command -v sdkmanager || true)"
+          fi
+          if [ -z "$sdkmanager" ] || [ ! -x "$sdkmanager" ]; then
+            sdkmanager="$(find "$sdk_root" -name sdkmanager -type f 2>/dev/null | head -1)"
+          fi
+          if [ -z "$sdkmanager" ] || [ ! -x "$sdkmanager" ]; then
+            echo "could not locate sdkmanager under $sdk_root"; exit 1
+          fi
+          echo "using sdkmanager at: $sdkmanager"
           for attempt in 1 2 3; do
             echo "::group::sdkmanager install attempt $attempt/3"
-            if yes | sdkmanager --install "$SDK_PKG" --channel=0; then
+            if yes | "$sdkmanager" --install "$SDK_PKG" --channel=0; then
               echo "::endgroup::"
               echo "system image present after attempt $attempt"
               exit 0
             fi
             echo "::endgroup::"
             echo "attempt $attempt failed — clearing partial download, retrying"
-            rm -rf "${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/android-sdk}}/system-images/android-30" \
-                   "$HOME/.android/cache" || true
+            rm -rf "$sdk_root/system-images/android-30" "$HOME/.android/cache" || true
             sleep $((attempt * 5))
           done
           echo "system image install failed after 3 attempts"
