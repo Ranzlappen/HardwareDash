@@ -1,3 +1,9 @@
+// GadgetBottomSheet's signature carries M3's experimental SheetState, and
+// LabeledChipRow's carries FlowRowScope — both opt-in requirements
+// propagate to every call site in this file (annotating a declaration
+// covers its body, not its consumers), so opt in file-wide.
+@file:OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+
 package dev.ranzlappen.gadget.feature.automation.ui.editor
 
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -467,7 +474,6 @@ internal fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolea
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun LabeledChipRow(label: String, content: @Composable FlowRowScope.() -> Unit) {
     val spacing = LocalGadgetTheme.current.spacing

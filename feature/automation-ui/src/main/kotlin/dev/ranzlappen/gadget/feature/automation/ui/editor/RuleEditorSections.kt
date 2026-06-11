@@ -1,6 +1,12 @@
+// LabeledChipRow's signature carries FlowRowScope, so every call site in
+// this file needs the foundation-layout opt-in (annotating only the
+// declaration covers its body, not its consumers).
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package dev.ranzlappen.gadget.feature.automation.ui.editor
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +24,7 @@ import dev.ranzlappen.gadget.core.automation.model.ComparisonOp
 import dev.ranzlappen.gadget.core.automation.model.Condition
 import dev.ranzlappen.gadget.core.automation.model.ConditionLogic
 import dev.ranzlappen.gadget.core.automation.model.RuleAction
+import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.model.MetricDescriptor
 import dev.ranzlappen.gadget.core.model.currentMax
@@ -26,7 +33,6 @@ import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
 import dev.ranzlappen.gadget.core.ui.component.GadgetTertiaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
-import dev.ranzlappen.gadget.core.ui.component.GlassIntensity
 import dev.ranzlappen.gadget.core.ui.component.GlassSurface
 import dev.ranzlappen.gadget.feature.automation.ui.ActionChoice
 import dev.ranzlappen.gadget.feature.automation.ui.MINUTES_PER_DAY

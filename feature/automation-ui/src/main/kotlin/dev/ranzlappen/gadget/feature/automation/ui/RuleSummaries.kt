@@ -90,9 +90,13 @@ internal fun triggerSummary(
             stringResource(R.string.automation_summary_schedule_daily, time)
         } else {
             // Stable Monday-first ordering regardless of set iteration order.
+            // map (inline) resolves the composable labels; joinToString takes
+            // no lambda — a composable call inside its non-inline transform
+            // doesn't compile.
             val days = DayOfWeek.values()
                 .filter { it in trigger.daysOfWeek }
-                .joinToString(", ") { dayLabel(it) }
+                .map { dayLabel(it) }
+                .joinToString(", ")
             stringResource(R.string.automation_summary_schedule_days, days, time)
         }
         if (trigger.exact) {
