@@ -47,8 +47,6 @@ import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
 import dev.ranzlappen.gadget.feature.rooted.root.emergency.RootedEmergencyResetCoordinator
 import dev.ranzlappen.gadget.feature.rooted.root.sysfs.RootedSysfsMutationLog
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
-import com.gadget.sensors.RootedSensorsController
-import com.gadget.sensors.SensorsController
 import com.gadget.storage.RootedStorageController
 import com.gadget.storage.StorageController
 import com.gadget.wifi.RootedWifiController
@@ -122,9 +120,6 @@ abstract class RootBindings {
 
     @Binds @Singleton
     abstract fun bindSysfsMutationLog(impl: RootedSysfsMutationLog): SysfsMutationLog
-
-    @Binds @Singleton
-    abstract fun bindSensorsController(impl: RootedSensorsController): SensorsController
 
     @Binds @Singleton
     abstract fun bindBatteryController(impl: RootedBatteryController): BatteryController

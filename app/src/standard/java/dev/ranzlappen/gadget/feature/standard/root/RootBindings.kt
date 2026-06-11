@@ -42,8 +42,6 @@ import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
 import dev.ranzlappen.gadget.feature.standard.root.emergency.StandardEmergencyResetCoordinator
 import dev.ranzlappen.gadget.feature.standard.root.sysfs.StandardSysfsMutationLog
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
-import com.gadget.sensors.SensorsController
-import com.gadget.sensors.StandardSensorsController
 import com.gadget.storage.StandardStorageController
 import com.gadget.storage.StorageController
 import com.gadget.wifi.StandardWifiController
@@ -132,10 +130,6 @@ object RootBindings {
     @Provides
     @Singleton
     fun provideSysfsMutationLog(impl: StandardSysfsMutationLog): SysfsMutationLog = impl
-
-    @Provides
-    @Singleton
-    fun provideSensorsController(impl: StandardSensorsController): SensorsController = impl
 
     @Provides
     @Singleton
