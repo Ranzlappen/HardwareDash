@@ -38,6 +38,26 @@ module sits outside `:app`'s build graph and `assembleStandardDebug` never
 compiles it. Guards (refuse-on-existing-sources, base-mode hyphen rejection)
 and the hyphenated path tested locally. `docs/migration-guide.md` Step 3
 updated (skeleton mode documented; "not CI-exercised" → verified).
+Merged as PR #149 (merge `55e262b`) after a review follow-up commit applying
+manual step #1 (SensorsNavigation registers at `GadgetDestination.Sensors
+.route` instead of a string-coincident module-local const).
+
+**Batch D (legacy-reachability audit — decision pending):** branch
+`claude/legacy-reachability-audit`. Produced
+`docs/refactor-2026/legacy-reachability.md` (the audit half of #147).
+Headline: the legacy screens were already deleted by the clean-cut, so the
+app is under a **de-facto strict clean-cut today** — every remaining
+`com.gadget.*` capability package is an orphaned engine room (only consumers:
+the retiring `RootFeaturesEntryPoint` + orphaned `root/ui` extras cards),
+every manifest-registered legacy service is inert (zero reachable starters),
+and `WidgetUpdateWorker` periodically services a provider that is no longer
+registered. Recommendation: **strict clean-cut** — the bridge option would
+mean resurrecting screens from the `legacy-main` archive at migration-scale
+cost per feature. Three reversible interim cleanups listed (C1 stop the
+useless worker, C2 = #107 deletion, C3 unregister inert components).
+**HARD STOP: the policy decision + WS5 ordering are Matthias's** — recorded
+in the doc's decision record when made; Batch G's migration scope waits on it
+(the sensors *stub* from Batch C is unaffected).
 
 ## 2026-06 — "Get back on track" plan (doc-resync + scaffold + automation design)
 
