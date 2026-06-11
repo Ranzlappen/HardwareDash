@@ -3,9 +3,22 @@
 # scripts/new-feature.sh — scaffold a new feature module.
 # =========================================================================
 #
-# Generates a `feature/<name>/` module wired to the design system and the
-# `gadget.android.feature` convention plugin, ready to flesh out per the
-# eight-step recipe in docs/migration-guide.md.
+# Two auto-detected modes:
+#
+#   * BASE mode — `feature/<name>/` does NOT exist yet. Creates the whole
+#     module (build.gradle.kts + manifest + sources) and appends the
+#     `:feature:<name>` include to settings.gradle.kts. Optional --rooted
+#     also scaffolds the standard/rooted sibling pair (torch/vibration model).
+#
+#   * SKELETON-FILL mode — `feature/<name>/` exists with a `build.gradle.kts`
+#     but no Kotlin sources (the Batch-0 empty skeletons). Generates **sources
+#     only**: it reads `namespace = "…"` from the existing build file (so it
+#     handles hyphenated module names like `radios-bt` for free), never
+#     overwrites the build file, and does NOT touch settings.gradle.kts (the
+#     include is already registered). If the skeleton's build file has no
+#     `dependencies { }` block, a minimal one (`:core:ui` + `:core:navigation`)
+#     is appended so the generated screen compiles. If the module already has
+#     Kotlin sources, the script refuses loudly.
 #
 # -------------------------------------------------------------------------
 # Usage
@@ -13,35 +26,24 @@
 #
 #   scripts/new-feature.sh <name> [--rooted]
 #
-# <name> must be lowercase alphanumeric (a–z, 0–9), starting with a letter,
-# with no hyphens or spaces (e.g. `sensors`, `gps`, `flipper`). Multi-word
-# capabilities that need a hyphenated module name (e.g. `radios-nfc`) are not
-# auto-scaffolded — copy an existing module by hand for those.
+# BASE-mode <name> must be lowercase alphanumeric (a–z, 0–9) starting with a
+# letter (no hyphens — the namespace is derived from it). SKELETON-FILL mode
+# additionally accepts hyphenated names (the namespace comes from the file).
 #
-# Creates (base):
-#   feature/<name>/build.gradle.kts                         (applies gadget.android.feature)
-#   feature/<name>/src/main/AndroidManifest.xml
-#   feature/<name>/src/main/kotlin/dev/ranzlappen/gadget/feature/<name>/
-#       <Name>Screen.kt        — stateless content + Hilt entry on the design system
-#       <Name>ViewModel.kt     — @HiltViewModel
-#       <Name>Navigation.kt    — NavGraphBuilder.<name>Screen() + route const
+# Generates these sources (both modes), under the module's namespace package:
+#       <Pascal>Screen.kt        — stateless content + Hilt entry on the design system
+#       <Pascal>ViewModel.kt     — @HiltViewModel
+#       <Pascal>Navigation.kt    — NavGraphBuilder.<camel>Screen() + route const
 #
-# With --rooted, also creates the standard/rooted sibling pair (the
-# torch/vibration model) so the standard APK is physically unable to compile
-# against root code:
-#   feature/<name>/...<Name>RootCapabilities.kt             (the flavor-agnostic interface)
-#   feature/<name>-standard/...                             (no-op impl + Hilt @Binds)
-#   feature/<name>-rooted/...                               (real impl seam + Hilt @Binds)
-#
-# Appends the `:feature:<name>` include line(s) to settings.gradle.kts.
+# --rooted (BASE mode only) also creates the standard/rooted sibling pair.
 #
 # -------------------------------------------------------------------------
 # Manual steps left after running (intentionally NOT automated — they touch
 # shared files where a blind edit would be wrong):
-#   1. Add a `GadgetDestination.<Name>` data object in
+#   1. Add a `GadgetDestination.<Pascal>` data object in
 #      core/navigation/.../GadgetDestination.kt and append it to the
 #      `modules` list (then fix every non-exhaustive `when (destination)`).
-#   2. Call `<name>Screen()` from the `GadgetApp { … }` builder in :app.
+#   2. Call `<camel>Screen()` from the `GadgetApp { … }` builder in :app.
 #   3. (--rooted only) Wire the siblings in app/build.gradle.kts:
 #         "standardImplementation"(project(":feature:<name>-standard"))
 #         "rootedImplementation"(project(":feature:<name>-rooted"))
@@ -69,58 +71,81 @@ if [[ -z "$NAME" ]]; then
     exit 2
 fi
 
-if [[ ! "$NAME" =~ ^[a-z][a-z0-9]*$ ]]; then
-    echo "error: <name> must be lowercase alphanumeric starting with a letter" >&2
-    echo "       (got '$NAME'). Hyphenated names aren't auto-scaffolded." >&2
+# Loose name check (segments are lowercase-alphanumeric, hyphen-separated).
+if [[ ! "$NAME" =~ ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ ]]; then
+    echo "error: <name> must be lowercase alphanumeric segments separated by" >&2
+    echo "       single hyphens, starting with a letter (got '$NAME')." >&2
     exit 2
 fi
 
-if [[ -d "feature/$NAME" ]]; then
-    echo "error: feature/$NAME already exists" >&2
+FEATURE_DIR="feature/$NAME"
+
+# --- mode detection -------------------------------------------------------
+if [[ -d "$FEATURE_DIR" ]]; then
+    if [[ ! -f "$FEATURE_DIR/build.gradle.kts" ]]; then
+        echo "error: $FEATURE_DIR exists but has no build.gradle.kts — not a" >&2
+        echo "       recognised skeleton. Refusing to touch it." >&2
+        exit 2
+    fi
+    if find "$FEATURE_DIR/src" -name '*.kt' 2>/dev/null | grep -q .; then
+        echo "error: $FEATURE_DIR already has Kotlin sources — nothing to fill." >&2
+        echo "       Refusing to overwrite existing code." >&2
+        exit 2
+    fi
+    MODE=skeleton
+else
+    MODE=base
+fi
+
+# BASE mode derives the namespace from the name, so it can't contain hyphens.
+if [[ "$MODE" == base && "$NAME" == *-* ]]; then
+    echo "error: hyphenated names ('$NAME') aren't supported in base mode" >&2
+    echo "       (the namespace is derived from the name). Create the skeleton" >&2
+    echo "       module first, then re-run to fill it." >&2
+    exit 2
+fi
+if [[ "$MODE" == skeleton && "$ROOTED" == true ]]; then
+    echo "error: --rooted is only supported in base mode. Add the" >&2
+    echo "       :feature:$NAME-{rooted,standard} siblings by hand for an" >&2
+    echo "       existing skeleton." >&2
     exit 2
 fi
 
-# --- derived identifiers --------------------------------------------------
-# Pascal: capitalise the first letter (name is [a-z][a-z0-9]* so this is safe).
-PASCAL="$(tr '[:lower:]' '[:upper:]' <<<"${NAME:0:1}")${NAME:1}"
-UPPER="$(tr '[:lower:]' '[:upper:]' <<<"$NAME")"
-PKG_DIR="feature/$NAME/src/main/kotlin/dev/ranzlappen/gadget/feature/$NAME"
+# --- derived identifiers (hyphen-aware) -----------------------------------
+# PASCAL: each hyphen segment capitalised + joined  (radios-bt -> RadiosBt)
+# CAMEL : first segment lower, rest capitalised      (radios-bt -> radiosBt)
+# UPPER : hyphens -> underscores, uppercased          (radios-bt -> RADIOS_BT)
+IFS='-' read -ra _SEGS <<<"$NAME"
+PASCAL=""
+CAMEL=""
+for _i in "${!_SEGS[@]}"; do
+    _s="${_SEGS[$_i]}"
+    _cap="$(tr '[:lower:]' '[:upper:]' <<<"${_s:0:1}")${_s:1}"
+    PASCAL+="$_cap"
+    if [[ "$_i" -eq 0 ]]; then CAMEL+="$_s"; else CAMEL+="$_cap"; fi
+done
+UPPER="$(tr '[:lower:]-' '[:upper:]_' <<<"$NAME")"
 
-echo "Scaffolding :feature:$NAME (rooted=$ROOTED) …"
+# Namespace: from the name (base) or read from the existing build file (skeleton).
+if [[ "$MODE" == base ]]; then
+    NAMESPACE="dev.ranzlappen.gadget.feature.$NAME"
+else
+    NAMESPACE="$(grep -oP 'namespace\s*=\s*"\K[^"]+' "$FEATURE_DIR/build.gradle.kts" | head -1 || true)"
+    if [[ -z "$NAMESPACE" ]]; then
+        echo "error: couldn't read 'namespace = \"…\"' from $FEATURE_DIR/build.gradle.kts" >&2
+        exit 2
+    fi
+fi
+PKG_DIR="$FEATURE_DIR/src/main/kotlin/${NAMESPACE//.//}"
 
-# --- base module ----------------------------------------------------------
-mkdir -p "$PKG_DIR"
+echo "Scaffolding :feature:$NAME (mode=$MODE, rooted=$ROOTED) …"
 
-cat > "feature/$NAME/build.gradle.kts" <<EOF
-// :feature:$NAME — TODO one-line description of the capability.
-//
-// Scaffolded by scripts/new-feature.sh. Build out the real controller/UI
-// per the eight-step recipe in docs/migration-guide.md.
+# --- shared source generator ----------------------------------------------
+generate_sources() {
+    mkdir -p "$PKG_DIR"
 
-plugins {
-    id("gadget.android.feature")
-}
-
-android {
-    namespace = "dev.ranzlappen.gadget.feature.$NAME"
-}
-
-dependencies {
-    // :core:ui transitively brings :core:designsystem (DashCard, GadgetEmptyState,
-    // the design-system component library + the preview matrix annotations).
-    implementation(project(":core:ui"))
-    // :core:navigation surfaces GadgetDestination + the route plumbing.
-    implementation(project(":core:navigation"))
-}
-EOF
-
-cat > "feature/$NAME/src/main/AndroidManifest.xml" <<EOF
-<?xml version="1.0" encoding="utf-8"?>
-<manifest />
-EOF
-
-cat > "$PKG_DIR/${PASCAL}Screen.kt" <<EOF
-package dev.ranzlappen.gadget.feature.$NAME
+    cat > "$PKG_DIR/${PASCAL}Screen.kt" <<EOF
+package $NAMESPACE
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -166,8 +191,8 @@ internal fun ${PASCAL}ScreenContent(modifier: Modifier = Modifier) {
 private fun ${PASCAL}ScreenPreview() = GadgetThemedPreview { ${PASCAL}ScreenContent() }
 EOF
 
-cat > "$PKG_DIR/${PASCAL}ViewModel.kt" <<EOF
-package dev.ranzlappen.gadget.feature.$NAME
+    cat > "$PKG_DIR/${PASCAL}ViewModel.kt" <<EOF
+package $NAMESPACE
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -181,8 +206,8 @@ import javax.inject.Inject
 class ${PASCAL}ViewModel @Inject constructor() : ViewModel()
 EOF
 
-cat > "$PKG_DIR/${PASCAL}Navigation.kt" <<EOF
-package dev.ranzlappen.gadget.feature.$NAME
+    cat > "$PKG_DIR/${PASCAL}Navigation.kt" <<EOF
+package $NAMESPACE
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -198,18 +223,79 @@ const val ${UPPER}_ROUTE = "$NAME"
  * Wire :feature:$NAME into the Gadget NavGraph. Call from the
  * \`GadgetApp { … }\` builder in :app.
  */
-fun NavGraphBuilder.${NAME}Screen() {
+fun NavGraphBuilder.${CAMEL}Screen() {
     composable(route = ${UPPER}_ROUTE) {
         ${PASCAL}Screen()
     }
 }
 EOF
+}
 
-# --- rooted sibling pair (optional) ---------------------------------------
+# --- write the manifest if absent -----------------------------------------
+write_manifest_if_absent() {
+    local manifest="$FEATURE_DIR/src/main/AndroidManifest.xml"
+    if [[ ! -f "$manifest" ]]; then
+        mkdir -p "$FEATURE_DIR/src/main"
+        cat > "$manifest" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<manifest />
+EOF
+    fi
+}
+
+if [[ "$MODE" == base ]]; then
+    # --- base module: write build file + manifest -------------------------
+    mkdir -p "$FEATURE_DIR"
+    cat > "$FEATURE_DIR/build.gradle.kts" <<EOF
+// :feature:$NAME — TODO one-line description of the capability.
+//
+// Scaffolded by scripts/new-feature.sh. Build out the real controller/UI
+// per the eight-step recipe in docs/migration-guide.md.
+
+plugins {
+    id("gadget.android.feature")
+}
+
+android {
+    namespace = "$NAMESPACE"
+}
+
+dependencies {
+    // :core:ui transitively brings :core:designsystem (DashCard, GadgetEmptyState,
+    // the design-system component library + the preview matrix annotations).
+    implementation(project(":core:ui"))
+    // :core:navigation surfaces GadgetDestination + the route plumbing.
+    implementation(project(":core:navigation"))
+}
+EOF
+    write_manifest_if_absent
+    generate_sources
+else
+    # --- skeleton-fill: sources only, never overwrite the build file ------
+    write_manifest_if_absent
+    generate_sources
+    # Ensure the design-system deps the generated screen needs are present.
+    if ! grep -q 'dependencies' "$FEATURE_DIR/build.gradle.kts"; then
+        cat >> "$FEATURE_DIR/build.gradle.kts" <<EOF
+
+dependencies {
+    // Added by scripts/new-feature.sh (skeleton-fill) so the generated screen
+    // compiles. :core:ui brings the design system; :core:navigation the routes.
+    implementation(project(":core:ui"))
+    implementation(project(":core:navigation"))
+}
+EOF
+        echo "  · appended a dependencies { } block (:core:ui + :core:navigation)"
+    else
+        echo "  · WARNING: existing dependencies { } block left untouched — confirm"
+        echo "    it has :core:ui + :core:navigation, or the generated screen won't compile."
+    fi
+fi
+
+# --- rooted sibling pair (base mode only) ---------------------------------
 if [[ "$ROOTED" == true ]]; then
-    # Flavor-agnostic capability interface in the base module.
     cat > "$PKG_DIR/${PASCAL}RootCapabilities.kt" <<EOF
-package dev.ranzlappen.gadget.feature.$NAME
+package $NAMESPACE
 
 /**
  * Root-only capability surface for $PASCAL, bound per flavor:
@@ -226,10 +312,8 @@ interface ${PASCAL}RootCapabilities {
 }
 EOF
 
-    # ---- :feature:<name>-standard (no-op) --------------------------------
     STD_PKG="feature/$NAME-standard/src/main/kotlin/dev/ranzlappen/gadget/feature/$NAME/standard"
     mkdir -p "$STD_PKG/di"
-
     cat > "feature/$NAME-standard/build.gradle.kts" <<EOF
 // :feature:$NAME-standard — standard-flavor no-op $PASCAL root surface.
 //
@@ -249,12 +333,10 @@ dependencies {
     implementation(project(":feature:$NAME"))
 }
 EOF
-
     cat > "feature/$NAME-standard/src/main/AndroidManifest.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <manifest />
 EOF
-
     cat > "$STD_PKG/Standard${PASCAL}RootCapabilities.kt" <<EOF
 package dev.ranzlappen.gadget.feature.$NAME.standard
 
@@ -266,7 +348,6 @@ class Standard${PASCAL}RootCapabilities @Inject constructor() : ${PASCAL}RootCap
     override suspend fun isAvailable(): Boolean = false
 }
 EOF
-
     cat > "$STD_PKG/di/Standard${PASCAL}Module.kt" <<EOF
 package dev.ranzlappen.gadget.feature.$NAME.standard.di
 
@@ -289,10 +370,8 @@ abstract class Standard${PASCAL}Module {
 }
 EOF
 
-    # ---- :feature:<name>-rooted (real impl seam) -------------------------
     ROOT_PKG="feature/$NAME-rooted/src/main/kotlin/dev/ranzlappen/gadget/feature/$NAME/rooted"
     mkdir -p "$ROOT_PKG/di"
-
     cat > "feature/$NAME-rooted/build.gradle.kts" <<EOF
 // :feature:$NAME-rooted — rooted-only $PASCAL capability surface.
 //
@@ -320,12 +399,10 @@ dependencies {
     implementation(libs.libsu.service)
 }
 EOF
-
     cat > "feature/$NAME-rooted/src/main/AndroidManifest.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <manifest />
 EOF
-
     cat > "$ROOT_PKG/Rooted${PASCAL}RootCapabilities.kt" <<EOF
 package dev.ranzlappen.gadget.feature.$NAME.rooted
 
@@ -342,7 +419,6 @@ class Rooted${PASCAL}RootCapabilities @Inject constructor() : ${PASCAL}RootCapab
     override suspend fun isAvailable(): Boolean = false // TODO: real root probe
 }
 EOF
-
     cat > "$ROOT_PKG/di/Rooted${PASCAL}Module.kt" <<EOF
 package dev.ranzlappen.gadget.feature.$NAME.rooted.di
 
@@ -366,10 +442,8 @@ abstract class Rooted${PASCAL}Module {
 EOF
 fi
 
-# --- register module(s) in settings.gradle.kts ----------------------------
-# Insert after the last existing ":feature:…" include entry (the feature
-# include block is contiguous; order isn't strictly alphabetical so we append
-# rather than sort).
+# --- register module(s) in settings.gradle.kts (base mode only) -----------
+# Skeleton modules are already registered, so skeleton-fill skips this.
 register_includes() {
     local settings="settings.gradle.kts"
     local last
@@ -389,21 +463,26 @@ register_includes() {
     tail -n +"$((last + 1))" "$settings" >> "$tmp"
     mv "$tmp" "$settings"
 }
-register_includes
+if [[ "$MODE" == base ]]; then
+    register_includes
+fi
 
 # --- done -----------------------------------------------------------------
-echo "✓ created feature/$NAME"
+echo "✓ filled feature/$NAME sources (${PASCAL}Screen / ${PASCAL}ViewModel / ${PASCAL}Navigation)"
+if [[ "$MODE" == base ]]; then
+    echo "✓ created feature/$NAME (build.gradle.kts + manifest)"
+    echo "✓ registered include in settings.gradle.kts"
+fi
 if [[ "$ROOTED" == true ]]; then
     echo "✓ created feature/$NAME-standard, feature/$NAME-rooted"
 fi
-echo "✓ registered include(s) in settings.gradle.kts"
 echo
 echo "Verify it compiles:"
 echo "  ./gradlew :feature:$NAME:assembleDebug"
 echo
 echo "Manual wiring left (see this script's header):"
 echo "  1. Add GadgetDestination.$PASCAL in core/navigation + append to modules"
-echo "  2. Call ${NAME}Screen() from the GadgetApp { … } builder in :app"
+echo "  2. Call ${CAMEL}Screen() from the GadgetApp { … } builder in :app"
 if [[ "$ROOTED" == true ]]; then
     echo "  3. In app/build.gradle.kts:"
     echo "       \"standardImplementation\"(project(\":feature:$NAME-standard\"))"
