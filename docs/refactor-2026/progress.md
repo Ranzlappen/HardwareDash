@@ -7,6 +7,106 @@ CI-only pitfalls.
 
 ## 2026-06 — Engine milestone follow-up (post PR #148)
 
+> **STANDING BLOCKER (Mode C, load-bearing):** Room **`schemas/` JSON is not
+> committed for any modular DB** — `automation.db` (new), `apps.db`,
+> `monitoring.db`. Mode C physically cannot generate them (no Android SDK;
+> `room.schemaLocation` export needs a real build), and CI doesn't archive
+> them. **No Room migration test can exist until `schemas/` is backfilled,
+> and that MUST happen before any of these DBs goes to v2.** Clears in one
+> Mode L session (domain allowlist → local `assembleDebug` exports all three
+> → commit). Until then, no schema-version bump on a modular DB.
+
+**Batch F (engine runtime, branch `claude/automation-engine-runtime`) — F1
+(pure-logic core) this push:**
+- **Manual-vs-cooldown decision (Matthias):** Manual triggers **bypass the
+  cooldown check** but the runtime still calls `markFired` (cooldown gates
+  automated triggers only; a manual run still delays the next automatic
+  fire). Implemented in `RuleEvaluator` (`rule.trigger is Trigger.Manual`),
+  JVM-tested (manual fires inside the window; the same cooldown on a
+  SystemEvent trigger is still enforced). Documented in the design doc's
+  Runtime host section (the open item is now a decision) + the runtime
+  contract that `evaluate` receives the rule's own trigger instance.
+- **`AutomationBudget`** (pure, clock-injected) in `:core:automation/engine`:
+  per-cycle cap (16) + rolling window cap (60 / 60 s), `admit(now, requested)
+  → Admission(allowed, throttled)`, overflow dropped not queued. Exhaustive
+  JVM tests (per-cycle clamp, rolling clamp across cycles, exact-windowMs
+  expiry, partial expiry, zero-request no-op, spec defaults).
+- **F2a — pure runtime contracts (this push):** `AlarmSchedulingDecision`
+  (the exact/inexact degradation as a pure function — the design doc's
+  3-state table; `plan(exactRequested, canScheduleExactAlarms) →
+  ScheduleAlarmPlan(exactness, needsExactAlarmPermission)`) and
+  `AutomationServiceResidency` (pure predicate: the FGS is resident only while
+  ≥1 enabled rule has a `MetricThreshold` trigger; `streamingRules` returns
+  the subscription set). Both exhaustively JVM-tested — the Android
+  `AutomationScheduler` + `AutomationService` call these so their core logic
+  is verified without an emulator.
+- **F2b — Android runtime (split into slices for tighter CI feedback):**
+  - **F2b-1 (service + residency + dispatch loop, this push):**
+    `AutomationService` — the `specialUse` FGS (mirror of `MonitorService`),
+    resident only while ≥1 enabled `MetricThreshold` rule exists
+    (`AutomationServiceResidency`), self-stopping otherwise. Per-fire
+    pipeline: metric sample → per-rule `MetricThresholdGate` → readings
+    snapshot → `RuleEvaluator` → `AutomationBudget` cap → `ModuleActionRegistry
+    .dispatch` → `RuleRepository.markFired`, with `rootAvailable` from
+    `RootCapabilityRegistry` and a one-shot "Automation throttled"
+    notification on budget breach. `AutomationBudget` is **confined to the
+    service's single `Dispatchers.Default` scope** (documented in the class
+    KDoc). `AutomationController.ensureStarted()` is the sole start path
+    (mirrors `MonitorController`; callers — the rule-builder save + boot
+    re-arm — arrive in later slices). `:core:automation` gains deps on
+    `:core:model` / `:core:root` / `:core:notifications` (+ core-ktx,
+    coroutines-android) and a `specialUse` `<service>` in its manifest;
+    still imports NO `:feature` module. **Assemble-verified** (the FGS / Hilt
+    wiring resolves at `:app`, which pulls `:core:automation` transitively via
+    `:feature:torch`).
+  - **F2b-2+3 (scheduler + receivers + boot re-arm, this push):**
+    - `RuleFireExecutor` — the fire→evaluate→budget→dispatch pipeline
+      **extracted from the service** so every trigger path (resident metric
+      streams, one-shot alarms/broadcasts, future manual) shares **one global
+      `AutomationBudget`**, confined to a `limitedParallelism(1)` lane
+      (documented; ADR-0002 Decision 8 budgets total pressure, not per-path).
+      `AutomationService` now only detects edges and delegates.
+    - `NextScheduleCalculator` (pure): next-occurrence math (strictly-after,
+      day-set filtering, `atStartOfDay+minutes` for DST sanity, empty set →
+      null) — JVM-tested against a fixed zone (later-today / roll-tomorrow /
+      exactly-now / Saturday-only / same-day-rolls-a-week / midnight / empty).
+    - `AutomationScheduler` — one one-shot AlarmManager alarm per enabled
+      Schedule rule (`setExactAndAllowWhileIdle` vs `setWindow(10 min)` per
+      `AlarmSchedulingDecision` + live `canScheduleExactAlarms()`, API-31
+      guard); same-rule PendingIntent slot (UPDATE_CURRENT|IMMUTABLE);
+      `rearmAll()` for boot. `AutomationAlarmReceiver` fires the rule then
+      arms the next occurrence — the design doc's one-shot path.
+    - `AutomationSystemEventReceiver` — manifest receiver for the power
+      events (implicit-broadcast exempt). **Design-doc amendment (no silent
+      drift):** `SystemEventKind.Connectivity` is modeled but NOT armed —
+      connectivity broadcasts aren't deliverable to manifest receivers since
+      Android N; needs a resident `NetworkCallback`, queued behind the UI
+      batch (hide it in the trigger picker).
+    - `AutomationBootRearmHandler` + `AutomationAppModule` in **`:app`**
+      (package `dev.ranzlappen.gadget.automation`): binds into the widgetkit
+      `BootRearmHandler` map (key `"automation"`) — boot fires
+      `BootCompleted` rules, re-arms all schedule alarms, and `ensureStarted`s
+      the service iff residency requires. Lives in `:app` because
+      `:core:automation` is deliberately Compose-free and must not pull
+      `:core:widgetkit`; `:app` gains explicit `:core:automation` +
+      `:core:widgetkit` deps.
+    - Manifest: both receivers + `SCHEDULE_EXACT_ALARM` (user-grantable
+      special permission; not on the leak-gate list; `USE_EXACT_ALARM`
+      deliberately unused).
+- **F3 — end-to-end engine integration test (this push):**
+  `AutomationEngineIntegrationTest` in `:core:data` androidTest (added to the
+  instrumented-tests matrix): the canonical rule ("if proximity < 5 cm then
+  torch off") persisted through the real Room `AutomationDatabase` →
+  `MetricThresholdGate` arm/fire on real samples → `RuleEvaluator` →
+  dispatched through a real `ModuleActionRegistry` into a **recording** torch
+  `ActionHandler` → `markFired` persisted → hysteresis re-arm at the gate but
+  the **persisted cooldown** suppresses the re-dispatch. The handler is a
+  recording fake by design — `:core:data` must not import a feature (the
+  engine's own invariant) and a CI emulator has no flash unit; the
+  real-TorchController half of the acceptance is the Batch-H milestone demo
+  on a physical device. Emulator gate reliable since PR #155 (+ #157).
+
+
 **Batch A (merge + baseline):** PR #148 merged to `main` (merge `d461c89`);
 parity metric re-confirmed at **310** (`find app/src -path "*com/gadget*"
 -name "*.kt" | wc -l`); engine design doc + ADR-0002 now canonical on `main`.

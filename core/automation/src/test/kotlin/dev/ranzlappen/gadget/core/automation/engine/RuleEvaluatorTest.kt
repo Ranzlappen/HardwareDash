@@ -24,6 +24,10 @@ class RuleEvaluatorTest {
     private val evaluator = RuleEvaluator()
 
     private val manualTrigger = Trigger.Manual
+    // An automated trigger for cooldown tests — Manual now BYPASSES cooldown
+    // (Batch-F decision), so cooldown enforcement must be exercised on a
+    // non-Manual trigger.
+    private val automatedTrigger = Trigger.SystemEvent(SystemEventKind.PowerConnected)
     private val torchOff = RuleAction(featureId = "torch", actionKey = "off")
     private val rootAction = RuleAction(featureId = "torch", actionKey = "boost", requiresRoot = true)
 
@@ -76,32 +80,54 @@ class RuleEvaluatorTest {
 
     @Test
     fun cooldown_justUnder_suppresses() {
-        val r = rule(cooldownSeconds = 30)
+        val r = rule(trigger = automatedTrigger, cooldownSeconds = 30)
         assertEquals(emptyList<RuleAction>(), evaluate(r, sinceLastFiredMillis = 29_999L))
     }
 
     @Test
     fun cooldown_exactlyAt_fires() {
         // The suppression window is strictly `< cooldownSeconds * 1000`.
-        val r = rule(cooldownSeconds = 30)
+        val r = rule(trigger = automatedTrigger, cooldownSeconds = 30)
         assertEquals(listOf(torchOff), evaluate(r, sinceLastFiredMillis = 30_000L))
     }
 
     @Test
     fun cooldown_justOver_fires() {
-        val r = rule(cooldownSeconds = 30)
+        val r = rule(trigger = automatedTrigger, cooldownSeconds = 30)
         assertEquals(listOf(torchOff), evaluate(r, sinceLastFiredMillis = 30_001L))
     }
 
     @Test
     fun cooldown_neverFired_fires() {
-        val r = rule(cooldownSeconds = 30)
+        val r = rule(trigger = automatedTrigger, cooldownSeconds = 30)
         assertEquals(listOf(torchOff), evaluate(r, sinceLastFiredMillis = null))
     }
 
     @Test
     fun zeroCooldown_ignoresLastFired() {
         assertEquals(listOf(torchOff), evaluate(rule(), sinceLastFiredMillis = 1L))
+    }
+
+    // ─── Manual bypasses cooldown (Batch-F decision) ────────────────
+
+    @Test
+    fun manualTrigger_bypassesCooldown_evenInsideTheWindow() {
+        // rule()'s trigger is Manual; a tap inside the cooldown window fires.
+        val r = rule(cooldownSeconds = 30)
+        assertEquals(listOf(torchOff), evaluate(r, sinceLastFiredMillis = 1L))
+    }
+
+    @Test
+    fun automatedTrigger_stillObeysCooldown() {
+        // The same cooldown on a non-Manual trigger is enforced.
+        val r = rule(
+            trigger = Trigger.SystemEvent(SystemEventKind.PowerConnected),
+            cooldownSeconds = 30,
+        )
+        assertEquals(
+            emptyList<RuleAction>(),
+            evaluate(r, sinceLastFiredMillis = 1L),
+        )
     }
 
     // ─── condition folding: ALL / ANY ───────────────────────────────

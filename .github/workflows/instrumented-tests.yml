@@ -7,6 +7,8 @@ name: Instrumented Tests
 #
 # Scope (MVP): the three Hilt-free, library/feature instrumented modules
 #   * :core:ui            — design-system component contracts (Modals, …)
+#   * :core:data          — automation engine integration (rule → Room →
+#                           gate → evaluate → dispatch; Batch F / F3)
 #   * :feature:torch      — TorchScreenContent (stateless screen)
 #   * :feature:vibration  — VibrationScreenContent (stateless screen)
 #   * :feature:apps       — AppsScreenContent (stateless screen)
@@ -61,17 +63,10 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      # Cache the AVD + its cold-boot snapshot so subsequent runs skip the
-      # multi-minute system-image download and boot. Keyed on the API level
-      # so a bump invalidates cleanly.
-      - name: AVD cache
-        uses: actions/cache@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-api30-x86_64-google_apis
+      # Do not cache the AVD/snapshot itself. The public API-30 emulator has
+      # intermittently restored to a state where android-emulator-runner waits
+      # until its boot timeout, so each CI attempt creates a clean AVD and only
+      # relies on the retried system-image install below for download hardening.
 
       # The recurring CI flake was `sdkmanager` failing with "Error on ZipFile
       # unknown archive" while downloading the API-30 system image — a transient
@@ -119,32 +114,20 @@ jobs:
           echo "system image install failed after 3 attempts"
           exit 1
 
-      - name: Create AVD + generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 30
-          arch: x86_64
-          target: google_apis
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          script: echo "Generated AVD snapshot for caching."
-
       - name: Run instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
           arch: x86_64
           target: google_apis
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          force-avd-creation: true
+          emulator-options: -no-snapshot-load -no-snapshot-save -wipe-data -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           # Compose UI tests assert against a settled tree — animations off.
           disable-animations: true
           # Single line: android-emulator-runner's `script` input does not
           # reliably honor backslash-newline continuations (the `\` leaks
           # through as a literal Gradle task → "Task '\' not found").
-          script: ./gradlew :core:ui:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest :feature:apps:connectedDebugAndroidTest --stacktrace
+          script: ./gradlew :core:ui:connectedDebugAndroidTest :core:data:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest :feature:apps:connectedDebugAndroidTest --stacktrace
 
       - name: Upload test reports
         if: always()
@@ -164,7 +147,7 @@ jobs:
             echo "## Instrumented tests (API 30 emulator)"
             echo ""
             if [ "${{ job.status }}" = "success" ]; then
-              echo "✅ **connectedDebugAndroidTest passed** for :core:ui, :feature:torch, :feature:vibration, :feature:apps."
+              echo "✅ **connectedDebugAndroidTest passed** for :core:ui, :core:data, :feature:torch, :feature:vibration, :feature:apps."
             else
               echo "❌ **Instrumented tests failed.** See the uploaded \`instrumented-test-reports\` artifact."
             fi
