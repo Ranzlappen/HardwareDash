@@ -198,6 +198,9 @@ dependencies {
     implementation(project(":feature:vibration"))
     implementation(project(":feature:apps"))
     implementation(project(":feature:sensors"))
+    // Batch H: the automation rules list + builder (also pulls
+    // :core:hardware — the read-side registry — into the :app Hilt graph).
+    implementation(project(":feature:automation-ui"))
 
     // ─── Compose UI components ───────────────────────────────────
     // The Compose BOM + ui-tooling-preview + ui-tooling are pulled in by

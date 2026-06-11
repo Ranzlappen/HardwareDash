@@ -144,10 +144,11 @@ sealed interface GadgetDestination {
          * gets a rail button — a module is never dashboard-only.
          *
          * Real modules replace the abstract placeholder areas as they
-         * land: [Torch] is the first real module; [Sensors] /
-         * [Actuators] / [Automation] remain coming-soon placeholders
-         * until their feature modules ship. Append new / legacy-
-         * migrated modules here.
+         * land: [Torch], [Vibration], [Apps], [Sensors], and
+         * [Automation] (the rules list + builder) are live;
+         * [Actuators] remains a coming-soon placeholder until its
+         * feature module ships. Append new / legacy-migrated modules
+         * here.
          */
         val modules: List<GadgetDestination> = listOf(
             Torch, Vibration, Apps, Sensors, Actuators, Automation,

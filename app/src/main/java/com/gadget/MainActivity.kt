@@ -41,6 +41,7 @@ import dev.ranzlappen.gadget.core.navigation.GadgetApp
 import dev.ranzlappen.gadget.core.navigation.GadgetDestination
 import dev.ranzlappen.gadget.core.navigation.navigateTopLevel
 import dev.ranzlappen.gadget.core.navigation.placeholderScreen
+import dev.ranzlappen.gadget.feature.automation.ui.automationScreen
 import dev.ranzlappen.gadget.feature.dashboard.dashboardScreen
 import dev.ranzlappen.gadget.feature.sensors.sensorsScreen
 import dev.ranzlappen.gadget.feature.settings.settingsScreen
@@ -118,7 +119,7 @@ class MainActivity : ComponentActivity() {
                         )
                         sensorsScreen()
                         placeholderScreen(GadgetDestination.Actuators)
-                        placeholderScreen(GadgetDestination.Automation)
+                        automationScreen()
                         settingsScreen(
                             // Backup/restore lives in :app (BackupManager
                             // depends on the legacy GadgetDatabase a leaf
