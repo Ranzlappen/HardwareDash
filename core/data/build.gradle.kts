@@ -27,4 +27,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
+
+    // F3 engine integration test (rule -> Room -> gate -> evaluator ->
+    // dispatch) runs on-device against an in-memory AutomationDatabase.
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 }

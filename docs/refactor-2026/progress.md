@@ -93,9 +93,18 @@ CI-only pitfalls.
     - Manifest: both receivers + `SCHEDULE_EXACT_ALARM` (user-grantable
       special permission; not on the leak-gate list; `USE_EXACT_ALARM`
       deliberately unused).
-- **F3 — end-to-end instrumented test (rule → dispatch → TorchController)**,
-  added to the instrumented-tests matrix. **Unblocked:** the emulator flake
-  was fixed in PR #155 (merge `8b8a556`) — the instrumented gate is reliable.
+- **F3 — end-to-end engine integration test (this push):**
+  `AutomationEngineIntegrationTest` in `:core:data` androidTest (added to the
+  instrumented-tests matrix): the canonical rule ("if proximity < 5 cm then
+  torch off") persisted through the real Room `AutomationDatabase` →
+  `MetricThresholdGate` arm/fire on real samples → `RuleEvaluator` →
+  dispatched through a real `ModuleActionRegistry` into a **recording** torch
+  `ActionHandler` → `markFired` persisted → hysteresis re-arm at the gate but
+  the **persisted cooldown** suppresses the re-dispatch. The handler is a
+  recording fake by design — `:core:data` must not import a feature (the
+  engine's own invariant) and a CI emulator has no flash unit; the
+  real-TorchController half of the acceptance is the Batch-H milestone demo
+  on a physical device. Emulator gate reliable since PR #155 (+ #157).
 
 
 **Batch A (merge + baseline):** PR #148 merged to `main` (merge `d461c89`);
