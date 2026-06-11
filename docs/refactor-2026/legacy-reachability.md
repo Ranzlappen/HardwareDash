@@ -149,5 +149,10 @@ miss day-to-day).
 ## Decision record
 
 - **2026-06-11 — audit complete; recommendation: strict clean-cut.**
-- **Decision (Matthias):** _pending — recorded here when made._
-- **WS5 order confirmed/amended:** _pending._
+- **2026-06-11 — Decision (Matthias): strict clean-cut confirmed.** No
+  legacy bridge; migration order is the lever. C1+C2 cleanup approved; C3
+  deferred pending per-component verification.
+- **WS5 order:** default confirmed — **sensors → NFC/IR → GPS → Flipper →
+  rest** (storage/battery/audio/camera/diagnostics, then the rooted-heavy
+  subghz/lock/bugreport tail). Amendable at any batch boundary; GPS jumps
+  the queue on request.
