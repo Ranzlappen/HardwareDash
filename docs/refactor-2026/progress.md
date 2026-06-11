@@ -5,6 +5,40 @@ lives in `README.md` + the plan scratchpad). No Android SDK in the container,
 so CI is the compile gate — each batch is written to respect the CLAUDE.md
 CI-only pitfalls.
 
+## 2026-06 — Engine milestone follow-up (post PR #148)
+
+**Batch A (merge + baseline):** PR #148 merged to `main` (merge `d461c89`);
+parity metric re-confirmed at **310** (`find app/src -path "*com/gadget*"
+-name "*.kt" | wc -l`); engine design doc + ADR-0002 now canonical on `main`.
+
+**Batch B (environment probe → MODE C):** this container **cannot build
+Android locally** — the Android SDK host `dl.google.com` is blocked by the
+network egress policy (`curl -sI …commandlinetools-linux… → HTTP/2 403
+host_not_allowed`), and no SDK is pre-installed (`ANDROID_HOME` empty, no
+`~/android-sdk`). Java is 21 (build targets 17), moot without the SDK.
+**Decision: Mode C (CI-iterated)** — every code batch is verified through CI
+via draft PRs (`ci-refactor` / `build-apk` on code paths, `instrumented-tests`
+for emulator suites); batch design biases toward pure-JVM logic. Future
+sessions: don't re-probe — egress is locked down.
+
+**Batch C (scaffolder skeleton-fill + sensors stub):** branch
+`claude/scaffolder-skeleton-mode`. Added auto-detected **skeleton-fill mode**
+to `scripts/new-feature.sh` — for the Batch-0 empty skeletons it generates
+sources only, reads the namespace from the existing build file (handles
+hyphenated names like `radios-bt`), never overwrites the build file, skips the
+settings.gradle.kts append, and appends a `:core:ui`+`:core:navigation`
+`dependencies` block only when absent; refuses if sources already exist.
+Verified by first real use: ran it against `:feature:sensors` and committed
+the generated stub (the starting commit of Batch G), wired minimally into
+`:app` per the scaffolder's declared manual steps so CI actually compiles it
+— `implementation(project(":feature:sensors"))` + swapping
+`placeholderScreen(GadgetDestination.Sensors)` for `sensorsScreen()` in
+`MainActivity` (`GadgetDestination.Sensors` already existed). Without this the
+module sits outside `:app`'s build graph and `assembleStandardDebug` never
+compiles it. Guards (refuse-on-existing-sources, base-mode hyphen rejection)
+and the hyphenated path tested locally. `docs/migration-guide.md` Step 3
+updated (skeleton mode documented; "not CI-exercised" → verified).
+
 ## 2026-06 — "Get back on track" plan (doc-resync + scaffold + automation design)
 
 Branch `claude/repo-plan-execution-5ch33k`. Executed the low/zero-risk front

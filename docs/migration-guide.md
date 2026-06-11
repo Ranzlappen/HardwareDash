@@ -87,17 +87,29 @@ slider, SOS pattern, multi-LED panic.
 
 ### Step 3 — Wire the module's `build.gradle.kts`
 
-> **Shortcut:** `scripts/new-feature.sh <name> [--rooted]` scaffolds the
-> whole module skeleton (build file, manifest, `<Name>Screen` /
-> `<Name>ViewModel` / `<Name>Navigation` on the design system, the
-> standard/rooted sibling pair with `--rooted`) and appends the
-> `:feature:<name>` include(s) to `settings.gradle.kts`. It is designed to
-> compile standalone — verify with `./gradlew :feature:<name>:assembleDebug`
-> on first use; the scaffolder's output has not yet been CI-exercised; the
-> only manual steps it leaves are the shared-file edits — adding the
-> `GadgetDestination` entry, calling `<name>Screen()` from `GadgetApp`,
-> and (for `--rooted`) the `app/build.gradle.kts` flavor-impl lines. Start
-> here, then resume the recipe at Step 4.
+> **Shortcut:** `scripts/new-feature.sh <name> [--rooted]` scaffolds a
+> feature module wired to the design system. It auto-detects two modes:
+>
+> - **Base mode** (the `feature/<name>/` dir doesn't exist): creates the
+>   whole module — build file, manifest, `<Name>Screen` / `<Name>ViewModel`
+>   / `<Name>Navigation`, the standard/rooted sibling pair with `--rooted` —
+>   and appends the `:feature:<name>` include(s) to `settings.gradle.kts`.
+> - **Skeleton-fill mode** (the Batch-0 skeleton dir exists with a
+>   `build.gradle.kts` but no Kotlin sources — every planned migration
+>   target): generates **sources only**, reading `namespace = "…"` from the
+>   existing build file (so hyphenated names like `radios-bt` work), never
+>   overwriting the build file, and appending a `:core:ui` + `:core:navigation`
+>   `dependencies { }` block only if none is present. It refuses if the
+>   module already has sources.
+>
+> Verified by first real use: `scripts/new-feature.sh sensors` generated the
+> `:feature:sensors` stub whose **sources compile in CI unedited** once the
+> module is wired per the declared manual steps — the shared-file edits the
+> script can't safely make: adding/using the `GadgetDestination` entry
+> (`Sensors` already existed, so its `placeholderScreen(...)` route was
+> swapped for `sensorsScreen()`), adding `implementation(project(":feature:sensors"))`
+> to `:app`, and (for `--rooted`) the `app/build.gradle.kts` flavor-impl
+> lines. Start here, then resume the recipe at Step 4.
 
 The skeleton already has `id("gadget.android.feature")` (which
 brings Compose + Hilt + lifecycle + material3 + activity-compose
