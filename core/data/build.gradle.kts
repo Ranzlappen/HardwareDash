@@ -32,5 +32,10 @@ dependencies {
     // dispatch) runs on-device against an in-memory AutomationDatabase.
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
+    // androidx.test.ext:junit does NOT pull the instrumentation runner; the
+    // test APK needs androidx.test:runner for AndroidJUnitRunner itself (CI:
+    // ClassNotFoundException instantiating the runner). Other instrumented
+    // modules get it transitively via :core:testing's Compose test stack.
+    androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.kotlinx.coroutines.test)
 }
