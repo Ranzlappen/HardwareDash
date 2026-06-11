@@ -7,6 +7,31 @@ CI-only pitfalls.
 
 ## 2026-06 — Engine milestone follow-up (post PR #148)
 
+**Batch G (`:core:hardware` + sensors migration, branch
+`claude/core-hardware-sensors`) — G1 (`:core:hardware` read-side seam) this
+push:** `HardwareRegistry` (`@Singleton`, injects the shared
+`Map<String, MetricSource>` multibinding — the SAME map monitoring's sampler
+and the automation engine consume, so one signal definition is simultaneously
+chartable + automatable + enumerable; the fix for legacy `Link`'s hardcoded
+70-entry registry). API: `signals()` (descriptors sorted by display name),
+`descriptor(key)`, `isRegistered(key)`, `read(key)` (one-shot sample, null
+for an unregistered key). It's the symmetric partner to
+`ModuleActionRegistry` — actions on the write side, signals on the read side
+— and the seam `:feature:automation-ui`'s trigger/condition pickers (Batch H)
+enumerate without importing any feature. `:core:hardware` build file gains
+`api(:core:model)` + test deps; `HardwareRegistryTest` (signals/descriptor/
+isRegistered/read + empty-registry) added to the `ci-refactor` unit-tests
+job. Pure-JVM-verified; full Hilt-graph validation lands when H wires
+`:core:hardware` into `:app`. Closes the registry half of **#146** (the
+sensors `MetricSource` registrations + the builder selecting one complete
+its acceptance — G2/Batch H).
+- **G2+ (next):** sensors feature migration — `SensorManager`-backed
+  `MetricSource`s (proximity / light / accel-magnitude) registered `@IntoMap`
+  (the "real sensor reading" the engine triggers on), the real sensors screen
+  on the design system replacing the Batch-C stub, then delete legacy
+  `com.gadget.sensors` and log parity.
+
+
 > **STANDING BLOCKER (Mode C, load-bearing):** Room **`schemas/` JSON is not
 > committed for any modular DB** — `automation.db` (new), `apps.db`,
 > `monitoring.db`. Mode C physically cannot generate them (no Android SDK;
