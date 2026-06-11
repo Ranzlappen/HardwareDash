@@ -25,6 +25,15 @@ import dev.ranzlappen.gadget.core.automation.model.Trigger
  *    `clearValue 8` fires below 5 and re-arms only at ≥ 8, so noise
  *    dithering around 5 cannot machine-gun the rule. (One uniform formula —
  *    at-the-bound counts as re-armed.)
+ *
+ * **Warning — the clearValue's side matters.** The uniform formula assumes
+ * the clearValue lies on the **re-arm side** of `value` for the trigger's
+ * (op, edge). A wrong-side clearValue (e.g. Falling `Lt 5` with
+ * `clearValue 8`) silently degenerates hysteresis to ~`null` — dithering
+ * around the threshold machine-guns as if unprotected. Every persistence
+ * path must run the trigger through `normalizedClearValue()` (see
+ * `RuleNormalization` in the model package; `RuleRepository.save` does) and
+ * the builder UI should restrict threshold ops to inequalities.
  */
 object MetricThresholdGate {
 

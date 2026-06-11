@@ -17,4 +17,14 @@ android {
 
 dependencies {
     implementation(libs.kotlinx.coroutines.android)
+
+    // Automation engine core (ADR-0002): the RuleRepository contract + the
+    // Rule model whose sealed graphs persist as JSON columns in
+    // automation.db. The serialization runtime is needed to invoke the
+    // model's serializers from RuleMapper (no @Serializable declarations
+    // here, so the serialization *plugin* is not applied).
+    implementation(project(":core:automation"))
+    implementation(libs.kotlinx.serialization.json)
+
+    testImplementation(libs.junit)
 }

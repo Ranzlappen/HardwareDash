@@ -39,9 +39,12 @@ is what the *builder UI* enumerates.
 | `:core:data` | The Room `automation.db` (sibling to `apps.db` / `monitoring.db`) + `RuleRepository` impl. Features read repositories from `:core:data`, never Room directly. | Yes | No |
 | `:feature:automation-ui` | The Compose rule list + rule builder. | Yes | Yes |
 
-Invariant: `:core:automation` depends on `:core:model` (MetricSource),
-`:core:data` (RuleRepository), and `:core:root` (root gating). It depends
-on **no `:feature:*` module**. The evaluator is pure Kotlin so it can be
+Invariant: the dependency edge points `:core:data` → `:core:automation`
+(the `RuleRepository` **contract** lives in `:core:automation`; `:core:data`
+implements it over Room and binds it via Hilt — the reverse edge would be a
+cycle). `:core:automation` additionally depends on `:core:model`
+(MetricSource) and `:core:root` (root gating) as the runtime lands, and on
+**no `:feature:*` module**. The evaluator is pure Kotlin so it can be
 JVM-unit-tested with zero Android.
 
 ## Rule model
@@ -235,6 +238,12 @@ Rationale, weighed against Android background limits:
 - **Manual triggers** dispatch immediately via a one-shot path; they don't
   need the service running.
 
+  **Open item for batch 3.3:** as evaluated today, Manual triggers obey the
+  rule's cooldown — a "run now" tap inside the window is silently swallowed.
+  Decide at runtime-build time whether Manual bypasses cooldown or the UI
+  surfaces "on cooldown" feedback; and document the runtime contract that
+  `evaluate` receives the rule's *own* trigger instance as `firedTrigger`.
+
 Why a separate FGS and not folding into `MonitorService`: monitoring's
 "one shared FGS for the whole app" rule is about not spawning a service
 *per feature module*. Automation is a single cross-cutting engine, so one
@@ -265,7 +274,8 @@ A new Room database **`automation.db`** in `:core:data`, sibling to
 ```
 rules(id TEXT PK, name TEXT, enabled INTEGER, trigger_json TEXT,
       conditions_json TEXT, condition_logic TEXT, actions_json TEXT,
-      created_at INTEGER, updated_at INTEGER, last_fired_at INTEGER)
+      cooldown_seconds INTEGER, created_at INTEGER, updated_at INTEGER,
+      last_fired_at INTEGER)
 ```
 
 `last_fired_at` (nullable) is persisted so per-rule cooldowns survive

@@ -26,6 +26,9 @@ dependencies {
     // (the automation.db rules table stores the sealed graphs as JSON
     // columns — ADR-0002 Decision 5).
     implementation(libs.kotlinx.serialization.json)
+    // RuleRepository exposes Flow. `api` so consumers of the contract see
+    // the type without re-declaring the dep (mirrors :core:model).
+    api(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.junit)
 }
