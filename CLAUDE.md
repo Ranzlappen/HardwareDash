@@ -23,15 +23,19 @@ slot without forking components.
 Master roadmap is in `MASTER-PLAN.md`. Current phase: **Phase 2
 (Accelerated Feature Migration), in progress** — real hardware
 features are migrating one module at a time onto the Phase-1 design
-system. **Torch**, **Vibration**, and **App-Organizer** (folders +
-folder widgets) are migrated and live in the shell, alongside
-**Settings** and the **Dashboard**. The shared infrastructure layer
-has landed: `:core:root` (root-safety seam), `:core:widgetkit`
+system. **Torch**, **Vibration**, **App-Organizer** (folders +
+folder widgets), **Sensors**, and **Automation** (the rules list +
+builder) are migrated and live in the shell, alongside **Settings**
+and the **Dashboard**. The shared infrastructure layer has landed:
+`:core:root` (root-safety seam), `:core:widgetkit`
 (home-screen-widget framework), `:core:monitoring` (chart + persist
-framework, whole-app backup format v4), plus the `:core:automation`
-action-contract seam (`ActionHandler` / `ModuleActionRegistry`, shipped)
-and the reserved-but-empty `:core:hardware` module the engine's
-enumeration layer will fill (epic #146). The remaining legacy
+framework, whole-app backup format v5), plus the **cross-automation
+engine** end-to-end (epics #145/#146): `:core:automation` (the
+`ActionHandler` / `ModuleActionRegistry` contract **plus** the rule
+model, pure evaluator, and AlarmManager/FGS runtime), `automation.db`
+in `:core:data`, `:core:hardware`'s `HardwareRegistry` (read-side
+enumeration over the shared `MetricSource` map), and the
+`:feature:automation-ui` rules list + builder. The remaining legacy
 `com.gadget.*` capability still living in `:app` migrates
 feature-by-feature per `docs/migration-guide.md`.
 
@@ -148,10 +152,10 @@ What every component **must** do for accessibility:
     `GadgetDestination.modules` in a `verticalScroll`-backed middle
     region that scrolls independently as the module list grows.
     Modules replace the placeholder areas as real features land —
-    Torch is the first; Sensors / Actuators / Automation stay as
-    coming-soon placeholders in the module region until their feature
-    modules ship. Add a new module by appending it to
-    `GadgetDestination.modules` and registering its route in the
+    Torch, Vibration, Apps, Sensors, and Automation are live;
+    Actuators stays a coming-soon placeholder in the module region
+    until its feature module ships. Add a new module by appending it
+    to `GadgetDestination.modules` and registering its route in the
     `GadgetApp { … }` builder.
 13. The `ModuleScreenScaffold` exposes an optional `secondaryPane`
     slot rendered to the right of the primary column when
@@ -1053,30 +1057,66 @@ reference.
 
 ---
 
-## Automation contract (`:core:automation`)
+## Automation engine (`:core:automation` + `:core:hardware` + `:core:data` + `:feature:automation-ui`)
 
-The per-module **action** surface the final automation tool drives modules
-through. `:core:automation` holds **only the contract**; the rule model,
-condition-tree evaluator, scheduler, and builder UI are the final
-`:feature:automation-ui` feature (deferred — every module satisfies the
-contract first).
-```kotlin
-interface ActionHandler {
-    val featureId: String
-    val actions: List<ModuleAction>   // metadata: key, label, requiresRoot, params
-    suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult
-}
-```
-- A feature binds one handler: `@Binds @IntoMap @StringKey("<featureId>")
+The cross-automation engine is **shipped end-to-end** (epics #145/#146;
+design: `docs/automation-engine.md`, ADR-0002). Layout:
+
+- **Contract** (`:core:automation`, unchanged): the per-module action
+  surface every feature satisfies —
+  ```kotlin
+  interface ActionHandler {
+      val featureId: String
+      val actions: List<ModuleAction>   // metadata: key, label, requiresRoot, params
+      suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult
+  }
+  ```
+  A feature binds one handler: `@Binds @IntoMap @StringKey("<featureId>")
   … : ActionHandler`. `ModuleActionRegistry` (injects the map) is what the
-  automation engine enumerates + dispatches through — **no central
-  hardcoding** (the fix for legacy `Link`'s hardcoded `LinkActionType`).
-- Reuse the feature's existing controllers/services in `dispatch` rather
-  than re-implementing hardware control. Reference: `TorchActionHandler`
-  (torch on/off, strobe start/stop, morse) delegating to `TorchController`
-  + `StrobeService`.
-- Contract types are plain (no `@Immutable` — `:core:automation` is not a
-  Compose module).
+  engine enumerates + dispatches through — **no central hardcoding** (the
+  fix for legacy `Link`'s hardcoded `LinkActionType`). Reuse the feature's
+  existing controllers/services in `dispatch` (reference:
+  `TorchActionHandler`). Contract + model types are plain (no `@Immutable`
+  — `:core:automation` is not a Compose module).
+- **Rule model + evaluator** (`:core:automation/model` + `engine`):
+  `Rule` = `when <Trigger> [if <Condition>s] then <RuleAction>s` with
+  pinned-`@SerialName` sealed graphs (wire format is sacred —
+  `RuleSerializationTest`), per-rule `cooldownSeconds` + threshold
+  hysteresis (`clearValue`, save-normalized), the pure JVM-tested
+  `RuleEvaluator` (Manual bypasses cooldown but still `markFired`s) and
+  `MetricThresholdGate` (edge + hysteresis, no fire-on-subscribe).
+- **Runtime** (`:core:automation/service`): `AutomationService` — a
+  self-stopping `specialUse` FGS resident **only** while ≥1 enabled
+  `MetricThreshold` rule exists; one-shot paths via
+  `AutomationAlarmReceiver` (AlarmManager, exact/inexact per
+  `AlarmSchedulingDecision`) + `AutomationSystemEventReceiver` (power
+  events; `Connectivity` modeled but NOT armed) + widgetkit boot re-arm.
+  Every path funnels through `RuleFireExecutor` — one budget-confined
+  fire→evaluate→dispatch pipeline (`fire` returns the dispatched count;
+  the manual "run now" surface uses it for honest feedback).
+- **Persistence**: `automation.db` in `:core:data` (`RoomRuleRepository`
+  behind the `RuleRepository` contract). Rides the backup `databases/`
+  sweep (format v5) and `DatabaseCheckpointer.checkpointAll()`.
+- **Read-side enumeration** (`:core:hardware`): `HardwareRegistry` over
+  the **same** `Map<String, MetricSource>` multibinding monitoring
+  samples — one signal definition is chartable + automatable +
+  enumerable. The builder's trigger/condition pickers consume it; no
+  feature imports.
+- **UI** (`:feature:automation-ui`): rules list (DashCard rows: summary,
+  enable switch, run-now, delete) + the `RuleEditorSheet` builder
+  (trigger kind → per-kind params, flat ALL/ANY conditions, actions with
+  param editors auto-generated from `ActionParam` schemas — the widget
+  sheet pattern), registered at `GadgetDestination.Automation`. Root
+  gating layer 1 lives here (the action picker drops `requiresRoot`
+  entries when `RootCapabilityRegistry.hasRootAccess()` is false); the
+  evaluator re-filters as layer 2. The exact-alarm degradation badge
+  ("needs Alarms & reminders" → `ACTION_REQUEST_SCHEDULE_EXACT_ALARM`)
+  shows in the editor and as a tri-state `ModuleCapability` row, with
+  grant state refreshed on `ON_RESUME`. Saves flow
+  `RuleRepository.save` → `AutomationScheduler.scheduleNext` /
+  `AutomationController.ensureStarted`; deletes also
+  `scheduler.cancel(id)`. `AutomationScreenContentTest` runs in the
+  instrumented matrix.
 
 ---
 
@@ -1613,11 +1653,14 @@ mistake on PR.
 - Settings: `app/src/main/java/com/gadget/ui/screens/SettingsScreen.kt`
 - Radios (Sub-GHz / IR / NFC / WiFi / Cell): `…/ui/screens/RadiosScreen.kt`
 - Backup: `app/src/main/java/com/gadget/backup/BackupManager.kt` — whole-app
-  ZIP (format v4): legacy `gadget_db`, modular `databases/{apps,monitoring}.db`,
-  every `shared_prefs/*.xml` + `datastore/*`, and the asset sweeps
-  (`folder_covers/`, `apps_favicons/`, `widget_icons/`). WAL must be
-  checkpointed via `query("PRAGMA wal_checkpoint(FULL)")`, not `execSQL` —
-  `execSQL` rejects statements that return rows. **Legacy backwards-compat**: a
+  ZIP (format v5): legacy `gadget_db`, modular
+  `databases/{apps,monitoring,automation}.db`, every `shared_prefs/*.xml` +
+  `datastore/*`, and the asset sweeps (`folder_covers/`, `apps_favicons/`,
+  `widget_icons/`). WAL must be checkpointed via
+  `query("PRAGMA wal_checkpoint(FULL)")`, not `execSQL` — `execSQL` rejects
+  statements that return rows; the modular DBs are checkpointed through
+  `:core:data`'s `DatabaseCheckpointer.checkpointAll()` before the sweep
+  (issue #153 — **add every new modular Room DB to its list**). **Legacy backwards-compat**: a
   backup with `gadget_db` but no `databases/apps.db` is a legacy backup — its
   `gadget_db` is an old schema Room can't migrate, so restore **stages it to
   `filesDir/legacy_restore/`** (off the live Room path — else Room crashes on

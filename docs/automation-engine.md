@@ -361,7 +361,14 @@ builder (batch 3.4).
    builder (trigger picker → conditions → actions rendered from
    `ModuleAction.params`), wired into `GadgetDestination.Automation` +
    `GadgetApp`; instrumented stateless-screen test under
-   `instrumented-tests.yml`.
+   `instrumented-tests.yml`. (done — Batch H: the builder enumerates
+   signals via `HardwareRegistry` and actions via `ModuleActionRegistry`,
+   hides the unarmed `Connectivity` event, flavor-filters `requiresRoot`
+   actions, surfaces the exact-alarm badge +
+   `ACTION_REQUEST_SCHEDULE_EXACT_ALARM` deep link, and wires save →
+   `AutomationScheduler.scheduleNext` / `AutomationController
+   .ensureStarted`; the manual "run now" path dispatches through the
+   shared `RuleFireExecutor`.)
 
 `:core:hardware` (epic #146) lands alongside 3.2/3.3 as the enumeration
 layer the builder uses to list available trigger/condition signals.
