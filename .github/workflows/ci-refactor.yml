@@ -25,6 +25,51 @@ on:
       - '.idea/**'
 
 jobs:
+  # JVM unit tests for the modules that carry pure-logic correctness
+  # (serialization wire-format pins, the automation rule model/evaluator).
+  # Scoped to an explicit module list rather than a repo-wide
+  # `testDebugUnitTest` so pre-existing never-run-in-CI test debt in other
+  # modules can't block unrelated PRs; grow the list as modules gain tests
+  # that must gate.
+  unit-tests:
+    name: JVM unit tests (core modules)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run unit tests
+        run: |
+          ./gradlew \
+            :core:automation:testDebugUnitTest \
+            :core:data:testDebugUnitTest \
+            :core:widgetkit:testDebugUnitTest \
+            --stacktrace
+
+      - name: Upload unit-test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-reports
+          path: |
+            core/automation/build/reports/tests/
+            core/data/build/reports/tests/
+            core/widgetkit/build/reports/tests/
+          retention-days: 7
+
   build:
     name: Assemble both flavors (debug)
     runs-on: ubuntu-latest

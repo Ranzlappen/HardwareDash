@@ -75,6 +75,44 @@ consumers; `BuilderPresetStore` decodes persisted entries via
 it; it dies with the package per the audit's per-feature deletions. Parity
 310 → 307.
 
+**Batch E (engine core, PR #150 — E1+E3 shipped, E2+E4 this push):**
+branch `claude/automation-engine-core`, Mode C (draft PR, CI-iterated).
+- **E1 — model + serialization:** `Rule`/`RuleAction`/`Trigger`/`Condition`
+  sealed families in `:core:automation/model`, every persisted subtype with a
+  pinned `@SerialName` FQN; `AutomationJson` (ignoreUnknownKeys,
+  encodeDefaults=false); `RuleSerializationTest` (round-trips, 6 discriminator
+  pins, enum wire names, defaults-tolerant + unknown-key decode). **Plus a
+  found CI gap:** no workflow ran any JVM unit test (even widgetkit's
+  wire-format pins never executed) — `ci-refactor.yml` gains a scoped
+  `unit-tests` job (`:core:automation` + `:core:data` + `:core:widgetkit`).
+- **E3 — evaluator:** pure-Kotlin `RuleEvaluator` (disabled → cooldown
+  strict-< → trigger match → ALL/ANY fold → requiresRoot filter) +
+  `MetricThresholdGate` (stateless arm/fire machine; edge + hysteresis; no
+  fire-on-subscribe). Tests cover the design doc's named list incl. cooldown
+  just-under/at/over and the proximity Lt5/clear8 noise sequence.
+- **E2 — persistence:** `automation.db` in `:core:data`
+  (`RuleEntity`/`RuleDao`/`AutomationDatabase` v1 + `RoomRuleRepository`
+  bound to the `RuleRepository` contract in `:core:automation`); pure
+  `RuleMapper` (JSON columns ↔ model, JVM-tested). **Review P2 folded in:**
+  `Rule.normalized()` / `normalizedClearValue()` null a wrong-side
+  `clearValue` on every save (the Falling-Lt5/clear8 degenerate-hysteresis
+  footgun), with the validity table tested per (op, edge) cell and a warning
+  KDoc on the gate. Design-doc amendments in the same PR (no silent drift):
+  schema line gains `cooldown_seconds`; the module-invariant sentence fixed
+  to the real dependency edge (`:core:data` → `:core:automation` — the
+  reverse would be a cycle).
+- **E4 — backup v5:** `automation.db` rides the existing generic
+  `databases/` sweep, so the change is the `BACKUP_FORMAT_VERSION` 4→5 bump
+  + version-history/comment docs; restored-from-rooted rules are defanged by
+  the evaluator's root filter (layer 2).
+- **Known gap:** Room schema JSON for `AutomationDatabase` v1 cannot be
+  generated in this environment (no SDK) and CI doesn't export it — the
+  committed-`schemas/` convention is currently unmet for *all three* modular
+  DBs (monitoring/apps/automation alike); needs one local build to backfill.
+- **Open item for Batch F (review P3):** Manual triggers currently obey
+  cooldown — decide bypass-vs-"on cooldown" feedback; documented in the
+  design doc's Runtime host section.
+
 ## 2026-06 — "Get back on track" plan (doc-resync + scaffold + automation design)
 
 Branch `claude/repo-plan-execution-5ch33k`. Executed the low/zero-risk front

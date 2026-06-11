@@ -94,7 +94,8 @@ class BackupManager @Inject constructor(
             }
 
             // 2b. Modular Room databases (apps.db = App-Organizer, monitoring.db
-            //     = metric history) live in the same databases/ dir but aren't
+            //     = metric history, automation.db = automation rules) live in
+            //     the same databases/ dir but aren't
             //     owned by this manager's GadgetDatabase reference. Sweep them
             //     (+ their -wal/-shm) under databases/ so v2 backups carry that
             //     data. gadget_db* is already captured above and is skipped here.
@@ -373,8 +374,14 @@ class BackupManager @Inject constructor(
          *       backup without these restores gadget_db and the
          *       LegacyAppsImporter migrates its apps_* rows into apps.db.
          *  - 4: + widget_icons/ sweep (custom torch / vibration widget icons).
+         *  - 5: + databases/automation.db (the automation engine's rules
+         *       store) rides the existing generic databases/ sweep; restore
+         *       follows the same next-launch staging as apps.db /
+         *       monitoring.db. Rules restored from a rooted device's backup
+         *       onto a standard install are defanged at evaluation time
+         *       (the evaluator drops requiresRoot actions — gating layer 2).
          */
-        const val BACKUP_FORMAT_VERSION = 4
+        const val BACKUP_FORMAT_VERSION = 5
 
         /**
          * SharedPreferences file backing `LegacyAppsImporter`'s one-shot import
