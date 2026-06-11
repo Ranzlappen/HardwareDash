@@ -3,7 +3,10 @@ package dev.ranzlappen.gadget.core.automation.service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import dev.ranzlappen.gadget.core.automation.RuleRepository
 import dev.ranzlappen.gadget.core.automation.model.SystemEventKind
 import dev.ranzlappen.gadget.core.automation.model.Trigger
@@ -11,7 +14,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * One-shot landing point for [Trigger.SystemEvent] rules. Manifest-registered
@@ -27,12 +29,19 @@ import javax.inject.Inject
  *  - [SystemEventKind.BootCompleted] rules fire from the widgetkit
  *    `BootCompletedReceiver` path (the `:app` automation boot-rearm handler),
  *    not here — one boot receiver for the whole app, per the kit's rule.
+ *
+ * **Not** `@AndroidEntryPoint` — see [AutomationAlarmReceiver]'s note (the
+ * repo's receivers use [EntryPointAccessors]; Hilt's receiver ASM transform
+ * breaks on Kotlin-only modules).
  */
-@AndroidEntryPoint
 class AutomationSystemEventReceiver : BroadcastReceiver() {
 
-    @Inject lateinit var ruleRepository: RuleRepository
-    @Inject lateinit var fireExecutor: RuleFireExecutor
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface SystemEventEntryPoint {
+        fun ruleRepository(): RuleRepository
+        fun fireExecutor(): RuleFireExecutor
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
         val kind = when (intent.action) {
@@ -40,12 +49,16 @@ class AutomationSystemEventReceiver : BroadcastReceiver() {
             Intent.ACTION_POWER_DISCONNECTED -> SystemEventKind.PowerDisconnected
             else -> return
         }
+        val entry = EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            SystemEventEntryPoint::class.java,
+        )
         val pending = goAsync()
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                ruleRepository.observeRules().first()
+                entry.ruleRepository().observeRules().first()
                     .filter { it.enabled && it.trigger == Trigger.SystemEvent(kind) }
-                    .forEach { fireExecutor.fire(it) }
+                    .forEach { entry.fireExecutor().fire(it) }
             } finally {
                 pending.finish()
             }
