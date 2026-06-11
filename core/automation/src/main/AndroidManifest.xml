@@ -1,2 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+        <!--
+          The automation engine runs as ONE specialUse foreground service for
+          the whole app (a single cross-cutting engine, not one service per
+          module — same spirit as :core:monitoring's MonitorService). It is
+          resident ONLY while >=1 enabled rule has a metric-stream
+          (MetricThreshold) trigger; schedule / broadcast / manual rules run
+          one-shot with no resident service. No standard foregroundServiceType
+          fits "continuous user-defined rule evaluation", so specialUse is
+          declared with a Play-console justification property.
+        -->
+        <service
+            android:name=".service.AutomationService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Event-driven evaluation of user-defined automation rules (metric-threshold triggers) to dispatch on-device actions." />
+        </service>
+    </application>
+</manifest>

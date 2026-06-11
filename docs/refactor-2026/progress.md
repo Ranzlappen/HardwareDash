@@ -40,15 +40,33 @@ CI-only pitfalls.
   the subscription set). Both exhaustively JVM-tested — the Android
   `AutomationScheduler` + `AutomationService` call these so their core logic
   is verified without an emulator.
-- **F2b — Android runtime (next push):** `AutomationService` (FGS owning the
-  `AutomationBudget` on its single evaluation dispatcher — the confinement
-  KDoc lands with the service), `AutomationScheduler` (AlarmManager, calling
-  `AlarmSchedulingDecision`), system-event receivers + boot re-arm via the
-  widgetkit `BootRearmHandler` multibinding, the throttle notification wired
-  to `AutomationBudget`. Assemble-verified.
+- **F2b — Android runtime (split into slices for tighter CI feedback):**
+  - **F2b-1 (service + residency + dispatch loop, this push):**
+    `AutomationService` — the `specialUse` FGS (mirror of `MonitorService`),
+    resident only while ≥1 enabled `MetricThreshold` rule exists
+    (`AutomationServiceResidency`), self-stopping otherwise. Per-fire
+    pipeline: metric sample → per-rule `MetricThresholdGate` → readings
+    snapshot → `RuleEvaluator` → `AutomationBudget` cap → `ModuleActionRegistry
+    .dispatch` → `RuleRepository.markFired`, with `rootAvailable` from
+    `RootCapabilityRegistry` and a one-shot "Automation throttled"
+    notification on budget breach. `AutomationBudget` is **confined to the
+    service's single `Dispatchers.Default` scope** (documented in the class
+    KDoc). `AutomationController.ensureStarted()` is the sole start path
+    (mirrors `MonitorController`; callers — the rule-builder save + boot
+    re-arm — arrive in later slices). `:core:automation` gains deps on
+    `:core:model` / `:core:root` / `:core:notifications` (+ core-ktx,
+    coroutines-android) and a `specialUse` `<service>` in its manifest;
+    still imports NO `:feature` module. **Assemble-verified** (the FGS / Hilt
+    wiring resolves at `:app`, which pulls `:core:automation` transitively via
+    `:feature:torch`).
+  - **F2b-2 (next):** `AutomationScheduler` (AlarmManager, calling
+    `AlarmSchedulingDecision`) for `Schedule` triggers.
+  - **F2b-3 (next):** system-event receivers + `BootCompleted` re-arm via the
+    widgetkit `BootRearmHandler` multibinding (also the rule-save →
+    `ensureStarted` wiring).
 - **F3 — end-to-end instrumented test (rule → dispatch → TorchController)**,
-  added to the instrumented-tests matrix; gated on the emulator-flake fix
-  (PR #155, `claude/ci-emulator-hardening`).
+  added to the instrumented-tests matrix. **Unblocked:** the emulator flake
+  was fixed in PR #155 (merge `8b8a556`) — the instrumented gate is reliable.
 
 
 **Batch A (merge + baseline):** PR #148 merged to `main` (merge `d461c89`);

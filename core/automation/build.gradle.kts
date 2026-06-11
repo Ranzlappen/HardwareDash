@@ -10,6 +10,11 @@
 //     pinned @SerialName), the pure-Kotlin RuleEvaluator, and the
 //     RuleRepository contract. The Room implementation lives in :core:data;
 //     the Compose builder UI lives in :feature:automation-ui — NOT here.
+//   * The RUNTIME HOST (engine-milestone Batch F): AutomationService (the
+//     specialUse FGS that subscribes metric-stream triggers and dispatches)
+//     + AutomationController. Reads signals via :core:model's MetricSource,
+//     gates root via :core:root, and posts its FGS notification via
+//     :core:notifications. Still imports NO :feature module.
 
 plugins {
     id("gadget.android.library")
@@ -29,6 +34,15 @@ dependencies {
     // RuleRepository exposes Flow. `api` so consumers of the contract see
     // the type without re-declaring the dep (mirrors :core:model).
     api(libs.kotlinx.coroutines.core)
+
+    // Runtime host (Batch F): the read seam (MetricSource), root gating, and
+    // the FGS notification channel. NO :feature module, NO :core:data (the
+    // RuleRepository contract lives here; :core:data implements it).
+    implementation(project(":core:model"))
+    implementation(project(":core:root"))
+    implementation(project(":core:notifications"))
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
 }
