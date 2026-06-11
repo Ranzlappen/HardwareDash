@@ -4,13 +4,14 @@ Whole-app export/import so a restore on a fresh install reproduces the device's
 full configuration. `app/src/main/java/com/gadget/backup/BackupManager.kt` owns
 the archive; `BackupCard` (Settings) is the UI.
 
-## Archive layout (ZIP, format v4)
+## Archive layout (ZIP, format v5)
 
 ```
 metadata.json                      app version, schema versions, timestamp, backupFormatVersion
 gadget_db (+ -wal, -shm)           legacy Room DB (metrics + pre-split apps_* tables)
 databases/apps.db (+ -wal/-shm)    modular App-Organizer DB
 databases/monitoring.db (+ …)      modular metric-history DB
+databases/automation.db (+ …)      modular automation-rules DB             ← added in v5
 shared_prefs/<name>.xml            every SharedPreferences file
 datastore/<name>                   every DataStore<Preferences> file (widget configs, monitor config, …)
 folder_covers/<id>.png             App-Organizer folder cover photos
@@ -28,12 +29,18 @@ clients read new ZIPs gracefully.
 - v2: + folder_covers/ + apps_favicons/
 - v3: + databases/ (modular apps.db / monitoring.db)
 - v4: + widget_icons/ (custom widget icons)
+- v5: + databases/automation.db (automation rules; rides the generic
+  `databases/` sweep — restored-from-rooted rules are defanged by the
+  evaluator's root filter)
 
 ## Export
 
-`createBackup(OutputStream)` — checkpoints the WAL
-(`query("PRAGMA wal_checkpoint(FULL)")`, **not** `execSQL` — it returns rows),
-then streams each category into the ZIP. Triggered from `BackupCard` via
+`createBackup(OutputStream)` — checkpoints the WAL of the legacy `gadget_db`
+**and** of every modular DB via `:core:data`'s `DatabaseCheckpointer
+.checkpointAll()` (issue #153 — without it a backup taken mid-write captures
+a torn copy of whichever modular DB still has committed pages in its WAL).
+Both use `query("PRAGMA wal_checkpoint(FULL)")`, **not** `execSQL` — it
+returns rows. Then streams each category into the ZIP. Triggered from `BackupCard` via
 `ACTION_CREATE_DOCUMENT` (`application/zip`, default name
 `gadget-backup-<yyyyMMdd-HHmm>.zip`).
 
