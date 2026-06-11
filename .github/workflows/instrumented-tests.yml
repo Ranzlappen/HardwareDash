@@ -61,29 +61,56 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      # Cache the AVD + its cold-boot snapshot so subsequent runs skip the
-      # multi-minute system-image download and boot. Keyed on the API level
-      # so a bump invalidates cleanly.
-      - name: AVD cache
-        uses: actions/cache@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-api30-x86_64-google_apis
+      # Do not cache the AVD/snapshot itself. The public API-30 emulator has
+      # intermittently restored to a state where android-emulator-runner waits
+      # until its boot timeout, so each CI attempt creates a clean AVD and only
+      # relies on the retried system-image install below for download hardening.
 
-      - name: Create AVD + generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 30
-          arch: x86_64
-          target: google_apis
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          script: echo "Generated AVD snapshot for caching."
+      # The recurring CI flake was `sdkmanager` failing with "Error on ZipFile
+      # unknown archive" while downloading the API-30 system image — a transient
+      # corrupt/partial download that aborts the emulator-runner before any test
+      # runs (job dies in ~100s with an orphaned adb). The image isn't
+      # pre-present on ubuntu-latest, so it's fetched every run. Pre-install it
+      # here with a 3-attempt retry that clears the partial download between
+      # tries; a clean re-fetch nearly always succeeds. The emulator-runner's
+      # own `sdkmanager --install` is idempotent, so once this leaves a valid
+      # image in place that step is a no-op (no second download to flake on).
+      - name: Pre-install system image (retry on corrupt download)
+        env:
+          SDK_PKG: "system-images;android-30;google_apis;x86_64"
+        run: |
+          set -u
+          sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          # `sdkmanager` is NOT on PATH in a bare run step (the emulator-runner
+          # action sets that up internally — the first attempt of this fix hit
+          # "sdkmanager: command not found"), so resolve the binary explicitly:
+          # the cmdline-tools install first, then PATH, then any copy under the
+          # SDK root.
+          sdkmanager="$sdk_root/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$sdkmanager" ]; then
+            sdkmanager="$(command -v sdkmanager || true)"
+          fi
+          if [ -z "$sdkmanager" ] || [ ! -x "$sdkmanager" ]; then
+            sdkmanager="$(find "$sdk_root" -name sdkmanager -type f 2>/dev/null | head -1)"
+          fi
+          if [ -z "$sdkmanager" ] || [ ! -x "$sdkmanager" ]; then
+            echo "could not locate sdkmanager under $sdk_root"; exit 1
+          fi
+          echo "using sdkmanager at: $sdkmanager"
+          for attempt in 1 2 3; do
+            echo "::group::sdkmanager install attempt $attempt/3"
+            if yes | "$sdkmanager" --install "$SDK_PKG" --channel=0; then
+              echo "::endgroup::"
+              echo "system image present after attempt $attempt"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "attempt $attempt failed — clearing partial download, retrying"
+            rm -rf "$sdk_root/system-images/android-30" "$HOME/.android/cache" || true
+            sleep $((attempt * 5))
+          done
+          echo "system image install failed after 3 attempts"
+          exit 1
 
       - name: Run instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -91,8 +118,8 @@ jobs:
           api-level: 30
           arch: x86_64
           target: google_apis
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          force-avd-creation: true
+          emulator-options: -no-snapshot-load -no-snapshot-save -wipe-data -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           # Compose UI tests assert against a settled tree — animations off.
           disable-animations: true
           # Single line: android-emulator-runner's `script` input does not
