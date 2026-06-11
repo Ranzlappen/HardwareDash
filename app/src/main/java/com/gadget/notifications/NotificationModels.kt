@@ -7,11 +7,9 @@ import androidx.core.app.NotificationCompat
 import com.gadget.MainActivity
 import com.gadget.widget.CameraSnapshotWidgetProvider
 import com.gadget.widget.DbMeterWidgetProvider
-import com.gadget.widget.FlashlightWidgetProvider
 import com.gadget.widget.LogNowWidgetProvider
 import com.gadget.widget.NotifyWidgetProvider
 import com.gadget.widget.PhoneRingWidgetProvider
-import com.gadget.widget.StrobeWidgetProvider
 import com.gadget.widget.VibrationWidgetProvider
 import com.gadget.widget.VideoToggleWidgetProvider
 import com.gadget.widget.VoiceRecordWidgetProvider
@@ -26,8 +24,8 @@ enum class NotifActionEntry(
 ) {
     OPEN_APP("Open App", null, null),
     LOG_NOW("Log Now", "com.gadget.widget.ACTION_LOG_NOW", LogNowWidgetProvider::class.java),
-    FLASHLIGHT("Flashlight Toggle", "com.gadget.widget.ACTION_FLASHLIGHT_TOGGLE", FlashlightWidgetProvider::class.java),
-    STROBE("Strobe Toggle", "com.gadget.widget.ACTION_STROBE_TOGGLE", StrobeWidgetProvider::class.java),
+    // FLASHLIGHT / STROBE entries removed with the dead legacy torch widget
+    // providers (#107): the modular :feature:torch surfaces supersede them.
     CAMERA_SNAPSHOT("Camera Snapshot", "com.gadget.widget.ACTION_CAMERA_SNAPSHOT", CameraSnapshotWidgetProvider::class.java),
     VIDEO_TOGGLE("Video Toggle", "com.gadget.widget.ACTION_VIDEO_TOGGLE", VideoToggleWidgetProvider::class.java),
     VOICE_RECORD("Voice Record Toggle", "com.gadget.widget.ACTION_VOICE_RECORD_TOGGLE", VoiceRecordWidgetProvider::class.java),

@@ -29,7 +29,6 @@ import com.gadget.ui.theme.GadgetTheme
 import com.gadget.backup.ui.BackupCard
 import com.gadget.root.ui.RootedFeatureTogglesCard
 import com.gadget.ui.theme.ThemePreferencesManager
-import com.gadget.widget.WidgetUpdateWorker
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.feature.apps.AppRepository
 import dev.ranzlappen.gadget.feature.apps.appsScreen
@@ -167,7 +166,13 @@ class MainActivity : ComponentActivity() {
             osmdroidBasePath = File(cacheDir, "osmdroid")
         }
 
-        WidgetUpdateWorker.schedule(this)
+        // Legacy widget-cleanup C1: the deleted WidgetUpdateWorker enqueued
+        // KEEP unique periodic work on every prior launch, servicing widget
+        // providers that are no longer manifest-registered. Cancel it once on
+        // upgraded installs so the orphaned 15-min wakeup stops; modular
+        // widgets repaint via their own notifier seams.
+        androidx.work.WorkManager.getInstance(this)
+            .cancelUniqueWork("widget_periodic_update")
         appRepository.requestRefresh()
         LogbookReminderWorker.ensureChannel(this)
     }
