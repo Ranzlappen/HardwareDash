@@ -1,0 +1,92 @@
+name: Publish Wiki
+
+# Publishes the wiki source under wiki/ to the repository's GitHub Wiki.
+# The GitHub Wiki is a separate git repo (<repo>.wiki.git) that can only be
+# written by `git push`, not the REST API — so this job does the push from
+# an Actions runner (which, unlike a sandboxed dev container, can reach the
+# wiki repo with the workflow token).
+#
+# Trigger: a push to main that touches wiki/**, or a manual run. Re-run from
+# the Actions tab (Run workflow) any time you want to force a re-sync.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'wiki/**'
+      - '.github/workflows/publish-wiki.yml'
+  workflow_dispatch:
+
+# The wiki shares the repository's `contents` permission.
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-wiki
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Publish wiki/ to the GitHub Wiki
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$(ls wiki/*.md 2>/dev/null)" ]; then
+            echo "::error::No wiki/*.md pages found — nothing to publish."
+            exit 1
+          fi
+
+          REPO="${{ github.repository }}"
+          WIKI_URL="https://x-access-token:${GH_TOKEN}@github.com/${REPO}.wiki.git"
+
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Clone the existing wiki, or initialise a fresh one if the wiki repo
+          # has never been written to (enabled-but-empty wiki).
+          if git clone "${WIKI_URL}" wiki-repo 2>/dev/null; then
+            echo "Cloned existing wiki repository."
+          else
+            echo "Wiki repository is empty/uninitialised — creating it fresh."
+            mkdir wiki-repo
+            git -C wiki-repo init -b master
+            git -C wiki-repo remote add origin "${WIKI_URL}"
+          fi
+
+          # Mirror wiki/ onto the wiki repo: drop existing top-level pages so
+          # renamed/removed pages don't linger, then copy the current source.
+          find wiki-repo -maxdepth 1 -name '*.md' -delete
+          cp wiki/*.md wiki-repo/
+
+          cd wiki-repo
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Wiki already up to date — nothing to publish."
+            exit 0
+          fi
+
+          git commit -m "Publish wiki from ${GITHUB_SHA}"
+
+          # Retry the push a few times to ride out a freshly-initialised wiki.
+          n=0
+          until git push origin HEAD:master; do
+            n=$((n + 1))
+            if [ "$n" -ge 4 ]; then
+              echo "::error::Failed to push to the wiki repo. If this is the very"
+              echo "::error::first publish, create any one page once at"
+              echo "::error::https://github.com/${REPO}/wiki then re-run this workflow."
+              exit 1
+            fi
+            echo "push failed (attempt $n) — retrying in $((2 ** n))s"
+            sleep "$((2 ** n))"
+          done
+
+          echo "Wiki published. View it at https://github.com/${REPO}/wiki"
