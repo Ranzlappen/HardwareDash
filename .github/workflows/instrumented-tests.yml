@@ -24,6 +24,7 @@ on:
     paths-ignore:
       - '*.md'
       - 'docs/**'
+      - 'wiki/**'
       - '.gitignore'
       - '.gitattributes'
       - '.idea/**'

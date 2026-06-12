@@ -23,6 +23,7 @@ on:
       - '.gitattributes'
       - '.idea/**'
       - 'docs/**'
+      - 'wiki/**'
       - 'app/src/test/**'
       - 'app/src/androidTest/**'
 
