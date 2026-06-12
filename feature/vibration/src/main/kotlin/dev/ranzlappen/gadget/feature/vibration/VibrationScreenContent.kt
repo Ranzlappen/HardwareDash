@@ -53,6 +53,7 @@ fun VibrationScreenContent(
                 onSamplesChange = { onEvent(VibrationUiEvent.PatternDraftChange(it)) },
                 onLoopChange = { onEvent(VibrationUiEvent.PatternLoopChange(it)) },
                 onPlay = { onEvent(VibrationUiEvent.PatternPlay) },
+                onStop = { onEvent(VibrationUiEvent.Stop) },
                 onClear = { onEvent(VibrationUiEvent.PatternClear) },
                 onSave = { onEvent(VibrationUiEvent.PatternSaveRequest(it)) },
                 expanded = expanded(VibrationSectionId.PatternBuilder),

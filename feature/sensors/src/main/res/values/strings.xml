@@ -5,6 +5,7 @@
     <string name="sensors_value_pending">Waiting for reading…</string>
     <string name="sensors_not_present">Not present on this device</string>
     <string name="sensors_monitor_title">%1$s history</string>
+    <string name="sensors_live_monitor_title">%1$s live</string>
     <string name="sensors_capability_available">Sensor present — streaming readings</string>
     <string name="sensors_capability_missing">This device has no such sensor</string>
     <string name="sensors_capability_detail_signal">Chartable + usable as an automation trigger (metric key: %1$s)</string>

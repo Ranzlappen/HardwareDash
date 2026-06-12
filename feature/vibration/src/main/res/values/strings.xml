@@ -23,6 +23,7 @@
     <string name="vibration_builder_instructions">Draw with your finger: left→right is time (0–2 s), up is intensity (0–100%).</string>
     <string name="vibration_builder_loop">Loop pattern</string>
     <string name="vibration_builder_play">Play</string>
+    <string name="vibration_builder_stop">Stop</string>
     <string name="vibration_builder_clear">Clear</string>
     <string name="vibration_builder_name">Pattern name</string>
     <string name="vibration_builder_save">Save pattern</string>
@@ -50,7 +51,8 @@
     <!-- Widget function labels (the customization sheet's function picker) -->
     <string name="vibration_widget_function_oneshot">One-shot buzz</string>
     <string name="vibration_widget_function_continuous">Continuous</string>
-    <string name="vibration_widget_function_pattern">Saved pattern</string>
+    <string name="vibration_widget_function_pattern">Saved pattern (one-shot)</string>
+    <string name="vibration_widget_function_pattern_toggle">Loop pattern (toggle)</string>
     <string name="vibration_widget_function_extreme_amplitude">Extreme amplitude (rooted)</string>
     <string name="vibration_widget_function_direct_pwm">Direct PWM (rooted)</string>
     <string name="vibration_widget_function_sustained_rumble">Sustained rumble (rooted)</string>

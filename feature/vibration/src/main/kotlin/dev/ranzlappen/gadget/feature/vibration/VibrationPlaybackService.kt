@@ -117,7 +117,12 @@ class VibrationPlaybackService : Service() {
             // config shape).
             val keepAliveMs = when (config?.actionKey) {
                 VibrationWidgetConfig.FUNCTION_PATTERN ->
-                    playPatternById(config.params[VibrationActionHandler.PARAM_PATTERN_ID])
+                    playPatternById(config.params[VibrationActionHandler.PARAM_PATTERN_ID], loop = false)
+                VibrationWidgetConfig.FUNCTION_PATTERN_TOGGLE ->
+                    playPatternById(
+                        config.params[VibrationActionHandler.PARAM_PATTERN_ID],
+                        loop = config.params[VibrationActionHandler.PARAM_LOOP]?.toBooleanStrictOrNull() ?: true,
+                    )
                 else -> {
                     // Default + one-shot function: a buzz at the configured
                     // strength/duration (falls back to defaults for an in-app
@@ -157,7 +162,10 @@ class VibrationPlaybackService : Service() {
     private suspend fun playDirect(actionKey: String, intent: Intent): Long? =
         when (actionKey) {
             VibrationActionHandler.ACTION_PATTERN_PLAY ->
-                playPatternById(intent.getStringExtra(EXTRA_PATTERN_ID))
+                playPatternById(
+                    intent.getStringExtra(EXTRA_PATTERN_ID),
+                    intent.getBooleanExtra(EXTRA_LOOP, false),
+                )
             VibrationActionHandler.ACTION_VIBRATE_CONTINUOUS -> {
                 controller.startContinuous(
                     intent.getIntExtra(EXTRA_AMPLITUDE, VibrationWidgetConfig.DEFAULT_AMPLITUDE_PERCENT),
@@ -180,16 +188,17 @@ class VibrationPlaybackService : Service() {
             }
         }
 
-    /** Play the saved pattern [patternId] once; returns its total play time (ms)
-     *  to keep the FGS alive for, or 0 if the pattern is missing/blank. */
-    private suspend fun playPatternById(patternId: String?): Long {
+    /** Play the saved pattern [patternId]; when [loop] is true the pattern repeats
+     *  until ACTION_STOP and returns null (FGS held alive), otherwise returns the
+     *  total play time (ms) so the caller keeps the service foreground until done. */
+    private suspend fun playPatternById(patternId: String?, loop: Boolean = false): Long? {
         val pattern = patternId?.takeIf { it.isNotBlank() }?.let { patternRepository.get(it) } ?: return 0L
         controller.playPattern(
             timingsMillis = pattern.timingsMillis.toLongArray(),
             amplitudes = pattern.amplitudes.toIntArray(),
-            loop = false,
+            loop = loop,
         )
-        return pattern.totalMillis
+        return if (loop) null else pattern.totalMillis
     }
 
     private fun stopPlayback() {
@@ -275,5 +284,8 @@ class VibrationPlaybackService : Service() {
 
         /** Saved-pattern id (String) for an [EXTRA_ACTION_KEY] pattern start. */
         const val EXTRA_PATTERN_ID = "dev.ranzlappen.gadget.feature.vibration.EXTRA_PATTERN_ID"
+
+        /** Boolean extra: when true the pattern repeats until ACTION_STOP. */
+        const val EXTRA_LOOP = "dev.ranzlappen.gadget.feature.vibration.EXTRA_LOOP"
     }
 }

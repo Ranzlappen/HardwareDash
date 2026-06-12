@@ -45,6 +45,7 @@ internal fun PatternBuilderCard(
     onSamplesChange: (List<Float>) -> Unit,
     onLoopChange: (Boolean) -> Unit,
     onPlay: () -> Unit,
+    onStop: () -> Unit,
     onClear: () -> Unit,
     onSave: (String) -> Unit,
     expanded: Boolean,
@@ -100,6 +101,11 @@ internal fun PatternBuilderCard(
                     enabled = enabled && samples.any { it > 0f },
                     modifier = Modifier.weight(1f),
                 )
+                GadgetSecondaryButton(
+                    onClick = onStop,
+                    text = stringResource(R.string.vibration_builder_stop),
+                    modifier = Modifier.weight(1f),
+                )
                 GadgetTertiaryButton(
                     onClick = onClear,
                     text = stringResource(R.string.vibration_builder_clear),
@@ -137,6 +143,7 @@ private fun PatternBuilderCardPreview() = GadgetThemedPreview {
         onSamplesChange = {},
         onLoopChange = {},
         onPlay = {},
+        onStop = {},
         onClear = {},
         onSave = {},
         expanded = true,

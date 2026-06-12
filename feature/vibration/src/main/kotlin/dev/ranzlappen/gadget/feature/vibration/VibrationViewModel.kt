@@ -278,7 +278,7 @@ class VibrationViewModel @Inject constructor(
 
     private fun defaultWidgetConfig() = VibrationWidgetConfig(
         displayName = context.getString(R.string.vibration_widget_default_name_vibrate),
-        actionKey = VibrationWidgetConfig.FUNCTION_ONESHOT,
+        actionKey = VibrationWidgetConfig.FUNCTION_CONTINUOUS,
     )
 
     private fun requestPin(config: VibrationWidgetConfig) {

@@ -139,6 +139,7 @@ private fun MonitorBody(
                 windowMs = history.windowMs,
                 layout = config.chartLayout,
                 yMax = yMax,
+                isEnabled = config.enabled,
             )
 
             if (config.enabled) {

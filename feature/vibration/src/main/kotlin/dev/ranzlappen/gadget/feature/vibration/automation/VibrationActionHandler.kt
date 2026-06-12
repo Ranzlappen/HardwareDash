@@ -142,10 +142,12 @@ class VibrationActionHandler @Inject constructor(
                 val id = params[PARAM_PATTERN_ID]?.takeIf { it.isNotBlank() }
                 val pattern = id?.let { patternRepository.get(it) }
                 if (pattern != null) {
+                    val loop = params[PARAM_LOOP]?.toBooleanStrictOrNull() ?: false
                     startPlayback(
                         Intent(context, VibrationPlaybackService::class.java).apply {
                             putExtra(VibrationPlaybackService.EXTRA_ACTION_KEY, ACTION_PATTERN_PLAY)
                             putExtra(VibrationPlaybackService.EXTRA_PATTERN_ID, id)
+                            putExtra(VibrationPlaybackService.EXTRA_LOOP, loop)
                         },
                     )
                     ActionResult.Success
@@ -198,6 +200,7 @@ class VibrationActionHandler @Inject constructor(
         const val PARAM_AMPLITUDE = "amplitude"
         const val PARAM_DURATION_MS = "duration_ms"
         const val PARAM_PATTERN_ID = "pattern_id"
+        const val PARAM_LOOP = "loop"
         const val PARAM_PWM_ON_MICROS = "pwm_on_micros"
         const val PARAM_PWM_OFF_MICROS = "pwm_off_micros"
         const val PARAM_PWM_PULSES = "pwm_pulses"

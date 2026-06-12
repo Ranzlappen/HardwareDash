@@ -62,6 +62,19 @@ class VibrationWidgetFunctionCatalog @Inject constructor(
             ),
             behavior = WidgetFunctionBehavior.Momentary(VibrationActionHandler.ACTION_PATTERN_PLAY),
         ),
+        WidgetFunction(
+            id = VibrationWidgetConfig.FUNCTION_PATTERN_TOGGLE,
+            label = context.getString(R.string.vibration_widget_function_pattern_toggle),
+            params = listOf(
+                ActionParam(VibrationActionHandler.PARAM_PATTERN_ID, ActionParamType.Text),
+                ActionParam(VibrationActionHandler.PARAM_LOOP, ActionParamType.Bool, "true"),
+            ),
+            behavior = WidgetFunctionBehavior.Toggle(
+                onActionKey = VibrationActionHandler.ACTION_PATTERN_PLAY,
+                offActionKey = VibrationActionHandler.ACTION_STOP,
+                stateKey = STATE_VIBRATION_RUNNING,
+            ),
+        ),
         // ─── Rooted functions — filtered out by the VM on standard ──────────
         WidgetFunction(
             id = VibrationActionHandler.ACTION_EXTREME_AMPLITUDE,
