@@ -8,6 +8,7 @@ import dev.ranzlappen.gadget.core.widgetkit.pin.PendingWidgetConfigs
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.apps.icons.AppIconLoader
+import dev.ranzlappen.gadget.feature.apps.widget.customization.FolderWidgetIconCatalog
 
 /**
  * Hilt entry point for the folder widget's `AppWidgetProvider` / receivers,
@@ -22,4 +23,5 @@ interface FolderWidgetEntryPoint {
     fun widgetAppearanceRenderer(): WidgetAppearanceRenderer
     fun appsDao(): AppsDao
     fun appIconLoader(): AppIconLoader
+    fun folderWidgetIconCatalog(): FolderWidgetIconCatalog
 }

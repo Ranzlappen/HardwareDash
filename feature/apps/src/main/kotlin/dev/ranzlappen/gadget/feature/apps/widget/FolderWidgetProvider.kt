@@ -9,6 +9,7 @@ import android.widget.RemoteViews
 import dagger.hilt.android.EntryPointAccessors
 import dev.ranzlappen.gadget.core.data.apps.AppsDao
 import dev.ranzlappen.gadget.core.data.apps.Folder
+import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
 import dev.ranzlappen.gadget.core.widgetkit.provider.BaseContentWidgetProvider
 import dev.ranzlappen.gadget.core.widgetkit.provider.WidgetRenderDensity
@@ -17,6 +18,7 @@ import dev.ranzlappen.gadget.feature.apps.R
 import dev.ranzlappen.gadget.feature.apps.icons.AppIconLoader
 import dev.ranzlappen.gadget.feature.apps.icons.MaterialSymbol
 import dev.ranzlappen.gadget.feature.apps.ui.folder.FolderPopupActivity
+import dev.ranzlappen.gadget.feature.apps.widget.customization.FolderWidgetIconCatalog
 
 /**
  * The App-Organizer folder home-screen widget — the reference consumer of the
@@ -87,14 +89,24 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
             } else {
                 config.coverTintArgb.toInt()
             }
-            val cover = folder.coverIcon
-            when {
-                cover.startsWith("image:") -> renderCoverImage(context, folder)
-                cover.startsWith("symbol:") -> renderCoverSymbol(context, folder, tint)
-                else -> null
-            } ?: renderPreviewGrid(
-                context, folder, dao, ep.appIconLoader(), density, tint, config.showLabel,
-            )
+            // Widget-specific icon takes precedence over the folder's cover.
+            // This lets a widget look different from the folder editor cover
+            // without changing the folder itself.
+            val widgetIconViews = config.iconKey?.let { key ->
+                renderWidgetIcon(context, key, ep.folderWidgetIconCatalog(), tint)
+            }
+            if (widgetIconViews != null) {
+                widgetIconViews
+            } else {
+                val cover = folder.coverIcon
+                when {
+                    cover.startsWith("image:") -> renderCoverImage(context, folder)
+                    cover.startsWith("symbol:") -> renderCoverSymbol(context, folder, tint)
+                    else -> null
+                } ?: renderPreviewGrid(
+                    context, folder, dao, ep.appIconLoader(), density, tint, config.showLabel,
+                )
+            }
         }
 
         // Shared kit chrome (glass / solid / transparent) — identical paint
@@ -114,6 +126,33 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
     }
 
     // ── Render modes ────────────────────────────────────────────────────────
+
+    private fun renderWidgetIcon(
+        context: Context,
+        iconKey: String,
+        catalog: FolderWidgetIconCatalog,
+        tintArgb: Int,
+    ): RemoteViews? {
+        return when (val source = catalog.resolveSource(iconKey)) {
+            is WidgetIconSource.Resource -> baseViews(context).apply {
+                setViewVisibility(R.id.widget_folder_cover_image, View.GONE)
+                setViewVisibility(R.id.widget_folder_cover_symbol, View.VISIBLE)
+                setViewVisibility(R.id.widget_folder_grid_section, View.GONE)
+                setImageViewResource(R.id.widget_folder_cover_symbol, source.resId)
+                setInt(R.id.widget_folder_cover_symbol, "setColorFilter", tintArgb)
+            }
+            is WidgetIconSource.CustomFile -> {
+                val bmp = runCatching { BitmapFactory.decodeFile(source.path) }.getOrNull()
+                    ?: return null
+                baseViews(context).apply {
+                    setViewVisibility(R.id.widget_folder_cover_image, View.VISIBLE)
+                    setViewVisibility(R.id.widget_folder_cover_symbol, View.GONE)
+                    setViewVisibility(R.id.widget_folder_grid_section, View.GONE)
+                    setImageViewBitmap(R.id.widget_folder_cover_image, bmp)
+                }
+            }
+        }
+    }
 
     private fun renderCoverImage(context: Context, folder: Folder): RemoteViews? {
         val path = folder.coverIcon.removePrefix("image:")
