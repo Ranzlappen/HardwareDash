@@ -20,6 +20,9 @@ interface AppsDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertFolder(folder: Folder): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertFolder(folder: Folder): Long
+
     @Update
     suspend fun updateFolder(folder: Folder)
 
@@ -81,6 +84,9 @@ interface AppsDao {
     // ── Web-link apps ───────────────────────────────────────────────────
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertWebLink(link: WebLinkApp): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertWebLink(link: WebLinkApp): Long
 
     @Update
     suspend fun updateWebLink(link: WebLinkApp)

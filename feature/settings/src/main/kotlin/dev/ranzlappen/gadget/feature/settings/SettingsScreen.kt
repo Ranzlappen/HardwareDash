@@ -9,6 +9,7 @@ import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.feature.settings.components.AboutCard
 import dev.ranzlappen.gadget.feature.settings.components.AccessibilityCard
 import dev.ranzlappen.gadget.feature.settings.components.AppearanceCard
+import dev.ranzlappen.gadget.feature.settings.components.MonitoringCard
 
 /**
  * Settings v1 — three cards under one [ModuleScreenScaffold]:
@@ -41,6 +42,7 @@ fun SettingsScreen(
     rootFeatureToggles: @Composable () -> Unit = {},
 ) {
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
+    val monitorNotificationActionsEnabled by viewModel.monitorNotificationActionsEnabled.collectAsStateWithLifecycle()
     ModuleScreenScaffold(
         title = "Settings",
         modifier = modifier,
@@ -56,6 +58,10 @@ fun SettingsScreen(
                 onReducedMotionOverrideChange = viewModel::setReducedMotionOverride,
                 onReducedTransparencyChange = viewModel::setReducedTransparency,
                 onLargeTextOverrideChange = viewModel::setLargeTextOverride,
+            )
+            MonitoringCard(
+                notificationActionsEnabled = monitorNotificationActionsEnabled,
+                onNotificationActionsEnabledChange = viewModel::setMonitorNotificationActionsEnabled,
             )
             // Whole-app backup / restore. Empty default; supplied by :app
             // (BackupManager depends on the legacy GadgetDatabase a leaf

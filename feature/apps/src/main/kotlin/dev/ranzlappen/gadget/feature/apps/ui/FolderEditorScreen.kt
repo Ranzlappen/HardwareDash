@@ -75,10 +75,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ranzlappen.gadget.core.data.apps.AppRecord
 import dev.ranzlappen.gadget.core.data.apps.Folder
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
 import dev.ranzlappen.gadget.core.ui.component.GadgetColorPicker
+import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
+import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
 import dev.ranzlappen.gadget.core.ui.component.GlassSurface
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
+import androidx.compose.material.icons.outlined.Delete
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -105,6 +109,7 @@ fun FolderEditorScreen(onBack: () -> Unit) {
     val ruleSet by viewModel.ruleSet.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val otherFolderMembership by viewModel.otherFolderMembership.collectAsState()
+    val placedWidgets by viewModel.placedWidgets.collectAsState()
 
     FolderEditorContent(
         state = FolderEditorState(
@@ -114,6 +119,7 @@ fun FolderEditorScreen(onBack: () -> Unit) {
             ruleSet = ruleSet,
             searchQuery = searchQuery,
             otherFolderMembership = otherFolderMembership,
+            placedWidgets = placedWidgets,
         ),
         onBack = onBack,
         onRename = viewModel::rename,
@@ -128,6 +134,7 @@ fun FolderEditorScreen(onBack: () -> Unit) {
         onAddOrReplaceRule = viewModel::addOrReplaceRule,
         onRemoveRuleOfKind = viewModel::removeRuleOfKind,
         onSearchChange = { viewModel.searchQuery.value = it },
+        onDeleteWidget = viewModel::deleteWidget,
     )
 }
 
@@ -139,6 +146,13 @@ data class FolderEditorState(
     val ruleSet: FolderRuleSet,
     val searchQuery: String,
     val otherFolderMembership: Map<String, List<String>>,
+    val placedWidgets: List<PlacedFolderWidget> = emptyList(),
+)
+
+/** A single placed folder widget visible in the editor's widget management section. */
+data class PlacedFolderWidget(
+    val appWidgetId: Int,
+    val displayName: String,
 )
 
 /**
@@ -163,6 +177,7 @@ fun FolderEditorContent(
     onAddOrReplaceRule: (FolderRule) -> Unit,
     onRemoveRuleOfKind: ((FolderRule) -> Boolean) -> Unit,
     onSearchChange: (String) -> Unit,
+    onDeleteWidget: (Int) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var nameDraft by remember { mutableStateOf("") }
@@ -256,6 +271,17 @@ fun FolderEditorContent(
                     },
                     text = stringResource(R.string.apps_pin_to_home),
                     modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            item {
+                FolderWidgetsSection(
+                    widgets = state.placedWidgets,
+                    onAddWidget = {
+                        if (!onPinToHome()) {
+                            scope.launch { snackbarHostState.showSnackbar(pinUnsupported) }
+                        }
+                    },
+                    onDeleteWidget = onDeleteWidget,
                 )
             }
             item {
@@ -682,6 +708,64 @@ private fun AppRow(
                 }
             }
             Checkbox(checked = selected, onCheckedChange = { onToggle() })
+        }
+    }
+}
+
+@Composable
+private fun FolderWidgetsSection(
+    widgets: List<PlacedFolderWidget>,
+    onAddWidget: () -> Unit,
+    onDeleteWidget: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(spacing.small),
+    ) {
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.apps_widgets_section_title),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        GadgetSecondaryButton(
+            onClick = onAddWidget,
+            text = stringResource(R.string.apps_widget_add),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (widgets.isEmpty()) {
+            GadgetEmptyState(
+                title = stringResource(R.string.apps_widget_list_empty),
+                icon = Icons.Filled.GridView,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        } else {
+            widgets.forEach { widget ->
+                GlassSurface(
+                    modifier = Modifier.fillMaxWidth(),
+                    intensity = GlassIntensity.Subtle,
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                    ) {
+                        Text(
+                            text = widget.displayName.ifBlank { stringResource(R.string.apps_widget_folder_label) },
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        GadgetIconButton(
+                            onClick = { onDeleteWidget(widget.appWidgetId) },
+                            icon = Icons.Outlined.Delete,
+                            contentDescription = stringResource(R.string.apps_widget_delete),
+                        )
+                    }
+                }
+            }
         }
     }
 }

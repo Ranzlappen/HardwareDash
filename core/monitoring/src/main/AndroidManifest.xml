@@ -21,5 +21,13 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Continuous user-initiated monitoring of on-device hardware/sensor signals for charts, widgets, and notifications." />
         </service>
+
+        <receiver
+            android:name=".MonitorNotificationActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="dev.ranzlappen.gadget.core.monitoring.ACTION_DISABLE_METRIC" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

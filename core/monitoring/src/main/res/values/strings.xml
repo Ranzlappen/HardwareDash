@@ -33,4 +33,5 @@
         <item quantity="one">%d signal</item>
         <item quantity="other">%d signals</item>
     </plurals>
+    <string name="monitor_notification_action_stop">Stop monitoring</string>
 </resources>

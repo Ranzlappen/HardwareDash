@@ -2,6 +2,7 @@ package dev.ranzlappen.gadget.core.monitoring
 
 import android.Manifest
 import android.app.Notification
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -64,6 +65,7 @@ class MonitorService : Service() {
     @Inject lateinit var metricSources: Map<String, @JvmSuppressWildcards MetricSource>
     @Inject lateinit var widgetNotifiers: Map<String, @JvmSuppressWildcards MonitorWidgetNotifier>
     @Inject lateinit var channelRegistry: dev.ranzlappen.gadget.core.notifications.NotificationChannelRegistry
+    @Inject lateinit var globalPrefs: MonitorGlobalPrefs
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val active = Collections.synchronizedSet(mutableSetOf<String>())
@@ -143,13 +145,16 @@ class MonitorService : Service() {
         now: Long,
     ) {
         sampleRepo.insert(metricKey, now, value)
+        runtime.sampleCount++
+        if (value < runtime.minValue) runtime.minValue = value
+        if (value > runtime.maxValue) runtime.maxValue = value
         if (now - runtime.lastPruneMs >= PRUNE_INTERVAL_MS) {
             sampleRepo.prune(metricKey, now - RETENTION_MS)
             runtime.lastPruneMs = now
         }
         val uiDue = now - runtime.lastUiMs >= UI_UPDATE_THROTTLE_MS
         if (cfg.notificationEnabled) {
-            if (uiDue) postMetricNotification(metricKey, descriptor, value)
+            if (uiDue) postMetricNotification(metricKey, descriptor, value, runtime)
         } else {
             cancelMetricNotification(metricKey)
         }
@@ -168,36 +173,73 @@ class MonitorService : Service() {
 
     // -- notifications ----------------------------------------------------
 
-    private fun summaryNotification(): Notification =
-        NotificationCompat.Builder(this, CHANNEL_ID)
+    private fun summaryNotification(): Notification {
+        val activeSnapshot = synchronized(active) { active.toList() }
+        val names = activeSnapshot
+            .mapNotNull { metricSources[it]?.descriptor?.displayName }
+            .take(4)
+        val summaryText = if (names.isNotEmpty()) {
+            val listed = names.joinToString(", ")
+            val extra = activeSnapshot.size - names.size
+            if (extra > 0) "$listed +$extra" else listed
+        } else {
+            resources.getQuantityString(
+                R.plurals.monitor_notification_summary_text,
+                activeSnapshot.size.coerceAtLeast(1),
+                activeSnapshot.size.coerceAtLeast(1),
+            )
+        }
+        return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_view)
             .setContentTitle(getString(R.string.monitor_notification_summary_title))
-            .setContentText(
-                resources.getQuantityString(
-                    R.plurals.monitor_notification_summary_text,
-                    active.size.coerceAtLeast(1),
-                    active.size.coerceAtLeast(1),
-                ),
-            )
+            .setContentText(summaryText)
             .setOngoing(true)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
+    }
 
-    private fun postMetricNotification(metricKey: String, descriptor: MetricDescriptor, value: Float) {
+    private fun postMetricNotification(
+        metricKey: String,
+        descriptor: MetricDescriptor,
+        value: Float,
+        runtime: MetricRuntime,
+    ) {
         if (!canPostNotifications()) return
         val span = (descriptor.currentMax() - descriptor.min).takeIf { it > 0f } ?: 1f
         val progress = (((value - descriptor.min) / span) * 100f).roundToInt().coerceIn(0, 100)
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        val current = formatValue(value, descriptor)
+        val min = formatValue(runtime.minValue.takeIf { it != Float.MAX_VALUE } ?: value, descriptor)
+        val max = formatValue(runtime.maxValue.takeIf { it != -Float.MAX_VALUE } ?: value, descriptor)
+        val compactText = "$current — min $min max $max"
+        val bigText = "${descriptor.displayName}: $current — min $min, max $max"
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_view)
             .setContentTitle(descriptor.displayName)
-            .setContentText(formatValue(value, descriptor))
+            .setContentText(compactText)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
             .setProgress(100, progress, false)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .build()
+        if (globalPrefs.notificationActionsEnabled.value) {
+            val stopIntent = Intent(MonitorNotificationActionReceiver.ACTION_DISABLE_METRIC).apply {
+                setPackage(packageName)
+                putExtra(MonitorNotificationActionReceiver.EXTRA_METRIC_KEY, metricKey)
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                this,
+                metricKey.hashCode(),
+                stopIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            builder.addAction(
+                android.R.drawable.ic_media_pause,
+                getString(R.string.monitor_notification_action_stop),
+                pendingIntent,
+            )
+        }
         val id = metricNotificationId(metricKey)
         notifiedIds.add(id)
-        NotificationManagerCompat.from(this).notify(id, notification)
+        NotificationManagerCompat.from(this).notify(id, builder.build())
     }
 
     private fun cancelMetricNotification(metricKey: String) {
@@ -230,11 +272,14 @@ class MonitorService : Service() {
     private fun metricNotificationId(metricKey: String): Int =
         METRIC_NOTIFICATION_ID_BASE + (metricKey.hashCode() and 0xFFFF)
 
-    /** Per-metric run state — last prune / last UI-repaint timestamps for the
-     *  batching + throttling guards. */
+    /** Per-metric run state — timestamps for batching/throttling guards plus
+     *  running min/max/count for richer notification text. */
     private class MetricRuntime {
         var lastPruneMs: Long = 0L
         var lastUiMs: Long = 0L
+        var sampleCount: Int = 0
+        var minValue: Float = Float.MAX_VALUE
+        var maxValue: Float = -Float.MAX_VALUE
     }
 
     private companion object {

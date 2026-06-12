@@ -22,9 +22,16 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -33,6 +40,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +62,7 @@ import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 import dev.ranzlappen.gadget.feature.apps.R
+import kotlinx.coroutines.launch
 
 /**
  * Top-level App-Organizer screen (Hilt route): a grid of folders. Tap opens the
@@ -66,11 +75,32 @@ import dev.ranzlappen.gadget.feature.apps.R
 fun AppsScreen(onOpenFolder: (Long) -> Unit) {
     val viewModel = hiltViewModel<AppsViewModel>()
     val folders by viewModel.folders.collectAsState()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val importLegacyLabel = stringResource(R.string.apps_import_legacy)
+    val importSuccessTemplate = stringResource(R.string.apps_import_success)
+    val importNothingMsg = stringResource(R.string.apps_import_nothing)
+    val importErrorMsg = stringResource(R.string.apps_import_error)
     AppsScreenContent(
         folders = folders,
         onOpenFolder = onOpenFolder,
         onCreateFolder = { name -> viewModel.createFolder(name, DEFAULT_FOLDER_COLOR) },
         onDeleteFolder = viewModel::deleteFolder,
+        snackbarHostState = snackbarHostState,
+        showLegacyImport = viewModel.legacyDbExists,
+        onImportLegacy = {
+            scope.launch {
+                val msg = runCatching { viewModel.importLegacy() }
+                    .fold(
+                        onSuccess = { result ->
+                            if (result.isEmpty) importNothingMsg
+                            else importSuccessTemplate.format(result.folderCount, result.appCount)
+                        },
+                        onFailure = { importErrorMsg },
+                    )
+                snackbarHostState.showSnackbar(msg)
+            }
+        },
     )
 }
 
@@ -83,13 +113,46 @@ fun AppsScreenContent(
     onCreateFolder: (String) -> Unit,
     onDeleteFolder: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    showLegacyImport: Boolean = false,
+    onImportLegacy: () -> Unit = {},
 ) {
     var showCreate by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<Folder?>(null) }
+    var showOverflow by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.apps_title)) }) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.apps_title)) },
+                actions = {
+                    if (showLegacyImport) {
+                        Box {
+                            IconButton(onClick = { showOverflow = true }) {
+                                Icon(
+                                    imageVector = Icons.Filled.MoreVert,
+                                    contentDescription = null,
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showOverflow,
+                                onDismissRequest = { showOverflow = false },
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.apps_import_legacy)) },
+                                    onClick = {
+                                        showOverflow = false
+                                        onImportLegacy()
+                                    },
+                                )
+                            }
+                        }
+                    }
+                },
+            )
+        },
         floatingActionButton = {
             GadgetFab(
                 onClick = { showCreate = true },
