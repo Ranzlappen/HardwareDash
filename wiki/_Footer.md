@@ -1,0 +1,1 @@
+HardwareDash / **Gadget** — modular Android hardware-control app · `dev.ranzlappen.gadget` (standard) / `dev.ranzlappen.gadget.rooted` (rooted) · Documentation product lives in this wiki; the implementation product lives in the [main repo](https://github.com/Ranzlappen/HardwareDash). · Source: `wiki/` directory of the repo.
