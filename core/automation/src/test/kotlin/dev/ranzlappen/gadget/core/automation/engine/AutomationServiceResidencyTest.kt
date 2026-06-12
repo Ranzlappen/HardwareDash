@@ -18,6 +18,7 @@ class AutomationServiceResidencyTest {
     private val metric = Trigger.MetricThreshold("proximity", ComparisonOp.Lt, 5f)
     private val schedule = Trigger.Schedule(timeOfDayMinutes = 540)
     private val systemEvent = Trigger.SystemEvent(SystemEventKind.PowerConnected)
+    private val connectivity = Trigger.SystemEvent(SystemEventKind.Connectivity)
     private val manual = Trigger.Manual
 
     @Test
@@ -44,6 +45,28 @@ class AutomationServiceResidencyTest {
     }
 
     @Test
+    fun anEnabledConnectivityRule_requiresService() {
+        val rules = listOf(rule(schedule), rule(connectivity))
+        assertTrue(AutomationServiceResidency.isServiceRequired(rules))
+    }
+
+    @Test
+    fun aDisabledConnectivityRule_doesNotRequireService() {
+        val rules = listOf(rule(connectivity, enabled = false), rule(manual))
+        assertFalse(AutomationServiceResidency.isServiceRequired(rules))
+    }
+
+    @Test
+    fun requiresResidency_perRule() {
+        assertTrue(AutomationServiceResidency.requiresResidency(rule(metric)))
+        assertTrue(AutomationServiceResidency.requiresResidency(rule(connectivity)))
+        assertFalse(AutomationServiceResidency.requiresResidency(rule(metric, enabled = false)))
+        assertFalse(AutomationServiceResidency.requiresResidency(rule(schedule)))
+        assertFalse(AutomationServiceResidency.requiresResidency(rule(systemEvent)))
+        assertFalse(AutomationServiceResidency.requiresResidency(rule(manual)))
+    }
+
+    @Test
     fun streamingRules_returnsOnlyEnabledMetricRules() {
         val enabledMetric = rule(metric)
         val rules = listOf(
@@ -51,8 +74,22 @@ class AutomationServiceResidencyTest {
             rule(metric, enabled = false),
             rule(schedule),
             rule(manual),
+            rule(connectivity),
         )
         val streaming = AutomationServiceResidency.streamingRules(rules)
         assertEquals(listOf(enabledMetric), streaming)
+    }
+
+    @Test
+    fun connectivityRules_returnsOnlyEnabledConnectivityRules() {
+        val enabledConnectivity = rule(connectivity)
+        val rules = listOf(
+            enabledConnectivity,
+            rule(connectivity, enabled = false),
+            rule(systemEvent),
+            rule(metric),
+        )
+        val watched = AutomationServiceResidency.connectivityRules(rules)
+        assertEquals(listOf(enabledConnectivity), watched)
     }
 }

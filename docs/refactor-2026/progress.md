@@ -7,6 +7,28 @@ CI-only pitfalls.
 
 ## 2026-06 — Engine milestone follow-up (post PR #148)
 
+**Batch I (Connectivity arming, same branch / PR #159 per Matthias):** the
+item the design doc queued *behind* the builder batch, appended to #159 on
+his call. `AutomationServiceResidency` extends to "≥1 enabled
+MetricThreshold **or** SystemEvent(Connectivity) rule" (`requiresResidency`
+per-rule helper + `connectivityRules` selector; JVM tests extended — the
+boot re-arm handler and the builder's save path already call the shared
+predicate, so both gained connectivity support for free / via the VM
+switching from its inline MetricThreshold check). `AutomationService` now
+runs the metric subscriptions and a `watchConnectivity` leg under one
+`coroutineScope`: a single default-network `ConnectivityManager
+.NetworkCallback` (`callbackFlow` + `awaitClose` unregister) whose
+`onAvailable`/`onLost` fire every enabled Connectivity rule through the
+shared `RuleFireExecutor`. **No fire-on-subscribe:** registration
+immediately replays the current network as an `onAvailable` — swallowed as
+baseline iff a default network existed at registration (`activeNetwork !=
+null`); flap storms bounded by per-rule cooldown + the global budget.
+Manifest: `ACCESS_NETWORK_STATE` (normal) + service property/comments
+updated; the trigger picker un-hides Connectivity ("Connectivity changed"
+chip). Design doc amendment resolved + CLAUDE.md runtime bullet updated.
+Trade-off documented: a Connectivity rule keeps the FGS resident, like a
+metric rule.
+
 **Batch H (automation UI + milestone close-out, branch
 `claude/stoic-shannon-5kfio2`) — the engine epic's last code batch:**
 - **H0 — #153 pre-H blocker:** `DatabaseCheckpointer` (`:core:data`,

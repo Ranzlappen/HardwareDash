@@ -417,9 +417,9 @@ private fun SystemEventTriggerEditor(
     onTriggerChange: (Trigger) -> Unit,
 ) {
     LabeledChipRow(label = stringResource(R.string.automation_editor_event)) {
-        // Connectivity is modeled but not yet armed (no resident
-        // NetworkCallback) — hidden from authoring per the design doc's
-        // batch-3.3 amendment.
+        // All four kinds are authorable: power events land in the manifest
+        // receiver, boot in the widgetkit re-arm path, and Connectivity in
+        // the resident service's NetworkCallback (armed in Batch I).
         AUTHORABLE_EVENTS.forEach { event ->
             GadgetChip(
                 selected = trigger.event == event,
@@ -430,7 +430,7 @@ private fun SystemEventTriggerEditor(
                         SystemEventKind.PowerConnected -> R.string.automation_event_power_connected
                         SystemEventKind.PowerDisconnected ->
                             R.string.automation_event_power_disconnected
-                        SystemEventKind.Connectivity -> R.string.automation_summary_connectivity
+                        SystemEventKind.Connectivity -> R.string.automation_event_connectivity
                     },
                 ),
             )
@@ -510,6 +510,7 @@ private val AUTHORABLE_EVENTS = listOf(
     SystemEventKind.BootCompleted,
     SystemEventKind.PowerConnected,
     SystemEventKind.PowerDisconnected,
+    SystemEventKind.Connectivity,
 )
 
 /** 09:00 — the design doc's worked schedule example. */

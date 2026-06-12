@@ -11,6 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.automation.ModuleAction
 import dev.ranzlappen.gadget.core.automation.ModuleActionRegistry
 import dev.ranzlappen.gadget.core.automation.RuleRepository
+import dev.ranzlappen.gadget.core.automation.engine.AutomationServiceResidency
 import dev.ranzlappen.gadget.core.automation.model.Rule
 import dev.ranzlappen.gadget.core.automation.model.Trigger
 import dev.ranzlappen.gadget.core.automation.service.AutomationController
@@ -58,9 +59,11 @@ sealed interface AutomationUiEvent {
  * after every save / enable-toggle the scheduler (re)arms or cancels the
  * rule's alarm ([AutomationScheduler.scheduleNext] handles the
  * not-Schedule / disabled cases) and [AutomationController.ensureStarted]
- * spins the resident service up iff an enabled metric-stream rule now
- * exists (the service itself re-derives residency from the repository and
- * self-stops when no longer required, so disabling needs no stop call).
+ * spins the resident service up iff the rule needs a live subscription —
+ * metric-stream or Connectivity, the shared
+ * `AutomationServiceResidency.requiresResidency` predicate (the service
+ * itself re-derives residency from the repository and self-stops when no
+ * longer required, so disabling needs no stop call).
  */
 @HiltViewModel
 class AutomationViewModel @Inject constructor(
@@ -161,7 +164,9 @@ class AutomationViewModel @Inject constructor(
             // stale alarm armed for the old shape.
             scheduler.cancel(rule.id)
         }
-        if (rule.enabled && rule.trigger is Trigger.MetricThreshold) {
+        // Same predicate the service + boot re-arm use: metric-stream and
+        // connectivity rules both need the resident service.
+        if (AutomationServiceResidency.requiresResidency(rule)) {
             controller.ensureStarted()
         }
         refreshExactAlarmStatus()

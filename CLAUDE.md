@@ -1086,14 +1086,17 @@ design: `docs/automation-engine.md`, ADR-0002). Layout:
   `RuleEvaluator` (Manual bypasses cooldown but still `markFired`s) and
   `MetricThresholdGate` (edge + hysteresis, no fire-on-subscribe).
 - **Runtime** (`:core:automation/service`): `AutomationService` — a
-  self-stopping `specialUse` FGS resident **only** while ≥1 enabled
-  `MetricThreshold` rule exists; one-shot paths via
-  `AutomationAlarmReceiver` (AlarmManager, exact/inexact per
+  self-stopping `specialUse` FGS resident **only** while ≥1 enabled rule
+  needs a live subscription: a `MetricThreshold` stream **or** a
+  `Connectivity` system event (armed via the service's registered
+  default-network `NetworkCallback`; the registration's `onAvailable`
+  replay is swallowed as baseline — no fire-on-subscribe). One-shot paths
+  via `AutomationAlarmReceiver` (AlarmManager, exact/inexact per
   `AlarmSchedulingDecision`) + `AutomationSystemEventReceiver` (power
-  events; `Connectivity` modeled but NOT armed) + widgetkit boot re-arm.
-  Every path funnels through `RuleFireExecutor` — one budget-confined
-  fire→evaluate→dispatch pipeline (`fire` returns the dispatched count;
-  the manual "run now" surface uses it for honest feedback).
+  events) + widgetkit boot re-arm. Every path funnels through
+  `RuleFireExecutor` — one budget-confined fire→evaluate→dispatch
+  pipeline (`fire` returns the dispatched count; the manual "run now"
+  surface uses it for honest feedback).
 - **Persistence**: `automation.db` in `:core:data` (`RoomRuleRepository`
   behind the `RuleRepository` contract). Rides the backup `databases/`
   sweep (format v5) and `DatabaseCheckpointer.checkpointAll()`.

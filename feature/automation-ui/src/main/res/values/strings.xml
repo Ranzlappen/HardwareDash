@@ -73,6 +73,7 @@
     <string name="automation_event_boot">Device booted</string>
     <string name="automation_event_power_connected">Power connected</string>
     <string name="automation_event_power_disconnected">Power disconnected</string>
+    <string name="automation_event_connectivity">Connectivity changed</string>
     <string name="automation_editor_manual_hint">Runs only when you tap “Run now” on this screen.</string>
 
     <!-- Editor: conditions -->

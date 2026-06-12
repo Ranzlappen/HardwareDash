@@ -23,9 +23,10 @@ import kotlinx.coroutines.launch
  *
  * **Scope notes** (mirrored in `docs/automation-engine.md`):
  *  - [SystemEventKind.Connectivity] is **not armed here** — connectivity
- *    broadcasts stopped being deliverable to manifest receivers in Android N;
- *    arming it needs a registered `NetworkCallback` inside a resident
- *    component, queued behind the builder UI batch.
+ *    broadcasts stopped being deliverable to manifest receivers in Android N.
+ *    It is armed by the resident [AutomationService]'s registered
+ *    `NetworkCallback` (`watchConnectivity`), which residency keeps alive
+ *    while ≥1 enabled Connectivity rule exists.
  *  - [SystemEventKind.BootCompleted] rules fire from the widgetkit
  *    `BootCompletedReceiver` path (the `:app` automation boot-rearm handler),
  *    not here — one boot receiver for the whole app, per the kit's rule.
