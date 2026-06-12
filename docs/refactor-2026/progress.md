@@ -7,6 +7,84 @@ CI-only pitfalls.
 
 ## 2026-06 — Engine milestone follow-up (post PR #148)
 
+**Batch I (Connectivity arming, same branch / PR #159 per Matthias):** the
+item the design doc queued *behind* the builder batch, appended to #159 on
+his call. `AutomationServiceResidency` extends to "≥1 enabled
+MetricThreshold **or** SystemEvent(Connectivity) rule" (`requiresResidency`
+per-rule helper + `connectivityRules` selector; JVM tests extended — the
+boot re-arm handler and the builder's save path already call the shared
+predicate, so both gained connectivity support for free / via the VM
+switching from its inline MetricThreshold check). `AutomationService` now
+runs the metric subscriptions and a `watchConnectivity` leg under one
+`coroutineScope`: a single default-network `ConnectivityManager
+.NetworkCallback` (`callbackFlow` + `awaitClose` unregister) whose
+`onAvailable`/`onLost` fire every enabled Connectivity rule through the
+shared `RuleFireExecutor`. **No fire-on-subscribe:** registration
+immediately replays the current network as an `onAvailable` — swallowed as
+baseline iff a default network existed at registration (`activeNetwork !=
+null`); flap storms bounded by per-rule cooldown + the global budget.
+Manifest: `ACCESS_NETWORK_STATE` (normal) + service property/comments
+updated; the trigger picker un-hides Connectivity ("Connectivity changed"
+chip). Design doc amendment resolved + CLAUDE.md runtime bullet updated.
+Trade-off documented: a Connectivity rule keeps the FGS resident, like a
+metric rule.
+
+**Batch H (automation UI + milestone close-out, branch
+`claude/stoic-shannon-5kfio2`) — the engine epic's last code batch:**
+- **H0 — #153 pre-H blocker:** `DatabaseCheckpointer` (`:core:data`,
+  `@Singleton`) — `checkpointAll()` runs `query("PRAGMA wal_checkpoint
+  (FULL)")` (query, not execSQL — it returns rows) over the three modular
+  DBs via the same singleton instances the repositories write through;
+  `BackupManager.createBackup` calls it before the generic `databases/`
+  sweep, closing the torn-backup window that became load-bearing once
+  rule-restore joined the milestone demo path. Legacy `gadget_db` keeps its
+  inline checkpoint. `docs/backup.md` re-synced to reality while there
+  (v5 layout line, version history, checkpoint paragraph — the doc had
+  stayed at v4 after E4 bumped the code).
+- **H1 — `:feature:automation-ui` (design-doc batch 3.4):** the Batch-0
+  skeleton becomes the rules list + builder. `AutomationViewModel` injects
+  the two enumeration seams — `HardwareRegistry.signals()` for the
+  trigger/condition pickers, `ModuleActionRegistry.actions()`
+  flavor-filtered by `RootCapabilityRegistry.hasRootAccess()` (root gating
+  layer 1) for the action picker — plus the engine wiring the runtime
+  batches left open: save/toggle → `scheduleNext` (cancel when the trigger
+  changed away from Schedule) → `ensureStarted` iff an enabled
+  MetricThreshold rule exists; delete → `scheduler.cancel`. The screen is
+  the blueprint shape: Hilt-free `AutomationScreenContent` (DashCard rows
+  with trigger/action summaries, enable switch, run-now, delete-confirm
+  dialog; `GadgetEmptyState`; extended `GadgetFab`), `ModuleInfo` with the
+  exact-alarm OS notes + a live tri-state capability row
+  (`canScheduleExactAlarms()` refreshed on ON_RESUME, `Custom` action →
+  `ACTION_REQUEST_SCHEDULE_EXACT_ALARM`). `RuleEditorSheet` mirrors the
+  widget customization sheet: name → trigger kind chips (Metric / Schedule
+  / Event / Manual) with per-kind editors (signal/op/value/edge +
+  optional hysteresis re-arm slider for ordered ops; HH:MM time slider +
+  day chips + exact switch with the denied-badge + deep link; power/boot
+  event chips — `Connectivity` hidden per the F2b amendment; Manual hint),
+  flat ALL/ANY conditions (signal check / midnight-wrapping time window),
+  actions with param editors auto-generated from `ActionParam` schemas
+  (the widgetkit `ParamEditor` idiom; unknown restored actions render an
+  "unavailable on this build" row instead of being dropped), cooldown
+  slider. **Manual "run now"** dispatches through the shared
+  `RuleFireExecutor` (one global budget across every path) — `fire()` now
+  returns the dispatched count (all existing callers discard it) so the
+  snackbar can answer honestly ("ran — N actions" vs "didn't run —
+  conditions/cooldown"). `AutomationScreenContentTest` (5 tests: rows +
+  summaries, empty state, FAB→editor, run-now callback, the
+  exact-alarm-denied badge through the editor) joins the instrumented
+  matrix.
+- **H2 — wiring:** `MainActivity` swaps `placeholderScreen(Automation)`
+  for `automationScreen()`; `:app` gains `:feature:automation-ui` (pulling
+  `:core:hardware` into the app Hilt graph — the G1 validation gap);
+  `GadgetDestination.modules` KDoc un-staled; CLAUDE.md (vision header,
+  rule 12, the Automation section rewritten to the shipped engine, backup
+  pointer), MASTER-PLAN (engine + sensors rows ✅), design doc 3.4 marked
+  done.
+- **Milestone state:** #145/#146 acceptance now rests on the
+  physical-device demo (create "proximity < 5 cm → torch off", fire,
+  reboot, re-fire) — Matthias's half. Standing schemas/ blocker unchanged
+  (no schema bump here).
+
 **Batch G (`:core:hardware` + sensors migration, branch
 `claude/core-hardware-sensors`) — G1 (`:core:hardware` read-side seam) this
 push:** `HardwareRegistry` (`@Singleton`, injects the shared

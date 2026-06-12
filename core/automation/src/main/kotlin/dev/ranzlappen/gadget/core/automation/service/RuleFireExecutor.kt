@@ -73,27 +73,34 @@ class RuleFireExecutor @Inject constructor(
      * [preSampledTriggerValue] carries the metric sample that caused a
      * [Trigger.MetricThreshold] fire so it isn't re-sampled; one-shot paths
      * pass `null`.
+     *
+     * @return the number of actions actually dispatched — `0` when the
+     *   evaluator returned empty (disabled / cooldown / conditions failed /
+     *   root-filtered) or the budget dropped everything. Automated callers
+     *   ignore it; the manual "run now" surface uses it for honest feedback.
      */
-    suspend fun fire(rule: Rule, preSampledTriggerValue: Float? = null) = withContext(dispatcher) {
-        val readings = gatherReadings(rule, preSampledTriggerValue)
-        val now = System.currentTimeMillis()
-        val sinceLastFired = ruleRepository.lastFiredAt(rule.id)?.let { now - it }
-        val actions = evaluator.evaluate(
-            rule = rule,
-            firedTrigger = rule.trigger,
-            readings = readings,
-            now = LocalTime.now(),
-            rootAvailable = rootRegistry.hasRootAccess(),
-            sinceLastFiredMillis = sinceLastFired,
-        )
-        if (actions.isEmpty()) return@withContext
+    suspend fun fire(rule: Rule, preSampledTriggerValue: Float? = null): Int =
+        withContext(dispatcher) {
+            val readings = gatherReadings(rule, preSampledTriggerValue)
+            val now = System.currentTimeMillis()
+            val sinceLastFired = ruleRepository.lastFiredAt(rule.id)?.let { now - it }
+            val actions = evaluator.evaluate(
+                rule = rule,
+                firedTrigger = rule.trigger,
+                readings = readings,
+                now = LocalTime.now(),
+                rootAvailable = rootRegistry.hasRootAccess(),
+                sinceLastFiredMillis = sinceLastFired,
+            )
+            if (actions.isEmpty()) return@withContext 0
 
-        val admission = budget.admit(now, actions.size)
-        val dispatched = actions.take(admission.allowed)
-        dispatched.forEach { actionRegistry.dispatch(it.featureId, it.actionKey, it.params) }
-        if (dispatched.isNotEmpty()) ruleRepository.markFired(rule.id, now)
-        if (admission.throttled) postThrottleNotification()
-    }
+            val admission = budget.admit(now, actions.size)
+            val dispatched = actions.take(admission.allowed)
+            dispatched.forEach { actionRegistry.dispatch(it.featureId, it.actionKey, it.params) }
+            if (dispatched.isNotEmpty()) ruleRepository.markFired(rule.id, now)
+            if (admission.throttled) postThrottleNotification()
+            dispatched.size
+        }
 
     /** The trigger metric (pre-sampled when available) + each condition metric. */
     private suspend fun gatherReadings(rule: Rule, triggerValue: Float?): Map<String, Float> {

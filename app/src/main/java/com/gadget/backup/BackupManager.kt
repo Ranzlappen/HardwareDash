@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.os.Build
 import com.gadget.data.db.GadgetDatabase
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.ranzlappen.gadget.core.data.DatabaseCheckpointer
 import dev.ranzlappen.gadget.feature.apps.LegacyAppsImporter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -45,6 +46,7 @@ class BackupManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val database: GadgetDatabase,
     private val legacyAppsImporter: LegacyAppsImporter,
+    private val databaseCheckpointer: DatabaseCheckpointer,
 ) {
 
     /**
@@ -68,6 +70,11 @@ class BackupManager @Inject constructor(
         database.openHelper.writableDatabase
             .query("PRAGMA wal_checkpoint(FULL)")
             .use { it.moveToFirst() }
+        // Same guarantee for the modular DBs (apps / monitoring / automation)
+        // the generic databases/ sweep below copies — without this a backup
+        // taken mid-write captures a torn copy of whichever DB still has
+        // committed pages in its WAL (issue #153).
+        databaseCheckpointer.checkpointAll()
 
         ZipOutputStream(outputStream).use { zip ->
             // 1. metadata.json

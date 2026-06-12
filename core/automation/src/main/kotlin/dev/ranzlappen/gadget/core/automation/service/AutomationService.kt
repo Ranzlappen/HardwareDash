@@ -3,6 +3,8 @@ package dev.ranzlappen.gadget.core.automation.service
 import android.app.Notification
 import android.app.Service
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -11,6 +13,7 @@ import dev.ranzlappen.gadget.core.automation.RuleRepository
 import dev.ranzlappen.gadget.core.automation.engine.AutomationServiceResidency
 import dev.ranzlappen.gadget.core.automation.engine.MetricThresholdGate
 import dev.ranzlappen.gadget.core.automation.model.Rule
+import dev.ranzlappen.gadget.core.automation.model.SystemEventKind
 import dev.ranzlappen.gadget.core.automation.model.Trigger
 import dev.ranzlappen.gadget.core.model.MetricSource
 import dev.ranzlappen.gadget.core.notifications.NotificationChannelRegistry
@@ -19,8 +22,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -34,18 +39,22 @@ import kotlin.coroutines.coroutineContext
  * [dev.ranzlappen.gadget.core.monitoring] `MonitorService` shape: one shared
  * `specialUse` FGS for the whole engine, self-stopping when not needed.
  *
- * **Residency:** resident only while ≥1 enabled rule has a
- * [Trigger.MetricThreshold] trigger (the one kind needing a continuous
- * `MetricSource` subscription — [AutomationServiceResidency]). Schedule /
- * system-event / manual rules evaluate one-shot via [AutomationAlarmReceiver]
- * / [AutomationSystemEventReceiver] / "run now" and never start this
- * service. It re-derives residency on every rule-set change and [stopSelf]s
- * when no longer required.
+ * **Residency:** resident only while ≥1 enabled rule needs a live
+ * in-process subscription ([AutomationServiceResidency]) — a
+ * [Trigger.MetricThreshold] (continuous `MetricSource` stream) or a
+ * [SystemEventKind.Connectivity] event (a registered
+ * `ConnectivityManager.NetworkCallback`; connectivity broadcasts aren't
+ * deliverable to manifest receivers since Android N). Schedule /
+ * power-event / manual rules evaluate one-shot via
+ * [AutomationAlarmReceiver] / [AutomationSystemEventReceiver] / "run now"
+ * and never start this service. It re-derives residency on every rule-set
+ * change and [stopSelf]s when no longer required.
  *
  * **This service only detects edges**: a metric sample steps each rule's
- * [MetricThresholdGate] (edge + hysteresis; no fire-on-subscribe); a fire
- * hands off to [RuleFireExecutor], the single budget-confined pipeline every
- * trigger path shares.
+ * [MetricThresholdGate] (edge + hysteresis; no fire-on-subscribe), and the
+ * network watch swallows the registration replay ([watchConnectivity]); a
+ * fire hands off to [RuleFireExecutor], the single budget-confined pipeline
+ * every trigger path shares.
  */
 @AndroidEntryPoint
 class AutomationService : Service() {
@@ -65,14 +74,22 @@ class AutomationService : Service() {
         startForeground(NOTIFICATION_ID, ongoingNotification())
         scope.launch {
             ruleRepository.observeRules().collectLatest { rules ->
-                val streaming = AutomationServiceResidency.streamingRules(rules)
-                if (streaming.isEmpty()) {
+                if (!AutomationServiceResidency.isServiceRequired(rules)) {
                     stopSelf()
                     return@collectLatest
                 }
                 // Suspends here (subscriptions stay live) until the rule set
                 // changes, at which point collectLatest cancels + re-invokes.
-                subscribeStreamingRules(streaming)
+                coroutineScope {
+                    val streaming = AutomationServiceResidency.streamingRules(rules)
+                    if (streaming.isNotEmpty()) {
+                        launch { subscribeStreamingRules(streaming) }
+                    }
+                    val connectivity = AutomationServiceResidency.connectivityRules(rules)
+                    if (connectivity.isNotEmpty()) {
+                        launch { watchConnectivity(connectivity) }
+                    }
+                }
             }
         }
     }
@@ -131,6 +148,46 @@ class AutomationService : Service() {
         withTimeout(RuleFireExecutor.SAMPLE_TIMEOUT_MS) { source.sample() }
     } catch (_: TimeoutCancellationException) {
         null
+    }
+
+    /**
+     * One resident default-network callback firing every enabled
+     * [SystemEventKind.Connectivity] rule on a real network change — the
+     * arming path the design doc queued behind the builder batch (manifest
+     * receivers stopped getting connectivity broadcasts in Android N).
+     *
+     * No fire-on-subscribe: registering a default-network callback
+     * immediately **replays** the current network as an `onAvailable`. When
+     * a default network exists at registration that replay is swallowed as
+     * the baseline (the [MetricThresholdGate] principle — the first sample
+     * arms, it never fires); when none exists there is no replay, so the
+     * first `onAvailable` is a genuine change and fires. Storms (flapping
+     * Wi-Fi) are bounded by per-rule cooldown + the global budget.
+     */
+    private suspend fun watchConnectivity(rules: List<Rule>) {
+        val manager = getSystemService(ConnectivityManager::class.java) ?: return
+        callbackFlow {
+            var expectBaselineReplay = manager.activeNetwork != null
+            val callback = object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    if (expectBaselineReplay) {
+                        expectBaselineReplay = false
+                        return
+                    }
+                    trySend(Unit)
+                }
+
+                override fun onLost(network: Network) {
+                    // A loss is never a registration replay.
+                    expectBaselineReplay = false
+                    trySend(Unit)
+                }
+            }
+            manager.registerDefaultNetworkCallback(callback)
+            awaitClose { manager.unregisterNetworkCallback(callback) }
+        }.collect {
+            rules.forEach { rule -> fireExecutor.fire(rule) }
+        }
     }
 
     private fun ongoingNotification(): Notification =

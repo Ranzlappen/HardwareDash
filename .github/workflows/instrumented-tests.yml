@@ -5,13 +5,15 @@ name: Instrumented Tests
 # before — gate every PR. Closes
 # https://github.com/Ranzlappen/HardwareDash/issues/92.
 #
-# Scope (MVP): the three Hilt-free, library/feature instrumented modules
-#   * :core:ui            — design-system component contracts (Modals, …)
-#   * :core:data          — automation engine integration (rule → Room →
-#                           gate → evaluate → dispatch; Batch F / F3)
-#   * :feature:torch      — TorchScreenContent (stateless screen)
-#   * :feature:vibration  — VibrationScreenContent (stateless screen)
-#   * :feature:apps       — AppsScreenContent (stateless screen)
+# Scope (MVP): the Hilt-free, library/feature instrumented modules
+#   * :core:ui                 — design-system component contracts (Modals, …)
+#   * :core:data               — automation engine integration (rule → Room →
+#                                gate → evaluate → dispatch; Batch F / F3)
+#   * :feature:torch           — TorchScreenContent (stateless screen)
+#   * :feature:vibration       — VibrationScreenContent (stateless screen)
+#   * :feature:apps            — AppsScreenContent (stateless screen)
+#   * :feature:sensors         — SensorsScreenContent (stateless screen)
+#   * :feature:automation-ui   — AutomationScreenContent + rule editor (Batch H)
 # Only :app declares product flavors, so these modules use the unqualified
 # `connectedDebugAndroidTest` task. A flavor/API-level matrix (and :app's own
 # connected tests) can be layered on later if the need arises — kept to one
@@ -127,7 +129,7 @@ jobs:
           # Single line: android-emulator-runner's `script` input does not
           # reliably honor backslash-newline continuations (the `\` leaks
           # through as a literal Gradle task → "Task '\' not found").
-          script: ./gradlew :core:ui:connectedDebugAndroidTest :core:data:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest :feature:apps:connectedDebugAndroidTest :feature:sensors:connectedDebugAndroidTest --stacktrace
+          script: ./gradlew :core:ui:connectedDebugAndroidTest :core:data:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest :feature:apps:connectedDebugAndroidTest :feature:sensors:connectedDebugAndroidTest :feature:automation-ui:connectedDebugAndroidTest --stacktrace
 
       - name: Upload test reports
         if: always()
@@ -147,7 +149,7 @@ jobs:
             echo "## Instrumented tests (API 30 emulator)"
             echo ""
             if [ "${{ job.status }}" = "success" ]; then
-              echo "✅ **connectedDebugAndroidTest passed** for :core:ui, :core:data, :feature:torch, :feature:vibration, :feature:apps, :feature:sensors."
+              echo "✅ **connectedDebugAndroidTest passed** for :core:ui, :core:data, :feature:torch, :feature:vibration, :feature:apps, :feature:sensors, :feature:automation-ui."
             else
               echo "❌ **Instrumented tests failed.** See the uploaded \`instrumented-test-reports\` artifact."
             fi

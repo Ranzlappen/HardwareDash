@@ -6,7 +6,7 @@ HardwareDash (app name: Gadget) will become the definitive Android app for explo
 **Current State**
 - Branch `main`: canonical. Phase 0 + Phase 1 + Phase 1.1 hardening complete; Phase 2 (accelerated feature migration) **in progress** (June 2026). All work now lands on `main` via one PR per `claude/<topic>` batch branch — the long-lived `claude/refactor-2026` integration branch is retired.
 - **Migrated & live in the shell:** Torch (+ rooted/standard siblings), Vibration (+ rooted/standard siblings), App-Organizer (folders + folder widgets), Settings, Dashboard.
-- **Infrastructure landed:** `:core:root` (root-safety seam), `:core:widgetkit` (home-screen-widget framework), `:core:monitoring` (chart + persist framework), whole-app backup format v4, plus the `:core:automation` / `:core:hardware` contract seams. `:core:hardware` is reserved-but-empty pending the automation/sensors work (see Phase 3).
+- **Infrastructure landed:** `:core:root` (root-safety seam), `:core:widgetkit` (home-screen-widget framework), `:core:monitoring` (chart + persist framework), whole-app backup format v5, plus the full cross-automation engine — `:core:automation` (contract + rule model + evaluator + runtime), `automation.db` in `:core:data`, `:core:hardware`'s `HardwareRegistry`, and the `:feature:automation-ui` rules list + builder.
 - **Legacy surface shrinking:** 310 legacy `com.gadget.*` Kotlin files remain
   across ALL `:app` source sets (195 in `src/main`; the rest in the
   rooted/standard flavor + test source sets — the flavor trees are future
@@ -46,8 +46,9 @@ HardwareDash (app name: Gadget) will become the definitive Android app for explo
 | App-Organizer + folder widgets | ✅ Done (PRs #138–#144) | `:feature:apps` (+ `-rooted`); content-widget archetype in `:core:widgetkit` |
 | Settings v2 — Backup / Restore | ✅ Done (PRs #142–#144) | Whole-app backup format v4 + legacy in-process import |
 | Settings v2 — Flipper Zero | ⏳ Phase 2 tail | After `FlipperConnectionManager` migration to `:feature:flipper` |
-| Sensors / Radios / GPS / Camera / Storage / etc. | ⏳ Phase 2 tail | One feature per batch, following the migration guide; sensors pairs with the automation engine's trigger source (`:core:hardware`) |
-| Cross-automation engine | ⏳ Phase 3 next | `:core:automation` contract seam landed (`ActionHandler` + `ModuleActionRegistry`); engine/UI build is the next major effort — see `docs/automation-engine.md` |
+| Sensors (proximity / light / acceleration) | ✅ Done (PR #158) | `:feature:sensors` — push `MetricSource`s over the `DeviceSensors` seam; legacy `com.gadget.sensors` retired (94-A pattern) |
+| Radios / GPS / Camera / Storage / etc. | ⏳ Phase 2 tail | One feature per batch, following the migration guide |
+| Cross-automation engine | ✅ Done (PRs #150/#152/#155/#157/#158 + Batch H) | Engine core + runtime in `:core:automation`, `automation.db` in `:core:data`, `HardwareRegistry` in `:core:hardware`, rules list + builder in `:feature:automation-ui` — see `docs/automation-engine.md` (closes #145/#146 pending the physical-device demo) |
 
 **Phase 2 Outstanding Follow-up Issues** (reconciled against the live tracker, June 2026)
 
@@ -63,8 +64,8 @@ Still open:
 - Tech-debt: [#72](https://github.com/Ranzlappen/HardwareDash/issues/72) / [#68](https://github.com/Ranzlappen/HardwareDash/issues/68) detekt cleanup; [#101](https://github.com/Ranzlappen/HardwareDash/issues/101) floating/accessibility buttons exploration.
 
 **Phase 3 forward plan (new epics — see Workstreams 3/6 of the get-back-on-track plan):**
-- Automation engine: rule model + Room persistence + evaluator + scheduler/runtime, then `:feature:automation-ui` rule builder. `docs/automation-engine.md` carries the design.
-- `:core:hardware` registry: the symmetric read-side partner to the `ActionHandler` action registry — the trigger/condition source the engine and rule-builder enumerate without importing any feature.
+- ✅ Automation engine: rule model + Room persistence + evaluator + scheduler/runtime (Batches E/F), then the `:feature:automation-ui` rule builder (Batch H). `docs/automation-engine.md` carries the design.
+- ✅ `:core:hardware` registry: `HardwareRegistry` (Batch G) — the symmetric read-side partner to the `ActionHandler` action registry; the rule-builder's trigger/condition pickers enumerate it without importing any feature.
 
 ---
 

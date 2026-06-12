@@ -236,11 +236,21 @@ Rationale, weighed against Android background limits:
   boot-rearm path: `BootCompleted` re-arm reuses `:core:widgetkit`'s
   `BootRearmHandler` Hilt multibinding (one more handler keyed by an
   automation `FEATURE_ID`) — **don't** add a second boot receiver.
-  **Amendment (batch 3.3):** `SystemEventKind.Connectivity` is *modeled but
-  not yet armed* — connectivity broadcasts stopped being deliverable to
-  manifest receivers in Android N, so arming it needs a registered
-  `NetworkCallback` inside a resident component; queued behind the builder
-  UI batch (which should hide it from the trigger picker until then).
+  **Amendment (batch 3.3, resolved post-3.4):** `SystemEventKind
+  .Connectivity` cannot use a manifest receiver (connectivity broadcasts
+  stopped being deliverable in Android N). It is **armed by the resident
+  `AutomationService`**: residency extends to "≥1 enabled MetricThreshold
+  *or* Connectivity rule" (`AutomationServiceResidency`), and the service
+  registers one default-network `ConnectivityManager.NetworkCallback`
+  whose `onAvailable`/`onLost` fire every enabled Connectivity rule
+  through `RuleFireExecutor`. No fire-on-subscribe: the registration's
+  immediate `onAvailable` replay (delivered when a default network already
+  exists) is swallowed as the baseline — the `MetricThresholdGate`
+  principle applied to the network watch. Flap storms are bounded by
+  per-rule cooldown + the global budget. Cost note: a Connectivity rule
+  therefore keeps the FGS resident, exactly like a metric rule — the
+  one-shot "never see a notification" guarantee covers schedule / power /
+  boot / manual rule sets only.
 - **Manual triggers** dispatch immediately via a one-shot path; they don't
   need the service running.
 
@@ -361,7 +371,14 @@ builder (batch 3.4).
    builder (trigger picker → conditions → actions rendered from
    `ModuleAction.params`), wired into `GadgetDestination.Automation` +
    `GadgetApp`; instrumented stateless-screen test under
-   `instrumented-tests.yml`.
+   `instrumented-tests.yml`. (done — Batch H: the builder enumerates
+   signals via `HardwareRegistry` and actions via `ModuleActionRegistry`,
+   hides the unarmed `Connectivity` event, flavor-filters `requiresRoot`
+   actions, surfaces the exact-alarm badge +
+   `ACTION_REQUEST_SCHEDULE_EXACT_ALARM` deep link, and wires save →
+   `AutomationScheduler.scheduleNext` / `AutomationController
+   .ensureStarted`; the manual "run now" path dispatches through the
+   shared `RuleFireExecutor`.)
 
 `:core:hardware` (epic #146) lands alongside 3.2/3.3 as the enumeration
 layer the builder uses to list available trigger/condition signals.

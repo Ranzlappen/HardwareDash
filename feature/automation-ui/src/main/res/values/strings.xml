@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="automation_title">Automation</string>
+    <string name="automation_new_rule">New rule</string>
+    <string name="automation_empty_title">No rules yet</string>
+    <string name="automation_empty_subtitle">Create your first rule — when its trigger fires, Gadget runs the actions you choose.</string>
+    <string name="automation_run_now">Run now</string>
+    <string name="automation_delete_rule">Delete rule</string>
+    <string name="automation_rule_enabled_toggle">Rule enabled</string>
+    <string name="automation_rule_actions_summary">Runs: %1$s</string>
+    <string name="automation_rule_actions_none">No actions yet</string>
+    <string name="automation_delete_confirm_title">Delete rule?</string>
+    <string name="automation_delete_confirm_text">“%1$s” will be removed. This can’t be undone.</string>
+    <string name="automation_delete_confirm_yes">Delete</string>
+    <string name="automation_cancel">Cancel</string>
+    <string name="automation_run_now_result">“%1$s” ran — %2$d action(s) dispatched</string>
+    <string name="automation_run_now_nothing">“%1$s” didn’t run — conditions not met or the rule is cooling down</string>
+
+    <!-- Exact-alarm capability -->
+    <string name="automation_capability_exact">Exact-time schedules</string>
+    <string name="automation_capability_exact_detail">Schedule triggers marked “exact” fire at the minute, even in Doze</string>
+    <string name="automation_capability_exact_ok">Allowed — exact schedules fire at the set minute</string>
+    <string name="automation_capability_exact_missing">Not allowed — exact schedules fall back to a ±10 min window</string>
+    <string name="automation_capability_exact_action">Allow</string>
+    <string name="automation_os_note_31">Android 12+: exact-time schedules need the “Alarms &amp; reminders” special permission.</string>
+    <string name="automation_os_note_34">Android 14+: that permission is denied by default on fresh installs — schedules degrade to a ±10 min window until you allow it.</string>
+
+    <!-- Rule summaries -->
+    <string name="automation_summary_metric">When %1$s %2$s %3$s</string>
+    <string name="automation_summary_schedule_daily">Daily at %1$s</string>
+    <string name="automation_summary_schedule_days">%1$s at %2$s</string>
+    <string name="automation_summary_schedule_exact_suffix">· exact</string>
+    <string name="automation_summary_boot">On device boot</string>
+    <string name="automation_summary_power_connected">On power connected</string>
+    <string name="automation_summary_power_disconnected">On power disconnected</string>
+    <string name="automation_summary_connectivity">On connectivity change</string>
+    <string name="automation_summary_manual">Manual — tap Run now</string>
+
+    <!-- Editor: shared -->
+    <string name="automation_editor_title_new">New rule</string>
+    <string name="automation_editor_title_edit">Edit rule</string>
+    <string name="automation_editor_name_label">Name</string>
+    <string name="automation_editor_section_trigger">When (trigger)</string>
+    <string name="automation_editor_section_conditions">Only if (conditions)</string>
+    <string name="automation_editor_section_actions">Then (actions)</string>
+    <string name="automation_editor_section_options">Options</string>
+    <string name="automation_editor_save">Save rule</string>
+
+    <!-- Editor: trigger -->
+    <string name="automation_editor_trigger_kind">Trigger</string>
+    <string name="automation_trigger_kind_metric">Signal threshold</string>
+    <string name="automation_trigger_kind_schedule">Schedule</string>
+    <string name="automation_trigger_kind_event">System event</string>
+    <string name="automation_trigger_kind_manual">Manual</string>
+    <string name="automation_editor_signal">Signal</string>
+    <string name="automation_editor_operator">Fires when value is</string>
+    <string name="automation_editor_threshold">Threshold</string>
+    <string name="automation_editor_edge">Fire on</string>
+    <string name="automation_edge_rising">Entering</string>
+    <string name="automation_edge_falling">Leaving</string>
+    <string name="automation_editor_hysteresis">Re-arm value (hysteresis)</string>
+    <string name="automation_editor_hysteresis_hint">After firing, re-arm only once the value crosses back past this — stops a noisy signal from re-firing the rule rapidly.</string>
+    <string name="automation_editor_rearm">Re-arm at</string>
+    <string name="automation_editor_time">Time</string>
+    <string name="automation_editor_days">Days</string>
+    <string name="automation_editor_exact">Exact time</string>
+    <string name="automation_editor_exact_hint_inexact">Fires within a ±10 min window around the set time.</string>
+    <string name="automation_editor_exact_hint_exact">Fires at the minute, even in Doze.</string>
+    <string name="automation_editor_exact_denied">Exact alarms aren’t allowed for Gadget — this rule falls back to a ±10 min window.</string>
+    <string name="automation_editor_exact_allow">Allow exact alarms</string>
+    <string name="automation_editor_event">Event</string>
+    <string name="automation_event_boot">Device booted</string>
+    <string name="automation_event_power_connected">Power connected</string>
+    <string name="automation_event_power_disconnected">Power disconnected</string>
+    <string name="automation_event_connectivity">Connectivity changed</string>
+    <string name="automation_editor_manual_hint">Runs only when you tap “Run now” on this screen.</string>
+
+    <!-- Editor: conditions -->
+    <string name="automation_editor_conditions_empty">No conditions — the trigger alone decides.</string>
+    <string name="automation_editor_condition_logic">Must hold</string>
+    <string name="automation_logic_all">All</string>
+    <string name="automation_logic_any">Any</string>
+    <string name="automation_editor_condition_add_metric">Add signal check</string>
+    <string name="automation_editor_condition_add_time">Add time window</string>
+    <string name="automation_condition_metric_title">Signal check</string>
+    <string name="automation_condition_time_title">Time window</string>
+    <string name="automation_editor_condition_remove">Remove condition</string>
+    <string name="automation_editor_condition_value_is">Value is</string>
+    <string name="automation_editor_window_start">From</string>
+    <string name="automation_editor_window_end">Until</string>
+    <string name="automation_editor_window_wrap_hint">An end before the start wraps midnight (22:00–06:00).</string>
+
+    <!-- Editor: actions -->
+    <string name="automation_editor_action_pick">Action</string>
+    <string name="automation_editor_action_add">Add action</string>
+    <string name="automation_editor_actions_empty">Add at least one action.</string>
+    <string name="automation_editor_action_remove">Remove action</string>
+    <string name="automation_editor_action_unavailable">%1$s — unavailable on this build</string>
+    <string name="automation_action_label">%1$s · %2$s</string>
+
+    <!-- Editor: options -->
+    <string name="automation_editor_cooldown">Cooldown</string>
+    <string name="automation_editor_cooldown_suffix">s</string>
+    <string name="automation_editor_cooldown_hint">Minimum time between automatic firings — 0 = none. A manual “Run now” bypasses it but still delays the next automatic fire.</string>
+
+    <!-- Day-of-week short labels -->
+    <string name="automation_day_mon">Mon</string>
+    <string name="automation_day_tue">Tue</string>
+    <string name="automation_day_wed">Wed</string>
+    <string name="automation_day_thu">Thu</string>
+    <string name="automation_day_fri">Fri</string>
+    <string name="automation_day_sat">Sat</string>
+    <string name="automation_day_sun">Sun</string>
+</resources>

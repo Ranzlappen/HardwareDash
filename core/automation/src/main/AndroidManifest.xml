@@ -12,17 +12,25 @@
       alarm-clock/calendar apps (ADR-0002 Decision 4).
     -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!--
+      Normal permission for the resident ConnectivityManager.NetworkCallback
+      that arms SystemEventKind.Connectivity rules (connectivity broadcasts
+      aren't deliverable to manifest receivers since Android N).
+    -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application>
         <!--
           The automation engine runs as ONE specialUse foreground service for
           the whole app (a single cross-cutting engine, not one service per
           module — same spirit as :core:monitoring's MonitorService). It is
-          resident ONLY while >=1 enabled rule has a metric-stream
-          (MetricThreshold) trigger; schedule / broadcast / manual rules run
-          one-shot with no resident service. No standard foregroundServiceType
-          fits "continuous user-defined rule evaluation", so specialUse is
-          declared with a Play-console justification property.
+          resident ONLY while >=1 enabled rule needs a live in-process
+          subscription: a metric-stream (MetricThreshold) trigger or a
+          Connectivity system-event trigger (NetworkCallback); schedule /
+          power-event / manual rules run one-shot with no resident service.
+          No standard foregroundServiceType fits "continuous user-defined
+          rule evaluation", so specialUse is declared with a Play-console
+          justification property.
         -->
         <service
             android:name=".service.AutomationService"
@@ -30,7 +38,7 @@
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Event-driven evaluation of user-defined automation rules (metric-threshold triggers) to dispatch on-device actions." />
+                android:value="Event-driven evaluation of user-defined automation rules (metric-threshold and connectivity triggers) to dispatch on-device actions." />
         </service>
 
         <!-- One-shot landing point for AutomationScheduler's alarms. -->
@@ -41,8 +49,9 @@
         <!--
           Power events are on the implicit-broadcast exemption list, so a
           manifest receiver still gets them. Connectivity is NOT armed here
-          (not deliverable to manifest receivers since Android N — see the
-          receiver KDoc + design doc).
+          (not deliverable to manifest receivers since Android N) — it is
+          armed by the resident AutomationService's NetworkCallback; see the
+          receiver KDoc + design doc.
         -->
         <receiver
             android:name=".service.AutomationSystemEventReceiver"
