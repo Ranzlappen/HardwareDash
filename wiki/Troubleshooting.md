@@ -159,6 +159,24 @@ should do the same.
   statements). Every new modular DB joins `DatabaseCheckpointer.checkpointAll()`
   (#153) and bumps `BACKUP_FORMAT_VERSION`. Full design: [Asset
   Catalog](Asset-Catalog) + the backup notes below.
+- **WAL data loss on legacy restore.** After `PRAGMA wal_checkpoint(TRUNCATE)`
+  the WAL may still exist if the checkpoint only partially succeeded (e.g.,
+  another process held a read lock). `BackupManager` now copies the companion
+  `-wal` file alongside the staged `gadget_db` before deleting the originals.
+  `LegacyAppsImporter.openReadOnly` uses `OPEN_READONLY`, which makes SQLite
+  apply the WAL at read time, recovering any committed pages not yet in the
+  main file. Without this, committed folders/apps written only to the WAL are
+  silently lost on a legacy-backup restore.
+- **`LegacyAppsImporter` silent-failure on ID collision.** `insertFolder` /
+  `insertWebLink` used `OnConflictStrategy.ABORT`; any ID collision (e.g.,
+  user created a folder in the new app before import ran) threw and was
+  swallowed by `runCatching`, leaving `KEY_DONE = false` so every subsequent
+  launch retried and kept failing. Fixed: `AppsDao` exposes `upsertFolder` /
+  `upsertWebLink` with `OnConflictStrategy.REPLACE`; `LegacyAppsImporter`
+  uses them and returns a typed `ImportResult(folderCount, appCount,
+  webLinkCount)` for UI feedback. A manual "Import from legacy app" action in
+  the Apps screen's overflow menu calls `forceReimport()` to re-run without
+  a cold restart.
 
 ## R8 / serialization issues
 
@@ -192,5 +210,5 @@ bridges.
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `CLAUDE.md` (engineering pitfalls),
+> _Last reviewed: 2026-06-13 · Source: `CLAUDE.md` (engineering pitfalls),
 > `docs/backup.md` · Related modules: all._

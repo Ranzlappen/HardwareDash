@@ -48,12 +48,18 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 - **`:core:widgetkit`** — the home-screen-widget framework (config store,
   pin flow, RemoteViews rendering, base providers, boot re-arm).
 - **`:core:monitoring`** — the chart + persist framework (MetricSource
-  consumption, monitor containers, hand-drawn charts).
+  consumption, monitor containers, hand-drawn charts). Enhanced: per-signal
+  min/max/count stats in `MonitorService`, richer notifications with
+  conditional "Stop monitoring" action button, `MonitorGlobalPrefs` DataStore
+  preference, `MonitorNotificationActionReceiver`, and correct "enable hint"
+  vs "collecting" chart placeholder logic.
 - **Cross-automation engine** — `:core:automation` (contract + rule model
   + evaluator + runtime), `automation.db` in `:core:data`,
   `:core:hardware`'s `HardwareRegistry`, and `:feature:automation-ui`.
 - **Whole-app backup format v5** — ZIP of every DB / DataStore /
-  SharedPrefs / asset sweep, with legacy in-process import.
+  SharedPrefs / asset sweep, with legacy in-process import. Fixed: WAL data
+  staged alongside `gadget_db`; `LegacyAppsImporter` uses upsert to survive
+  ID collisions; manual re-import UI added to Apps screen overflow.
 
 ### Remaining legacy surface
 
@@ -133,5 +139,5 @@ complete. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-06-13 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md` · Related modules: all._
