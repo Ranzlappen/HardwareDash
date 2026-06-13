@@ -40,6 +40,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | App-Organizer + folder widgets | `:feature:apps` (+ `-rooted` skeleton) | ✅ |
 | Sensors (proximity / light / acceleration) | `:feature:sensors` | ✅ (PR #158) |
 | Battery (level / charging / temperature / voltage / health) | `:feature:battery` | ✅ |
+| GPS / Location (map, position, speed, altitude) | `:feature:gps` | ✅ |
 | Cross-automation engine + rule builder | `:core:automation` + `:core:hardware` + `:feature:automation-ui` | ✅ (epics #145/#146) |
 
 ### Shared infrastructure landed
@@ -76,7 +77,7 @@ find app/src -path "*com/gadget*" -name "*.kt" | wc -l
 
 These modules exist as Gradle skeletons with **no Kotlin sources yet**:
 `actuators`, `ambient`, `audio`, `bugreport` (+ `-rooted`),
-`camera`, `diagnostics` (+ `-rooted`), `flipper` (+ `-rooted`), `gps`,
+`camera`, `diagnostics` (+ `-rooted`), `flipper` (+ `-rooted`),
 `lock` (+ `-rooted`), `manual`, `motion`, `radios-{wifi,bt,nfc,subghz,ir}`,
 `storage` (+ `-rooted`). One feature per batch, following the guide.
 

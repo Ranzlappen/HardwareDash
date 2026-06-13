@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tune
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.outlined.BatteryFull
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.FlashlightOn
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Tune
@@ -146,6 +148,20 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.BatteryFull
     }
 
+    /**
+     * GPS / Location feature module — live position on an OSMDroid map,
+     * coordinates readout (lat/lon/altitude/speed/bearing/accuracy), and
+     * speed + altitude monitoring. Requires [ACCESS_FINE_LOCATION]; the
+     * rooted extreme-tier (NMEA tap, constellation dump, spoofing) ships
+     * separately as `:feature:gps-rooted`.
+     */
+    data object Gps : GadgetDestination {
+        override val route = "gps"
+        override val label = "GPS"
+        override val iconFilled = Icons.Filled.LocationOn
+        override val iconOutlined = Icons.Outlined.LocationOn
+    }
+
     companion object {
         /**
          * Destinations pinned to the **top** of the rail, above the
@@ -167,7 +183,7 @@ sealed interface GadgetDestination {
          * here.
          */
         val modules: List<GadgetDestination> = listOf(
-            Torch, Vibration, Apps, Sensors, Battery, Actuators, Automation,
+            Torch, Vibration, Apps, Sensors, Battery, Gps, Actuators, Automation,
         )
 
         /**

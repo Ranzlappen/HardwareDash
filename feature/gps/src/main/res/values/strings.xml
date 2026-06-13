@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gps_screen_title">GPS / Location</string>
+
+    <!-- ─── Permission card ────────────────────────────────────────────── -->
+    <string name="gps_permission_card_title">Location permission required</string>
+    <string name="gps_permission_card_body">This screen needs access to your device\'s location to show your position on the map and report speed and altitude.</string>
+    <string name="gps_permission_grant_button">Grant location permission</string>
+
+    <!-- ─── Permission ModuleInfo ──────────────────────────────────────── -->
+    <string name="gps_permission_label">Location</string>
+    <string name="gps_permission_rationale">Required to read GPS position, speed, and altitude from the device.</string>
+
+    <!-- ─── Module capabilities ─────────────────────────────────────────── -->
+    <string name="gps_cap_location_name">GPS location</string>
+    <string name="gps_cap_location_detail">Real-time position via FusedLocationProvider.</string>
+    <string name="gps_cap_no_permission">Location permission not granted.</string>
+    <string name="gps_cap_searching">Permission granted — acquiring fix…</string>
+    <string name="gps_cap_available">Location fix acquired.</string>
+
+    <!-- ─── Map card ─────────────────────────────────────────────────────── -->
+    <string name="gps_card_map_title">Map</string>
+
+    <!-- ─── Coordinates card ─────────────────────────────────────────────── -->
+    <string name="gps_card_coordinates_title">Position</string>
+    <string name="gps_searching">Acquiring GPS fix…</string>
+    <string name="gps_label_lat">Latitude</string>
+    <string name="gps_label_lon">Longitude</string>
+    <string name="gps_label_altitude">Altitude</string>
+    <string name="gps_label_speed">Speed</string>
+    <string name="gps_label_bearing">Bearing</string>
+    <string name="gps_label_accuracy">Accuracy</string>
+
+    <!-- ─── Monitoring containers ─────────────────────────────────────────── -->
+    <string name="gps_live_monitor_speed">Speed (live)</string>
+    <string name="gps_live_monitor_altitude">Altitude (live)</string>
+    <string name="gps_monitor_speed">Speed history</string>
+    <string name="gps_monitor_altitude">Altitude history</string>
+</resources>
