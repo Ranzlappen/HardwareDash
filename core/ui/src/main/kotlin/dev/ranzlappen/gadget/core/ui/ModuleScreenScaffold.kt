@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.adaptive.GadgetLayoutMode
+import dev.ranzlappen.gadget.core.ui.adaptive.GadgetPosture
 import dev.ranzlappen.gadget.core.ui.adaptive.rememberLayoutMode
+import dev.ranzlappen.gadget.core.ui.adaptive.rememberPosture
 import dev.ranzlappen.gadget.core.ui.module.ModuleCapabilitiesSection
 import dev.ranzlappen.gadget.core.ui.module.ModuleCompatibilitySection
 import dev.ranzlappen.gadget.core.ui.module.ModuleFirmwareSection
@@ -39,13 +41,18 @@ import dev.ranzlappen.gadget.core.ui.module.ModulePermissionsSection
  *      1. functional   — the module's primary content
  *      2. moduleInfo   — permissions / OS-compat / firmware (auto)
  *      3. disclaimer   — collapsible safety / legal note
- *  - An optional [secondaryPane] slot rendered to the **right** of
- *    the primary column when the active [GadgetLayoutMode] is
- *    [GadgetLayoutMode.TwoPane] or [GadgetLayoutMode.ThreePane]
- *    (medium / expanded widths). On [GadgetLayoutMode.SinglePane]
- *    the secondary pane is omitted entirely — callers should treat
- *    it as "supplementary content for wider screens" rather than
- *    something the primary flow depends on.
+ *  - An optional [secondaryPane] slot that adapts to both the active
+ *    [GadgetLayoutMode] and the device's [GadgetPosture]:
+ *    - On [GadgetLayoutMode.SinglePane] it is omitted entirely.
+ *    - On [GadgetLayoutMode.TwoPane] or [ThreePane] + [GadgetPosture.Flat]
+ *      or [GadgetPosture.Book]: rendered to the **right** of the primary
+ *      column (landscape split — primary ≈ 60 % + secondary ≈ 40 %).
+ *    - On [GadgetPosture.Tabletop] (foldable held half-open like a laptop):
+ *      stacked **below** the primary content instead, so content sits in
+ *      the top half and controls / supplementary info in the bottom half
+ *      (both at equal height, separated by the hinge).
+ *    Callers should treat the pane as "supplementary content for wider
+ *    / foldable screens" rather than something the primary flow depends on.
  *
  * Modules can add/remove sections freely — **this is only a common
  * pattern** for sensor/actuator modules, not enforced. A settings-style
@@ -75,6 +82,7 @@ fun ModuleScreenScaffold(
 ) {
     val spacing = LocalGadgetTheme.current.spacing
     val layoutMode = rememberLayoutMode()
+    val posture = rememberPosture()
     val showSecondary = secondaryPane != null && layoutMode != GadgetLayoutMode.SinglePane
 
     val primary: @Composable () -> Unit = {
@@ -107,11 +115,30 @@ fun ModuleScreenScaffold(
         }
     }
 
-    if (showSecondary) {
+    if (showSecondary && posture == GadgetPosture.Tabletop) {
+        // Tabletop posture: foldable held half-open like a laptop. Stack primary
+        // (content) on the top half and secondary (controls / supplementary) on
+        // the bottom half, respecting the horizontal hinge between them.
+        Column(modifier = modifier.fillMaxSize()) {
+            Row(modifier = Modifier.weight(1f)) { primary() }
+            val secondaryScroll = rememberScrollState()
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(secondaryScroll)
+                    .padding(
+                        horizontal = spacing.medium,
+                        vertical = spacing.large,
+                    ),
+                verticalArrangement = Arrangement.spacedBy(spacing.large),
+            ) {
+                secondaryPane!!.invoke(this)
+            }
+        }
+    } else if (showSecondary) {
+        // Flat or Book posture on a wide screen: side by side.
+        // Primary takes ~60% on TwoPane, ~50% on ThreePane.
         Row(modifier = modifier.fillMaxSize()) {
-            // Primary takes ~60% on TwoPane, ~50% on ThreePane.
-            // weight()s give a clean ratio without committing to dp
-            // breakpoints inside the scaffold.
             val primaryWeight = when (layoutMode) {
                 GadgetLayoutMode.TwoPane -> 1.5f
                 GadgetLayoutMode.ThreePane -> 1f

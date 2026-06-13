@@ -144,14 +144,19 @@ The component families (full signatures in
   (Settings), and `modules` in a scrollable middle region. Add a module
   by appending it to `GadgetDestination.modules` and registering its route
   in `GadgetApp { … }`.
-- **`ModuleScreenScaffold`** exposes an optional `secondaryPane` slot
-  rendered to the right of the primary column on TwoPane/ThreePane;
-  omitted entirely on Compact.
-- **Foldable posture** has a stable seam (#89): `GadgetPosture` +
-  `rememberPosture()` returns `Flat` / `Tabletop` / `Book`. Read it for
-  posture, `rememberLayoutMode()` for width — they're orthogonal. Wired
-  ahead of need; go through the seam, never pull `material3-adaptive` into
-  a feature ad-hoc.
+- **`ModuleScreenScaffold`** exposes an optional `secondaryPane` slot. Its
+  placement adapts to both width and posture:
+  - **Compact** (`SinglePane`): omitted entirely.
+  - **Medium/Expanded + Flat or Book posture**: rendered to the **right** of the
+    primary column (primary ≈ 60 % on TwoPane, ≈ 50 % on ThreePane).
+  - **Tabletop posture** (foldable held half-open like a laptop): stacked
+    **below** the primary content — content on top half, supplementary/controls
+    on the bottom half at the hinge. This is the first consumer of `rememberPosture()`.
+- **Foldable posture seam** (#89 ✅): `GadgetPosture` + `rememberPosture()`
+  returns `Flat` / `Tabletop` / `Book`. Read it for posture,
+  `rememberLayoutMode()` for width — they're orthogonal. Go through the seam;
+  never pull `material3-adaptive` into a feature directly. Reference consumer:
+  `ModuleScreenScaffold`, first caller: `DashboardScreen.secondaryPane`.
 
 ## Performance & stability
 
