@@ -83,73 +83,51 @@ class BackupManager @Inject constructor(
             zip.write(metadata.toString(2).toByteArray())
             zip.closeEntry()
 
-            // 2. Database file
+            // 2. Main database (gadget_db) + WAL/SHM
             val dbPath = database.openHelper.writableDatabase.path
-            if (dbPath != null) {
-                val dbFile = File(dbPath)
-                if (dbFile.exists()) {
-                    addFileToZip(zip, dbFile, "gadget_db")
-                }
-                val walFile = File("$dbPath-wal")
-                if (walFile.exists()) {
-                    addFileToZip(zip, walFile, "gadget_db-wal")
-                }
-                val shmFile = File("$dbPath-shm")
-                if (shmFile.exists()) {
-                    addFileToZip(zip, shmFile, "gadget_db-shm")
-                }
-            }
+            if (dbPath != null) addMainDbToZip(zip, dbPath)
 
             // 2b. Modular Room databases (apps.db = App-Organizer, monitoring.db
             //     = metric history, automation.db = automation rules) live in
-            //     the same databases/ dir but aren't
-            //     owned by this manager's GadgetDatabase reference. Sweep them
-            //     (+ their -wal/-shm) under databases/ so v2 backups carry that
-            //     data. gadget_db* is already captured above and is skipped here.
-            val databasesDir = dbPath?.let { File(it).parentFile }
-            if (databasesDir != null && databasesDir.isDirectory) {
-                databasesDir.listFiles()?.forEach { file ->
-                    if (file.isFile && !file.name.startsWith("gadget_db")) {
-                        addFileToZip(zip, file, "databases/${file.name}")
-                    }
-                }
+            //     the same databases/ dir. gadget_db* is already captured above.
+            addDirToZip(zip, dbPath?.let { File(it).parentFile }, "databases") {
+                !it.name.startsWith("gadget_db")
             }
 
             // 3. SharedPreferences XML files
-            val sharedPrefsDir = File(context.filesDir.parent, "shared_prefs")
-            if (sharedPrefsDir.exists() && sharedPrefsDir.isDirectory) {
-                sharedPrefsDir.listFiles()?.forEach { file ->
-                    if (file.isFile && file.name.endsWith(".xml")) {
-                        addFileToZip(zip, file, "shared_prefs/${file.name}")
-                    }
-                }
+            addDirToZip(zip, File(context.filesDir.parent, "shared_prefs"), "shared_prefs") {
+                it.name.endsWith(".xml")
             }
 
             // 4. DataStore files
-            val dataStoreDir = File(context.filesDir, "datastore")
-            if (dataStoreDir.exists() && dataStoreDir.isDirectory) {
-                dataStoreDir.listFiles()?.forEach { file ->
-                    if (file.isFile) {
-                        addFileToZip(zip, file, "datastore/${file.name}")
-                    }
-                }
-            }
+            addDirToZip(zip, File(context.filesDir, "datastore"), "datastore")
 
-            // 5. App-Organizer asset directories (cover photos + favicon cache).
-            //    These live under filesDir but outside `datastore/`, so the
-            //    sweep above doesn't reach them.
+            // 5. App-Organizer asset directories (cover photos, favicon cache,
+            //    widget icons). These live under filesDir but outside datastore/.
             for ((subDir, prefix) in filesDirAssetSweeps) {
-                val src = File(context.filesDir, subDir)
-                if (src.exists() && src.isDirectory) {
-                    src.listFiles()?.forEach { file ->
-                        if (file.isFile) {
-                            addFileToZip(zip, file, "$prefix/${file.name}")
-                        }
-                    }
-                }
+                addDirToZip(zip, File(context.filesDir, subDir), prefix)
             }
         }
         Timber.i("Backup created successfully")
+    }
+
+    private fun addMainDbToZip(zip: ZipOutputStream, dbPath: String) {
+        for (suffix in listOf("", "-wal", "-shm")) {
+            val file = File("$dbPath$suffix")
+            if (file.exists()) addFileToZip(zip, file, "gadget_db$suffix")
+        }
+    }
+
+    private fun addDirToZip(
+        zip: ZipOutputStream,
+        dir: File?,
+        prefix: String,
+        filter: (File) -> Boolean = { true },
+    ) {
+        if (dir == null || !dir.isDirectory) return
+        dir.listFiles()?.forEach { file ->
+            if (file.isFile && filter(file)) addFileToZip(zip, file, "$prefix/${file.name}")
+        }
     }
 
     suspend fun restoreBackup(inputStream: InputStream) = withContext(Dispatchers.IO) {
