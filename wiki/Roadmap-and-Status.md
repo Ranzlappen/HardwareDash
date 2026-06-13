@@ -107,7 +107,9 @@ These modules exist as Gradle skeletons with **no Kotlin sources yet**:
   `rememberPosture()` seam landed but has no consumer yet; kept open for
   the first adaptive consumer.
 - **[#95](https://github.com/Ranzlappen/HardwareDash/issues/95)** — torch
-  brightness control (`WRITE_SETTINGS` UX). Feature enhancement.
+  brightness control (API 33+ variable-intensity via `turnOnTorchWithStrengthLevel`).
+  ✅ Shipped: `BrightnessCard`, `TorchController.setBrightness`, `UserPreferences.defaultTorchBrightness`.
+  Screen-fill-light fallback (`WRITE_SETTINGS`) tracked separately.
 - **[#107](https://github.com/Ranzlappen/HardwareDash/issues/107)** —
   delete dead legacy `com.gadget.widget` torch providers; folded into the
   per-feature clean-cut deletion step.

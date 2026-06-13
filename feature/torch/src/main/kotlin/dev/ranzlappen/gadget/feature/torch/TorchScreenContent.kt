@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
+import dev.ranzlappen.gadget.feature.torch.components.BrightnessCard
 import dev.ranzlappen.gadget.feature.torch.components.RootToolsCard
 import dev.ranzlappen.gadget.feature.torch.components.StrobeDefaultsCard
 import dev.ranzlappen.gadget.feature.torch.components.TorchToggleCard
@@ -25,15 +26,17 @@ import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
  *
  *   1. **Torch toggle** — hero controls plus in-app strobe / Morse toggles
  *      for immediate testing without pinning a widget.
- *   2. **Strobe defaults** — slider feeding
+ *   2. **Brightness** — flash-intensity slider (API 33+ / variable-brightness
+ *      flash only); shows an informational note on unsupported devices.
+ *   3. **Strobe defaults** — slider feeding
  *      [dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository.setDefaultStrobeRateHz];
  *      the value is the default captured into every new strobe widget at
  *      pin time.
- *   3. **Monitoring** — two independent tiles supplied as slots: the
+ *   4. **Monitoring** — two independent tiles supplied as slots: the
  *      persisted history chart ([monitor]) and the in-memory live-stream
  *      chart ([liveMonitor]).
- *   4. **Your widgets** — the saved-widget list with edit / delete + add.
- *   5. **Root tools** — privileged controls, shown only when rooted.
+ *   5. **Your widgets** — the saved-widget list with edit / delete + add.
+ *   6. **Root tools** — privileged controls, shown only when rooted.
  */
 @Composable
 fun TorchScreenContent(
@@ -66,6 +69,14 @@ fun TorchScreenContent(
                 onMorseToggle = { onEvent(TorchUiEvent.MorseToggle) },
                 onMorseHold = { onEvent(TorchUiEvent.MorseHold(it)) },
                 onMorseTextChange = { onEvent(TorchUiEvent.MorseTextChange(it)) },
+            )
+            BrightnessCard(
+                brightness = state.defaultBrightness,
+                brightnessSupported = state.torch.brightnessSupported,
+                onBrightnessChange = { onEvent(TorchUiEvent.BrightnessChange(it)) },
+                onBrightnessCommit = { onEvent(TorchUiEvent.BrightnessCommit) },
+                expanded = expanded(TorchSectionId.Brightness),
+                onExpandedChange = { onEvent(TorchUiEvent.SectionToggle(TorchSectionId.Brightness)) },
             )
             StrobeDefaultsCard(
                 rateHz = state.defaultStrobeRateHz,

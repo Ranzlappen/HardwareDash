@@ -9,6 +9,7 @@ package dev.ranzlappen.gadget.feature.torch
  */
 internal object TorchSectionId {
     const val Controls = "torch_controls"
+    const val Brightness = "torch_brightness"
     const val StrobeDefaults = "torch_strobe_defaults"
     const val Widgets = "torch_widgets"
     const val RootTools = "torch_root_tools"
@@ -17,5 +18,5 @@ internal object TorchSectionId {
 
     /** Cards whose collapse state the screen hoists (not the self-managing
      *  monitor containers). */
-    val hoisted = listOf(Controls, StrobeDefaults, Widgets, RootTools)
+    val hoisted = listOf(Controls, Brightness, StrobeDefaults, Widgets, RootTools)
 }

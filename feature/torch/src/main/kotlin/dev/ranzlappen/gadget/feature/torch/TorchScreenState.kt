@@ -8,10 +8,11 @@ import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 /**
  * Stateless view-state container consumed by [TorchScreenContent].
  *
- * Produced by [TorchViewModel.state] from the four reactive sources
+ * Produced by [TorchViewModel.state] from the reactive sources
  * the screen depends on:
  * - [TorchController.state] (live torch hardware snapshot)
  * - [UserPreferencesRepository.flow.map { it.defaultStrobeRateHz }]
+ * - [UserPreferencesRepository.flow.map { it.defaultTorchBrightness }]
  * - [WidgetConfigStore.all] (saved widget configs)
  * - [StrobeRuntime.running] (live strobe-running signal, no polling)
  *
@@ -23,6 +24,10 @@ data class TorchScreenState(
     val torch: TorchState,
     val defaultStrobeRateHz: Float,
     val widgets: List<SavedTorchWidget>,
+    /** Persisted default brightness, normalised `0f..1f`. Drives the
+     *  brightness slider and is applied via [TorchController.setBrightness]
+     *  on commit. */
+    val defaultBrightness: Float = 1f,
     val strobeRunning: Boolean = false,
     val morseText: String = "",
     val rootAvailability: TorchRootAvailability = TorchRootAvailability.Unavailable,
@@ -40,6 +45,7 @@ data class TorchScreenState(
         val Initial = TorchScreenState(
             torch = TorchState(),
             defaultStrobeRateHz = TorchWidgetConfig.DEFAULT_RATE_HZ,
+            defaultBrightness = 1f,
             widgets = emptyList(),
         )
     }

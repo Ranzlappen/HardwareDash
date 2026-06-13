@@ -42,6 +42,18 @@ interface TorchController {
     fun setOn(on: Boolean)
 
     /**
+     * Set the flash-unit intensity. Level is normalised `0f..1f` where
+     * `1f` is maximum brightness.
+     *
+     * On API 33+ devices with `FLASH_INFO_STRENGTH_MAXIMUM_LEVEL > 1`
+     * this calls `CameraManager.turnOnTorchWithStrengthLevel` (which
+     * also turns the torch on if it is currently off). On unsupported
+     * devices this updates [state] with [TorchError.BrightnessUnsupported]
+     * and is otherwise a no-op.
+     */
+    fun setBrightness(level: Float)
+
+    /**
      * The torch's **authoritative** current state, awaiting the first real
      * hardware delivery if it hasn't arrived yet.
      *
@@ -70,6 +82,12 @@ interface TorchController {
  * - [isAvailable] — `false` when the device has no flash unit
  *   (e.g. emulators, flashless tablets). UI should disable
  *   torch-related controls and show an "Unavailable" state.
+ * - [brightness] — normalised intensity in `0f..1f`; only meaningful
+ *   when [isOn]. `1f` represents maximum (hardware default). Updated
+ *   by [TorchController.setBrightness].
+ * - [brightnessSupported] — `true` when the device exposes variable
+ *   flash intensity (API 33+ and `FLASH_INFO_STRENGTH_MAXIMUM_LEVEL > 1`).
+ *   When `false`, [TorchController.setBrightness] is a no-op.
  * - [error] — last error encountered, or `null` if no error.
  *   `null` after a successful operation (errors aren't sticky).
  */
@@ -77,6 +95,8 @@ interface TorchController {
 data class TorchState(
     val isOn: Boolean = false,
     val isAvailable: Boolean = false,
+    val brightness: Float = 1f,
+    val brightnessSupported: Boolean = false,
     val error: TorchError? = null,
 )
 
@@ -91,4 +111,8 @@ enum class TorchError {
 
     /** CAMERA permission not granted (rare for torch-only on most OEMs). */
     PermissionDenied,
+
+    /** [TorchController.setBrightness] was called but the device doesn't
+     *  support variable torch intensity (API < 33 or single-level flash). */
+    BrightnessUnsupported,
 }

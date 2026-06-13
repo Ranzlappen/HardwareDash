@@ -23,7 +23,12 @@ everyone.
 ## Standard torch controller
 
 ```kotlin
-interface TorchController { val state: StateFlow<TorchState>; fun toggle(); fun setOn(on: Boolean) }
+interface TorchController {
+    val state: StateFlow<TorchState>
+    fun toggle()
+    fun setOn(on: Boolean)
+    fun setBrightness(level: Float)   // 0f..1f; API 33+ only
+}
 ```
 
 `StandardTorchController` wraps Camera2 `CameraManager.setTorchMode()` and
@@ -31,6 +36,16 @@ registers a `TorchCallback` so external toggles (QS tile, OEM gestures,
 other apps) flow back into `state`. Setters are **non-suspend** — the
 binder calls finish in microseconds, so the screen, tile, widget, and
 service hit them directly.
+
+**Variable brightness** (issue #95): `setBrightness(level)` maps `0f..1f`
+onto `1..FLASH_INFO_STRENGTH_MAXIMUM_LEVEL` and calls
+`CameraManager.turnOnTorchWithStrengthLevel` on API 33+ devices with
+`maxLevel > 1`. On unsupported devices it sets `TorchError.BrightnessUnsupported`
+in state and is otherwise a no-op. `TorchState` exposes `brightness: Float`
+(self-reported, no OS callback) and `brightnessSupported: Boolean` (derived
+from API + capability at construction). `UserPreferences.defaultTorchBrightness`
+persists the slider value; `BrightnessCard` shows a note instead of the
+slider on unsupported devices.
 
 > **`init`-block forward-reference trap.** The first migration tripped on
 > registering the `TorchCallback` from an `init` block before the property
@@ -129,7 +144,7 @@ every PR via `instrumented-tests.yml`.
 
 | File | Why |
 |---|---|
-| `TorchController.kt` / `StandardTorchController.kt` | Interface + Camera2 impl with `TorchCallback`. |
+| `TorchController.kt` / `StandardTorchController.kt` | Interface + Camera2 impl with `TorchCallback` + `setBrightness`. |
 | `TorchScreen.kt` / `TorchScreenContent.kt` | Stateful route vs. stateless testable content. |
 | `TorchViewModel.kt` | `combine(...)` over flows + rooted availability + collapse state. |
 | `tile/FlashlightTileService.kt` | `EntryPointAccessors.fromApplication(...)` for non-Hilt components. |
@@ -149,7 +164,7 @@ Copy the **shape** (stateless content, `MetricSource`, `ActionHandler`,
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `CLAUDE.md` (torch sections),
+> _Last reviewed: 2026-06-13 · Source: `CLAUDE.md` (torch sections),
 > `docs/migration-guide.md`, `feature/torch/*` · Related modules:
 > `:feature:torch` (+ `-rooted`/`-standard`), `:core:widgetkit`,
 > `:core:monitoring`, `:core:automation`, `:core:root`._

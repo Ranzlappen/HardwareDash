@@ -101,6 +101,10 @@ class TorchViewModel @Inject constructor(
      *  DataStore by [onRateCommit]. */
     private val pendingRateHz = MutableStateFlow<Float?>(null)
 
+    /** In-flight brightness drag value; overlays the DataStore default so the
+     *  slider doesn't snap back mid-drag. Cleared on [onBrightnessCommit]. */
+    private val pendingBrightness = MutableStateFlow<Float?>(null)
+
     /** Optimistic in-flight edit of the rooted-tool parameters. Overlays the
      *  persisted [RootToolsConfigRepository] value so sliders move live; cleared
      *  on [onRootToolsCommit] once the value reaches DataStore. */
@@ -152,15 +156,19 @@ class TorchViewModel @Inject constructor(
         ::TorchInputs,
     )
 
+    private val defaultBrightnessFlow = userPreferences.flow.map { it.defaultTorchBrightness }
+
     val state: StateFlow<TorchScreenState> = combine(
         inputs,
         rootAvailability,
         collapseRepo.expandedStates(TorchSectionId.hoisted),
         rootToolsState,
-    ) { i, root, expanded, rootTools ->
+        defaultBrightnessFlow,
+    ) { i, root, expanded, rootTools, persistedBrightness ->
         TorchScreenState(
             torch = i.torch,
             defaultStrobeRateHz = pendingRateHz.value ?: i.defaultRateHz,
+            defaultBrightness = pendingBrightness.value ?: persistedBrightness,
             widgets = i.widgets
                 .toSortedMap()
                 // Drop widgets the user deleted in-app (kept on disk as
@@ -228,6 +236,8 @@ class TorchViewModel @Inject constructor(
             is TorchUiEvent.MorseTextChange -> onMorseTextChange(event.text)
             is TorchUiEvent.RateChange -> onRateChange(event.rateHz)
             TorchUiEvent.RateCommit -> onRateCommit()
+            is TorchUiEvent.BrightnessChange -> onBrightnessChange(event.level)
+            TorchUiEvent.BrightnessCommit -> onBrightnessCommit()
             TorchUiEvent.AddWidget -> onAddWidget()
             is TorchUiEvent.EditWidget -> onEditWidget(event.widget)
             is TorchUiEvent.DeleteWidget -> onDeleteWidget(event.widget)
@@ -269,6 +279,25 @@ class TorchViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferences.setDefaultStrobeRateHz(rate)
             pendingRateHz.value = null
+        }
+    }
+
+    /** Brightness slider drag — updates pending state and applies the level to
+     *  the hardware immediately so the torch responds while the user drags.
+     *  Persists nothing; [onBrightnessCommit] handles the DataStore write. */
+    fun onBrightnessChange(level: Float) {
+        val clamped = level.coerceIn(0f, 1f)
+        pendingBrightness.value = clamped
+        controller.setBrightness(clamped)
+    }
+
+    /** Brightness slider release — persists the final value and clears the
+     *  pending shadow so the DataStore emission takes over. */
+    fun onBrightnessCommit() {
+        val level = pendingBrightness.value ?: return
+        viewModelScope.launch {
+            userPreferences.setDefaultTorchBrightness(level)
+            pendingBrightness.value = null
         }
     }
 

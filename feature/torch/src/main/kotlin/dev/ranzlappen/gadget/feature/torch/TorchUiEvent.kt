@@ -26,6 +26,13 @@ sealed interface TorchUiEvent {
     data class RateChange(val rateHz: Float) : TorchUiEvent
     data object RateCommit : TorchUiEvent
 
+    /** Live drag of the brightness slider (`0f..1f`). Calls [TorchController.setBrightness]
+     *  immediately so the hardware responds while the user is still dragging. */
+    data class BrightnessChange(val level: Float) : TorchUiEvent
+
+    /** Slider release — persist the last brightness as the new default. */
+    data object BrightnessCommit : TorchUiEvent
+
     /** Open the customization sheet for a brand-new widget. One entry point
      *  now that the function (flashlight / strobe / morse) is a picker inside
      *  the sheet rather than a per-kind Add button. */

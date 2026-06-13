@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.roundToInt
 
 /**
  * Standard-flavor torch controller backed by Camera2's
@@ -51,10 +53,26 @@ class StandardTorchController @Inject constructor(
 
     private val flashCameraId: String? = resolveFlashCameraId(context, cameraManager)
 
+    // Maximum hardware strength level; > 1 means variable brightness is available.
+    // FLASH_INFO_STRENGTH_MAXIMUM_LEVEL requires API 33 (Tiramisu).
+    private val flashMaxStrengthLevel: Int = if (
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && flashCameraId != null
+    ) {
+        runCatching {
+            cameraManager.getCameraCharacteristics(flashCameraId)
+                .get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL) ?: 1
+        }.getOrDefault(1)
+    } else {
+        1
+    }
+
+    private val brightnessSupported: Boolean = flashMaxStrengthLevel > 1
+
     private val _state = MutableStateFlow(
         TorchState(
             isOn = false,
             isAvailable = flashCameraId != null,
+            brightnessSupported = brightnessSupported,
             error = if (flashCameraId == null) TorchError.NoFlashUnit else null,
         ),
     )
@@ -115,6 +133,30 @@ class StandardTorchController @Inject constructor(
             _state.update { current ->
                 current.copy(isAvailable = false, error = TorchError.HardwareError)
             }
+        }
+    }
+
+    override fun setBrightness(level: Float) {
+        if (!brightnessSupported) {
+            _state.update { it.copy(error = TorchError.BrightnessUnsupported) }
+            return
+        }
+        val cameraId = flashCameraId ?: return
+        val clamped = level.coerceIn(0f, 1f)
+        // Map 0..1 → 1..maxLevel (hardware minimum is 1, not 0).
+        val strength = (clamped * flashMaxStrengthLevel).roundToInt().coerceIn(1, flashMaxStrengthLevel)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                cameraManager.turnOnTorchWithStrengthLevel(cameraId, strength)
+                // turnOnTorchWithStrengthLevel also turns the torch on — the
+                // TorchCallback fires and updates isOn; self-report brightness
+                // here since there's no OS callback for the strength level.
+                _state.update { it.copy(brightness = clamped, error = null) }
+            }
+        } catch (e: CameraAccessException) {
+            _state.update { it.copy(error = mapException(e)) }
+        } catch (e: IllegalArgumentException) {
+            _state.update { it.copy(isAvailable = false, error = TorchError.HardwareError) }
         }
     }
 
