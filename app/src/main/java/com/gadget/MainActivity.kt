@@ -43,6 +43,7 @@ import dev.ranzlappen.gadget.core.navigation.navigateTopLevel
 import dev.ranzlappen.gadget.core.navigation.placeholderScreen
 import dev.ranzlappen.gadget.feature.automation.ui.automationScreen
 import dev.ranzlappen.gadget.feature.dashboard.dashboardScreen
+import dev.ranzlappen.gadget.feature.battery.batteryScreen
 import dev.ranzlappen.gadget.feature.sensors.sensorsScreen
 import dev.ranzlappen.gadget.feature.settings.settingsScreen
 import dev.ranzlappen.gadget.feature.torch.torchScreen
@@ -118,6 +119,7 @@ class MainActivity : ComponentActivity() {
                             },
                         )
                         sensorsScreen()
+                        batteryScreen()
                         placeholderScreen(GadgetDestination.Actuators)
                         automationScreen()
                         settingsScreen(

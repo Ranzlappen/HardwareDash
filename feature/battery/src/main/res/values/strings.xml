@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="battery_screen_title">Battery</string>
+
+    <!-- ─── Status card ─────────────────────────────────────────────── -->
+    <string name="battery_card_status_title">Status</string>
+    <string name="battery_level_value">%1$d%%</string>
+    <string name="battery_level_unknown">Level unknown</string>
+    <string name="battery_unavailable">Battery information not available.</string>
+    <!-- health · temp · voltage on a single summary line -->
+    <string name="battery_detail_line">%1$s · %.1f°C · %.2f V</string>
+
+    <!-- ─── Charging card ────────────────────────────────────────────── -->
+    <string name="battery_card_charging_title">Charging</string>
+    <string name="battery_plugged_via">via %1$s</string>
+
+    <!-- Charging status labels -->
+    <string name="battery_status_charging">Charging</string>
+    <string name="battery_status_discharging">Discharging</string>
+    <string name="battery_status_not_charging">Not charging</string>
+    <string name="battery_status_full">Full</string>
+    <string name="battery_status_unknown">Unknown</string>
+
+    <!-- Plug type labels -->
+    <string name="battery_plug_ac">AC</string>
+    <string name="battery_plug_usb">USB</string>
+    <string name="battery_plug_wireless">Wireless</string>
+    <string name="battery_plug_none">Unplugged</string>
+
+    <!-- Health labels -->
+    <string name="battery_health_good">Good</string>
+    <string name="battery_health_overheat">Overheat</string>
+    <string name="battery_health_dead">Dead</string>
+    <string name="battery_health_overvoltage">Over voltage</string>
+    <string name="battery_health_failure">Unspecified failure</string>
+    <string name="battery_health_cold">Cold</string>
+    <string name="battery_health_unknown">Unknown</string>
+
+    <!-- ─── Module capabilities ──────────────────────────────────────── -->
+    <string name="battery_cap_level_name">Battery level</string>
+    <string name="battery_cap_level_detail">Real-time charge percentage via BatteryManager.</string>
+    <string name="battery_cap_temp_name">Temperature</string>
+    <string name="battery_cap_temp_detail">Battery pack temperature reported by the system.</string>
+    <string name="battery_cap_available">Works — no permissions required.</string>
+    <string name="battery_cap_unavailable">Battery data not yet received.</string>
+    <string name="battery_cap_temp_ok">%.1f°C — within normal range.</string>
+
+    <!-- ─── Monitoring containers ────────────────────────────────────── -->
+    <string name="battery_live_monitor_level">Battery level (live)</string>
+    <string name="battery_live_monitor_temp">Temperature (live)</string>
+    <string name="battery_monitor_level">Battery level history</string>
+    <string name="battery_monitor_temp">Temperature history</string>
+</resources>

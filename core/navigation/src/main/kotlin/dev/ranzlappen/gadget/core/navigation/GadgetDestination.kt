@@ -2,6 +2,7 @@ package dev.ranzlappen.gadget.core.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.FlashlightOn
@@ -10,6 +11,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.outlined.Apps
+import androidx.compose.material.icons.outlined.BatteryFull
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.FlashlightOn
@@ -130,6 +132,20 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.Apps
     }
 
+    /**
+     * Battery feature module — level, charging state, temperature, voltage,
+     * and health readouts from [android.os.BatteryManager] broadcasts. Live
+     * and history monitoring via the shared monitoring framework. The rooted
+     * extreme-tier (fuel-gauge, cell monitor, charging-profile override) ships
+     * separately as `:feature:battery-rooted`.
+     */
+    data object Battery : GadgetDestination {
+        override val route = "battery"
+        override val label = "Battery"
+        override val iconFilled = Icons.Filled.BatteryFull
+        override val iconOutlined = Icons.Outlined.BatteryFull
+    }
+
     companion object {
         /**
          * Destinations pinned to the **top** of the rail, above the
@@ -151,7 +167,7 @@ sealed interface GadgetDestination {
          * here.
          */
         val modules: List<GadgetDestination> = listOf(
-            Torch, Vibration, Apps, Sensors, Actuators, Automation,
+            Torch, Vibration, Apps, Sensors, Battery, Actuators, Automation,
         )
 
         /**
