@@ -34,9 +34,11 @@ data class FolderWidgetConfig(
      *  folder's own `baseColorArgb`; any other ARGB overrides it. New field, so
      *  older on-disk configs decode with the follow default. */
     val coverTintArgb: Long = FOLLOW_FOLDER_COLOR,
+    /** Optional icon key from the icon catalog. `null` means use the default folder cover. */
+    val iconKey: String? = null,
     override val displayName: String = "",
     override val removed: Boolean = false,
-    override val schemaVersion: Int = 1,
+    override val schemaVersion: Int = 2,
     override val appearance: WidgetAppearance = WidgetAppearance(),
 ) : WidgetKitConfig {
     companion object {

@@ -58,9 +58,15 @@ fun MonitorChart(
     windowMs: Long,
     layout: MonitorChartLayout,
     yMax: Float,
+    isEnabled: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     if (buckets.size < 2) {
+        val emptyText = if (isEnabled) {
+            stringResource(R.string.monitor_chart_collecting)
+        } else {
+            stringResource(R.string.monitor_chart_enable_hint)
+        }
         Box(
             modifier = modifier
                 .fillMaxWidth()
@@ -68,7 +74,7 @@ fun MonitorChart(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = stringResource(R.string.monitor_chart_collecting),
+                text = emptyText,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

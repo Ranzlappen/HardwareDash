@@ -53,6 +53,18 @@
     <string name="apps_delete">Delete</string>
     <string name="apps_back">Back</string>
 
+    <!-- Legacy import -->
+    <string name="apps_import_legacy">Import from legacy app</string>
+    <string name="apps_import_success">Imported %1$d folders, %2$d apps</string>
+    <string name="apps_import_nothing">No legacy data found</string>
+    <string name="apps_import_error">Import failed — try again</string>
+
+    <!-- In-editor widget management section -->
+    <string name="apps_widgets_section_title">Home-screen widgets</string>
+    <string name="apps_widget_add">Add widget</string>
+    <string name="apps_widget_list_empty">No widgets placed yet</string>
+    <string name="apps_widget_delete">Delete widget</string>
+
     <!-- Folder home-screen widget. -->
     <string name="apps_widget_folder_label">App Folder</string>
     <string name="apps_widget_folder_description">A customizable home-screen folder of installed apps, PWAs, and web links.</string>

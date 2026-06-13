@@ -309,6 +309,18 @@ class BackupManager @Inject constructor(
                     }
                 }
                 live.delete()
+
+                // If the checkpoint was incomplete the WAL still holds committed
+                // pages that aren't yet in the main file. Copy it alongside the
+                // staged DB so SQLite auto-applies it when openReadOnly opens the
+                // staged copy (SQLite reads the WAL even in read-only mode).
+                val liveWal = File("$dbPath-wal")
+                if (liveWal.exists() && liveWal.length() > 0) {
+                    runCatching {
+                        liveWal.copyTo(File(staging.parent, "${staging.name}-wal"), overwrite = true)
+                        Timber.i("Staged legacy gadget_db WAL alongside main file (checkpoint incomplete)")
+                    }.onFailure { Timber.w(it, "Failed to stage legacy gadget_db WAL") }
+                }
                 File("$dbPath-wal").delete()
                 File("$dbPath-shm").delete()
 

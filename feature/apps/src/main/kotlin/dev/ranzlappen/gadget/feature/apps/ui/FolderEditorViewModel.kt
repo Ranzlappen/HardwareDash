@@ -10,11 +10,13 @@ import dev.ranzlappen.gadget.core.data.apps.AppsDao
 import dev.ranzlappen.gadget.core.data.apps.Folder
 import dev.ranzlappen.gadget.core.data.apps.FolderApp
 import dev.ranzlappen.gadget.core.data.apps.FolderRuleEntity
+import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.apps.WebLinkRepository
 import dev.ranzlappen.gadget.feature.apps.icons.CoverImageStore
 import dev.ranzlappen.gadget.feature.apps.rules.FolderRule
 import dev.ranzlappen.gadget.feature.apps.rules.FolderRuleSet
 import dev.ranzlappen.gadget.feature.apps.rules.RuleCodec
+import dev.ranzlappen.gadget.feature.apps.widget.FolderWidgetConfig
 import dev.ranzlappen.gadget.feature.apps.widget.PinFolderHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -37,6 +39,7 @@ class FolderEditorViewModel @Inject constructor(
     private val webLinkRepository: WebLinkRepository,
     private val pinFolderHelper: PinFolderHelper,
     private val coverImageStore: CoverImageStore,
+    private val widgetStore: WidgetConfigStore<FolderWidgetConfig>,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -92,6 +95,23 @@ class FolderEditorViewModel @Inject constructor(
                 ?: FolderRuleSet()
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FolderRuleSet())
+
+    /** All placed widgets bound to this folder, excluding soft-deleted ones. */
+    val placedWidgets: StateFlow<List<PlacedFolderWidget>> = widgetStore.all
+        .map { all ->
+            all.entries
+                .filter { (_, cfg) -> cfg.folderId == folderId && !cfg.removed }
+                .map { (id, cfg) -> PlacedFolderWidget(appWidgetId = id, displayName = cfg.displayName) }
+                .sortedBy { it.appWidgetId }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun deleteWidget(appWidgetId: Int) {
+        viewModelScope.launch {
+            val cfg = widgetStore.get(appWidgetId) ?: return@launch
+            widgetStore.save(appWidgetId, cfg.copy(removed = true))
+        }
+    }
 
     fun rename(newName: String) {
         val f = folder.value ?: return

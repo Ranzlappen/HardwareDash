@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
 import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.component.DashCard
@@ -40,6 +41,16 @@ fun SensorsScreen(
         rows = rows,
         moduleInfo = sensorsModuleInfo(rows),
         modifier = modifier,
+        liveMonitors = {
+            rows.filter { it.available }.forEach { row ->
+                LiveMonitorContainer(
+                    metricKey = row.metricKey,
+                    title = stringResource(R.string.sensors_live_monitor_title, row.name),
+                    modifier = Modifier.fillMaxWidth(),
+                    collapseId = "sensors_live_monitor_${row.metricKey}",
+                )
+            }
+        },
         monitors = {
             rows.filter { it.available }.forEach { row ->
                 MonitorContainer(
@@ -92,6 +103,7 @@ internal fun SensorsScreenContent(
     rows: List<SensorRowUi>,
     moduleInfo: ModuleInfo?,
     modifier: Modifier = Modifier,
+    liveMonitors: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
@@ -100,6 +112,7 @@ internal fun SensorsScreenContent(
         moduleInfo = moduleInfo,
         functional = {
             rows.forEach { row -> SensorReadingCard(row) }
+            liveMonitors()
             monitors()
         },
     )

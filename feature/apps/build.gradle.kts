@@ -51,6 +51,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     // Structured logging, matching the legacy domain code being ported.
     implementation(libs.timber)
+    // ExifInterface — EXIF orientation correction for custom widget icons
+    // imported from the gallery (same dependency used by :feature:vibration).
+    implementation(libs.androidx.exifinterface)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

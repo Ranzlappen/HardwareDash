@@ -1,10 +1,14 @@
 package dev.ranzlappen.gadget.feature.apps.ui
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.data.apps.AppsDao
 import dev.ranzlappen.gadget.core.data.apps.Folder
+import dev.ranzlappen.gadget.feature.apps.ImportResult
+import dev.ranzlappen.gadget.feature.apps.LegacyAppsImporter
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -18,7 +22,9 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AppsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val dao: AppsDao,
+    private val legacyImporter: LegacyAppsImporter,
 ) : ViewModel() {
 
     val folders: StateFlow<List<Folder>> = dao.observeFolders()
@@ -27,6 +33,13 @@ class AppsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList(),
         )
+
+    /** True when the legacy gadget_db exists and can be imported from. */
+    val legacyDbExists: Boolean
+        get() = context.getDatabasePath(LegacyAppsImporter.LEGACY_DB).exists()
+
+    /** Clears the one-shot guard and re-runs the import. Returns the result for snackbar display. */
+    suspend fun importLegacy(): ImportResult = legacyImporter.forceReimport()
 
     fun createFolder(name: String, baseColorArgb: Int) {
         if (name.isBlank()) return

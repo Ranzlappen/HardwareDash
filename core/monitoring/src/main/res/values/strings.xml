@@ -11,6 +11,7 @@
     <string name="monitor_show_widget">Show as widget</string>
     <string name="monitor_show_notification">Show as notification</string>
     <string name="monitor_chart_collecting">Collecting data…</string>
+    <string name="monitor_chart_enable_hint">Turn on monitoring to start collecting history</string>
 
     <!-- Live monitor (in-memory realtime chart) -->
     <string name="live_monitor_toggle_label">Live stream</string>
@@ -32,4 +33,5 @@
         <item quantity="one">%d signal</item>
         <item quantity="other">%d signals</item>
     </plurals>
+    <string name="monitor_notification_action_stop">Stop monitoring</string>
 </resources>

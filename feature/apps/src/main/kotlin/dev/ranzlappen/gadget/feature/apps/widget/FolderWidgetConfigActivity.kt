@@ -5,15 +5,24 @@ import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,16 +40,22 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.core.data.apps.Folder
+import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.CompactCard
+import dev.ranzlappen.gadget.core.ui.component.GadgetChip
 import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
+import dev.ranzlappen.gadget.core.ui.component.GlassSurface
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
 import dev.ranzlappen.gadget.core.widgetkit.provider.ContentWidgetUpdater
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.core.widgetkit.ui.ContentWidgetCustomizationSheet
 import dev.ranzlappen.gadget.feature.apps.R
+import dev.ranzlappen.gadget.feature.apps.icons.MaterialSymbol
 import dev.ranzlappen.gadget.feature.apps.ui.AppsViewModel
+import dev.ranzlappen.gadget.feature.apps.widget.customization.FolderWidgetIconCatalog
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -60,6 +76,7 @@ import javax.inject.Inject
 class FolderWidgetConfigActivity : ComponentActivity() {
 
     @Inject lateinit var configStore: WidgetConfigStore<FolderWidgetConfig>
+    @Inject lateinit var iconCatalog: FolderWidgetIconCatalog
 
     private var appWidgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID
 
@@ -85,6 +102,7 @@ class FolderWidgetConfigActivity : ComponentActivity() {
                 GadgetTheme {
                     FolderWidgetConfigScreen(
                         existing = existing,
+                        iconCatalog = iconCatalog,
                         onCancel = { finish() },
                         onConfirm = ::saveAndFinish,
                     )
@@ -109,14 +127,17 @@ class FolderWidgetConfigActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FolderWidgetConfigScreen(
     existing: FolderWidgetConfig?,
+    iconCatalog: FolderWidgetIconCatalog,
     onCancel: () -> Unit,
     onConfirm: (FolderWidgetConfig) -> Unit,
 ) {
     val viewModel = hiltViewModel<AppsViewModel>()
     val folders by viewModel.folders.collectAsState()
+    val scope = rememberCoroutineScope()
 
     var folderId by remember { mutableStateOf(existing?.folderId ?: FolderWidgetConfig.NO_FOLDER) }
     var name by remember { mutableStateOf(existing?.displayName.orEmpty()) }
@@ -128,8 +149,17 @@ private fun FolderWidgetConfigScreen(
     }
     var showLabel by remember { mutableStateOf(existing?.showLabel ?: true) }
     var sizePreset by remember { mutableStateOf(existing?.sizePreset ?: WidgetSizePreset.Medium) }
+    var iconKey by remember { mutableStateOf(existing?.iconKey) }
 
     val selectedFolder = folders.firstOrNull { it.id == folderId }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) {
+            scope.launch { iconKey = iconCatalog.importCustomIcon(uri) }
+        }
+    }
 
     ContentWidgetCustomizationSheet(
         name = name,
@@ -154,6 +184,7 @@ private fun FolderWidgetConfigScreen(
                     sizePreset = sizePreset,
                     showLabel = showLabel,
                     coverTintArgb = tintArgb ?: FolderWidgetConfig.FOLLOW_FOLDER_COLOR,
+                    iconKey = iconKey,
                     displayName = name.ifBlank { folderName },
                     appearance = appearance,
                 ),
@@ -168,9 +199,90 @@ private fun FolderWidgetConfigScreen(
                     if (name.isBlank()) name = folder.name
                 },
             )
+            WidgetIconPicker(
+                catalog = iconCatalog,
+                selectedKey = iconKey,
+                onSelect = { iconKey = it },
+                onClear = { iconKey = null },
+                onImportCustom = {
+                    importLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                    )
+                },
+            )
         },
         preview = { FolderWidgetPreview(folder = selectedFolder) },
     )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun WidgetIconPicker(
+    catalog: FolderWidgetIconCatalog,
+    selectedKey: String?,
+    onSelect: (String) -> Unit,
+    onClear: () -> Unit,
+    onImportCustom: () -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(spacing.tiny),
+    ) {
+        Text(
+            text = stringResource(R.string.apps_cover_icon),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(spacing.tiny),
+            verticalArrangement = Arrangement.spacedBy(spacing.tiny),
+        ) {
+            // "None" chip clears the widget-specific icon (falls back to folder cover).
+            GadgetChip(
+                selected = selectedKey == null,
+                onClick = onClear,
+                label = stringResource(R.string.apps_cover_none),
+            )
+            catalog.entries.forEach { entry ->
+                GadgetChip(
+                    selected = selectedKey == entry.key,
+                    onClick = { onSelect(entry.key) },
+                    label = entry.displayName,
+                    leadingIcon = MaterialSymbol.fromId(entry.key)?.icon,
+                )
+            }
+        }
+        // Import a custom image from the gallery.
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            intensity = GlassIntensity.Subtle,
+            onClick = onImportCustom,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(spacing.small),
+            ) {
+                Icon(Icons.Filled.AddPhotoAlternate, contentDescription = null)
+                Text(
+                    text = stringResource(R.string.apps_cover_pick_image),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                if (selectedKey != null && catalog.isCustom(selectedKey)) {
+                    Icon(
+                        Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                    IconButton(onClick = onClear) {
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.apps_cover_clear))
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable

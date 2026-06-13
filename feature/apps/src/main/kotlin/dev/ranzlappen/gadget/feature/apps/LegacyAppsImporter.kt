@@ -51,7 +51,7 @@ class LegacyAppsImporter @Inject constructor(
         scope.launch { importIfNeeded() }
     }
 
-    suspend fun importIfNeeded() {
+    suspend fun importIfNeeded(): ImportResult {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
         // A legacy-backup restore stages the old gadget_db here (BackupManager)
@@ -63,31 +63,43 @@ class LegacyAppsImporter @Inject constructor(
         // this is the cold-start fallback if that didn't complete.
         val staging = stagingFile()
         val fromStaging = staging.exists()
-        if (!fromStaging && prefs.getBoolean(KEY_DONE, false)) return
+        if (!fromStaging && prefs.getBoolean(KEY_DONE, false)) return ImportResult.NONE
 
         val dbFile = if (fromStaging) staging else context.getDatabasePath(LEGACY_DB)
         if (!dbFile.exists()) {
             // Fresh install with no legacy DB — nothing to import, ever.
             prefs.edit().putBoolean(KEY_DONE, true).apply()
-            return
+            return ImportResult.NONE
         }
 
         // A staged restore replaces current data; an in-place upgrade merges
         // into the (empty-on-first-launch) modular DB.
-        val imported = runCatching { doImport(dbFile, clearFirst = fromStaging) }
+        val result = runCatching { doImport(dbFile, clearFirst = fromStaging) }
             .onFailure { Timber.e(it, "LegacyAppsImporter: import failed") }
-            .getOrDefault(false)
+            .getOrNull()
 
         // Mark done even if the source had no apps tables, so we don't reopen
         // the legacy DB on every launch. A genuine failure (caught above)
         // leaves the flag unset so the next launch retries.
-        if (imported || runCatching { !hasAppsTables(dbFile) }.getOrDefault(false)) {
+        if (result != null || runCatching { !hasAppsTables(dbFile) }.getOrDefault(false)) {
             prefs.edit().putBoolean(KEY_DONE, true).apply()
             if (fromStaging) staging.parentFile?.deleteRecursively()
         }
+        val imported = result ?: ImportResult.NONE
         Timber.i(
-            "LegacyAppsImporter: source=${if (fromStaging) "staged-restore" else "live"} imported=$imported",
+            "LegacyAppsImporter: source=${if (fromStaging) "staged-restore" else "live"} result=$imported",
         )
+        return imported
+    }
+
+    /**
+     * Clears the one-shot guard and re-runs the import, returning the counts.
+     * Used by the manual "Import from legacy app" action in the UI.
+     */
+    suspend fun forceReimport(): ImportResult {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit().remove(KEY_DONE).apply()
+        return importIfNeeded()
     }
 
     /**
@@ -107,22 +119,22 @@ class LegacyAppsImporter @Inject constructor(
             staging.parentFile?.deleteRecursively()
             return false
         }
-        val ok = runCatching { doImport(staging, clearFirst = true) }
+        val result = runCatching { doImport(staging, clearFirst = true) }
             .onFailure { Timber.e(it, "LegacyAppsImporter: in-process restore import failed") }
-            .getOrDefault(false)
-        if (ok) {
+            .getOrNull()
+        if (result != null) {
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 .edit().putBoolean(KEY_DONE, true).apply()
             staging.parentFile?.deleteRecursively()
-            Timber.i("LegacyAppsImporter: in-process restore import complete")
+            Timber.i("LegacyAppsImporter: in-process restore import complete, result=$result")
         }
-        return ok
+        return result != null
     }
 
     private fun stagingFile(): File =
         File(context.filesDir, "$RESTORE_STAGING_SUBDIR/$LEGACY_DB")
 
-    private suspend fun doImport(dbFile: File, clearFirst: Boolean): Boolean {
+    private suspend fun doImport(dbFile: File, clearFirst: Boolean): ImportResult {
         if (clearFirst) clearAllAppsData()
         return importFrom(dbFile)
     }
@@ -136,13 +148,14 @@ class LegacyAppsImporter @Inject constructor(
         dao.clearAppRecords()
     }
 
-    private suspend fun importFrom(dbFile: File): Boolean {
+    private suspend fun importFrom(dbFile: File): ImportResult {
         openReadOnly(dbFile).use { db ->
-            if (!hasAppsTables(db)) return false
+            if (!hasAppsTables(db)) return ImportResult.NONE
 
+            var folderCount = 0
             db.rawQuery("SELECT * FROM apps_folder", null).use { c ->
                 while (c.moveToNext()) {
-                    dao.insertFolder(
+                    dao.upsertFolder(
                         Folder(
                             id = c.getLong(c.getColumnIndexOrThrow("id")),
                             name = c.getString(c.getColumnIndexOrThrow("name")).orEmpty(),
@@ -153,6 +166,7 @@ class LegacyAppsImporter @Inject constructor(
                             createdAt = c.getLong(c.getColumnIndexOrThrow("created_at")),
                         ),
                     )
+                    folderCount++
                 }
             }
 
@@ -166,6 +180,7 @@ class LegacyAppsImporter @Inject constructor(
                     )
                 }
             }
+            val appCount = memberships.size
             if (memberships.isNotEmpty()) dao.insertFolderApps(memberships)
 
             val records = mutableListOf<AppRecord>()
@@ -188,9 +203,10 @@ class LegacyAppsImporter @Inject constructor(
             }
             if (records.isNotEmpty()) dao.upsertAppRecords(records)
 
+            var webLinkCount = 0
             db.rawQuery("SELECT * FROM apps_weblink", null).use { c ->
                 while (c.moveToNext()) {
-                    dao.insertWebLink(
+                    dao.upsertWebLink(
                         WebLinkApp(
                             id = c.getLong(c.getColumnIndexOrThrow("id")),
                             url = c.getString(c.getColumnIndexOrThrow("url")).orEmpty(),
@@ -199,6 +215,7 @@ class LegacyAppsImporter @Inject constructor(
                             createdAt = c.getLong(c.getColumnIndexOrThrow("created_at")),
                         ),
                     )
+                    webLinkCount++
                 }
             }
 
@@ -227,9 +244,14 @@ class LegacyAppsImporter @Inject constructor(
                     )
                 }
             }
+            val result = ImportResult(
+                folderCount = folderCount,
+                appCount = appCount,
+                webLinkCount = webLinkCount,
+            )
+            Timber.i("LegacyAppsImporter: imported App-Organizer data from gadget_db: $result")
+            return result
         }
-        Timber.i("LegacyAppsImporter: imported App-Organizer data from gadget_db")
-        return true
     }
 
     private fun hasAppsTables(dbFile: File): Boolean =
@@ -267,5 +289,21 @@ class LegacyAppsImporter @Inject constructor(
          * (and fails) to migrate it.
          */
         const val RESTORE_STAGING_SUBDIR = "legacy_restore"
+    }
+}
+
+/**
+ * Result of a [LegacyAppsImporter] run — how many records were imported.
+ * [NONE] means no import ran (already done or no legacy DB present).
+ */
+data class ImportResult(
+    val folderCount: Int,
+    val appCount: Int,
+    val webLinkCount: Int,
+) {
+    val isEmpty: Boolean get() = folderCount == 0 && appCount == 0 && webLinkCount == 0
+
+    companion object {
+        val NONE = ImportResult(0, 0, 0)
     }
 }

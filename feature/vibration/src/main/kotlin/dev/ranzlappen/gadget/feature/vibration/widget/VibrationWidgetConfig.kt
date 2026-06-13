@@ -75,6 +75,10 @@ data class VibrationWidgetConfig(
          *  torch's flashlight/strobe toggles. */
         const val FUNCTION_CONTINUOUS: String = "continuous"
 
+        /** Loop-pattern **toggle** function id: first tap plays the saved
+         *  pattern in a loop, second tap stops it. */
+        const val FUNCTION_PATTERN_TOGGLE: String = "pattern_toggle"
+
         const val DEFAULT_AMPLITUDE_PERCENT: Int = 60
         const val DEFAULT_DURATION_MS: Long = 300L
 

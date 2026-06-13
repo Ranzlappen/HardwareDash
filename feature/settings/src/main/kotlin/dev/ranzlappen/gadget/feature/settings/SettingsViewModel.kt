@@ -7,6 +7,7 @@ import dev.ranzlappen.gadget.core.datastore.DarkThemeMode
 import dev.ranzlappen.gadget.core.datastore.TriStatePreference
 import dev.ranzlappen.gadget.core.datastore.UserPreferences
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
+import dev.ranzlappen.gadget.core.monitoring.MonitorGlobalPrefs
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -30,6 +31,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: UserPreferencesRepository,
+    private val monitorGlobalPrefs: MonitorGlobalPrefs,
 ) : ViewModel() {
 
     val preferences: StateFlow<UserPreferences> = repository.flow
@@ -38,6 +40,9 @@ class SettingsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(STATE_FLOW_TIMEOUT_MS),
             initialValue = UserPreferences(),
         )
+
+    val monitorNotificationActionsEnabled: StateFlow<Boolean> =
+        monitorGlobalPrefs.notificationActionsEnabled
 
     fun setDarkThemeMode(mode: DarkThemeMode) {
         viewModelScope.launch { repository.setDarkThemeMode(mode) }
@@ -57,6 +62,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setLargeTextOverride(enabled: Boolean) {
         viewModelScope.launch { repository.setLargeTextOverride(enabled) }
+    }
+
+    fun setMonitorNotificationActionsEnabled(enabled: Boolean) {
+        monitorGlobalPrefs.setNotificationActionsEnabled(enabled)
     }
 
     private companion object {

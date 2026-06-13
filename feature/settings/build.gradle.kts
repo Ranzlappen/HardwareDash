@@ -40,4 +40,6 @@ dependencies {
     implementation(project(":core:navigation"))
     // :core:datastore exposes UserPreferencesRepository.
     implementation(project(":core:datastore"))
+    // :core:monitoring exposes MonitorGlobalPrefs for the monitoring settings card.
+    implementation(project(":core:monitoring"))
 }
