@@ -41,6 +41,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Sensors (proximity / light / acceleration) | `:feature:sensors` | ✅ (PR #158) |
 | Battery (level / charging / temperature / voltage / health) | `:feature:battery` | ✅ |
 | GPS / Location (map, position, speed, altitude) | `:feature:gps` | ✅ |
+| Storage (volumes, used / free / total, monitoring) | `:feature:storage` | ✅ |
 | Cross-automation engine + rule builder | `:core:automation` + `:core:hardware` + `:feature:automation-ui` | ✅ (epics #145/#146) |
 
 ### Shared infrastructure landed
@@ -79,7 +80,7 @@ These modules exist as Gradle skeletons with **no Kotlin sources yet**:
 `actuators`, `ambient`, `audio`, `bugreport` (+ `-rooted`),
 `camera`, `diagnostics` (+ `-rooted`), `flipper` (+ `-rooted`),
 `lock` (+ `-rooted`), `manual`, `motion`, `radios-{wifi,bt,nfc,subghz,ir}`,
-`storage` (+ `-rooted`). One feature per batch, following the guide.
+`storage-rooted`. One feature per batch, following the guide.
 
 ## Completed phases
 

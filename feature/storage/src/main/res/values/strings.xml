@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="storage_screen_title">Storage</string>
+
+    <!-- ─── Volume cards ──────────────────────────────────────────────── -->
+    <string name="storage_card_title_internal">Internal storage</string>
+    <string name="storage_card_title_removable">%1$s</string>
+    <string name="storage_reading">Reading storage…</string>
+    <string name="storage_used_label">%1$s of %2$s used</string>
+    <string name="storage_used_percent">%1$d%%</string>
+    <string name="storage_free_label">%1$s free</string>
+
+    <!-- ─── Module capabilities ─────────────────────────────────────────── -->
+    <string name="storage_cap_name">Storage volumes</string>
+    <string name="storage_cap_detail">StatFs block counts — no permissions required.</string>
+    <string name="storage_cap_available">%1$d volume(s) detected.</string>
+    <string name="storage_cap_unavailable">No storage volumes found.</string>
+
+    <!-- ─── Monitoring containers ──────────────────────────────────────── -->
+    <string name="storage_live_monitor_used">Storage usage (live)</string>
+    <string name="storage_monitor_used">Storage usage history</string>
+    <string name="storage_monitor_free">Free space history</string>
+</resources>

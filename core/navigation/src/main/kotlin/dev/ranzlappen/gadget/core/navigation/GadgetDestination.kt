@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.outlined.Apps
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.runtime.Immutable
@@ -162,6 +164,19 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.LocationOn
     }
 
+    /**
+     * Storage feature module — used / free / total per mounted volume
+     * ([StatFs] + [StorageManager.getStorageVolumes]). No runtime
+     * permissions required. The rooted extreme-tier (fstrim, drop_caches,
+     * dumpsys diskstats) ships separately as `:feature:storage-rooted`.
+     */
+    data object Storage : GadgetDestination {
+        override val route = "storage"
+        override val label = "Storage"
+        override val iconFilled = Icons.Filled.Storage
+        override val iconOutlined = Icons.Outlined.Storage
+    }
+
     companion object {
         /**
          * Destinations pinned to the **top** of the rail, above the
@@ -183,7 +198,7 @@ sealed interface GadgetDestination {
          * here.
          */
         val modules: List<GadgetDestination> = listOf(
-            Torch, Vibration, Apps, Sensors, Battery, Gps, Actuators, Automation,
+            Torch, Vibration, Apps, Sensors, Battery, Gps, Storage, Actuators, Automation,
         )
 
         /**
