@@ -103,9 +103,11 @@ These modules exist as Gradle skeletons with **no Kotlin sources yet**:
 ## Open follow-up issues
 
 - **[#89](https://github.com/Ranzlappen/HardwareDash/issues/89)** —
-  `material3-adaptive` foldable hinge utility. The `GadgetPosture` /
-  `rememberPosture()` seam landed but has no consumer yet; kept open for
-  the first adaptive consumer.
+  ✅ `material3-adaptive` foldable posture consumer landed.
+  `ModuleScreenScaffold` now reads `rememberPosture()` and stacks the
+  `secondaryPane` below the primary content on `GadgetPosture.Tabletop`
+  (side-by-side on Flat/Book). `DashboardScreen` is the first consumer
+  (feature shortcut pane on wide/foldable screens).
 - **[#95](https://github.com/Ranzlappen/HardwareDash/issues/95)** — torch
   brightness control (`WRITE_SETTINGS` UX). Feature enhancement.
 - **[#107](https://github.com/Ranzlappen/HardwareDash/issues/107)** —
@@ -116,9 +118,11 @@ These modules exist as Gradle skeletons with **no Kotlin sources yet**:
   cleanup; **[#101](https://github.com/Ranzlappen/HardwareDash/issues/101)**
   floating/accessibility buttons.
 
-**Resolved & closed:** #90 (theme wiring), #91 (`GadgetBottomSheet`
-instrumented tests, covered by `ModalsTest`), #92 (emulator CI,
-`instrumented-tests.yml`), #94 (rooted torch extras + `:core:root`).
+**Resolved & closed:** #89 (foldable posture consumer — `ModuleScreenScaffold`
+Tabletop layout + `DashboardScreen` secondary pane), #90 (theme wiring),
+#91 (`GadgetBottomSheet` instrumented tests, covered by `ModalsTest`),
+#92 (emulator CI, `instrumented-tests.yml`), #94 (rooted torch extras +
+`:core:root`).
 
 ## Release readiness
 

@@ -129,13 +129,11 @@ enum class GadgetPosture {
  * Gadget enum, never a `material3-adaptive` `Posture`/`HingeInfo` type, so
  * the adaptive library's API churn stays contained to this file.
  *
- * **Wired ahead of need.** No Phase-1 screen branches on posture yet
- * (mirroring `ModuleScreenScaffold.secondaryPane` and the recognised-but-
- * unused `ThreePane`). It exists so the first foldable-aware consumer has
- * a ready seam instead of reaching for `material3-adaptive` ad-hoc. On a
- * non-folding device it always returns [Flat], so adopting it is free.
- *
- * Example (future consumer):
+ * Consumed by [dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold]: when the
+ * device is in [GadgetPosture.Tabletop] posture and a `secondaryPane` is
+ * supplied, the scaffold stacks the panes vertically (primary on top, secondary
+ * below the hinge) instead of side-by-side. On non-folding devices it always
+ * returns [Flat], so adopting it is free.
  *
  * ```kotlin
  * when (rememberPosture()) {

@@ -2,7 +2,10 @@ package dev.ranzlappen.gadget.feature.dashboard
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoMode
 import androidx.compose.material.icons.outlined.FlashlightOn
+import androidx.compose.material.icons.outlined.Sensors
+import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,19 +17,15 @@ import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
- * Phase 1 dashboard module.
+ * App home screen.
  *
- * Uses the [ModuleScreenScaffold] with a functional + disclaimer
- * slot. The dashboard is the app home — not a hardware module — so it
- * supplies no `moduleInfo` (no permissions / OS-compat / firmware
- * block). Phase 2 / Batch 1 adds the first real feature tile — Torch —
- * inside the functional slot. Future batches grow the functional slot
- * into a true adaptive grid of hardware readouts.
+ * The [functional] slot holds the primary readout / navigation tiles. On wide
+ * screens (tablet or open foldable) [ModuleScreenScaffold] shows a
+ * [secondaryPane] alongside or below (Tabletop posture) the primary content —
+ * this pane holds quick-access shortcuts to every migrated feature.
  *
- * [onNavigate] dispatches by route — the host (MainActivity)
- * decides whether to use `navigateTopLevel` (for top-level
- * destinations) or `navigate(...)` (for sub-routes like
- * [GadgetDestination.Torch]).
+ * [onNavigate] dispatches by route; the host decides whether to use
+ * `navigateTopLevel` (top-level destinations) or `navigate(...)` (sub-routes).
  */
 @Composable
 fun DashboardScreen(
@@ -65,6 +64,54 @@ fun DashboardScreen(
             ) {
                 Text(
                     text = "Sample placeholder content. Do not rely on these values.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        },
+        // On wide / foldable screens: feature shortcuts appear alongside or below
+        // the primary content depending on device posture (side-by-side on a
+        // tablet/open foldable; stacked in the bottom half on Tabletop).
+        secondaryPane = {
+            DashCard(
+                modifier = Modifier.fillMaxWidth(),
+                title = "Quick access",
+            ) {
+                Text(
+                    text = "Jump to a feature.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            DashCard(
+                modifier = Modifier.fillMaxWidth(),
+                title = "Vibration",
+                icon = Icons.Outlined.Vibration,
+                onClick = { onNavigate(GadgetDestination.Vibration) },
+            ) {
+                Text(
+                    text = "Vibration patterns and motor controls.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            DashCard(
+                modifier = Modifier.fillMaxWidth(),
+                title = "Sensors",
+                icon = Icons.Outlined.Sensors,
+                onClick = { onNavigate(GadgetDestination.Sensors) },
+            ) {
+                Text(
+                    text = "Proximity, light, and motion sensors.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            DashCard(
+                modifier = Modifier.fillMaxWidth(),
+                title = "Automation",
+                icon = Icons.Outlined.AutoMode,
+                onClick = { onNavigate(GadgetDestination.Automation) },
+            ) {
+                Text(
+                    text = "Cross-feature automation rules.",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
