@@ -455,7 +455,7 @@ private fun readSensor(
             result = format(e.values)
             latch.countDown()
         }
-        override fun onAccuracyChanged(s: Sensor, a: Int) {}
+        override fun onAccuracyChanged(s: Sensor, a: Int) = Unit
     }
     sm.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_FASTEST)
     latch.await(500, TimeUnit.MILLISECONDS)

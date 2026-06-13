@@ -194,39 +194,37 @@ fun RootedFeatureTogglesCard(modifier: Modifier = Modifier) {
     }
 }
 
-private fun riskBucketTextFor(key: RootFeatureKey, lang: Language): String {
-    val id = key.id
-    return when {
-        id.startsWith("torch_") ||
-            id.startsWith("vibration_") ||
-            id.startsWith("display_") ->
-            S.RootFeatureRisk.thermal(lang)
-        id.startsWith("battery_") ->
-            S.RootFeatureRisk.batteryCell(lang)
-        id.startsWith("audio_") || id.startsWith("mic_") ->
-            S.RootFeatureRisk.hearing(lang)
-        id.startsWith("sensors_") || id.startsWith("camera_") ->
-            S.RootFeatureRisk.sensorIntegrity(lang)
-        id.startsWith("wifi_") ||
-            id.startsWith("bluetooth_") ||
-            id.startsWith("cell_") ||
-            id.startsWith("nfc_") ||
-            id.startsWith("ir_") ||
-            id.startsWith("gps_") ->
-            S.RootFeatureRisk.radioRegulatory(lang)
-        id.startsWith("storage_") ->
-            S.RootFeatureRisk.storageNonReversible(lang)
-        id.startsWith("automation_") ||
-            id.startsWith("notification_") ||
-            id.startsWith("keep_alive_") ->
-            S.RootFeatureRisk.uxDeadlock(lang)
-        id.startsWith("adb_") || id.startsWith("usb_") ->
-            S.RootFeatureRisk.attackSurface(lang)
-        id.startsWith("diagnostics_") ->
-            S.RootFeatureRisk.infoDisclosure(lang)
-        else -> S.RootFeatureRisk.generic(lang)
-    }
+private fun riskBucketTextFor(key: RootFeatureKey, lang: Language): String = when {
+    key.isThermalRisk()       -> S.RootFeatureRisk.thermal(lang)
+    key.id.startsWith("battery_") -> S.RootFeatureRisk.batteryCell(lang)
+    key.isHearingRisk()       -> S.RootFeatureRisk.hearing(lang)
+    key.isSensorRisk()        -> S.RootFeatureRisk.sensorIntegrity(lang)
+    key.isRadioRisk()         -> S.RootFeatureRisk.radioRegulatory(lang)
+    key.id.startsWith("storage_") -> S.RootFeatureRisk.storageNonReversible(lang)
+    key.isUxRisk()            -> S.RootFeatureRisk.uxDeadlock(lang)
+    key.isAttackSurfaceRisk() -> S.RootFeatureRisk.attackSurface(lang)
+    key.id.startsWith("diagnostics_") -> S.RootFeatureRisk.infoDisclosure(lang)
+    else                      -> S.RootFeatureRisk.generic(lang)
 }
+
+private fun RootFeatureKey.isThermalRisk() =
+    id.startsWith("torch_") || id.startsWith("vibration_") || id.startsWith("display_")
+
+private fun RootFeatureKey.isHearingRisk() =
+    id.startsWith("audio_") || id.startsWith("mic_")
+
+private fun RootFeatureKey.isSensorRisk() =
+    id.startsWith("sensors_") || id.startsWith("camera_")
+
+private fun RootFeatureKey.isRadioRisk() =
+    id.startsWith("wifi_") || id.startsWith("bluetooth_") || id.startsWith("cell_") ||
+        id.startsWith("nfc_") || id.startsWith("ir_") || id.startsWith("gps_")
+
+private fun RootFeatureKey.isUxRisk() =
+    id.startsWith("automation_") || id.startsWith("notification_") || id.startsWith("keep_alive_")
+
+private fun RootFeatureKey.isAttackSurfaceRisk() =
+    id.startsWith("adb_") || id.startsWith("usb_")
 
 @Composable
 internal fun rememberRootFeatures(): RootFeaturesEntryPoint {

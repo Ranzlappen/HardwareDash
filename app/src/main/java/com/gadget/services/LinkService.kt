@@ -395,7 +395,7 @@ class LinkService : Service() {
             if (activePattern != null) {
                 val (points, loop) = activePattern
                 val (t, a) = DrawnPatternUtils.toWaveformArrays(points, hasAmplitude)
-                if (t.isEmpty()) throw IllegalStateException("empty pattern")
+                if (t.isEmpty()) error("empty pattern")
                 VibrationEffect.createWaveform(t, a, if (loop) 0 else -1)
             } else {
                 null

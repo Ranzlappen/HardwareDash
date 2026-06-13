@@ -73,7 +73,7 @@ class VibrationService : Service() {
             if (activePattern != null) {
                 val (points, _) = activePattern
                 val (t, a) = DrawnPatternUtils.toWaveformArrays(points, hasAmplitude)
-                if (t.isEmpty()) throw IllegalStateException("empty pattern")
+                if (t.isEmpty()) error("empty pattern")
                 VibrationEffect.createWaveform(t, a, 0)
             } else {
                 null
