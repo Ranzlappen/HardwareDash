@@ -95,9 +95,38 @@ A content widget's layout must include an `@id/widget_background`
 ImageView as the backmost child; the provider calls
 `WidgetAppearanceRenderer.applyBackground` in `buildRemoteViews`.
 
-Reference: `:feature:apps`'s `FolderWidgetProvider` + `FolderWidgetController`
-+ `FolderWidgetConfigActivity` / `PinFolderHelper`. Design:
-`docs/widgets/content-widget-customization.md` (now folded into this page).
+**Folder widget icon catalog** — `FolderWidgetIconCatalog`
+(`feature/apps/.../widget/customization/`) implements `WidgetIconResolver`
+for the folder widget. Built-in entries map each `MaterialSymbol` id to its
+vendored `drawableRes` (usable by RemoteViews). Custom icons are downscaled
+WEBP files stored under `filesDir/widget_icons/apps/` keyed
+`custom:<uuid>.webp` (same EXIF-corrected import pipeline as
+`VibrationIconCatalog`). Accessed via `FolderWidgetEntryPoint` in the
+provider (not via the `WidgetAppearanceRenderer` multibinding — the folder
+widget renders its own content, not via `apply(…, featureId)`).
+
+`FolderWidgetConfig.iconKey: String?` (schema v2) stores the chosen key.
+When non-null, `FolderWidgetProvider.buildRemoteViews()` checks it first:
+a built-in key renders through `@id/widget_folder_cover_symbol` with the
+catalog's drawable + accent tint; a `custom:` key loads the WEBP file as a
+bitmap into `@id/widget_folder_cover_image`. Falls back to the folder's own
+cover / app-grid preview when `null`.
+
+`FolderWidgetConfigActivity` injects the catalog and adds a `WidgetIconPicker`
+composable inside the `content` slot of `ContentWidgetCustomizationSheet`:
+a chip row of built-in symbols (with icon), an "Auto" chip to clear the
+override, and a `GlassSurface` row to import a custom image from the
+gallery. The selected `iconKey` is saved into `FolderWidgetConfig`.
+
+**In-app widget management** — `FolderEditorScreen` now shows a
+"Home-screen widgets" section (mirrors `VibrationScreenContent`'s
+`WidgetsCard`) listing all placed widgets for the current folder (filtered
+from `WidgetConfigStore` via `FolderEditorViewModel.placedWidgets`). Each
+row has a delete button that soft-deletes via `removed = true`. An "Add
+widget" button re-uses the existing `onPinToHome()` path.
+
+Reference: `:feature:apps`'s `FolderWidgetProvider` + `FolderWidgetConfigActivity`
++ `FolderWidgetIconCatalog` + `FolderEditorScreen` / `PinFolderHelper`.
 
 ## Dynamic widget pinning — the reliability rules
 
@@ -183,7 +212,7 @@ Catalog](Asset-Catalog), [Troubleshooting](Troubleshooting).
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `CLAUDE.md` (widgetkit),
+> _Last reviewed: 2026-06-13 · Source: `CLAUDE.md` (widgetkit),
 > `docs/migration-guide.md`, `docs/widgets/content-widget-customization.md`
 > · Related modules: `:core:widgetkit`, `:feature:torch`,
 > `:feature:vibration`, `:feature:apps`._

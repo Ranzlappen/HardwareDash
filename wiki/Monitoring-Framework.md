@@ -120,8 +120,12 @@ window stays a few hundred points.
   1h, now`), a fixed handful sharing one unit. Y is pinned `0..yMax` where
   `yMax` = the source's `descriptor.max`. No horizontal scroll/pinch — to
   "zoom in", shrink the window (the slider re-queries at a finer bucket).
-- Axis text via `rememberTextMeasurer()` + `DrawScope.drawText`; guard `<
-  2` points with a "collecting…" placeholder.
+- Axis text via `rememberTextMeasurer()` + `DrawScope.drawText`; the `< 2`
+  bucket guard now branches on **`isEnabled`**: when `false` shows "Turn on
+  monitoring to start collecting history" (`R.string.monitor_chart_enable_hint`);
+  when `true` shows the original "Collecting data…" placeholder.
+  `MonitorContainer` passes `isEnabled = config.enabled` so the chart never
+  shows "Collecting data…" to a user who hasn't yet turned monitoring on.
 
 `MonitorChartBitmapRenderer` is the reusable pure-`Canvas` sparkline →
 `Bitmap` for the **chart widget** (RemoteViews can't host a Compose chart):
@@ -139,10 +143,34 @@ window stays a few hundred points.
   reads by push (`stream()` — zero idle wakeups) or poll (`sample()` every
   `pollIntervalMs`, wrapped in `withTimeout`). Inserts are per-reading;
   **pruning is batched** (`PRUNE_INTERVAL_MS`); widget + notification
-  repaints are **throttled** (`UI_UPDATE_THROTTLE_MS`). Posts a determinate
-  notification per `notificationEnabled` metric, pushes widget repaints per
-  `widgetEnabled`, and **self-stops** when no metric is enabled.
-  `MonitorController.ensureStarted()` is the only start path.
+  repaints are **throttled** (`UI_UPDATE_THROTTLE_MS`). Posts a richer
+  per-metric notification per `notificationEnabled` metric (see below),
+  pushes widget repaints per `widgetEnabled`, and **self-stops** when no
+  metric is enabled. `MonitorController.ensureStarted()` is the only start
+  path.
+- **`MonitorService` per-metric stats** — `MetricRuntime` now tracks
+  `minValue`, `maxValue`, `sampleCount` across the service lifetime. The
+  per-metric notification compact text is `"75% — min 45% max 92%"`;
+  `BigTextStyle` expands to `"Vibration: 75% — min 45%, max 92%"`. The
+  summary notification lists active metric display names up to 4
+  (e.g., `"Torch, Vibration +1"`) instead of only a count. A conditional
+  **"Stop monitoring"** action button appears on each per-metric notification
+  when `MonitorGlobalPrefs.notificationActionsEnabled` is `true`; tapping it
+  dispatches to `MonitorNotificationActionReceiver`, which sets that metric's
+  `MonitorConfig.enabled = false`.
+- **`MonitorGlobalPrefs`** (`core/monitoring/MonitorGlobalPrefs.kt`) —
+  DataStore-backed singleton (`"monitor_global"` preferences file) with a
+  single `notificationActionsEnabled: StateFlow<Boolean>` (default `true`).
+  Exposed in `:feature:settings` via a `MonitoringCard` settings row so the
+  user can hide the stop-action buttons from all monitoring notifications.
+  Injected by `MonitorGlobalPrefsModule` (provides the named DataStore via
+  `@MonitorGlobalDataStore` qualifier, `di/MonitorGlobalPrefsModule.kt`).
+- **`MonitorNotificationActionReceiver`** — `BroadcastReceiver` registered
+  in `:core:monitoring`'s manifest (`exported="false"`, action
+  `ACTION_DISABLE_METRIC`). Receives `EXTRA_METRIC_KEY`; uses
+  `EntryPointAccessors` (Kotlin-only module limitation — same pattern as
+  `AutomationAlarmReceiver`) to get `MonitorConfigRepository`, saves
+  `config.copy(enabled = false)`.
 - **`MonitorWidgetNotifier`** — the seam letting a feature refresh its own
   monitor widget when a sample lands (`@IntoMap` keyed by metricKey).
 - **Room lives in `:core:data`** (`MonitorSample` + `MonitorSampleRepository`;
@@ -170,6 +198,7 @@ Contract](Module-Authoring-Contract).
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `CLAUDE.md` (monitoring),
+> _Last reviewed: 2026-06-13 · Source: `CLAUDE.md` (monitoring),
 > `docs/sensor-actuator-api.md`, `core/monitoring/*`, `core/model/*` ·
-> Related modules: `:core:monitoring`, `:core:model`, `:core:data`._
+> Related modules: `:core:monitoring`, `:core:model`, `:core:data`,
+> `:feature:settings`._
