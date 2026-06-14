@@ -43,6 +43,15 @@ data class UserPreferences(
      * (API 33+). Range `0f..1f`; `1f` = maximum intensity.
      */
     val defaultTorchBrightness: Float = DEFAULT_TORCH_BRIGHTNESS,
+    /**
+     * Whether the floating torch-toggle overlay button is enabled.
+     * The overlay requires `SYSTEM_ALERT_WINDOW` permission (checked at
+     * runtime in Settings); `true` here does not mean the overlay is
+     * currently visible — it means the user asked for it and permission
+     * was granted. `TorchOverlayService` reads this and stops itself
+     * when the value flips to `false`.
+     */
+    val floatingTorchButtonEnabled: Boolean = false,
 ) {
     companion object {
         /** Initial strobe rate before the user touches the slider. 5 Hz

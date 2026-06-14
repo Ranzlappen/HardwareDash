@@ -90,6 +90,10 @@ class UserPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun setFloatingTorchButtonEnabled(enabled: Boolean) {
+        dataStore.edit { it[UserPreferencesKeys.FLOATING_TORCH_BUTTON_ENABLED] = enabled }
+    }
+
     private fun Preferences.readFrom(): UserPreferences = UserPreferences(
         darkThemeMode = this[UserPreferencesKeys.DARK_THEME_MODE]
             ?.let { runCatching { DarkThemeMode.valueOf(it) }.getOrNull() }
@@ -105,6 +109,7 @@ class UserPreferencesRepository @Inject constructor(
         morseText = this[UserPreferencesKeys.MORSE_TEXT] ?: UserPreferences.DEFAULT_MORSE_TEXT,
         defaultTorchBrightness = this[UserPreferencesKeys.DEFAULT_TORCH_BRIGHTNESS]
             ?.coerceIn(0f, 1f) ?: UserPreferences.DEFAULT_TORCH_BRIGHTNESS,
+        floatingTorchButtonEnabled = this[UserPreferencesKeys.FLOATING_TORCH_BUTTON_ENABLED] ?: false,
     )
 }
 
@@ -118,4 +123,5 @@ private object UserPreferencesKeys {
     val DEFAULT_STROBE_RATE_HZ = floatPreferencesKey("default_strobe_rate_hz")
     val MORSE_TEXT = stringPreferencesKey("morse_text")
     val DEFAULT_TORCH_BRIGHTNESS = floatPreferencesKey("default_torch_brightness")
+    val FLOATING_TORCH_BUTTON_ENABLED = booleanPreferencesKey("floating_torch_button_enabled")
 }

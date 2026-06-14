@@ -13,6 +13,9 @@
     -->
     <color name="widget_chart_line">#FF26C6DA</color>
     <color name="widget_chart_fill">#3326C6DA</color>
+    <!-- Overlay floating button backgrounds -->
+    <color name="overlay_button_inactive">#CC1F1F1F</color>
+    <color name="overlay_button_active">#CC26C6DA</color>
     <!--
       Opaque chart-panel base. The chart bitmap is RGB_565 (no alpha), so it
       can't be transparent over the glass card the way the old ARGB_8888 bitmap
