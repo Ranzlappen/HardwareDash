@@ -7,8 +7,10 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Vibration
@@ -18,8 +20,10 @@ import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.SettingsRemote
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Vibration
@@ -177,6 +181,31 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.Storage
     }
 
+    /**
+     * IR Blaster feature module — transmit NEC / Pronto / RAW IR codes via
+     * [android.hardware.ConsumerIrManager]. Saved-signal library + automation
+     * action binding. No runtime permissions required. The rooted extreme-tier
+     * (LIRC sysfs + raw GPIO) ships separately as `:feature:radios-ir-rooted`.
+     */
+    data object RadiosIr : GadgetDestination {
+        override val route = "radios_ir"
+        override val label = "IR Blaster"
+        override val iconFilled = Icons.Filled.SettingsRemote
+        override val iconOutlined = Icons.Outlined.SettingsRemote
+    }
+
+    /**
+     * Camera / Barcode Scanner feature module — CameraX preview + MLKit
+     * barcode scanning (all formats), scan history, WiFi/URL extraction.
+     * Requires [android.Manifest.permission.CAMERA].
+     */
+    data object Camera : GadgetDestination {
+        override val route = "camera"
+        override val label = "Scanner"
+        override val iconFilled = Icons.Filled.QrCodeScanner
+        override val iconOutlined = Icons.Outlined.QrCodeScanner
+    }
+
     companion object {
         /**
          * Destinations pinned to the **top** of the rail, above the
@@ -198,7 +227,7 @@ sealed interface GadgetDestination {
          * here.
          */
         val modules: List<GadgetDestination> = listOf(
-            Torch, Vibration, Apps, Sensors, Battery, Gps, Storage, Actuators, Automation,
+            Torch, Vibration, Apps, Sensors, Battery, Gps, Storage, RadiosIr, Camera, Actuators, Automation,
         )
 
         /**

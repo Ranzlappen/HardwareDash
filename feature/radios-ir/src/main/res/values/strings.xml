@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="ir_screen_title">IR Blaster</string>
+
+    <!-- Hardware card -->
+    <string name="ir_card_hardware_title">Hardware</string>
+    <string name="ir_emitter_present">IR emitter detected</string>
+    <string name="ir_emitter_absent">No IR emitter on this device. You can still save codes.</string>
+
+    <!-- ModuleInfo capability -->
+    <string name="ir_cap_emitter_name">IR Emitter</string>
+    <string name="ir_cap_emitter_detail">Allows the device to transmit IR signals to control compatible devices</string>
+    <string name="ir_cap_emitter_ok">Emitter available</string>
+    <string name="ir_cap_emitter_missing">No IR emitter</string>
+
+    <!-- Composer card -->
+    <string name="ir_card_composer_title">Compose Signal</string>
+    <string name="ir_label_protocol">Protocol</string>
+    <string name="ir_label_payload_nec">NEC code (hex)</string>
+    <string name="ir_label_payload_pronto">Pronto code</string>
+    <string name="ir_label_payload_raw">Raw timings (µs, comma-separated)</string>
+    <string name="ir_btn_paste">Paste from clipboard</string>
+    <string name="ir_label_carrier_hz">Carrier frequency (Hz)</string>
+    <string name="ir_label_repeats">Repeats: %d</string>
+    <string name="ir_transmit_ok">Transmitted successfully</string>
+    <string name="ir_transmitting">Transmitting…</string>
+    <string name="ir_btn_transmit">Transmit</string>
+    <string name="ir_btn_save">Save</string>
+
+    <!-- Save dialog -->
+    <string name="ir_save_dialog_title">Save Signal</string>
+    <string name="ir_save_dialog_label">Name</string>
+
+    <!-- Saved signals card -->
+    <string name="ir_card_saved_title">Saved Signals</string>
+    <string name="ir_no_saved_codes">No saved codes yet. Compose and save a signal above.</string>
+    <string name="ir_btn_replay">Replay</string>
+    <string name="ir_btn_delete">Delete</string>
+</resources>
