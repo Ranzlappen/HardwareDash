@@ -37,6 +37,12 @@ data class UserPreferences(
      * message once. Per-widget Morse widgets store their own text.
      */
     val morseText: String = DEFAULT_MORSE_TEXT,
+    /**
+     * Default torch brightness applied when the torch is turned on and
+     * the device supports `CameraManager.turnOnTorchWithStrengthLevel`
+     * (API 33+). Range `0f..1f`; `1f` = maximum intensity.
+     */
+    val defaultTorchBrightness: Float = DEFAULT_TORCH_BRIGHTNESS,
 ) {
     companion object {
         /** Initial strobe rate before the user touches the slider. 5 Hz
@@ -45,6 +51,9 @@ data class UserPreferences(
 
         /** Initial Morse message before the user edits the field. */
         const val DEFAULT_MORSE_TEXT: String = "SOS"
+
+        /** Initial torch brightness (full intensity). */
+        const val DEFAULT_TORCH_BRIGHTNESS: Float = 1f
     }
 }
 

@@ -101,6 +101,9 @@ class TorchViewModel @Inject constructor(
      *  DataStore by [onRateCommit]. */
     private val pendingRateHz = MutableStateFlow<Float?>(null)
 
+    /** Optimistic brightness during slider drag; persisted on [BrightnessCommit]. */
+    private val pendingBrightness = MutableStateFlow<Float?>(null)
+
     /** Optimistic in-flight edit of the rooted-tool parameters. Overlays the
      *  persisted [RootToolsConfigRepository] value so sliders move live; cleared
      *  on [onRootToolsCommit] once the value reaches DataStore. */
@@ -138,6 +141,7 @@ class TorchViewModel @Inject constructor(
     private data class TorchInputs(
         val torch: TorchState,
         val defaultRateHz: Float,
+        val defaultBrightness: Float,
         val widgets: Map<Int, TorchWidgetConfig>,
         val strobeRunning: Boolean,
         val morseText: String,
@@ -145,12 +149,13 @@ class TorchViewModel @Inject constructor(
 
     private val inputs: kotlinx.coroutines.flow.Flow<TorchInputs> = combine(
         controller.state,
-        userPreferences.flow.map { it.defaultStrobeRateHz },
+        userPreferences.flow.map { it.defaultStrobeRateHz to it.defaultTorchBrightness },
         widgetRepository.all,
         strobeRunning,
         userPreferences.flow.map { it.morseText },
-        ::TorchInputs,
-    )
+    ) { torch, (rateHz, brightness), widgets, running, morse ->
+        TorchInputs(torch, rateHz, brightness, widgets, running, morse)
+    }
 
     val state: StateFlow<TorchScreenState> = combine(
         inputs,
@@ -161,6 +166,7 @@ class TorchViewModel @Inject constructor(
         TorchScreenState(
             torch = i.torch,
             defaultStrobeRateHz = pendingRateHz.value ?: i.defaultRateHz,
+            defaultBrightness = pendingBrightness.value ?: i.defaultBrightness,
             widgets = i.widgets
                 .toSortedMap()
                 // Drop widgets the user deleted in-app (kept on disk as
@@ -228,6 +234,8 @@ class TorchViewModel @Inject constructor(
             is TorchUiEvent.MorseTextChange -> onMorseTextChange(event.text)
             is TorchUiEvent.RateChange -> onRateChange(event.rateHz)
             TorchUiEvent.RateCommit -> onRateCommit()
+            is TorchUiEvent.BrightnessChange -> onBrightnessChange(event.brightness)
+            TorchUiEvent.BrightnessCommit -> onBrightnessCommit()
             TorchUiEvent.AddWidget -> onAddWidget()
             is TorchUiEvent.EditWidget -> onEditWidget(event.widget)
             is TorchUiEvent.DeleteWidget -> onDeleteWidget(event.widget)
@@ -269,6 +277,20 @@ class TorchViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferences.setDefaultStrobeRateHz(rate)
             pendingRateHz.value = null
+        }
+    }
+
+    fun onBrightnessChange(brightness: Float) {
+        val clamped = brightness.coerceIn(0f, 1f)
+        pendingBrightness.value = clamped
+        controller.setBrightness(clamped)
+    }
+
+    fun onBrightnessCommit() {
+        val brightness = pendingBrightness.value ?: return
+        viewModelScope.launch {
+            userPreferences.setDefaultTorchBrightness(brightness)
+            pendingBrightness.value = null
         }
     }
 

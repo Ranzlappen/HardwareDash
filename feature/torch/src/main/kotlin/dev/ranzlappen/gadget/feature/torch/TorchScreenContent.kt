@@ -57,6 +57,7 @@ fun TorchScreenContent(
                 torch = state.torch,
                 strobeRunning = state.strobeRunning,
                 morseText = state.morseText,
+                brightness = state.defaultBrightness,
                 expanded = expanded(TorchSectionId.Controls),
                 onExpandedChange = { onEvent(TorchUiEvent.SectionToggle(TorchSectionId.Controls)) },
                 onToggleClick = { onEvent(TorchUiEvent.ToggleClick) },
@@ -66,6 +67,8 @@ fun TorchScreenContent(
                 onMorseToggle = { onEvent(TorchUiEvent.MorseToggle) },
                 onMorseHold = { onEvent(TorchUiEvent.MorseHold(it)) },
                 onMorseTextChange = { onEvent(TorchUiEvent.MorseTextChange(it)) },
+                onBrightnessChange = { onEvent(TorchUiEvent.BrightnessChange(it)) },
+                onBrightnessCommit = { onEvent(TorchUiEvent.BrightnessCommit) },
             )
             StrobeDefaultsCard(
                 rateHz = state.defaultStrobeRateHz,

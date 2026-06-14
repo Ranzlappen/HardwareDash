@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.GadgetCircleControl
 import dev.ranzlappen.gadget.core.ui.component.GadgetExpandableCard
+import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
 import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
 import dev.ranzlappen.gadget.feature.torch.R
 import dev.ranzlappen.gadget.feature.torch.TorchState
@@ -42,6 +43,7 @@ internal fun TorchToggleCard(
     torch: TorchState,
     strobeRunning: Boolean,
     morseText: String,
+    brightness: Float,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onToggleClick: () -> Unit,
@@ -51,6 +53,8 @@ internal fun TorchToggleCard(
     onMorseToggle: () -> Unit,
     onMorseHold: (Boolean) -> Unit,
     onMorseTextChange: (String) -> Unit,
+    onBrightnessChange: (Float) -> Unit,
+    onBrightnessCommit: () -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
     GadgetExpandableCard(
@@ -134,6 +138,18 @@ internal fun TorchToggleCard(
                 onCommit = onMorseTextChange,
                 modifier = Modifier.fillMaxWidth(),
             )
+            if (torch.brightnessSupported) {
+                GadgetSlider(
+                    value = brightness,
+                    onValueChange = onBrightnessChange,
+                    onValueChangeFinished = onBrightnessCommit,
+                    valueRange = 0f..1f,
+                    label = stringResource(R.string.torch_brightness_label),
+                    suffix = "%",
+                    valueFormatter = { v -> (v * 100).toInt().toString() },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             Text(
                 text = torch.statusMessage(),
                 style = MaterialTheme.typography.bodyMedium,

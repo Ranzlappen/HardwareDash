@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,11 +52,16 @@ class StandardTorchController @Inject constructor(
 
     private val flashCameraId: String? = resolveFlashCameraId(context, cameraManager)
 
+    // Number of discrete strength levels the flash unit supports (API 33+).
+    // 0 or 1 means no adjustable brightness; > 1 means setBrightness() is functional.
+    private val maxBrightnessLevel: Int = resolveMaxBrightnessLevel(cameraManager, flashCameraId)
+
     private val _state = MutableStateFlow(
         TorchState(
             isOn = false,
             isAvailable = flashCameraId != null,
             error = if (flashCameraId == null) TorchError.NoFlashUnit else null,
+            brightnessSupported = maxBrightnessLevel > 1,
         ),
     )
     override val state: StateFlow<TorchState> = _state.asStateFlow()
@@ -118,6 +124,22 @@ class StandardTorchController @Inject constructor(
         }
     }
 
+    override fun setBrightness(level: Float) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val cameraId = flashCameraId ?: return
+        if (maxBrightnessLevel <= 1) return
+        val clamped = level.coerceIn(0f, 1f)
+        // Strength levels are 1-based (1 = minimum, maxBrightnessLevel = maximum).
+        val targetLevel = (clamped * maxBrightnessLevel).toInt().coerceIn(1, maxBrightnessLevel)
+        try {
+            @Suppress("NewApi") // guarded by SDK_INT check above
+            cameraManager.turnOnTorchWithStrengthLevel(cameraId, targetLevel)
+            _state.update { it.copy(brightness = clamped) }
+        } catch (e: CameraAccessException) {
+            _state.update { it.copy(error = mapException(e)) }
+        }
+    }
+
     override suspend fun currentState(): TorchState {
         // On a flashless device the callback never fires for our (null) camera,
         // so don't wait. Otherwise await the first authoritative delivery,
@@ -151,6 +173,22 @@ class StandardTorchController @Inject constructor(
          * (well inside the broadcast's ~10s goAsync window).
          */
         const val STATE_READY_TIMEOUT_MS = 500L
+
+        /**
+         * Read the maximum strength level for the given camera's flash unit
+         * (API 33+). Returns 0 on older API levels or if the characteristic
+         * is absent. A value > 1 means `turnOnTorchWithStrengthLevel` will work.
+         */
+        fun resolveMaxBrightnessLevel(manager: CameraManager, cameraId: String?): Int {
+            if (cameraId == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return 0
+            return try {
+                @Suppress("NewApi")
+                manager.getCameraCharacteristics(cameraId)
+                    .get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL) ?: 0
+            } catch (_: CameraAccessException) {
+                0
+            }
+        }
 
         /**
          * Find the first back-facing camera that advertises a flash
