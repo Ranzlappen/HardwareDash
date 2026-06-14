@@ -118,10 +118,14 @@ These modules exist as Gradle skeletons with **no Kotlin sources yet**:
 - **[#107](https://github.com/Ranzlappen/HardwareDash/issues/107)** —
   delete dead legacy `com.gadget.widget` torch providers; folded into the
   per-feature clean-cut deletion step.
+- **[#95](https://github.com/Ranzlappen/HardwareDash/issues/95)** torch
+  brightness slider (API 33+ `turnOnTorchWithStrengthLevel`) — **done**, in
+  `claude/open-issues-xktnze`.
+- **[#101](https://github.com/Ranzlappen/HardwareDash/issues/101)** floating
+  torch overlay button — **done**, in `claude/open-issues-xktnze`.
 - Tech-debt: **[#72](https://github.com/Ranzlappen/HardwareDash/issues/72)**
   / **[#68](https://github.com/Ranzlappen/HardwareDash/issues/68)** detekt
-  cleanup; **[#101](https://github.com/Ranzlappen/HardwareDash/issues/101)**
-  floating/accessibility buttons.
+  cleanup — **done** (PR #164).
 
 **Resolved & closed:** #89 (foldable posture consumer — `ModuleScreenScaffold`
 Tabletop layout + `DashboardScreen` secondary pane), #90 (theme wiring),
