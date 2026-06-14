@@ -42,6 +42,15 @@ interface TorchController {
     fun setOn(on: Boolean)
 
     /**
+     * Set the torch brightness level (range `0f..1f`, where `1f` is maximum
+     * intensity). No-op on devices that don't support
+     * `CameraManager.turnOnTorchWithStrengthLevel` (API < 33 or flash units
+     * with only one brightness step). The slider in [TorchToggleCard] is hidden
+     * when [TorchState.brightnessSupported] is `false`.
+     */
+    fun setBrightness(level: Float) { /* default no-op for impls that don't support it */ }
+
+    /**
      * The torch's **authoritative** current state, awaiting the first real
      * hardware delivery if it hasn't arrived yet.
      *
@@ -78,6 +87,13 @@ data class TorchState(
     val isOn: Boolean = false,
     val isAvailable: Boolean = false,
     val error: TorchError? = null,
+    /** Current brightness level, `0f..1f`. Meaningful only when
+     *  [brightnessSupported] is `true`. */
+    val brightness: Float = 1f,
+    /** `true` when the device supports per-level brightness via
+     *  `CameraManager.turnOnTorchWithStrengthLevel` (API 33+, and the
+     *  flash unit must advertise more than one strength level). */
+    val brightnessSupported: Boolean = false,
 )
 
 /** Discrete error categories. Specific enough for the UI to react. */

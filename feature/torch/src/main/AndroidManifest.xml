@@ -32,6 +32,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE_SHORT_SERVICE" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!--
       POST_NOTIFICATIONS required on API 33+ for the StrobeService's
@@ -180,6 +182,31 @@
             android:name=".strobe.StrobeService"
             android:exported="false"
             android:foregroundServiceType="shortService" />
+
+        <!--
+          Floating torch-toggle overlay. exported=false — only the
+          Settings toggle and the notification Stop action can start it.
+
+          Requires SYSTEM_ALERT_WINDOW (granted at runtime via
+          Settings.ACTION_MANAGE_OVERLAY_PERMISSION before the service
+          is started). Uses specialUse FGS type on API 34+ because no
+          other type covers a WindowManager overlay process.
+        -->
+        <service
+            android:name=".overlay.TorchOverlayService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Draggable system-overlay button for toggling the device torch without returning to the app." />
+            <!-- Implicit-intent entry points used by SettingsViewModel to avoid
+                 a compile-time feature-to-feature dependency. setPackage() on
+                 the sender's side keeps this private to our app process. -->
+            <intent-filter>
+                <action android:name="dev.ranzlappen.gadget.feature.torch.ACTION_OVERLAY_START" />
+                <action android:name="dev.ranzlappen.gadget.feature.torch.ACTION_OVERLAY_STOP" />
+            </intent-filter>
+        </service>
 
     </application>
 </manifest>

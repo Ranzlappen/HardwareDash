@@ -74,7 +74,10 @@ code — the clean-cut policy, enforced in CI.
 ## detekt / ktlint
 
 `./gradlew detekt ktlintCheck` runs both flavors. Config in `config/`.
-Open detekt cleanup debt: #72 / #68.
+Detekt findings were driven to zero in PR #164 (closes #72 / #68); the
+`continue-on-error: true` guard on the `lint` CI job remains until the
+new-module code (IR, camera, battery, GPS, storage, torch overlay) is
+verified clean on CI.
 
 ## Manual smoke checklist
 

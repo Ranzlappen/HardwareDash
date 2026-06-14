@@ -22,6 +22,7 @@ import dev.ranzlappen.gadget.feature.torch.widget.TorchWidgetConfig
 data class TorchScreenState(
     val torch: TorchState,
     val defaultStrobeRateHz: Float,
+    val defaultBrightness: Float = 1f,
     val widgets: List<SavedTorchWidget>,
     val strobeRunning: Boolean = false,
     val morseText: String = "",

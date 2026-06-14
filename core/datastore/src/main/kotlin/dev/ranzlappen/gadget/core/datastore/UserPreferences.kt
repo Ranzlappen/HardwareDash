@@ -37,6 +37,21 @@ data class UserPreferences(
      * message once. Per-widget Morse widgets store their own text.
      */
     val morseText: String = DEFAULT_MORSE_TEXT,
+    /**
+     * Default torch brightness applied when the torch is turned on and
+     * the device supports `CameraManager.turnOnTorchWithStrengthLevel`
+     * (API 33+). Range `0f..1f`; `1f` = maximum intensity.
+     */
+    val defaultTorchBrightness: Float = DEFAULT_TORCH_BRIGHTNESS,
+    /**
+     * Whether the floating torch-toggle overlay button is enabled.
+     * The overlay requires `SYSTEM_ALERT_WINDOW` permission (checked at
+     * runtime in Settings); `true` here does not mean the overlay is
+     * currently visible — it means the user asked for it and permission
+     * was granted. `TorchOverlayService` reads this and stops itself
+     * when the value flips to `false`.
+     */
+    val floatingTorchButtonEnabled: Boolean = false,
 ) {
     companion object {
         /** Initial strobe rate before the user touches the slider. 5 Hz
@@ -45,6 +60,9 @@ data class UserPreferences(
 
         /** Initial Morse message before the user edits the field. */
         const val DEFAULT_MORSE_TEXT: String = "SOS"
+
+        /** Initial torch brightness (full intensity). */
+        const val DEFAULT_TORCH_BRIGHTNESS: Float = 1f
     }
 }
 

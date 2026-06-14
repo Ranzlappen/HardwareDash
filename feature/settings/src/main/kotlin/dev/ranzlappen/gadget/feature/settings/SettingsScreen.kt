@@ -58,6 +58,7 @@ fun SettingsScreen(
                 onReducedMotionOverrideChange = viewModel::setReducedMotionOverride,
                 onReducedTransparencyChange = viewModel::setReducedTransparency,
                 onLargeTextOverrideChange = viewModel::setLargeTextOverride,
+                onFloatingTorchButtonEnabledChange = viewModel::setFloatingTorchButtonEnabled,
             )
             MonitoringCard(
                 notificationActionsEnabled = monitorNotificationActionsEnabled,
