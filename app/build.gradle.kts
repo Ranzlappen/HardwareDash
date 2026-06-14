@@ -202,6 +202,11 @@ dependencies {
     implementation(project(":feature:vibration"))
     implementation(project(":feature:apps"))
     implementation(project(":feature:sensors"))
+    implementation(project(":feature:battery"))
+    implementation(project(":feature:gps"))
+    implementation(project(":feature:storage"))
+    implementation(project(":feature:radios-ir"))
+    implementation(project(":feature:camera"))
     // Batch H: the automation rules list + builder (also pulls
     // :core:hardware — the read-side registry — into the :app Hilt graph).
     implementation(project(":feature:automation-ui"))

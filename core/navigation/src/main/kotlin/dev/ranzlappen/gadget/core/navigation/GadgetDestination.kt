@@ -2,19 +2,29 @@ package dev.ranzlappen.gadget.core.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SettingsRemote
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.outlined.Apps
+import androidx.compose.material.icons.outlined.BatteryFull
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.FlashlightOn
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.SettingsRemote
+import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.runtime.Immutable
@@ -130,6 +140,72 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.Apps
     }
 
+    /**
+     * Battery feature module — level, charging state, temperature, voltage,
+     * and health readouts from [android.os.BatteryManager] broadcasts. Live
+     * and history monitoring via the shared monitoring framework. The rooted
+     * extreme-tier (fuel-gauge, cell monitor, charging-profile override) ships
+     * separately as `:feature:battery-rooted`.
+     */
+    data object Battery : GadgetDestination {
+        override val route = "battery"
+        override val label = "Battery"
+        override val iconFilled = Icons.Filled.BatteryFull
+        override val iconOutlined = Icons.Outlined.BatteryFull
+    }
+
+    /**
+     * GPS / Location feature module — live position on an OSMDroid map,
+     * coordinates readout (lat/lon/altitude/speed/bearing/accuracy), and
+     * speed + altitude monitoring. Requires [ACCESS_FINE_LOCATION]; the
+     * rooted extreme-tier (NMEA tap, constellation dump, spoofing) ships
+     * separately as `:feature:gps-rooted`.
+     */
+    data object Gps : GadgetDestination {
+        override val route = "gps"
+        override val label = "GPS"
+        override val iconFilled = Icons.Filled.LocationOn
+        override val iconOutlined = Icons.Outlined.LocationOn
+    }
+
+    /**
+     * Storage feature module — used / free / total per mounted volume
+     * ([StatFs] + [StorageManager.getStorageVolumes]). No runtime
+     * permissions required. The rooted extreme-tier (fstrim, drop_caches,
+     * dumpsys diskstats) ships separately as `:feature:storage-rooted`.
+     */
+    data object Storage : GadgetDestination {
+        override val route = "storage"
+        override val label = "Storage"
+        override val iconFilled = Icons.Filled.Storage
+        override val iconOutlined = Icons.Outlined.Storage
+    }
+
+    /**
+     * IR Blaster feature module — transmit NEC / Pronto / RAW IR codes via
+     * [android.hardware.ConsumerIrManager]. Saved-signal library + automation
+     * action binding. No runtime permissions required. The rooted extreme-tier
+     * (LIRC sysfs + raw GPIO) ships separately as `:feature:radios-ir-rooted`.
+     */
+    data object RadiosIr : GadgetDestination {
+        override val route = "radios_ir"
+        override val label = "IR Blaster"
+        override val iconFilled = Icons.Filled.SettingsRemote
+        override val iconOutlined = Icons.Outlined.SettingsRemote
+    }
+
+    /**
+     * Camera / Barcode Scanner feature module — CameraX preview + MLKit
+     * barcode scanning (all formats), scan history, WiFi/URL extraction.
+     * Requires [android.Manifest.permission.CAMERA].
+     */
+    data object Camera : GadgetDestination {
+        override val route = "camera"
+        override val label = "Scanner"
+        override val iconFilled = Icons.Filled.QrCodeScanner
+        override val iconOutlined = Icons.Outlined.QrCodeScanner
+    }
+
     companion object {
         /**
          * Destinations pinned to the **top** of the rail, above the
@@ -151,7 +227,7 @@ sealed interface GadgetDestination {
          * here.
          */
         val modules: List<GadgetDestination> = listOf(
-            Torch, Vibration, Apps, Sensors, Actuators, Automation,
+            Torch, Vibration, Apps, Sensors, Battery, Gps, Storage, RadiosIr, Camera, Actuators, Automation,
         )
 
         /**

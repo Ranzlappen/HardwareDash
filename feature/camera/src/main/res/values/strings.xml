@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="camera_screen_title">Scanner</string>
+
+    <!-- Permission -->
+    <string name="camera_perm_label">Camera</string>
+    <string name="camera_perm_rationale">Camera access is needed to scan barcodes and QR codes</string>
+    <string name="camera_perm_card_title">Camera Permission Required</string>
+    <string name="camera_perm_card_body">Grant camera access to scan barcodes and QR codes with your device camera.</string>
+    <string name="camera_perm_grant_btn">Grant Camera Access</string>
+
+    <!-- ModuleInfo capability -->
+    <string name="camera_cap_scanner_name">Barcode Scanner</string>
+    <string name="camera_cap_scanner_detail">Scans all major barcode and QR code formats using MLKit</string>
+    <string name="camera_cap_scanner_ok">Camera access granted</string>
+    <string name="camera_cap_scanner_denied">Camera permission required</string>
+
+    <!-- Scanner card -->
+    <string name="camera_card_scanner_title">Camera</string>
+    <string name="camera_torch_toggle">Toggle flashlight</string>
+
+    <!-- Result card -->
+    <string name="camera_card_result_title">Last Scan</string>
+    <string name="camera_btn_copy">Copy to clipboard</string>
+    <string name="camera_btn_share">Share</string>
+    <string name="camera_btn_open_url">Open URL</string>
+
+    <!-- WiFi result -->
+    <string name="camera_wifi_ssid">Network: %s</string>
+    <string name="camera_wifi_password">Password: %s</string>
+    <string name="camera_wifi_type">Security: %s</string>
+
+    <!-- History card -->
+    <string name="camera_card_history_title">Scan History</string>
+    <string name="camera_history_empty">No scans yet. Point the camera at a barcode or QR code.</string>
+    <string name="camera_btn_clear_history">Clear history</string>
+</resources>
