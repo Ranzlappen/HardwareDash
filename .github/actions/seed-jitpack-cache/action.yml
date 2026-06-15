@@ -47,8 +47,9 @@ runs:
         }
 
         # ── usb-serial-for-android ────────────────────────────────────────
+        # Tag format: v{version} (e.g. v3.7.0)
         echo "▶ Building usb-serial-for-android ${{ inputs.usb-serial-version }}"
-        git clone --depth 1 --branch "${{ inputs.usb-serial-version }}" \
+        git clone --depth 1 --branch "v${{ inputs.usb-serial-version }}" \
           https://github.com/mik3y/usb-serial-for-android /tmp/usb-serial
         cd /tmp/usb-serial
         chmod +x gradlew
@@ -64,10 +65,11 @@ runs:
         fi
 
         # ── libsu core + service ──────────────────────────────────────────
+        # Tag format: {version} (no v prefix, e.g. 5.2.2)
         echo "▶ Building libsu ${{ inputs.libsu-version }}"
-        git clone --depth 1 --branch "v${{ inputs.libsu-version }}" \
+        git clone --depth 1 --branch "${{ inputs.libsu-version }}" \
           https://github.com/topjohnwu/libsu /tmp/libsu 2>/dev/null \
-        || git clone --depth 1 --branch "${{ inputs.libsu-version }}" \
+        || git clone --depth 1 --branch "v${{ inputs.libsu-version }}" \
           https://github.com/topjohnwu/libsu /tmp/libsu
         cd /tmp/libsu
         chmod +x gradlew
