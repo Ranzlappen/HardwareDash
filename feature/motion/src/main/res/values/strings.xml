@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="motion_capability_gyroscope">Gyroscope</string>
+    <string name="motion_capability_gyroscope_detail">Angular velocity sensor</string>
+    <string name="motion_capability_step_counter">Step Counter</string>
+    <string name="motion_capability_step_counter_detail">Pedometer sensor</string>
+    <string name="motion_capability_motion_detect">Motion Detector</string>
+    <string name="motion_capability_motion_detect_detail">Event-based motion detection</string>
+    <string name="motion_capability_card_title">Motion Sensors</string>
+    <string name="motion_permission_title">Activity Permission Required</string>
+    <string name="motion_permission_body">The ACTIVITY_RECOGNITION permission is needed to read step counter data.</string>
+    <string name="motion_permission_grant">Grant permission</string>
+    <string name="motion_gyroscope_card_title">Gyroscope</string>
+    <string name="motion_gyroscope_value">Rotation rate</string>
+    <string name="motion_step_counter_card_title">Step Counter</string>
+    <string name="motion_steps_label">Steps (since last reboot)</string>
+    <string name="motion_detect_card_title">Motion Detector</string>
+    <string name="motion_detected">Motion detected</string>
+    <string name="motion_idle">No motion</string>
+    <string name="motion_live_monitor_title">%1$s — live</string>
+    <string name="motion_monitor_title">%1$s history</string>
+</resources>

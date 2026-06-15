@@ -101,6 +101,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
+      - name: Seed JitPack Maven Local cache
+        uses: ./.github/actions/seed-jitpack-cache
+
       # Both assemble tasks in one Gradle invocation so the configuration
       # phase only runs once. -PenableLsposedModule=true mirrors the
       # production rooted CI leg and causes the lsposed-module project to

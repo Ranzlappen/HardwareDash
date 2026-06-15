@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nfc_hce_service_description">Gadget NFC emulation</string>
+    <string name="nfc_hce_aid_group_description">NDEF tag emulation</string>
+
+    <string name="nfc_screen_title">NFC</string>
+    <string name="nfc_capability_adapter">NFC adapter</string>
+    <string name="nfc_capability_adapter_detail">Reads and emulates NFC tags</string>
+    <string name="nfc_tag_card_title">Last Scanned Tag</string>
+    <string name="nfc_tag_empty">Hold phone near an NFC tag to scan</string>
+    <string name="nfc_tag_format">Format</string>
+    <string name="nfc_tag_id">Tag ID</string>
+    <string name="nfc_tag_payload">Payload</string>
+    <string name="nfc_tag_copy">Copy payload</string>
+    <string name="nfc_hce_card_title">HCE Emulation</string>
+    <string name="nfc_hce_text_label">Text payload</string>
+    <string name="nfc_hce_url_label">URL payload</string>
+    <string name="nfc_hce_activate">Activate HCE</string>
+    <string name="nfc_hce_clear">Clear</string>
+    <string name="nfc_hce_active">HCE active</string>
+    <string name="nfc_hce_inactive">HCE inactive</string>
+    <string name="nfc_capability_card_title">NFC Status</string>
+    <string name="nfc_adapter_present">NFC adapter present</string>
+    <string name="nfc_adapter_enabled">NFC enabled</string>
+    <string name="nfc_adapter_disabled">NFC disabled — tap to enable</string>
+    <string name="nfc_monitor_title">NFC state history</string>
+</resources>

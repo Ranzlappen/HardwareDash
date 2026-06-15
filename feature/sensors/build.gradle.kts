@@ -16,6 +16,9 @@ dependencies {
     // `api` surface also brings :core:model (MetricSource — the signal
     // contract the three sensor sources implement).
     implementation(project(":core:monitoring"))
+    // DeviceSensors — moved to :core:hardware so :feature:motion can reuse it
+    // without a feature-to-feature dependency.
+    implementation(project(":core:hardware"))
 
     // Stateless-screen instrumented test (Compose UI test stack via the
     // shared fixtures, the torch/vibration pattern).

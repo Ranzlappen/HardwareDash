@@ -60,6 +60,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
+      - name: Seed JitPack Maven Local cache
+        uses: ./.github/actions/seed-jitpack-cache
+
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE }}" | base64 -d > Gadget-release.jks
 

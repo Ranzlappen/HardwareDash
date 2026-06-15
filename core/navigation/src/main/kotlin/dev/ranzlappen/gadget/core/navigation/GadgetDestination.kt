@@ -4,9 +4,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Settings
@@ -16,10 +20,14 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.BatteryFull
+import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.Nfc
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.Settings
@@ -73,6 +81,33 @@ sealed interface GadgetDestination {
         override val label = "Sensors"
         override val iconFilled = Icons.Filled.Sensors
         override val iconOutlined = Icons.Outlined.Sensors
+    }
+
+    /**
+     * Motion feature module — gyroscope, step counter, and motion-detect
+     * sensors. A first-class entry in the scrollable [modules] region.
+     * Ships monitoring ([RotationRateMetricSource], [StepCounterMetricSource],
+     * [MotionDetectedMetricSource]) ready; read-only sensors, no ActionHandler
+     * needed.
+     */
+    data object Motion : GadgetDestination {
+        override val route = "motion"
+        override val label = "Motion"
+        override val iconFilled = Icons.Filled.DirectionsRun
+        override val iconOutlined = Icons.Outlined.DirectionsRun
+    }
+
+    /**
+     * Audio feature module — live microphone dB meter and WAV voice
+     * recording. A first-class entry in the scrollable [modules] region.
+     * Ships monitoring ([DbMeterMetricSource]) and automation
+     * ([AudioActionHandler]) ready.
+     */
+    data object Audio : GadgetDestination {
+        override val route = "audio"
+        override val label = "Audio"
+        override val iconFilled = Icons.Filled.Mic
+        override val iconOutlined = Icons.Outlined.Mic
     }
 
     data object Actuators : GadgetDestination {
@@ -206,6 +241,29 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.QrCodeScanner
     }
 
+    /**
+     * NFC feature module — reads NFC/NDEF tags and emulates them via
+     * Host Card Emulation (HCE). A Phase-2 migration from the legacy
+     * monolith; a first-class entry in the scrollable [modules] region.
+     */
+    data object RadiosNfc : GadgetDestination {
+        override val route = "radios_nfc"
+        override val label = "NFC"
+        override val iconFilled = Icons.Filled.Nfc
+        override val iconOutlined = Icons.Outlined.Nfc
+    }
+
+    /**
+     * Bluetooth feature module — adapter status, bonded device list,
+     * BT-enabled metric source for automation, and read-only BLE info.
+     */
+    data object RadiosBt : GadgetDestination {
+        override val route = "radios_bt"
+        override val label = "Bluetooth"
+        override val iconFilled = Icons.Filled.Bluetooth
+        override val iconOutlined = Icons.Outlined.Bluetooth
+    }
+
     companion object {
         /**
          * Destinations pinned to the **top** of the rail, above the
@@ -227,7 +285,10 @@ sealed interface GadgetDestination {
          * here.
          */
         val modules: List<GadgetDestination> = listOf(
-            Torch, Vibration, Apps, Sensors, Battery, Gps, Storage, RadiosIr, Camera, Actuators, Automation,
+            Torch, Vibration, Apps, Sensors,
+            Battery, Gps, Storage, RadiosIr, Camera,
+            Motion, Audio, RadiosNfc, RadiosBt,
+            Actuators, Automation,
         )
 
         /**

@@ -29,6 +29,8 @@ import com.gadget.ui.theme.GadgetTheme
 import com.gadget.backup.ui.BackupCard
 import com.gadget.root.ui.RootedFeatureTogglesCard
 import com.gadget.ui.theme.ThemePreferencesManager
+import android.nfc.NfcAdapter
+import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.feature.apps.AppRepository
 import dev.ranzlappen.gadget.feature.apps.appsScreen
@@ -41,6 +43,7 @@ import dev.ranzlappen.gadget.core.navigation.GadgetApp
 import dev.ranzlappen.gadget.core.navigation.GadgetDestination
 import dev.ranzlappen.gadget.core.navigation.navigateTopLevel
 import dev.ranzlappen.gadget.core.navigation.placeholderScreen
+import dev.ranzlappen.gadget.feature.audio.audioScreen
 import dev.ranzlappen.gadget.feature.automation.ui.automationScreen
 import dev.ranzlappen.gadget.feature.dashboard.dashboardScreen
 import dev.ranzlappen.gadget.feature.battery.batteryScreen
@@ -48,6 +51,10 @@ import dev.ranzlappen.gadget.feature.gps.gpsScreen
 import dev.ranzlappen.gadget.feature.storage.storageScreen
 import dev.ranzlappen.gadget.feature.radios.ir.irScreen
 import dev.ranzlappen.gadget.feature.camera.cameraScreen
+import dev.ranzlappen.gadget.feature.motion.motionScreen
+import dev.ranzlappen.gadget.feature.radios.bt.btScreen
+import dev.ranzlappen.gadget.feature.radios.nfc.NfcViewModel
+import dev.ranzlappen.gadget.feature.radios.nfc.nfcScreen
 import dev.ranzlappen.gadget.feature.sensors.sensorsScreen
 import dev.ranzlappen.gadget.feature.settings.settingsScreen
 import dev.ranzlappen.gadget.feature.torch.torchScreen
@@ -71,6 +78,8 @@ class MainActivity : ComponentActivity() {
 
     @Inject lateinit var launchGate: LaunchGate
     @Inject lateinit var companionDetector: CompanionModuleDetector
+
+    private val nfcViewModel: NfcViewModel by viewModels()
 
     // Phase 2 / Batch 1 — new typed user-preferences repository. Drives
     // the GadgetApp theme params reactively (dark mode, dynamic colour,
@@ -128,6 +137,10 @@ class MainActivity : ComponentActivity() {
                         storageScreen()
                         irScreen()
                         cameraScreen()
+                        motionScreen()
+                        audioScreen()
+                        nfcScreen()
+                        btScreen()
                         placeholderScreen(GadgetDestination.Actuators)
                         automationScreen()
                         settingsScreen(
@@ -163,6 +176,17 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val action = intent.action
+        if (action == NfcAdapter.ACTION_NDEF_DISCOVERED ||
+            action == NfcAdapter.ACTION_TAG_DISCOVERED ||
+            action == NfcAdapter.ACTION_TECH_DISCOVERED) {
+            nfcViewModel.onNewIntent(intent)
         }
     }
 
