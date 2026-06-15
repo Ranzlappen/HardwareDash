@@ -42,8 +42,8 @@ class NfcActionHandler @Inject constructor(
         ),
     )
 
-    override suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult =
-        when (actionKey) {
+    override suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult {
+        return when (actionKey) {
             ACTION_EMULATE_TEXT -> {
                 val text = params[PARAM_TEXT]?.takeIf { it.isNotBlank() }
                     ?: return ActionResult.Failure("text param required")
@@ -64,6 +64,7 @@ class NfcActionHandler @Inject constructor(
             }
             else -> ActionResult.Unsupported
         }
+    }
 
     companion object {
         const val FEATURE_ID = "nfc"
