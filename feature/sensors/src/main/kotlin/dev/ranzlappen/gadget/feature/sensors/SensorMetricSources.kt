@@ -1,6 +1,7 @@
 package dev.ranzlappen.gadget.feature.sensors
 
 import android.hardware.Sensor
+import dev.ranzlappen.gadget.core.hardware.DeviceSensors
 import dev.ranzlappen.gadget.core.model.MetricCategory
 import dev.ranzlappen.gadget.core.model.MetricDescriptor
 import dev.ranzlappen.gadget.core.model.MetricSource

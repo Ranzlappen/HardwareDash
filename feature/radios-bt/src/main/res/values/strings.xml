@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bt_screen_title">Bluetooth</string>
+    <string name="bt_capability_adapter">Bluetooth adapter</string>
+    <string name="bt_capability_adapter_detail">Classic and BLE radio</string>
+    <string name="bt_capability_card_title">Bluetooth Status</string>
+    <string name="bt_adapter_present">Adapter present</string>
+    <string name="bt_adapter_enabled">Bluetooth on</string>
+    <string name="bt_adapter_disabled">Bluetooth off</string>
+    <string name="bt_adapter_name">Adapter name</string>
+    <string name="bt_permission_required">Bluetooth permission required</string>
+    <string name="bt_permission_grant">Grant permission</string>
+    <string name="bt_bonded_devices_title">Bonded Devices</string>
+    <string name="bt_no_bonded_devices">No bonded devices</string>
+    <string name="bt_device_type_classic">Classic</string>
+    <string name="bt_device_type_le">BLE</string>
+    <string name="bt_device_type_dual">Dual</string>
+    <string name="bt_device_type_unknown">Unknown</string>
+    <string name="bt_monitor_title">Bluetooth state history</string>
+    <string name="bt_refresh">Refresh</string>
+</resources>

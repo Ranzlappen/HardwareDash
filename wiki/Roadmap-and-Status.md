@@ -44,6 +44,10 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Storage (volumes, used / free / total, monitoring) | `:feature:storage` | ✅ |
 | IR Blaster (NEC / Pronto / RAW, saved-signal library, automation action) | `:feature:radios-ir` | ✅ |
 | Barcode Scanner (CameraX + MLKit, all formats, scan history, WiFi/URL) | `:feature:camera` | ✅ |
+| Motion (gyroscope / step counter / motion detect) | `:feature:motion` | ✅ |
+| Audio (dB meter + WAV voice recording) | `:feature:audio` | ✅ |
+| NFC (NDEF tag read + HCE emulation) | `:feature:radios-nfc` | ✅ |
+| Bluetooth (adapter status + bonded devices) | `:feature:radios-bt` | ✅ |
 | Cross-automation engine + rule builder | `:core:automation` + `:core:hardware` + `:feature:automation-ui` | ✅ (epics #145/#146) |
 
 ### Shared infrastructure landed
@@ -79,9 +83,9 @@ find app/src -path "*com/gadget*" -name "*.kt" | wc -l
 ### Phase-2 tail (skeleton modules awaiting migration)
 
 These modules exist as Gradle skeletons with **no Kotlin sources yet**:
-`actuators`, `ambient`, `audio`, `bugreport` (+ `-rooted`),
+`actuators`, `ambient`, `bugreport` (+ `-rooted`),
 `diagnostics` (+ `-rooted`), `flipper` (+ `-rooted`),
-`lock` (+ `-rooted`), `manual`, `motion`, `radios-{wifi,bt,nfc,subghz}`,
+`lock` (+ `-rooted`), `manual`, `radios-{wifi,subghz}`,
 `storage-rooted`. One feature per batch, following the guide.
 
 ## Completed phases
@@ -152,5 +156,5 @@ complete. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-06-13 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-06-15 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md` · Related modules: all._

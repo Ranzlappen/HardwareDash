@@ -1,4 +1,4 @@
-package dev.ranzlappen.gadget.feature.sensors
+package dev.ranzlappen.gadget.core.hardware
 
 import android.content.Context
 import android.hardware.Sensor
@@ -16,9 +16,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
- * Thin, injectable seam over [SensorManager] — the only place the sensors
- * feature touches the framework API, so the [MetricSource]s and the
- * ViewModel stay declarative.
+ * Thin, injectable seam over [SensorManager] — shared by both
+ * `:feature:sensors` and `:feature:motion` so neither imports the other.
  *
  * [stream] is a **cold** flow: the listener registers on collect and
  * unregisters on cancel ([awaitClose]), so an uncollected signal costs zero

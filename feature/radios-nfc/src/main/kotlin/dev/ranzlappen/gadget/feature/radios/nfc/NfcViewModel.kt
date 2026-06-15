@@ -1,0 +1,105 @@
+package dev.ranzlappen.gadget.feature.radios.nfc
+
+import android.content.Intent
+import android.nfc.NdefMessage
+import android.nfc.NdefRecord
+import android.nfc.NfcAdapter
+import android.nfc.Tag
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.ranzlappen.gadget.feature.radios.nfc.hce.NfcHceState
+import java.nio.charset.Charset
+import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+@HiltViewModel
+class NfcViewModel @Inject constructor(
+    private val adapter: NfcAdapterWrapper,
+    private val hceState: NfcHceState,
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(NfcState())
+    val state: StateFlow<NfcState> = _state
+
+    init {
+        _state.update { it.copy(adapterPresent = adapter.isAvailable(), adapterEnabled = adapter.isEnabled()) }
+    }
+
+    fun refresh() {
+        _state.update { it.copy(adapterPresent = adapter.isAvailable(), adapterEnabled = adapter.isEnabled()) }
+    }
+
+    fun onNewIntent(intent: Intent) {
+        val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
+        val tagId = tag.id.joinToString("") { "%02X".format(it) }
+        val techList = tag.techList.joinToString(", ") { it.substringAfterLast('.') }
+
+        val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
+        val payload = if (rawMsgs != null && rawMsgs.isNotEmpty()) {
+            val msg = rawMsgs[0] as? NdefMessage
+            msg?.records?.firstOrNull()?.let { parseNdefRecord(it) }
+        } else null
+
+        _state.update {
+            it.copy(
+                lastTagPayload = payload,
+                lastTagFormat = techList,
+                lastTagId = tagId,
+            )
+        }
+    }
+
+    fun setHcePayload(text: String) {
+        _state.update { it.copy(hcePayload = text) }
+    }
+
+    fun activateHce(mode: NfcHceMode) {
+        viewModelScope.launch {
+            val payload = _state.value.hcePayload
+            val ndefBytes = when (mode) {
+                NfcHceMode.TEXT -> buildTextNdef(payload)
+                NfcHceMode.URL -> buildUrlNdef(payload)
+                NfcHceMode.NONE -> null
+            }
+            hceState.setPayload(ndefBytes)
+            _state.update { it.copy(hceMode = mode) }
+        }
+    }
+
+    fun clearHce() {
+        hceState.setPayload(null)
+        _state.update { it.copy(hceMode = NfcHceMode.NONE, hcePayload = "") }
+    }
+
+    private fun parseNdefRecord(record: NdefRecord): String? {
+        return when (record.tnf) {
+            NdefRecord.TNF_WELL_KNOWN -> {
+                if (record.type.contentEquals(NdefRecord.RTD_TEXT)) {
+                    val payload = record.payload
+                    val languageCodeLength = payload[0].toInt() and 0x3F
+                    String(payload, 1 + languageCodeLength, payload.size - 1 - languageCodeLength, Charsets.UTF_8)
+                } else if (record.type.contentEquals(NdefRecord.RTD_URI)) {
+                    record.toUri()?.toString()
+                } else null
+            }
+            NdefRecord.TNF_MIME_MEDIA -> String(record.payload, Charset.forName("UTF-8"))
+            else -> record.payload.joinToString("") { "%02X".format(it) }
+        }
+    }
+
+    private fun buildTextNdef(text: String): ByteArray {
+        val record = NdefRecord.createTextRecord("en", text)
+        val msg = NdefMessage(record)
+        return msg.toByteArray()
+    }
+
+    private fun buildUrlNdef(url: String): ByteArray {
+        val record = NdefRecord.createUri(android.net.Uri.parse(url))
+        val msg = NdefMessage(record)
+        return msg.toByteArray()
+    }
+}

@@ -207,6 +207,10 @@ dependencies {
     implementation(project(":feature:storage"))
     implementation(project(":feature:radios-ir"))
     implementation(project(":feature:camera"))
+    implementation(project(":feature:motion"))
+    implementation(project(":feature:audio"))
+    implementation(project(":feature:radios-nfc"))
+    implementation(project(":feature:radios-bt"))
     // Batch H: the automation rules list + builder (also pulls
     // :core:hardware — the read-side registry — into the :app Hilt graph).
     implementation(project(":feature:automation-ui"))
