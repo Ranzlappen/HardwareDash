@@ -49,6 +49,13 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        // mavenLocal() is checked first so that CI-built copies of the
+        // JitPack libraries (usb-serial-for-android, libsu) are found
+        // before the remote JitPack repo is consulted. JitPack returns
+        // host_not_allowed on GitHub-hosted runner IPs; the
+        // .github/actions/seed-jitpack-cache composite action builds
+        // them from source and installs them here on cache miss.
+        mavenLocal()
         google()
         mavenCentral()
         // usb-serial-for-android is published only on JitPack. The

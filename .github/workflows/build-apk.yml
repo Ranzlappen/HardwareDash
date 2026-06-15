@@ -64,6 +64,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
+      - name: Seed JitPack Maven Local cache
+        uses: ./.github/actions/seed-jitpack-cache
+
       - name: Prepare build metadata
         run: |
           echo "VERSION_CODE=${{ github.run_number }}" >> $GITHUB_ENV

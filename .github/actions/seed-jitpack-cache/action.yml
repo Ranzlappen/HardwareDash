@@ -1,0 +1,91 @@
+name: 'Seed JitPack Maven Local cache'
+description: >
+  JitPack returns host_not_allowed (403) for GitHub-hosted runner IPs.
+  This action builds the two affected libraries from their GitHub sources,
+  installs them to Maven Local, and caches the result so subsequent runs
+  skip the ~2-min build step.
+  Requires mavenLocal() to be declared first in settings.gradle.kts repos.
+
+inputs:
+  usb-serial-version:
+    description: 'com.github.mik3y:usb-serial-for-android version'
+    required: false
+    default: '3.7.0'
+  libsu-version:
+    description: 'com.github.topjohnwu.libsu version'
+    required: false
+    default: '5.2.2'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Restore JitPack Maven Local cache
+      id: jitpack-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository/com/github
+        key: jitpack-local-usb${{ inputs.usb-serial-version }}-libsu${{ inputs.libsu-version }}
+
+    - name: Build JitPack libs from source (cache miss)
+      if: steps.jitpack-cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        ANDROID_HOME: /usr/local/lib/android/sdk
+      run: |
+        set -euo pipefail
+
+        install_aar() {
+          local file="$1" group="$2" artifact="$3" version="$4"
+          mvn install:install-file \
+            -Dfile="$file" \
+            -DgroupId="$group" \
+            -DartifactId="$artifact" \
+            -Dversion="$version" \
+            -Dpackaging="aar" \
+            -DgeneratePom=true \
+            -q
+        }
+
+        # ── usb-serial-for-android ────────────────────────────────────────
+        echo "▶ Building usb-serial-for-android ${{ inputs.usb-serial-version }}"
+        git clone --depth 1 --branch "${{ inputs.usb-serial-version }}" \
+          https://github.com/mik3y/usb-serial-for-android /tmp/usb-serial
+        cd /tmp/usb-serial
+        chmod +x gradlew
+
+        if ./gradlew publishToMavenLocal --no-daemon -q 2>/dev/null; then
+          echo "  publishToMavenLocal succeeded"
+        else
+          ./gradlew assembleRelease --no-daemon -q
+          AAR=$(find . -name "*.aar" -path "*/release/*" ! -path "*/test*" | head -1)
+          install_aar "$AAR" "com.github.mik3y" "usb-serial-for-android" \
+            "${{ inputs.usb-serial-version }}"
+          echo "  installed via mvn install:install-file"
+        fi
+
+        # ── libsu core + service ──────────────────────────────────────────
+        echo "▶ Building libsu ${{ inputs.libsu-version }}"
+        git clone --depth 1 --branch "v${{ inputs.libsu-version }}" \
+          https://github.com/topjohnwu/libsu /tmp/libsu 2>/dev/null \
+        || git clone --depth 1 --branch "${{ inputs.libsu-version }}" \
+          https://github.com/topjohnwu/libsu /tmp/libsu
+        cd /tmp/libsu
+        chmod +x gradlew
+
+        if ./gradlew publishToMavenLocal --no-daemon -q 2>/dev/null; then
+          echo "  publishToMavenLocal succeeded"
+        else
+          ./gradlew :core:assembleRelease :service:assembleRelease --no-daemon -q \
+          || ./gradlew assembleRelease --no-daemon -q
+          for MODULE in core service; do
+            AAR=$(find . -path "*/${MODULE}/build/outputs/aar/*" -name "*release*.aar" \
+                  ! -name "*test*" | head -1)
+            [ -n "$AAR" ] && install_aar "$AAR" \
+              "com.github.topjohnwu.libsu" "$MODULE" "${{ inputs.libsu-version }}"
+          done
+          echo "  installed via mvn install:install-file"
+        fi
+
+        echo "✓ Maven Local com/github:"
+        find ~/.m2/repository/com/github -name "*.aar" 2>/dev/null \
+          | sed 's|.*repository/||' || echo "  (no AARs — publishToMavenLocal path used)"
