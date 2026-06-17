@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationAvailability
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -40,6 +41,14 @@ class GpsLocationTracker @Inject constructor(
         override fun onLocationResult(result: LocationResult) {
             val loc = result.lastLocation ?: return
             _state.update { loc.toGpsState(permissionGranted = true) }
+        }
+
+        override fun onLocationAvailability(avail: LocationAvailability) {
+            if (!avail.isLocationAvailable) {
+                _state.update { it.copy(error = "Location unavailable") }
+            } else {
+                _state.update { it.copy(error = null) }
+            }
         }
     }
 
@@ -75,18 +84,29 @@ class GpsLocationTracker @Inject constructor(
 
     @SuppressLint("MissingPermission")
     private fun requestLastKnown() {
-        fusedClient.lastLocation.addOnSuccessListener { loc: Location? ->
-            if (loc != null) _state.update { loc.toGpsState(permissionGranted = true) }
-        }
+        fusedClient.lastLocation
+            .addOnSuccessListener { loc: Location? ->
+                if (loc != null) _state.update { loc.toGpsState(permissionGranted = true) }
+            }
+            .addOnFailureListener { e ->
+                _state.update { it.copy(error = e.message) }
+            }
     }
 
     @SuppressLint("MissingPermission")
     private fun requestUpdates() {
-        fusedClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper(),
-        )
+        try {
+            fusedClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper(),
+            ).addOnFailureListener { e ->
+                _state.update { it.copy(error = e.message) }
+            }
+        } catch (e: SecurityException) {
+            tracking = false
+            _state.update { it.copy(permissionGranted = false, error = e.message) }
+        }
     }
 
     private companion object {

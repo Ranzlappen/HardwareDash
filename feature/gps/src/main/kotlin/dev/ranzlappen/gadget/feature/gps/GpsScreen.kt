@@ -252,8 +252,15 @@ private fun GpsCoordinatesCard(
     ) {
         if (!state.hasLocation) {
             Text(
-                text = stringResource(R.string.gps_searching),
+                text = if (state.error != null)
+                    state.error
+                else
+                    stringResource(R.string.gps_searching),
                 style = MaterialTheme.typography.bodyMedium,
+                color = if (state.error != null)
+                    MaterialTheme.colorScheme.error
+                else
+                    MaterialTheme.colorScheme.onSurface,
             )
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {

@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -47,6 +49,8 @@ import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
+import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibraryBrand
+import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibrarySignal
 
 @Composable
 fun IrScreen(
@@ -70,6 +74,11 @@ fun IrScreen(
         onReplay = viewModel::replay,
         onDelete = viewModel::delete,
         onPaste = { clipboard.getText()?.text?.let(viewModel::pasteProto) },
+        onOpenLibrary = viewModel::openLibrary,
+        onCloseLibrary = viewModel::closeLibrary,
+        onSelectBrand = viewModel::selectBrand,
+        onClearBrand = viewModel::clearBrandSelection,
+        onImportSignal = viewModel::importSignal,
         modifier = modifier,
     )
 }
@@ -117,6 +126,11 @@ internal fun IrScreenContent(
     onReplay: (IrSignal) -> Unit,
     onDelete: (IrSignal) -> Unit,
     onPaste: () -> Unit,
+    onOpenLibrary: () -> Unit = {},
+    onCloseLibrary: () -> Unit = {},
+    onSelectBrand: (IrLibraryBrand) -> Unit = {},
+    onClearBrand: () -> Unit = {},
+    onImportSignal: (IrLibrarySignal) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     ModuleScreenScaffold(
@@ -137,6 +151,14 @@ internal fun IrScreenContent(
                 onTransmit = onTransmit,
                 onSave = onSave,
                 onPaste = onPaste,
+            )
+            IrLibraryCard(
+                state = state,
+                onOpenLibrary = onOpenLibrary,
+                onCloseLibrary = onCloseLibrary,
+                onSelectBrand = onSelectBrand,
+                onClearBrand = onClearBrand,
+                onImportSignal = onImportSignal,
             )
             IrSavedSignalsCard(
                 signals = signals,
@@ -357,6 +379,125 @@ private fun IrSignalComposerCard(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun IrLibraryCard(
+    state: IrState,
+    onOpenLibrary: () -> Unit,
+    onCloseLibrary: () -> Unit,
+    onSelectBrand: (IrLibraryBrand) -> Unit,
+    onClearBrand: () -> Unit,
+    onImportSignal: (IrLibrarySignal) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    DashCard(
+        modifier = modifier.fillMaxWidth(),
+        title = stringResource(R.string.ir_card_library_title),
+    ) {
+        if (!state.showLibrary) {
+            GadgetSecondaryButton(
+                onClick = onOpenLibrary,
+                text = stringResource(R.string.ir_btn_browse_library),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        } else if (state.selectedBrand == null) {
+            Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = stringResource(R.string.ir_library_pick_brand),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    IconButton(onClick = onCloseLibrary) {
+                        Icon(
+                            Icons.Outlined.ArrowBack,
+                            contentDescription = stringResource(R.string.ir_library_close),
+                        )
+                    }
+                }
+                val categories = state.libraryBrands.map { it.category }.distinct()
+                categories.forEach { category ->
+                    Text(
+                        text = category,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
+                        state.libraryBrands.filter { it.category == category }.forEach { brand ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 2.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(
+                                    text = brand.brand,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                Text(
+                                    text = "${brand.signals.size} signals",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                IconButton(onClick = { onSelectBrand(brand) }) {
+                                    Icon(
+                                        Icons.Outlined.PlayArrow,
+                                        contentDescription = brand.brand,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            val brand = state.selectedBrand
+            Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = brand.brand,
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    IconButton(onClick = onClearBrand) {
+                        Icon(
+                            Icons.Outlined.ArrowBack,
+                            contentDescription = stringResource(R.string.ir_library_back),
+                        )
+                    }
+                }
+                brand.signals.forEach { signal ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = signal.name, style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                text = signal.protocol,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        IconButton(onClick = { onImportSignal(signal) }) {
+                            Icon(
+                                Icons.Outlined.Download,
+                                contentDescription = stringResource(R.string.ir_btn_import),
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

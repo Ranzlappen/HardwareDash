@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ranzlappen.gadget.feature.radios.nfc.hce.NfcHceState
+import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplate
+import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplateRepository
 import java.nio.charset.Charset
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,13 +22,20 @@ import kotlinx.coroutines.launch
 class NfcViewModel @Inject constructor(
     private val adapter: NfcAdapterWrapper,
     private val hceState: NfcHceState,
+    private val templateRepository: NfcTemplateRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NfcState())
     val state: StateFlow<NfcState> = _state
 
     init {
-        _state.update { it.copy(adapterPresent = adapter.isAvailable(), adapterEnabled = adapter.isEnabled()) }
+        _state.update {
+            it.copy(
+                adapterPresent = adapter.isAvailable(),
+                adapterEnabled = adapter.isEnabled(),
+                templates = templateRepository.templates,
+            )
+        }
     }
 
     fun refresh() {
@@ -73,6 +82,40 @@ class NfcViewModel @Inject constructor(
     fun clearHce() {
         hceState.setPayload(null)
         _state.update { it.copy(hceMode = NfcHceMode.NONE, hcePayload = "") }
+    }
+
+    fun openTemplatePicker() = _state.update { it.copy(showTemplatePicker = true) }
+
+    fun closeTemplatePicker() = _state.update {
+        it.copy(showTemplatePicker = false, selectedTemplate = null, templateValues = emptyMap())
+    }
+
+    fun selectTemplate(template: NfcTemplate) = _state.update {
+        it.copy(selectedTemplate = template, templateValues = emptyMap())
+    }
+
+    fun setTemplateValue(key: String, value: String) = _state.update {
+        it.copy(templateValues = it.templateValues + (key to value))
+    }
+
+    fun applyTemplate() {
+        val s = _state.value
+        val template = s.selectedTemplate ?: return
+        val resolved = template.resolve(s.templateValues)
+        val mode = when (template.mode.uppercase()) {
+            "URL" -> NfcHceMode.URL
+            else -> NfcHceMode.TEXT
+        }
+        _state.update { it.copy(hcePayload = resolved, showTemplatePicker = false, selectedTemplate = null) }
+        viewModelScope.launch {
+            val ndefBytes = when (mode) {
+                NfcHceMode.TEXT -> buildTextNdef(resolved)
+                NfcHceMode.URL -> buildUrlNdef(resolved)
+                NfcHceMode.NONE -> null
+            }
+            hceState.setPayload(ndefBytes)
+            _state.update { it.copy(hceMode = mode) }
+        }
     }
 
     private fun parseNdefRecord(record: NdefRecord): String? {

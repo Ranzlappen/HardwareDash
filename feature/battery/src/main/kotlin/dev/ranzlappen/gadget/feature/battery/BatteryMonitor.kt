@@ -44,7 +44,7 @@ class BatteryMonitor @Inject constructor(
                 override fun onReceive(ctx: Context, intent: Intent) = updateState(intent)
             },
             IntentFilter(Intent.ACTION_BATTERY_CHANGED),
-            ContextCompat.RECEIVER_NOT_EXPORTED,
+            ContextCompat.RECEIVER_EXPORTED,
         )
     }
 

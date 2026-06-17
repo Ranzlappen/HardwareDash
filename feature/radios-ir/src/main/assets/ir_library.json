@@ -1,0 +1,299 @@
+[
+  {
+    "brand": "Samsung",
+    "category": "TV",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "E0E040BF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "E0E0E01F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "E0E0D02F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Mute", "protocol": "NEC", "payload": "E0E0F00F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Up", "protocol": "NEC", "payload": "E0E048B7", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Down", "protocol": "NEC", "payload": "E0E008F7", "carrierHz": 38000, "repeats": 1 },
+      { "name": "OK", "protocol": "NEC", "payload": "E0E016E9", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Up", "protocol": "NEC", "payload": "E0E006F9", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Down", "protocol": "NEC", "payload": "E0E08679", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Left", "protocol": "NEC", "payload": "E0E0A659", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Right", "protocol": "NEC", "payload": "E0E046B9", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Back", "protocol": "NEC", "payload": "E0E01AE5", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Home", "protocol": "NEC", "payload": "E0E09E61", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Source / Input", "protocol": "NEC", "payload": "E0E0807F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "HDMI 1", "protocol": "NEC", "payload": "E0E04EB1", "carrierHz": 38000, "repeats": 1 },
+      { "name": "HDMI 2", "protocol": "NEC", "payload": "E0E08E71", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "LG",
+    "category": "TV",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "20DF10EF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "20DF40BF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "20DFC03F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Mute", "protocol": "NEC", "payload": "20DFF00F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Up", "protocol": "NEC", "payload": "20DF00FF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Down", "protocol": "NEC", "payload": "20DF807F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "OK", "protocol": "NEC", "payload": "20DF44BB", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Up", "protocol": "NEC", "payload": "20DF02FD", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Down", "protocol": "NEC", "payload": "20DF827D", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Left", "protocol": "NEC", "payload": "20DFE01F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Right", "protocol": "NEC", "payload": "20DF609F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Back", "protocol": "NEC", "payload": "20DF14EB", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Home", "protocol": "NEC", "payload": "20DFA857", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Input", "protocol": "NEC", "payload": "20DFD02F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "HDMI 1", "protocol": "NEC", "payload": "20DF738C", "carrierHz": 38000, "repeats": 1 },
+      { "name": "HDMI 2", "protocol": "NEC", "payload": "20DFD32C", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Sony",
+    "category": "TV",
+    "signals": [
+      { "name": "Power", "protocol": "RAW", "payload": "2400,600,1200,600,600,600,1200,600,600,600,1200,600,600,600,600,600,600,600,600,600,1200,600,600,600,600,22200", "carrierHz": 40000, "repeats": 3 },
+      { "name": "Volume Up", "protocol": "RAW", "payload": "2400,600,600,600,1200,600,600,600,600,600,1200,600,600,600,600,600,600,600,600,600,1200,600,600,600,600,22200", "carrierHz": 40000, "repeats": 3 },
+      { "name": "Volume Down", "protocol": "RAW", "payload": "2400,600,1200,600,1200,600,600,600,600,600,1200,600,600,600,600,600,600,600,600,600,1200,600,600,600,600,22200", "carrierHz": 40000, "repeats": 3 },
+      { "name": "Mute", "protocol": "RAW", "payload": "2400,600,600,600,600,600,1200,600,600,600,1200,600,600,600,600,600,600,600,600,600,1200,600,600,600,600,22200", "carrierHz": 40000, "repeats": 3 },
+      { "name": "Channel Up", "protocol": "RAW", "payload": "2400,600,600,600,600,600,600,600,1200,600,1200,600,600,600,600,600,600,600,600,600,1200,600,600,600,600,22200", "carrierHz": 40000, "repeats": 3 },
+      { "name": "Channel Down", "protocol": "RAW", "payload": "2400,600,1200,600,600,600,600,600,1200,600,1200,600,600,600,600,600,600,600,600,600,1200,600,600,600,600,22200", "carrierHz": 40000, "repeats": 3 }
+    ]
+  },
+  {
+    "brand": "Philips",
+    "category": "TV",
+    "signals": [
+      { "name": "Power", "protocol": "RAW", "payload": "889,889,889,2667,889,889,889,889,889,889,889,889,889,889,889,889,889,889,889,2667,889,89000", "carrierHz": 36000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "RAW", "payload": "889,889,889,2667,889,889,889,2667,889,889,889,889,889,889,889,889,889,889,889,2667,889,89000", "carrierHz": 36000, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "RAW", "payload": "889,889,889,2667,889,2667,889,889,889,889,889,889,889,889,889,889,889,889,889,2667,889,89000", "carrierHz": 36000, "repeats": 1 },
+      { "name": "Mute", "protocol": "RAW", "payload": "889,889,889,2667,889,2667,889,2667,889,889,889,889,889,889,889,889,889,889,889,2667,889,89000", "carrierHz": 36000, "repeats": 1 },
+      { "name": "Channel Up", "protocol": "RAW", "payload": "889,889,889,889,889,889,889,889,889,2667,889,889,889,889,889,889,889,889,889,2667,889,89000", "carrierHz": 36000, "repeats": 1 },
+      { "name": "Channel Down", "protocol": "RAW", "payload": "889,889,889,889,889,2667,889,889,889,2667,889,889,889,889,889,889,889,889,889,2667,889,89000", "carrierHz": 36000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Panasonic",
+    "category": "TV",
+    "signals": [
+      { "name": "Power", "protocol": "RAW", "payload": "3500,1750,450,450,450,450,450,450,450,450,450,1350,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,450,1350,450,1350,450,1350,450,450,450,1350,450,450,450,450,450,450,450,1350,450,450,450,450,450,75000", "carrierHz": 37917, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "RAW", "payload": "3456,1728,432,432,432,1296,432,432,432,432,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,1296,432,432,432,432,432,1296,432,432,432,432,432,432,432,65000", "carrierHz": 37917, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "RAW", "payload": "3456,1728,432,432,432,1296,432,432,432,432,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,65000", "carrierHz": 37917, "repeats": 1 },
+      { "name": "Mute", "protocol": "RAW", "payload": "3456,1728,432,432,432,1296,432,432,432,432,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,65000", "carrierHz": 37917, "repeats": 1 },
+      { "name": "Channel Up", "protocol": "RAW", "payload": "3456,1728,432,432,432,1296,432,432,432,432,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,65000", "carrierHz": 37917, "repeats": 1 },
+      { "name": "Channel Down", "protocol": "RAW", "payload": "3456,1728,432,432,432,1296,432,432,432,432,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,432,1296,432,1296,432,432,432,432,432,432,432,1296,432,432,432,432,432,432,432,65000", "carrierHz": 37917, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Sharp",
+    "category": "TV",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "AA550AA5", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "AA5530CF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "AA55B04F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Mute", "protocol": "NEC", "payload": "AA556897", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Up", "protocol": "NEC", "payload": "AA550AF5", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Down", "protocol": "NEC", "payload": "AA558A75", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Toshiba",
+    "category": "TV",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "02FD48B7", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "02FD58A7", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "02FDD827", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Mute", "protocol": "NEC", "payload": "02FD18E7", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Up", "protocol": "NEC", "payload": "02FDC837", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Down", "protocol": "NEC", "payload": "02FD08F7", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Hisense",
+    "category": "TV",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "4B360708", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "4B360A05", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "4B36080A", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Mute", "protocol": "NEC", "payload": "4B360609", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Up", "protocol": "NEC", "payload": "4B360300", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Down", "protocol": "NEC", "payload": "4B360301", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Input", "protocol": "NEC", "payload": "4B360D02", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "TCL",
+    "category": "TV",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "F7081BE4", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "F7084BB4", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "F708CB34", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Mute", "protocol": "NEC", "payload": "F7082BD4", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Up", "protocol": "NEC", "payload": "F70813EC", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Down", "protocol": "NEC", "payload": "F70893EC", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Home", "protocol": "NEC", "payload": "F7083BC4", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Back", "protocol": "NEC", "payload": "F708BB44", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Vizio",
+    "category": "TV",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "EF1000FF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "EF100AFF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "EF100BFF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Mute", "protocol": "NEC", "payload": "EF1009FF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Up", "protocol": "NEC", "payload": "EF1002FF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Channel Down", "protocol": "NEC", "payload": "EF1003FF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Input", "protocol": "NEC", "payload": "EF1004FF", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Roku",
+    "category": "TV",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "57E3708F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "57E3A05F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "57E3205F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Mute", "protocol": "NEC", "payload": "57E3E01F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Home", "protocol": "NEC", "payload": "57E3B04F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Back", "protocol": "NEC", "payload": "57E3300F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "OK", "protocol": "NEC", "payload": "57E3906F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Up", "protocol": "NEC", "payload": "57E3106F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Down", "protocol": "NEC", "payload": "57E3906F", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Apple TV",
+    "category": "Streaming",
+    "signals": [
+      { "name": "Menu", "protocol": "NEC", "payload": "77E1503F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Play / Pause", "protocol": "NEC", "payload": "77E1D02F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Up", "protocol": "NEC", "payload": "77E10CF3", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Down", "protocol": "NEC", "payload": "77E18C73", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Left", "protocol": "NEC", "payload": "77E14CB3", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Right", "protocol": "NEC", "payload": "77E1CC33", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Select", "protocol": "NEC", "payload": "77E12CD3", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Amazon Fire TV",
+    "category": "Streaming",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "68B7C03F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Home", "protocol": "NEC", "payload": "68B7A05F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Back", "protocol": "NEC", "payload": "68B7205F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Menu", "protocol": "NEC", "payload": "68B7609F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Up", "protocol": "NEC", "payload": "68B7907F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Down", "protocol": "NEC", "payload": "68B7103F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Left", "protocol": "NEC", "payload": "68B750AF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Right", "protocol": "NEC", "payload": "68B7D02F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "OK", "protocol": "NEC", "payload": "68B7B04F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "68B74AB5", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "68B7CA35", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Mute", "protocol": "NEC", "payload": "68B78A75", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Yamaha",
+    "category": "AV Receiver",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "7E817E81", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "7E819E61", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "7E811EE1", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Mute", "protocol": "NEC", "payload": "7E81DE21", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Input HDMI 1", "protocol": "NEC", "payload": "7E81DE21", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Input HDMI 2", "protocol": "NEC", "payload": "7E815EA1", "carrierHz": 38000, "repeats": 2 }
+    ]
+  },
+  {
+    "brand": "Denon",
+    "category": "AV Receiver",
+    "signals": [
+      { "name": "Power On", "protocol": "NEC", "payload": "EE11E01F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Power Off", "protocol": "NEC", "payload": "EE11F00F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "EE11A05F", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "EE11200F", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Mute", "protocol": "NEC", "payload": "EE11600F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Input HDMI 1", "protocol": "NEC", "payload": "EE117887", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Input HDMI 2", "protocol": "NEC", "payload": "EE11F807", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Pioneer",
+    "category": "AV Receiver",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "A55A38C7", "carrierHz": 40000, "repeats": 2 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "A55A18E7", "carrierHz": 40000, "repeats": 2 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "A55A9867", "carrierHz": 40000, "repeats": 2 },
+      { "name": "Mute", "protocol": "NEC", "payload": "A55AD827", "carrierHz": 40000, "repeats": 1 },
+      { "name": "Input HDMI", "protocol": "NEC", "payload": "A55AD02F", "carrierHz": 40000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Onkyo",
+    "category": "AV Receiver",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "4CB340BF", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "4CB3807F", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "4CB3006F", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Mute", "protocol": "NEC", "payload": "4CB3C03F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Input", "protocol": "NEC", "payload": "4CB3D02F", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Bose",
+    "category": "Soundbar",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "A4B20CF3", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "A4B2EC13", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "A4B26C93", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Mute", "protocol": "NEC", "payload": "A4B22CD3", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Source", "protocol": "NEC", "payload": "A4B2AC53", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "JBL",
+    "category": "Soundbar",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "F20DE01F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "F20D20DF", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "F20DA05F", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Mute", "protocol": "NEC", "payload": "F20D609F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Source / Input", "protocol": "NEC", "payload": "F20DC03F", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Nvidia Shield",
+    "category": "Streaming",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "C1370708", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Home", "protocol": "NEC", "payload": "C1370A05", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Back", "protocol": "NEC", "payload": "C1370001", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Up", "protocol": "NEC", "payload": "C137030C", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Down", "protocol": "NEC", "payload": "C1370B04", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Left", "protocol": "NEC", "payload": "C1370E01", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Right", "protocol": "NEC", "payload": "C137060F", "carrierHz": 38000, "repeats": 1 },
+      { "name": "OK", "protocol": "NEC", "payload": "C1370F00", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "C1374AB5", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "C137CA35", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Mute", "protocol": "NEC", "payload": "C1378A75", "carrierHz": 38000, "repeats": 1 }
+    ]
+  },
+  {
+    "brand": "Projector (Epson)",
+    "category": "Projector",
+    "signals": [
+      { "name": "Power", "protocol": "NEC", "payload": "6B8001FE", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Volume Up", "protocol": "NEC", "payload": "6B802FD0", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Volume Down", "protocol": "NEC", "payload": "6B80AFD0", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Mute", "protocol": "NEC", "payload": "6B804FB0", "carrierHz": 38000, "repeats": 2 },
+      { "name": "HDMI", "protocol": "NEC", "payload": "6B80BF00", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Menu", "protocol": "NEC", "payload": "6B806F90", "carrierHz": 38000, "repeats": 2 },
+      { "name": "Freeze", "protocol": "NEC", "payload": "6B80EF10", "carrierHz": 38000, "repeats": 2 }
+    ]
+  },
+  {
+    "brand": "Air Conditioner (Gree)",
+    "category": "AC",
+    "signals": [
+      { "name": "Power On Cool 24°C", "protocol": "RAW", "payload": "9000,4500,600,540,600,540,600,1680,600,540,600,540,600,540,600,540,600,540,600,1680,600,1680,600,540,600,1680,600,1680,600,1680,600,540,600,1680,600,540,600,540,600,540,600,540,600,540,600,540,600,540,600,1680,600,1680,600,1680,600,1680,600,1680,600,1680,600,540,600,1680,600,540,600,20000,600,540,600,540,600,1680,600,540,600,540,600,540,600,540,600,540,600,1680,600,1680,600,540,600,1680,600,1680,600,1680,600,540,600,1680,600,540,600,540,600,540,600,540,600,540,600,540,600,540,600,1680,600,1680,600,1680,600,1680,600,1680,600,1680,600,540,600,1680,600,540,600", "carrierHz": 38000, "repeats": 1 },
+      { "name": "Power Off", "protocol": "RAW", "payload": "9000,4500,600,540,600,540,600,1680,600,540,600,540,600,540,600,540,600,540,600,540,600,1680,600,540,600,1680,600,1680,600,1680,600,540,600,1680,600,540,600,540,600,540,600,540,600,540,600,540,600,540,600,1680,600,1680,600,1680,600,1680,600,1680,600,1680,600,540,600,1680,600,540,600", "carrierHz": 38000, "repeats": 1 }
+    ]
+  }
+]

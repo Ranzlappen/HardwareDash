@@ -3,6 +3,9 @@ package dev.ranzlappen.gadget.feature.radios.ir
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibraryBrand
+import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibraryRepository
+import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibrarySignal
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +20,7 @@ import kotlinx.coroutines.launch
 class IrViewModel @Inject constructor(
     private val hardware: IrHardware,
     private val repository: IrSignalRepository,
+    private val libraryRepository: IrLibraryRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -25,6 +29,10 @@ class IrViewModel @Inject constructor(
             supportedFrequencies = hardware.supportedFrequencies(),
         )
     )
+
+    init {
+        _state.update { it.copy(libraryBrands = libraryRepository.brands) }
+    }
     val state: StateFlow<IrState> = _state.asStateFlow()
 
     val signals: StateFlow<List<IrSignal>> = repository.signals
@@ -100,5 +108,27 @@ class IrViewModel @Inject constructor(
             else -> IrProtocol.NEC
         }
         _state.update { it.copy(pendingPayload = trimmed, pendingProtocol = protocol) }
+    }
+
+    fun openLibrary() = _state.update { it.copy(showLibrary = true) }
+
+    fun closeLibrary() = _state.update { it.copy(showLibrary = false, selectedBrand = null) }
+
+    fun selectBrand(brand: IrLibraryBrand) = _state.update { it.copy(selectedBrand = brand) }
+
+    fun clearBrandSelection() = _state.update { it.copy(selectedBrand = null) }
+
+    fun importSignal(signal: IrLibrarySignal) {
+        val protocol = runCatching { IrProtocol.valueOf(signal.protocol.uppercase()) }
+            .getOrDefault(IrProtocol.NEC)
+        val irSignal = IrSignal(
+            id = UUID.randomUUID().toString(),
+            name = signal.name,
+            protocol = protocol,
+            payload = signal.payload,
+            carrierHz = signal.carrierHz,
+            repeats = signal.repeats,
+        )
+        viewModelScope.launch { repository.save(irSignal) }
     }
 }

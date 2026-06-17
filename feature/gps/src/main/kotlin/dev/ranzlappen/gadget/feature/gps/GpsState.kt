@@ -12,4 +12,5 @@ data class GpsState(
     val accuracyMeters: Float = 0f,
     val hasLocation: Boolean = false,
     val permissionGranted: Boolean = false,
+    val error: String? = null,
 )
