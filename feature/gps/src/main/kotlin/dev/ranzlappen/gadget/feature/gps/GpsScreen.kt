@@ -61,6 +61,18 @@ fun GpsScreen(
         else viewModel.onPermissionRevoked()
     }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (permissionState.status.isGranted) viewModel.onPermissionGranted()
+                else viewModel.onPermissionRevoked()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     GpsScreenContent(
         state = state,
         moduleInfo = gpsModuleInfo(

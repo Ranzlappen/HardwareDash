@@ -8,7 +8,7 @@
     <string name="battery_level_unknown">Level unknown</string>
     <string name="battery_unavailable">Battery information not available.</string>
     <!-- health · temp · voltage on a single summary line -->
-    <string name="battery_detail_line">%1$s · %.1f°C · %.2f V</string>
+    <string name="battery_detail_line">%s · %.1f°C · %.2f V</string>
 
     <!-- ─── Charging card ────────────────────────────────────────────── -->
     <string name="battery_card_charging_title">Charging</string>
