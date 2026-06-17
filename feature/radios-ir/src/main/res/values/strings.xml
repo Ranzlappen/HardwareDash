@@ -37,4 +37,12 @@
     <string name="ir_no_saved_codes">No saved codes yet. Compose and save a signal above.</string>
     <string name="ir_btn_replay">Replay</string>
     <string name="ir_btn_delete">Delete</string>
+
+    <!-- Library card -->
+    <string name="ir_card_library_title">Remote Library</string>
+    <string name="ir_btn_browse_library">Browse Remote Library</string>
+    <string name="ir_library_pick_brand">Select a brand</string>
+    <string name="ir_library_close">Close library</string>
+    <string name="ir_library_back">Back to brands</string>
+    <string name="ir_btn_import">Import signal</string>
 </resources>

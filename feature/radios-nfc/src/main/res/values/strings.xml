@@ -24,4 +24,10 @@
     <string name="nfc_adapter_enabled">NFC enabled</string>
     <string name="nfc_adapter_disabled">NFC disabled — tap to enable</string>
     <string name="nfc_monitor_title">NFC state history</string>
+
+    <!-- Template library -->
+    <string name="nfc_template_card_title">NDEF Templates</string>
+    <string name="nfc_template_browse">Browse Templates</string>
+    <string name="nfc_template_pick">Select a template</string>
+    <string name="nfc_template_activate">Activate</string>
 </resources>

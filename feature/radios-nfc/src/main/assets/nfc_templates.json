@@ -1,0 +1,114 @@
+[
+  {
+    "id": "url_generic",
+    "name": "Web URL",
+    "category": "Web",
+    "mode": "URL",
+    "template": "https://{{url}}"
+  },
+  {
+    "id": "url_app",
+    "name": "App store link",
+    "category": "Web",
+    "mode": "URL",
+    "template": "https://play.google.com/store/apps/details?id={{package}}"
+  },
+  {
+    "id": "url_wifi",
+    "name": "Wi-Fi Network",
+    "category": "Network",
+    "mode": "TEXT",
+    "template": "WIFI:S:{{ssid}};T:WPA;P:{{password}};;"
+  },
+  {
+    "id": "url_wifi_open",
+    "name": "Wi-Fi (open, no password)",
+    "category": "Network",
+    "mode": "TEXT",
+    "template": "WIFI:S:{{ssid}};T:nopass;;"
+  },
+  {
+    "id": "url_sms",
+    "name": "SMS message",
+    "category": "Messaging",
+    "mode": "URL",
+    "template": "sms:{{number}}?body={{message}}"
+  },
+  {
+    "id": "url_tel",
+    "name": "Phone call",
+    "category": "Messaging",
+    "mode": "URL",
+    "template": "tel:{{number}}"
+  },
+  {
+    "id": "url_email",
+    "name": "Email",
+    "category": "Messaging",
+    "mode": "URL",
+    "template": "mailto:{{email}}?subject={{subject}}"
+  },
+  {
+    "id": "url_whatsapp",
+    "name": "WhatsApp chat",
+    "category": "Messaging",
+    "mode": "URL",
+    "template": "https://wa.me/{{number}}"
+  },
+  {
+    "id": "text_vcard",
+    "name": "vCard contact",
+    "category": "Contact",
+    "mode": "TEXT",
+    "template": "BEGIN:VCARD\nVERSION:3.0\nFN:{{name}}\nTEL:{{phone}}\nEMAIL:{{email}}\nEND:VCARD"
+  },
+  {
+    "id": "text_vcard_org",
+    "name": "vCard contact (with company)",
+    "category": "Contact",
+    "mode": "TEXT",
+    "template": "BEGIN:VCARD\nVERSION:3.0\nFN:{{name}}\nORG:{{company}}\nTEL:{{phone}}\nEMAIL:{{email}}\nURL:{{website}}\nEND:VCARD"
+  },
+  {
+    "id": "url_geo",
+    "name": "Geo location",
+    "category": "Location",
+    "mode": "URL",
+    "template": "geo:{{lat}},{{lon}}"
+  },
+  {
+    "id": "url_maps",
+    "name": "Google Maps link",
+    "category": "Location",
+    "mode": "URL",
+    "template": "https://www.google.com/maps/search/?api=1&query={{lat}},{{lon}}"
+  },
+  {
+    "id": "text_plain",
+    "name": "Plain text",
+    "category": "Text",
+    "mode": "TEXT",
+    "template": "{{text}}"
+  },
+  {
+    "id": "text_note",
+    "name": "Note / memo",
+    "category": "Text",
+    "mode": "TEXT",
+    "template": "{{title}}\n\n{{body}}"
+  },
+  {
+    "id": "url_youtube",
+    "name": "YouTube video",
+    "category": "Media",
+    "mode": "URL",
+    "template": "https://youtu.be/{{video_id}}"
+  },
+  {
+    "id": "url_spotify",
+    "name": "Spotify track",
+    "category": "Media",
+    "mode": "URL",
+    "template": "https://open.spotify.com/track/{{track_id}}"
+  }
+]

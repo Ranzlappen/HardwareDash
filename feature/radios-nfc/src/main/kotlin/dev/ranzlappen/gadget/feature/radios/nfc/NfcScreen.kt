@@ -6,11 +6,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Nfc
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -39,6 +44,7 @@ import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
+import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplate
 
 @Composable
 fun NfcScreen(
@@ -61,6 +67,11 @@ fun NfcScreen(
                 is NfcUiEvent.SetHcePayload -> viewModel.setHcePayload(event.text)
                 is NfcUiEvent.ActivateHce -> viewModel.activateHce(event.mode)
                 NfcUiEvent.ClearHce -> viewModel.clearHce()
+                NfcUiEvent.OpenTemplatePicker -> viewModel.openTemplatePicker()
+                NfcUiEvent.CloseTemplatePicker -> viewModel.closeTemplatePicker()
+                is NfcUiEvent.SelectTemplate -> viewModel.selectTemplate(event.template)
+                is NfcUiEvent.SetTemplateValue -> viewModel.setTemplateValue(event.key, event.value)
+                NfcUiEvent.ApplyTemplate -> viewModel.applyTemplate()
             }
         },
         modifier = modifier,
@@ -71,6 +82,11 @@ sealed interface NfcUiEvent {
     data class SetHcePayload(val text: String) : NfcUiEvent
     data class ActivateHce(val mode: NfcHceMode) : NfcUiEvent
     data object ClearHce : NfcUiEvent
+    data object OpenTemplatePicker : NfcUiEvent
+    data object CloseTemplatePicker : NfcUiEvent
+    data class SelectTemplate(val template: NfcTemplate) : NfcUiEvent
+    data class SetTemplateValue(val key: String, val value: String) : NfcUiEvent
+    data object ApplyTemplate : NfcUiEvent
 }
 
 @Composable
@@ -109,6 +125,7 @@ fun NfcScreenContent(
         functional = {
             NfcCapabilityCard(state = state)
             NfcTagCard(state = state)
+            NfcTemplateCard(state = state, onEvent = onEvent)
             NfcHceCard(state = state, onEvent = onEvent)
             MonitorContainer(
                 metricKey = NfcEnabledMetricSource.METRIC_KEY,
@@ -204,6 +221,86 @@ private fun NfcTagCard(state: NfcState, modifier: Modifier = Modifier) {
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NfcTemplateCard(
+    state: NfcState,
+    onEvent: (NfcUiEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    DashCard(
+        modifier = modifier.fillMaxWidth(),
+        title = stringResource(R.string.nfc_template_card_title),
+    ) {
+        if (!state.showTemplatePicker) {
+            GadgetSecondaryButton(
+                onClick = { onEvent(NfcUiEvent.OpenTemplatePicker) },
+                text = stringResource(R.string.nfc_template_browse),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        } else if (state.selectedTemplate == null) {
+            Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = stringResource(R.string.nfc_template_pick),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    IconButton(onClick = { onEvent(NfcUiEvent.CloseTemplatePicker) }) {
+                        Icon(Icons.Outlined.ArrowBack, contentDescription = null)
+                    }
+                }
+                val categories = state.templates.map { it.category }.distinct()
+                categories.forEach { category ->
+                    Text(
+                        text = category,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    state.templates.filter { it.category == category }.forEach { template ->
+                        GadgetChip(
+                            selected = false,
+                            onClick = { onEvent(NfcUiEvent.SelectTemplate(template)) },
+                            label = template.name,
+                            modifier = Modifier.padding(vertical = 2.dp),
+                        )
+                    }
+                }
+            }
+        } else {
+            val template = state.selectedTemplate
+            Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(text = template.name, style = MaterialTheme.typography.titleSmall)
+                    IconButton(onClick = { onEvent(NfcUiEvent.CloseTemplatePicker) }) {
+                        Icon(Icons.Outlined.ArrowBack, contentDescription = null)
+                    }
+                }
+                template.placeholders.forEach { key ->
+                    OutlinedTextField(
+                        value = state.templateValues[key] ?: "",
+                        onValueChange = { onEvent(NfcUiEvent.SetTemplateValue(key, it)) },
+                        label = { Text(key) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                    )
+                }
+                GadgetPrimaryButton(
+                    onClick = { onEvent(NfcUiEvent.ApplyTemplate) },
+                    text = stringResource(R.string.nfc_template_activate),
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
