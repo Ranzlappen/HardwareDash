@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:datastore"))
     implementation(project(":core:automation"))
+    implementation(project(":core:root"))
     implementation(libs.kotlinx.serialization.json)
 
     androidTestImplementation(project(":core:testing"))
