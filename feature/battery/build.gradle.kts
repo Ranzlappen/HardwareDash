@@ -20,6 +20,7 @@ dependencies {
     // MonitorContainer + MetricSource seam (also transitively exposes
     // :core:model which defines MetricDescriptor / MetricCategory).
     implementation(project(":core:monitoring"))
+    implementation(project(":core:root"))
 
     androidTestImplementation(project(":core:testing"))
     androidTestImplementation(libs.androidx.junit)

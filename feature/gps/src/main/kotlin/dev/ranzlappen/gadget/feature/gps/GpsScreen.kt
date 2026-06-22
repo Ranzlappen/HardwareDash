@@ -54,6 +54,7 @@ fun GpsScreen(
     viewModel: GpsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val isRootedFlavor = viewModel.isRootedFlavor
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
     LaunchedEffect(permissionState.status.isGranted) {
@@ -78,6 +79,7 @@ fun GpsScreen(
         moduleInfo = gpsModuleInfo(
             locationGranted = permissionState.status.isGranted,
             hasLocation = state.hasLocation,
+            isRootedFlavor = isRootedFlavor,
         ),
         onRequestPermission = { permissionState.launchPermissionRequest() },
         modifier = modifier,
@@ -116,6 +118,7 @@ fun GpsScreen(
 private fun gpsModuleInfo(
     locationGranted: Boolean,
     hasLocation: Boolean,
+    isRootedFlavor: Boolean,
 ): ModuleInfo = ModuleInfo(
     compatibility = OsCompatibility(minSdk = 21),
     permissions = listOf(
@@ -142,6 +145,57 @@ private fun gpsModuleInfo(
                         else -> stringResource(R.string.gps_cap_searching)
                     },
                 )
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.gps_cap_nmea_name),
+            detail = stringResource(R.string.gps_cap_nmea_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.gps_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.gps_cap_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.gps_cap_constellation_name),
+            detail = stringResource(R.string.gps_cap_constellation_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.gps_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.gps_cap_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.gps_cap_location_override_name),
+            detail = stringResource(R.string.gps_cap_location_override_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.gps_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.gps_cap_rooted_required),
+                    )
+                }
             },
         ),
     ),
