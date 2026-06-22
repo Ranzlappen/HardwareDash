@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
     implementation(project(":core:monitoring"))
+    implementation(project(":core:root"))
 
     // FusedLocationProvider — standard SDK (no root).
     implementation(libs.play.services.location)

@@ -5,6 +5,7 @@ import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplate
 data class NfcState(
     val adapterPresent: Boolean = false,
     val adapterEnabled: Boolean = false,
+    val isRootedFlavor: Boolean = false,
     val lastTagPayload: String? = null,
     val lastTagFormat: String? = null,
     val lastTagId: String? = null,

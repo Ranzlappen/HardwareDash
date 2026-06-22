@@ -53,6 +53,8 @@ import com.gadget.wifi.RootedWifiController
 import com.gadget.wifi.WifiController
 import com.gadget.usbdebug.RootedUsbDebuggingController
 import com.gadget.usbdebug.UsbDebuggingController
+import dev.ranzlappen.gadget.feature.radios.bt.BtEnhancedInfoProvider
+import dev.ranzlappen.gadget.feature.radios.bt.RootedBtEnhancedInfoProvider
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -125,6 +127,9 @@ abstract class RootBindings {
     abstract fun bindBatteryController(impl: RootedBatteryController): BatteryController
 
     // ──── Batch 6: radios + connectivity controllers ────
+
+    @Binds @Singleton
+    abstract fun bindBtEnhancedInfoProvider(impl: RootedBtEnhancedInfoProvider): BtEnhancedInfoProvider
 
     @Binds @Singleton
     abstract fun bindWifiController(impl: RootedWifiController): WifiController

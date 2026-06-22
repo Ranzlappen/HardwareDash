@@ -31,6 +31,16 @@
     <string name="gps_label_bearing">Bearing</string>
     <string name="gps_label_accuracy">Accuracy</string>
 
+    <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
+    <string name="gps_cap_rooted_active">Active — rooted build</string>
+    <string name="gps_cap_rooted_required">Requires rooted build</string>
+    <string name="gps_cap_nmea_name">NMEA raw tap</string>
+    <string name="gps_cap_nmea_detail">Direct NMEA sentence stream bypassing the LocationManager API</string>
+    <string name="gps_cap_constellation_name">Constellation dump</string>
+    <string name="gps_cap_constellation_detail">Full satellite constellation report via /dev/gnss0 or sysfs</string>
+    <string name="gps_cap_location_override_name">Location override</string>
+    <string name="gps_cap_location_override_detail">Mock location injection via test provider (requires mock location developer option)</string>
+
     <!-- ─── Monitoring containers ─────────────────────────────────────────── -->
     <string name="gps_live_monitor_speed">Speed (live)</string>
     <string name="gps_live_monitor_altitude">Altitude (live)</string>

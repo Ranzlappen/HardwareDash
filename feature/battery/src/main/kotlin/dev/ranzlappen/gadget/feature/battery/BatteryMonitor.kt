@@ -33,8 +33,13 @@ class BatteryMonitor @Inject constructor(
 
     init {
         // Read the sticky broadcast for immediate initial state.
-        context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            ?.let { updateState(it) }
+        // ContextCompat overload required on API 31+ which demands explicit export flags
+        // even for the null-receiver sticky-read path.
+        ContextCompat.registerReceiver(
+            context, null,
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED),
+            ContextCompat.RECEIVER_EXPORTED,
+        )?.let { updateState(it) }
 
         // Live receiver for subsequent updates. Singleton lives for the entire
         // process lifetime, so the receiver is intentionally not unregistered.

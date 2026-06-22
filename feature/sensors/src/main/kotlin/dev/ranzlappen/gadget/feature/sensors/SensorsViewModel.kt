@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ranzlappen.gadget.core.model.MetricSource
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +41,10 @@ class SensorsViewModel @Inject constructor(
     proximity: ProximityMetricSource,
     light: LightMetricSource,
     acceleration: AccelerationMetricSource,
+    rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
+
+    val isRootedFlavor: Boolean = rootCapabilityRegistry.isRootedFlavor
 
     private val sources: List<MetricSource> = listOf(proximity, light, acceleration)
 

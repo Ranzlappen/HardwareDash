@@ -19,4 +19,14 @@
     <string name="motion_idle">No motion</string>
     <string name="motion_live_monitor_title">%1$s — live</string>
     <string name="motion_monitor_title">%1$s history</string>
+    <string name="motion_capability_present">Present</string>
+    <string name="motion_capability_not_present">Not present</string>
+    <string name="motion_capability_high_polling">High-rate sampling</string>
+    <string name="motion_capability_high_polling_detail">Override sensor reporting rate below the public API minimum</string>
+    <string name="motion_capability_raw_unfiltered">Raw unfiltered data</string>
+    <string name="motion_capability_raw_unfiltered_detail">Bypass Android\'s sensor fusion and filtering pipeline</string>
+    <string name="motion_capability_sysfs_read">Sysfs sensor read</string>
+    <string name="motion_capability_sysfs_read_detail">Direct kernel sysfs access to sensor hardware nodes</string>
+    <string name="motion_capability_rooted_active">Active — rooted build</string>
+    <string name="motion_capability_rooted_required">Requires rooted build</string>
 </resources>

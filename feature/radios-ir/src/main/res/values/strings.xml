@@ -45,4 +45,12 @@
     <string name="ir_library_close">Close library</string>
     <string name="ir_library_back">Back to brands</string>
     <string name="ir_btn_import">Import signal</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="ir_cap_rooted_active">Active — rooted build</string>
+    <string name="ir_cap_rooted_required">Requires rooted build</string>
+    <string name="ir_cap_custom_carrier_name">Custom carrier frequency</string>
+    <string name="ir_cap_custom_carrier_detail">Transmit at arbitrary carrier frequencies outside the ConsumerIrManager range</string>
+    <string name="ir_cap_gpio_burst_name">GPIO raw burst</string>
+    <string name="ir_cap_gpio_burst_detail">Direct GPIO pulse-train output via sysfs, bypassing the IR HAL</string>
 </resources>

@@ -29,6 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
+import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
 import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.component.DashCard
@@ -90,43 +91,69 @@ sealed interface NfcUiEvent {
 }
 
 @Composable
+private fun nfcModuleInfo(state: NfcState): ModuleInfo = ModuleInfo(
+    compatibility = OsCompatibility(minSdk = 10),
+    capabilities = listOf(
+        ModuleCapability(
+            name = stringResource(R.string.nfc_capability_adapter),
+            detail = stringResource(R.string.nfc_capability_adapter_detail),
+            status = {
+                when {
+                    !state.adapterPresent -> CapabilityStatus(
+                        kind = GadgetStatusKind.Error,
+                        message = stringResource(R.string.nfc_adapter_present),
+                    )
+                    state.adapterEnabled -> CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.nfc_adapter_enabled),
+                    )
+                    else -> CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.nfc_adapter_disabled),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.nfc_cap_raw_nci_name),
+            detail = stringResource(R.string.nfc_cap_raw_nci_detail),
+            status = {
+                if (state.isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.nfc_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.nfc_cap_rooted_required),
+                    )
+                }
+            },
+        ),
+    ),
+)
+
+@Composable
 fun NfcScreenContent(
     state: NfcState,
     onEvent: (NfcUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ModuleScreenScaffold(
-        moduleInfo = ModuleInfo(
-            compatibility = OsCompatibility(minSdk = 10),
-            capabilities = listOf(
-                ModuleCapability(
-                    name = stringResource(R.string.nfc_capability_adapter),
-                    detail = stringResource(R.string.nfc_capability_adapter_detail),
-                    status = {
-                        when {
-                            !state.adapterPresent -> CapabilityStatus(
-                                kind = GadgetStatusKind.Error,
-                                message = stringResource(R.string.nfc_adapter_present),
-                            )
-                            state.adapterEnabled -> CapabilityStatus(
-                                kind = GadgetStatusKind.Success,
-                                message = stringResource(R.string.nfc_adapter_enabled),
-                            )
-                            else -> CapabilityStatus(
-                                kind = GadgetStatusKind.Warning,
-                                message = stringResource(R.string.nfc_adapter_disabled),
-                            )
-                        }
-                    },
-                ),
-            ),
-        ),
+        moduleInfo = nfcModuleInfo(state),
         modifier = modifier,
         functional = {
             NfcCapabilityCard(state = state)
             NfcTagCard(state = state)
             NfcTemplateCard(state = state, onEvent = onEvent)
             NfcHceCard(state = state, onEvent = onEvent)
+            LiveMonitorContainer(
+                metricKey = NfcEnabledMetricSource.METRIC_KEY,
+                title = stringResource(R.string.nfc_live_monitor_title),
+                modifier = Modifier.fillMaxWidth(),
+                collapseId = "nfc_live_monitor",
+            )
             MonitorContainer(
                 metricKey = NfcEnabledMetricSource.METRIC_KEY,
                 title = stringResource(R.string.nfc_monitor_title),

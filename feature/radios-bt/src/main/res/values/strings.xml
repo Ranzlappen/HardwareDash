@@ -18,4 +18,21 @@
     <string name="bt_device_type_unknown">Unknown</string>
     <string name="bt_monitor_title">Bluetooth state history</string>
     <string name="bt_refresh">Refresh</string>
+
+    <!-- Per-device connection and battery info. -->
+    <string name="bt_device_connected">Connected</string>
+    <string name="bt_device_disconnected">Disconnected</string>
+    <string name="bt_device_battery">%1$d%%</string>
+    <string name="bt_device_rssi">%1$d dBm</string>
+
+    <!-- Monitor titles -->
+    <string name="bt_live_monitor_title">Bluetooth state (live)</string>
+
+    <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
+    <string name="bt_cap_rooted_active">Active — rooted build</string>
+    <string name="bt_cap_rooted_required">Requires rooted build</string>
+    <string name="bt_cap_hidden_battery_name">Hidden battery level API</string>
+    <string name="bt_cap_hidden_battery_detail">Read device battery % via hidden Bluetooth reflection APIs, covering Classic, BLE, and Dual devices</string>
+    <string name="bt_cap_a2dp_codec_name">A2DP codec identification</string>
+    <string name="bt_cap_a2dp_codec_detail">Identify active A2DP streaming codec (AAC, aptX, LDAC) via hidden BluetoothA2dp proxy</string>
 </resources>

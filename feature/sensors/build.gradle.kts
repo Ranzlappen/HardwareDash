@@ -19,6 +19,7 @@ dependencies {
     // DeviceSensors — moved to :core:hardware so :feature:motion can reuse it
     // without a feature-to-feature dependency.
     implementation(project(":core:hardware"))
+    implementation(project(":core:root"))
 
     // Stateless-screen instrumented test (Compose UI test stack via the
     // shared fixtures, the torch/vibration pattern).

@@ -34,9 +34,10 @@ fun StorageScreen(
     viewModel: StorageViewModel = hiltViewModel(),
 ) {
     val volumes by viewModel.volumes.collectAsStateWithLifecycle()
+    val isRootedFlavor = viewModel.isRootedFlavor
     StorageScreenContent(
         volumes = volumes,
-        moduleInfo = storageModuleInfo(volumes),
+        moduleInfo = storageModuleInfo(volumes, isRootedFlavor),
         modifier = modifier,
         liveMonitors = {
             LiveMonitorContainer(
@@ -64,7 +65,7 @@ fun StorageScreen(
 }
 
 @Composable
-private fun storageModuleInfo(volumes: List<StorageVolumeInfo>): ModuleInfo = ModuleInfo(
+private fun storageModuleInfo(volumes: List<StorageVolumeInfo>, isRootedFlavor: Boolean): ModuleInfo = ModuleInfo(
     compatibility = OsCompatibility(minSdk = 24),
     capabilities = listOf(
         ModuleCapability(
@@ -78,6 +79,57 @@ private fun storageModuleInfo(volumes: List<StorageVolumeInfo>): ModuleInfo = Mo
                     else
                         stringResource(R.string.storage_cap_unavailable),
                 )
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.storage_cap_diskstats_name),
+            detail = stringResource(R.string.storage_cap_diskstats_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.storage_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.storage_cap_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.storage_cap_mounts_name),
+            detail = stringResource(R.string.storage_cap_mounts_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.storage_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.storage_cap_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.storage_cap_fstrim_name),
+            detail = stringResource(R.string.storage_cap_fstrim_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.storage_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.storage_cap_rooted_required),
+                    )
+                }
             },
         ),
     ),

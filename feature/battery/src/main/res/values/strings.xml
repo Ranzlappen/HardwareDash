@@ -8,7 +8,7 @@
     <string name="battery_level_unknown">Level unknown</string>
     <string name="battery_unavailable">Battery information not available.</string>
     <!-- health · temp · voltage on a single summary line -->
-    <string name="battery_detail_line">%1$s · %.1f°C · %.2f V</string>
+    <string name="battery_detail_line">%s · %.1f°C · %.2f V</string>
 
     <!-- ─── Charging card ────────────────────────────────────────────── -->
     <string name="battery_card_charging_title">Charging</string>
@@ -50,4 +50,14 @@
     <string name="battery_live_monitor_temp">Temperature (live)</string>
     <string name="battery_monitor_level">Battery level history</string>
     <string name="battery_monitor_temp">Temperature history</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="battery_cap_rooted_active">Active — rooted build</string>
+    <string name="battery_cap_rooted_required">Requires rooted build</string>
+    <string name="battery_cap_fuel_gauge_name">Fuel gauge raw read</string>
+    <string name="battery_cap_fuel_gauge_detail">Direct sysfs read of fuel gauge chip (SoC, voltage, current)</string>
+    <string name="battery_cap_cell_monitor_name">Cell voltage monitor</string>
+    <string name="battery_cap_cell_monitor_detail">Per-cell voltage telemetry from the fuel gauge</string>
+    <string name="battery_cap_charging_profile_name">Charging profile control</string>
+    <string name="battery_cap_charging_profile_detail">Override charge current and voltage cutoff limits</string>
 </resources>

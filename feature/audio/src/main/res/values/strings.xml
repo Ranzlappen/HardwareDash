@@ -19,4 +19,15 @@
     <string name="audio_notification_title">Recording audio</string>
     <string name="audio_notification_text">Tap to open Gadget</string>
     <string name="audio_notification_stop">Stop recording</string>
+    <string name="audio_capability_available">Recording available</string>
+    <string name="audio_capability_permission_required">Permission required</string>
+    <string name="audio_live_monitor_title">dB meter — live</string>
+    <string name="audio_capability_rooted_active">Active — rooted build</string>
+    <string name="audio_capability_rooted_required">Requires rooted build</string>
+    <string name="audio_capability_gain_boost">Mic gain boost</string>
+    <string name="audio_capability_gain_boost_detail">Override hardware gain register beyond OS limits</string>
+    <string name="audio_capability_direct_pcm">Direct PCM capture</string>
+    <string name="audio_capability_direct_pcm_detail">Bypass AudioRecord stack for raw kernel capture</string>
+    <string name="audio_capability_custom_sample_rate">Custom sample rate</string>
+    <string name="audio_capability_custom_sample_rate_detail">Request non-standard capture rates (e.g. 96 kHz)</string>
 </resources>

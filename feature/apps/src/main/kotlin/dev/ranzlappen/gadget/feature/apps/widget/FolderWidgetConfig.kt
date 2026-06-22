@@ -5,6 +5,9 @@ import dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
 import kotlinx.serialization.Serializable
 
+@Serializable
+enum class FolderShape { Circle, RoundedSquare, Square }
+
 /**
  * Per-`appWidgetId` config for a placed folder widget, persisted as JSON via
  * the kit's [dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore].
@@ -36,6 +39,18 @@ data class FolderWidgetConfig(
     val coverTintArgb: Long = FOLLOW_FOLDER_COLOR,
     /** Optional icon key from the icon catalog. `null` means use the default folder cover. */
     val iconKey: String? = null,
+    /** Chip shape: Circle, RoundedSquare (default), or Square. */
+    val folderShape: FolderShape = FolderShape.RoundedSquare,
+    /** When true, always render the 2×2 app-icon preview grid regardless of cover. */
+    val showAppGridPreview: Boolean = false,
+    /** Second gradient stop for Solid background. `null` = flat solid fill. */
+    val gradientEndArgb: Long? = null,
+    /** Stroke outline width in dp (0 = no stroke). */
+    val strokeWidthDp: Float = 0f,
+    /** Stroke colour as packed ARGB Long. */
+    val strokeArgb: Long = 0xFF000000L,
+    /** Corner radius as fraction of the chip size (0–0.5). `null` = shape default. */
+    val cornerRadiusFraction: Float? = null,
     override val displayName: String = "",
     override val removed: Boolean = false,
     override val schemaVersion: Int = 2,

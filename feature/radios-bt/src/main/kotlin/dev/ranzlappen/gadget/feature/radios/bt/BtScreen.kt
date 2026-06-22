@@ -5,6 +5,8 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +29,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
+import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
 import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.component.DashCard
@@ -69,6 +72,12 @@ fun BtScreen(
         moduleInfo = btModuleInfo(state),
         modifier = modifier,
         monitors = {
+            LiveMonitorContainer(
+                metricKey = BtEnabledMetricSource.METRIC_KEY,
+                title = stringResource(R.string.bt_live_monitor_title),
+                modifier = Modifier.fillMaxWidth(),
+                collapseId = "bt_live_${BtEnabledMetricSource.METRIC_KEY}",
+            )
             MonitorContainer(
                 metricKey = BtEnabledMetricSource.METRIC_KEY,
                 title = stringResource(R.string.bt_monitor_title),
@@ -79,10 +88,6 @@ fun BtScreen(
     )
 }
 
-/**
- * Builds the [ModuleInfo] for the Bluetooth screen — a single capability row
- * that reflects adapter presence and enabled state.
- */
 @Composable
 private fun btModuleInfo(state: BtState): ModuleInfo {
     val ctx = LocalContext.current
@@ -119,6 +124,40 @@ private fun btModuleInfo(state: BtState): ModuleInfo {
                         else -> CapabilityStatus(
                             kind = GadgetStatusKind.Warning,
                             message = stringResource(R.string.bt_adapter_disabled),
+                        )
+                    }
+                },
+            ),
+            ModuleCapability(
+                name = stringResource(R.string.bt_cap_hidden_battery_name),
+                detail = stringResource(R.string.bt_cap_hidden_battery_detail),
+                status = {
+                    if (state.isRootedFlavor) {
+                        CapabilityStatus(
+                            kind = GadgetStatusKind.Success,
+                            message = stringResource(R.string.bt_cap_rooted_active),
+                        )
+                    } else {
+                        CapabilityStatus(
+                            kind = GadgetStatusKind.Warning,
+                            message = stringResource(R.string.bt_cap_rooted_required),
+                        )
+                    }
+                },
+            ),
+            ModuleCapability(
+                name = stringResource(R.string.bt_cap_a2dp_codec_name),
+                detail = stringResource(R.string.bt_cap_a2dp_codec_detail),
+                status = {
+                    if (state.isRootedFlavor) {
+                        CapabilityStatus(
+                            kind = GadgetStatusKind.Success,
+                            message = stringResource(R.string.bt_cap_rooted_active),
+                        )
+                    } else {
+                        CapabilityStatus(
+                            kind = GadgetStatusKind.Warning,
+                            message = stringResource(R.string.bt_cap_rooted_required),
                         )
                     }
                 },
@@ -246,38 +285,83 @@ private fun BtStatusCard(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun BondedDeviceRow(
     device: BluetoothDeviceInfo,
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = spacing.pico),
-        horizontalArrangement = Arrangement.spacedBy(spacing.small),
+        verticalArrangement = Arrangement.spacedBy(spacing.pico),
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = device.name ?: device.address,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            if (device.name != null) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(spacing.small),
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = device.address,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = device.name ?: device.address,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                if (device.name != null) {
+                    Text(
+                        text = device.address,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            GadgetChip(
+                selected = device.isConnected,
+                onClick = {},
+                label = if (device.isConnected) {
+                    stringResource(R.string.bt_device_connected)
+                } else {
+                    stringResource(R.string.bt_device_disconnected)
+                },
+                enabled = false,
+            )
+        }
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(spacing.tiny),
+            verticalArrangement = Arrangement.spacedBy(spacing.pico),
+        ) {
+            GadgetChip(
+                selected = false,
+                onClick = {},
+                label = device.typeName,
+                enabled = false,
+            )
+            device.batteryPercent?.let { pct ->
+                GadgetChip(
+                    selected = false,
+                    onClick = {},
+                    label = stringResource(R.string.bt_device_battery, pct),
+                    enabled = false,
+                )
+            }
+            device.rssiDbm?.let { rssi ->
+                GadgetChip(
+                    selected = false,
+                    onClick = {},
+                    label = stringResource(R.string.bt_device_rssi, rssi),
+                    enabled = false,
+                )
+            }
+            device.codecName?.let { codec ->
+                GadgetChip(
+                    selected = false,
+                    onClick = {},
+                    label = codec,
+                    enabled = false,
                 )
             }
         }
-        GadgetChip(
-            selected = false,
-            onClick = {},
-            label = device.typeName,
-            enabled = false,
-        )
     }
 }
 
@@ -295,8 +379,18 @@ private fun BtScreenPreview() = GadgetThemedPreview {
             adapterName = "Pixel 8",
             permissionGranted = true,
             bondedDevices = listOf(
-                BluetoothDeviceInfo(name = "Galaxy Buds2", address = "AA:BB:CC:DD:EE:FF", typeName = "Classic"),
-                BluetoothDeviceInfo(name = null, address = "11:22:33:44:55:66", typeName = "BLE"),
+                BluetoothDeviceInfo(
+                    name = "Galaxy Buds2", address = "AA:BB:CC:DD:EE:FF", typeName = "Classic",
+                    isConnected = true, batteryPercent = 73,
+                ),
+                BluetoothDeviceInfo(
+                    name = "Pixel Watch", address = "11:22:33:44:55:66", typeName = "BLE",
+                    isConnected = true, batteryPercent = 48, rssiDbm = -61,
+                ),
+                BluetoothDeviceInfo(
+                    name = null, address = "AA:11:BB:22:CC:33", typeName = "Dual",
+                    isConnected = false,
+                ),
             ),
         ),
         moduleInfo = null,

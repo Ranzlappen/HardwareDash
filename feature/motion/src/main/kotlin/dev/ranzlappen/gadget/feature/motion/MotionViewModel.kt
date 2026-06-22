@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.hardware.DeviceSensors
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +25,7 @@ class MotionViewModel @Inject constructor(
     private val rotationRate: RotationRateMetricSource,
     private val stepCounter: StepCounterMetricSource,
     private val motionDetected: MotionDetectedMetricSource,
+    private val rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MotionState())
@@ -36,6 +38,7 @@ class MotionViewModel @Inject constructor(
                 hasStepCounter = sensors.has(Sensor.TYPE_STEP_COUNTER),
                 hasMotionDetect = sensors.has(Sensor.TYPE_MOTION_DETECT),
                 activityPermissionGranted = checkActivityPermission(),
+                isRootedFlavor = rootCapabilityRegistry.isRootedFlavor,
             )
         }
         collectSensors()

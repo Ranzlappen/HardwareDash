@@ -9,4 +9,12 @@
     <string name="sensors_capability_available">Sensor present — streaming readings</string>
     <string name="sensors_capability_missing">This device has no such sensor</string>
     <string name="sensors_capability_detail_signal">Chartable + usable as an automation trigger (metric key: %1$s)</string>
+    <string name="sensors_capability_rooted_active">Active — rooted build</string>
+    <string name="sensors_capability_rooted_required">Requires rooted build</string>
+    <string name="sensors_capability_high_polling">High-rate sampling</string>
+    <string name="sensors_capability_high_polling_detail">Override sensor reporting rate below the public API minimum</string>
+    <string name="sensors_capability_raw_unfiltered">Raw unfiltered output</string>
+    <string name="sensors_capability_raw_unfiltered_detail">Bypass Android\'s sensor fusion and low-pass filter pipeline</string>
+    <string name="sensors_capability_sysfs_read">Sysfs direct read</string>
+    <string name="sensors_capability_sysfs_read_detail">Kernel-level sysfs access to sensor hardware nodes</string>
 </resources>

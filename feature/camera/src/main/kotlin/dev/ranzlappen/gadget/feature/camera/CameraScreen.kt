@@ -83,6 +83,7 @@ fun CameraScreen(
     val history by viewModel.history.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
+    val isRootedFlavor = viewModel.isRootedFlavor
 
     LaunchedEffect(cameraPermission.status.isGranted) {
         viewModel.onPermissionResult(cameraPermission.status.isGranted)
@@ -91,7 +92,7 @@ fun CameraScreen(
     CameraScreenContent(
         state = state,
         history = history,
-        moduleInfo = cameraModuleInfo(permissionGranted = state.permissionGranted),
+        moduleInfo = cameraModuleInfo(permissionGranted = state.permissionGranted, isRootedFlavor = isRootedFlavor),
         onRequestPermission = { cameraPermission.launchPermissionRequest() },
         onScanDetected = viewModel::onScanDetected,
         onToggleTorch = viewModel::toggleTorch,
@@ -103,7 +104,7 @@ fun CameraScreen(
 }
 
 @Composable
-private fun cameraModuleInfo(permissionGranted: Boolean): ModuleInfo = ModuleInfo(
+private fun cameraModuleInfo(permissionGranted: Boolean, isRootedFlavor: Boolean): ModuleInfo = ModuleInfo(
     compatibility = OsCompatibility(minSdk = 21),
     permissions = listOf(
         ModulePermission(
@@ -126,6 +127,57 @@ private fun cameraModuleInfo(permissionGranted: Boolean): ModuleInfo = ModuleInf
                     CapabilityStatus(
                         kind = GadgetStatusKind.Warning,
                         message = stringResource(R.string.camera_cap_scanner_denied),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.camera_cap_high_fps_name),
+            detail = stringResource(R.string.camera_cap_high_fps_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.camera_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.camera_cap_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.camera_cap_manual_name),
+            detail = stringResource(R.string.camera_cap_manual_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.camera_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.camera_cap_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.camera_cap_hal_bypass_name),
+            detail = stringResource(R.string.camera_cap_hal_bypass_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.camera_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.camera_cap_rooted_required),
                     )
                 }
             },

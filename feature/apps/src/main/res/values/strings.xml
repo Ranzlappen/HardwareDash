@@ -65,6 +65,18 @@
     <string name="apps_widget_list_empty">No widgets placed yet</string>
     <string name="apps_widget_delete">Delete widget</string>
 
+    <!-- Folder widget design customization. -->
+    <string name="apps_folder_design">Design</string>
+    <string name="apps_folder_shape_circle">Circle</string>
+    <string name="apps_folder_shape_rounded">Rounded</string>
+    <string name="apps_folder_shape_square">Square</string>
+    <string name="apps_folder_corner_radius">Corner radius: %1$d%%</string>
+    <string name="apps_folder_grid_preview">Show app icon grid</string>
+    <string name="apps_folder_gradient">Gradient</string>
+    <string name="apps_folder_gradient_add">Add</string>
+    <string name="apps_folder_gradient_clear">Clear</string>
+    <string name="apps_folder_stroke_width">Stroke: %1$d dp</string>
+
     <!-- Folder home-screen widget. -->
     <string name="apps_widget_folder_label">App Folder</string>
     <string name="apps_widget_folder_description">A customizable home-screen folder of installed apps, PWAs, and web links.</string>

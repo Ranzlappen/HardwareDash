@@ -3,6 +3,7 @@ package dev.ranzlappen.gadget.feature.radios.ir
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibraryBrand
 import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibraryRepository
 import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibrarySignal
@@ -21,7 +22,11 @@ class IrViewModel @Inject constructor(
     private val hardware: IrHardware,
     private val repository: IrSignalRepository,
     private val libraryRepository: IrLibraryRepository,
+    rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
+
+    val isRootedFlavor: Boolean = rootCapabilityRegistry.isRootedFlavor
+
 
     private val _state = MutableStateFlow(
         IrState(

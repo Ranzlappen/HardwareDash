@@ -54,6 +54,7 @@ fun GpsScreen(
     viewModel: GpsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val isRootedFlavor = viewModel.isRootedFlavor
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
     LaunchedEffect(permissionState.status.isGranted) {
@@ -61,11 +62,24 @@ fun GpsScreen(
         else viewModel.onPermissionRevoked()
     }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (permissionState.status.isGranted) viewModel.onPermissionGranted()
+                else viewModel.onPermissionRevoked()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     GpsScreenContent(
         state = state,
         moduleInfo = gpsModuleInfo(
             locationGranted = permissionState.status.isGranted,
             hasLocation = state.hasLocation,
+            isRootedFlavor = isRootedFlavor,
         ),
         onRequestPermission = { permissionState.launchPermissionRequest() },
         modifier = modifier,
@@ -104,6 +118,7 @@ fun GpsScreen(
 private fun gpsModuleInfo(
     locationGranted: Boolean,
     hasLocation: Boolean,
+    isRootedFlavor: Boolean,
 ): ModuleInfo = ModuleInfo(
     compatibility = OsCompatibility(minSdk = 21),
     permissions = listOf(
@@ -132,6 +147,57 @@ private fun gpsModuleInfo(
                 )
             },
         ),
+        ModuleCapability(
+            name = stringResource(R.string.gps_cap_nmea_name),
+            detail = stringResource(R.string.gps_cap_nmea_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.gps_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.gps_cap_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.gps_cap_constellation_name),
+            detail = stringResource(R.string.gps_cap_constellation_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.gps_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.gps_cap_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.gps_cap_location_override_name),
+            detail = stringResource(R.string.gps_cap_location_override_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.gps_cap_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.gps_cap_rooted_required),
+                    )
+                }
+            },
+        ),
     ),
 )
 
@@ -153,9 +219,7 @@ internal fun GpsScreenContent(
             if (!state.permissionGranted) {
                 GpsPermissionCard(onRequestPermission = onRequestPermission)
             } else {
-                if (state.hasLocation) {
-                    GpsMapCard(state = state)
-                }
+                GpsMapCard(state = state)
                 GpsCoordinatesCard(state = state)
                 liveMonitors()
                 monitors()
@@ -225,15 +289,21 @@ private fun GpsMapCard(
                 .fillMaxWidth()
                 .height(260.dp),
             update = { view ->
-                val center = GeoPoint(state.latitude, state.longitude)
-                view.controller.setCenter(center)
-                view.overlays.clear()
-                val marker = Marker(view).apply {
-                    position = center
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    title = "%.5f, %.5f".format(state.latitude, state.longitude)
+                if (state.hasLocation) {
+                    val center = GeoPoint(state.latitude, state.longitude)
+                    view.controller.setZoom(15.0)
+                    view.controller.setCenter(center)
+                    view.overlays.clear()
+                    val marker = Marker(view).apply {
+                        position = center
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        title = "%.5f, %.5f".format(state.latitude, state.longitude)
+                    }
+                    view.overlays.add(marker)
+                } else {
+                    view.controller.setZoom(2.0)
+                    view.overlays.clear()
                 }
-                view.overlays.add(marker)
                 view.invalidate()
             },
         )

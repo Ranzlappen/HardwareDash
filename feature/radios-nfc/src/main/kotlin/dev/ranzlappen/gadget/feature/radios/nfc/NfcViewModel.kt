@@ -8,6 +8,7 @@ import android.nfc.Tag
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.feature.radios.nfc.hce.NfcHceState
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplate
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplateRepository
@@ -23,9 +24,10 @@ class NfcViewModel @Inject constructor(
     private val adapter: NfcAdapterWrapper,
     private val hceState: NfcHceState,
     private val templateRepository: NfcTemplateRepository,
+    rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(NfcState())
+    private val _state = MutableStateFlow(NfcState(isRootedFlavor = rootCapabilityRegistry.isRootedFlavor))
     val state: StateFlow<NfcState> = _state
 
     init {

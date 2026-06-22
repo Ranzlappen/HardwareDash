@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
     implementation(project(":core:datastore"))
+    implementation(project(":core:root"))
 
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
