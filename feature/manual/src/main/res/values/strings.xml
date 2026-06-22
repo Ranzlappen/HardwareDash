@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="manual_screen_title">Manual</string>
+
+    <!-- Intro -->
+    <string name="manual_intro_title">About Gadget</string>
+    <string name="manual_intro_body">Gadget lets you inspect every sensor and actuator on your Android device and wire them together with the Automation engine. Each module is self-contained; the rooted flavor unlocks deeper hardware access without changing the standard UI.</string>
+
+    <!-- Sections -->
+    <string name="manual_section_sensors">Sensors</string>
+    <string name="manual_section_sensors_body">Proximity, light, accelerometer, gyroscope, and step counter. Every sensor streams live data and records history. Rooted builds can poll at higher rates.</string>
+
+    <string name="manual_section_radios">Radios</string>
+    <string name="manual_section_radios_body">Bluetooth, WiFi, NFC, and IR Blaster. Shows adapter state, connected devices, signal strength, and network details. IR can transmit NEC/Pronto/RAW codes.</string>
+
+    <string name="manual_section_actuators">Actuators</string>
+    <string name="manual_section_actuators_body">Torch (flashlight) and Vibration are the primary actuators. The rooted flavor adds direct PWM control of the LRA and ERM motors for complex haptic patterns.</string>
+
+    <string name="manual_section_system">System</string>
+    <string name="manual_section_system_body">Battery health, GPS position, Storage volumes, Lock state, and Ambient light are all monitored here. Rooted builds add sysfs writes, live fuel-gauge data, and kernel diagnostics.</string>
+
+    <string name="manual_section_automation">Automation</string>
+    <string name="manual_section_automation_body">Build rules that connect any sensor reading or hardware event to an actuator action. Rules evaluate in real-time; the engine runs as a foreground service when active.</string>
+
+    <string name="manual_section_rooted">Rooted flavor</string>
+    <string name="manual_section_rooted_body">Install the rooted APK alongside the standard one. Every privileged operation passes through RootSafetyGate — it respects your per-feature opt-outs and the soft rate limiter. Nothing fires without your consent.</string>
+
+    <string name="manual_section_monitoring">Monitoring</string>
+    <string name="manual_section_monitoring_body">Every module with a continuous signal exposes a live chart and a scrollable history chart. Start a monitor session from the module screen; data persists across restarts.</string>
+</resources>

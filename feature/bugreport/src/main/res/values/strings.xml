@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bugreport_screen_title">Health</string>
+
+    <!-- Status card -->
+    <string name="bugreport_card_title">App Permissions</string>
+    <string name="bugreport_all_granted">All permissions granted</string>
+    <string name="bugreport_some_missing">Some permissions are missing</string>
+    <string name="bugreport_open_settings">Open App Settings</string>
+
+    <!-- Permission row labels -->
+    <string name="bugreport_perm_camera">Camera</string>
+    <string name="bugreport_perm_microphone">Microphone</string>
+    <string name="bugreport_perm_location">Location (fine)</string>
+    <string name="bugreport_perm_bluetooth">Bluetooth connect</string>
+    <string name="bugreport_perm_notifications">Post notifications</string>
+    <string name="bugreport_perm_phone">Phone state</string>
+    <string name="bugreport_perm_granted">Granted</string>
+    <string name="bugreport_perm_denied">Denied</string>
+
+    <!-- Capability rows -->
+    <string name="bugreport_cap_health_name">App health check</string>
+    <string name="bugreport_cap_health_detail">Read-only scan of permission grant states — no runtime requests triggered</string>
+    <string name="bugreport_cap_health_ok">All permissions granted</string>
+    <string name="bugreport_cap_health_missing">%1$d permission(s) missing</string>
+
+    <!-- Rooted capability rows -->
+    <string name="bugreport_cap_rooted_active">Active — rooted build</string>
+    <string name="bugreport_cap_rooted_required">Requires rooted build</string>
+    <string name="bugreport_cap_adb_name">ADB diagnostics</string>
+    <string name="bugreport_cap_adb_detail">Toggle ADB over network and dump device properties via setprop-safe shell commands</string>
+</resources>

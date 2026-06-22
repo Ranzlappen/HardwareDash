@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="actuators_screen_title">Actuators</string>
+
+    <!-- Status card -->
+    <string name="actuators_card_title">Vibration Hardware</string>
+    <string name="actuators_chip_available">Vibrator available</string>
+    <string name="actuators_chip_unavailable">No vibrator</string>
+    <string name="actuators_chip_amplitude">Amplitude control</string>
+    <string name="actuators_chip_no_amplitude">Fixed amplitude</string>
+
+    <!-- Capability rows -->
+    <string name="actuators_cap_vibrator_name">Vibration actuator</string>
+    <string name="actuators_cap_vibrator_detail">Android VibrationEffect API for haptic feedback patterns</string>
+    <string name="actuators_cap_vibrator_available">Vibrator present</string>
+    <string name="actuators_cap_vibrator_unavailable">Vibrator not found</string>
+
+    <!-- Rooted capability rows -->
+    <string name="actuators_cap_rooted_active">Active — rooted build</string>
+    <string name="actuators_cap_rooted_required">Requires rooted build</string>
+    <string name="actuators_cap_extreme_name">Extreme amplitude</string>
+    <string name="actuators_cap_extreme_detail">Drive the vibration motor above OS amplitude ceiling via sysfs, sustaining maximum duty cycle (80% hard cap to protect hardware)</string>
+    <string name="actuators_cap_pwm_name">Direct PWM control</string>
+    <string name="actuators_cap_pwm_detail">Write PWM frequency and duty cycle directly to the vibration driver sysfs nodes, bypassing VibrationEffect</string>
+    <string name="actuators_cap_dual_name">Dual-actuator control</string>
+    <string name="actuators_cap_dual_detail">Drive LRA (linear resonant) and ERM (eccentric rotating mass) actuators concurrently with phase-offset synchronization</string>
+    <string name="actuators_cap_rumble_name">Sustained rumble</string>
+    <string name="actuators_cap_rumble_detail">Loop a haptic pattern beyond the OS 500 ms limit while monitoring battery drain and motor temperature via a watchdog</string>
+</resources>

@@ -1,6 +1,7 @@
 package dev.ranzlappen.gadget.core.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Bolt
@@ -8,7 +9,11 @@ import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.filled.HealthAndSafety
+import androidx.compose.material.icons.filled.Help
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -18,6 +23,8 @@ import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Vibration
+import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.BatteryFull
 import androidx.compose.material.icons.outlined.Bluetooth
@@ -25,7 +32,11 @@ import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.FlashlightOn
+import androidx.compose.material.icons.outlined.HealthAndSafety
+import androidx.compose.material.icons.outlined.Help
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Nfc
 import androidx.compose.material.icons.outlined.QrCodeScanner
@@ -35,6 +46,7 @@ import androidx.compose.material.icons.outlined.SettingsRemote
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Vibration
+import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -264,6 +276,73 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.Bluetooth
     }
 
+    /**
+     * WiFi feature module — adapter status, live signal strength,
+     * network details (SSID / BSSID / frequency / link speed), WiFi-signal
+     * and WiFi-enabled metric sources for monitoring and automation.
+     */
+    data object RadiosWifi : GadgetDestination {
+        override val route = "radios_wifi"
+        override val label = "WiFi"
+        override val iconFilled = Icons.Filled.Wifi
+        override val iconOutlined = Icons.Outlined.Wifi
+    }
+
+    /**
+     * Ambient light feature module — live lux reading from the device's
+     * light sensor, with level descriptors and monitoring support.
+     */
+    data object Ambient : GadgetDestination {
+        override val route = "ambient"
+        override val label = "Ambient"
+        override val iconFilled = Icons.Filled.LightMode
+        override val iconOutlined = Icons.Outlined.LightMode
+    }
+
+    /**
+     * Lock / Security feature module — keyguard lock state, screen-lock
+     * security level, biometric enrollment, and lock-state monitoring.
+     */
+    data object Lock : GadgetDestination {
+        override val route = "lock"
+        override val label = "Lock"
+        override val iconFilled = Icons.Filled.Lock
+        override val iconOutlined = Icons.Outlined.Lock
+    }
+
+    /**
+     * Diagnostics feature module — capability overview for rooted diagnostic
+     * shell dumps (logcat, meminfo, cpuinfo, procstats) via the automation engine.
+     */
+    data object Diagnostics : GadgetDestination {
+        override val route = "diagnostics"
+        override val label = "Diagnostics"
+        override val iconFilled = Icons.Filled.Analytics
+        override val iconOutlined = Icons.Outlined.Analytics
+    }
+
+    /**
+     * Health / BugReport feature module — scans all runtime permission grant
+     * states and surfaces missing permissions. No runtime requests are triggered.
+     */
+    data object BugReport : GadgetDestination {
+        override val route = "bugreport"
+        override val label = "Health"
+        override val iconFilled = Icons.Filled.HealthAndSafety
+        override val iconOutlined = Icons.Outlined.HealthAndSafety
+    }
+
+    /**
+     * Manual / Help feature module — static documentation for all modules,
+     * capabilities, and how to use the automation engine.
+     */
+    data object Manual : GadgetDestination {
+        override val route = "manual"
+        override val label = "Help"
+        override val iconFilled = Icons.Filled.Help
+        override val iconOutlined = Icons.Outlined.Help
+    }
+
     companion object {
         /**
          * Destinations pinned to the **top** of the rail, above the
@@ -287,8 +366,8 @@ sealed interface GadgetDestination {
         val modules: List<GadgetDestination> = listOf(
             Torch, Vibration, Apps, Sensors,
             Battery, Gps, Storage, RadiosIr, Camera,
-            Motion, Audio, RadiosNfc, RadiosBt,
-            Actuators, Automation,
+            Motion, Audio, RadiosNfc, RadiosBt, RadiosWifi,
+            Ambient, Lock, Actuators, Diagnostics, BugReport, Manual, Automation,
         )
 
         /**

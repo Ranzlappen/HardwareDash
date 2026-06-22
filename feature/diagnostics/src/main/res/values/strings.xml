@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_screen_title">Diagnostics</string>
+
+    <!-- Info text -->
+    <string name="diagnostics_info">All diagnostic snapshots run via the Automation engine. Trigger them from an automation rule or tap \'Run\' in a connected action.</string>
+
+    <!-- Capability rows -->
+    <string name="diagnostics_cap_rooted_active">Active — rooted build</string>
+    <string name="diagnostics_cap_rooted_required">Requires rooted build</string>
+    <string name="diagnostics_cap_logcat_name">Logcat tail</string>
+    <string name="diagnostics_cap_logcat_detail">Capture the last 500 lines of logcat (all buffers, auto-redacted RADIO/SYSTEM) via adb logcat</string>
+    <string name="diagnostics_cap_meminfo_name">Memory dump</string>
+    <string name="diagnostics_cap_meminfo_detail">Snapshot dumpsys meminfo (tail-capped 8 KB) for the top memory consumers</string>
+    <string name="diagnostics_cap_cpuinfo_name">CPU info dump</string>
+    <string name="diagnostics_cap_cpuinfo_detail">Snapshot dumpsys cpuinfo (tail-capped 8 KB) for CPU utilization per process</string>
+    <string name="diagnostics_cap_procstats_name">Process stats dump</string>
+    <string name="diagnostics_cap_procstats_detail">Snapshot dumpsys procstats for long-term process memory and CPU history</string>
+</resources>

@@ -48,6 +48,14 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Audio (dB meter + WAV voice recording; live dB monitor; rooted mic-gain / direct-PCM / custom-sample-rate rows) | `:feature:audio` | ✅ |
 | NFC (NDEF tag read + HCE emulation + template library; live + history NFC-state monitors; rooted raw-NCI row) | `:feature:radios-nfc` | ✅ |
 | Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows) | `:feature:radios-bt` | ✅ |
+| WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions) | `:feature:radios-wifi` | ✅ |
+| Ambient Light (live lux reading + level descriptor; ambient-light history monitor; assert-bright / assert-dark automation actions; rooted brightness / refresh-rate / density rows) | `:feature:ambient` | ✅ |
+| Lock / Security (keyguard lock state + biometrics enrollment; lock-state live + history monitors; assert-locked / assert-unlocked / assert-secure automation actions; rooted overlay row) | `:feature:lock` | ✅ |
+| Actuators / Haptics (vibrator availability + amplitude control; haptic-click / heavy-click / assert-available automation actions; rooted extreme/PWM/dual/rumble capability rows) | `:feature:actuators` | ✅ |
+| Diagnostics (rooted shell dump overview; logcat / meminfo / cpuinfo / procstats automation actions via `:feature:diagnostics-rooted`) | `:feature:diagnostics` + `:feature:diagnostics-rooted` | ✅ |
+| Health / BugReport (permission grant scanner; assert-permission automation action; rooted ADB-diagnostics row) | `:feature:bugreport` | ✅ |
+| Help / Manual (static documentation screen for all modules, capabilities, and automation engine) | `:feature:manual` | ✅ |
+| Rooted Storage actions (diskstats / mounts / fstrim / drop_caches) | `:feature:storage-rooted` | ✅ |
 | Cross-automation engine + rule builder | `:core:automation` + `:core:hardware` + `:feature:automation-ui` | ✅ (epics #145/#146) |
 
 ### Shared infrastructure landed
@@ -55,8 +63,8 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 - **`:core:root`** — the root-safety seam (`RootCapabilityRegistry`,
   `RootSafetyGate`, `RootFeatureKey`). Extended in PR #172 with
   `BluetoothHiddenBatteryApi` and `BluetoothA2dpCodecReflection` keys;
-  wired into all 10 sensor/radio feature modules via the rooted-capability
-  rows pattern.
+  wired into all 19 sensor/radio/actuator/lock/diagnostics feature modules
+  via the rooted-capability rows pattern.
 - **`:core:widgetkit`** — the home-screen-widget framework (config store,
   pin flow, RemoteViews rendering, base providers, boot re-arm).
 - **`:core:monitoring`** — the chart + persist framework (MetricSource
@@ -83,13 +91,14 @@ sets, migrating feature-by-feature per the
 find app/src -path "*com/gadget*" -name "*.kt" | wc -l
 ```
 
-### Phase-2 tail (skeleton modules awaiting migration)
+### Phase-2 tail (skeleton modules still pending)
 
-These modules exist as Gradle skeletons with **no Kotlin sources yet**:
-`actuators`, `ambient`, `bugreport` (+ `-rooted`),
-`diagnostics` (+ `-rooted`), `flipper` (+ `-rooted`),
-`lock` (+ `-rooted`), `manual`, `radios-{wifi,subghz}`,
-`storage-rooted`. One feature per batch, following the guide.
+The following skeleton modules still have no Kotlin sources and are
+deferred to a separate batch (complexity or unclear scope):
+`flipper` (+ `-flipper-rooted`) — protobuf RPC over USB/BLE;
+`lock-rooted` — `TYPE_SYSTEM_ALERT` overlay;
+`radios-subghz` — Sub-GHz SDR bridge.
+All other Phase-2 skeleton modules shipped in this batch.
 
 ## Completed phases
 
@@ -159,5 +168,5 @@ complete. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-06-22 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-06-23 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md` · Related modules: all._

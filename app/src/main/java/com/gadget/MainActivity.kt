@@ -42,7 +42,6 @@ import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
 import dev.ranzlappen.gadget.core.navigation.GadgetApp
 import dev.ranzlappen.gadget.core.navigation.GadgetDestination
 import dev.ranzlappen.gadget.core.navigation.navigateTopLevel
-import dev.ranzlappen.gadget.core.navigation.placeholderScreen
 import dev.ranzlappen.gadget.feature.audio.audioScreen
 import dev.ranzlappen.gadget.feature.automation.ui.automationScreen
 import dev.ranzlappen.gadget.feature.dashboard.dashboardScreen
@@ -52,8 +51,15 @@ import dev.ranzlappen.gadget.feature.storage.storageScreen
 import dev.ranzlappen.gadget.feature.radios.ir.irScreen
 import dev.ranzlappen.gadget.feature.camera.cameraScreen
 import dev.ranzlappen.gadget.feature.motion.motionScreen
+import dev.ranzlappen.gadget.feature.actuators.actuatorsScreen
+import dev.ranzlappen.gadget.feature.ambient.ambientScreen
+import dev.ranzlappen.gadget.feature.bugreport.bugReportScreen
+import dev.ranzlappen.gadget.feature.diagnostics.diagnosticsScreen
+import dev.ranzlappen.gadget.feature.lock.lockScreen
+import dev.ranzlappen.gadget.feature.manual.manualScreen
 import dev.ranzlappen.gadget.feature.radios.bt.btScreen
 import dev.ranzlappen.gadget.feature.radios.nfc.NfcViewModel
+import dev.ranzlappen.gadget.feature.radios.wifi.wifiScreen
 import dev.ranzlappen.gadget.feature.radios.nfc.nfcScreen
 import dev.ranzlappen.gadget.feature.sensors.sensorsScreen
 import dev.ranzlappen.gadget.feature.settings.settingsScreen
@@ -141,7 +147,13 @@ class MainActivity : ComponentActivity() {
                         audioScreen()
                         nfcScreen()
                         btScreen()
-                        placeholderScreen(GadgetDestination.Actuators)
+                        wifiScreen()
+                        ambientScreen()
+                        lockScreen()
+                        actuatorsScreen()
+                        diagnosticsScreen()
+                        bugReportScreen()
+                        manualScreen()
                         automationScreen()
                         settingsScreen(
                             // Backup/restore lives in :app (BackupManager
