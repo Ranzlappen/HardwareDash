@@ -33,6 +33,7 @@
     <uses-feature android:name="android.hardware.nfc" android:required="false" />
 
     <!-- ══════════════════════ INFRARED (transmit-only) ═══════════ -->
+    <uses-permission android:name="android.permission.TRANSMIT_IR" />
     <uses-feature android:name="android.hardware.consumerir" android:required="false" />
 
     <!-- ══════════════════════ USB HOST (Flipper Zero CDC-ACM) ════ -->

@@ -165,9 +165,7 @@ internal fun GpsScreenContent(
             if (!state.permissionGranted) {
                 GpsPermissionCard(onRequestPermission = onRequestPermission)
             } else {
-                if (state.hasLocation) {
-                    GpsMapCard(state = state)
-                }
+                GpsMapCard(state = state)
                 GpsCoordinatesCard(state = state)
                 liveMonitors()
                 monitors()
@@ -237,15 +235,21 @@ private fun GpsMapCard(
                 .fillMaxWidth()
                 .height(260.dp),
             update = { view ->
-                val center = GeoPoint(state.latitude, state.longitude)
-                view.controller.setCenter(center)
-                view.overlays.clear()
-                val marker = Marker(view).apply {
-                    position = center
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    title = "%.5f, %.5f".format(state.latitude, state.longitude)
+                if (state.hasLocation) {
+                    val center = GeoPoint(state.latitude, state.longitude)
+                    view.controller.setZoom(15.0)
+                    view.controller.setCenter(center)
+                    view.overlays.clear()
+                    val marker = Marker(view).apply {
+                        position = center
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        title = "%.5f, %.5f".format(state.latitude, state.longitude)
+                    }
+                    view.overlays.add(marker)
+                } else {
+                    view.controller.setZoom(2.0)
+                    view.overlays.clear()
                 }
-                view.overlays.add(marker)
                 view.invalidate()
             },
         )

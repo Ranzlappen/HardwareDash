@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,8 +47,10 @@ import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.CompactCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
+import dev.ranzlappen.gadget.core.ui.component.GadgetColorPicker
 import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GlassSurface
+import dev.ranzlappen.gadget.core.widgetkit.config.BackgroundMode
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetAppearance
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
 import dev.ranzlappen.gadget.core.widgetkit.provider.ContentWidgetUpdater
@@ -150,6 +154,12 @@ private fun FolderWidgetConfigScreen(
     var showLabel by remember { mutableStateOf(existing?.showLabel ?: true) }
     var sizePreset by remember { mutableStateOf(existing?.sizePreset ?: WidgetSizePreset.Medium) }
     var iconKey by remember { mutableStateOf(existing?.iconKey) }
+    var folderShape by remember { mutableStateOf(existing?.folderShape ?: FolderShape.RoundedSquare) }
+    var showAppGridPreview by remember { mutableStateOf(existing?.showAppGridPreview ?: false) }
+    var gradientEndArgb by remember { mutableStateOf(existing?.gradientEndArgb) }
+    var strokeWidthDp by remember { mutableStateOf(existing?.strokeWidthDp ?: 0f) }
+    var strokeArgb by remember { mutableStateOf(existing?.strokeArgb ?: 0xFF000000L) }
+    var cornerRadiusFraction by remember { mutableStateOf(existing?.cornerRadiusFraction) }
 
     val selectedFolder = folders.firstOrNull { it.id == folderId }
 
@@ -185,6 +195,12 @@ private fun FolderWidgetConfigScreen(
                     showLabel = showLabel,
                     coverTintArgb = tintArgb ?: FolderWidgetConfig.FOLLOW_FOLDER_COLOR,
                     iconKey = iconKey,
+                    folderShape = folderShape,
+                    showAppGridPreview = showAppGridPreview,
+                    gradientEndArgb = gradientEndArgb,
+                    strokeWidthDp = strokeWidthDp,
+                    strokeArgb = strokeArgb,
+                    cornerRadiusFraction = cornerRadiusFraction,
                     displayName = name.ifBlank { folderName },
                     appearance = appearance,
                 ),
@@ -209,6 +225,21 @@ private fun FolderWidgetConfigScreen(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                     )
                 },
+            )
+            FolderDesignSection(
+                shape = folderShape,
+                onShapeChange = { folderShape = it },
+                showAppGrid = showAppGridPreview,
+                onShowAppGridChange = { showAppGridPreview = it },
+                solidBackground = appearance.background == BackgroundMode.Solid,
+                gradientEndArgb = gradientEndArgb,
+                onGradientEndChange = { gradientEndArgb = it },
+                strokeWidthDp = strokeWidthDp,
+                onStrokeWidthChange = { strokeWidthDp = it },
+                strokeArgb = strokeArgb,
+                onStrokeArgbChange = { strokeArgb = it },
+                cornerRadiusFraction = cornerRadiusFraction,
+                onCornerRadiusChange = { cornerRadiusFraction = it },
             )
         },
         preview = { FolderWidgetPreview(folder = selectedFolder) },
@@ -314,6 +345,143 @@ private fun FolderPicker(
                 } else {
                     null
                 },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun FolderDesignSection(
+    shape: FolderShape,
+    onShapeChange: (FolderShape) -> Unit,
+    showAppGrid: Boolean,
+    onShowAppGridChange: (Boolean) -> Unit,
+    solidBackground: Boolean,
+    gradientEndArgb: Long?,
+    onGradientEndChange: (Long?) -> Unit,
+    strokeWidthDp: Float,
+    onStrokeWidthChange: (Float) -> Unit,
+    strokeArgb: Long,
+    onStrokeArgbChange: (Long) -> Unit,
+    cornerRadiusFraction: Float?,
+    onCornerRadiusChange: (Float?) -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(spacing.small),
+    ) {
+        Text(
+            text = stringResource(R.string.apps_folder_design),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        // ── Shape ──────────────────────────────────────────────────────────
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(spacing.tiny),
+            verticalArrangement = Arrangement.spacedBy(spacing.tiny),
+        ) {
+            GadgetChip(
+                selected = shape == FolderShape.Circle,
+                onClick = { onShapeChange(FolderShape.Circle) },
+                label = stringResource(R.string.apps_folder_shape_circle),
+            )
+            GadgetChip(
+                selected = shape == FolderShape.RoundedSquare,
+                onClick = { onShapeChange(FolderShape.RoundedSquare) },
+                label = stringResource(R.string.apps_folder_shape_rounded),
+            )
+            GadgetChip(
+                selected = shape == FolderShape.Square,
+                onClick = { onShapeChange(FolderShape.Square) },
+                label = stringResource(R.string.apps_folder_shape_square),
+            )
+        }
+
+        // ── Corner radius override (only when not Circle) ──────────────────
+        if (shape != FolderShape.Circle) {
+            val fraction = cornerRadiusFraction ?: when (shape) {
+                FolderShape.RoundedSquare -> 0.22f
+                FolderShape.Square -> 0f
+                else -> 0f
+            }
+            Text(
+                text = stringResource(R.string.apps_folder_corner_radius, (fraction * 100).toInt()),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Slider(
+                value = fraction,
+                onValueChange = { onCornerRadiusChange(it) },
+                valueRange = 0f..0.5f,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        // ── App grid preview ───────────────────────────────────────────────
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = stringResource(R.string.apps_folder_grid_preview),
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Switch(checked = showAppGrid, onCheckedChange = onShowAppGridChange)
+        }
+
+        // ── Gradient end color (only for Solid background) ─────────────────
+        if (solidBackground) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = stringResource(R.string.apps_folder_gradient),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                GadgetChip(
+                    selected = gradientEndArgb != null,
+                    onClick = {
+                        if (gradientEndArgb != null) onGradientEndChange(null)
+                        else onGradientEndChange(0xFF000000L)
+                    },
+                    label = if (gradientEndArgb != null)
+                        stringResource(R.string.apps_folder_gradient_clear)
+                    else
+                        stringResource(R.string.apps_folder_gradient_add),
+                )
+            }
+            if (gradientEndArgb != null) {
+                GadgetColorPicker(
+                    argb = gradientEndArgb,
+                    onArgbChange = onGradientEndChange,
+                )
+            }
+        }
+
+        // ── Stroke ─────────────────────────────────────────────────────────
+        Text(
+            text = stringResource(R.string.apps_folder_stroke_width, strokeWidthDp.toInt()),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Slider(
+            value = strokeWidthDp,
+            onValueChange = onStrokeWidthChange,
+            valueRange = 0f..8f,
+            steps = 15,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (strokeWidthDp > 0f) {
+            GadgetColorPicker(
+                argb = strokeArgb,
+                onArgbChange = onStrokeArgbChange,
             )
         }
     }

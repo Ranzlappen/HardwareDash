@@ -95,7 +95,9 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
             val widgetIconViews = config.iconKey?.let { key ->
                 renderWidgetIcon(context, key, ep.folderWidgetIconCatalog(), tint)
             }
-            if (widgetIconViews != null) {
+            if (config.showAppGridPreview) {
+                renderPreviewGrid(context, folder, dao, ep.appIconLoader(), density, tint, config.showLabel)
+            } else if (widgetIconViews != null) {
                 widgetIconViews
             } else {
                 val cover = folder.coverIcon
@@ -112,6 +114,13 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
         // Shared kit chrome (glass / solid / transparent) — identical paint
         // path as the function-driven widgets.
         ep.widgetAppearanceRenderer().applyBackground(views, config.appearance)
+        // Folder-specific background override: shape / gradient / stroke via Canvas.
+        // setImageViewBitmap overrides the resource set by applyBackground above.
+        val folderBg = FolderWidgetBackgroundRenderer.buildBackground(config, context)
+        if (folderBg != null) {
+            views.setImageViewBitmap(R.id.widget_background, folderBg)
+            views.setInt(R.id.widget_background, "setColorFilter", 0)
+        }
         // Held tap-press frame (Flash/Pulse/Scale) painted on @id/widget_background;
         // plays concurrently with the floating popup opening behind it.
         if (pressed) {
