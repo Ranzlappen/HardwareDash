@@ -6,4 +6,5 @@ data class BtState(
     val adapterName: String? = null,
     val bondedDevices: List<BluetoothDeviceInfo> = emptyList(),
     val permissionGranted: Boolean = false,
+    val isRootedFlavor: Boolean = false,
 )

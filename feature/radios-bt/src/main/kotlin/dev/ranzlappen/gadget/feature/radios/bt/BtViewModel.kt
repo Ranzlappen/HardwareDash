@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,9 +21,10 @@ class BtViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val adapter: BluetoothAdapterWrapper,
     private val enhancedInfo: BtEnhancedInfoProvider,
+    rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(BtState())
+    private val _state = MutableStateFlow(BtState(isRootedFlavor = rootCapabilityRegistry.isRootedFlavor))
     val state: StateFlow<BtState> = _state
 
     init { refresh() }

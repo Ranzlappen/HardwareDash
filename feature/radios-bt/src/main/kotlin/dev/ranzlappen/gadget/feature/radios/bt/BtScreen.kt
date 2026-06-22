@@ -29,6 +29,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
+import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
 import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.component.DashCard
@@ -71,6 +72,12 @@ fun BtScreen(
         moduleInfo = btModuleInfo(state),
         modifier = modifier,
         monitors = {
+            LiveMonitorContainer(
+                metricKey = BtEnabledMetricSource.METRIC_KEY,
+                title = stringResource(R.string.bt_live_monitor_title),
+                modifier = Modifier.fillMaxWidth(),
+                collapseId = "bt_live_${BtEnabledMetricSource.METRIC_KEY}",
+            )
             MonitorContainer(
                 metricKey = BtEnabledMetricSource.METRIC_KEY,
                 title = stringResource(R.string.bt_monitor_title),
@@ -81,10 +88,6 @@ fun BtScreen(
     )
 }
 
-/**
- * Builds the [ModuleInfo] for the Bluetooth screen — a single capability row
- * that reflects adapter presence and enabled state.
- */
 @Composable
 private fun btModuleInfo(state: BtState): ModuleInfo {
     val ctx = LocalContext.current
@@ -121,6 +124,40 @@ private fun btModuleInfo(state: BtState): ModuleInfo {
                         else -> CapabilityStatus(
                             kind = GadgetStatusKind.Warning,
                             message = stringResource(R.string.bt_adapter_disabled),
+                        )
+                    }
+                },
+            ),
+            ModuleCapability(
+                name = stringResource(R.string.bt_cap_hidden_battery_name),
+                detail = stringResource(R.string.bt_cap_hidden_battery_detail),
+                status = {
+                    if (state.isRootedFlavor) {
+                        CapabilityStatus(
+                            kind = GadgetStatusKind.Success,
+                            message = stringResource(R.string.bt_cap_rooted_active),
+                        )
+                    } else {
+                        CapabilityStatus(
+                            kind = GadgetStatusKind.Warning,
+                            message = stringResource(R.string.bt_cap_rooted_required),
+                        )
+                    }
+                },
+            ),
+            ModuleCapability(
+                name = stringResource(R.string.bt_cap_a2dp_codec_name),
+                detail = stringResource(R.string.bt_cap_a2dp_codec_detail),
+                status = {
+                    if (state.isRootedFlavor) {
+                        CapabilityStatus(
+                            kind = GadgetStatusKind.Success,
+                            message = stringResource(R.string.bt_cap_rooted_active),
+                        )
+                    } else {
+                        CapabilityStatus(
+                            kind = GadgetStatusKind.Warning,
+                            message = stringResource(R.string.bt_cap_rooted_required),
                         )
                     }
                 },
