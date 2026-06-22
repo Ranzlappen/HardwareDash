@@ -48,6 +48,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Audio (dB meter + WAV voice recording; live dB monitor; rooted mic-gain / direct-PCM / custom-sample-rate rows) | `:feature:audio` | ✅ |
 | NFC (NDEF tag read + HCE emulation + template library; live + history NFC-state monitors; rooted raw-NCI row) | `:feature:radios-nfc` | ✅ |
 | Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows) | `:feature:radios-bt` | ✅ |
+| WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions) | `:feature:radios-wifi` | ✅ |
 | Cross-automation engine + rule builder | `:core:automation` + `:core:hardware` + `:feature:automation-ui` | ✅ (epics #145/#146) |
 
 ### Shared infrastructure landed
@@ -55,7 +56,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 - **`:core:root`** — the root-safety seam (`RootCapabilityRegistry`,
   `RootSafetyGate`, `RootFeatureKey`). Extended in PR #172 with
   `BluetoothHiddenBatteryApi` and `BluetoothA2dpCodecReflection` keys;
-  wired into all 10 sensor/radio feature modules via the rooted-capability
+  wired into all 11 sensor/radio feature modules via the rooted-capability
   rows pattern.
 - **`:core:widgetkit`** — the home-screen-widget framework (config store,
   pin flow, RemoteViews rendering, base providers, boot re-arm).
@@ -88,7 +89,7 @@ find app/src -path "*com/gadget*" -name "*.kt" | wc -l
 These modules exist as Gradle skeletons with **no Kotlin sources yet**:
 `actuators`, `ambient`, `bugreport` (+ `-rooted`),
 `diagnostics` (+ `-rooted`), `flipper` (+ `-rooted`),
-`lock` (+ `-rooted`), `manual`, `radios-{wifi,subghz}`,
+`lock` (+ `-rooted`), `manual`, `radios-subghz`,
 `storage-rooted`. One feature per batch, following the guide.
 
 ## Completed phases
@@ -159,5 +160,5 @@ complete. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-06-22 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-06-23 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md` · Related modules: all._
