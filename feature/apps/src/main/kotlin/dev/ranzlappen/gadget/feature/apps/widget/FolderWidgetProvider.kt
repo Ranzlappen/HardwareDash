@@ -15,6 +15,7 @@ import dev.ranzlappen.gadget.core.widgetkit.provider.BaseContentWidgetProvider
 import dev.ranzlappen.gadget.core.widgetkit.provider.WidgetRenderDensity
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
 import dev.ranzlappen.gadget.feature.apps.R
+import dev.ranzlappen.gadget.core.widgetkit.R as WidgetKitR
 import dev.ranzlappen.gadget.feature.apps.icons.AppIconLoader
 import dev.ranzlappen.gadget.feature.apps.icons.MaterialSymbol
 import dev.ranzlappen.gadget.feature.apps.ui.folder.FolderPopupActivity
@@ -118,8 +119,8 @@ class FolderWidgetProvider : BaseContentWidgetProvider<FolderWidgetConfig>() {
         // setImageViewBitmap overrides the resource set by applyBackground above.
         val folderBg = FolderWidgetBackgroundRenderer.buildBackground(config, context)
         if (folderBg != null) {
-            views.setImageViewBitmap(R.id.widget_background, folderBg)
-            views.setInt(R.id.widget_background, "setColorFilter", 0)
+            views.setImageViewBitmap(WidgetKitR.id.widget_background, folderBg)
+            views.setInt(WidgetKitR.id.widget_background, "setColorFilter", 0)
         }
         // Held tap-press frame (Flash/Pulse/Scale) painted on @id/widget_background;
         // plays concurrently with the floating popup opening behind it.
