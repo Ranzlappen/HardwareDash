@@ -29,7 +29,7 @@ class AmbientLightMetricSource @Inject constructor(
         unit = "lux",
         min = 0f,
         max = 20_000f,
-        category = MetricCategory.Environment,
+        category = MetricCategory.Sensor,
     )
 
     override suspend fun sample(): Float =
