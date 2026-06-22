@@ -20,4 +20,14 @@
     <string name="storage_live_monitor_used">Storage usage (live)</string>
     <string name="storage_monitor_used">Storage usage history</string>
     <string name="storage_monitor_free">Free space history</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="storage_cap_rooted_active">Active — rooted build</string>
+    <string name="storage_cap_rooted_required">Requires rooted build</string>
+    <string name="storage_cap_diskstats_name">Diskstats dump</string>
+    <string name="storage_cap_diskstats_detail">Kernel I/O statistics from /proc/diskstats (reads, writes, latency per block device)</string>
+    <string name="storage_cap_mounts_name">Mount enumeration</string>
+    <string name="storage_cap_mounts_detail">Full mount table via /proc/mounts, including hidden partitions not visible via StorageManager</string>
+    <string name="storage_cap_fstrim_name">Storage trim (fstrim)</string>
+    <string name="storage_cap_fstrim_detail">Force discard operation on mounted filesystems to improve SSD longevity</string>
 </resources>

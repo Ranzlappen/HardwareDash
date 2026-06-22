@@ -7,6 +7,7 @@ import androidx.camera.core.CameraControl
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,7 +20,11 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     private val repository: ScanHistoryRepository,
+    rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
+
+    val isRootedFlavor: Boolean = rootCapabilityRegistry.isRootedFlavor
+
 
     private val _state = MutableStateFlow(CameraState())
     val state: StateFlow<CameraState> = _state.asStateFlow()

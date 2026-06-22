@@ -35,4 +35,14 @@
     <string name="camera_card_history_title">Scan History</string>
     <string name="camera_history_empty">No scans yet. Point the camera at a barcode or QR code.</string>
     <string name="camera_btn_clear_history">Clear history</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="camera_cap_rooted_active">Active — rooted build</string>
+    <string name="camera_cap_rooted_required">Requires rooted build</string>
+    <string name="camera_cap_high_fps_name">High FPS capture</string>
+    <string name="camera_cap_high_fps_detail">Force recording frame rates above the published camera maximum via HAL parameters</string>
+    <string name="camera_cap_manual_name">Manual camera control</string>
+    <string name="camera_cap_manual_detail">Direct HAL parameters: ISO, shutter speed, white balance, and focus distance</string>
+    <string name="camera_cap_hal_bypass_name">HAL bypass</string>
+    <string name="camera_cap_hal_bypass_detail">Raw frame delivery from camera driver, bypassing the Camera2 API stack</string>
 </resources>
