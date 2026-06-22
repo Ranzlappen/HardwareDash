@@ -45,11 +45,11 @@ interface BtEnhancedInfoProvider {
      * Always returns `null` on the standard flavor. On the rooted flavor
      * returns `null` if the gate is blocked or the API returns -1 (unknown).
      */
-    fun hiddenBatteryLevel(device: BluetoothDevice): Int?
+    suspend fun hiddenBatteryLevel(device: BluetoothDevice): Int?
 
     /**
      * Negotiated A2DP codec for [device] via `BluetoothA2dp.getCodecStatus()`
      * reflection (e.g. "AAC", "LDAC", "SBC"). Always `null` on standard.
      */
-    fun a2dpCodecName(device: BluetoothDevice): String?
+    suspend fun a2dpCodecName(device: BluetoothDevice): String?
 }

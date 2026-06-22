@@ -46,7 +46,7 @@ class RootedBtEnhancedInfoProvider @Inject constructor(
      * Returns null if the gate blocks, the device is not connected, or the
      * stack returns -1 (unknown).
      */
-    override fun hiddenBatteryLevel(device: BluetoothDevice): Int? {
+    override suspend fun hiddenBatteryLevel(device: BluetoothDevice): Int? {
         if (gate.check(RootFeatureKey.BluetoothHiddenBatteryApi) != RootGateDecision.Allowed) return null
         return runCatching {
             val method = BluetoothDevice::class.java.getMethod("getBatteryLevel")
@@ -66,7 +66,7 @@ class RootedBtEnhancedInfoProvider @Inject constructor(
      * `BluetoothAdapter.getProfileProxy` — this is best-effort; it will return
      * null on devices that don't expose the internal service.
      */
-    override fun a2dpCodecName(device: BluetoothDevice): String? {
+    override suspend fun a2dpCodecName(device: BluetoothDevice): String? {
         if (gate.check(RootFeatureKey.BluetoothA2dpCodecReflection) != RootGateDecision.Allowed) return null
         return runCatching {
             val adapter = bluetoothManager?.adapter ?: return null

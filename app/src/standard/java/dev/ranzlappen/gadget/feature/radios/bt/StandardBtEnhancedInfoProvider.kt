@@ -32,7 +32,7 @@ class StandardBtEnhancedInfoProvider @Inject constructor(
     override suspend fun readGattBatteryAndRssi(device: BluetoothDevice): Pair<Int?, Int?> =
         BtGattBatteryReader.read(context, device)
 
-    override fun hiddenBatteryLevel(device: BluetoothDevice): Int? = null
+    override suspend fun hiddenBatteryLevel(device: BluetoothDevice): Int? = null
 
-    override fun a2dpCodecName(device: BluetoothDevice): String? = null
+    override suspend fun a2dpCodecName(device: BluetoothDevice): String? = null
 }
