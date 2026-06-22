@@ -1,13 +1,11 @@
 package dev.ranzlappen.gadget.feature.radios.bt
 
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothA2dp
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.os.Build
-import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
@@ -113,11 +111,19 @@ class RootedBtEnhancedInfoProvider @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
-    @SuppressLint("MissingPermission")
+    // BluetoothA2dp.getCodecStatus() is @hide — access via reflection.
     private fun readA2dpCodec(proxy: BluetoothA2dp, device: BluetoothDevice): String? {
-        val status = proxy.getCodecStatus(device) ?: return null
-        return when (status.codecConfig.codecType) {
+        val status = runCatching {
+            proxy.javaClass.getMethod("getCodecStatus", BluetoothDevice::class.java)
+                .invoke(proxy, device)
+        }.getOrNull() ?: return null
+        val config = runCatching {
+            status.javaClass.getMethod("getCodecConfig").invoke(status)
+        }.getOrNull() ?: return null
+        val codecType = runCatching {
+            config.javaClass.getMethod("getCodecType").invoke(config) as? Int
+        }.getOrNull() ?: return null
+        return when (codecType) {
             0 -> "SBC"
             1 -> "AAC"
             2 -> "aptX"
