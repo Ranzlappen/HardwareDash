@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,9 +22,10 @@ class AudioViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val recorder: AudioRecorder,
     private val dbMeter: DbMeterMetricSource,
+    rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(AudioState())
+    private val _state = MutableStateFlow(AudioState(isRootedFlavor = rootCapabilityRegistry.isRootedFlavor))
     val state: StateFlow<AudioState> = _state
 
     init {

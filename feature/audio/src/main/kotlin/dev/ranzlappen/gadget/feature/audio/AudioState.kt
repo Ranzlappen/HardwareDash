@@ -6,4 +6,5 @@ data class AudioState(
     val lastRecordingUri: String? = null,
     val currentDbLevel: Float = 0f,
     val error: String? = null,
+    val isRootedFlavor: Boolean = false,
 )

@@ -37,9 +37,10 @@ fun SensorsScreen(
     // stateIn-backed flow -> collectAsState (lifecycle-runtime-compose isn't
     // in the feature plugin's default set; see the CLAUDE.md pitfall).
     val rows by viewModel.rows.collectAsState()
+    val isRootedFlavor = viewModel.isRootedFlavor
     SensorsScreenContent(
         rows = rows,
-        moduleInfo = sensorsModuleInfo(rows),
+        moduleInfo = sensorsModuleInfo(rows, isRootedFlavor),
         modifier = modifier,
         liveMonitors = {
             rows.filter { it.available }.forEach { row ->
@@ -70,7 +71,7 @@ fun SensorsScreen(
  * permissions — proximity / light / accelerometer are normal-protection.
  */
 @Composable
-private fun sensorsModuleInfo(rows: List<SensorRowUi>): ModuleInfo = ModuleInfo(
+private fun sensorsModuleInfo(rows: List<SensorRowUi>, isRootedFlavor: Boolean): ModuleInfo = ModuleInfo(
     compatibility = OsCompatibility(minSdk = 29),
     capabilities = rows.map { row ->
         ModuleCapability(
@@ -90,7 +91,59 @@ private fun sensorsModuleInfo(rows: List<SensorRowUi>): ModuleInfo = ModuleInfo(
                 }
             },
         )
-    },
+    } + listOf(
+        ModuleCapability(
+            name = stringResource(R.string.sensors_capability_high_polling),
+            detail = stringResource(R.string.sensors_capability_high_polling_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.sensors_capability_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.sensors_capability_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.sensors_capability_raw_unfiltered),
+            detail = stringResource(R.string.sensors_capability_raw_unfiltered_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.sensors_capability_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.sensors_capability_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.sensors_capability_sysfs_read),
+            detail = stringResource(R.string.sensors_capability_sysfs_read_detail),
+            status = {
+                if (isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.sensors_capability_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.sensors_capability_rooted_required),
+                    )
+                }
+            },
+        ),
+    ),
 )
 
 /**

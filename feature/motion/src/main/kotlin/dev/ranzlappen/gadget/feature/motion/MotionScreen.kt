@@ -149,12 +149,12 @@ private fun motionModuleInfo(state: MotionState): ModuleInfo = ModuleInfo(
                 if (state.hasGyroscope) {
                     CapabilityStatus(
                         kind = GadgetStatusKind.Success,
-                        message = "Present",
+                        message = stringResource(R.string.motion_capability_present),
                     )
                 } else {
                     CapabilityStatus(
                         kind = GadgetStatusKind.Error,
-                        message = "Not present",
+                        message = stringResource(R.string.motion_capability_not_present),
                     )
                 }
             },
@@ -166,12 +166,12 @@ private fun motionModuleInfo(state: MotionState): ModuleInfo = ModuleInfo(
                 if (state.hasStepCounter) {
                     CapabilityStatus(
                         kind = GadgetStatusKind.Success,
-                        message = "Present",
+                        message = stringResource(R.string.motion_capability_present),
                     )
                 } else {
                     CapabilityStatus(
                         kind = GadgetStatusKind.Error,
-                        message = "Not present",
+                        message = stringResource(R.string.motion_capability_not_present),
                     )
                 }
             },
@@ -183,12 +183,63 @@ private fun motionModuleInfo(state: MotionState): ModuleInfo = ModuleInfo(
                 if (state.hasMotionDetect) {
                     CapabilityStatus(
                         kind = GadgetStatusKind.Success,
-                        message = "Present",
+                        message = stringResource(R.string.motion_capability_present),
                     )
                 } else {
                     CapabilityStatus(
                         kind = GadgetStatusKind.Error,
-                        message = "Not present",
+                        message = stringResource(R.string.motion_capability_not_present),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.motion_capability_high_polling),
+            detail = stringResource(R.string.motion_capability_high_polling_detail),
+            status = {
+                if (state.isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.motion_capability_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.motion_capability_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.motion_capability_raw_unfiltered),
+            detail = stringResource(R.string.motion_capability_raw_unfiltered_detail),
+            status = {
+                if (state.isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.motion_capability_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.motion_capability_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.motion_capability_sysfs_read),
+            detail = stringResource(R.string.motion_capability_sysfs_read_detail),
+            status = {
+                if (state.isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.motion_capability_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.motion_capability_rooted_required),
                     )
                 }
             },

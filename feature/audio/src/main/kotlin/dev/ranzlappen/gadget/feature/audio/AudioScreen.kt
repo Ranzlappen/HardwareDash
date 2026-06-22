@@ -15,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
 import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.component.DashCard
@@ -55,6 +56,16 @@ fun AudioScreen(
         onGrantPermission = { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) },
         onStartRecording = { viewModel.startRecording() },
         onStopRecording = { viewModel.stopRecording() },
+        liveMonitors = {
+            if (state.permissionGranted) {
+                LiveMonitorContainer(
+                    metricKey = DbMeterMetricSource.METRIC_KEY,
+                    title = stringResource(R.string.audio_live_monitor_title),
+                    modifier = Modifier.fillMaxWidth(),
+                    collapseId = "audio_live_monitor_db_meter",
+                )
+            }
+        },
         monitors = {
             MonitorContainer(
                 metricKey = DbMeterMetricSource.METRIC_KEY,
@@ -80,6 +91,7 @@ internal fun AudioScreenContent(
     onGrantPermission: () -> Unit = {},
     onStartRecording: () -> Unit = {},
     onStopRecording: () -> Unit = {},
+    liveMonitors: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
@@ -97,6 +109,7 @@ internal fun AudioScreenContent(
                 onStartRecording = onStartRecording,
                 onStopRecording = onStopRecording,
             )
+            liveMonitors()
             monitors()
         },
     )
@@ -120,12 +133,63 @@ private fun audioModuleInfo(state: AudioState): ModuleInfo = ModuleInfo(
                 if (state.permissionGranted) {
                     CapabilityStatus(
                         kind = GadgetStatusKind.Success,
-                        message = "Recording available",
+                        message = stringResource(R.string.audio_capability_available),
                     )
                 } else {
                     CapabilityStatus(
                         kind = GadgetStatusKind.Warning,
-                        message = "Permission required",
+                        message = stringResource(R.string.audio_capability_permission_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.audio_capability_gain_boost),
+            detail = stringResource(R.string.audio_capability_gain_boost_detail),
+            status = {
+                if (state.isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.audio_capability_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.audio_capability_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.audio_capability_direct_pcm),
+            detail = stringResource(R.string.audio_capability_direct_pcm_detail),
+            status = {
+                if (state.isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.audio_capability_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.audio_capability_rooted_required),
+                    )
+                }
+            },
+        ),
+        ModuleCapability(
+            name = stringResource(R.string.audio_capability_custom_sample_rate),
+            detail = stringResource(R.string.audio_capability_custom_sample_rate_detail),
+            status = {
+                if (state.isRootedFlavor) {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Success,
+                        message = stringResource(R.string.audio_capability_rooted_active),
+                    )
+                } else {
+                    CapabilityStatus(
+                        kind = GadgetStatusKind.Warning,
+                        message = stringResource(R.string.audio_capability_rooted_required),
                     )
                 }
             },

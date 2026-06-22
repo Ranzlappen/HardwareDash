@@ -8,4 +8,5 @@ data class MotionState(
     val stepCount: Float = 0f,
     val motionDetected: Boolean = false,
     val activityPermissionGranted: Boolean = false,
+    val isRootedFlavor: Boolean = false,
 )

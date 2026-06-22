@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:monitoring"))
     implementation(project(":core:automation"))
+    implementation(project(":core:root"))
 
     androidTestImplementation(project(":core:testing"))
     androidTestImplementation(libs.androidx.junit)
