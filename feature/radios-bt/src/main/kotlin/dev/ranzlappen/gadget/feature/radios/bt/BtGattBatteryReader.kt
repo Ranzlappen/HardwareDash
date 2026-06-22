@@ -23,7 +23,7 @@ import kotlin.coroutines.resume
  * Permission note: BLUETOOTH_CONNECT is checked by the caller
  * ([BtViewModel.refresh]) before this path is reached.
  */
-internal object BtGattBatteryReader {
+object BtGattBatteryReader {
 
     private val BATTERY_SERVICE = UUID.fromString("0000180f-0000-1000-8000-00805f9b34fb")
     private val BATTERY_LEVEL_CHAR = UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb")
