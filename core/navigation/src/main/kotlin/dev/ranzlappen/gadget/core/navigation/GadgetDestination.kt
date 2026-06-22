@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Vibration
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.BatteryFull
 import androidx.compose.material.icons.outlined.Bluetooth
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.outlined.SettingsRemote
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Vibration
+import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -264,6 +266,18 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.Bluetooth
     }
 
+    /**
+     * WiFi feature module — adapter status, live signal strength,
+     * network details (SSID / BSSID / frequency / link speed), WiFi-signal
+     * and WiFi-enabled metric sources for monitoring and automation.
+     */
+    data object RadiosWifi : GadgetDestination {
+        override val route = "radios_wifi"
+        override val label = "WiFi"
+        override val iconFilled = Icons.Filled.Wifi
+        override val iconOutlined = Icons.Outlined.Wifi
+    }
+
     companion object {
         /**
          * Destinations pinned to the **top** of the rail, above the
@@ -287,7 +301,7 @@ sealed interface GadgetDestination {
         val modules: List<GadgetDestination> = listOf(
             Torch, Vibration, Apps, Sensors,
             Battery, Gps, Storage, RadiosIr, Camera,
-            Motion, Audio, RadiosNfc, RadiosBt,
+            Motion, Audio, RadiosNfc, RadiosBt, RadiosWifi,
             Actuators, Automation,
         )
 

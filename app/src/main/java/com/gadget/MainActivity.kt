@@ -54,6 +54,7 @@ import dev.ranzlappen.gadget.feature.camera.cameraScreen
 import dev.ranzlappen.gadget.feature.motion.motionScreen
 import dev.ranzlappen.gadget.feature.radios.bt.btScreen
 import dev.ranzlappen.gadget.feature.radios.nfc.NfcViewModel
+import dev.ranzlappen.gadget.feature.radios.wifi.wifiScreen
 import dev.ranzlappen.gadget.feature.radios.nfc.nfcScreen
 import dev.ranzlappen.gadget.feature.sensors.sensorsScreen
 import dev.ranzlappen.gadget.feature.settings.settingsScreen
@@ -141,6 +142,7 @@ class MainActivity : ComponentActivity() {
                         audioScreen()
                         nfcScreen()
                         btScreen()
+                        wifiScreen()
                         placeholderScreen(GadgetDestination.Actuators)
                         automationScreen()
                         settingsScreen(
