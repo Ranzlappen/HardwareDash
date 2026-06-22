@@ -212,6 +212,12 @@ dependencies {
     implementation(project(":feature:radios-nfc"))
     implementation(project(":feature:radios-bt"))
     implementation(project(":feature:radios-wifi"))
+    implementation(project(":feature:ambient"))
+    implementation(project(":feature:lock"))
+    implementation(project(":feature:actuators"))
+    implementation(project(":feature:diagnostics"))
+    implementation(project(":feature:bugreport"))
+    implementation(project(":feature:manual"))
     // Batch H: the automation rules list + builder (also pulls
     // :core:hardware — the read-side registry — into the :app Hilt graph).
     implementation(project(":feature:automation-ui"))
@@ -316,6 +322,10 @@ dependencies {
     // (libsu sysfs PWM) + the dual-actuator / rumble-monitor helpers. Standard
     // APK never sees this module (sourceSet scoping).
     "rootedImplementation"(project(":feature:vibration-rooted"))
+    // Rooted Storage action handler — diskstats, mounts, fstrim, drop_caches.
+    "rootedImplementation"(project(":feature:storage-rooted"))
+    // Rooted Diagnostics action handler — logcat tail, meminfo, cpuinfo, procstats.
+    "rootedImplementation"(project(":feature:diagnostics-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

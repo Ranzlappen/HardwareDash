@@ -1,4 +1,4 @@
-// :feature:diagnostics — skeleton; configuration via gadget.android.feature.
+// :feature:diagnostics — system diagnostics capability overview.
 
 plugins {
     id("gadget.android.feature")
@@ -6,4 +6,11 @@ plugins {
 
 android {
     namespace = "dev.ranzlappen.gadget.feature.diagnostics"
+}
+
+dependencies {
+    implementation(project(":core:root"))
+    implementation(project(":core:ui"))
+    implementation(project(":core:navigation"))
+    implementation(project(":core:automation"))
 }

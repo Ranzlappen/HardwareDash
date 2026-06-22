@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lock_screen_title">Lock</string>
+
+    <!-- Status card -->
+    <string name="lock_card_title">Lock State</string>
+    <string name="lock_chip_locked">Locked</string>
+    <string name="lock_chip_unlocked">Unlocked</string>
+    <string name="lock_chip_secure">Secure</string>
+    <string name="lock_chip_insecure">No screen lock</string>
+    <string name="lock_chip_biometric">Biometrics enrolled</string>
+    <string name="lock_chip_no_biometric">No biometrics</string>
+
+    <!-- Monitor titles -->
+    <string name="lock_live_monitor_state">Lock state (live)</string>
+    <string name="lock_monitor_state">Lock state history</string>
+
+    <!-- Capability rows -->
+    <string name="lock_cap_keyguard_name">Device lock</string>
+    <string name="lock_cap_keyguard_detail">Monitors keyguard lock state via KeyguardManager</string>
+    <string name="lock_cap_keyguard_active">Lock screen active</string>
+    <string name="lock_cap_keyguard_inactive">No lock screen configured</string>
+    <string name="lock_cap_biometric_name">Biometric authentication</string>
+    <string name="lock_cap_biometric_detail">Checks biometric enrollment state (fingerprint, face, iris)</string>
+    <string name="lock_cap_biometric_available">Biometrics enrolled</string>
+    <string name="lock_cap_biometric_unavailable">No biometrics enrolled</string>
+
+    <!-- Rooted capability rows -->
+    <string name="lock_cap_rooted_active">Active — rooted build</string>
+    <string name="lock_cap_rooted_required">Requires rooted build</string>
+    <string name="lock_cap_overlay_name">Lock-screen notification overlay</string>
+    <string name="lock_cap_overlay_detail">Display a system-alert notification window over the lock screen for timed secure alerts (hard cap: 60 s)</string>
+</resources>

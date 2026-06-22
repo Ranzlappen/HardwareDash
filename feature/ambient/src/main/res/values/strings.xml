@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ambient_screen_title">Ambient</string>
+
+    <!-- Status card -->
+    <string name="ambient_card_title">Ambient Light</string>
+    <string name="ambient_label_lux">Illuminance</string>
+    <string name="ambient_lux_format">%.1f lux</string>
+    <string name="ambient_sensor_unavailable">Ambient light sensor not available on this device</string>
+
+    <!-- Light level descriptors -->
+    <string name="ambient_level_dark">Dark</string>
+    <string name="ambient_level_dim">Dim</string>
+    <string name="ambient_level_indoor">Indoor light</string>
+    <string name="ambient_level_bright">Bright</string>
+    <string name="ambient_level_sunlight">Direct sunlight</string>
+
+    <!-- Monitor titles -->
+    <string name="ambient_live_monitor_lux">Ambient light (live)</string>
+    <string name="ambient_monitor_lux">Ambient light history</string>
+
+    <!-- Capability rows -->
+    <string name="ambient_cap_sensor_name">Ambient light sensor</string>
+    <string name="ambient_cap_sensor_detail">TYPE_LIGHT sensor measuring illuminance in lux</string>
+    <string name="ambient_cap_sensor_available">Sensor available</string>
+    <string name="ambient_cap_sensor_unavailable">Sensor not found</string>
+
+    <!-- Rooted capability rows -->
+    <string name="ambient_cap_rooted_active">Active — rooted build</string>
+    <string name="ambient_cap_rooted_required">Requires rooted build</string>
+    <string name="ambient_cap_brightness_name">Display brightness override</string>
+    <string name="ambient_cap_brightness_detail">Set display brightness directly via sysfs, bypassing Android auto-brightness</string>
+    <string name="ambient_cap_refresh_name">Refresh-rate override</string>
+    <string name="ambient_cap_refresh_detail">Force a specific display refresh rate via the SurfaceFlinger service</string>
+    <string name="ambient_cap_density_name">Display density override</string>
+    <string name="ambient_cap_density_detail">Change display DPI via adb/wm density equivalent at the kernel level</string>
+</resources>
