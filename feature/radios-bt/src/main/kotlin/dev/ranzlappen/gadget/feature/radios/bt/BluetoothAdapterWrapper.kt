@@ -44,4 +44,9 @@ class BluetoothAdapterWrapper @Inject constructor(
     } catch (_: SecurityException) {
         emptyList()
     }
+
+    /** Returns the raw [BluetoothDevice] for the given MAC address, or null. */
+    fun remoteDevice(address: String): BluetoothDevice? = runCatching {
+        adapter?.getRemoteDevice(address)
+    }.getOrNull()
 }

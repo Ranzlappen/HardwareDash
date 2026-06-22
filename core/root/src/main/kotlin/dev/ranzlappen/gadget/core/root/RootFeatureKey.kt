@@ -67,6 +67,11 @@ sealed class RootFeatureKey(val id: String) {
     data object BluetoothRfkillToggle : RootFeatureKey("bluetooth_rfkill_toggle")
     data object BluetoothTxPowerOverride : RootFeatureKey("bluetooth_tx_power_override")
     data object BluetoothHciSnoopDump : RootFeatureKey("bluetooth_hci_snoop_dump")
+    /** Hidden `BluetoothDevice.getBatteryLevel()` reflection call — covers
+     *  BLE and Classic devices the stack already polls internally. */
+    data object BluetoothHiddenBatteryApi : RootFeatureKey("bluetooth_hidden_battery_api")
+    /** Reflection on `BluetoothA2dp.getCodecStatus()` for negotiated codec. */
+    data object BluetoothA2dpCodecReflection : RootFeatureKey("bluetooth_a2dp_codec_reflection")
 
     // ──── Batch-6 NFC features ────
     data object NfcRawNciCommand : RootFeatureKey("nfc_raw_nci_command")

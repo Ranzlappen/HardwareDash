@@ -18,4 +18,10 @@
     <string name="bt_device_type_unknown">Unknown</string>
     <string name="bt_monitor_title">Bluetooth state history</string>
     <string name="bt_refresh">Refresh</string>
+
+    <!-- Per-device connection and battery info. -->
+    <string name="bt_device_connected">Connected</string>
+    <string name="bt_device_disconnected">Disconnected</string>
+    <string name="bt_device_battery">🔋 %1$d%%</string>
+    <string name="bt_device_rssi">%1$d dBm</string>
 </resources>
