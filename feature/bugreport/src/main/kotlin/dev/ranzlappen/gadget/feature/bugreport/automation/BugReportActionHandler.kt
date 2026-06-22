@@ -34,8 +34,8 @@ class BugReportActionHandler @Inject constructor(
         ModuleAction(key = ACTION_ASSERT_ADB, label = "Assert ADB diagnostics available", requiresRoot = true),
     )
 
-    override suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult =
-        when (actionKey) {
+    override suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult {
+        return when (actionKey) {
             ACTION_ASSERT_PERMISSION -> {
                 val permission = params["permission"]?.takeIf { it.isNotBlank() }
                     ?: return ActionResult.Failure("No permission specified")
@@ -47,6 +47,7 @@ class BugReportActionHandler @Inject constructor(
             ACTION_ASSERT_ADB -> ActionResult.Unsupported
             else -> ActionResult.Unsupported
         }
+    }
 
     companion object {
         const val FEATURE_ID = "bugreport"
