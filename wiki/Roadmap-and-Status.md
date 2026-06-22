@@ -37,23 +37,26 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Torch / Flashlight (+ QS tile + 2 home widgets + strobe service) | `:feature:torch` (+ `-rooted`/`-standard`) | ✅ |
 | Rooted torch extras (DutyCycle / MultiLed / Thermal) | `:feature:torch-rooted` + `:core:root` | ✅ (closes #94) |
 | Vibration (standard + rooted) | `:feature:vibration` (+ `-rooted`/`-standard`) | ✅ |
-| App-Organizer + folder widgets | `:feature:apps` (+ `-rooted` skeleton) | ✅ |
+| App-Organizer + folder widgets (shape / gradient / stroke / grid-preview customization) | `:feature:apps` (+ `-rooted` skeleton) | ✅ |
 | Sensors (proximity / light / acceleration) | `:feature:sensors` | ✅ (PR #158) |
-| Battery (level / charging / temperature / voltage / health) | `:feature:battery` | ✅ |
-| GPS / Location (map, position, speed, altitude) | `:feature:gps` | ✅ |
-| Storage (volumes, used / free / total, monitoring) | `:feature:storage` | ✅ |
-| IR Blaster (NEC / Pronto / RAW, saved-signal library, automation action) | `:feature:radios-ir` | ✅ |
-| Barcode Scanner (CameraX + MLKit, all formats, scan history, WiFi/URL) | `:feature:camera` | ✅ |
-| Motion (gyroscope / step counter / motion detect) | `:feature:motion` | ✅ |
-| Audio (dB meter + WAV voice recording) | `:feature:audio` | ✅ |
-| NFC (NDEF tag read + HCE emulation) | `:feature:radios-nfc` | ✅ |
-| Bluetooth (adapter status + bonded devices) | `:feature:radios-bt` | ✅ |
+| Battery (level / charging / temperature / voltage / health; dual live monitors; rooted fuel-gauge / cell-monitor / charging-profile rows) | `:feature:battery` | ✅ |
+| GPS / Location (map, position, speed, altitude; live speed + altitude monitors; rooted NMEA / constellation / location-override rows) | `:feature:gps` | ✅ |
+| Storage (volumes, used / free / total, live used-% monitor; rooted diskstats / mounts / fstrim rows) | `:feature:storage` | ✅ |
+| IR Blaster (NEC / Pronto / RAW, saved-signal library, automation action; rooted custom-carrier / GPIO-burst rows) | `:feature:radios-ir` | ✅ |
+| Barcode Scanner (CameraX + MLKit, all formats, scan history, WiFi/URL; rooted high-fps / manual-override / HAL-bypass rows) | `:feature:camera` | ✅ |
+| Motion (gyroscope / step counter / motion detect; per-sensor live monitors; rooted high-polling / raw-unfiltered / sysfs-read rows) | `:feature:motion` | ✅ |
+| Audio (dB meter + WAV voice recording; live dB monitor; rooted mic-gain / direct-PCM / custom-sample-rate rows) | `:feature:audio` | ✅ |
+| NFC (NDEF tag read + HCE emulation + template library; live + history NFC-state monitors; rooted raw-NCI row) | `:feature:radios-nfc` | ✅ |
+| Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows) | `:feature:radios-bt` | ✅ |
 | Cross-automation engine + rule builder | `:core:automation` + `:core:hardware` + `:feature:automation-ui` | ✅ (epics #145/#146) |
 
 ### Shared infrastructure landed
 
 - **`:core:root`** — the root-safety seam (`RootCapabilityRegistry`,
-  `RootSafetyGate`, `RootFeatureKey`).
+  `RootSafetyGate`, `RootFeatureKey`). Extended in PR #172 with
+  `BluetoothHiddenBatteryApi` and `BluetoothA2dpCodecReflection` keys;
+  wired into all 10 sensor/radio feature modules via the rooted-capability
+  rows pattern.
 - **`:core:widgetkit`** — the home-screen-widget framework (config store,
   pin flow, RemoteViews rendering, base providers, boot re-arm).
 - **`:core:monitoring`** — the chart + persist framework (MetricSource
@@ -156,5 +159,5 @@ complete. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-06-15 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-06-22 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md` · Related modules: all._

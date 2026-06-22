@@ -72,24 +72,25 @@ Migration status legend: ✅ migrated & live · 🟡 partial · ⬜ skeleton
 | `feature:vibration` | 43 | ✅ | Second blueprint consumer; modelled poll signal + draw-canvas pattern builder. |
 | `feature:vibration-rooted` | 5 | ✅ | 4-capability rooted tier. |
 | `feature:vibration-standard` | 2 | ✅ | No-op root twin. |
-| `feature:apps` | 34 | ✅ | App-Organizer (folders + folder widgets); content-widget archetype. |
+| `feature:apps` | 34 | ✅ | App-Organizer (folders + folder widgets + canvas background renderer); content-widget archetype. |
 | `feature:apps-rooted` | 0 | ⬜ | Rooted app surface pending. |
-| `feature:sensors` | 6 | ✅ | Proximity / light / acceleration push `MetricSource`s. |
+| `feature:sensors` | 6 | ✅ | Proximity / light / acceleration `MetricSource`s + rooted sensor capability rows. |
 | `feature:automation-ui` | 6 | ✅ | Rules list + `RuleEditorSheet` builder. |
 | `feature:actuators` | 0 | ⬜ | Coming-soon placeholder in the rail. |
-| `feature:battery` | 0 | ⬜ | |
-| `feature:audio` | 0 | ⬜ | `AudioManager` / `MediaRecorder`. |
-| `feature:camera` | 0 | ⬜ | |
-| `feature:gps` | 0 | ⬜ | `FusedLocationProvider`. |
-| `feature:motion` | 0 | ⬜ | |
+| `feature:battery` | 9 | ✅ | Level / charging / temperature / voltage / health; dual live+history monitors; 3 rooted rows (FuelGaugeRaw, CellMonitor, ChargingProfile). |
+| `feature:audio` | 9 | ✅ | dB meter + WAV voice recording; live dB monitor; 3 rooted rows (MicGainBoost, MicDirectPcm, MicCustomSampleRate). |
+| `feature:camera` | 8 | ✅ | CameraX + MLKit barcode scanner (all formats), scan history, WiFi/URL deep-open; 3 rooted rows (HighFps, ManualOverride, HalBypass). |
+| `feature:gps` | 11 | ✅ | OSMDroid map + coordinates card; live speed + altitude monitors; 3 rooted rows (NmeaRawTap, ConstellationDump, LocationOverride). |
+| `feature:motion` | 9 | ✅ | Gyroscope / step counter / motion detect; live + history monitors per sensor; 3 rooted rows (HighPolling, RawUnfiltered, SysfsRead). |
 | `feature:ambient` | 0 | ⬜ | |
 | `feature:radios-wifi` | 0 | ⬜ | |
-| `feature:radios-bt` | 0 | ⬜ | |
-| `feature:radios-nfc` | 0 | ⬜ | |
+| `feature:radios-bt` | 11 | ✅ | Adapter status + bonded device list; GATT battery + RSSI (standard); hidden battery API + A2DP codec name (rooted via `BtEnhancedInfoProvider` seam); live + history BT-enabled monitors. |
+| `feature:radios-nfc` | 10 | ✅ | NDEF tag read + HCE emulation + NDEF template library; live + history NFC-enabled monitor; rooted raw-NCI row. |
 | `feature:radios-subghz` | 0 | ⬜ | |
-| `feature:radios-ir` | 0 | ⬜ | `ConsumerIrManager`. |
+| `feature:radios-ir` | 10 | ✅ | NEC / Pronto / RAW transmit; saved-signal library; remote-brand library; 2 rooted rows (CustomCarrier, RawGpioPattern). |
 | `feature:flipper` (+ `-rooted`) | 0 | ⬜ | Flipper Zero USB CDC-ACM + BLE GATT. |
-| `feature:storage` (+ `-rooted`) | 0 | ⬜ | |
+| `feature:storage` | 9 | ✅ | Volume cards (internal + removable) with progress bars; live used-% monitor; 3 rooted rows (DumpDiskstats, EnumerateMounts, Fstrim). |
+| `feature:storage-rooted` | 0 | ⬜ | |
 | `feature:lock` (+ `-rooted`) | 0 | ⬜ | |
 | `feature:diagnostics` (+ `-rooted`) | 0 | ⬜ | |
 | `feature:bugreport` (+ `-rooted`) | 0 | ⬜ | |
@@ -109,5 +110,5 @@ Migration status legend: ✅ migrated & live · 🟡 partial · ⬜ skeleton
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `settings.gradle.kts`, live
+> _Last reviewed: 2026-06-22 · Source: `settings.gradle.kts`, live
 > `find … -name '*.kt'` counts · Related: every module._

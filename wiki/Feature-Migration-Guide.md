@@ -178,10 +178,44 @@ core frameworks rather than hand-rolling:
   subclass `BaseGadgetWidgetProvider<T>` + `BaseWidgetPinSuccessReceiver<T>`,
   persist via `WidgetConfigStore<T>`.
 - Monitoring → a `MetricSource` per signal + `MonitorContainer` /
-  `LiveMonitorContainer`.
+  `LiveMonitorContainer`. Every module with chartable signals must have both;
+  modules with discrete-event outputs (IR, Camera) are exempt.
 - Automation → an `ActionHandler` with `ModuleAction` metadata.
 - Rooted extras → a feature-side capability interface + `-standard`/
   `-rooted` sibling modules, gated by `RootSafetyGate` + `RootFeatureKey`.
+
+### Rooted-capability rows (required for all feature modules)
+
+Every feature module must add `:core:root` to its `build.gradle.kts` and
+expose a `isRootedFlavor` flag from the ViewModel to the screen. The
+`ModuleInfo` capability list then appends one row per rooted feature:
+
+```kotlin
+// build.gradle.kts
+implementation(project(":core:root"))
+
+// ViewModel — thin style (no State class):
+val isRootedFlavor: Boolean = rootCapabilityRegistry.isRootedFlavor
+
+// ViewModel — state style:
+_state.update { it.copy(isRootedFlavor = rootCapabilityRegistry.isRootedFlavor) }
+
+// Screen — in moduleInfo():
+ModuleCapability(
+    name = stringResource(R.string.my_cap_name),
+    detail = stringResource(R.string.my_cap_detail),
+    status = {
+        if (isRootedFlavor) CapabilityStatus(GadgetStatusKind.Success,
+            stringResource(R.string.my_cap_rooted_active))
+        else CapabilityStatus(GadgetStatusKind.Warning,
+            stringResource(R.string.my_cap_rooted_required))
+    },
+)
+```
+
+String convention: `<module>_cap_rooted_active` / `<module>_cap_rooted_required`
+for the shared status labels; `<module>_cap_<feature>_name` /
+`<module>_cap_<feature>_detail` for each row. Never hardcode these strings.
 
 Rule of thumb: an actuator with widgets + monitoring + automation + a
 rooted boost is advanced; a read-only sensor readout is minimal. Both
@@ -217,6 +251,6 @@ Anti-patterns](Design-System).
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `docs/migration-guide.md` · Related
+> _Last reviewed: 2026-06-22 · Source: `docs/migration-guide.md` · Related
 > modules: `:feature:torch`, `:feature:vibration`, `:core:datastore`,
-> `:core:widgetkit`._
+> `:core:widgetkit`, `:core:root`, all sensor/radio feature modules._

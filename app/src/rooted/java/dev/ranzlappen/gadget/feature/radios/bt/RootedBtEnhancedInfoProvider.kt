@@ -1,15 +1,24 @@
 package dev.ranzlappen.gadget.feature.radios.bt
 
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothA2dp
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 
 @Singleton
 class RootedBtEnhancedInfoProvider @Inject constructor(
@@ -21,6 +30,9 @@ class RootedBtEnhancedInfoProvider @Inject constructor(
         context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
 
     override val isRootedFlavor = true
+
+    @Volatile private var a2dpProxy: BluetoothA2dp? = null
+    private val a2dpMutex = Mutex()
 
     override fun connectedAddresses(): Set<String> {
         val mgr = bluetoothManager ?: return emptySet()
@@ -55,31 +67,64 @@ class RootedBtEnhancedInfoProvider @Inject constructor(
     }
 
     /**
-     * Returns the negotiated A2DP codec name for [device] by reflecting into
-     * `BluetoothA2dp.getCodecStatus()`. Requires an active A2DP connection;
-     * returns null if the gate blocks, no profile proxy is available, or
-     * reflection fails.
+     * Returns the negotiated A2DP codec name for [device] (e.g. "AAC", "LDAC",
+     * "aptX") via [BluetoothA2dp.getCodecStatus] (API 29+).
      *
-     * Note: acquiring a `BluetoothA2dp` proxy requires a `ServiceListener`
-     * callback that's normally held by the system. We query the cached proxy
-     * stored in the Bluetooth app process via reflection on
-     * `BluetoothAdapter.getProfileProxy` — this is best-effort; it will return
-     * null on devices that don't expose the internal service.
+     * A [BluetoothA2dp] profile proxy is acquired lazily on first call and
+     * cached for the process lifetime — subsequent calls are instant. Returns
+     * null if the gate blocks, API < 29, the proxy times out (3 s), the device
+     * has no active A2DP connection, or the device doesn't report codec info.
      */
     override suspend fun a2dpCodecName(device: BluetoothDevice): String? {
         if (gate.check(RootFeatureKey.BluetoothA2dpCodecReflection) != RootGateDecision.Allowed) return null
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
         return runCatching {
-            val adapter = bluetoothManager?.adapter ?: return null
-            // Access the internal BluetoothA2dp proxy via reflection.
-            val getProfileProxyMethod = adapter.javaClass.getMethod(
-                "getProfileProxy",
-                Context::class.java,
-                BluetoothProfile.ServiceListener::class.java,
-                Int::class.javaPrimitiveType,
-            )
-            // We can't get the proxy synchronously this way; return null and
-            // rely on a future approach (e.g. holding the proxy in a singleton).
-            null
+            val proxy = acquireA2dpProxy() ?: return null
+            readA2dpCodec(proxy, device)
         }.getOrNull()
+    }
+
+    /**
+     * Acquires a [BluetoothA2dp] profile proxy, waiting up to 3 s for
+     * [BluetoothProfile.ServiceListener.onServiceConnected]. The proxy is
+     * cached; [onServiceDisconnected] clears it so the next call re-binds.
+     */
+    private suspend fun acquireA2dpProxy(): BluetoothA2dp? {
+        a2dpProxy?.let { return it }
+        return a2dpMutex.withLock {
+            a2dpProxy?.let { return@withLock it }
+            val adapter = bluetoothManager?.adapter ?: return@withLock null
+            withTimeoutOrNull(3_000L) {
+                suspendCancellableCoroutine { cont ->
+                    val listener = object : BluetoothProfile.ServiceListener {
+                        override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                            val p = proxy as? BluetoothA2dp
+                            a2dpProxy = p
+                            if (!cont.isCompleted) cont.resume(p)
+                        }
+                        override fun onServiceDisconnected(profile: Int) {
+                            a2dpProxy = null
+                        }
+                    }
+                    @Suppress("MissingPermission")
+                    adapter.getProfileProxy(context, listener, BluetoothProfile.A2DP)
+                }
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    @SuppressLint("MissingPermission")
+    private fun readA2dpCodec(proxy: BluetoothA2dp, device: BluetoothDevice): String? {
+        val status = proxy.getCodecStatus(device) ?: return null
+        return when (status.codecConfig.codecType) {
+            0 -> "SBC"
+            1 -> "AAC"
+            2 -> "aptX"
+            3 -> "aptX HD"
+            4 -> "LDAC"
+            6 -> "LC3"
+            else -> null
+        }
     }
 }
