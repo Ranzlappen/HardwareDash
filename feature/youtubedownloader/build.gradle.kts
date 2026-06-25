@@ -17,6 +17,12 @@ plugins {
 
 android {
     namespace = "dev.ranzlappen.gadget.feature.youtubedownloader"
+
+    defaultConfig {
+        // Ship keep rules to consumers (the :app release build runs R8) so the
+        // youtubedl-android JNI/reflection surface survives minification.
+        consumerProguardFiles("consumer-rules.pro")
+    }
 }
 
 dependencies {
