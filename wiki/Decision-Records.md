@@ -165,8 +165,10 @@ off-theme but self-contained.
 ### Consequences
 
 **Positive:** no root requirement; standard option set ported 1:1 from the web
-tool; clean Maven Central dependency. **Negative:** **+30–80 MB APK** from the
-bundled native runtimes (single biggest cost; ABI splits can trim it); cookie
+tool; clean Maven Central dependency. **Negative:** large APK growth from the
+bundled native runtimes — measured at **+196 MB** (all four ABIs at ~49 MB
+each). Mitigated by restricting `ndk.abiFilters` to `arm64-v8a` + `x86_64`
+(drops the 32-bit ABIs, ~halving the cost and keeping the CI emulator); cookie
 capture loses HttpOnly cookies the WebView won't surface, and cookies expire so
 the UI must prompt re-login on auth failure; downloads currently land in
 app-scoped external storage (MediaStore export is a follow-up). Downloading

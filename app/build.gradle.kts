@@ -59,6 +59,14 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
+        ndk {
+            // :feature:youtubedownloader bundles the yt-dlp + ffmpeg + Python
+            // runtime as per-ABI native libs (~49 MB each). Ship only 64-bit
+            // ARM (real devices) + x86_64 (the CI emulator); drop the 32-bit
+            // ABIs (armeabi-v7a, x86) to roughly halve the APK. See ADR-0003.
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
+
         // Build metadata (injected by CI, defaults for local dev).
         buildConfigField(
             "String", "BUILD_AUTHOR",
