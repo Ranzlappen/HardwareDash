@@ -48,6 +48,10 @@ exifinterface = "1.3.7"
 usbSerial = "3.7.0"
 libsu = "5.2.2"
 orgJson = "20231013"
+# youtubedl-android (JunkFood02 fork — yt-dlp based, published on Maven
+# Central, not JitPack). Bundles yt-dlp + ffmpeg + a Python runtime as
+# per-ABI native libs. Consumed only by :feature:youtubedownloader.
+youtubedlAndroid = "0.18.1"
 
 [libraries]
 # Application / library dependencies (consumed by modules)
@@ -107,6 +111,8 @@ usb-serial-android = { group = "com.github.mik3y", name = "usb-serial-for-androi
 libsu-core = { group = "com.github.topjohnwu.libsu", name = "core", version.ref = "libsu" }
 libsu-service = { group = "com.github.topjohnwu.libsu", name = "service", version.ref = "libsu" }
 json = { group = "org.json", name = "json", version.ref = "orgJson" }
+youtubedl-android-library = { group = "io.github.junkfood02.youtubedl-android", name = "library", version.ref = "youtubedlAndroid" }
+youtubedl-android-ffmpeg = { group = "io.github.junkfood02.youtubedl-android", name = "ffmpeg", version.ref = "youtubedlAndroid" }
 
 # Gradle plugin artefacts — consumed by build-logic/convention as
 # `compileOnly` so the convention plugins can reference AGP / Kotlin /
