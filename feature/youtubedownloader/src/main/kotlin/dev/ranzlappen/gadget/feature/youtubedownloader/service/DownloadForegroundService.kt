@@ -5,7 +5,6 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
-import android.os.Environment
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -14,11 +13,11 @@ import dev.ranzlappen.gadget.core.notifications.NotificationChannelRegistry
 import dev.ranzlappen.gadget.feature.youtubedownloader.DownloadConfig
 import dev.ranzlappen.gadget.feature.youtubedownloader.DownloadStatus
 import dev.ranzlappen.gadget.feature.youtubedownloader.DownloadTask
-import dev.ranzlappen.gadget.feature.youtubedownloader.MediaKind
 import dev.ranzlappen.gadget.feature.youtubedownloader.R
 import dev.ranzlappen.gadget.feature.youtubedownloader.YoutubeDlEngine
 import dev.ranzlappen.gadget.feature.youtubedownloader.YtDlpRequestBuilder
 import dev.ranzlappen.gadget.feature.youtubedownloader.cookies.CookieStore
+import dev.ranzlappen.gadget.feature.youtubedownloader.storage.MediaStoreExporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,6 +28,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import timber.log.Timber
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -78,9 +78,11 @@ class DownloadForegroundService : Service() {
         promoteToForeground(initialNotification(config))
         active.incrementAndGet()
         serviceScope.launch {
-            val dir = outputDir(config.kind).apply { mkdirs() }.absolutePath
+            // Download into a private working dir, then publish finished files
+            // into the shared MediaStore collections.
+            val workDir = File(filesDir, "$WORK_SUBDIR/$id").apply { mkdirs() }
             val cookies = if (config.useCookies) cookieStore.fileOrNull()?.absolutePath else null
-            val request = YtDlpRequestBuilder.toRequest(config, config.url, dir, cookies)
+            val request = YtDlpRequestBuilder.toRequest(config, config.url, workDir.absolutePath, cookies)
             val task = DownloadTask(id = id, url = config.url, title = config.url, config = config)
 
             val notifyJob = launch {
@@ -92,6 +94,13 @@ class DownloadForegroundService : Service() {
             }
             engine.download(task, request)
             notifyJob.cancel()
+
+            if (engine.tasks.value[id]?.status == DownloadStatus.Completed) {
+                runCatching { MediaStoreExporter.publish(applicationContext, workDir, config.kind) }
+                    .onSuccess { Timber.i("Exported %d file(s) to MediaStore", it) }
+                    .onFailure { Timber.w(it, "MediaStore export failed") }
+            }
+            workDir.deleteRecursively()
 
             if (active.decrementAndGet() == 0) {
                 stopForegroundCompat()
@@ -105,22 +114,6 @@ class DownloadForegroundService : Service() {
             stopForegroundCompat()
             stopSelf()
         }
-    }
-
-    // ─── Storage ────────────────────────────────────────────────────────
-
-    /**
-     * App-scoped external dir (no storage permission needed on minSdk 29+):
-     * `Android/data/<pkg>/files/{Movies,Music}/HardwareDash`. Promoting these
-     * to the shared MediaStore collections is a planned follow-up.
-     */
-    private fun outputDir(kind: MediaKind): File {
-        val type = if (kind == MediaKind.AUDIO) {
-            Environment.DIRECTORY_MUSIC
-        } else {
-            Environment.DIRECTORY_MOVIES
-        }
-        return File(getExternalFilesDir(type), "HardwareDash")
     }
 
     // ─── Notification ───────────────────────────────────────────────────
@@ -220,6 +213,7 @@ class DownloadForegroundService : Service() {
         const val EXTRA_ID = "extra_id"
         const val EXTRA_CONFIG = "extra_config"
 
+        private const val WORK_SUBDIR = "ytdl_work"
         private const val CHANNEL_ID = "youtube_downloads"
         private const val NOTIFICATION_ID = 0x59_54_44_4C // "YTDL"
     }

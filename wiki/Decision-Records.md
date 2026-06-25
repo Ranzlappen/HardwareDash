@@ -170,9 +170,11 @@ bundled native runtimes — measured at **+196 MB** (all four ABIs at ~49 MB
 each). Mitigated by restricting `ndk.abiFilters` to `arm64-v8a` + `x86_64`
 (drops the 32-bit ABIs, ~halving the cost and keeping the CI emulator); cookie
 capture loses HttpOnly cookies the WebView won't surface, and cookies expire so
-the UI must prompt re-login on auth failure; downloads currently land in
-app-scoped external storage (MediaStore export is a follow-up). Downloading
-one's own private content may conflict with YouTube's ToS — left to the user.
+the UI must prompt re-login on auth failure. Finished files are published into
+the shared MediaStore collections (`Movies/HardwareDash`, `Music/HardwareDash`)
+via `MediaStoreExporter` after downloading to a private working dir, preserving
+playlist sub-folders. Downloading one's own private content may conflict with
+YouTube's ToS — left to the user.
 
 ### Alternatives rejected
 
