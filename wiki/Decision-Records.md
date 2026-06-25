@@ -9,6 +9,7 @@ long-form ADR files. New ADRs are added here as numbered sections; record
 |---|---|---|---|
 | 0001 | Monorepo refactor onto module-per-feature layout | Accepted | 2026-05-12 |
 | 0002 | Cross-automation engine — model, runtime, persistence | Accepted | 2026-06-10 |
+| 0003 | YouTube downloader — youtubedl-android engine + cookie auth | Accepted | 2026-06-25 |
 
 ---
 
@@ -126,6 +127,61 @@ exactness depends on Doze + the special permission (degradation contract
 specified).
 
 Full design: [Automation Engine](Automation-Engine).
+
+---
+
+## ADR-0003 — YouTube downloader: youtubedl-android engine + cookie auth
+
+**Status:** Accepted · **Deciders:** project owner, Claude (implementer).
+
+### Context
+
+We wanted a `:feature:youtubedownloader` that downloads YouTube video and
+audio — including complete **private** playlists — using yt-dlp + ffmpeg,
+reusing the option logic from `tools.ranzlappen.com`'s YouTube MP3 Studio.
+yt-dlp is Python and ffmpeg is native; neither existed in the app. HardwareDash
+is otherwise a hardware/gadget dashboard, so this module is deliberately
+off-theme but self-contained.
+
+### Decisions
+
+1. **Engine:** bundle `io.github.junkfood02.youtubedl-android` (library +
+   ffmpeg), which ships yt-dlp + ffmpeg + a Python runtime as per-ABI native
+   libs and runs **unprivileged** → standard flavor only, no `-rooted` sibling.
+2. **Distribution:** the JunkFood02 fork is on **Maven Central** (the original
+   yausername artifacts are JitPack-only). This sidesteps the repo's
+   `seed-jitpack-cache` machinery entirely — no CI seeding needed.
+3. **Private auth:** capture YouTube/Google session cookies via an in-app
+   WebView (`CookieManager` → Netscape `cookies.txt`) and pass `--cookies` to
+   yt-dlp. Chosen over Google OAuth (which still needs cookies for media) and
+   manual cookies.txt import (poor UX).
+4. **Execution:** a `dataSync` foreground service drives downloads so long
+   playlists survive backgrounding; a `@Singleton YoutubeDlEngine` holds the
+   single task-state `StateFlow` consumed by UI, monitoring and automation.
+5. **Contract fit:** progress (%) is surfaced as `DownloadMetricSource`
+   (monitoring) and download/cancel as `DownloadActionHandler` (automation),
+   satisfying the mandatory monitoring + automation seams.
+
+### Consequences
+
+**Positive:** no root requirement; standard option set ported 1:1 from the web
+tool; clean Maven Central dependency. **Negative:** large APK growth from the
+bundled native runtimes — measured at **+196 MB** (all four ABIs at ~49 MB
+each). Mitigated by restricting `ndk.abiFilters` to `arm64-v8a` + `x86_64`
+(drops the 32-bit ABIs, ~halving the cost and keeping the CI emulator); cookie
+capture loses HttpOnly cookies the WebView won't surface, and cookies expire so
+the UI must prompt re-login on auth failure. Finished files are published into
+the shared MediaStore collections (`Movies/HardwareDash`, `Music/HardwareDash`)
+via `MediaStoreExporter` after downloading to a private working dir, preserving
+playlist sub-folders. Downloading one's own private content may conflict with
+YouTube's ToS — left to the user.
+
+### Alternatives rejected
+
+- **Chaquopy** (run yt-dlp as real Python): more upgradable but adds a Python
+  build step and larger toolchain.
+- **Rooted-only ProcessBuilder + system binaries:** smaller standard APK but
+  excludes non-rooted users (the majority).
 
 ---
 

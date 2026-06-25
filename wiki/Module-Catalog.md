@@ -95,6 +95,7 @@ Migration status legend: ✅ migrated & live · 🟡 partial · ⬜ skeleton
 | `feature:diagnostics` (+ `-rooted`) | 0 | ⬜ | |
 | `feature:bugreport` (+ `-rooted`) | 0 | ⬜ | |
 | `feature:manual` | 0 | ⬜ | In-app manual / help. |
+| `feature:youtubedownloader` | 17 | ✅ | YouTube video/audio downloader (yt-dlp + ffmpeg via youtubedl-android); private playlists via in-app cookie login; dataSync FGS; MediaStore export to Movies/Music; `download_progress` monitor + `youtube_downloader` ActionHandler. Standard-only (runs unprivileged). |
 
 ## `benchmark`
 

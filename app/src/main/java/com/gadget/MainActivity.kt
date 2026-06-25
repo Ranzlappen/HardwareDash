@@ -65,6 +65,7 @@ import dev.ranzlappen.gadget.feature.sensors.sensorsScreen
 import dev.ranzlappen.gadget.feature.settings.settingsScreen
 import dev.ranzlappen.gadget.feature.torch.torchScreen
 import dev.ranzlappen.gadget.feature.vibration.vibrationScreen
+import dev.ranzlappen.gadget.feature.youtubedownloader.youtubeDownloaderScreen
 import org.osmdroid.config.Configuration
 import java.io.File
 import javax.inject.Inject
@@ -178,6 +179,7 @@ class MainActivity : ComponentActivity() {
                             },
                         )
                         appsScreen(navController)
+                        youtubeDownloaderScreen(navController)
                     }
                 }
                 is LaunchGateOutcome.DeniedFatal -> GadgetTheme {

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Help
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DirectionsRun
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.HealthAndSafety
 import androidx.compose.material.icons.outlined.Help
@@ -343,6 +345,22 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.Help
     }
 
+    /**
+     * YouTube Downloader feature module — downloads videos and audio
+     * (including private playlists) via the bundled yt-dlp + ffmpeg runtime.
+     * Standard-flavor; runs unprivileged. Ships monitoring
+     * ([dev.ranzlappen.gadget.feature.youtubedownloader.monitor.DownloadMetricSource])
+     * and automation
+     * ([dev.ranzlappen.gadget.feature.youtubedownloader.automation.DownloadActionHandler])
+     * surfaces.
+     */
+    data object Youtubedownloader : GadgetDestination {
+        override val route = "youtube_downloader"
+        override val label = "Downloader"
+        override val iconFilled = Icons.Filled.Download
+        override val iconOutlined = Icons.Outlined.Download
+    }
+
     companion object {
         /**
          * Destinations pinned to the **top** of the rail, above the
@@ -367,7 +385,7 @@ sealed interface GadgetDestination {
             Torch, Vibration, Apps, Sensors,
             Battery, Gps, Storage, RadiosIr, Camera,
             Motion, Audio, RadiosNfc, RadiosBt, RadiosWifi,
-            Ambient, Lock, Actuators, Diagnostics, BugReport, Manual, Automation,
+            Ambient, Lock, Actuators, Youtubedownloader, Diagnostics, BugReport, Manual, Automation,
         )
 
         /**
