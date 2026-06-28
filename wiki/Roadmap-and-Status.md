@@ -50,7 +50,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows) | `:feature:radios-bt` | ✅ |
 | WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions) | `:feature:radios-wifi` | ✅ |
 | Ambient Light (live lux reading + level descriptor; ambient-light history monitor; assert-bright / assert-dark automation actions; rooted brightness / refresh-rate / density rows) | `:feature:ambient` | ✅ |
-| Lock / Security (keyguard lock state + biometrics enrollment; lock-state live + history monitors; assert-locked / assert-unlocked / assert-secure automation actions; rooted overlay row) | `:feature:lock` | ✅ |
+| Lock / Security (keyguard lock state + biometrics enrollment; lock-state live + history monitors; assert-locked / assert-unlocked / assert-secure automation actions; rooted secure-keyguard overlay — self-grants SYSTEM_ALERT_WINDOW via appops and draws a bounded anti-phishing overlay, gated by `RootFeatureKey.LockSecureOverlay`, exposed as the `lock_root` action) | `:feature:lock` + `:feature:lock-rooted` | ✅ |
 | Actuators / Haptics (vibrator availability + amplitude control; haptic-click / heavy-click / assert-available automation actions; rooted extreme/PWM/dual/rumble capability rows) | `:feature:actuators` | ✅ |
 | Diagnostics (rooted shell dump overview; logcat / meminfo / cpuinfo / procstats automation actions via `:feature:diagnostics-rooted`) | `:feature:diagnostics` + `:feature:diagnostics-rooted` | ✅ |
 | Health / BugReport (permission grant scanner; assert-permission automation action; rooted ADB-diagnostics row) | `:feature:bugreport` | ✅ |
@@ -95,13 +95,14 @@ find app/src -path "*com/gadget*" -name "*.kt" | wc -l
 
 ### Phase-2 tail (skeleton modules still pending)
 
-The following skeleton modules still have no Kotlin sources and are
-deferred to a separate batch (complexity or unclear scope):
-`flipper` (+ `-flipper-rooted`) — protobuf RPC over USB/BLE;
-`lock-rooted` — `TYPE_SYSTEM_ALERT` overlay.
+The only skeleton module still without Kotlin sources is
+`flipper` (+ `-flipper-rooted`) — protobuf RPC over USB/BLE, deferred for
+its transport + generated-protobuf complexity.
 `radios-subghz` shipped its v1 (USB SDR / Sub-GHz transceiver detection +
 monitoring + automation + rooted capability rows); the SDR data path
 (raw register / tuning / OOK-FSK capture) remains a rooted follow-up.
+`lock-rooted` shipped its secure-keyguard overlay (the migration of the
+legacy `LockScreenOverlayHelper`, hardened to the `RootSafetyGate` seam).
 All other Phase-2 skeleton modules shipped in this batch.
 
 ## Completed phases

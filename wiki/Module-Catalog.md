@@ -91,7 +91,8 @@ Migration status legend: ✅ migrated & live · 🟡 partial · ⬜ skeleton
 | `feature:flipper` (+ `-rooted`) | 0 | ⬜ | Flipper Zero USB CDC-ACM + BLE GATT. |
 | `feature:storage` | 9 | ✅ | Volume cards (internal + removable) with progress bars; live used-% monitor; 3 rooted rows (DumpDiskstats, EnumerateMounts, Fstrim). |
 | `feature:storage-rooted` | 0 | ⬜ | |
-| `feature:lock` (+ `-rooted`) | 0 | ⬜ | |
+| `feature:lock` | 9 | ✅ | Keyguard lock/secure state + biometric enrollment; lock-state live + history monitors; assert-locked / -unlocked / -secure automation actions; informational rooted overlay row. |
+| `feature:lock-rooted` | 4 | ✅ | Secure-keyguard `TYPE_APPLICATION_OVERLAY`: self-grants SYSTEM_ALERT_WINDOW via root appops, draws a bounded anti-phishing overlay above the lock screen, torn down in a `NonCancellable` finally. Gated by `RootFeatureKey.LockSecureOverlay`; `lock_root` ActionHandler. |
 | `feature:diagnostics` (+ `-rooted`) | 0 | ⬜ | |
 | `feature:bugreport` (+ `-rooted`) | 0 | ⬜ | |
 | `feature:manual` | 0 | ⬜ | In-app manual / help. |

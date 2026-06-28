@@ -336,6 +336,8 @@ dependencies {
     "rootedImplementation"(project(":feature:storage-rooted"))
     // Rooted Diagnostics action handler — logcat tail, meminfo, cpuinfo, procstats.
     "rootedImplementation"(project(":feature:diagnostics-rooted"))
+    // Rooted Lock overlay — secure-keyguard TYPE_APPLICATION_OVERLAY action.
+    "rootedImplementation"(project(":feature:lock-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)
