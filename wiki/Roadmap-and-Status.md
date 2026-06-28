@@ -56,6 +56,8 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Health / BugReport (permission grant scanner; assert-permission automation action; rooted ADB-diagnostics row) | `:feature:bugreport` | ✅ |
 | Help / Manual (static documentation screen for all modules, capabilities, and automation engine) | `:feature:manual` | ✅ |
 | Rooted Storage actions (diskstats / mounts / fstrim / drop_caches) | `:feature:storage-rooted` | ✅ |
+| Sub-GHz Radio (USB SDR / transceiver detection — RTL-SDR / HackRF / YARD Stick One / LimeSDR / CC1101; bridge-connected push monitor; assert-bridge / assert-Sub-GHz-capable automation actions; rooted raw-register / custom-tuning / OOK-FSK-capture rows) | `:feature:radios-subghz` | ✅ |
+| YouTube Downloader (yt-dlp + ffmpeg video/audio downloads, private playlists via cookie login, MediaStore export, dataSync FGS; `download_progress` monitor + `youtube_downloader` action) — standard-only, runs unprivileged | `:feature:youtubedownloader` | ✅ |
 | Cross-automation engine + rule builder | `:core:automation` + `:core:hardware` + `:feature:automation-ui` | ✅ (epics #145/#146) |
 
 ### Shared infrastructure landed
@@ -96,8 +98,10 @@ find app/src -path "*com/gadget*" -name "*.kt" | wc -l
 The following skeleton modules still have no Kotlin sources and are
 deferred to a separate batch (complexity or unclear scope):
 `flipper` (+ `-flipper-rooted`) — protobuf RPC over USB/BLE;
-`lock-rooted` — `TYPE_SYSTEM_ALERT` overlay;
-`radios-subghz` — Sub-GHz SDR bridge.
+`lock-rooted` — `TYPE_SYSTEM_ALERT` overlay.
+`radios-subghz` shipped its v1 (USB SDR / Sub-GHz transceiver detection +
+monitoring + automation + rooted capability rows); the SDR data path
+(raw register / tuning / OOK-FSK capture) remains a rooted follow-up.
 All other Phase-2 skeleton modules shipped in this batch.
 
 ## Completed phases
@@ -168,5 +172,5 @@ complete. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-06-23 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-06-28 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md` · Related modules: all._

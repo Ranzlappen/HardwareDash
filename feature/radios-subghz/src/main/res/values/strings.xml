@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subghz_screen_title">Sub-GHz</string>
+
+    <!-- Bridge card -->
+    <string name="subghz_card_bridge_title">Sub-GHz Bridge</string>
+    <string name="subghz_chip_connected">Bridge attached</string>
+    <string name="subghz_chip_none">No bridge</string>
+    <string name="subghz_chip_capable">Sub-GHz capable</string>
+    <string name="subghz_label_device">Device</string>
+    <string name="subghz_label_coverage">Coverage</string>
+    <string name="subghz_coverage_subghz">300–928 MHz ISM (Sub-GHz)</string>
+    <string name="subghz_coverage_wideband">Wideband (not Sub-GHz tuned)</string>
+    <string name="subghz_no_bridge">Attach a supported SDR or Sub-GHz transceiver (RTL-SDR, HackRF, YARD Stick One, …) over USB to use this module</string>
+    <string name="subghz_no_usb_host">This device has no USB host bus, so an external Sub-GHz radio cannot be attached</string>
+
+    <!-- Monitor titles -->
+    <string name="subghz_live_monitor_bridge">Bridge state (live)</string>
+    <string name="subghz_monitor_bridge">Bridge state history</string>
+
+    <!-- Standard capability -->
+    <string name="subghz_cap_bridge_name">USB SDR detection</string>
+    <string name="subghz_cap_bridge_detail">Detects a supported SDR / Sub-GHz transceiver on the USB host bus; Android exposes no first-party Sub-GHz radio API</string>
+    <string name="subghz_cap_bridge_connected">Bridge attached</string>
+    <string name="subghz_cap_bridge_none">No bridge attached</string>
+    <string name="subghz_cap_bridge_no_host">No USB host support</string>
+
+    <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
+    <string name="subghz_cap_rooted_active">Active — rooted build</string>
+    <string name="subghz_cap_rooted_required">Requires rooted build</string>
+    <string name="subghz_cap_registers_name">Raw register access</string>
+    <string name="subghz_cap_registers_detail">Read and write the transceiver\'s radio registers directly over the USB device node, bypassing the userspace driver</string>
+    <string name="subghz_cap_tuning_name">Custom carrier tuning</string>
+    <string name="subghz_cap_tuning_detail">Tune to an explicit Sub-GHz carrier (e.g. 315 / 433.92 / 868 / 915 MHz) and set deviation outside the stock driver presets</string>
+    <string name="subghz_cap_capture_name">OOK / 2-FSK capture</string>
+    <string name="subghz_cap_capture_detail">Stream raw on-off-keying and 2-FSK symbols from the radio for replay and analysis</string>
+</resources>

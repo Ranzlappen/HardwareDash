@@ -220,6 +220,7 @@ dependencies {
     implementation(project(":feature:radios-nfc"))
     implementation(project(":feature:radios-bt"))
     implementation(project(":feature:radios-wifi"))
+    implementation(project(":feature:radios-subghz"))
     implementation(project(":feature:ambient"))
     implementation(project(":feature:lock"))
     implementation(project(":feature:actuators"))

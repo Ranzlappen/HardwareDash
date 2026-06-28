@@ -1,2 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Sub-GHz radios are reached through an external SDR / transceiver on
+         the USB host bus; enumeration needs no runtime permission, and the
+         feature is optional so the standard APK installs on phones without
+         USB-host support. -->
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="false" />
+
+</manifest>

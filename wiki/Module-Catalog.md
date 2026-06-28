@@ -86,7 +86,7 @@ Migration status legend: ✅ migrated & live · 🟡 partial · ⬜ skeleton
 | `feature:radios-wifi` | 0 | ⬜ | |
 | `feature:radios-bt` | 11 | ✅ | Adapter status + bonded device list; GATT battery + RSSI (standard); hidden battery API + A2DP codec name (rooted via `BtEnhancedInfoProvider` seam); live + history BT-enabled monitors. |
 | `feature:radios-nfc` | 10 | ✅ | NDEF tag read + HCE emulation + NDEF template library; live + history NFC-enabled monitor; rooted raw-NCI row. |
-| `feature:radios-subghz` | 0 | ⬜ | |
+| `feature:radios-subghz` | 9 | ✅ | USB SDR / Sub-GHz transceiver detection (RTL-SDR, HackRF, YARD Stick One, …) via `UsbManager`; `subghz_bridge_connected` push metric (live + history monitors); `subghz` ActionHandler (bridge-attached + Sub-GHz-capable asserts); 3 rooted rows (RawRegisters, CustomTuning, OokFskCapture). Detection-only on standard (Android has no Sub-GHz radio API). |
 | `feature:radios-ir` | 10 | ✅ | NEC / Pronto / RAW transmit; saved-signal library; remote-brand library; 2 rooted rows (CustomCarrier, RawGpioPattern). |
 | `feature:flipper` (+ `-rooted`) | 0 | ⬜ | Flipper Zero USB CDC-ACM + BLE GATT. |
 | `feature:storage` | 9 | ✅ | Volume cards (internal + removable) with progress bars; live used-% monitor; 3 rooted rows (DumpDiskstats, EnumerateMounts, Fstrim). |
@@ -111,5 +111,5 @@ Migration status legend: ✅ migrated & live · 🟡 partial · ⬜ skeleton
 
 ---
 
-> _Last reviewed: 2026-06-22 · Source: `settings.gradle.kts`, live
+> _Last reviewed: 2026-06-28 · Source: `settings.gradle.kts`, live
 > `find … -name '*.kt'` counts · Related: every module._
