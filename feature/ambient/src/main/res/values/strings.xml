@@ -15,6 +15,13 @@
     <string name="ambient_level_bright">Bright</string>
     <string name="ambient_level_sunlight">Direct sunlight</string>
 
+    <!-- Home-screen widget -->
+    <string name="ambient_widget_label">Ambient light</string>
+    <string name="ambient_widget_description">Live ambient light level (lux)</string>
+    <string name="ambient_widget_lux_format">%1$d lx</string>
+    <string name="ambient_widget_unknown">—</string>
+    <string name="ambient_widget_no_sensor">No light sensor</string>
+
     <!-- Monitor titles -->
     <string name="ambient_live_monitor_lux">Ambient light (live)</string>
     <string name="ambient_monitor_lux">Ambient light history</string>
