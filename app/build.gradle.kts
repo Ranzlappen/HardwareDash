@@ -341,6 +341,8 @@ dependencies {
     "rootedImplementation"(project(":feature:lock-rooted"))
     // Rooted Flipper — root-granted USB device-node access (no permission dialog).
     "rootedImplementation"(project(":feature:flipper-rooted"))
+    // Rooted BugReport — force-grant runtime permissions via `pm grant`.
+    "rootedImplementation"(project(":feature:bugreport-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

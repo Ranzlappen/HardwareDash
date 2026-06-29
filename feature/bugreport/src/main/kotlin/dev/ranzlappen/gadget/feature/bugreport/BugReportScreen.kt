@@ -99,6 +99,19 @@ private fun bugReportModuleInfo(state: BugReportState): ModuleInfo = ModuleInfo(
                 )
             },
         ),
+        ModuleCapability(
+            name = stringResource(R.string.bugreport_cap_force_grant_name),
+            detail = stringResource(R.string.bugreport_cap_force_grant_detail),
+            status = {
+                if (state.isRootedFlavor) CapabilityStatus(
+                    kind = GadgetStatusKind.Success,
+                    message = stringResource(R.string.bugreport_cap_rooted_active),
+                ) else CapabilityStatus(
+                    kind = GadgetStatusKind.Warning,
+                    message = stringResource(R.string.bugreport_cap_rooted_required),
+                )
+            },
+        ),
     ),
 )
 

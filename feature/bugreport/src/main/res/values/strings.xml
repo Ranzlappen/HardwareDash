@@ -31,4 +31,6 @@
     <string name="bugreport_cap_rooted_required">Requires rooted build</string>
     <string name="bugreport_cap_adb_name">ADB diagnostics</string>
     <string name="bugreport_cap_adb_detail">Toggle ADB over network and dump device properties via setprop-safe shell commands</string>
+    <string name="bugreport_cap_force_grant_name">Force-grant permissions</string>
+    <string name="bugreport_cap_force_grant_detail">Grant a declared runtime permission via pm grant, bypassing the system permission dialog (gated by RootSafetyGate)</string>
 </resources>
