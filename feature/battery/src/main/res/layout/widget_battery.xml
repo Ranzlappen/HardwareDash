@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Battery status widget layout. RemoteViews-safe: only @RemoteView-inflatable
+  classes (FrameLayout / LinearLayout / ImageView / TextView / ProgressBar).
+  No bare <View> (the launcher throws InflateException — see CLAUDE.md).
+
+  @id/widget_background (kit-declared) is painted by
+  WidgetAppearanceRenderer.applyBackground; the name strip @id/widget_label
+  paints only at WidgetRenderDensity.Expanded.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_battery_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Kit appearance chrome (glass / solid / transparent). Backmost child. -->
+    <ImageView
+        android:id="@id/widget_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="fitXY" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/battery_widget_percent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:text="@string/battery_widget_unknown"
+            android:textColor="#FFFFFF"
+            android:textSize="26sp" />
+
+        <ProgressBar
+            android:id="@+id/battery_widget_progress"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:max="100"
+            android:progress="0" />
+
+        <TextView
+            android:id="@+id/battery_widget_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/battery_widget_discharging"
+            android:textColor="#CCFFFFFF"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@id/widget_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="@string/battery_widget_label"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:visibility="gone" />
+    </LinearLayout>
+</FrameLayout>

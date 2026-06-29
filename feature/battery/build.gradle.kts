@@ -8,6 +8,7 @@
 
 plugins {
     id("gadget.android.feature")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -21,6 +22,15 @@ dependencies {
     // :core:model which defines MetricDescriptor / MetricCategory).
     implementation(project(":core:monitoring"))
     implementation(project(":core:root"))
+    // :core:widgetkit — the battery home-screen widget rides the kit's
+    // content/display archetype (BaseContentWidgetProvider); :core:datastore
+    // backs the per-appWidgetId config store via FeaturePreferencesFactory.
+    implementation(project(":core:widgetkit"))
+    implementation(project(":core:datastore"))
+    // BatteryWidgetConfig is @Serializable (persisted per appWidgetId).
+    implementation(libs.kotlinx.serialization.json)
+
+    testImplementation(libs.junit)
 
     androidTestImplementation(project(":core:testing"))
     androidTestImplementation(libs.androidx.junit)

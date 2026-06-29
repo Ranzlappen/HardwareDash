@@ -46,6 +46,22 @@ file with a KDoc explaining why they're allowed.
   hand-pick three colours.
 - **Shape** — `LocalGadgetTheme.current.shapes`.
 
+## Custom themes (Phase 3)
+
+`GadgetTheme(customTheme = …)` selects a user-chosen palette. `GadgetCustomTheme`
+ships four values: `Default` (the canonical dark/light/dynamic resolution),
+`HighContrast` (pure black/white grounds, brighter accents, stronger outlines),
+`AmoledTrue` (every surface `#000000`; dark-only — light falls back to the
+standard light palette), and `Pastel` (soft desaturated accents). Each
+non-`Default` theme is a `.copy()` derivation of the base dark/light scheme
+(`GadgetColor.kt`) resolved via `GadgetCustomTheme.colorScheme(dark)`, and
+**suppresses dynamic colour** (the user picked a fixed palette). The choice is
+persisted as `UserPreferences.customTheme` (a Compose-free `CustomThemeOption`
+enum in `:core:datastore`, mapped to `GadgetCustomTheme` in `MainActivity`),
+selectable from **Settings → Appearance → Palette**. Dark/light selection stays
+orthogonal — a custom theme still honours `darkThemeMode`. The active theme is
+also readable at any call site via `LocalGadgetTheme.current.identifier`.
+
 ## Glass surfaces
 
 **Rule 6 — Every glassy surface goes through `GlassSurface` (composable)
@@ -201,6 +217,6 @@ Multi-preview annotations live in
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `CLAUDE.md` (design-system
+> _Last reviewed: 2026-06-29 · Source: `CLAUDE.md` (design-system
 > sections), `core/designsystem/*`, `core/ui/*` · Related modules:
 > `:core:designsystem`, `:core:ui`, `:core:navigation`._

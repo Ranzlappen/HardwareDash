@@ -35,8 +35,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.feature.apps.AppRepository
 import dev.ranzlappen.gadget.feature.apps.appsScreen
 import dev.ranzlappen.gadget.feature.apps.widget.FolderWidgetController
+import dev.ranzlappen.gadget.feature.battery.widget.BatteryWidgetController
+import dev.ranzlappen.gadget.feature.storage.widget.StorageWidgetController
+import dev.ranzlappen.gadget.core.datastore.CustomThemeOption
 import dev.ranzlappen.gadget.core.datastore.DarkThemeMode
 import dev.ranzlappen.gadget.core.datastore.TriStatePreference
+import dev.ranzlappen.gadget.core.designsystem.theme.GadgetCustomTheme
 import dev.ranzlappen.gadget.core.datastore.UserPreferences
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
 import dev.ranzlappen.gadget.core.navigation.GadgetApp
@@ -81,6 +85,14 @@ class MainActivity : ComponentActivity() {
     // widgets reactively for the lifetime of the process.
     @Inject lateinit var folderWidgetController: FolderWidgetController
 
+    // Eager-injected so its init { } observes battery state and repaints
+    // placed battery widgets for the lifetime of the process.
+    @Inject lateinit var batteryWidgetController: BatteryWidgetController
+
+    // Eager-injected so its init { } observes storage usage and repaints
+    // placed storage widgets for the lifetime of the process.
+    @Inject lateinit var storageWidgetController: StorageWidgetController
+
     // Eager-injected so its init { } runs the one-shot legacy gadget_db ->
     // apps.db import (in-place upgrade + legacy backup restore continuity).
     @Inject lateinit var legacyAppsImporter: dev.ranzlappen.gadget.feature.apps.LegacyAppsImporter
@@ -121,10 +133,17 @@ class MainActivity : ComponentActivity() {
                         TriStatePreference.Off -> false
                         TriStatePreference.FollowSystem -> null
                     }
+                    val customTheme = when (preferences.customTheme) {
+                        CustomThemeOption.Default -> GadgetCustomTheme.Default
+                        CustomThemeOption.HighContrast -> GadgetCustomTheme.HighContrast
+                        CustomThemeOption.AmoledTrue -> GadgetCustomTheme.AmoledTrue
+                        CustomThemeOption.Pastel -> GadgetCustomTheme.Pastel
+                    }
                     GadgetApp(
                         navController = navController,
                         useDarkTheme = useDarkTheme,
                         useDynamicColor = preferences.dynamicColor,
+                        customTheme = customTheme,
                         reducedMotionOverride = reducedMotionOverride,
                         reducedTransparency = preferences.reducedTransparency,
                     ) {

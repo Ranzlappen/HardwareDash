@@ -30,4 +30,11 @@
     <string name="storage_cap_mounts_detail">Full mount table via /proc/mounts, including hidden partitions not visible via StorageManager</string>
     <string name="storage_cap_fstrim_name">Storage trim (fstrim)</string>
     <string name="storage_cap_fstrim_detail">Force discard operation on mounted filesystems to improve SSD longevity</string>
+
+    <!-- Home-screen widget -->
+    <string name="storage_widget_label">Storage</string>
+    <string name="storage_widget_description">Internal storage used and free space</string>
+    <string name="storage_widget_percent_format">%1$d%% used</string>
+    <string name="storage_widget_free_format">%1$s free</string>
+    <string name="storage_widget_unknown">—</string>
 </resources>

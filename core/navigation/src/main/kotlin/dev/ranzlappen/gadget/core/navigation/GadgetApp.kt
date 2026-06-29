@@ -20,6 +20,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import dev.ranzlappen.gadget.core.designsystem.theme.GadgetCustomTheme
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.adaptive.LocalWindowSizeClass
@@ -59,6 +60,7 @@ fun GadgetApp(
     startDestination: GadgetDestination = GadgetDestination.Dashboard,
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     useDynamicColor: Boolean = true,
+    customTheme: GadgetCustomTheme = GadgetCustomTheme.Default,
     reducedMotionOverride: Boolean? = null,
     reducedTransparency: Boolean = false,
     builder: NavGraphBuilder.() -> Unit,
@@ -74,6 +76,7 @@ fun GadgetApp(
     GadgetTheme(
         useDarkTheme = useDarkTheme,
         useDynamicColor = useDynamicColor,
+        customTheme = customTheme,
         reducedMotionOverride = reducedMotionOverride,
         reducedTransparency = reducedTransparency,
     ) {

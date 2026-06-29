@@ -95,7 +95,8 @@ Migration status legend: ✅ migrated & live · 🟡 partial · ⬜ skeleton
 | `feature:lock` | 9 | ✅ | Keyguard lock/secure state + biometric enrollment; lock-state live + history monitors; assert-locked / -unlocked / -secure automation actions; informational rooted overlay row. |
 | `feature:lock-rooted` | 4 | ✅ | Secure-keyguard `TYPE_APPLICATION_OVERLAY`: self-grants SYSTEM_ALERT_WINDOW via root appops, draws a bounded anti-phishing overlay above the lock screen, torn down in a `NonCancellable` finally. Gated by `RootFeatureKey.LockSecureOverlay`; `lock_root` ActionHandler. |
 | `feature:diagnostics` (+ `-rooted`) | 0 | ⬜ | |
-| `feature:bugreport` (+ `-rooted`) | 0 | ⬜ | |
+| `feature:bugreport` | 5 | ✅ | Permission manager: grant-state scan + per-permission runtime request + App-Settings fallback + granted/total summary (refreshes on resume); assert-permission automation action; informational rooted rows (ADB diagnostics, force-grant). |
+| `feature:bugreport-rooted` | 3 | ✅ | Force-grants a declared runtime permission via `pm grant` (validated token, gated by `RootFeatureKey.PermissionForceGrant`); `bugreport_root` ActionHandler. |
 | `feature:manual` | 0 | ⬜ | In-app manual / help. |
 | `feature:youtubedownloader` | 17 | ✅ | YouTube video/audio downloader (yt-dlp + ffmpeg via youtubedl-android); private playlists via in-app cookie login; dataSync FGS; MediaStore export to Movies/Music; `download_progress` monitor + `youtube_downloader` ActionHandler. Standard-only (runs unprivileged). |
 

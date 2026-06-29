@@ -61,6 +61,7 @@ private const val GPS_LSPOSED_INSTALL_CAP = 1
 
 private const val LOCK_OVERLAY_WINDOW_SECONDS = 60
 private const val FLIPPER_USB_GRANT_WINDOW_SECONDS = 60
+private const val PERMISSION_GRANT_WINDOW_SECONDS = 60
 
 /**
  * Single source of truth mapping every [RootFeatureKey] to its
@@ -892,6 +893,18 @@ class RootFeatureRegistry @Inject constructor() {
             defaultOn = false,
             limit = RootLimitPolicy(
                 window = FLIPPER_USB_GRANT_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+
+        // ──── Batch-16 Permission features ────
+        RootFeatureKey.PermissionForceGrant to RootFeatureDescriptor(
+            key = RootFeatureKey.PermissionForceGrant,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = PERMISSION_GRANT_WINDOW_SECONDS.seconds,
                 maxInvocations = EXTREME_OPS_MED_CAP,
             ),
             requiresExplicitConfirm = true,

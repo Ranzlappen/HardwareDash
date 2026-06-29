@@ -7,6 +7,8 @@
     <string name="bugreport_all_granted">All permissions granted</string>
     <string name="bugreport_some_missing">Some permissions are missing</string>
     <string name="bugreport_open_settings">Open App Settings</string>
+    <string name="bugreport_summary">%1$d of %2$d granted</string>
+    <string name="bugreport_perm_grant">Grant</string>
 
     <!-- Permission row labels -->
     <string name="bugreport_perm_camera">Camera</string>
@@ -20,7 +22,7 @@
 
     <!-- Capability rows -->
     <string name="bugreport_cap_health_name">App health check</string>
-    <string name="bugreport_cap_health_detail">Read-only scan of permission grant states — no runtime requests triggered</string>
+    <string name="bugreport_cap_health_detail">Scan permission grant states and request missing ones, or jump to App Settings for permanently-denied ones</string>
     <string name="bugreport_cap_health_ok">All permissions granted</string>
     <string name="bugreport_cap_health_missing">%1$d permission(s) missing</string>
 
@@ -29,4 +31,6 @@
     <string name="bugreport_cap_rooted_required">Requires rooted build</string>
     <string name="bugreport_cap_adb_name">ADB diagnostics</string>
     <string name="bugreport_cap_adb_detail">Toggle ADB over network and dump device properties via setprop-safe shell commands</string>
+    <string name="bugreport_cap_force_grant_name">Force-grant permissions</string>
+    <string name="bugreport_cap_force_grant_detail">Grant a declared runtime permission via pm grant, bypassing the system permission dialog (gated by RootSafetyGate)</string>
 </resources>

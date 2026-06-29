@@ -52,6 +52,7 @@ fun SettingsScreen(
                 preferences = preferences,
                 onDarkThemeModeChange = viewModel::setDarkThemeMode,
                 onDynamicColorChange = viewModel::setDynamicColor,
+                onCustomThemeChange = viewModel::setCustomTheme,
             )
             AccessibilityCard(
                 preferences = preferences,

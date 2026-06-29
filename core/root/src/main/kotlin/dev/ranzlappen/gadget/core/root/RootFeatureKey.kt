@@ -162,4 +162,9 @@ sealed class RootFeatureKey(val id: String) {
     // Relax the attached Flipper's USB device-node permissions via root so the
     // app opens the CDC-ACM port without the per-attach permission dialog.
     data object FlipperUsbGrant : RootFeatureKey("flipper_usb_grant")
+
+    // ──── Batch-16 Permission features ────
+    // Force-grant a declared runtime permission to this app via `pm grant`,
+    // bypassing the system permission dialog.
+    data object PermissionForceGrant : RootFeatureKey("permission_force_grant")
 }
