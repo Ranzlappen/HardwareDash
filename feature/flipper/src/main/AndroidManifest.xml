@@ -1,2 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- USB host bus for the Flipper's CDC-ACM serial port. -->
+    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
+
+    <!-- BLE GATT transport to a bonded Flipper. CONNECT/SCAN are the API 31+
+         runtime permissions; the legacy BLUETOOTH/ADMIN cover older devices. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+
+</manifest>

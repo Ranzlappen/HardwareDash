@@ -88,7 +88,8 @@ Migration status legend: ✅ migrated & live · 🟡 partial · ⬜ skeleton
 | `feature:radios-nfc` | 10 | ✅ | NDEF tag read + HCE emulation + NDEF template library; live + history NFC-enabled monitor; rooted raw-NCI row. |
 | `feature:radios-subghz` | 9 | ✅ | USB SDR / Sub-GHz transceiver detection (RTL-SDR, HackRF, YARD Stick One, …) via `UsbManager`; `subghz_bridge_connected` push metric (live + history monitors); `subghz` ActionHandler (bridge-attached + Sub-GHz-capable asserts); 3 rooted rows (RawRegisters, CustomTuning, OokFskCapture). Detection-only on standard (Android has no Sub-GHz radio API). |
 | `feature:radios-ir` | 10 | ✅ | NEC / Pronto / RAW transmit; saved-signal library; remote-brand library; 2 rooted rows (CustomCarrier, RawGpioPattern). |
-| `feature:flipper` (+ `-rooted`) | 0 | ⬜ | Flipper Zero USB CDC-ACM + BLE GATT. |
+| `feature:flipper` | 21 | ✅ | Flipper Zero bridge: USB CDC-ACM + BLE GATT transport, hand-rolled protobuf RPC (framing + PB_Main), System/Storage/Sub-GHz/Infrared command suites, connection manager. `flipper_connected` + `flipper_battery` monitors; `flipper` ActionHandler (assert-connected / ping / transmit .sub / transmit .ir). Migrated from legacy `com.gadget.flipper`. |
+| `feature:flipper-rooted` | 3 | ✅ | Root-grants USB access by relaxing the Flipper's `/dev/bus/usb` device-node permissions (`chmod 666`) so the port opens without the per-attach dialog. Gated by `RootFeatureKey.FlipperUsbGrant`; `flipper_root` ActionHandler. |
 | `feature:storage` | 9 | ✅ | Volume cards (internal + removable) with progress bars; live used-% monitor; 3 rooted rows (DumpDiskstats, EnumerateMounts, Fstrim). |
 | `feature:storage-rooted` | 0 | ⬜ | |
 | `feature:lock` | 9 | ✅ | Keyguard lock/secure state + biometric enrollment; lock-state live + history monitors; assert-locked / -unlocked / -secure automation actions; informational rooted overlay row. |
@@ -112,5 +113,5 @@ Migration status legend: ✅ migrated & live · 🟡 partial · ⬜ skeleton
 
 ---
 
-> _Last reviewed: 2026-06-28 · Source: `settings.gradle.kts`, live
+> _Last reviewed: 2026-06-29 · Source: `settings.gradle.kts`, live
 > `find … -name '*.kt'` counts · Related: every module._

@@ -13,7 +13,11 @@ panels, granular permission management, and hardware-safety guardrails.
 The rooted flavor safely extends functionality; the standard flavor stays
 fully functional and Play-store-safe.
 
-## Current phase — Phase 2: Accelerated Feature Migration (🚧 in progress)
+## Current phase — Phase 2: Accelerated Feature Migration (✅ feature-complete)
+
+> All Phase-2 skeleton modules are now filled — `flipper` (+ `-rooted`) was
+> the last, closing the tail. What remains of Phase 2 is the clean-cut
+> deletion of the ~legacy `com.gadget.*` sources, tracked per-feature.
 
 Each feature migrates directly from the archived `legacy-main` branch
 into a `:feature:<name>` module using the new design system (`:core:ui`),
@@ -58,6 +62,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Rooted Storage actions (diskstats / mounts / fstrim / drop_caches) | `:feature:storage-rooted` | ✅ |
 | Sub-GHz Radio (USB SDR / transceiver detection — RTL-SDR / HackRF / YARD Stick One / LimeSDR / CC1101; bridge-connected push monitor; assert-bridge / assert-Sub-GHz-capable automation actions; rooted raw-register / custom-tuning / OOK-FSK-capture rows) | `:feature:radios-subghz` | ✅ |
 | YouTube Downloader (yt-dlp + ffmpeg video/audio downloads, private playlists via cookie login, MediaStore export, dataSync FGS; `download_progress` monitor + `youtube_downloader` action) — standard-only, runs unprivileged | `:feature:youtubedownloader` | ✅ |
+| Flipper Zero bridge (USB CDC-ACM + BLE GATT transport, hand-rolled protobuf RPC, System/Storage/Sub-GHz/Infrared command suites; `flipper_connected` + `flipper_battery` monitors; `flipper` ActionHandler — assert-connected / ping / transmit .sub / .ir; rooted USB device-node auto-grant via `RootFeatureKey.FlipperUsbGrant`) | `:feature:flipper` + `:feature:flipper-rooted` | ✅ |
 | Cross-automation engine + rule builder | `:core:automation` + `:core:hardware` + `:feature:automation-ui` | ✅ (epics #145/#146) |
 
 ### Shared infrastructure landed
@@ -93,17 +98,18 @@ sets, migrating feature-by-feature per the
 find app/src -path "*com/gadget*" -name "*.kt" | wc -l
 ```
 
-### Phase-2 tail (skeleton modules still pending)
+### Phase-2 tail (skeleton modules — all filled ✅)
 
-The only skeleton module still without Kotlin sources is
-`flipper` (+ `-flipper-rooted`) — protobuf RPC over USB/BLE, deferred for
-its transport + generated-protobuf complexity.
-`radios-subghz` shipped its v1 (USB SDR / Sub-GHz transceiver detection +
-monitoring + automation + rooted capability rows); the SDR data path
-(raw register / tuning / OOK-FSK capture) remains a rooted follow-up.
-`lock-rooted` shipped its secure-keyguard overlay (the migration of the
-legacy `LockScreenOverlayHelper`, hardened to the `RootSafetyGate` seam).
-All other Phase-2 skeleton modules shipped in this batch.
+**No skeleton modules remain** — `flipper` (+ `-rooted`) shipped the full
+USB CDC-ACM + BLE GATT transport, the hand-rolled protobuf RPC stack, and
+all four command suites (System / Storage / Sub-GHz / Infrared), closing the
+tail. `radios-subghz` shipped USB SDR / Sub-GHz transceiver detection (the
+SDR data path remains a rooted follow-up); `lock-rooted` shipped its
+secure-keyguard overlay (migration of the legacy `LockScreenOverlayHelper`).
+
+Remaining Phase-2 work is purely clean-cut deletion of the legacy
+`com.gadget.flipper` sources once the new module is device-verified (deferred
+because `BackupManagerEntryPoint` / legacy strings still reference them).
 
 ## Completed phases
 
@@ -173,5 +179,5 @@ complete. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-06-28 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-06-29 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md` · Related modules: all._

@@ -130,6 +130,27 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
   feature).
 - **Source:** `:feature:youtubedownloader`.
 
+## Flipper Zero ✅
+
+- **What:** bridge to a Flipper Zero over **USB CDC-ACM** (115200-8-N-1) or
+  **BLE GATT** (Nordic-UART serial service). Shows live connection state,
+  device name, firmware, and battery; transmits Sub-GHz `.sub` and IR `.ir`
+  files to the device.
+- **RPC:** a hand-rolled protobuf `PB_Main` stack (varint framing +
+  command-id demux) driving the System / Storage / Sub-GHz / Infrared command
+  suites — no protoc/codegen dependency.
+- **Monitoring:** `flipper_connected` + `flipper_battery` `MetricSource`s.
+- **Automation:** `flipper` `ActionHandler` — assert-connected, ping,
+  transmit-`.sub`, transmit-`.ir`.
+- **Permissions:** USB host (no runtime grant); `BLUETOOTH_CONNECT/SCAN` for
+  the BLE picker.
+- **Rooted:** `flipper_root` action root-grants USB access by relaxing the
+  Flipper's `/dev/bus/usb` device-node permissions, so the port opens without
+  the per-attach dialog (gated by `RootFeatureKey.FlipperUsbGrant`).
+- **Standard:** ✅ · **Rooted:** ✅ + USB auto-grant.
+- **Source:** `:feature:flipper` (+ `:feature:flipper-rooted`). Migrated from
+  legacy `com.gadget.flipper`.
+
 ## Rooted extras ✅ (per feature)
 
 - **What:** root-only capabilities layered onto a feature without
@@ -153,7 +174,6 @@ Skeleton modules awaiting their migration batch — each follows the
 | GPS | `FusedLocationProvider` | `:feature:gps` |
 | Battery | `BatteryManager` | `:feature:battery` |
 | Motion / Ambient | `SensorManager` | `:feature:motion`, `:feature:ambient` |
-| Flipper Zero | USB CDC-ACM + BLE GATT | `:feature:flipper` (+ `-rooted`) |
 | Storage | StorageManager | `:feature:storage` (+ `-rooted`) |
 | Lock / Diagnostics / Bugreport | device admin / dumpsys | `:feature:lock`, `:feature:diagnostics`, `:feature:bugreport` (+ `-rooted`) |
 | Actuators (hub) | — | `:feature:actuators` |
@@ -161,5 +181,5 @@ Skeleton modules awaiting their migration batch — each follows the
 
 ---
 
-> _Last reviewed: 2026-06-28 · Source: `MASTER-PLAN.md`, `settings.gradle.kts`,
+> _Last reviewed: 2026-06-29 · Source: `MASTER-PLAN.md`, `settings.gradle.kts`,
 > feature source counts · Related: every `feature/*`._
