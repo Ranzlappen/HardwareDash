@@ -42,8 +42,8 @@ class FlipperActionHandler @Inject constructor(
         ),
     )
 
-    override suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult =
-        when (actionKey) {
+    override suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult {
+        return when (actionKey) {
             ACTION_ASSERT_CONNECTED -> {
                 if (manager.state.value is FlipperConnectionManager.State.Connected) ActionResult.Success
                 else ActionResult.Failure("No Flipper connected")
@@ -73,6 +73,7 @@ class FlipperActionHandler @Inject constructor(
             }
             else -> ActionResult.Unsupported
         }
+    }
 
     companion object {
         const val FEATURE_ID = "flipper"
