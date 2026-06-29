@@ -61,6 +61,10 @@ class UserPreferencesRepository @Inject constructor(
         dataStore.edit { it[UserPreferencesKeys.DYNAMIC_COLOR] = enabled }
     }
 
+    suspend fun setCustomTheme(option: CustomThemeOption) {
+        dataStore.edit { it[UserPreferencesKeys.CUSTOM_THEME] = option.name }
+    }
+
     suspend fun setReducedMotionOverride(value: TriStatePreference) {
         dataStore.edit { it[UserPreferencesKeys.REDUCED_MOTION_OVERRIDE] = value.name }
     }
@@ -99,6 +103,9 @@ class UserPreferencesRepository @Inject constructor(
             ?.let { runCatching { DarkThemeMode.valueOf(it) }.getOrNull() }
             ?: DarkThemeMode.FollowSystem,
         dynamicColor = this[UserPreferencesKeys.DYNAMIC_COLOR] ?: true,
+        customTheme = this[UserPreferencesKeys.CUSTOM_THEME]
+            ?.let { runCatching { CustomThemeOption.valueOf(it) }.getOrNull() }
+            ?: CustomThemeOption.Default,
         reducedMotionOverride = this[UserPreferencesKeys.REDUCED_MOTION_OVERRIDE]
             ?.let { runCatching { TriStatePreference.valueOf(it) }.getOrNull() }
             ?: TriStatePreference.FollowSystem,
@@ -117,6 +124,7 @@ class UserPreferencesRepository @Inject constructor(
 private object UserPreferencesKeys {
     val DARK_THEME_MODE = stringPreferencesKey("dark_theme_mode")
     val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+    val CUSTOM_THEME = stringPreferencesKey("custom_theme")
     val REDUCED_MOTION_OVERRIDE = stringPreferencesKey("reduced_motion_override")
     val REDUCED_TRANSPARENCY = booleanPreferencesKey("reduced_transparency")
     val LARGE_TEXT_OVERRIDE = booleanPreferencesKey("large_text_override")

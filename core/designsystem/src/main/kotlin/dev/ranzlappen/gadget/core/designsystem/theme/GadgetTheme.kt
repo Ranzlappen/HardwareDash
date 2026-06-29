@@ -62,11 +62,16 @@ import dev.ranzlappen.gadget.core.designsystem.a11y.rememberSystemReducedMotion
 fun GadgetTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     useDynamicColor: Boolean = true,
+    customTheme: GadgetCustomTheme = GadgetCustomTheme.Default,
     reducedMotionOverride: Boolean? = null,
     reducedTransparency: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    // A non-Default custom theme overrides everything else — including dynamic
+    // color — because the user explicitly chose a fixed palette.
+    val customScheme = customTheme.colorScheme(dark = useDarkTheme)
     val colorScheme = when {
+        customScheme != null -> customScheme
         useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
@@ -78,7 +83,7 @@ fun GadgetTheme(
         colors = colorScheme,
         typography = GadgetTypography,
         shapes = GadgetShapes,
-        identifier = GadgetCustomTheme.Default,
+        identifier = customTheme,
     )
     val systemReducedMotion = rememberSystemReducedMotion()
     val effectiveReducedMotion = reducedMotionOverride ?: systemReducedMotion
@@ -115,14 +120,22 @@ val LocalGadgetTheme = staticCompositionLocalOf<GadgetThemeData> {
  * the named theme variant (e.g. pick between two backdrop images
  * based on `LocalGadgetTheme.current.identifier`).
  *
- * Phase 0 ships only [Default]. Marked [Immutable] so Compose can
- * skip recompositions when the value is unchanged.
+ * [Default] follows the canonical dark/light/dynamic resolution. The
+ * three user-selectable Phase-3 variants override the palette (and
+ * suppress dynamic color) while keeping typography, shapes, spacing,
+ * motion, and glass tokens. Marked [Immutable] so Compose can skip
+ * recompositions when the value is unchanged.
  */
 @Immutable
 enum class GadgetCustomTheme {
     Default,
-    // Placeholders for the user-selectable themes coming in Phase 3:
-    // HighContrast,
-    // AmoledTrue,
-    // Pastel,
+
+    /** Maximal legibility — pure black/white grounds, brighter accents, stronger outlines. */
+    HighContrast,
+
+    /** True-black surfaces for OLED panels (dark only; light falls back to the standard light palette). */
+    AmoledTrue,
+
+    /** Soft, desaturated pastel accents on muted grounds. */
+    Pastel,
 }

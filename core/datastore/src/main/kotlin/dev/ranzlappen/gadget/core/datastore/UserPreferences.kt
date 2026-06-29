@@ -20,6 +20,13 @@ package dev.ranzlappen.gadget.core.datastore
 data class UserPreferences(
     val darkThemeMode: DarkThemeMode = DarkThemeMode.FollowSystem,
     val dynamicColor: Boolean = true,
+    /**
+     * The selected custom palette. [CustomThemeOption.Default] keeps the
+     * canonical dark/light/dynamic resolution; the other values pin a fixed
+     * palette (and suppress dynamic colour). Dark/light selection stays
+     * orthogonal — a custom theme still honours [darkThemeMode].
+     */
+    val customTheme: CustomThemeOption = CustomThemeOption.Default,
     val reducedMotionOverride: TriStatePreference = TriStatePreference.FollowSystem,
     val reducedTransparency: Boolean = false,
     val largeTextOverride: Boolean = false,
@@ -76,6 +83,19 @@ enum class DarkThemeMode {
     Light,
     Dark,
     FollowSystem,
+}
+
+/**
+ * User-selectable custom palette (Phase 3). A plain enum kept in
+ * `:core:datastore` (Compose-free); the UI layer maps it to the
+ * design-system `GadgetCustomTheme` when building the theme. Names are
+ * persisted via `.name`, so they must stay stable once shipped.
+ */
+enum class CustomThemeOption {
+    Default,
+    HighContrast,
+    AmoledTrue,
+    Pastel,
 }
 
 /**

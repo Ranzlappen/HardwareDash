@@ -21,4 +21,6 @@ dependencies {
     api(libs.androidx.material.icons.extended)
     api(libs.androidx.ui)
     api(libs.androidx.ui.graphics)
+
+    testImplementation(libs.junit)
 }

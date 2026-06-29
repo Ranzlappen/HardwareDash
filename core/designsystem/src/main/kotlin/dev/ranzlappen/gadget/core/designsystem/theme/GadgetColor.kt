@@ -1,5 +1,6 @@
 package dev.ranzlappen.gadget.core.designsystem.theme
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
@@ -160,3 +161,117 @@ val GadgetLightColorScheme = lightColorScheme(
     onErrorContainer = GadgetPalette.LightOnErrorContainer,
     scrim = Color.Black,
 )
+
+// ─── Phase-3 user-selectable custom themes ──────────────────────────────────
+// Each is a `.copy()` derivation of a base scheme so every required slot is
+// inherited and only the intentionally-different colours are overridden.
+
+/** High-contrast dark: pure-black grounds, white text, brightened accents, stronger outlines. */
+val GadgetHighContrastDarkColorScheme: ColorScheme = GadgetDarkColorScheme.copy(
+    primary = GadgetPalette.BrandTealSoft,
+    onPrimary = Color.Black,
+    secondary = GadgetPalette.BrandMagentaSoft,
+    onSecondary = Color.Black,
+    tertiary = GadgetPalette.BrandAmberSoft,
+    onTertiary = Color.Black,
+    background = Color.Black,
+    onBackground = Color.White,
+    surface = Color.Black,
+    onSurface = Color.White,
+    onSurfaceVariant = Color(0xFFE4E7EC),
+    surfaceDim = Color.Black,
+    surfaceBright = Color(0xFF222831),
+    surfaceContainerLowest = Color.Black,
+    surfaceContainerLow = Color(0xFF0A0C0F),
+    surfaceContainer = Color(0xFF111418),
+    surfaceContainerHigh = Color(0xFF191D23),
+    surfaceContainerHighest = Color(0xFF222831),
+    outline = Color(0xFF9AA2AE),
+    outlineVariant = Color(0xFF5C6470),
+)
+
+/** High-contrast light: pure-white grounds, black text, darkened accents, stronger outlines. */
+val GadgetHighContrastLightColorScheme: ColorScheme = GadgetLightColorScheme.copy(
+    primary = Color(0xFF00564A),
+    onPrimary = Color.White,
+    secondary = Color(0xFF7A2A62),
+    onSecondary = Color.White,
+    tertiary = Color(0xFF6E4E12),
+    onTertiary = Color.White,
+    background = Color.White,
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    onSurfaceVariant = Color(0xFF1A1D22),
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color(0xFFF4F6FA),
+    surfaceContainer = Color(0xFFEDEFF4),
+    surfaceContainerHigh = Color(0xFFE2E5EC),
+    surfaceContainerHighest = Color(0xFFD6DAE2),
+    outline = Color(0xFF2B2F36),
+    outlineVariant = Color(0xFF6B707A),
+)
+
+/** AMOLED true-black: every surface paints #000000 so OLED pixels switch fully off. */
+val GadgetAmoledColorScheme: ColorScheme = GadgetDarkColorScheme.copy(
+    background = Color.Black,
+    surface = Color.Black,
+    surfaceVariant = Color(0xFF101316),
+    surfaceDim = Color.Black,
+    surfaceBright = Color(0xFF15191E),
+    surfaceContainerLowest = Color.Black,
+    surfaceContainerLow = Color.Black,
+    surfaceContainer = Color(0xFF080A0C),
+    surfaceContainerHigh = Color(0xFF101316),
+    surfaceContainerHighest = Color(0xFF181C21),
+    outlineVariant = Color(0xFF1C2025),
+)
+
+// Pastel accents — soft, desaturated hues.
+private val PastelTeal = Color(0xFF7FD8C8)
+private val PastelPink = Color(0xFFE6A8D0)
+private val PastelAmber = Color(0xFFF2D08A)
+
+/** Pastel dark: muted slate grounds with soft accents. */
+val GadgetPastelDarkColorScheme: ColorScheme = GadgetDarkColorScheme.copy(
+    primary = PastelTeal,
+    onPrimary = Color(0xFF06251F),
+    primaryContainer = Color(0xFF234A42),
+    secondary = PastelPink,
+    onSecondary = Color(0xFF2E0E25),
+    tertiary = PastelAmber,
+    onTertiary = Color(0xFF2E2408),
+    background = Color(0xFF14161A),
+    surface = Color(0xFF181B20),
+    surfaceContainer = Color(0xFF1B1F25),
+    surfaceContainerHigh = Color(0xFF222730),
+)
+
+/** Pastel light: soft off-white grounds with gentle accents. */
+val GadgetPastelLightColorScheme: ColorScheme = GadgetLightColorScheme.copy(
+    primary = Color(0xFF4FA593),
+    onPrimary = Color.White,
+    secondary = Color(0xFFB56FA0),
+    onSecondary = Color.White,
+    tertiary = Color(0xFFC9A24E),
+    onTertiary = Color.White,
+    background = Color(0xFFF7F4FA),
+    surface = Color(0xFFFFFDFF),
+    surfaceContainer = Color(0xFFF1ECF5),
+)
+
+/**
+ * Resolve the [ColorScheme] for a [GadgetCustomTheme] at the given brightness,
+ * or `null` for [GadgetCustomTheme.Default] (the caller then falls back to the
+ * dynamic / canonical resolution). AMOLED is a dark-only concept, so its light
+ * variant uses the standard light palette.
+ */
+fun GadgetCustomTheme.colorScheme(dark: Boolean): ColorScheme? = when (this) {
+    GadgetCustomTheme.Default -> null
+    GadgetCustomTheme.HighContrast ->
+        if (dark) GadgetHighContrastDarkColorScheme else GadgetHighContrastLightColorScheme
+    GadgetCustomTheme.AmoledTrue ->
+        if (dark) GadgetAmoledColorScheme else GadgetLightColorScheme
+    GadgetCustomTheme.Pastel ->
+        if (dark) GadgetPastelDarkColorScheme else GadgetPastelLightColorScheme
+}

@@ -35,8 +35,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.feature.apps.AppRepository
 import dev.ranzlappen.gadget.feature.apps.appsScreen
 import dev.ranzlappen.gadget.feature.apps.widget.FolderWidgetController
+import dev.ranzlappen.gadget.core.datastore.CustomThemeOption
 import dev.ranzlappen.gadget.core.datastore.DarkThemeMode
 import dev.ranzlappen.gadget.core.datastore.TriStatePreference
+import dev.ranzlappen.gadget.core.designsystem.theme.GadgetCustomTheme
 import dev.ranzlappen.gadget.core.datastore.UserPreferences
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
 import dev.ranzlappen.gadget.core.navigation.GadgetApp
@@ -121,10 +123,17 @@ class MainActivity : ComponentActivity() {
                         TriStatePreference.Off -> false
                         TriStatePreference.FollowSystem -> null
                     }
+                    val customTheme = when (preferences.customTheme) {
+                        CustomThemeOption.Default -> GadgetCustomTheme.Default
+                        CustomThemeOption.HighContrast -> GadgetCustomTheme.HighContrast
+                        CustomThemeOption.AmoledTrue -> GadgetCustomTheme.AmoledTrue
+                        CustomThemeOption.Pastel -> GadgetCustomTheme.Pastel
+                    }
                     GadgetApp(
                         navController = navController,
                         useDarkTheme = useDarkTheme,
                         useDynamicColor = preferences.dynamicColor,
+                        customTheme = customTheme,
                         reducedMotionOverride = reducedMotionOverride,
                         reducedTransparency = preferences.reducedTransparency,
                     ) {

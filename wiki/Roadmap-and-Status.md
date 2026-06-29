@@ -129,9 +129,10 @@ per-feature clean-cut for the other migrated modules' legacy sources.
 
 ## Forward plan
 
-- **Phase 3 — Core God-App Capabilities.** Full widget/notification-panel
-  coverage of the legacy surface, in-depth permission UI + rooted
-  one-ups, a custom theme picker (high-contrast / amoled-true / pastel).
+- **Phase 3 — Core God-App Capabilities (🚧 started).** The custom theme
+  picker (high-contrast / amoled-true / pastel) shipped — `GadgetCustomTheme`
+  + `Settings → Appearance → Palette`. Still open: full widget/notification-panel
+  coverage of the legacy surface, and in-depth permission UI + rooted one-ups.
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.
