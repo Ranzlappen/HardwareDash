@@ -60,4 +60,12 @@
     <string name="battery_cap_cell_monitor_detail">Per-cell voltage telemetry from the fuel gauge</string>
     <string name="battery_cap_charging_profile_name">Charging profile control</string>
     <string name="battery_cap_charging_profile_detail">Override charge current and voltage cutoff limits</string>
+
+    <!-- Home-screen widget -->
+    <string name="battery_widget_label">Battery</string>
+    <string name="battery_widget_description">Live battery level and charging state</string>
+    <string name="battery_widget_percent_format">%1$d%%</string>
+    <string name="battery_widget_unknown">—</string>
+    <string name="battery_widget_charging">Charging</string>
+    <string name="battery_widget_discharging">Discharging</string>
 </resources>

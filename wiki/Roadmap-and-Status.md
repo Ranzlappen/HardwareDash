@@ -134,8 +134,10 @@ per-feature clean-cut for the other migrated modules' legacy sources.
   `Settings → Appearance → Palette`) and the in-depth permission UI (the Health
   screen is now an actionable permission manager — runtime grant requests +
   App-Settings fallback) plus its rooted one-up (`:feature:bugreport-rooted`
-  force-grants permissions via `pm grant`, gated by `RootSafetyGate`). Still
-  open: full widget/notification-panel coverage of the legacy surface.
+  force-grants permissions via `pm grant`, gated by `RootSafetyGate`) and the
+  first widget-coverage slice (a battery status home-screen widget on the
+  `:core:widgetkit` content archetype). Still open: widget/notification-panel
+  coverage for the remaining features.
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.
