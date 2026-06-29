@@ -60,6 +60,8 @@ import dev.ranzlappen.gadget.feature.manual.manualScreen
 import dev.ranzlappen.gadget.feature.radios.bt.btScreen
 import dev.ranzlappen.gadget.feature.radios.nfc.NfcViewModel
 import dev.ranzlappen.gadget.feature.radios.wifi.wifiScreen
+import dev.ranzlappen.gadget.feature.radios.subghz.subghzScreen
+import dev.ranzlappen.gadget.feature.flipper.flipperScreen
 import dev.ranzlappen.gadget.feature.radios.nfc.nfcScreen
 import dev.ranzlappen.gadget.feature.sensors.sensorsScreen
 import dev.ranzlappen.gadget.feature.settings.settingsScreen
@@ -149,6 +151,8 @@ class MainActivity : ComponentActivity() {
                         nfcScreen()
                         btScreen()
                         wifiScreen()
+                        subghzScreen()
+                        flipperScreen()
                         ambientScreen()
                         lockScreen()
                         actuatorsScreen()

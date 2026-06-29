@@ -220,6 +220,8 @@ dependencies {
     implementation(project(":feature:radios-nfc"))
     implementation(project(":feature:radios-bt"))
     implementation(project(":feature:radios-wifi"))
+    implementation(project(":feature:radios-subghz"))
+    implementation(project(":feature:flipper"))
     implementation(project(":feature:ambient"))
     implementation(project(":feature:lock"))
     implementation(project(":feature:actuators"))
@@ -335,6 +337,10 @@ dependencies {
     "rootedImplementation"(project(":feature:storage-rooted"))
     // Rooted Diagnostics action handler — logcat tail, meminfo, cpuinfo, procstats.
     "rootedImplementation"(project(":feature:diagnostics-rooted"))
+    // Rooted Lock overlay — secure-keyguard TYPE_APPLICATION_OVERLAY action.
+    "rootedImplementation"(project(":feature:lock-rooted"))
+    // Rooted Flipper — root-granted USB device-node access (no permission dialog).
+    "rootedImplementation"(project(":feature:flipper-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

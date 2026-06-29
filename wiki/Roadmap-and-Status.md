@@ -13,7 +13,11 @@ panels, granular permission management, and hardware-safety guardrails.
 The rooted flavor safely extends functionality; the standard flavor stays
 fully functional and Play-store-safe.
 
-## Current phase — Phase 2: Accelerated Feature Migration (🚧 in progress)
+## Current phase — Phase 2: Accelerated Feature Migration (✅ feature-complete)
+
+> All Phase-2 skeleton modules are now filled — `flipper` (+ `-rooted`) was
+> the last, closing the tail. What remains of Phase 2 is the clean-cut
+> deletion of the ~legacy `com.gadget.*` sources, tracked per-feature.
 
 Each feature migrates directly from the archived `legacy-main` branch
 into a `:feature:<name>` module using the new design system (`:core:ui`),
@@ -50,12 +54,15 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows) | `:feature:radios-bt` | ✅ |
 | WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions) | `:feature:radios-wifi` | ✅ |
 | Ambient Light (live lux reading + level descriptor; ambient-light history monitor; assert-bright / assert-dark automation actions; rooted brightness / refresh-rate / density rows) | `:feature:ambient` | ✅ |
-| Lock / Security (keyguard lock state + biometrics enrollment; lock-state live + history monitors; assert-locked / assert-unlocked / assert-secure automation actions; rooted overlay row) | `:feature:lock` | ✅ |
+| Lock / Security (keyguard lock state + biometrics enrollment; lock-state live + history monitors; assert-locked / assert-unlocked / assert-secure automation actions; rooted secure-keyguard overlay — self-grants SYSTEM_ALERT_WINDOW via appops and draws a bounded anti-phishing overlay, gated by `RootFeatureKey.LockSecureOverlay`, exposed as the `lock_root` action) | `:feature:lock` + `:feature:lock-rooted` | ✅ |
 | Actuators / Haptics (vibrator availability + amplitude control; haptic-click / heavy-click / assert-available automation actions; rooted extreme/PWM/dual/rumble capability rows) | `:feature:actuators` | ✅ |
 | Diagnostics (rooted shell dump overview; logcat / meminfo / cpuinfo / procstats automation actions via `:feature:diagnostics-rooted`) | `:feature:diagnostics` + `:feature:diagnostics-rooted` | ✅ |
 | Health / BugReport (permission grant scanner; assert-permission automation action; rooted ADB-diagnostics row) | `:feature:bugreport` | ✅ |
 | Help / Manual (static documentation screen for all modules, capabilities, and automation engine) | `:feature:manual` | ✅ |
 | Rooted Storage actions (diskstats / mounts / fstrim / drop_caches) | `:feature:storage-rooted` | ✅ |
+| Sub-GHz Radio (USB SDR / transceiver detection — RTL-SDR / HackRF / YARD Stick One / LimeSDR / CC1101; bridge-connected push monitor; assert-bridge / assert-Sub-GHz-capable automation actions; rooted raw-register / custom-tuning / OOK-FSK-capture rows) | `:feature:radios-subghz` | ✅ |
+| YouTube Downloader (yt-dlp + ffmpeg video/audio downloads, private playlists via cookie login, MediaStore export, dataSync FGS; `download_progress` monitor + `youtube_downloader` action) — standard-only, runs unprivileged | `:feature:youtubedownloader` | ✅ |
+| Flipper Zero bridge (USB CDC-ACM + BLE GATT transport, hand-rolled protobuf RPC, System/Storage/Sub-GHz/Infrared command suites; `flipper_connected` + `flipper_battery` monitors; `flipper` ActionHandler — assert-connected / ping / transmit .sub / .ir; rooted USB device-node auto-grant via `RootFeatureKey.FlipperUsbGrant`) | `:feature:flipper` + `:feature:flipper-rooted` | ✅ |
 | Cross-automation engine + rule builder | `:core:automation` + `:core:hardware` + `:feature:automation-ui` | ✅ (epics #145/#146) |
 
 ### Shared infrastructure landed
@@ -83,22 +90,30 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 
 ### Remaining legacy surface
 
-~297 legacy `com.gadget.*` Kotlin files remain across all `:app` source
+~284 legacy `com.gadget.*` Kotlin files remain across all `:app` source
 sets, migrating feature-by-feature per the
-[Feature Migration Guide](Feature-Migration-Guide). Canonical metric:
+[Feature Migration Guide](Feature-Migration-Guide). The `com.gadget.flipper`
++ `com.gadget.subghz.SubGhzSignal` sources (13 files) were clean-cut deleted
+once `:feature:flipper` landed green. Canonical metric:
 
 ```bash
 find app/src -path "*com/gadget*" -name "*.kt" | wc -l
 ```
 
-### Phase-2 tail (skeleton modules still pending)
+### Phase-2 tail (skeleton modules — all filled ✅)
 
-The following skeleton modules still have no Kotlin sources and are
-deferred to a separate batch (complexity or unclear scope):
-`flipper` (+ `-flipper-rooted`) — protobuf RPC over USB/BLE;
-`lock-rooted` — `TYPE_SYSTEM_ALERT` overlay;
-`radios-subghz` — Sub-GHz SDR bridge.
-All other Phase-2 skeleton modules shipped in this batch.
+**No skeleton modules remain** — `flipper` (+ `-rooted`) shipped the full
+USB CDC-ACM + BLE GATT transport, the hand-rolled protobuf RPC stack, and
+all four command suites (System / Storage / Sub-GHz / Infrared), closing the
+tail. `radios-subghz` shipped USB SDR / Sub-GHz transceiver detection (the
+SDR data path remains a rooted follow-up); `lock-rooted` shipped its
+secure-keyguard overlay (migration of the legacy `LockScreenOverlayHelper`).
+
+The `com.gadget.flipper` legacy sources have now been clean-cut deleted (no
+non-legacy code referenced them). The app-level USB-attach launch hook
+(`.MainActivity` intent-filter + `@xml/flipper_usb_filter`) is retained — it
+is app glue, not feature code. Remaining Phase-2 cleanup is the same
+per-feature clean-cut for the other migrated modules' legacy sources.
 
 ## Completed phases
 
@@ -168,5 +183,5 @@ complete. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-06-23 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-06-29 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md` · Related modules: all._

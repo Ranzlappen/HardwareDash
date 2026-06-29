@@ -59,6 +59,9 @@ private const val GPS_ROUTE_INVOCATION_CAP = 30
 private const val GPS_LSPOSED_INSTALL_WINDOW_MINUTES = 5
 private const val GPS_LSPOSED_INSTALL_CAP = 1
 
+private const val LOCK_OVERLAY_WINDOW_SECONDS = 60
+private const val FLIPPER_USB_GRANT_WINDOW_SECONDS = 60
+
 /**
  * Single source of truth mapping every [RootFeatureKey] to its
  * [RootFeatureDescriptor]. Both flavors read this; the standard flavor's
@@ -866,6 +869,30 @@ class RootFeatureRegistry @Inject constructor() {
             limit = RootLimitPolicy(
                 window = GPS_LSPOSED_INSTALL_WINDOW_MINUTES.minutes,
                 maxInvocations = GPS_LSPOSED_INSTALL_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+
+        // ──── Batch-14 Lock overlay features ────
+        RootFeatureKey.LockSecureOverlay to RootFeatureDescriptor(
+            key = RootFeatureKey.LockSecureOverlay,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = LOCK_OVERLAY_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+
+        // ──── Batch-15 Flipper features ────
+        RootFeatureKey.FlipperUsbGrant to RootFeatureDescriptor(
+            key = RootFeatureKey.FlipperUsbGrant,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = FLIPPER_USB_GRANT_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
             ),
             requiresExplicitConfirm = true,
             isWriteCapable = true,

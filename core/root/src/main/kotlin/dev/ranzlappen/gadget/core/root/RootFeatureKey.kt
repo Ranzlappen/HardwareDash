@@ -151,4 +151,15 @@ sealed class RootFeatureKey(val id: String) {
     // One-shot installer for the bundled LSPosed module that hides
     // isFromMockProvider()/isMock() from third-party apps.
     data object GpsLsposedHookInstall : RootFeatureKey("gps_lsposed_hook_install")
+
+    // ──── Batch-14 Lock overlay features ────
+    // Draw a bounded `TYPE_APPLICATION_OVERLAY` above the secure keyguard,
+    // granting SYSTEM_ALERT_WINDOW via root appops first so it works even
+    // without the user toggling the Settings permission.
+    data object LockSecureOverlay : RootFeatureKey("lock_secure_overlay")
+
+    // ──── Batch-15 Flipper features ────
+    // Relax the attached Flipper's USB device-node permissions via root so the
+    // app opens the CDC-ACM port without the per-attach permission dialog.
+    data object FlipperUsbGrant : RootFeatureKey("flipper_usb_grant")
 }

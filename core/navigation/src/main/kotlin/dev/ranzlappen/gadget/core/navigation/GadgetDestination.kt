@@ -15,11 +15,13 @@ import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SettingsInputAntenna
 import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tune
@@ -39,11 +41,13 @@ import androidx.compose.material.icons.outlined.Help
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Nfc
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.SettingsInputAntenna
 import androidx.compose.material.icons.outlined.SettingsRemote
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Tune
@@ -291,6 +295,33 @@ sealed interface GadgetDestination {
     }
 
     /**
+     * Sub-GHz feature module — detects an attached SDR / Sub-GHz USB
+     * transceiver (RTL-SDR, HackRF, YARD Stick One, …) on the host bus,
+     * exposes a bridge-connected metric source for monitoring/automation,
+     * and lists the rooted raw-radio one-ups. Android has no first-party
+     * Sub-GHz radio API, so the standard flavor is detection-only.
+     */
+    data object RadiosSubghz : GadgetDestination {
+        override val route = "radios_subghz"
+        override val label = "Sub-GHz"
+        override val iconFilled = Icons.Filled.SettingsInputAntenna
+        override val iconOutlined = Icons.Outlined.SettingsInputAntenna
+    }
+
+    /**
+     * Flipper Zero bridge feature module — USB CDC-ACM + BLE GATT transport,
+     * a hand-rolled protobuf RPC stack, and System/Storage/Sub-GHz/Infrared
+     * command suites. Exposes connection + battery metric sources and a
+     * `flipper` ActionHandler; the rooted sibling adds root-granted USB access.
+     */
+    data object Flipper : GadgetDestination {
+        override val route = "flipper"
+        override val label = "Flipper"
+        override val iconFilled = Icons.Filled.Memory
+        override val iconOutlined = Icons.Outlined.Memory
+    }
+
+    /**
      * Ambient light feature module — live lux reading from the device's
      * light sensor, with level descriptors and monitoring support.
      */
@@ -384,7 +415,7 @@ sealed interface GadgetDestination {
         val modules: List<GadgetDestination> = listOf(
             Torch, Vibration, Apps, Sensors,
             Battery, Gps, Storage, RadiosIr, Camera,
-            Motion, Audio, RadiosNfc, RadiosBt, RadiosWifi,
+            Motion, Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosSubghz, Flipper,
             Ambient, Lock, Actuators, Youtubedownloader, Diagnostics, BugReport, Manual, Automation,
         )
 

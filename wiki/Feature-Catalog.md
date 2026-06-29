@@ -99,6 +99,58 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
 - **Source:** `:core:widgetkit`.
 - **Deep-dive:** [Widgets, Tiles & Surfaces](Widgets-Tiles-and-Surfaces).
 
+## Sub-GHz Radio ✅
+
+- **What:** detects an attached SDR / Sub-GHz USB transceiver (RTL-SDR,
+  HackRF, YARD Stick One, LimeSDR Mini, CC1101 bridges) on the host bus and
+  reports whether it covers the 300–928 MHz ISM bands. Android exposes no
+  first-party Sub-GHz radio API, so the standard flavor is **detection-only**
+  (graceful-unavailable when no dongle / no USB-host bus).
+- **Monitoring:** `subghz_bridge_connected` push `MetricSource` (emits on USB
+  attach/detach only) → `MonitorContainer` + `LiveMonitorContainer`.
+- **Automation:** `SubghzActionHandler` — assert-bridge-attached and
+  assert-Sub-GHz-capable conditions.
+- **Permissions:** none (USB enumeration needs no runtime grant);
+  `uses-feature android.hardware.usb.host` (not required).
+- **Rooted:** 3 capability rows — raw register access, custom carrier tuning,
+  OOK / 2-FSK capture (informational one-ups, gated on the rooted flavor).
+- **Standard:** ✅ (detection) · **Rooted:** ✅ + raw-radio rows.
+- **Source:** `:feature:radios-subghz`.
+
+## YouTube Downloader ✅
+
+- **What:** downloads videos and audio (including private playlists via an
+  in-app cookie login) using the bundled yt-dlp + ffmpeg runtime
+  (youtubedl-android). Finished downloads are exported to MediaStore
+  (Movies / Music).
+- **Monitoring:** `download_progress` `MetricSource`.
+- **Automation:** `youtube_downloader` `ActionHandler`.
+- **Service:** `dataSync` foreground service for in-progress downloads.
+- **Standard:** ✅ (runs unprivileged) · **Rooted:** ✅ (same; standard-only
+  feature).
+- **Source:** `:feature:youtubedownloader`.
+
+## Flipper Zero ✅
+
+- **What:** bridge to a Flipper Zero over **USB CDC-ACM** (115200-8-N-1) or
+  **BLE GATT** (Nordic-UART serial service). Shows live connection state,
+  device name, firmware, and battery; transmits Sub-GHz `.sub` and IR `.ir`
+  files to the device.
+- **RPC:** a hand-rolled protobuf `PB_Main` stack (varint framing +
+  command-id demux) driving the System / Storage / Sub-GHz / Infrared command
+  suites — no protoc/codegen dependency.
+- **Monitoring:** `flipper_connected` + `flipper_battery` `MetricSource`s.
+- **Automation:** `flipper` `ActionHandler` — assert-connected, ping,
+  transmit-`.sub`, transmit-`.ir`.
+- **Permissions:** USB host (no runtime grant); `BLUETOOTH_CONNECT/SCAN` for
+  the BLE picker.
+- **Rooted:** `flipper_root` action root-grants USB access by relaxing the
+  Flipper's `/dev/bus/usb` device-node permissions, so the port opens without
+  the per-attach dialog (gated by `RootFeatureKey.FlipperUsbGrant`).
+- **Standard:** ✅ · **Rooted:** ✅ + USB auto-grant.
+- **Source:** `:feature:flipper` (+ `:feature:flipper-rooted`). Migrated from
+  legacy `com.gadget.flipper`.
+
 ## Rooted extras ✅ (per feature)
 
 - **What:** root-only capabilities layered onto a feature without
@@ -122,8 +174,6 @@ Skeleton modules awaiting their migration batch — each follows the
 | GPS | `FusedLocationProvider` | `:feature:gps` |
 | Battery | `BatteryManager` | `:feature:battery` |
 | Motion / Ambient | `SensorManager` | `:feature:motion`, `:feature:ambient` |
-| Radios — WiFi / BT / NFC / Sub-GHz / IR | respective managers + `ConsumerIrManager` | `:feature:radios-*` |
-| Flipper Zero | USB CDC-ACM + BLE GATT | `:feature:flipper` (+ `-rooted`) |
 | Storage | StorageManager | `:feature:storage` (+ `-rooted`) |
 | Lock / Diagnostics / Bugreport | device admin / dumpsys | `:feature:lock`, `:feature:diagnostics`, `:feature:bugreport` (+ `-rooted`) |
 | Actuators (hub) | — | `:feature:actuators` |
@@ -131,5 +181,5 @@ Skeleton modules awaiting their migration batch — each follows the
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `MASTER-PLAN.md`, `settings.gradle.kts`,
+> _Last reviewed: 2026-06-29 · Source: `MASTER-PLAN.md`, `settings.gradle.kts`,
 > feature source counts · Related: every `feature/*`._

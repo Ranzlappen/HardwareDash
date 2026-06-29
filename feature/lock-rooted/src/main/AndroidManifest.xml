@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Draw the secure-lock overlay above the keyguard. Declared in the
+         rooted sibling only, so the standard APK never requests it; the
+         rooted flavor additionally self-grants it via appops at runtime. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+</manifest>
