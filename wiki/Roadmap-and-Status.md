@@ -57,7 +57,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Lock / Security (keyguard lock state + biometrics enrollment; lock-state live + history monitors; assert-locked / assert-unlocked / assert-secure automation actions; rooted secure-keyguard overlay — self-grants SYSTEM_ALERT_WINDOW via appops and draws a bounded anti-phishing overlay, gated by `RootFeatureKey.LockSecureOverlay`, exposed as the `lock_root` action) | `:feature:lock` + `:feature:lock-rooted` | ✅ |
 | Actuators / Haptics (vibrator availability + amplitude control; haptic-click / heavy-click / assert-available automation actions; rooted extreme/PWM/dual/rumble capability rows) | `:feature:actuators` | ✅ |
 | Diagnostics (rooted shell dump overview; logcat / meminfo / cpuinfo / procstats automation actions via `:feature:diagnostics-rooted`) | `:feature:diagnostics` + `:feature:diagnostics-rooted` | ✅ |
-| Health / BugReport (permission grant scanner; assert-permission automation action; rooted ADB-diagnostics row) | `:feature:bugreport` | ✅ |
+| Health / BugReport (permission manager — grant-state scan + per-permission runtime request + App-Settings fallback + granted/total summary, refreshes on resume; assert-permission automation action; rooted ADB-diagnostics row) | `:feature:bugreport` | ✅ |
 | Help / Manual (static documentation screen for all modules, capabilities, and automation engine) | `:feature:manual` | ✅ |
 | Rooted Storage actions (diskstats / mounts / fstrim / drop_caches) | `:feature:storage-rooted` | ✅ |
 | Sub-GHz Radio (USB SDR / transceiver detection — RTL-SDR / HackRF / YARD Stick One / LimeSDR / CC1101; bridge-connected push monitor; assert-bridge / assert-Sub-GHz-capable automation actions; rooted raw-register / custom-tuning / OOK-FSK-capture rows) | `:feature:radios-subghz` | ✅ |
@@ -129,10 +129,12 @@ per-feature clean-cut for the other migrated modules' legacy sources.
 
 ## Forward plan
 
-- **Phase 3 — Core God-App Capabilities (🚧 started).** The custom theme
-  picker (high-contrast / amoled-true / pastel) shipped — `GadgetCustomTheme`
-  + `Settings → Appearance → Palette`. Still open: full widget/notification-panel
-  coverage of the legacy surface, and in-depth permission UI + rooted one-ups.
+- **Phase 3 — Core God-App Capabilities (🚧 started).** Shipped: the custom
+  theme picker (high-contrast / amoled-true / pastel; `GadgetCustomTheme` +
+  `Settings → Appearance → Palette`) and the in-depth permission UI (the Health
+  screen is now an actionable permission manager — runtime grant requests +
+  App-Settings fallback). Still open: full widget/notification-panel coverage of
+  the legacy surface, and the rooted permission one-up (`pm grant` via root).
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.

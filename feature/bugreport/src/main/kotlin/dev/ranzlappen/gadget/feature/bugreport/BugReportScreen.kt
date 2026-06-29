@@ -1,5 +1,10 @@
 package dev.ranzlappen.gadget.feature.bugreport
 
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,13 +18,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
+import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetStatusKind
+import dev.ranzlappen.gadget.core.ui.component.GadgetTertiaryButton
 import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
 import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
@@ -33,10 +43,29 @@ fun BugReportScreen(
     viewModel: BugReportViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+
+    // Re-scan on resume so the screen reflects grants made in the system dialog
+    // or App Settings after the user leaves and returns.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refresh() }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { viewModel.refresh() }
+
     BugReportScreenContent(
         state = state,
         moduleInfo = bugReportModuleInfo(state),
         modifier = modifier,
+        onRequestPermission = { permissionLauncher.launch(it) },
+        onOpenAppSettings = {
+            context.startActivity(
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", context.packageName, null),
+                ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+        },
     )
 }
 
@@ -78,13 +107,19 @@ internal fun BugReportScreenContent(
     state: BugReportState,
     moduleInfo: ModuleInfo?,
     modifier: Modifier = Modifier,
+    onRequestPermission: (String) -> Unit = {},
+    onOpenAppSettings: () -> Unit = {},
 ) {
     ModuleScreenScaffold(
         title = stringResource(R.string.bugreport_screen_title),
         modifier = modifier,
         moduleInfo = moduleInfo,
         functional = {
-            BugReportPermissionsCard(state = state)
+            BugReportPermissionsCard(
+                state = state,
+                onRequestPermission = onRequestPermission,
+                onOpenAppSettings = onOpenAppSettings,
+            )
         },
     )
 }
@@ -92,6 +127,8 @@ internal fun BugReportScreenContent(
 @Composable
 private fun BugReportPermissionsCard(
     state: BugReportState,
+    onRequestPermission: (String) -> Unit,
+    onOpenAppSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
@@ -100,7 +137,16 @@ private fun BugReportPermissionsCard(
         title = stringResource(R.string.bugreport_card_title),
         icon = Icons.Filled.HealthAndSafety,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
+        Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
+            Text(
+                text = stringResource(
+                    R.string.bugreport_summary,
+                    state.permissions.count { it.granted },
+                    state.permissions.size,
+                ),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
             state.permissions.forEach { entry ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -111,16 +157,27 @@ private fun BugReportPermissionsCard(
                         text = stringResource(entry.label),
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    GadgetChip(
-                        selected = entry.granted,
-                        onClick = {},
-                        label = stringResource(
-                            if (entry.granted) R.string.bugreport_perm_granted
-                            else R.string.bugreport_perm_denied,
-                        ),
-                        enabled = false,
-                    )
+                    if (entry.granted) {
+                        GadgetChip(
+                            selected = true,
+                            onClick = {},
+                            label = stringResource(R.string.bugreport_perm_granted),
+                            enabled = false,
+                        )
+                    } else {
+                        GadgetSecondaryButton(
+                            onClick = { onRequestPermission(entry.permission) },
+                            text = stringResource(R.string.bugreport_perm_grant),
+                        )
+                    }
                 }
+            }
+            if (!state.allGranted) {
+                GadgetTertiaryButton(
+                    onClick = onOpenAppSettings,
+                    text = stringResource(R.string.bugreport_open_settings),
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
