@@ -52,4 +52,12 @@
     <string name="wifi_cap_tx_power_detail">Set transmit power via iw phy set txpower (hard ceiling: 20 dBm) to reduce interference or extend range</string>
     <string name="wifi_cap_channel_name">Explicit channel selection</string>
     <string name="wifi_cap_channel_detail">Lock onto a specific 2.4 or 5 GHz channel via iw dev set channel, bypassing automatic selection</string>
+
+    <!-- Home-screen widget -->
+    <string name="wifi_widget_label">WiFi</string>
+    <string name="wifi_widget_description">WiFi signal strength and connected network</string>
+    <string name="wifi_widget_percent_format">%1$d%%</string>
+    <string name="wifi_widget_unknown">—</string>
+    <string name="wifi_widget_off">WiFi off</string>
+    <string name="wifi_widget_disconnected">Not connected</string>
 </resources>
