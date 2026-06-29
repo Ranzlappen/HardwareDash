@@ -12,7 +12,7 @@ Module graph and dependency rules: [Architecture](Architecture).
 - **Purpose:** the single application module. Hosts `GadgetApplication`
   (`@HiltAndroidApp`), `MainActivity` + `GadgetApp { … }` nav wiring,
   flavor/applicationId/signing config, the flavor `RootBindings`, and the
-  not-yet-migrated legacy `com.gadget.*` surface (~297 files).
+  not-yet-migrated legacy `com.gadget.*` surface (~284 files).
 - **Maturity:** production; shrinking as features migrate out.
 - **Dependencies:** every standard `feature/*`; rooted flavor adds
   `feature/*-rooted` via `rootedImplementation`.

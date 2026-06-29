@@ -90,9 +90,11 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 
 ### Remaining legacy surface
 
-~297 legacy `com.gadget.*` Kotlin files remain across all `:app` source
+~284 legacy `com.gadget.*` Kotlin files remain across all `:app` source
 sets, migrating feature-by-feature per the
-[Feature Migration Guide](Feature-Migration-Guide). Canonical metric:
+[Feature Migration Guide](Feature-Migration-Guide). The `com.gadget.flipper`
++ `com.gadget.subghz.SubGhzSignal` sources (13 files) were clean-cut deleted
+once `:feature:flipper` landed green. Canonical metric:
 
 ```bash
 find app/src -path "*com/gadget*" -name "*.kt" | wc -l
@@ -107,9 +109,11 @@ tail. `radios-subghz` shipped USB SDR / Sub-GHz transceiver detection (the
 SDR data path remains a rooted follow-up); `lock-rooted` shipped its
 secure-keyguard overlay (migration of the legacy `LockScreenOverlayHelper`).
 
-Remaining Phase-2 work is purely clean-cut deletion of the legacy
-`com.gadget.flipper` sources once the new module is device-verified (deferred
-because `BackupManagerEntryPoint` / legacy strings still reference them).
+The `com.gadget.flipper` legacy sources have now been clean-cut deleted (no
+non-legacy code referenced them). The app-level USB-attach launch hook
+(`.MainActivity` intent-filter + `@xml/flipper_usb_filter`) is retained — it
+is app glue, not feature code. Remaining Phase-2 cleanup is the same
+per-feature clean-cut for the other migrated modules' legacy sources.
 
 ## Completed phases
 
