@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AppWidget provider metadata for the internal-storage widget.
+
+  Display-only: no android:configure (added straight from the launcher tray;
+  the provider self-heals a default config). updatePeriodMillis=0 — the widget
+  refreshes only via the content observer (StorageWidgetController ->
+  ContentWidgetUpdater) and onAppWidgetOptionsChanged, never on a periodic tick.
+
+  previewLayout (API 31+) renders the real layout in the picker.
+  targetCellWidth/Height declare the 2x1 footprint — some OEM launchers refuse
+  widgets without these.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="110dp"
+    android:minHeight="40dp"
+    android:minResizeWidth="40dp"
+    android:minResizeHeight="40dp"
+    android:maxResizeWidth="250dp"
+    android:maxResizeHeight="180dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_storage"
+    android:previewLayout="@layout/widget_storage"
+    android:description="@string/storage_widget_description"
+    android:widgetCategory="home_screen"
+    android:resizeMode="horizontal|vertical" />

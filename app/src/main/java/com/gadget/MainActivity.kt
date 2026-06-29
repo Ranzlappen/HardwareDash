@@ -36,6 +36,7 @@ import dev.ranzlappen.gadget.feature.apps.AppRepository
 import dev.ranzlappen.gadget.feature.apps.appsScreen
 import dev.ranzlappen.gadget.feature.apps.widget.FolderWidgetController
 import dev.ranzlappen.gadget.feature.battery.widget.BatteryWidgetController
+import dev.ranzlappen.gadget.feature.storage.widget.StorageWidgetController
 import dev.ranzlappen.gadget.core.datastore.CustomThemeOption
 import dev.ranzlappen.gadget.core.datastore.DarkThemeMode
 import dev.ranzlappen.gadget.core.datastore.TriStatePreference
@@ -87,6 +88,10 @@ class MainActivity : ComponentActivity() {
     // Eager-injected so its init { } observes battery state and repaints
     // placed battery widgets for the lifetime of the process.
     @Inject lateinit var batteryWidgetController: BatteryWidgetController
+
+    // Eager-injected so its init { } observes storage usage and repaints
+    // placed storage widgets for the lifetime of the process.
+    @Inject lateinit var storageWidgetController: StorageWidgetController
 
     // Eager-injected so its init { } runs the one-shot legacy gadget_db ->
     // apps.db import (in-place upgrade + legacy backup restore continuity).
