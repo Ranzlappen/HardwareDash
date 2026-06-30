@@ -343,6 +343,8 @@ dependencies {
     "rootedImplementation"(project(":feature:flipper-rooted"))
     // Rooted BugReport — force-grant runtime permissions via `pm grant`.
     "rootedImplementation"(project(":feature:bugreport-rooted"))
+    // Rooted Wi-Fi — rfkill / iw TX-power / channel / injection-probe actions.
+    "rootedImplementation"(project(":feature:radios-wifi-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

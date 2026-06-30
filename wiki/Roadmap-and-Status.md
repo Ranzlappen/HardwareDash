@@ -52,7 +52,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Audio (dB meter + WAV voice recording; live dB monitor; rooted mic-gain / direct-PCM / custom-sample-rate rows) | `:feature:audio` | ✅ |
 | NFC (NDEF tag read + HCE emulation + template library; live + history NFC-state monitors; rooted raw-NCI row) | `:feature:radios-nfc` | ✅ |
 | Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows) | `:feature:radios-bt` | ✅ |
-| WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions) | `:feature:radios-wifi` | ✅ |
+| WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions; rooted `wifi_root` ActionHandler — rfkill toggle / TX-power override capped at 20 dBm / channel override on a regulatory allow-list / read-only monitor-IBSS injection probe, each gated by `RootSafetyGate`) | `:feature:radios-wifi` + `:feature:radios-wifi-rooted` | ✅ |
 | Ambient Light (live lux reading + level descriptor; ambient-light history monitor; assert-bright / assert-dark automation actions; rooted brightness / refresh-rate / density rows) | `:feature:ambient` | ✅ |
 | Lock / Security (keyguard lock state + biometrics enrollment; lock-state live + history monitors; assert-locked / assert-unlocked / assert-secure automation actions; rooted secure-keyguard overlay — self-grants SYSTEM_ALERT_WINDOW via appops and draws a bounded anti-phishing overlay, gated by `RootFeatureKey.LockSecureOverlay`, exposed as the `lock_root` action) | `:feature:lock` + `:feature:lock-rooted` | ✅ |
 | Actuators / Haptics (vibrator availability + amplitude control; haptic-click / heavy-click / assert-available automation actions; rooted extreme/PWM/dual/rumble capability rows) | `:feature:actuators` | ✅ |
@@ -114,6 +114,18 @@ non-legacy code referenced them). The app-level USB-attach launch hook
 (`.MainActivity` intent-filter + `@xml/flipper_usb_filter`) is retained — it
 is app glue, not feature code. Remaining Phase-2 cleanup is the same
 per-feature clean-cut for the other migrated modules' legacy sources.
+
+`:feature:radios-wifi-rooted` adds the automation seam (`wifi_root`
+ActionHandler) for the privileged Wi-Fi controls as a new module. The
+**full clean-cut of the legacy `com.gadget.wifi` controller** (the
+`RootedWifiController` + helpers + `WifiController`/`WifiControllerResult`
+types still backing the `RootedRadiosExtrasSections` UI and the
+`RootBindings` flavor wiring) is a **deferred** follow-up — moving that
+subsystem into the module and re-pointing the UI/bindings is a
+flipper-scale migration, intentionally not bundled with the additive
+ActionHandler. The new handler carries its own self-contained
+`WifiRootCommands` (rfkill / `iw` shapes + the 20 dBm ceiling + channel
+allow-list) so it does not depend on the legacy controller.
 
 ## Completed phases
 

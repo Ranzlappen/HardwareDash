@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No Android permissions: every privileged Wi-Fi control runs through the
+     root shell (rfkill / iw), gated by RootSafetyGate. -->
+<manifest />
