@@ -62,6 +62,14 @@ selectable from **Settings → Appearance → Palette**. Dark/light selection st
 orthogonal — a custom theme still honours `darkThemeMode`. The active theme is
 also readable at any call site via `LocalGadgetTheme.current.identifier`.
 
+The palette picker renders **live preview swatches** (`AppearanceCard.ThemeSwatch`)
+rather than plain chips: each tile paints that palette's own `surface` carrying
+`primary` / `secondary` / `tertiary` accent dots, resolved through
+`GadgetCustomTheme.colorScheme(dark)` at the brightness the current `darkThemeMode`
+would actually apply (`Default` previews the canonical dark/light scheme it falls
+back to). The selected tile gets a thicker primary-coloured border, so the choice
+is visible before it's committed.
+
 ## Glass surfaces
 
 **Rule 6 — Every glassy surface goes through `GlassSurface` (composable)
@@ -217,6 +225,7 @@ Multi-preview annotations live in
 
 ---
 
-> _Last reviewed: 2026-06-29 · Source: `CLAUDE.md` (design-system
-> sections), `core/designsystem/*`, `core/ui/*` · Related modules:
-> `:core:designsystem`, `:core:ui`, `:core:navigation`._
+> _Last reviewed: 2026-06-30 · Source: `CLAUDE.md` (design-system
+> sections), `core/designsystem/*`, `core/ui/*`,
+> `feature/settings/.../components/AppearanceCard.kt` · Related modules:
+> `:core:designsystem`, `:core:ui`, `:core:navigation`, `:feature:settings`._

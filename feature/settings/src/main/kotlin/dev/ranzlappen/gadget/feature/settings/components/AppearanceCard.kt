@@ -1,11 +1,19 @@
 package dev.ranzlappen.gadget.feature.settings.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material3.MaterialTheme
@@ -14,11 +22,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.datastore.CustomThemeOption
 import dev.ranzlappen.gadget.core.datastore.DarkThemeMode
 import dev.ranzlappen.gadget.core.datastore.UserPreferences
+import dev.ranzlappen.gadget.core.designsystem.theme.GadgetCustomTheme
+import dev.ranzlappen.gadget.core.designsystem.theme.GadgetDarkColorScheme
+import dev.ranzlappen.gadget.core.designsystem.theme.GadgetLightColorScheme
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
+import dev.ranzlappen.gadget.core.designsystem.theme.colorScheme
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
@@ -73,12 +88,25 @@ internal fun AppearanceCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
+            // Live preview swatches: each palette renders its own surface +
+            // primary/secondary/tertiary accents at the brightness the app
+            // would actually use, so the choice is visible before it's applied.
+            val systemDark = isSystemInDarkTheme()
+            val previewDark = when (preferences.darkThemeMode) {
+                DarkThemeMode.Light -> false
+                DarkThemeMode.Dark -> true
+                DarkThemeMode.FollowSystem -> systemDark
+            }
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                verticalArrangement = Arrangement.spacedBy(spacing.small),
+            ) {
                 CustomThemeOption.entries.forEach { option ->
-                    GadgetChip(
+                    ThemeSwatch(
+                        option = option,
                         selected = preferences.customTheme == option,
+                        dark = previewDark,
                         onClick = { onCustomThemeChange(option) },
-                        label = option.toDisplayLabel(),
                     )
                 }
             }
@@ -136,6 +164,88 @@ internal fun SettingsToggleRow(
         }
         Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
     }
+}
+
+/**
+ * One palette preview tile: a rounded surface in the palette's own
+ * background colour carrying three accent dots (primary / secondary /
+ * tertiary), captioned with the palette name. The selected tile gets a
+ * thicker primary-coloured border and primary-tinted caption.
+ *
+ * [dark] resolves which brightness variant each palette renders so the
+ * swatch matches what the app would paint given the current dark-theme
+ * mode. [GadgetCustomTheme.Default] has no fixed palette, so it previews
+ * the canonical dark/light scheme it falls back to.
+ */
+@Composable
+private fun ThemeSwatch(
+    option: CustomThemeOption,
+    selected: Boolean,
+    dark: Boolean,
+    onClick: () -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    val shapes = LocalGadgetTheme.current.shapes
+    val scheme = option.toGadgetCustomTheme().colorScheme(dark)
+        ?: if (dark) GadgetDarkColorScheme else GadgetLightColorScheme
+    val accent = if (selected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.outlineVariant
+    }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(spacing.micro),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(width = 76.dp, height = 52.dp)
+                .clip(shapes.medium)
+                .background(scheme.surface)
+                .border(
+                    width = if (selected) 2.dp else 1.dp,
+                    color = accent,
+                    shape = shapes.medium,
+                )
+                .clickable(onClick = onClick)
+                .padding(horizontal = spacing.small),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(spacing.micro)) {
+                SwatchDot(scheme.primary)
+                SwatchDot(scheme.secondary)
+                SwatchDot(scheme.tertiary)
+            }
+        }
+        Text(
+            text = option.toDisplayLabel(),
+            style = MaterialTheme.typography.labelSmall,
+            color = if (selected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun SwatchDot(color: Color) {
+    Box(
+        modifier = Modifier
+            .size(16.dp)
+            .clip(CircleShape)
+            .background(color),
+    )
+}
+
+private fun CustomThemeOption.toGadgetCustomTheme(): GadgetCustomTheme = when (this) {
+    CustomThemeOption.Default -> GadgetCustomTheme.Default
+    CustomThemeOption.HighContrast -> GadgetCustomTheme.HighContrast
+    CustomThemeOption.AmoledTrue -> GadgetCustomTheme.AmoledTrue
+    CustomThemeOption.Pastel -> GadgetCustomTheme.Pastel
 }
 
 private fun DarkThemeMode.toDisplayLabel(): String = when (this) {
