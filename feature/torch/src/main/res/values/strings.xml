@@ -2,6 +2,7 @@
 <resources>
     <!-- ─── System UI surfaces (tile + widget chrome) ──────────── -->
     <string name="torch_tile_label">Flashlight</string>
+    <string name="strobe_tile_label">Strobe</string>
     <string name="widget_flashlight_label">Flashlight</string>
     <string name="widget_strobe_label">Strobe</string>
     <string name="widget_flashlight_description">Toggle the device flashlight.</string>
