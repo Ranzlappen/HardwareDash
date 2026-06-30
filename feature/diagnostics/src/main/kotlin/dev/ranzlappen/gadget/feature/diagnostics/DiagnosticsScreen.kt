@@ -7,9 +7,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
+import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetStatusKind
@@ -30,6 +33,20 @@ fun DiagnosticsScreen(
         state = state,
         moduleInfo = diagnosticsModuleInfo(state),
         modifier = modifier,
+        monitors = {
+            LiveMonitorContainer(
+                metricKey = MemoryMetricSource.METRIC_KEY,
+                title = stringResource(R.string.diagnostics_live_monitor_memory),
+                modifier = Modifier.fillMaxWidth(),
+                collapseId = "diagnostics_live_${MemoryMetricSource.METRIC_KEY}",
+            )
+            MonitorContainer(
+                metricKey = MemoryMetricSource.METRIC_KEY,
+                title = stringResource(R.string.diagnostics_monitor_memory),
+                modifier = Modifier.fillMaxWidth(),
+                collapseId = "diagnostics_monitor_${MemoryMetricSource.METRIC_KEY}",
+            )
+        },
     )
 }
 
@@ -97,6 +114,7 @@ internal fun DiagnosticsScreenContent(
     state: DiagnosticsState,
     moduleInfo: ModuleInfo?,
     modifier: Modifier = Modifier,
+    monitors: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
         title = stringResource(R.string.diagnostics_screen_title),
@@ -104,6 +122,7 @@ internal fun DiagnosticsScreenContent(
         moduleInfo = moduleInfo,
         functional = {
             DiagnosticsInfoCard()
+            monitors()
         },
     )
 }
