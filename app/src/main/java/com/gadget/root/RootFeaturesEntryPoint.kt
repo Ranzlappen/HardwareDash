@@ -5,7 +5,7 @@ import com.gadget.adbdebug.AdbDebuggingController
 import com.gadget.audio.AudioRoutingController
 import com.gadget.automation.AutomationController
 import com.gadget.battery.BatteryController
-import com.gadget.bluetooth.BluetoothController
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
 import com.gadget.camera.CameraController
 import com.gadget.cell.CellController
 import com.gadget.diagnostics.DiagnosticsController

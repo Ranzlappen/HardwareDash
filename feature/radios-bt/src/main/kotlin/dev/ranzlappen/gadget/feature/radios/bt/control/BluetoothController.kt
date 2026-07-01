@@ -1,4 +1,4 @@
-package com.gadget.bluetooth
+package dev.ranzlappen.gadget.feature.radios.bt.control
 
 /**
  * Rooted-only Bluetooth capability surface. Standard flavor returns

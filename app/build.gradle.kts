@@ -343,6 +343,8 @@ dependencies {
     "rootedImplementation"(project(":feature:flipper-rooted"))
     // Rooted BugReport — force-grant runtime permissions via `pm grant`.
     "rootedImplementation"(project(":feature:bugreport-rooted"))
+    // Rooted Bluetooth — rfkill / TX-power / HCI-snoop-tail controller.
+    "rootedImplementation"(project(":feature:radios-bt-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

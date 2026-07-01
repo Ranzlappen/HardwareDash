@@ -1,4 +1,4 @@
-package com.gadget.bluetooth
+package dev.ranzlappen.gadget.feature.radios.bt.control
 
 /**
  * Toggles the Bluetooth rfkill block state. Hard 60-second active window
