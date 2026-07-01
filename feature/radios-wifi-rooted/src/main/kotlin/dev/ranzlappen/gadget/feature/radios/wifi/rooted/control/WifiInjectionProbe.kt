@@ -1,6 +1,7 @@
-package com.gadget.wifi
+package dev.ranzlappen.gadget.feature.radios.wifi.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiControllerResult
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -1,4 +1,4 @@
-package com.gadget.wifi
+package dev.ranzlappen.gadget.feature.radios.wifi.control
 
 /**
  * Toggles the Wi-Fi rfkill block state. [block] = true issues `rfkill block

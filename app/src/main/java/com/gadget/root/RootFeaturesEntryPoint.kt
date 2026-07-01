@@ -20,7 +20,7 @@ import com.gadget.notification.NotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
 import com.gadget.storage.StorageController
 import com.gadget.usbdebug.UsbDebuggingController
-import com.gadget.wifi.WifiController
+import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiController
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent

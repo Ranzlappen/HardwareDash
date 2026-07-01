@@ -1,4 +1,4 @@
-package com.gadget.wifi
+package dev.ranzlappen.gadget.feature.radios.wifi.control
 
 import javax.inject.Inject
 import javax.inject.Singleton

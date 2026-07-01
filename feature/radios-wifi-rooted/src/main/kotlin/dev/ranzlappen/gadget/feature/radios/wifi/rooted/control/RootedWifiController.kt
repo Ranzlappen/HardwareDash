@@ -1,9 +1,14 @@
-package com.gadget.wifi
+package dev.ranzlappen.gadget.feature.radios.wifi.rooted.control
 
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.feature.radios.wifi.control.ChannelConfig
+import dev.ranzlappen.gadget.feature.radios.wifi.control.RfkillConfig
+import dev.ranzlappen.gadget.feature.radios.wifi.control.TxPowerConfig
+import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiController
+import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiControllerResult
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

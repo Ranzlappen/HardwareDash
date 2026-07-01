@@ -20,6 +20,9 @@ android {
 dependencies {
     implementation(project(":core:root"))
     implementation(project(":core:automation"))
+    // The Wi-Fi controller contract (WifiController + config/result types) lives
+    // in the base :feature:radios-wifi module so both flavors share it.
+    implementation(project(":feature:radios-wifi"))
 
     testImplementation(libs.junit)
 }

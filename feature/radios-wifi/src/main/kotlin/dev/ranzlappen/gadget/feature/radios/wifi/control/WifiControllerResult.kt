@@ -1,4 +1,4 @@
-package com.gadget.wifi
+package dev.ranzlappen.gadget.feature.radios.wifi.control
 
 /**
  * Result returned by every [WifiController] extreme-tier method. Same

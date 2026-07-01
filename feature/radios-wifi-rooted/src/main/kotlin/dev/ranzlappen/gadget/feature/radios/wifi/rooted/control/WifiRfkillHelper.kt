@@ -1,4 +1,4 @@
-package com.gadget.wifi
+package dev.ranzlappen.gadget.feature.radios.wifi.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import javax.inject.Inject

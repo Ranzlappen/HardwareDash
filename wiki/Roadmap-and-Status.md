@@ -116,16 +116,28 @@ is app glue, not feature code. Remaining Phase-2 cleanup is the same
 per-feature clean-cut for the other migrated modules' legacy sources.
 
 `:feature:radios-wifi-rooted` adds the automation seam (`wifi_root`
-ActionHandler) for the privileged Wi-Fi controls as a new module. The
-**full clean-cut of the legacy `com.gadget.wifi` controller** (the
-`RootedWifiController` + helpers + `WifiController`/`WifiControllerResult`
-types still backing the `RootedRadiosExtrasSections` UI and the
-`RootBindings` flavor wiring) is a **deferred** follow-up — moving that
-subsystem into the module and re-pointing the UI/bindings is a
-flipper-scale migration, intentionally not bundled with the additive
-ActionHandler. The new handler carries its own self-contained
-`WifiRootCommands` (rfkill / `iw` shapes + the 20 dBm ceiling + channel
-allow-list) so it does not depend on the legacy controller.
+ActionHandler) for the privileged Wi-Fi controls, and the **legacy
+`com.gadget.wifi` controller subsystem has now been clean-cut migrated
+into the modules**:
+
+- the contract + config/result types + the standard no-op
+  (`WifiController`, `RfkillConfig`/`TxPowerConfig`/`ChannelConfig`,
+  `WifiControllerResult`, `StandardWifiController`) → `:feature:radios-wifi`
+  under `…radios.wifi.control`;
+- the rooted controller + helpers (`RootedWifiController`,
+  `WifiRfkillHelper`, `WifiSysfsHelper`, `WifiInjectionProbe`) →
+  `:feature:radios-wifi-rooted` under `…radios.wifi.rooted.control`.
+
+The `com.gadget.wifi.*` sources are deleted; the app-level consumers
+(`RootedRadiosExtrasSections` UI, `RootFeaturesEntryPoint`, both
+flavors' `RootBindings`) now import the modular packages. This is the
+**first of the ~20 legacy feature controllers** in the
+`RootFeaturesEntryPoint` cluster to migrate out under the #94 plan; the
+entry point + the shared radios UI stay in `:app` (they still aggregate
+the other 19 legacy controllers) but now source their Wi-Fi types from
+the modules. The `wifi_root` ActionHandler keeps its own self-contained
+`WifiRootCommands` (rfkill / `iw` shapes + 20 dBm ceiling + channel
+allow-list), independent of the migrated controller.
 
 ## Completed phases
 
