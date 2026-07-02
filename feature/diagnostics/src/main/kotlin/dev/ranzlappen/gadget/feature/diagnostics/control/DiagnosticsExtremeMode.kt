@@ -1,4 +1,4 @@
-package com.gadget.diagnostics
+package dev.ranzlappen.gadget.feature.diagnostics.control
 
 /**
  * Logcat ring-buffer the helper reads via `logcat -b <wireName> -d`.

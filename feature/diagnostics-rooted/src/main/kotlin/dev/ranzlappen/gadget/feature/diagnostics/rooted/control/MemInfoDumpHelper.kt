@@ -1,4 +1,4 @@
-package com.gadget.diagnostics
+package dev.ranzlappen.gadget.feature.diagnostics.rooted.control
 
 import android.content.Context
 import android.os.Build

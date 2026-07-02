@@ -25,8 +25,8 @@ import com.gadget.camera.CameraController
 import com.gadget.camera.RootedCameraController
 import dev.ranzlappen.gadget.feature.radios.cell.control.CellController
 import dev.ranzlappen.gadget.feature.radios.cell.rooted.control.RootedCellController
-import com.gadget.diagnostics.DiagnosticsController
-import com.gadget.diagnostics.RootedDiagnosticsController
+import dev.ranzlappen.gadget.feature.diagnostics.control.DiagnosticsController
+import dev.ranzlappen.gadget.feature.diagnostics.rooted.control.RootedDiagnosticsController
 import com.gadget.display.DisplayController
 import com.gadget.display.RootedDisplayController
 import dev.ranzlappen.gadget.feature.gps.control.GpsController

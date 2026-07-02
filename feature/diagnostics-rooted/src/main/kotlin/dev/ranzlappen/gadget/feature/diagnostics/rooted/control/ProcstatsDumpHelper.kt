@@ -1,4 +1,4 @@
-package com.gadget.diagnostics
+package dev.ranzlappen.gadget.feature.diagnostics.rooted.control
 
 import android.content.Context
 import android.os.Build
@@ -13,42 +13,45 @@ import java.util.TimeZone
 import javax.inject.Inject
 import javax.inject.Singleton
 
-internal const val LOGCAT_TAIL_CAP_BYTES = 8 * 1024
+internal const val PROCSTATS_TAIL_CAP_BYTES = 16 * 1024
+internal const val PROCSTATS_HOURS = 3
 
 private const val LOGBOOK_DIR_NAME = "logbook"
-private const val LOGCAT_FILENAME_PREFIX = "logcat-"
-private const val LOGCAT_FILENAME_EXTENSION = ".json"
+private const val PROCSTATS_FILENAME_PREFIX = "procstats-"
+private const val PROCSTATS_FILENAME_EXTENSION = ".json"
 
 /**
- * Reads the tail of a logcat ring-buffer via the privileged shell.
- * Tail-capped to 8 KB so a runaway buffer can't flood the shell pipe.
- * Optionally persists a structured JSON copy to the Logbook directory
- * using the same convention as [com.gadget.battery.BatteryDumpWriter].
+ * Read-only `dumpsys procstats --hours <PROCSTATS_HOURS>` snapshot,
+ * tail-capped to 16 KB. Optionally persists a JSON copy to the Logbook
+ * directory. Heavier than the other dumps so its registry cap is
+ * smaller (MED rather than HIGH).
  */
 @Singleton
-class LogcatTailHelper @Inject constructor(
+class ProcstatsDumpHelper @Inject constructor(
     private val shell: RootShell,
     @ApplicationContext private val context: Context,
 ) {
-    suspend fun snapshot(buffer: LogcatBuffer): String? {
-        val cmd = "logcat -b ${buffer.wireName} -d 2>/dev/null | tail -c $LOGCAT_TAIL_CAP_BYTES"
-        val result = shell.exec(cmd)
+    suspend fun snapshot(): String? {
+        val result = shell.exec(
+            "dumpsys procstats --hours $PROCSTATS_HOURS 2>/dev/null | " +
+                "tail -c $PROCSTATS_TAIL_CAP_BYTES",
+        )
         if (!result.isSuccess) return null
-        return result.stdout.joinToString("\n").take(LOGCAT_TAIL_CAP_BYTES)
+        return result.stdout.joinToString("\n").take(PROCSTATS_TAIL_CAP_BYTES)
     }
 
-    fun persistToLogbook(buffer: LogcatBuffer, excerpt: String): File? {
+    fun persistToLogbook(excerpt: String): File? {
         val dir = resolveLogbookDir() ?: return null
         if (!dir.exists() && !dir.mkdirs()) return null
         val payload = JSONObject().apply {
             put("timestamp", isoTimestamp())
             put("device", deviceJson())
-            put("buffer", buffer.wireName)
+            put("hours", PROCSTATS_HOURS)
             put("excerpt", excerpt)
         }
         val file = File(
             dir,
-            "$LOGCAT_FILENAME_PREFIX${buffer.wireName}-${filenameTimestamp()}$LOGCAT_FILENAME_EXTENSION",
+            "$PROCSTATS_FILENAME_PREFIX${filenameTimestamp()}$PROCSTATS_FILENAME_EXTENSION",
         )
         file.writeText(payload.toString(2))
         return file
