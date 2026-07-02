@@ -1,4 +1,4 @@
-package com.gadget.storage
+package dev.ranzlappen.gadget.feature.storage.control
 
 /**
  * Result returned by every [StorageController] privileged method.

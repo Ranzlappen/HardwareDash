@@ -47,8 +47,8 @@ import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
 import dev.ranzlappen.gadget.feature.rooted.root.emergency.RootedEmergencyResetCoordinator
 import dev.ranzlappen.gadget.feature.rooted.root.sysfs.RootedSysfsMutationLog
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
-import com.gadget.storage.RootedStorageController
-import com.gadget.storage.StorageController
+import dev.ranzlappen.gadget.feature.storage.rooted.control.RootedStorageController
+import dev.ranzlappen.gadget.feature.storage.control.StorageController
 import dev.ranzlappen.gadget.feature.radios.wifi.rooted.control.RootedWifiController
 import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiController
 import com.gadget.usbdebug.RootedUsbDebuggingController

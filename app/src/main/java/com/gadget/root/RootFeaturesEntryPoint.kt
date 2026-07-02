@@ -18,7 +18,7 @@ import com.gadget.microphone.MicrophoneController
 import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
 import com.gadget.notification.NotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
-import com.gadget.storage.StorageController
+import dev.ranzlappen.gadget.feature.storage.control.StorageController
 import com.gadget.usbdebug.UsbDebuggingController
 import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiController
 import dagger.hilt.EntryPoint

@@ -45,7 +45,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Sensors (proximity / light / acceleration) | `:feature:sensors` | ✅ (PR #158) |
 | Battery (level / charging / temperature / voltage / health; dual live monitors; rooted fuel-gauge / cell-monitor / charging-profile rows) | `:feature:battery` | ✅ |
 | GPS / Location (map, position, speed, altitude; live speed + altitude monitors; rooted NMEA / constellation / location-override rows; rooted extreme-tier `GpsController` — read-only NMEA raw tap (30 s ceiling) + constellation dump over vendor sysfs / tty nodes, gated by `RootSafetyGate` — controller clean-cut migrated out of legacy `com.gadget.gps` into the modules. The GPS **spoofing** subsystem (GPX/KML/route playback, LSPosed + test-provider anti-detection, legal-ack gate, `LocationSpoofService` foreground service) is fully modularized too — shared engine in `:feature:gps`, rooted installer/controller in `:feature:gps-rooted`, with the LSPosed handshake FQN updated in lock-step; `com.gadget.gps` is now fully deleted) | `:feature:gps` + `:feature:gps-rooted` | ✅ |
-| Storage (volumes, used / free / total, live used-% monitor; rooted diskstats / mounts / fstrim rows) | `:feature:storage` | ✅ |
+| Storage (volumes, used / free / total, live used-% monitor; rooted diskstats / mounts / fstrim rows; rooted extreme-tier `StorageController` — diskstats / mountinfo reads + gated `fstrim` (`/data`,`/cache` allow-list) + `drop_caches` writes with snapshot-restore, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.storage` into the modules) | `:feature:storage` + `:feature:storage-rooted` | ✅ |
 | IR Blaster (NEC / Pronto / RAW, saved-signal library, automation action; rooted custom-carrier / GPIO-burst rows; rooted extreme-tier `IrController` — custom LIRC carrier frequency (20–100 kHz) + direct IR-LED GPIO toggling (≤50 % duty, 5 s burst ceiling), gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.ir` into the modules) | `:feature:radios-ir` + `:feature:radios-ir-rooted` | ✅ |
 | Barcode Scanner (CameraX + MLKit, all formats, scan history, WiFi/URL; rooted high-fps / manual-override / HAL-bypass rows) | `:feature:camera` | ✅ |
 | Motion (gyroscope / step counter / motion detect; per-sensor live monitors; rooted high-polling / raw-unfiltered / sysfs-read rows) | `:feature:motion` | ✅ |
@@ -91,14 +91,13 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 
 ### Remaining legacy surface
 
-~211 legacy `com.gadget.*` Kotlin files remain across all `:app` source
+~202 legacy `com.gadget.*` Kotlin files remain across all `:app` source
 sets (of which one, the separate `:lsposed-module`'s
 `com.gadget.spoofer.xposed`, is out of scope), migrating feature-by-feature
 per the [Feature Migration Guide](Feature-Migration-Guide). The radios/GPS
 rooted controllers (wifi/bt/nfc/ir/cell/gps/gps-spoof) and `diagnostics` are
-the most recent clean-cuts; **11 legacy rooted controllers remain** in the
-`RootFeaturesEntryPoint` seam (camera, microphone, battery, automation,
-notification, keepalive, storage, display, audio, adbdebug, usbdebug).
+the most recent clean-cuts; **10 legacy rooted controllers remain** in the
+`RootFeaturesEntryPoint` seam (camera, microphone, battery, automation, notification, keepalive, display, audio, adbdebug, usbdebug).
 Canonical metric:
 
 ```bash

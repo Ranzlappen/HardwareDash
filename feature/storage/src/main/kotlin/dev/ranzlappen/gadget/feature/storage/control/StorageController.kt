@@ -1,4 +1,4 @@
-package com.gadget.storage
+package dev.ranzlappen.gadget.feature.storage.control
 
 /**
  * Rooted-only Storage capability surface. Standard flavor returns

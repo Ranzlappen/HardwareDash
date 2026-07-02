@@ -1,9 +1,13 @@
-package com.gadget.storage
+package dev.ranzlappen.gadget.feature.storage.rooted.control
 
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.feature.storage.control.DropCachesConfig
+import dev.ranzlappen.gadget.feature.storage.control.FstrimConfig
+import dev.ranzlappen.gadget.feature.storage.control.StorageController
+import dev.ranzlappen.gadget.feature.storage.control.StorageControllerResult
 import javax.inject.Inject
 import javax.inject.Singleton
 

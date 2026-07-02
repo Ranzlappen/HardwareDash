@@ -16,4 +16,7 @@ android {
 dependencies {
     implementation(project(":core:root"))
     implementation(project(":core:automation"))
+    // The StorageController contract (+ result / config types) lives in the
+    // base :feature:storage module so both flavors share it.
+    implementation(project(":feature:storage"))
 }
