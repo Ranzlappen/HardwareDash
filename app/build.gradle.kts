@@ -343,6 +343,10 @@ dependencies {
     "rootedImplementation"(project(":feature:flipper-rooted"))
     // Rooted BugReport — force-grant runtime permissions via `pm grant`.
     "rootedImplementation"(project(":feature:bugreport-rooted"))
+    // Rooted Wi-Fi — rfkill / iw TX-power / channel / injection-probe actions.
+    "rootedImplementation"(project(":feature:radios-wifi-rooted"))
+    // Rooted Bluetooth — rfkill / TX-power / HCI-snoop-tail controller.
+    "rootedImplementation"(project(":feature:radios-bt-rooted"))
     // Rooted NFC — raw NCI command exchange over the vendor sysfs node.
     "rootedImplementation"(project(":feature:radios-nfc-rooted"))
 

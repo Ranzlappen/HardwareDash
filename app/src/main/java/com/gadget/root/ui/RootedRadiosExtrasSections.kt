@@ -22,9 +22,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.gadget.bluetooth.BluetoothControllerResult
-import com.gadget.bluetooth.BluetoothRfkillConfig
-import com.gadget.bluetooth.BluetoothTxPowerConfig
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothControllerResult
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothRfkillConfig
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothTxPowerConfig
 import com.gadget.cell.CellControllerResult
 import com.gadget.gps.GpsControllerResult
 import com.gadget.gps.NmeaTapConfig
@@ -33,10 +33,10 @@ import com.gadget.ir.IrControllerResult
 import com.gadget.ir.IrRawPatternConfig
 import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcControllerResult
 import dev.ranzlappen.gadget.feature.radios.nfc.control.RawNciCommandConfig
-import com.gadget.wifi.ChannelConfig
-import com.gadget.wifi.RfkillConfig
-import com.gadget.wifi.TxPowerConfig
-import com.gadget.wifi.WifiControllerResult
+import dev.ranzlappen.gadget.feature.radios.wifi.control.ChannelConfig
+import dev.ranzlappen.gadget.feature.radios.wifi.control.RfkillConfig
+import dev.ranzlappen.gadget.feature.radios.wifi.control.TxPowerConfig
+import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiControllerResult
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 

@@ -177,10 +177,26 @@ this.
 
 ## QS tile entry points
 
-QS `TileService`s (e.g. `FlashlightTileService`) toggle the feature's
-`@Singleton` controller directly via `EntryPointAccessors.fromApplication`,
-producing the same state visible from the screen and widgets. Declared in
-the feature module's manifest.
+QS `TileService`s toggle the feature's `@Singleton` controller / runtime
+directly via `EntryPointAccessors.fromApplication`, producing the same state
+visible from the screen and widgets. Declared in the feature module's
+manifest (`BIND_QUICK_SETTINGS_TILE` + `exported=true`).
+
+The torch module ships two:
+
+- **`FlashlightTileService`** — toggles `TorchController` on each tap; tile
+  state mirrors `TorchController.state` (UNAVAILABLE on flashless devices).
+- **`StrobeTileService`** — a tap starts / stops a constant-rate strobe
+  (`TorchWidgetConfig.DEFAULT_RATE_HZ`) by start/stopping `StrobeService`
+  (the same start path as `TorchViewModel` — `startForegroundService` inside
+  the tile-tap FGS-allowlist window, `IllegalStateException` caught). Tile
+  active-state reads `StrobeRuntime.running` (the process-wide `StateFlow`),
+  so a strobe started from the screen / widget / automation lights the tile
+  too. UNAVAILABLE gated on `TorchController.state.value.isAvailable`.
+
+A tile subscribes to its state flow only for the `onStartListening` ↔
+`onStopListening` window (the tile is visible in the panel), re-rendering on
+every emission; no work happens while the panel is closed.
 
 ## RemoteViews gotchas
 
@@ -212,7 +228,8 @@ Catalog](Asset-Catalog), [Troubleshooting](Troubleshooting).
 
 ---
 
-> _Last reviewed: 2026-06-13 · Source: `CLAUDE.md` (widgetkit),
-> `docs/migration-guide.md`, `docs/widgets/content-widget-customization.md`
+> _Last reviewed: 2026-06-30 · Source: `CLAUDE.md` (widgetkit),
+> `feature/torch/.../tile/*TileService.kt`,
+> `docs/widgets/content-widget-customization.md`
 > · Related modules: `:core:widgetkit`, `:feature:torch`,
 > `:feature:vibration`, `:feature:apps`._

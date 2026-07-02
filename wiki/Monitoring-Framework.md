@@ -45,6 +45,14 @@ chart/widget axes scale to the real range. This is the deliberate fix for
 legacy `Link`, which hardcoded a 70-entry metric registry inside
 `LinkService`.
 
+A signal does **not** need root or a permission to be a `MetricSource`. The
+diagnostics module's `memory_used_percent` (`MetricCategory.Device`, poll,
+0–100 %) reads `ActivityManager.MemoryInfo` — un-privileged — to make system
+RAM chartable, alertable, and usable as an automation trigger; it's the
+standard-flavor counterpart to the rooted `/proc/meminfo` capability. Its
+`usedPercent(total, avail)` math is a pure companion fn (clamped 0–100,
+divide-by-zero-guarded) so it's unit-tested without an `ActivityManager`.
+
 ## `MonitorContainer` — persisted history
 
 ```kotlin
@@ -198,7 +206,8 @@ Contract](Module-Authoring-Contract).
 
 ---
 
-> _Last reviewed: 2026-06-13 · Source: `CLAUDE.md` (monitoring),
-> `docs/sensor-actuator-api.md`, `core/monitoring/*`, `core/model/*` ·
+> _Last reviewed: 2026-06-30 · Source: `CLAUDE.md` (monitoring),
+> `docs/sensor-actuator-api.md`, `core/monitoring/*`, `core/model/*`,
+> `feature/diagnostics/.../MemoryMetricSource.kt` ·
 > Related modules: `:core:monitoring`, `:core:model`, `:core:data`,
-> `:feature:settings`._
+> `:feature:diagnostics`, `:feature:settings`._

@@ -76,6 +76,23 @@
         </service>
 
         <!--
+          Quick Settings tile for the flashlight strobe. Same binding
+          contract as the flashlight tile: BIND_QUICK_SETTINGS_TILE so only
+          the OS can launch it, exported=true so it surfaces in edit-tiles.
+          A tap starts / stops StrobeService.
+        -->
+        <service
+            android:name=".tile.StrobeTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_strobe"
+            android:label="@string/strobe_tile_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!--
           Home-screen flashlight widget. exported=true required for
           AppWidget host (Launcher) to receive the broadcasts.
         -->

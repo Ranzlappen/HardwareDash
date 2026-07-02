@@ -2,6 +2,10 @@
 <resources>
     <string name="diagnostics_screen_title">Diagnostics</string>
 
+    <!-- Memory monitor (standard MetricSource hosted on the screen) -->
+    <string name="diagnostics_live_monitor_memory">Memory in use (live)</string>
+    <string name="diagnostics_monitor_memory">Memory in use history</string>
+
     <!-- Info text -->
     <string name="diagnostics_info">All diagnostic snapshots run via the Automation engine. Trigger them from an automation rule or tap \'Run\' in a connected action.</string>
 
