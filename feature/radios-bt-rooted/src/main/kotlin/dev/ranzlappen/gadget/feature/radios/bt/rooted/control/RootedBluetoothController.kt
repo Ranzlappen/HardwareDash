@@ -1,9 +1,13 @@
-package com.gadget.bluetooth
+package dev.ranzlappen.gadget.feature.radios.bt.rooted.control
 
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothControllerResult
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothRfkillConfig
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothTxPowerConfig
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

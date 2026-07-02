@@ -1,4 +1,4 @@
-package com.gadget.bluetooth
+package dev.ranzlappen.gadget.feature.radios.bt.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog

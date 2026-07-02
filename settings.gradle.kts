@@ -132,6 +132,7 @@ include(
     ":feature:ambient",
     ":feature:radios-wifi",
     ":feature:radios-bt",
+    ":feature:radios-bt-rooted",
     ":feature:radios-nfc",
     ":feature:radios-subghz",
     ":feature:radios-ir",
