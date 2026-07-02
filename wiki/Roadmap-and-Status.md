@@ -44,19 +44,20 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | App-Organizer + folder widgets (shape / gradient / stroke / grid-preview customization) | `:feature:apps` (+ `-rooted` skeleton) | ✅ |
 | Sensors (proximity / light / acceleration) | `:feature:sensors` | ✅ (PR #158) |
 | Battery (level / charging / temperature / voltage / health; dual live monitors; rooted fuel-gauge / cell-monitor / charging-profile rows) | `:feature:battery` | ✅ |
-| GPS / Location (map, position, speed, altitude; live speed + altitude monitors; rooted NMEA / constellation / location-override rows) | `:feature:gps` | ✅ |
+| GPS / Location (map, position, speed, altitude; live speed + altitude monitors; rooted NMEA / constellation / location-override rows; rooted extreme-tier `GpsController` — read-only NMEA raw tap (30 s ceiling) + constellation dump over vendor sysfs / tty nodes, gated by `RootSafetyGate` — controller clean-cut migrated out of legacy `com.gadget.gps` into the modules. The GPS **spoofing** subsystem (GPX/KML/route playback, LSPosed + test-provider anti-detection, legal-ack gate, `LocationSpoofService` foreground service) is fully modularized too — shared engine in `:feature:gps`, rooted installer/controller in `:feature:gps-rooted`, with the LSPosed handshake FQN updated in lock-step; `com.gadget.gps` is now fully deleted) | `:feature:gps` + `:feature:gps-rooted` | ✅ |
 | Storage (volumes, used / free / total, live used-% monitor; rooted diskstats / mounts / fstrim rows) | `:feature:storage` | ✅ |
-| IR Blaster (NEC / Pronto / RAW, saved-signal library, automation action; rooted custom-carrier / GPIO-burst rows) | `:feature:radios-ir` | ✅ |
+| IR Blaster (NEC / Pronto / RAW, saved-signal library, automation action; rooted custom-carrier / GPIO-burst rows; rooted extreme-tier `IrController` — custom LIRC carrier frequency (20–100 kHz) + direct IR-LED GPIO toggling (≤50 % duty, 5 s burst ceiling), gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.ir` into the modules) | `:feature:radios-ir` + `:feature:radios-ir-rooted` | ✅ |
 | Barcode Scanner (CameraX + MLKit, all formats, scan history, WiFi/URL; rooted high-fps / manual-override / HAL-bypass rows) | `:feature:camera` | ✅ |
 | Motion (gyroscope / step counter / motion detect; per-sensor live monitors; rooted high-polling / raw-unfiltered / sysfs-read rows) | `:feature:motion` | ✅ |
 | Audio (dB meter + WAV voice recording; live dB monitor; rooted mic-gain / direct-PCM / custom-sample-rate rows) | `:feature:audio` | ✅ |
 | NFC (NDEF tag read + HCE emulation + template library; live + history NFC-state monitors; rooted raw-NCI row; rooted `NfcController` — raw NCI command exchange over the vendor sysfs node with a 256-byte payload ceiling + 5 s read-timeout, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.nfc` into the modules) | `:feature:radios-nfc` + `:feature:radios-nfc-rooted` | ✅ |
 | Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows; rooted extreme-tier `BluetoothController` — rfkill toggle / TX-power override capped at the 10 dBm Class-1 ceiling via bluetoothctl+hcitool / read-only HCI-snoop-log tail, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.bluetooth` into the modules) | `:feature:radios-bt` + `:feature:radios-bt-rooted` | ✅ |
 | WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions; rooted `wifi_root` ActionHandler — rfkill toggle / TX-power override capped at 20 dBm / channel override on a regulatory allow-list / read-only monitor-IBSS injection probe, each gated by `RootSafetyGate`) | `:feature:radios-wifi` + `:feature:radios-wifi-rooted` | ✅ |
+| Cellular (screenless rooted-extras controller; rooted extreme-tier `CellController` — read-only modem dump over Qualcomm `qcom_smd*` / `qmi_devices` / `rmnet` sysfs + per-band RSRP/RSRQ/SINR signal deep-dump, no AT-command write path, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.cell` into the modules) | `:feature:radios-cell` + `:feature:radios-cell-rooted` | ✅ |
 | Ambient Light (live lux reading + level descriptor; ambient-light history monitor; assert-bright / assert-dark automation actions; rooted brightness / refresh-rate / density rows) | `:feature:ambient` | ✅ |
 | Lock / Security (keyguard lock state + biometrics enrollment; lock-state live + history monitors; assert-locked / assert-unlocked / assert-secure automation actions; rooted secure-keyguard overlay — self-grants SYSTEM_ALERT_WINDOW via appops and draws a bounded anti-phishing overlay, gated by `RootFeatureKey.LockSecureOverlay`, exposed as the `lock_root` action) | `:feature:lock` + `:feature:lock-rooted` | ✅ |
 | Actuators / Haptics (vibrator availability + amplitude control; haptic-click / heavy-click / assert-available automation actions; rooted extreme/PWM/dual/rumble capability rows) | `:feature:actuators` | ✅ |
-| Diagnostics (rooted shell dump overview; logcat / meminfo / cpuinfo / procstats automation actions via `:feature:diagnostics-rooted`; standard no-root `memory_used_percent` MetricSource — live + history monitors on-screen + automation trigger) | `:feature:diagnostics` + `:feature:diagnostics-rooted` | ✅ |
+| Diagnostics (rooted shell dump overview; logcat / meminfo / cpuinfo / procstats automation actions via `:feature:diagnostics-rooted`; standard no-root `memory_used_percent` MetricSource — live + history monitors on-screen + automation trigger; rooted extreme-tier `DiagnosticsController` — read-only `logcat -b` tail + `dumpsys meminfo/cpuinfo/procstats` excerpts, tail-capped, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.diagnostics` into the modules) | `:feature:diagnostics` + `:feature:diagnostics-rooted` | ✅ |
 | Health / BugReport (permission manager — grant-state scan + per-permission runtime request + App-Settings fallback + granted/total summary, refreshes on resume; assert-permission automation action; rooted ADB-diagnostics row + `pm grant` force-grant one-up via `:feature:bugreport-rooted`) | `:feature:bugreport` + `:feature:bugreport-rooted` | ✅ |
 | Help / Manual (static documentation screen for all modules, capabilities, and automation engine) | `:feature:manual` | ✅ |
 | Rooted Storage actions (diskstats / mounts / fstrim / drop_caches) | `:feature:storage-rooted` | ✅ |
@@ -90,11 +91,15 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 
 ### Remaining legacy surface
 
-~284 legacy `com.gadget.*` Kotlin files remain across all `:app` source
-sets, migrating feature-by-feature per the
-[Feature Migration Guide](Feature-Migration-Guide). The `com.gadget.flipper`
-+ `com.gadget.subghz.SubGhzSignal` sources (13 files) were clean-cut deleted
-once `:feature:flipper` landed green. Canonical metric:
+~211 legacy `com.gadget.*` Kotlin files remain across all `:app` source
+sets (of which one, the separate `:lsposed-module`'s
+`com.gadget.spoofer.xposed`, is out of scope), migrating feature-by-feature
+per the [Feature Migration Guide](Feature-Migration-Guide). The radios/GPS
+rooted controllers (wifi/bt/nfc/ir/cell/gps/gps-spoof) and `diagnostics` are
+the most recent clean-cuts; **11 legacy rooted controllers remain** in the
+`RootFeaturesEntryPoint` seam (camera, microphone, battery, automation,
+notification, keepalive, storage, display, audio, adbdebug, usbdebug).
+Canonical metric:
 
 ```bash
 find app/src -path "*com/gadget*" -name "*.kt" | wc -l

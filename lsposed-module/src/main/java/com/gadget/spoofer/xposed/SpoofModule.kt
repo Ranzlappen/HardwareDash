@@ -153,7 +153,7 @@ class SpoofModule : IXposedHookLoadPackage {
         private const val TARGET_APP_ROOTED = "com.gadget.root"
 
         // Must match LsposedHandshake.EXPECTED_SENTINEL in the app.
-        private const val HANDSHAKE_FQN = "com.gadget.gps.spoof.LsposedHandshake"
+        private const val HANDSHAKE_FQN = "dev.ranzlappen.gadget.feature.gps.spoof.LsposedHandshake"
         private const val EXPECTED_SENTINEL = "hwd-spoofer-v1-loaded"
     }
 }

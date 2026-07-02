@@ -218,6 +218,7 @@ dependencies {
     implementation(project(":feature:motion"))
     implementation(project(":feature:audio"))
     implementation(project(":feature:radios-nfc"))
+    implementation(project(":feature:radios-cell"))
     implementation(project(":feature:radios-bt"))
     implementation(project(":feature:radios-wifi"))
     implementation(project(":feature:radios-subghz"))
@@ -349,6 +350,12 @@ dependencies {
     "rootedImplementation"(project(":feature:radios-bt-rooted"))
     // Rooted NFC — raw NCI command exchange over the vendor sysfs node.
     "rootedImplementation"(project(":feature:radios-nfc-rooted"))
+    // Rooted IR — custom LIRC carrier + raw IR-LED GPIO toggling.
+    "rootedImplementation"(project(":feature:radios-ir-rooted"))
+    // Rooted Cellular — read-only modem / signal deep-dump over Qualcomm sysfs.
+    "rootedImplementation"(project(":feature:radios-cell-rooted"))
+    // Rooted GPS — read-only NMEA raw tap + constellation dump over vendor nodes.
+    "rootedImplementation"(project(":feature:gps-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

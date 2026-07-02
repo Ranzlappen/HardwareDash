@@ -7,12 +7,12 @@ import com.gadget.automation.AutomationController
 import com.gadget.battery.BatteryController
 import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
 import com.gadget.camera.CameraController
-import com.gadget.cell.CellController
-import com.gadget.diagnostics.DiagnosticsController
+import dev.ranzlappen.gadget.feature.radios.cell.control.CellController
+import dev.ranzlappen.gadget.feature.diagnostics.control.DiagnosticsController
 import com.gadget.display.DisplayController
-import com.gadget.gps.GpsController
-import com.gadget.gps.spoof.GpsSpoofController
-import com.gadget.ir.IrController
+import dev.ranzlappen.gadget.feature.gps.control.GpsController
+import dev.ranzlappen.gadget.feature.gps.spoof.GpsSpoofController
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
 import com.gadget.keepalive.KeepAliveController
 import com.gadget.microphone.MicrophoneController
 import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
@@ -41,9 +41,10 @@ import dagger.hilt.components.SingletonComponent
  *
  * This file (and the 13 `ui/Rooted*` Compose composables that reach it)
  * stays at its legacy `com.gadget.root.*` location for one specific
- * reason: it depends on **20 legacy non-modular feature controllers**
- * (`CameraController`, `MicrophoneController`, …, each still in
- * `app/src/main/java/com/gadget/<feature>/`). Pulling
+ * reason: it depends on the remaining **11 legacy non-modular feature
+ * controllers** (`CameraController`, `MicrophoneController`, …, each still in
+ * `app/src/main/java/com/gadget/<feature>/`; the radios/GPS/diagnostics
+ * controllers have already migrated out to their feature modules). Pulling
  * the entry-point into `:core:root` would force `:core:root` to depend
  * on every one of those legacy controllers, defeating the purpose of
  * the extraction.
