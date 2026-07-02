@@ -121,6 +121,7 @@ include(
     ":feature:battery",
     ":feature:audio",
     ":feature:camera",
+    ":feature:camera-rooted",
     ":feature:torch",
     ":feature:torch-rooted",
     ":feature:torch-standard",

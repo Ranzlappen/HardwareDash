@@ -24,11 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.gadget.camera.CameraControllerResult
-import com.gadget.camera.HighFpsConfig
-import com.gadget.camera.ManualExposureConfig
-import com.gadget.camera.MultiCameraConfig
-import com.gadget.camera.RawCaptureConfig
+import dev.ranzlappen.gadget.feature.camera.control.CameraControllerResult
+import dev.ranzlappen.gadget.feature.camera.control.HighFpsConfig
+import dev.ranzlappen.gadget.feature.camera.control.ManualExposureConfig
+import dev.ranzlappen.gadget.feature.camera.control.MultiCameraConfig
+import dev.ranzlappen.gadget.feature.camera.control.RawCaptureConfig
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import com.gadget.microphone.DirectPcmConfig

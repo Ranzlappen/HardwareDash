@@ -1,8 +1,14 @@
-package com.gadget.camera
+package dev.ranzlappen.gadget.feature.camera.rooted.control
 
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
+import dev.ranzlappen.gadget.feature.camera.control.CameraController
+import dev.ranzlappen.gadget.feature.camera.control.CameraControllerResult
+import dev.ranzlappen.gadget.feature.camera.control.HighFpsConfig
+import dev.ranzlappen.gadget.feature.camera.control.ManualExposureConfig
+import dev.ranzlappen.gadget.feature.camera.control.MultiCameraConfig
+import dev.ranzlappen.gadget.feature.camera.control.RawCaptureConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 

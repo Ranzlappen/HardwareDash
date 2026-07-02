@@ -47,7 +47,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | GPS / Location (map, position, speed, altitude; live speed + altitude monitors; rooted NMEA / constellation / location-override rows; rooted extreme-tier `GpsController` — read-only NMEA raw tap (30 s ceiling) + constellation dump over vendor sysfs / tty nodes, gated by `RootSafetyGate` — controller clean-cut migrated out of legacy `com.gadget.gps` into the modules. The GPS **spoofing** subsystem (GPX/KML/route playback, LSPosed + test-provider anti-detection, legal-ack gate, `LocationSpoofService` foreground service) is fully modularized too — shared engine in `:feature:gps`, rooted installer/controller in `:feature:gps-rooted`, with the LSPosed handshake FQN updated in lock-step; `com.gadget.gps` is now fully deleted) | `:feature:gps` + `:feature:gps-rooted` | ✅ |
 | Storage (volumes, used / free / total, live used-% monitor; rooted diskstats / mounts / fstrim / drop_caches rows; rooted extreme-tier `StorageController` — read-only `dumpsys diskstats` + `/proc/mountinfo` enumeration + `fstrim -v` against a hard `/data` `/cache` allow-list + `drop_caches` write, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.storage` into the modules) | `:feature:storage` + `:feature:storage-rooted` | ✅ |
 | IR Blaster (NEC / Pronto / RAW, saved-signal library, automation action; rooted custom-carrier / GPIO-burst rows; rooted extreme-tier `IrController` — custom LIRC carrier frequency (20–100 kHz) + direct IR-LED GPIO toggling (≤50 % duty, 5 s burst ceiling), gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.ir` into the modules) | `:feature:radios-ir` + `:feature:radios-ir-rooted` | ✅ |
-| Barcode Scanner (CameraX + MLKit, all formats, scan history, WiFi/URL; rooted high-fps / manual-override / HAL-bypass rows) | `:feature:camera` | ✅ |
+| Barcode Scanner (CameraX + MLKit, all formats, scan history, WiFi/URL; rooted high-fps / manual-override / HAL-bypass rows; rooted extreme-tier `CameraController` — high-FPS (≤240 fps, 30 s ceiling) / manual-exposure / RAW-DNG / multi-camera (≤3 streams, 15 s) / v4l2 HAL-bypass / shutter-sound via direct Camera2 + vendor sysfs, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.camera` into the modules) | `:feature:camera` + `:feature:camera-rooted` | ✅ |
 | Motion (gyroscope / step counter / motion detect; per-sensor live monitors; rooted high-polling / raw-unfiltered / sysfs-read rows) | `:feature:motion` | ✅ |
 | Audio (dB meter + WAV voice recording; live dB monitor; rooted mic-gain / direct-PCM / custom-sample-rate rows) | `:feature:audio` | ✅ |
 | NFC (NDEF tag read + HCE emulation + template library; live + history NFC-state monitors; rooted raw-NCI row; rooted `NfcController` — raw NCI command exchange over the vendor sysfs node with a 256-byte payload ceiling + 5 s read-timeout, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.nfc` into the modules) | `:feature:radios-nfc` + `:feature:radios-nfc-rooted` | ✅ |
@@ -91,15 +91,15 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 
 ### Remaining legacy surface
 
-~202 legacy `com.gadget.*` Kotlin files remain across all `:app` source
+~192 legacy `com.gadget.*` Kotlin files remain across all `:app` source
 sets (of which one, the separate `:lsposed-module`'s
 `com.gadget.spoofer.xposed`, is out of scope), migrating feature-by-feature
 per the [Feature Migration Guide](Feature-Migration-Guide). The radios/GPS
-rooted controllers (wifi/bt/nfc/ir/cell/gps/gps-spoof), `diagnostics`, and
-`storage` are the most recent clean-cuts; **10 legacy rooted controllers
-remain** in the `RootFeaturesEntryPoint` seam (camera, microphone, battery,
-automation, notification, keepalive, display, audio, adbdebug, usbdebug).
-Canonical metric:
+rooted controllers (wifi/bt/nfc/ir/cell/gps/gps-spoof), `diagnostics`,
+`storage`, and `camera` are the most recent clean-cuts; **9 legacy rooted
+controllers remain** in the `RootFeaturesEntryPoint` seam (microphone,
+battery, automation, notification, keepalive, display, audio, adbdebug,
+usbdebug). Canonical metric:
 
 ```bash
 find app/src -path "*com/gadget*" -name "*.kt" | wc -l

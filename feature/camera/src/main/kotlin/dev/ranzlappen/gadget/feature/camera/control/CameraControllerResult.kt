@@ -1,4 +1,4 @@
-package com.gadget.camera
+package dev.ranzlappen.gadget.feature.camera.control
 
 /**
  * Result returned by every [CameraController] extreme-tier method.

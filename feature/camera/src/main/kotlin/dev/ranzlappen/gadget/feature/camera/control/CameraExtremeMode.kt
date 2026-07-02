@@ -1,4 +1,4 @@
-package com.gadget.camera
+package dev.ranzlappen.gadget.feature.camera.control
 
 /**
  * Configuration for a high-FPS capture session driven via Camera2 directly,

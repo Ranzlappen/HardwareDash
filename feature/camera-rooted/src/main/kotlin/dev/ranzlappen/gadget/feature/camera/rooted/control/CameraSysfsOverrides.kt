@@ -1,6 +1,7 @@
-package com.gadget.camera
+package dev.ranzlappen.gadget.feature.camera.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.feature.camera.control.CameraControllerResult
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -1,4 +1,4 @@
-package com.gadget.camera
+package dev.ranzlappen.gadget.feature.camera.control
 
 import javax.inject.Inject
 import javax.inject.Singleton

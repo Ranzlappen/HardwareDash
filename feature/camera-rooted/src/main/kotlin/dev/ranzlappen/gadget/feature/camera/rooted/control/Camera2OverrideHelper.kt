@@ -1,4 +1,4 @@
-package com.gadget.camera
+package dev.ranzlappen.gadget.feature.camera.rooted.control
 
 import android.content.Context
 import android.hardware.camera2.CameraAccessException
@@ -15,14 +15,17 @@ import android.os.HandlerThread
 import android.util.Range
 import android.view.Surface
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
+import dev.ranzlappen.gadget.feature.camera.control.CameraControllerResult
+import dev.ranzlappen.gadget.feature.camera.control.HighFpsConfig
+import dev.ranzlappen.gadget.feature.camera.control.ManualExposureConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 
 internal const val FPS_HARD_CEILING = 240
 internal const val EXPOSURE_HARD_CEILING_NANOS = 30_000_000_000L

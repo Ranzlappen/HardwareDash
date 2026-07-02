@@ -334,6 +334,9 @@ dependencies {
     // (libsu sysfs PWM) + the dual-actuator / rumble-monitor helpers. Standard
     // APK never sees this module (sourceSet scoping).
     "rootedImplementation"(project(":feature:vibration-rooted"))
+    // Rooted Camera extreme-tier controller — high-FPS / manual-exposure /
+    // RAW-DNG / multi-camera / HAL-bypass / shutter-sound, each safety-gated.
+    "rootedImplementation"(project(":feature:camera-rooted"))
     // Rooted Storage action handler — diskstats, mounts, fstrim, drop_caches.
     "rootedImplementation"(project(":feature:storage-rooted"))
     // Rooted Diagnostics action handler — logcat tail, meminfo, cpuinfo, procstats.

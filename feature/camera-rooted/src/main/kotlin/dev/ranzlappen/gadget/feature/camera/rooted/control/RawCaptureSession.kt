@@ -1,4 +1,4 @@
-package com.gadget.camera
+package dev.ranzlappen.gadget.feature.camera.rooted.control
 
 import android.content.Context
 import android.graphics.ImageFormat
@@ -17,17 +17,19 @@ import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
 import android.view.Surface
-import dev.ranzlappen.gadget.core.root.core.RootShell
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
+import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.feature.camera.control.CameraControllerResult
+import dev.ranzlappen.gadget.feature.camera.control.RawCaptureConfig
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 
 internal const val RAW_FRAME_HARD_CEILING = 20
 internal const val RAW_MIN_FREE_DISK_BYTES = 500L * 1024L * 1024L

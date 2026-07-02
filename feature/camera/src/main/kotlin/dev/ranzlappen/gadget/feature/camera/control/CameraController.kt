@@ -1,4 +1,4 @@
-package com.gadget.camera
+package dev.ranzlappen.gadget.feature.camera.control
 
 /**
  * Rooted-only Camera capability surface. The standard-flavor implementation

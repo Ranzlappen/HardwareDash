@@ -16,8 +16,8 @@ import com.gadget.battery.BatteryController
 import com.gadget.battery.StandardBatteryController
 import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
 import dev.ranzlappen.gadget.feature.radios.bt.control.StandardBluetoothController
-import com.gadget.camera.CameraController
-import com.gadget.camera.StandardCameraController
+import dev.ranzlappen.gadget.feature.camera.control.CameraController
+import dev.ranzlappen.gadget.feature.camera.control.StandardCameraController
 import dev.ranzlappen.gadget.feature.radios.cell.control.CellController
 import dev.ranzlappen.gadget.feature.radios.cell.control.StandardCellController
 import dev.ranzlappen.gadget.feature.diagnostics.control.DiagnosticsController

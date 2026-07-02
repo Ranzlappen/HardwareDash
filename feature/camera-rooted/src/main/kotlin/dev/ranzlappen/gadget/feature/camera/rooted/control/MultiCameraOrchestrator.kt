@@ -1,4 +1,4 @@
-package com.gadget.camera
+package dev.ranzlappen.gadget.feature.camera.rooted.control
 
 import android.content.Context
 import android.graphics.ImageFormat
@@ -14,6 +14,12 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.view.Surface
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.ranzlappen.gadget.feature.camera.control.CameraControllerResult
+import dev.ranzlappen.gadget.feature.camera.control.MultiCameraConfig
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -21,10 +27,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 internal const val MULTI_CAMERA_HARD_CEILING_MILLIS = 15_000L
 internal const val MULTI_CAMERA_MAX_CONCURRENT = 3
