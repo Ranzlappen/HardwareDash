@@ -1,4 +1,4 @@
-package com.gadget.storage
+package dev.ranzlappen.gadget.feature.storage.control
 
 /**
  * Configures an `fstrim` invocation. The impl filters [partitions]

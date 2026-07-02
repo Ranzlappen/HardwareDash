@@ -1,4 +1,4 @@
-package com.gadget.storage
+package dev.ranzlappen.gadget.feature.storage.rooted.control
 
 import android.content.Context
 import android.os.Build
@@ -22,7 +22,7 @@ private const val DISKSTATS_FILENAME_EXTENSION = ".json"
  * Read-only `dumpsys diskstats` snapshot helper. Tail-capped to 8 KB
  * so a runaway dumpsys can't flood the shell buffer. Optionally
  * persists a structured JSON copy to the Logbook directory using the
- * Batch-5 [com.gadget.battery.BatteryDumpWriter] convention.
+ * Batch-5 battery-dump-writer convention.
  */
 @Singleton
 class DiskstatsHelper @Inject constructor(

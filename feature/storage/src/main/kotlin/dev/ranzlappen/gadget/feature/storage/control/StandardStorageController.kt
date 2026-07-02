@@ -1,4 +1,4 @@
-package com.gadget.storage
+package dev.ranzlappen.gadget.feature.storage.control
 
 import javax.inject.Inject
 import javax.inject.Singleton

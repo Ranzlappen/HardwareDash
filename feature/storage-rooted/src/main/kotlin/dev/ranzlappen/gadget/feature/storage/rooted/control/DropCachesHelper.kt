@@ -1,4 +1,4 @@
-package com.gadget.storage
+package dev.ranzlappen.gadget.feature.storage.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import javax.inject.Inject

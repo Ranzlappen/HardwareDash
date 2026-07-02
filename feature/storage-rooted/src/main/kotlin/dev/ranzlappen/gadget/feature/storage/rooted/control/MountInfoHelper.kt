@@ -1,6 +1,7 @@
-package com.gadget.storage
+package dev.ranzlappen.gadget.feature.storage.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.feature.storage.control.MountEntry
 import javax.inject.Inject
 import javax.inject.Singleton
 
