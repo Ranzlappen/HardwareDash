@@ -1,4 +1,4 @@
-package com.gadget.gps.spoof
+package dev.ranzlappen.gadget.feature.gps.spoof
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals

@@ -26,8 +26,8 @@ import com.gadget.display.DisplayController
 import com.gadget.display.StandardDisplayController
 import dev.ranzlappen.gadget.feature.gps.control.GpsController
 import dev.ranzlappen.gadget.feature.gps.control.StandardGpsController
-import com.gadget.gps.spoof.GpsSpoofController
-import com.gadget.gps.spoof.StandardGpsSpoofController
+import dev.ranzlappen.gadget.feature.gps.spoof.GpsSpoofController
+import dev.ranzlappen.gadget.feature.gps.spoof.StandardGpsSpoofController
 import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
 import dev.ranzlappen.gadget.feature.radios.ir.control.StandardIrController
 import com.gadget.keepalive.KeepAliveController

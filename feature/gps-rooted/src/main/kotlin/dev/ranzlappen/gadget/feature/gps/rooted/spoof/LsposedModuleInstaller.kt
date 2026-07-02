@@ -1,9 +1,10 @@
-package com.gadget.gps.spoof
+package dev.ranzlappen.gadget.feature.gps.rooted.spoof
 
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.feature.gps.spoof.SpoofResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

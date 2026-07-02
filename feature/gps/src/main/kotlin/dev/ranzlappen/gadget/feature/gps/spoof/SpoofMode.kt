@@ -1,4 +1,4 @@
-package com.gadget.gps.spoof
+package dev.ranzlappen.gadget.feature.gps.spoof
 
 /**
  * Which technical mechanism is currently driving the spoof. UI uses this for

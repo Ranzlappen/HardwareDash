@@ -1,4 +1,4 @@
-package com.gadget.gps.spoof
+package dev.ranzlappen.gadget.feature.gps.spoof
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit

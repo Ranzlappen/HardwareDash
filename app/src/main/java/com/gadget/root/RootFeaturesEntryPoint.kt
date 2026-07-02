@@ -11,7 +11,7 @@ import dev.ranzlappen.gadget.feature.radios.cell.control.CellController
 import com.gadget.diagnostics.DiagnosticsController
 import com.gadget.display.DisplayController
 import dev.ranzlappen.gadget.feature.gps.control.GpsController
-import com.gadget.gps.spoof.GpsSpoofController
+import dev.ranzlappen.gadget.feature.gps.spoof.GpsSpoofController
 import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
 import com.gadget.keepalive.KeepAliveController
 import com.gadget.microphone.MicrophoneController
