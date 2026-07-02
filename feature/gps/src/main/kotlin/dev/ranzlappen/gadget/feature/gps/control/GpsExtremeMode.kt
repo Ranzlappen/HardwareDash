@@ -1,4 +1,4 @@
-package com.gadget.gps
+package dev.ranzlappen.gadget.feature.gps.control
 
 /**
  * Read-only NMEA-stream tap. Bounded by [durationMillis] (hard 30 s

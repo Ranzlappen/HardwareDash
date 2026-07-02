@@ -1,6 +1,7 @@
-package com.gadget.gps
+package dev.ranzlappen.gadget.feature.gps.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.feature.gps.control.SatelliteEntry
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -1,4 +1,4 @@
-package com.gadget.gps
+package dev.ranzlappen.gadget.feature.gps.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import javax.inject.Inject

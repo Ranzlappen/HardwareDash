@@ -1,8 +1,11 @@
-package com.gadget.gps
+package dev.ranzlappen.gadget.feature.gps.rooted.control
 
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
+import dev.ranzlappen.gadget.feature.gps.control.GpsController
+import dev.ranzlappen.gadget.feature.gps.control.GpsControllerResult
+import dev.ranzlappen.gadget.feature.gps.control.NmeaTapConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 
