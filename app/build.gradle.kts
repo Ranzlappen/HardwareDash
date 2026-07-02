@@ -349,6 +349,8 @@ dependencies {
     "rootedImplementation"(project(":feature:radios-bt-rooted"))
     // Rooted NFC — raw NCI command exchange over the vendor sysfs node.
     "rootedImplementation"(project(":feature:radios-nfc-rooted"))
+    // Rooted IR — custom LIRC carrier + raw IR-LED GPIO toggling.
+    "rootedImplementation"(project(":feature:radios-ir-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

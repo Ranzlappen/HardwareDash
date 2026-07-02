@@ -1,9 +1,13 @@
-package com.gadget.ir
+package dev.ranzlappen.gadget.feature.radios.ir.rooted.control
 
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrCarrierConfig
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrControllerResult
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrRawPatternConfig
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

@@ -1,4 +1,4 @@
-package com.gadget.ir
+package dev.ranzlappen.gadget.feature.radios.ir.control
 
 /**
  * Result returned by every [IrController] extreme-tier method.

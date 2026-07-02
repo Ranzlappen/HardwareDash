@@ -28,8 +28,8 @@ import com.gadget.gps.GpsController
 import com.gadget.gps.StandardGpsController
 import com.gadget.gps.spoof.GpsSpoofController
 import com.gadget.gps.spoof.StandardGpsSpoofController
-import com.gadget.ir.IrController
-import com.gadget.ir.StandardIrController
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
+import dev.ranzlappen.gadget.feature.radios.ir.control.StandardIrController
 import com.gadget.keepalive.KeepAliveController
 import com.gadget.keepalive.StandardKeepAliveController
 import com.gadget.microphone.MicrophoneController

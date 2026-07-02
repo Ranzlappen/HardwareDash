@@ -33,8 +33,8 @@ import com.gadget.gps.GpsController
 import com.gadget.gps.RootedGpsController
 import com.gadget.gps.spoof.GpsSpoofController
 import com.gadget.gps.spoof.RootedGpsSpoofController
-import com.gadget.ir.IrController
-import com.gadget.ir.RootedIrController
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
+import dev.ranzlappen.gadget.feature.radios.ir.rooted.control.RootedIrController
 import com.gadget.keepalive.KeepAliveController
 import com.gadget.keepalive.RootedKeepAliveController
 import com.gadget.microphone.MicrophoneController
