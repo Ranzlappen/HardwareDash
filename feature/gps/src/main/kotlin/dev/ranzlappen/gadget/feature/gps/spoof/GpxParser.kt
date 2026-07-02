@@ -1,4 +1,4 @@
-package com.gadget.gps.spoof
+package dev.ranzlappen.gadget.feature.gps.spoof
 
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException

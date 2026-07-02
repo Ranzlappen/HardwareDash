@@ -1,4 +1,4 @@
-package com.gadget.gps.spoof
+package dev.ranzlappen.gadget.feature.gps.spoof
 
 /**
  * Pure-Kotlin point on a spoofed track. Lives in the shared package so the

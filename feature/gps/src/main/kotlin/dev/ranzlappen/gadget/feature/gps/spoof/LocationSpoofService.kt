@@ -1,4 +1,4 @@
-package com.gadget.gps.spoof
+package dev.ranzlappen.gadget.feature.gps.spoof
 
 import android.app.Notification
 import android.app.PendingIntent
@@ -11,9 +11,8 @@ import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.gadget.MainActivity
-import com.gadget.R
-import com.gadget.notifications.CH_GPS_SPOOF
+import dev.ranzlappen.gadget.core.notifications.ChannelSpec
+import dev.ranzlappen.gadget.core.notifications.NotificationChannelRegistry
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +36,7 @@ import javax.inject.Inject
 class LocationSpoofService : Service() {
 
     @Inject lateinit var controller: GpsSpoofController
+    @Inject lateinit var channels: NotificationChannelRegistry
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var observerJob: Job? = null
@@ -53,6 +53,7 @@ class LocationSpoofService : Service() {
             }
         }
 
+        ensureChannel()
         startForegroundCompat(buildNotification("Starting…", null))
         acquireWakeLock()
 
@@ -94,7 +95,9 @@ class LocationSpoofService : Service() {
     }
 
     private fun buildNotification(title: String, body: String?): Notification {
-        val openIntent = Intent(this, MainActivity::class.java).apply {
+        // Launch the host app's entry activity without a compile-time dependency
+        // on it — the module can't see the app's MainActivity.
+        val openIntent = (packageManager.getLaunchIntentForPackage(packageName) ?: Intent()).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val openPi = PendingIntent.getActivity(
@@ -110,8 +113,8 @@ class LocationSpoofService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        return NotificationCompat.Builder(this, CH_GPS_SPOOF)
-            .setSmallIcon(R.mipmap.ic_launcher)
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .setContentTitle(title)
             .setContentText(body ?: "GPS spoofing active")
             .setOngoing(true)
@@ -142,9 +145,25 @@ class LocationSpoofService : Service() {
     private fun formatLatLon(lat: Double, lon: Double): String =
         "%.5f, %.5f".format(lat, lon)
 
+    private fun ensureChannel() {
+        channels.ensure(
+            ChannelSpec(
+                id = CHANNEL_ID,
+                displayName = "GPS Spoofing",
+                description = "Active when GPS spoofing playback (GPX, KML, route) is running",
+                importance = ChannelSpec.Importance.Low,
+                silent = true,
+            ),
+        )
+    }
+
     companion object {
         const val NOTIFICATION_ID = 0xC0FFEE
         const val ACTION_STOP = "com.gadget.gps.spoof.STOP"
+
+        /** Channel id — kept byte-identical to the app-level `hwd_gps_spoof`
+         *  so an in-place upgrade preserves the user's channel settings. */
+        const val CHANNEL_ID = "hwd_gps_spoof"
         private const val WAKE_LOCK_TAG = "HardwareDash:GpsSpoof"
 
         fun start(context: Context) {

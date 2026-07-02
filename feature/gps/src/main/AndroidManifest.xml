@@ -1,2 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Location for the GPS feature + spoofing playback. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Keeps spoofing playback active while the app is backgrounded. -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!-- Signature-only permission. Declaring it makes HardwareDash appear in
+         Developer Options' "Mock Location App" picker; the standard flavor
+         needs the user to select us there. The rooted flavor toggles the
+         android:mock_location AppOp via libsu instead. -->
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"
+        tools:ignore="MockLocation,ProtectedPermissions" />
+
+    <!-- Foreground service for GPX/KML/route playback. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+    <application>
+        <!-- GPS spoofing playback foreground service (both flavors; the
+             GpsSpoofController it injects is flavor-bound). -->
+        <service
+            android:name=".spoof.LocationSpoofService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+    </application>
+</manifest>

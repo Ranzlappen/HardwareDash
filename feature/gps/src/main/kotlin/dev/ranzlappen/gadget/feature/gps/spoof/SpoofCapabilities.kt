@@ -1,4 +1,4 @@
-package com.gadget.gps.spoof
+package dev.ranzlappen.gadget.feature.gps.spoof
 
 /**
  * Snapshot of what's possible on this device + flavor right now. UI's

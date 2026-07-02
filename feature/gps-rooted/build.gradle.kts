@@ -16,7 +16,10 @@ android {
 
 dependencies {
     implementation(project(":core:root"))
-    // The GPS controller contract (GpsController + config/result types) lives
-    // in the base :feature:gps module so both flavors share it.
+    // The GPS controller + spoofing contract types live in the base
+    // :feature:gps module so both flavors share them.
     implementation(project(":feature:gps"))
+    // LsposedModuleInstaller uses Dispatchers / withContext directly; core:root
+    // exposes coroutines as implementation only, so declare it explicitly.
+    implementation(libs.kotlinx.coroutines.core)
 }

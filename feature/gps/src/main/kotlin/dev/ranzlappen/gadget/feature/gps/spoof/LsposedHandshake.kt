@@ -1,4 +1,4 @@
-package com.gadget.gps.spoof
+package dev.ranzlappen.gadget.feature.gps.spoof
 
 /**
  * Cross-classloader sentinel used by the bundled LSPosed module to advertise

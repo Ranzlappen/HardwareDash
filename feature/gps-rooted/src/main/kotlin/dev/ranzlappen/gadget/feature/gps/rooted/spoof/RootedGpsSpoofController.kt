@@ -1,4 +1,4 @@
-package com.gadget.gps.spoof
+package dev.ranzlappen.gadget.feature.gps.rooted.spoof
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -8,6 +8,15 @@ import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.feature.gps.spoof.GpsSpoofController
+import dev.ranzlappen.gadget.feature.gps.spoof.LegalAcknowledgement
+import dev.ranzlappen.gadget.feature.gps.spoof.LsposedHandshake
+import dev.ranzlappen.gadget.feature.gps.spoof.SpoofCapabilities
+import dev.ranzlappen.gadget.feature.gps.spoof.SpoofConfig
+import dev.ranzlappen.gadget.feature.gps.spoof.SpoofEngine
+import dev.ranzlappen.gadget.feature.gps.spoof.SpoofMode
+import dev.ranzlappen.gadget.feature.gps.spoof.SpoofResult
+import dev.ranzlappen.gadget.feature.gps.spoof.SpoofState
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
