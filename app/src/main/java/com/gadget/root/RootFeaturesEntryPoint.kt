@@ -2,7 +2,7 @@ package com.gadget.root
 
 import dev.ranzlappen.gadget.core.root.*
 import dev.ranzlappen.gadget.feature.adbdebug.control.AdbDebuggingController
-import com.gadget.audio.AudioRoutingController
+import dev.ranzlappen.gadget.feature.audio.control.AudioRoutingController
 import dev.ranzlappen.gadget.feature.automation.control.AutomationController
 import dev.ranzlappen.gadget.feature.battery.control.BatteryController
 import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
@@ -14,7 +14,7 @@ import dev.ranzlappen.gadget.feature.gps.control.GpsController
 import dev.ranzlappen.gadget.feature.gps.spoof.GpsSpoofController
 import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
 import com.gadget.keepalive.KeepAliveController
-import com.gadget.microphone.MicrophoneController
+import dev.ranzlappen.gadget.feature.microphone.control.MicrophoneController
 import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
 import dev.ranzlappen.gadget.feature.notification.control.NotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
@@ -41,15 +41,15 @@ import dagger.hilt.components.SingletonComponent
  *
  * This file (and the 13 `ui/Rooted*` Compose composables that reach it)
  * stays at its legacy `com.gadget.root.*` location for one specific
- * reason: it depends on the remaining **3 legacy non-modular feature
- * controllers** (`MicrophoneController`, `AudioRoutingController`,
- * `KeepAliveController`, each still in `app/src/main/java/com/gadget/<feature>/`;
- * the radios/GPS/diagnostics/storage/camera/battery/display/adbdebug/usbdebug/
- * automation/notification controllers have already migrated out to their feature
- * modules). Pulling
+ * reason: it depends on the one remaining **legacy non-modular feature
+ * controller** — `KeepAliveController`, still in
+ * `app/src/main/java/com/gadget/keepalive/` because it depends on the app-shell
+ * `PersistentKeepAliveService` foreground service, which must be relocated
+ * first. Every other feature controller (radios/GPS/diagnostics/storage/camera/
+ * battery/display/adbdebug/usbdebug/automation/notification/microphone/audio)
+ * has already migrated out to its own feature module. Pulling
  * the entry-point into `:core:root` would force `:core:root` to depend
- * on every one of those legacy controllers, defeating the purpose of
- * the extraction.
+ * on that legacy controller, defeating the purpose of the extraction.
  *
  * **Replacement plan.** Once each feature controller migrates to its
  * own `:feature:<name>` module (the modular torch / vibration / etc.

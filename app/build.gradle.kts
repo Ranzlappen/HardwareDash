@@ -217,6 +217,7 @@ dependencies {
     implementation(project(":feature:camera"))
     implementation(project(":feature:motion"))
     implementation(project(":feature:audio"))
+    implementation(project(":feature:microphone"))
     implementation(project(":feature:radios-nfc"))
     implementation(project(":feature:radios-cell"))
     implementation(project(":feature:radios-bt"))
@@ -361,6 +362,10 @@ dependencies {
     "rootedImplementation"(project(":feature:automation-rooted"))
     // Rooted Notification controller — sticky override / listener-access grant / lock-screen overlay.
     "rootedImplementation"(project(":feature:notification-rooted"))
+    // Rooted Microphone controller — mic-gain / direct-PCM / custom-rate / multi-mic / effect override.
+    "rootedImplementation"(project(":feature:microphone-rooted"))
+    // Rooted Audio-routing controller — stream-volume bypass / force-routing / mute-all / dumpsys.
+    "rootedImplementation"(project(":feature:audio-rooted"))
     // Rooted Lock overlay — secure-keyguard TYPE_APPLICATION_OVERLAY action.
     "rootedImplementation"(project(":feature:lock-rooted"))
     // Rooted Flipper — root-granted USB device-node access (no permission dialog).

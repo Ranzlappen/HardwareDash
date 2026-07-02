@@ -8,8 +8,8 @@ import dev.ranzlappen.gadget.core.root.core.RootShell
 import dev.ranzlappen.gadget.core.root.launch.LaunchGate
 import dev.ranzlappen.gadget.feature.adbdebug.control.AdbDebuggingController
 import dev.ranzlappen.gadget.feature.adbdebug.control.StandardAdbDebuggingController
-import com.gadget.audio.AudioRoutingController
-import com.gadget.audio.StandardAudioRoutingController
+import dev.ranzlappen.gadget.feature.audio.control.AudioRoutingController
+import dev.ranzlappen.gadget.feature.audio.control.StandardAudioRoutingController
 import dev.ranzlappen.gadget.feature.automation.control.AutomationController
 import dev.ranzlappen.gadget.feature.automation.control.StandardAutomationController
 import dev.ranzlappen.gadget.feature.battery.control.BatteryController
@@ -32,8 +32,8 @@ import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
 import dev.ranzlappen.gadget.feature.radios.ir.control.StandardIrController
 import com.gadget.keepalive.KeepAliveController
 import com.gadget.keepalive.StandardKeepAliveController
-import com.gadget.microphone.MicrophoneController
-import com.gadget.microphone.StandardMicrophoneController
+import dev.ranzlappen.gadget.feature.microphone.control.MicrophoneController
+import dev.ranzlappen.gadget.feature.microphone.control.StandardMicrophoneController
 import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
 import dev.ranzlappen.gadget.feature.radios.nfc.control.StandardNfcController
 import dev.ranzlappen.gadget.feature.notification.control.NotificationController
