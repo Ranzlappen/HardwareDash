@@ -64,12 +64,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  preview:
+  # Render + assemble the gallery. Deliberately has NO `environment:` — the
+  # github-pages environment carries a branch-protection rule (default branch
+  # only), so gating this job on it would reject every PR-branch run at
+  # dispatch (before any step runs). Pages deployment is a separate job below.
+  build:
     runs-on: ubuntu-latest
-    # Required for actions/deploy-pages.
-    environment:
-      name: github-pages
-      url: ${{ steps.pages.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -171,11 +171,6 @@ jobs:
         with:
           path: gallery/preview
 
-      - name: Deploy to GitHub Pages
-        id: deploy
-        if: github.event_name != 'pull_request'
-        uses: actions/deploy-pages@v4
-
       - name: Commit gallery to app-previews branch
         if: github.event_name != 'pull_request'
         run: |
@@ -197,4 +192,19 @@ jobs:
             echo "push failed (attempt $n) — retrying in $((2 ** n))s"
             sleep "$((2 ** n))"
           done
-          echo "Gallery published: ${{ steps.deploy.outputs.page_url }}"
+          echo "Gallery committed to the app-previews branch."
+
+  # Publish to GitHub Pages. Isolated here so the github-pages environment
+  # (and its branch-protection rule) never gates the render/build job above,
+  # which must run on PR branches too. Skipped on pull requests.
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
