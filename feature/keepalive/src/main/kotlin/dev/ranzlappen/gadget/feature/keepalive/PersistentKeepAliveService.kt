@@ -1,4 +1,4 @@
-package com.gadget.services
+package dev.ranzlappen.gadget.feature.keepalive
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -9,9 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
-import com.gadget.MainActivity
-import com.gadget.localization.LocalizationManager
-import com.gadget.localization.S
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -22,7 +19,10 @@ import dagger.hilt.android.AndroidEntryPoint
  * `disableAndStopService()`.
  *
  * The notification is `setOngoing(true)`, posted on a high-importance
- * channel, and uses `CATEGORY_SERVICE` per the Batch-7 plan.
+ * channel, and uses `CATEGORY_SERVICE`. The tap intent resolves the
+ * app's own launcher activity via the package manager (rather than a
+ * compile-time dependency on `MainActivity`), so this service can live
+ * in a feature module.
  */
 @AndroidEntryPoint
 class PersistentKeepAliveService : Service() {
@@ -43,13 +43,15 @@ class PersistentKeepAliveService : Service() {
 
     private fun startForegroundLifeline() {
         ensureChannel()
-        val lang = LocalizationManager.loadLanguage(this)
-        val tapIntent = PendingIntent.getActivity(
-            this,
-            0,
-            Intent(this, MainActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        val tapIntent = launchIntent?.let {
+            PendingIntent.getActivity(
+                this,
+                0,
+                it,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+        }
         val stopIntent = PendingIntent.getService(
             this,
             1,
@@ -57,16 +59,16 @@ class PersistentKeepAliveService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val notification = Notification.Builder(this, CH_KEEPALIVE)
-            .setContentTitle(S.Services.keepAliveTitle(lang))
-            .setContentText(S.Services.keepAliveBody(lang))
+            .setContentTitle(getString(R.string.keepalive_notif_title))
+            .setContentText(getString(R.string.keepalive_notif_body))
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setOngoing(true)
             .setCategory(Notification.CATEGORY_SERVICE)
-            .setContentIntent(tapIntent)
+            .apply { if (tapIntent != null) setContentIntent(tapIntent) }
             .addAction(
                 Notification.Action.Builder(
                     null,
-                    S.Services.stop(lang),
+                    getString(R.string.keepalive_notif_stop),
                     stopIntent,
                 ).build(),
             )

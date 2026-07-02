@@ -282,11 +282,9 @@
              :feature:apps (modular migration); their manifest entries moved
              with them. -->
 
-        <!-- ── Batch-7: Persistent keep-alive foreground service ─────── -->
-        <service
-            android:name=".services.PersistentKeepAliveService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
+        <!-- Persistent keep-alive foreground service now lives in
+             :feature:keepalive (dev.ranzlappen.gadget.feature.keepalive) and is
+             folded back in via manifest merge. -->
 
         <!-- GPS spoofing playback foreground service now lives in
              :feature:gps (dev.ranzlappen.gadget.feature.gps.spoof) and is

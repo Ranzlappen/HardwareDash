@@ -1,4 +1,5 @@
-package com.gadget.keepalive
+package dev.ranzlappen.gadget.feature.keepalive.control
+
 
 /**
  * Persistent keep-alive capability surface. Both flavors implement
@@ -6,7 +7,7 @@ package com.gadget.keepalive
  * exemption intent; the rooted flavor automates Doze whitelisting +
  * `pm grant` of a hard-listed set of normal permissions.
  *
- * Either way, [enable] starts the shared [com.gadget.services.PersistentKeepAliveService].
+ * Either way, [enable] starts the shared [PersistentKeepAliveService].
  */
 interface KeepAliveController {
 

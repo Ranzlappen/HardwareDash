@@ -235,6 +235,7 @@ dependencies {
     implementation(project(":feature:usbdebug"))
     implementation(project(":feature:automation"))
     implementation(project(":feature:notification"))
+    implementation(project(":feature:keepalive"))
     implementation(project(":feature:bugreport"))
     implementation(project(":feature:manual"))
     implementation(project(":feature:youtubedownloader"))
@@ -362,6 +363,8 @@ dependencies {
     "rootedImplementation"(project(":feature:automation-rooted"))
     // Rooted Notification controller — sticky override / listener-access grant / lock-screen overlay.
     "rootedImplementation"(project(":feature:notification-rooted"))
+    // Rooted Keep-Alive controller — Doze whitelist (`cmd deviceidle`) + `pm grant` allow-list.
+    "rootedImplementation"(project(":feature:keepalive-rooted"))
     // Rooted Microphone controller — mic-gain / direct-PCM / custom-rate / multi-mic / effect override.
     "rootedImplementation"(project(":feature:microphone-rooted"))
     // Rooted Audio-routing controller — stream-volume bypass / force-routing / mute-all / dumpsys.

@@ -1,4 +1,5 @@
-package com.gadget.keepalive
+package dev.ranzlappen.gadget.feature.keepalive.control
+
 
 /**
  * Result returned by every [KeepAliveController] method. Same shape

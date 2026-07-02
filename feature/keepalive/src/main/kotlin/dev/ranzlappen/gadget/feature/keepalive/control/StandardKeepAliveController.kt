@@ -1,4 +1,4 @@
-package com.gadget.keepalive
+package dev.ranzlappen.gadget.feature.keepalive.control
 
 import android.content.Context
 import android.content.Intent
@@ -6,8 +6,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.core.content.ContextCompat
-import com.gadget.services.PersistentKeepAliveService
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.ranzlappen.gadget.feature.keepalive.PersistentKeepAliveService
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -1,4 +1,5 @@
-package com.gadget.keepalive
+package dev.ranzlappen.gadget.feature.keepalive.control
+
 
 /**
  * Doze-bypass scope. Always restricted to the app's own package — the
