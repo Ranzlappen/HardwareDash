@@ -134,10 +134,14 @@ per-feature clean-cut for the other migrated modules' legacy sources.
   `Settings → Appearance → Palette`) and the in-depth permission UI (the Health
   screen is now an actionable permission manager — runtime grant requests +
   App-Settings fallback) plus its rooted one-up (`:feature:bugreport-rooted`
-  force-grants permissions via `pm grant`, gated by `RootSafetyGate`) and the
-  first widget-coverage slices (battery + internal-storage status home-screen
-  widgets on the `:core:widgetkit` content archetype). Still open:
-  widget/notification-panel coverage for the remaining features.
+  force-grants permissions via `pm grant`, gated by `RootSafetyGate`), the
+  first widget-coverage gauges (battery + internal-storage status home-screen
+  widgets on the `:core:widgetkit` content archetype), and a second Quick
+  Settings tile (`StrobeTileService` joins `FlashlightTileService` —
+  start/stop the flashlight strobe straight from the panel). In flight on
+  feature branches: WiFi-signal + ambient-light gauge widgets, and
+  theme-picker live preview swatches. Still open: remaining
+  notification-panel / QS-tile coverage where a feature has a clean toggle.
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.
