@@ -15,7 +15,7 @@ import com.gadget.gps.spoof.GpsSpoofController
 import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
 import com.gadget.keepalive.KeepAliveController
 import com.gadget.microphone.MicrophoneController
-import com.gadget.nfc.NfcController
+import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
 import com.gadget.notification.NotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
 import com.gadget.storage.StorageController

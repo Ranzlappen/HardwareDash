@@ -1,6 +1,7 @@
-package com.gadget.nfc
+package dev.ranzlappen.gadget.feature.radios.nfc.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
+import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcControllerResult
 import javax.inject.Inject
 import javax.inject.Singleton
 
