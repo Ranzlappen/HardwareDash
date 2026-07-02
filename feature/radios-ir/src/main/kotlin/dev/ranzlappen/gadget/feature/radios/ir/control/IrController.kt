@@ -1,4 +1,4 @@
-package com.gadget.ir
+package dev.ranzlappen.gadget.feature.radios.ir.control
 
 /**
  * Rooted-only IR transmitter capability surface. Standard flavor

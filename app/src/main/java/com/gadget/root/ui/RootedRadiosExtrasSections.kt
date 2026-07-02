@@ -28,9 +28,9 @@ import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothTxPowerConfig
 import com.gadget.cell.CellControllerResult
 import com.gadget.gps.GpsControllerResult
 import com.gadget.gps.NmeaTapConfig
-import com.gadget.ir.IrCarrierConfig
-import com.gadget.ir.IrControllerResult
-import com.gadget.ir.IrRawPatternConfig
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrCarrierConfig
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrControllerResult
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrRawPatternConfig
 import com.gadget.nfc.NfcControllerResult
 import com.gadget.nfc.RawNciCommandConfig
 import dev.ranzlappen.gadget.feature.radios.wifi.control.ChannelConfig

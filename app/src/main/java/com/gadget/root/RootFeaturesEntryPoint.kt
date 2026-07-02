@@ -12,7 +12,7 @@ import com.gadget.diagnostics.DiagnosticsController
 import com.gadget.display.DisplayController
 import com.gadget.gps.GpsController
 import com.gadget.gps.spoof.GpsSpoofController
-import com.gadget.ir.IrController
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
 import com.gadget.keepalive.KeepAliveController
 import com.gadget.microphone.MicrophoneController
 import com.gadget.nfc.NfcController

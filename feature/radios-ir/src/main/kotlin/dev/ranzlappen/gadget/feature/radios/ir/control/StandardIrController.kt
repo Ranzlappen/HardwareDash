@@ -1,4 +1,4 @@
-package com.gadget.ir
+package dev.ranzlappen.gadget.feature.radios.ir.control
 
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -137,6 +137,7 @@ include(
     ":feature:radios-nfc",
     ":feature:radios-subghz",
     ":feature:radios-ir",
+    ":feature:radios-ir-rooted",
     ":feature:flipper",
     ":feature:flipper-rooted",
     ":feature:storage",

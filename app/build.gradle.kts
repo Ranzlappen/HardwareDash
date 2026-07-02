@@ -347,6 +347,8 @@ dependencies {
     "rootedImplementation"(project(":feature:radios-wifi-rooted"))
     // Rooted Bluetooth — rfkill / TX-power / HCI-snoop-tail controller.
     "rootedImplementation"(project(":feature:radios-bt-rooted"))
+    // Rooted IR — custom LIRC carrier + raw IR-LED GPIO toggling.
+    "rootedImplementation"(project(":feature:radios-ir-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

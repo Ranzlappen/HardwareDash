@@ -1,4 +1,4 @@
-package com.gadget.ir
+package dev.ranzlappen.gadget.feature.radios.ir.control
 
 /**
  * Custom IR carrier frequency outside `ConsumerIrManager`'s reported

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No Android permissions: the custom-carrier (LIRC) and raw IR-LED GPIO
+     writes run through the root shell / sysfs, gated by RootSafetyGate. -->
+<manifest />
