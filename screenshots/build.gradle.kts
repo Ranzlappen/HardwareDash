@@ -47,6 +47,11 @@ roborazzi {
         // Scan the whole app namespace. Every feature/core preview lives
         // under dev.ranzlappen.gadget.**, so this one root covers them all.
         packages = listOf("dev.ranzlappen.gadget")
+        // Every @Preview / @GadgetPreviewLightDark function in the app is
+        // declared `private` (the project convention). ComposablePreviewScanner
+        // skips private previews by default, which discovered zero previews and
+        // produced zero PNGs. Opt in so the whole app is actually rendered.
+        includePrivatePreviews = true
     }
 }
 
