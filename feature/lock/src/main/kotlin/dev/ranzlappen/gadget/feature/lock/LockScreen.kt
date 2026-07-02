@@ -36,6 +36,12 @@ fun LockScreen(
         state = state,
         moduleInfo = lockModuleInfo(state),
         modifier = modifier,
+        liveMonitors = {
+            LiveMonitorContainer(metricKey = METRIC_KEY, title = stringResource(R.string.lock_live_monitor_state))
+        },
+        monitors = {
+            MonitorContainer(metricKey = METRIC_KEY, title = stringResource(R.string.lock_monitor_state))
+        },
     )
 }
 
@@ -90,6 +96,8 @@ internal fun LockScreenContent(
     state: LockState,
     moduleInfo: ModuleInfo?,
     modifier: Modifier = Modifier,
+    liveMonitors: @Composable () -> Unit = {},
+    monitors: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
         title = stringResource(R.string.lock_screen_title),
@@ -97,8 +105,8 @@ internal fun LockScreenContent(
         moduleInfo = moduleInfo,
         functional = {
             LockStatusCard(state = state)
-            LiveMonitorContainer(metricKey = METRIC_KEY, title = stringResource(R.string.lock_live_monitor_state))
-            MonitorContainer(metricKey = METRIC_KEY, title = stringResource(R.string.lock_monitor_state))
+            liveMonitors()
+            monitors()
         },
     )
 }
