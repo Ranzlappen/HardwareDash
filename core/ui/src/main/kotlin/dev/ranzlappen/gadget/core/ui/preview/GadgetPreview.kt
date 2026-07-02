@@ -2,15 +2,21 @@ package dev.ranzlappen.gadget.core.ui.preview
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
+import dev.ranzlappen.gadget.core.ui.adaptive.LocalWindowSizeClass
 
 /**
  * Standard preview wrapper: wraps [content] in [GadgetTheme] over the
@@ -32,6 +38,7 @@ import dev.ranzlappen.gadget.core.designsystem.tokens.GadgetSpacing
  * }
  * ```
  */
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun GadgetThemedPreview(
     darkTheme: Boolean = true,
@@ -40,13 +47,25 @@ fun GadgetThemedPreview(
 ) {
     GadgetTheme(useDarkTheme = darkTheme, useDynamicColor = useDynamicColor) {
         val spacing = LocalGadgetTheme.current.spacing
-        Box(
+        // Derive a WindowSizeClass from the preview canvas and provide it via
+        // LocalWindowSizeClass. Screens built on ModuleScreenScaffold read it
+        // through rememberLayoutMode(); outside GadgetApp (Android Studio
+        // previews AND the Roborazzi gallery render) the local's default
+        // `error(...)` would otherwise throw. Deriving from the actual
+        // constraints keeps @GadgetPreviewSizeClasses meaningful — a 700/1024dp
+        // preview still resolves Medium/Expanded → TwoPane/ThreePane. GadgetApp
+        // supplies the real value at runtime; this wrapper is preview-only.
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(spacing.medium),
+                .background(MaterialTheme.colorScheme.background),
         ) {
-            content()
+            val sizeClass = WindowSizeClass.calculateFromSize(DpSize(maxWidth, maxHeight))
+            CompositionLocalProvider(LocalWindowSizeClass provides sizeClass) {
+                Box(modifier = Modifier.padding(spacing.medium)) {
+                    content()
+                }
+            }
         }
     }
 }

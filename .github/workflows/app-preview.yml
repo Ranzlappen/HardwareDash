@@ -113,6 +113,20 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
+      # On a render failure the console only prints the exception-class chain,
+      # not the message. Persist the Robolectric test report so a failing
+      # preview's actual cause (e.g. a missing CompositionLocal) is inspectable.
+      - name: Upload Robolectric test report (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-test-report-${{ env.VERSION }}
+          path: |
+            screenshots/build/reports/tests/**
+            screenshots/build/test-results/**
+          retention-days: 7
+          if-no-files-found: warn
+
       # ImageMagick powers the pixel-diff column. Preinstalled on
       # ubuntu-latest; install defensively in case the image changes.
       - name: Ensure ImageMagick
