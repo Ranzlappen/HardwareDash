@@ -1,4 +1,4 @@
-package com.gadget.nfc
+package dev.ranzlappen.gadget.feature.radios.nfc.control
 
 /**
  * Result returned by every [NfcController] extreme-tier method. Same

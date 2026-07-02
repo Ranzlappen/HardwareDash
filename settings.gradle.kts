@@ -133,6 +133,7 @@ include(
     ":feature:radios-wifi",
     ":feature:radios-bt",
     ":feature:radios-nfc",
+    ":feature:radios-nfc-rooted",
     ":feature:radios-subghz",
     ":feature:radios-ir",
     ":feature:flipper",

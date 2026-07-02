@@ -31,8 +31,8 @@ import com.gadget.gps.NmeaTapConfig
 import com.gadget.ir.IrCarrierConfig
 import com.gadget.ir.IrControllerResult
 import com.gadget.ir.IrRawPatternConfig
-import com.gadget.nfc.NfcControllerResult
-import com.gadget.nfc.RawNciCommandConfig
+import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcControllerResult
+import dev.ranzlappen.gadget.feature.radios.nfc.control.RawNciCommandConfig
 import com.gadget.wifi.ChannelConfig
 import com.gadget.wifi.RfkillConfig
 import com.gadget.wifi.TxPowerConfig

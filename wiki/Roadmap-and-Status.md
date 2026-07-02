@@ -50,7 +50,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Barcode Scanner (CameraX + MLKit, all formats, scan history, WiFi/URL; rooted high-fps / manual-override / HAL-bypass rows) | `:feature:camera` | ✅ |
 | Motion (gyroscope / step counter / motion detect; per-sensor live monitors; rooted high-polling / raw-unfiltered / sysfs-read rows) | `:feature:motion` | ✅ |
 | Audio (dB meter + WAV voice recording; live dB monitor; rooted mic-gain / direct-PCM / custom-sample-rate rows) | `:feature:audio` | ✅ |
-| NFC (NDEF tag read + HCE emulation + template library; live + history NFC-state monitors; rooted raw-NCI row) | `:feature:radios-nfc` | ✅ |
+| NFC (NDEF tag read + HCE emulation + template library; live + history NFC-state monitors; rooted raw-NCI row; rooted `NfcController` — raw NCI command exchange over the vendor sysfs node with a 256-byte payload ceiling + 5 s read-timeout, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.nfc` into the modules) | `:feature:radios-nfc` + `:feature:radios-nfc-rooted` | ✅ |
 | Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows) | `:feature:radios-bt` | ✅ |
 | WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions) | `:feature:radios-wifi` | ✅ |
 | Ambient Light (live lux reading + level descriptor; ambient-light history monitor; assert-bright / assert-dark automation actions; rooted brightness / refresh-rate / density rows) | `:feature:ambient` | ✅ |

@@ -1,4 +1,4 @@
-package com.gadget.nfc
+package dev.ranzlappen.gadget.feature.radios.nfc.control
 
 /**
  * Rooted-only NFC capability surface. Standard flavor returns

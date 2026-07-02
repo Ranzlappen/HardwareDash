@@ -1,4 +1,4 @@
-package com.gadget.nfc
+package dev.ranzlappen.gadget.feature.radios.nfc.control
 
 import javax.inject.Inject
 import javax.inject.Singleton
