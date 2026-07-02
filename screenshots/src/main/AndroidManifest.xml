@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Empty manifest for the test-only :screenshots aggregator. The module
+  contributes no components; it exists purely so Roborazzi's Compose-preview
+  scanner can render every downstream @Preview under Robolectric. The
+  package namespace is declared in build.gradle.kts.
+-->
+<manifest />

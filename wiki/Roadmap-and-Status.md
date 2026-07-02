@@ -222,6 +222,11 @@ any PR that lets rooted code/assets/permissions into the standard APK.
 `rooted-release.apk` (signed) ships once the rooted modules are feature
 complete. See [Testing & CI](Testing-and-CI).
 
+Every push to `main` also regenerates the **[App Preview Gallery](App-Preview-Gallery)**
+— an approximate visual render of every screen (Roborazzi, JVM, no emulator),
+published to GitHub Pages with a per-version archive and diffs. Entry point:
+[`PREVIEW.md`](https://github.com/Ranzlappen/HardwareDash/blob/main/PREVIEW.md).
+
 ## Historical milestones
 
 - **`claude/refactor-2026`** carried the Phase-0 → Phase-2 migration
@@ -234,5 +239,5 @@ complete. See [Testing & CI](Testing-and-CI).
 ---
 
 > _Last reviewed: 2026-07-02 · Source: `MASTER-PLAN.md`,
-> `docs/refactor-2026/*`, `README.md` · Related modules: all;
-> `:feature:storage` + `:feature:storage-rooted` (latest clean-cut)._
+> `docs/refactor-2026/*`, `README.md`, `.github/workflows/app-preview.yml` ·
+> Related modules: all, `:screenshots`._

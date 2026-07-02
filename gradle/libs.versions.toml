@@ -28,6 +28,16 @@ ktlintGradle = "12.1.0"
 mockk = "1.13.8"
 turbine = "1.0.0"
 coroutinesTest = "1.7.3"
+# Roborazzi screenshot pipeline (JVM/Robolectric — no emulator). Powers the
+# auto-generated app-preview gallery: `generateComposePreviewRobolectricTests`
+# scans every @Preview and renders it on the JVM. Robolectric 4.14+ is the
+# first line that supports compileSdk 35 (Android 15). Kept off the release
+# path — only the test-only :screenshots module consumes these. Pinned pair
+# validated on CI (no local Android SDK); bump together if the resolver or
+# the Kotlin 1.9.10 compile fails.
+roborazzi = "1.24.0"
+robolectric = "4.14.1"
+composablePreviewScanner = "0.5.0"
 
 # :app dependencies added in Batch 2 (app/build.gradle Groovy → Kotlin DSL
 # migration). Versions match the values previously hardcoded in
@@ -90,6 +100,16 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 
+# Roborazzi + Compose-preview scanner (consumed only by the test-only
+# :screenshots aggregator module). roborazzi-compose-preview-scanner-support
+# transitively pulls the ComposablePreviewScanner; it is declared explicitly
+# here so the coordinate is visible and pinnable.
+roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }
+roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version.ref = "roborazzi" }
+roborazzi-compose-preview-scanner-support = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose-preview-scanner-support", version.ref = "roborazzi" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+composable-preview-scanner-android = { group = "io.github.sergio-sastre.ComposablePreviewScanner", name = "android", version.ref = "composablePreviewScanner" }
+
 # :app dependencies added in Batch 2.
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
@@ -133,3 +153,4 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 androidx-room = { id = "androidx.room", version.ref = "room" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintGradle" }
+roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }

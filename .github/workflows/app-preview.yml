@@ -1,0 +1,224 @@
+name: App preview gallery
+
+# Renders an approximate visual preview of the ENTIRE app and publishes it as
+# (a) an interactive HTML "container" on GitHub Pages and (b) an inline
+# Markdown gallery, keeping a per-version archive with side-by-side diffs so
+# changes across versions are easy to eyeball.
+#
+# How it works — no emulator, no device:
+#   1. `:screenshots:recordRoborazziDebug` runs Roborazzi under Robolectric on
+#      the JVM. Its `generateComposePreviewRobolectricTests` feature discovers
+#      every @Preview in the app and renders each to a PNG.
+#   2. `scripts/build_preview_gallery.py` turns those PNGs into a per-version
+#      gallery (md + interactive HTML), a cross-version index, and a pixel diff
+#      against the previous version.
+#   3. The gallery is published to GitHub Pages AND committed to the dedicated
+#      `app-previews` orphan branch (keeping binaries out of `main` history).
+#      A static `PREVIEW.md` in `main` links to it.
+#
+# Companion workflows: build-apk.yml (APKs + gates), publish-wiki.yml (git-push
+# publish pattern reused below).
+#
+# ONE-TIME SETUP: enable Pages with "GitHub Actions" as the source at
+#   Settings → Pages → Build and deployment → Source: GitHub Actions.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**'
+      - 'core/**'
+      - 'feature/**'
+      - 'build-logic/**'
+      - 'screenshots/**'
+      - 'gradle/**'
+      - 'settings.gradle.kts'
+      - 'scripts/build_preview_gallery.py'
+      - '.github/workflows/app-preview.yml'
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'core/**'
+      - 'feature/**'
+      - 'screenshots/**'
+      - 'scripts/build_preview_gallery.py'
+      - '.github/workflows/app-preview.yml'
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Gallery label (e.g. v1.0.42). Blank → v1.0.<run_number>.'
+        required: false
+        default: ''
+
+# contents: write → push the app-previews branch.
+# pages + id-token  → deploy to GitHub Pages.
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Serialise runs so the app-previews branch and Pages deploy never race.
+concurrency:
+  group: app-preview
+  cancel-in-progress: false
+
+jobs:
+  # Render + assemble the gallery. Deliberately has NO `environment:` — the
+  # github-pages environment carries a branch-protection rule (default branch
+  # only), so gating this job on it would reject every PR-branch run at
+  # dispatch (before any step runs). Pages deployment is a separate job below.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Seed JitPack Maven Local cache
+        uses: ./.github/actions/seed-jitpack-cache
+
+      - name: Resolve version label
+        run: |
+          VERSION="v1.0.${{ github.run_number }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.version_name }}" ]; then
+            VERSION="${{ inputs.version_name }}"
+          fi
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            VERSION="pr-${{ github.event.number }}"
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Gallery version: $VERSION"
+
+      # Render every @Preview to PNG on the JVM. No emulator. `record` writes
+      # the images (vs `verify`/`compare` which assert against goldens); we
+      # want fresh images each run to feed the gallery.
+      - name: Render Compose previews (Roborazzi)
+        run: ./gradlew :screenshots:recordRoborazziDebug --stacktrace
+
+      - name: Upload raw PNGs (diagnostic)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: roborazzi-previews-${{ env.VERSION }}
+          path: screenshots/build/outputs/roborazzi/*.png
+          retention-days: 7
+          if-no-files-found: warn
+
+      # On a render failure the console only prints the exception-class chain,
+      # not the message. Persist the Robolectric test report so a failing
+      # preview's actual cause (e.g. a missing CompositionLocal) is inspectable.
+      - name: Upload Robolectric test report (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-test-report-${{ env.VERSION }}
+          path: |
+            screenshots/build/reports/tests/**
+            screenshots/build/test-results/**
+          retention-days: 7
+          if-no-files-found: warn
+
+      # ImageMagick powers the pixel-diff column. Preinstalled on
+      # ubuntu-latest; install defensively in case the image changes.
+      - name: Ensure ImageMagick
+        run: command -v compare >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y imagemagick)
+
+      # Configure Pages early so we can feed its resolved base_url into the
+      # generated image URLs.
+      - name: Configure GitHub Pages
+        id: pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      # Clone the existing gallery branch so the diff has a previous version to
+      # compare against; initialise it fresh on first run.
+      - name: Fetch existing gallery branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          REPO_URL="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git clone --depth=1 --branch app-previews "$REPO_URL" gallery 2>/dev/null; then
+            echo "Cloned existing app-previews branch."
+          else
+            echo "No app-previews branch yet — initialising."
+            mkdir -p gallery
+            git -C gallery init -b app-previews
+            git -C gallery remote add origin "$REPO_URL"
+          fi
+          mkdir -p gallery/preview
+
+      - name: Build gallery + diff
+        run: |
+          python3 scripts/build_preview_gallery.py \
+            --input screenshots/build/outputs/roborazzi \
+            --version "${VERSION}" \
+            --out gallery/preview \
+            --pages-base-url "${{ steps.pages.outputs.base_url }}" \
+            --preview-md gallery/PREVIEW.md \
+            --repo "${{ github.repository }}"
+
+      # On PRs, stop here: publish nothing, just leave the artifact + a summary.
+      - name: PR summary
+        if: github.event_name == 'pull_request'
+        run: |
+          {
+            echo "## App preview rendered for this PR"
+            echo "Download the **roborazzi-previews-${VERSION}** artifact above to view the screens."
+            echo "Publishing to Pages / the app-previews branch only happens on \`main\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: gallery/preview
+
+      - name: Commit gallery to app-previews branch
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          cd gallery
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Gallery unchanged — nothing to commit."
+            exit 0
+          fi
+          git commit -m "App preview ${VERSION} (${GITHUB_SHA})"
+          n=0
+          until git push origin HEAD:app-previews; do
+            n=$((n + 1))
+            if [ "$n" -ge 4 ]; then
+              echo "::error::Failed to push the app-previews branch."
+              exit 1
+            fi
+            echo "push failed (attempt $n) — retrying in $((2 ** n))s"
+            sleep "$((2 ** n))"
+          done
+          echo "Gallery committed to the app-previews branch."
+
+  # Publish to GitHub Pages. Isolated here so the github-pages environment
+  # (and its branch-protection rule) never gates the render/build job above,
+  # which must run on PR branches too. Skipped on pull requests.
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

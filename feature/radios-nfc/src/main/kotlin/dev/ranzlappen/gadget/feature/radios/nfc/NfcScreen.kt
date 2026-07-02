@@ -76,6 +76,22 @@ fun NfcScreen(
             }
         },
         modifier = modifier,
+        liveMonitors = {
+            LiveMonitorContainer(
+                metricKey = NfcEnabledMetricSource.METRIC_KEY,
+                title = stringResource(R.string.nfc_live_monitor_title),
+                modifier = Modifier.fillMaxWidth(),
+                collapseId = "nfc_live_monitor",
+            )
+        },
+        monitors = {
+            MonitorContainer(
+                metricKey = NfcEnabledMetricSource.METRIC_KEY,
+                title = stringResource(R.string.nfc_monitor_title),
+                modifier = Modifier.fillMaxWidth(),
+                collapseId = "nfc_monitor",
+            )
+        },
     )
 }
 
@@ -139,6 +155,8 @@ fun NfcScreenContent(
     state: NfcState,
     onEvent: (NfcUiEvent) -> Unit,
     modifier: Modifier = Modifier,
+    liveMonitors: @Composable () -> Unit = {},
+    monitors: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
         moduleInfo = nfcModuleInfo(state),
@@ -148,18 +166,8 @@ fun NfcScreenContent(
             NfcTagCard(state = state)
             NfcTemplateCard(state = state, onEvent = onEvent)
             NfcHceCard(state = state, onEvent = onEvent)
-            LiveMonitorContainer(
-                metricKey = NfcEnabledMetricSource.METRIC_KEY,
-                title = stringResource(R.string.nfc_live_monitor_title),
-                modifier = Modifier.fillMaxWidth(),
-                collapseId = "nfc_live_monitor",
-            )
-            MonitorContainer(
-                metricKey = NfcEnabledMetricSource.METRIC_KEY,
-                title = stringResource(R.string.nfc_monitor_title),
-                modifier = Modifier.fillMaxWidth(),
-                collapseId = "nfc_monitor",
-            )
+            liveMonitors()
+            monitors()
         },
     )
 }
