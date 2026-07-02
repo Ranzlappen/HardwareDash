@@ -96,7 +96,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 
 ### Remaining legacy surface
 
-~106 legacy `com.gadget.*` Kotlin files remain across all `:app` source
+~96 legacy `com.gadget.*` Kotlin files remain across all `:app` source
 sets (of which one, the separate `:lsposed-module`'s
 `com.gadget.spoofer.xposed`, is out of scope), migrating feature-by-feature
 per the [Feature Migration Guide](Feature-Migration-Guide). The radios/GPS
@@ -123,7 +123,17 @@ the hands-on rooted UX natively inside each modular feature screen is tracked
 as a Phase-3 epic. The entry point now exposes only the live root-safety
 framework (`capabilityRegistry` / `featureRegistry` / `featureToggles` /
 `emergencyResetCoordinator`), consumed by `MainActivity`'s `FatalLaunchScreen`
-and the `RootedFeatureTogglesCard`. Canonical metric:
+and the `RootedFeatureTogglesCard`.
+
+**Dead-island sweep.** Ten provably-dead legacy files (zero external
+referrers) were deleted: the legacy chart stack (`com.gadget.ui.charts` —
+`MetricHistoryScreen` / `MetricChartViewModel` / `ChartTheme`, superseded by
+`:core:monitoring`), `com.gadget.ui.onboarding.OnboardingScreen`, the legacy
+`com.gadget.export` CSV/PDF exporters, and the four safety-framework cards left
+stranded by the seam dissolution (`RootedLegalNoticeCard` / `RootedFirstAckDialog`
+/ `EmergencyResetCard` / `PackageNotes`). `com.gadget.root.ui` is now down to the
+two live composables (`FatalLaunchScreen`, `RootedFeatureTogglesCard`). Canonical
+metric:
 
 ```bash
 find app/src -path "*com/gadget*" -name "*.kt" | wc -l
