@@ -43,13 +43,13 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Vibration (standard + rooted) | `:feature:vibration` (+ `-rooted`/`-standard`) | ✅ |
 | App-Organizer + folder widgets (shape / gradient / stroke / grid-preview customization) | `:feature:apps` (+ `-rooted` skeleton) | ✅ |
 | Sensors (proximity / light / acceleration) | `:feature:sensors` | ✅ (PR #158) |
-| Battery (level / charging / temperature / voltage / health; dual live monitors; rooted fuel-gauge / cell-monitor / charging-profile rows) | `:feature:battery` | ✅ |
+| Battery (level / charging / temperature / voltage / health; dual live monitors; rooted fuel-gauge / cell-monitor / charging-profile rows; rooted extreme-tier `BatteryController` — power-supply sysfs fuel-gauge + per-cell reading, charging-profile + charging-type override, hold-SoC loop, thermal-throttle bypass, wireless coil-current write, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.battery` into the modules) | `:feature:battery` + `:feature:battery-rooted` | ✅ |
 | GPS / Location (map, position, speed, altitude; live speed + altitude monitors; rooted NMEA / constellation / location-override rows; rooted extreme-tier `GpsController` — read-only NMEA raw tap (30 s ceiling) + constellation dump over vendor sysfs / tty nodes, gated by `RootSafetyGate` — controller clean-cut migrated out of legacy `com.gadget.gps` into the modules. The GPS **spoofing** subsystem (GPX/KML/route playback, LSPosed + test-provider anti-detection, legal-ack gate, `LocationSpoofService` foreground service) is fully modularized too — shared engine in `:feature:gps`, rooted installer/controller in `:feature:gps-rooted`, with the LSPosed handshake FQN updated in lock-step; `com.gadget.gps` is now fully deleted) | `:feature:gps` + `:feature:gps-rooted` | ✅ |
-| Storage (volumes, used / free / total, live used-% monitor; rooted diskstats / mounts / fstrim rows) | `:feature:storage` | ✅ |
+| Storage (volumes, used / free / total, live used-% monitor; rooted diskstats / mounts / fstrim / drop_caches rows; rooted extreme-tier `StorageController` — read-only `dumpsys diskstats` + `/proc/mountinfo` enumeration + `fstrim -v` against a hard `/data` `/cache` allow-list + `drop_caches` write, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.storage` into the modules) | `:feature:storage` + `:feature:storage-rooted` | ✅ |
 | IR Blaster (NEC / Pronto / RAW, saved-signal library, automation action; rooted custom-carrier / GPIO-burst rows; rooted extreme-tier `IrController` — custom LIRC carrier frequency (20–100 kHz) + direct IR-LED GPIO toggling (≤50 % duty, 5 s burst ceiling), gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.ir` into the modules) | `:feature:radios-ir` + `:feature:radios-ir-rooted` | ✅ |
-| Barcode Scanner (CameraX + MLKit, all formats, scan history, WiFi/URL; rooted high-fps / manual-override / HAL-bypass rows) | `:feature:camera` | ✅ |
+| Barcode Scanner (CameraX + MLKit, all formats, scan history, WiFi/URL; rooted high-fps / manual-override / HAL-bypass rows; rooted extreme-tier `CameraController` — high-FPS (≤240 fps, 30 s ceiling) / manual-exposure / RAW-DNG / multi-camera (≤3 streams, 15 s) / v4l2 HAL-bypass / shutter-sound via direct Camera2 + vendor sysfs, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.camera` into the modules) | `:feature:camera` + `:feature:camera-rooted` | ✅ |
 | Motion (gyroscope / step counter / motion detect; per-sensor live monitors; rooted high-polling / raw-unfiltered / sysfs-read rows) | `:feature:motion` | ✅ |
-| Audio (dB meter + WAV voice recording; live dB monitor; rooted mic-gain / direct-PCM / custom-sample-rate rows) | `:feature:audio` | ✅ |
+| Audio (dB meter + WAV voice recording; live dB monitor; rooted mic-gain / direct-PCM / custom-sample-rate rows; rooted extreme-tier `AudioRoutingController` — stream-volume bypass, force-routing, mute-all via the shared ALSA mixer, dumpsys — and rooted `MicrophoneController` — mic-gain boost, direct-PCM, custom sample rate, multi-mic + system-audio capture, audio-effect override — both gated by `RootSafetyGate`; clean-cut migrated out of legacy `com.gadget.audio` + `com.gadget.microphone` into `:feature:audio(-rooted)` + `:feature:microphone(-rooted)`, with the shared `AlsaMixerControl` tinymix wrapper relocated to `:core:root`) | `:feature:audio` + `:feature:audio-rooted` + `:feature:microphone` + `:feature:microphone-rooted` | ✅ |
 | NFC (NDEF tag read + HCE emulation + template library; live + history NFC-state monitors; rooted raw-NCI row; rooted `NfcController` — raw NCI command exchange over the vendor sysfs node with a 256-byte payload ceiling + 5 s read-timeout, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.nfc` into the modules) | `:feature:radios-nfc` + `:feature:radios-nfc-rooted` | ✅ |
 | Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows; rooted extreme-tier `BluetoothController` — rfkill toggle / TX-power override capped at the 10 dBm Class-1 ceiling via bluetoothctl+hcitool / read-only HCI-snoop-log tail, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.bluetooth` into the modules) | `:feature:radios-bt` + `:feature:radios-bt-rooted` | ✅ |
 | WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions; rooted `wifi_root` ActionHandler — rfkill toggle / TX-power override capped at 20 dBm / channel override on a regulatory allow-list / read-only monitor-IBSS injection probe, each gated by `RootSafetyGate`) | `:feature:radios-wifi` + `:feature:radios-wifi-rooted` | ✅ |
@@ -73,6 +73,11 @@ the long-lived `claude/refactor-2026` integration branch is retired.
   `BluetoothHiddenBatteryApi` and `BluetoothA2dpCodecReflection` keys;
   wired into all 19 sensor/radio/actuator/lock/diagnostics feature modules
   via the rooted-capability rows pattern.
+- **`:core:root` → `…core.root.audio.AlsaMixerControl`** — the shared
+  `tinymix` ALSA-mixer wrapper (snapshot / restore / gain-set), relocated
+  out of the legacy microphone package so both `:feature:microphone-rooted`
+  and `:feature:audio-rooted` consume it without a feature-to-feature
+  dependency (the mixer-side mute path is shared by both).
 - **`:core:widgetkit`** — the home-screen-widget framework (config store,
   pin flow, RemoteViews rendering, base providers, boot re-arm).
 - **`:core:monitoring`** — the chart + persist framework (MetricSource
@@ -91,15 +96,21 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 
 ### Remaining legacy surface
 
-~211 legacy `com.gadget.*` Kotlin files remain across all `:app` source
+~117 legacy `com.gadget.*` Kotlin files remain across all `:app` source
 sets (of which one, the separate `:lsposed-module`'s
 `com.gadget.spoofer.xposed`, is out of scope), migrating feature-by-feature
 per the [Feature Migration Guide](Feature-Migration-Guide). The radios/GPS
-rooted controllers (wifi/bt/nfc/ir/cell/gps/gps-spoof) and `diagnostics` are
-the most recent clean-cuts; **11 legacy rooted controllers remain** in the
-`RootFeaturesEntryPoint` seam (camera, microphone, battery, automation,
-notification, keepalive, storage, display, audio, adbdebug, usbdebug).
-Canonical metric:
+rooted controllers (wifi/bt/nfc/ir/cell/gps/gps-spoof), `diagnostics`,
+`storage`, `camera`, `battery`, the five screenless controllers `display` /
+`adbdebug` / `usbdebug` / `automation` / `notification`, and now `microphone` +
+`audio` (their shared `AlsaMixerControl` tinymix wrapper pushed down into
+`:core:root` under `…core.root.audio` so neither feature depends on the other)
+have all been clean-cut into `:feature:<name>` (+ `-rooted`) pairs. **Just one
+legacy rooted controller remains** in the `RootFeaturesEntryPoint` seam —
+`keepalive`, held back because its controller depends on the app-shell
+`PersistentKeepAliveService` foreground service, which must be relocated (into
+`:feature:keepalive-rooted` or a core module) before the controller can follow
+the same clean-cut. Canonical metric:
 
 ```bash
 find app/src -path "*com/gadget*" -name "*.kt" | wc -l

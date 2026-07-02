@@ -217,6 +217,7 @@ dependencies {
     implementation(project(":feature:camera"))
     implementation(project(":feature:motion"))
     implementation(project(":feature:audio"))
+    implementation(project(":feature:microphone"))
     implementation(project(":feature:radios-nfc"))
     implementation(project(":feature:radios-cell"))
     implementation(project(":feature:radios-bt"))
@@ -227,6 +228,13 @@ dependencies {
     implementation(project(":feature:lock"))
     implementation(project(":feature:actuators"))
     implementation(project(":feature:diagnostics"))
+    // Screenless rooted-extras controller contracts (+ standard no-ops); the
+    // privileged impls ship in the matching -rooted siblings below.
+    implementation(project(":feature:display"))
+    implementation(project(":feature:adbdebug"))
+    implementation(project(":feature:usbdebug"))
+    implementation(project(":feature:automation"))
+    implementation(project(":feature:notification"))
     implementation(project(":feature:bugreport"))
     implementation(project(":feature:manual"))
     implementation(project(":feature:youtubedownloader"))
@@ -334,10 +342,30 @@ dependencies {
     // (libsu sysfs PWM) + the dual-actuator / rumble-monitor helpers. Standard
     // APK never sees this module (sourceSet scoping).
     "rootedImplementation"(project(":feature:vibration-rooted"))
+    // Rooted Camera extreme-tier controller — high-FPS / manual-exposure /
+    // RAW-DNG / multi-camera / HAL-bypass / shutter-sound, each safety-gated.
+    "rootedImplementation"(project(":feature:camera-rooted"))
+    // Rooted Battery extreme-tier controller — fuel-gauge / cell monitor /
+    // charging-profile + type override / hold-SoC / thermal bypass / coil current.
+    "rootedImplementation"(project(":feature:battery-rooted"))
     // Rooted Storage action handler — diskstats, mounts, fstrim, drop_caches.
     "rootedImplementation"(project(":feature:storage-rooted"))
     // Rooted Diagnostics action handler — logcat tail, meminfo, cpuinfo, procstats.
     "rootedImplementation"(project(":feature:diagnostics-rooted"))
+    // Rooted Display controller — backlight sysfs / density / refresh-rate / SurfaceFlinger dump.
+    "rootedImplementation"(project(":feature:display-rooted"))
+    // Rooted ADB-debugging controller — wireless-ADB toggle / setprop / prop dump.
+    "rootedImplementation"(project(":feature:adbdebug-rooted"))
+    // Rooted USB-debugging controller — function switch / device-node + serial-service dump.
+    "rootedImplementation"(project(":feature:usbdebug-rooted"))
+    // Rooted Automation controller — privileged intents / system-settings override / dumpsys.
+    "rootedImplementation"(project(":feature:automation-rooted"))
+    // Rooted Notification controller — sticky override / listener-access grant / lock-screen overlay.
+    "rootedImplementation"(project(":feature:notification-rooted"))
+    // Rooted Microphone controller — mic-gain / direct-PCM / custom-rate / multi-mic / effect override.
+    "rootedImplementation"(project(":feature:microphone-rooted"))
+    // Rooted Audio-routing controller — stream-volume bypass / force-routing / mute-all / dumpsys.
+    "rootedImplementation"(project(":feature:audio-rooted"))
     // Rooted Lock overlay — secure-keyguard TYPE_APPLICATION_OVERLAY action.
     "rootedImplementation"(project(":feature:lock-rooted"))
     // Rooted Flipper — root-granted USB device-node access (no permission dialog).

@@ -25,9 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
-import com.gadget.notification.LockScreenOverlayConfig
-import com.gadget.notification.NotificationControllerResult
-import com.gadget.notification.StickyOverrideConfig
+import dev.ranzlappen.gadget.feature.notification.control.LockScreenOverlayConfig
+import dev.ranzlappen.gadget.feature.notification.control.NotificationControllerResult
+import dev.ranzlappen.gadget.feature.notification.control.StickyOverrideConfig
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 

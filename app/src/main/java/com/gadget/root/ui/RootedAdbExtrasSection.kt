@@ -23,9 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.gadget.adbdebug.AdbDebuggingControllerResult
-import com.gadget.adbdebug.AdbNetworkConfig
-import com.gadget.adbdebug.SetPropConfig
+import dev.ranzlappen.gadget.feature.adbdebug.control.AdbDebuggingControllerResult
+import dev.ranzlappen.gadget.feature.adbdebug.control.AdbNetworkConfig
+import dev.ranzlappen.gadget.feature.adbdebug.control.SetPropConfig
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import kotlinx.coroutines.MainScope

@@ -23,11 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.gadget.automation.AutomationControllerResult
-import com.gadget.automation.PrivilegedIntentConfig
-import com.gadget.automation.PrivilegedIntentVerb
-import com.gadget.automation.SystemSettingsOverrideConfig
-import com.gadget.automation.SystemSettingsScope
+import dev.ranzlappen.gadget.feature.automation.control.AutomationControllerResult
+import dev.ranzlappen.gadget.feature.automation.control.PrivilegedIntentConfig
+import dev.ranzlappen.gadget.feature.automation.control.PrivilegedIntentVerb
+import dev.ranzlappen.gadget.feature.automation.control.SystemSettingsOverrideConfig
+import dev.ranzlappen.gadget.feature.automation.control.SystemSettingsScope
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import kotlinx.coroutines.MainScope

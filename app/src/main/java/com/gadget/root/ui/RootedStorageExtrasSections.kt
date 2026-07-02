@@ -25,9 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
-import com.gadget.storage.DropCachesConfig
-import com.gadget.storage.FstrimConfig
-import com.gadget.storage.StorageControllerResult
+import dev.ranzlappen.gadget.feature.storage.control.DropCachesConfig
+import dev.ranzlappen.gadget.feature.storage.control.FstrimConfig
+import dev.ranzlappen.gadget.feature.storage.control.StorageControllerResult
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 

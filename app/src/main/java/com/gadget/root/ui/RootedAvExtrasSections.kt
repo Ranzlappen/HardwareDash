@@ -24,17 +24,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.gadget.camera.CameraControllerResult
-import com.gadget.camera.HighFpsConfig
-import com.gadget.camera.ManualExposureConfig
-import com.gadget.camera.MultiCameraConfig
-import com.gadget.camera.RawCaptureConfig
+import dev.ranzlappen.gadget.feature.camera.control.CameraControllerResult
+import dev.ranzlappen.gadget.feature.camera.control.HighFpsConfig
+import dev.ranzlappen.gadget.feature.camera.control.ManualExposureConfig
+import dev.ranzlappen.gadget.feature.camera.control.MultiCameraConfig
+import dev.ranzlappen.gadget.feature.camera.control.RawCaptureConfig
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
-import com.gadget.microphone.DirectPcmConfig
-import com.gadget.microphone.GainBoostConfig
-import com.gadget.microphone.MicrophoneControllerResult
-import com.gadget.microphone.MultiMicConfig
+import dev.ranzlappen.gadget.feature.microphone.control.DirectPcmConfig
+import dev.ranzlappen.gadget.feature.microphone.control.GainBoostConfig
+import dev.ranzlappen.gadget.feature.microphone.control.MicrophoneControllerResult
+import dev.ranzlappen.gadget.feature.microphone.control.MultiMicConfig
 import kotlinx.coroutines.launch
 
 private const val DEMO_HIGH_FPS = 120
