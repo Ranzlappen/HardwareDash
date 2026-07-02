@@ -1,4 +1,4 @@
-package com.gadget.wifi
+package dev.ranzlappen.gadget.feature.radios.wifi.control
 
 /**
  * Rooted-only Wi-Fi capability surface. The standard-flavor implementation

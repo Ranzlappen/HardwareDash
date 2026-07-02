@@ -49,8 +49,8 @@ import dev.ranzlappen.gadget.feature.rooted.root.sysfs.RootedSysfsMutationLog
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import com.gadget.storage.RootedStorageController
 import com.gadget.storage.StorageController
-import com.gadget.wifi.RootedWifiController
-import com.gadget.wifi.WifiController
+import dev.ranzlappen.gadget.feature.radios.wifi.rooted.control.RootedWifiController
+import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiController
 import com.gadget.usbdebug.RootedUsbDebuggingController
 import com.gadget.usbdebug.UsbDebuggingController
 import dev.ranzlappen.gadget.feature.radios.bt.BtEnhancedInfoProvider

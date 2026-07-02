@@ -33,10 +33,10 @@ import com.gadget.ir.IrControllerResult
 import com.gadget.ir.IrRawPatternConfig
 import com.gadget.nfc.NfcControllerResult
 import com.gadget.nfc.RawNciCommandConfig
-import com.gadget.wifi.ChannelConfig
-import com.gadget.wifi.RfkillConfig
-import com.gadget.wifi.TxPowerConfig
-import com.gadget.wifi.WifiControllerResult
+import dev.ranzlappen.gadget.feature.radios.wifi.control.ChannelConfig
+import dev.ranzlappen.gadget.feature.radios.wifi.control.RfkillConfig
+import dev.ranzlappen.gadget.feature.radios.wifi.control.TxPowerConfig
+import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiControllerResult
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 

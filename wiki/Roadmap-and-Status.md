@@ -52,7 +52,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Audio (dB meter + WAV voice recording; live dB monitor; rooted mic-gain / direct-PCM / custom-sample-rate rows) | `:feature:audio` | ✅ |
 | NFC (NDEF tag read + HCE emulation + template library; live + history NFC-state monitors; rooted raw-NCI row) | `:feature:radios-nfc` | ✅ |
 | Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows; rooted extreme-tier `BluetoothController` — rfkill toggle / TX-power override capped at the 10 dBm Class-1 ceiling via bluetoothctl+hcitool / read-only HCI-snoop-log tail, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.bluetooth` into the modules) | `:feature:radios-bt` + `:feature:radios-bt-rooted` | ✅ |
-| WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions) | `:feature:radios-wifi` | ✅ |
+| WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions; rooted `wifi_root` ActionHandler — rfkill toggle / TX-power override capped at 20 dBm / channel override on a regulatory allow-list / read-only monitor-IBSS injection probe, each gated by `RootSafetyGate`) | `:feature:radios-wifi` + `:feature:radios-wifi-rooted` | ✅ |
 | Ambient Light (live lux reading + level descriptor; ambient-light history monitor; assert-bright / assert-dark automation actions; rooted brightness / refresh-rate / density rows) | `:feature:ambient` | ✅ |
 | Lock / Security (keyguard lock state + biometrics enrollment; lock-state live + history monitors; assert-locked / assert-unlocked / assert-secure automation actions; rooted secure-keyguard overlay — self-grants SYSTEM_ALERT_WINDOW via appops and draws a bounded anti-phishing overlay, gated by `RootFeatureKey.LockSecureOverlay`, exposed as the `lock_root` action) | `:feature:lock` + `:feature:lock-rooted` | ✅ |
 | Actuators / Haptics (vibrator availability + amplitude control; haptic-click / heavy-click / assert-available automation actions; rooted extreme/PWM/dual/rumble capability rows) | `:feature:actuators` | ✅ |
@@ -114,6 +114,30 @@ non-legacy code referenced them). The app-level USB-attach launch hook
 (`.MainActivity` intent-filter + `@xml/flipper_usb_filter`) is retained — it
 is app glue, not feature code. Remaining Phase-2 cleanup is the same
 per-feature clean-cut for the other migrated modules' legacy sources.
+
+`:feature:radios-wifi-rooted` adds the automation seam (`wifi_root`
+ActionHandler) for the privileged Wi-Fi controls, and the **legacy
+`com.gadget.wifi` controller subsystem has now been clean-cut migrated
+into the modules**:
+
+- the contract + config/result types + the standard no-op
+  (`WifiController`, `RfkillConfig`/`TxPowerConfig`/`ChannelConfig`,
+  `WifiControllerResult`, `StandardWifiController`) → `:feature:radios-wifi`
+  under `…radios.wifi.control`;
+- the rooted controller + helpers (`RootedWifiController`,
+  `WifiRfkillHelper`, `WifiSysfsHelper`, `WifiInjectionProbe`) →
+  `:feature:radios-wifi-rooted` under `…radios.wifi.rooted.control`.
+
+The `com.gadget.wifi.*` sources are deleted; the app-level consumers
+(`RootedRadiosExtrasSections` UI, `RootFeaturesEntryPoint`, both
+flavors' `RootBindings`) now import the modular packages. This is the
+**first of the ~20 legacy feature controllers** in the
+`RootFeaturesEntryPoint` cluster to migrate out under the #94 plan; the
+entry point + the shared radios UI stay in `:app` (they still aggregate
+the other 19 legacy controllers) but now source their Wi-Fi types from
+the modules. The `wifi_root` ActionHandler keeps its own self-contained
+`WifiRootCommands` (rfkill / `iw` shapes + 20 dBm ceiling + channel
+allow-list), independent of the migrated controller.
 
 ## Completed phases
 
