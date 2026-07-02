@@ -96,21 +96,27 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 
 ### Remaining legacy surface
 
-~96 legacy `com.gadget.*` Kotlin files remain across all `:app` source
+~88 legacy `com.gadget.*` Kotlin files remain across all `:app` source
 sets (of which one, the separate `:lsposed-module`'s
 `com.gadget.spoofer.xposed`, is out of scope), migrating feature-by-feature
-per the [Feature Migration Guide](Feature-Migration-Guide). The radios/GPS
+per the [Feature Migration Guide](Feature-Migration-Guide). **Workstream A is
+complete — every rooted feature controller is now modular.** The radios/GPS
 rooted controllers (wifi/bt/nfc/ir/cell/gps/gps-spoof), `diagnostics`,
 `storage`, `camera`, `battery`, the five screenless controllers `display` /
-`adbdebug` / `usbdebug` / `automation` / `notification`, and `microphone` +
+`adbdebug` / `usbdebug` / `automation` / `notification`, `microphone` +
 `audio` (their shared `AlsaMixerControl` tinymix wrapper pushed down into
-`:core:root` under `…core.root.audio` so neither feature depends on the other)
-have all been clean-cut into `:feature:<name>` (+ `-rooted`) pairs. **Just one
-legacy rooted controller remains** in the `RootFeaturesEntryPoint` seam —
-`keepalive`, held back because its controller depends on the app-shell
-`PersistentKeepAliveService` foreground service, which must be relocated (into
-`:feature:keepalive-rooted` or a core module) before the controller can follow
-the same clean-cut.
+`:core:root` under `…core.root.audio`), and finally `keepalive` have all been
+clean-cut into `:feature:<name>` (+ `-rooted`) pairs. `keepalive` was the last
+and hardest: its shared `PersistentKeepAliveService` foreground service moved
+into the base `:feature:keepalive` module and was decoupled from the app shell
+— the notification tap intent now resolves the launcher activity via
+`packageManager.getLaunchIntentForPackage(...)` (no `MainActivity` dependency)
+and the notification strings moved to module resources (off the legacy
+`LocalizationManager`). The flavor `RootBindings` no longer reference any
+`com.gadget.*` controller. Remaining legacy is now purely the **app shell**
+(`MainActivity` / `GadgetApplication`, `services`, `widget`, `data`,
+`ui.theme`, `localization`, `notifications`, `backup`, `permissions`,
+`receivers`).
 
 **Entry-point seam dissolution (partial, [#94](https://github.com/Ranzlappen/HardwareDash/issues/94)).**
 All 19 rooted feature-controller accessors were removed from

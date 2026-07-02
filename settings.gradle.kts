@@ -125,6 +125,8 @@ include(
     ":feature:automation-rooted",
     ":feature:notification",
     ":feature:notification-rooted",
+    ":feature:keepalive",
+    ":feature:keepalive-rooted",
     ":feature:manual",
     ":feature:sensors",
     ":feature:actuators",
