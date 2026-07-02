@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothControllerResult
 import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothRfkillConfig
 import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothTxPowerConfig
-import com.gadget.cell.CellControllerResult
+import dev.ranzlappen.gadget.feature.radios.cell.control.CellControllerResult
 import com.gadget.gps.GpsControllerResult
 import com.gadget.gps.NmeaTapConfig
 import dev.ranzlappen.gadget.feature.radios.ir.control.IrCarrierConfig

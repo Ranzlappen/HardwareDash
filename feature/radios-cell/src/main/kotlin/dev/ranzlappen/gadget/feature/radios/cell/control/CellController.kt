@@ -1,4 +1,4 @@
-package com.gadget.cell
+package dev.ranzlappen.gadget.feature.radios.cell.control
 
 /**
  * Rooted-only Cellular diagnostics surface. Read-only — no AT-command

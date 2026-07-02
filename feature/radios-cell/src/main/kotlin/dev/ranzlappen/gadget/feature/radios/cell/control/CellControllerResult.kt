@@ -1,4 +1,4 @@
-package com.gadget.cell
+package dev.ranzlappen.gadget.feature.radios.cell.control
 
 /**
  * Result returned by every [CellController] extreme-tier method. All

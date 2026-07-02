@@ -1,4 +1,4 @@
-package com.gadget.cell
+package dev.ranzlappen.gadget.feature.radios.cell.control
 
 import javax.inject.Inject
 import javax.inject.Singleton

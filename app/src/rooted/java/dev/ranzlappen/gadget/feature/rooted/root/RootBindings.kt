@@ -23,8 +23,8 @@ import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
 import dev.ranzlappen.gadget.feature.radios.bt.rooted.control.RootedBluetoothController
 import com.gadget.camera.CameraController
 import com.gadget.camera.RootedCameraController
-import com.gadget.cell.CellController
-import com.gadget.cell.RootedCellController
+import dev.ranzlappen.gadget.feature.radios.cell.control.CellController
+import dev.ranzlappen.gadget.feature.radios.cell.rooted.control.RootedCellController
 import com.gadget.diagnostics.DiagnosticsController
 import com.gadget.diagnostics.RootedDiagnosticsController
 import com.gadget.display.DisplayController

@@ -7,7 +7,7 @@ import com.gadget.automation.AutomationController
 import com.gadget.battery.BatteryController
 import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
 import com.gadget.camera.CameraController
-import com.gadget.cell.CellController
+import dev.ranzlappen.gadget.feature.radios.cell.control.CellController
 import com.gadget.diagnostics.DiagnosticsController
 import com.gadget.display.DisplayController
 import com.gadget.gps.GpsController

@@ -136,6 +136,8 @@ include(
     ":feature:radios-bt-rooted",
     ":feature:radios-nfc",
     ":feature:radios-nfc-rooted",
+    ":feature:radios-cell",
+    ":feature:radios-cell-rooted",
     ":feature:radios-subghz",
     ":feature:radios-ir",
     ":feature:radios-ir-rooted",

@@ -218,6 +218,7 @@ dependencies {
     implementation(project(":feature:motion"))
     implementation(project(":feature:audio"))
     implementation(project(":feature:radios-nfc"))
+    implementation(project(":feature:radios-cell"))
     implementation(project(":feature:radios-bt"))
     implementation(project(":feature:radios-wifi"))
     implementation(project(":feature:radios-subghz"))
@@ -351,6 +352,8 @@ dependencies {
     "rootedImplementation"(project(":feature:radios-nfc-rooted"))
     // Rooted IR — custom LIRC carrier + raw IR-LED GPIO toggling.
     "rootedImplementation"(project(":feature:radios-ir-rooted"))
+    // Rooted Cellular — read-only modem / signal deep-dump over Qualcomm sysfs.
+    "rootedImplementation"(project(":feature:radios-cell-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)
