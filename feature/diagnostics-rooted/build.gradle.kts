@@ -16,4 +16,7 @@ android {
 dependencies {
     implementation(project(":core:root"))
     implementation(project(":core:automation"))
+    // The DiagnosticsController contract (+ result / LogcatBuffer types) lives
+    // in the base :feature:diagnostics module so both flavors share it.
+    implementation(project(":feature:diagnostics"))
 }

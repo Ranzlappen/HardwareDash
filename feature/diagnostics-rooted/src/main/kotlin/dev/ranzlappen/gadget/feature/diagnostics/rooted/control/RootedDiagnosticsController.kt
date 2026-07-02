@@ -1,8 +1,11 @@
-package com.gadget.diagnostics
+package dev.ranzlappen.gadget.feature.diagnostics.rooted.control
 
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
+import dev.ranzlappen.gadget.feature.diagnostics.control.DiagnosticsController
+import dev.ranzlappen.gadget.feature.diagnostics.control.DiagnosticsControllerResult
+import dev.ranzlappen.gadget.feature.diagnostics.control.LogcatBuffer
 import javax.inject.Inject
 import javax.inject.Singleton
 

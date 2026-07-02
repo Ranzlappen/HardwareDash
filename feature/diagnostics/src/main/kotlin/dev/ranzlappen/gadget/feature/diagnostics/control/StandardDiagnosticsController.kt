@@ -1,4 +1,4 @@
-package com.gadget.diagnostics
+package dev.ranzlappen.gadget.feature.diagnostics.control
 
 import javax.inject.Inject
 import javax.inject.Singleton

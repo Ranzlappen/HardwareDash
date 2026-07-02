@@ -22,8 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.gadget.diagnostics.DiagnosticsControllerResult
-import com.gadget.diagnostics.LogcatBuffer
+import dev.ranzlappen.gadget.feature.diagnostics.control.DiagnosticsControllerResult
+import dev.ranzlappen.gadget.feature.diagnostics.control.LogcatBuffer
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import kotlinx.coroutines.launch

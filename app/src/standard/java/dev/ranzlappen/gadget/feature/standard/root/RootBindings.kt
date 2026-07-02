@@ -20,8 +20,8 @@ import com.gadget.camera.CameraController
 import com.gadget.camera.StandardCameraController
 import dev.ranzlappen.gadget.feature.radios.cell.control.CellController
 import dev.ranzlappen.gadget.feature.radios.cell.control.StandardCellController
-import com.gadget.diagnostics.DiagnosticsController
-import com.gadget.diagnostics.StandardDiagnosticsController
+import dev.ranzlappen.gadget.feature.diagnostics.control.DiagnosticsController
+import dev.ranzlappen.gadget.feature.diagnostics.control.StandardDiagnosticsController
 import com.gadget.display.DisplayController
 import com.gadget.display.StandardDisplayController
 import dev.ranzlappen.gadget.feature.gps.control.GpsController

@@ -1,4 +1,4 @@
-package com.gadget.diagnostics
+package dev.ranzlappen.gadget.feature.diagnostics.control
 
 /**
  * Rooted-only Diagnostics surface. Standard flavor returns

@@ -57,7 +57,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Ambient Light (live lux reading + level descriptor; ambient-light history monitor; assert-bright / assert-dark automation actions; rooted brightness / refresh-rate / density rows) | `:feature:ambient` | ✅ |
 | Lock / Security (keyguard lock state + biometrics enrollment; lock-state live + history monitors; assert-locked / assert-unlocked / assert-secure automation actions; rooted secure-keyguard overlay — self-grants SYSTEM_ALERT_WINDOW via appops and draws a bounded anti-phishing overlay, gated by `RootFeatureKey.LockSecureOverlay`, exposed as the `lock_root` action) | `:feature:lock` + `:feature:lock-rooted` | ✅ |
 | Actuators / Haptics (vibrator availability + amplitude control; haptic-click / heavy-click / assert-available automation actions; rooted extreme/PWM/dual/rumble capability rows) | `:feature:actuators` | ✅ |
-| Diagnostics (rooted shell dump overview; logcat / meminfo / cpuinfo / procstats automation actions via `:feature:diagnostics-rooted`; standard no-root `memory_used_percent` MetricSource — live + history monitors on-screen + automation trigger) | `:feature:diagnostics` + `:feature:diagnostics-rooted` | ✅ |
+| Diagnostics (rooted shell dump overview; logcat / meminfo / cpuinfo / procstats automation actions via `:feature:diagnostics-rooted`; standard no-root `memory_used_percent` MetricSource — live + history monitors on-screen + automation trigger; rooted extreme-tier `DiagnosticsController` — read-only `logcat -b` tail + `dumpsys meminfo/cpuinfo/procstats` excerpts, tail-capped, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.diagnostics` into the modules) | `:feature:diagnostics` + `:feature:diagnostics-rooted` | ✅ |
 | Health / BugReport (permission manager — grant-state scan + per-permission runtime request + App-Settings fallback + granted/total summary, refreshes on resume; assert-permission automation action; rooted ADB-diagnostics row + `pm grant` force-grant one-up via `:feature:bugreport-rooted`) | `:feature:bugreport` + `:feature:bugreport-rooted` | ✅ |
 | Help / Manual (static documentation screen for all modules, capabilities, and automation engine) | `:feature:manual` | ✅ |
 | Rooted Storage actions (diskstats / mounts / fstrim / drop_caches) | `:feature:storage-rooted` | ✅ |
@@ -91,11 +91,15 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 
 ### Remaining legacy surface
 
-~284 legacy `com.gadget.*` Kotlin files remain across all `:app` source
-sets, migrating feature-by-feature per the
-[Feature Migration Guide](Feature-Migration-Guide). The `com.gadget.flipper`
-+ `com.gadget.subghz.SubGhzSignal` sources (13 files) were clean-cut deleted
-once `:feature:flipper` landed green. Canonical metric:
+~211 legacy `com.gadget.*` Kotlin files remain across all `:app` source
+sets (of which one, the separate `:lsposed-module`'s
+`com.gadget.spoofer.xposed`, is out of scope), migrating feature-by-feature
+per the [Feature Migration Guide](Feature-Migration-Guide). The radios/GPS
+rooted controllers (wifi/bt/nfc/ir/cell/gps/gps-spoof) and `diagnostics` are
+the most recent clean-cuts; **11 legacy rooted controllers remain** in the
+`RootFeaturesEntryPoint` seam (camera, microphone, battery, automation,
+notification, keepalive, storage, display, audio, adbdebug, usbdebug).
+Canonical metric:
 
 ```bash
 find app/src -path "*com/gadget*" -name "*.kt" | wc -l
