@@ -354,6 +354,8 @@ dependencies {
     "rootedImplementation"(project(":feature:radios-ir-rooted"))
     // Rooted Cellular — read-only modem / signal deep-dump over Qualcomm sysfs.
     "rootedImplementation"(project(":feature:radios-cell-rooted"))
+    // Rooted GPS — read-only NMEA raw tap + constellation dump over vendor nodes.
+    "rootedImplementation"(project(":feature:gps-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

@@ -1,4 +1,4 @@
-package com.gadget.gps
+package dev.ranzlappen.gadget.feature.gps.control
 
 import javax.inject.Inject
 import javax.inject.Singleton

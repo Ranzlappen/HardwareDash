@@ -29,8 +29,8 @@ import com.gadget.diagnostics.DiagnosticsController
 import com.gadget.diagnostics.RootedDiagnosticsController
 import com.gadget.display.DisplayController
 import com.gadget.display.RootedDisplayController
-import com.gadget.gps.GpsController
-import com.gadget.gps.RootedGpsController
+import dev.ranzlappen.gadget.feature.gps.control.GpsController
+import dev.ranzlappen.gadget.feature.gps.rooted.control.RootedGpsController
 import com.gadget.gps.spoof.GpsSpoofController
 import com.gadget.gps.spoof.RootedGpsSpoofController
 import dev.ranzlappen.gadget.feature.radios.ir.control.IrController

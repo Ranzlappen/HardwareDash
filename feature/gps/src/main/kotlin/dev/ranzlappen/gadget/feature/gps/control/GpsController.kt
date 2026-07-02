@@ -1,4 +1,4 @@
-package com.gadget.gps
+package dev.ranzlappen.gadget.feature.gps.control
 
 /**
  * Rooted-only GPS / GNSS diagnostics surface. Read-only — no write

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No Android permissions: the NMEA raw tap + constellation dump run
+     through the root shell against vendor sysfs / tty nodes, gated by
+     RootSafetyGate. -->
+<manifest />

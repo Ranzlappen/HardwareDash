@@ -128,6 +128,7 @@ include(
     ":feature:vibration-rooted",
     ":feature:vibration-standard",
     ":feature:gps",
+    ":feature:gps-rooted",
     ":feature:motion",
     ":feature:ambient",
     ":feature:radios-wifi",
