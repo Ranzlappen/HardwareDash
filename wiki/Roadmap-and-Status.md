@@ -96,13 +96,13 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 
 ### Remaining legacy surface
 
-~117 legacy `com.gadget.*` Kotlin files remain across all `:app` source
+~106 legacy `com.gadget.*` Kotlin files remain across all `:app` source
 sets (of which one, the separate `:lsposed-module`'s
 `com.gadget.spoofer.xposed`, is out of scope), migrating feature-by-feature
 per the [Feature Migration Guide](Feature-Migration-Guide). The radios/GPS
 rooted controllers (wifi/bt/nfc/ir/cell/gps/gps-spoof), `diagnostics`,
 `storage`, `camera`, `battery`, the five screenless controllers `display` /
-`adbdebug` / `usbdebug` / `automation` / `notification`, and now `microphone` +
+`adbdebug` / `usbdebug` / `automation` / `notification`, and `microphone` +
 `audio` (their shared `AlsaMixerControl` tinymix wrapper pushed down into
 `:core:root` under `…core.root.audio` so neither feature depends on the other)
 have all been clean-cut into `:feature:<name>` (+ `-rooted`) pairs. **Just one
@@ -110,7 +110,20 @@ legacy rooted controller remains** in the `RootFeaturesEntryPoint` seam —
 `keepalive`, held back because its controller depends on the app-shell
 `PersistentKeepAliveService` foreground service, which must be relocated (into
 `:feature:keepalive-rooted` or a core module) before the controller can follow
-the same clean-cut. Canonical metric:
+the same clean-cut.
+
+**Entry-point seam dissolution (partial, [#94](https://github.com/Ranzlappen/HardwareDash/issues/94)).**
+All 19 rooted feature-controller accessors were removed from
+`RootFeaturesEntryPoint`, and the 16 interactive `com.gadget.root.ui.Rooted*ExtrasSection`
+composables (+ the shared `RootExtrasDisclaimerCard`) they fed were deleted —
+they were orphaned dead code, reachable only through the non-navigable legacy
+`LinkScreen`. The migrated controllers stay wired (dormant) via the flavor
+`RootBindings` and are live on the automation + monitoring seams; re-surfacing
+the hands-on rooted UX natively inside each modular feature screen is tracked
+as a Phase-3 epic. The entry point now exposes only the live root-safety
+framework (`capabilityRegistry` / `featureRegistry` / `featureToggles` /
+`emergencyResetCoordinator`), consumed by `MainActivity`'s `FatalLaunchScreen`
+and the `RootedFeatureTogglesCard`. Canonical metric:
 
 ```bash
 find app/src -path "*com/gadget*" -name "*.kt" | wc -l

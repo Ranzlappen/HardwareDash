@@ -1,66 +1,35 @@
 package com.gadget.root
 
 import dev.ranzlappen.gadget.core.root.*
-import dev.ranzlappen.gadget.feature.adbdebug.control.AdbDebuggingController
-import dev.ranzlappen.gadget.feature.audio.control.AudioRoutingController
-import dev.ranzlappen.gadget.feature.automation.control.AutomationController
-import dev.ranzlappen.gadget.feature.battery.control.BatteryController
-import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
-import dev.ranzlappen.gadget.feature.camera.control.CameraController
-import dev.ranzlappen.gadget.feature.radios.cell.control.CellController
-import dev.ranzlappen.gadget.feature.diagnostics.control.DiagnosticsController
-import dev.ranzlappen.gadget.feature.display.control.DisplayController
-import dev.ranzlappen.gadget.feature.gps.control.GpsController
-import dev.ranzlappen.gadget.feature.gps.spoof.GpsSpoofController
-import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
-import com.gadget.keepalive.KeepAliveController
-import dev.ranzlappen.gadget.feature.microphone.control.MicrophoneController
-import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
-import dev.ranzlappen.gadget.feature.notification.control.NotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
-import dev.ranzlappen.gadget.feature.storage.control.StorageController
-import dev.ranzlappen.gadget.feature.usbdebug.control.UsbDebuggingController
-import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiController
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
 /**
- * Hilt entry point for the rooted-features module. Composable code in
- * `src/main` reaches the controllers + capability/toggle services via
+ * Hilt entry point for the root-safety framework. Composable code in
+ * `src/main` reaches the capability / toggle / emergency-reset services via
  * `EntryPointAccessors.fromApplication(...)` rather than `@Inject`, since
  * `@Composable` functions can't take constructor parameters.
  *
- * **Why this file (and its `ui/` siblings) stay in `:app/src/main/`
- * (refactor-2026 Phase 2 / D4 policy).** The safety + capability
- * framework (`RootSafetyGate`, `RootCapabilityRegistry`,
- * `RootFeatureToggles`, `RootSafetyEvent`, `EmergencyResetCoordinator`,
- * …) moved to `:core:root` in D1. The flavor impls under both
- * `app/src/{standard,rooted}/java/com/gadget/root/` re-packaged to
- * `dev.ranzlappen.gadget.feature.{standard,rooted}.root.*` in D2 + D3.
- *
- * This file (and the 13 `ui/Rooted*` Compose composables that reach it)
- * stays at its legacy `com.gadget.root.*` location for one specific
- * reason: it depends on the one remaining **legacy non-modular feature
- * controller** — `KeepAliveController`, still in
- * `app/src/main/java/com/gadget/keepalive/` because it depends on the app-shell
- * `PersistentKeepAliveService` foreground service, which must be relocated
- * first. Every other feature controller (radios/GPS/diagnostics/storage/camera/
- * battery/display/adbdebug/usbdebug/automation/notification/microphone/audio)
- * has already migrated out to its own feature module. Pulling
- * the entry-point into `:core:root` would force `:core:root` to depend
- * on that legacy controller, defeating the purpose of the extraction.
- *
- * **Replacement plan.** Once each feature controller migrates to its
- * own `:feature:<name>` module (the modular torch / vibration / etc.
- * controllers already exist as the standard tier), this entry point
- * becomes obsolete: the UI sites would consume the modular controllers
- * directly via Hilt `@Inject` (since they'd live in feature modules
- * with their own composables), and the few cross-feature aggregations
- * the entry-point still provides could migrate to a kit-style
- * `Map<FeatureId, ?>` multibinding (the pattern `:core:automation`'s
- * `ModuleActionRegistry` already established). Tracked at
+ * **Scope (post refactor-2026 seam dissolution).** This entry point used to
+ * also hand out every rooted **feature controller** (`CameraController`,
+ * `StorageController`, …) to a matching `ui/Rooted*ExtrasSection` composable.
+ * Those controllers have all migrated into their own `:feature:<name>-rooted`
+ * modules and are consumed by the automation + monitoring seams; the legacy
+ * interactive "Root extras" sections that reached them through this entry
+ * point were never re-surfaced in the modular feature screens, so they were
+ * removed as dead code. Re-building that interactive rooted UX natively inside
+ * each feature screen (inject the controller, gate on root) is tracked as a
+ * Phase-3 epic — see
  * https://github.com/Ranzlappen/HardwareDash/issues/94.
+ *
+ * What remains here is only the cross-cutting **safety framework**, still
+ * consumed live by `MainActivity` (`FatalLaunchScreen`), the
+ * `RootedFeatureTogglesCard` (settings + torch nav), and the emergency-reset
+ * surface. The framework types themselves live in `:core:root`; this thin
+ * entry point stays in `:app/src/main/` only so those `com.gadget.root.ui.*`
+ * composables can reach them without an `@Inject` site.
  *
  * Mirrors the `AppsEntryPoint` shape.
  */
@@ -70,24 +39,5 @@ interface RootFeaturesEntryPoint {
     fun capabilityRegistry(): RootCapabilityRegistry
     fun featureRegistry(): RootFeatureRegistry
     fun featureToggles(): RootFeatureToggles
-    fun cameraController(): CameraController
-    fun microphoneController(): MicrophoneController
-    fun batteryController(): BatteryController
-    fun wifiController(): WifiController
-    fun bluetoothController(): BluetoothController
-    fun nfcController(): NfcController
-    fun irController(): IrController
-    fun cellController(): CellController
-    fun gpsController(): GpsController
-    fun gpsSpoofController(): GpsSpoofController
-    fun automationController(): AutomationController
-    fun notificationController(): NotificationController
-    fun keepAliveController(): KeepAliveController
-    fun storageController(): StorageController
-    fun displayController(): DisplayController
-    fun audioRoutingController(): AudioRoutingController
-    fun adbDebuggingController(): AdbDebuggingController
-    fun usbDebuggingController(): UsbDebuggingController
-    fun diagnosticsController(): DiagnosticsController
     fun emergencyResetCoordinator(): EmergencyResetCoordinator
 }
