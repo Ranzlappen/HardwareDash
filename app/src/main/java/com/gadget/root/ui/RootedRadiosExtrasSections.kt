@@ -22,9 +22,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.gadget.bluetooth.BluetoothControllerResult
-import com.gadget.bluetooth.BluetoothRfkillConfig
-import com.gadget.bluetooth.BluetoothTxPowerConfig
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothControllerResult
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothRfkillConfig
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothTxPowerConfig
 import com.gadget.cell.CellControllerResult
 import com.gadget.gps.GpsControllerResult
 import com.gadget.gps.NmeaTapConfig

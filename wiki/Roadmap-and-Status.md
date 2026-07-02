@@ -51,12 +51,12 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Motion (gyroscope / step counter / motion detect; per-sensor live monitors; rooted high-polling / raw-unfiltered / sysfs-read rows) | `:feature:motion` | ✅ |
 | Audio (dB meter + WAV voice recording; live dB monitor; rooted mic-gain / direct-PCM / custom-sample-rate rows) | `:feature:audio` | ✅ |
 | NFC (NDEF tag read + HCE emulation + template library; live + history NFC-state monitors; rooted raw-NCI row) | `:feature:radios-nfc` | ✅ |
-| Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows) | `:feature:radios-bt` | ✅ |
+| Bluetooth (adapter status + bonded devices; GATT battery + RSSI standard; hidden battery + A2DP codec rooted; live + history BT-state monitors; rooted hidden-battery / A2DP-codec rows; rooted extreme-tier `BluetoothController` — rfkill toggle / TX-power override capped at the 10 dBm Class-1 ceiling via bluetoothctl+hcitool / read-only HCI-snoop-log tail, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.bluetooth` into the modules) | `:feature:radios-bt` + `:feature:radios-bt-rooted` | ✅ |
 | WiFi (adapter status + network details SSID/BSSID/freq/speed; live signal + enabled history monitors; rooted rfkill / TX-power / channel-select rows; enabled + connected automation actions; rooted `wifi_root` ActionHandler — rfkill toggle / TX-power override capped at 20 dBm / channel override on a regulatory allow-list / read-only monitor-IBSS injection probe, each gated by `RootSafetyGate`) | `:feature:radios-wifi` + `:feature:radios-wifi-rooted` | ✅ |
 | Ambient Light (live lux reading + level descriptor; ambient-light history monitor; assert-bright / assert-dark automation actions; rooted brightness / refresh-rate / density rows) | `:feature:ambient` | ✅ |
 | Lock / Security (keyguard lock state + biometrics enrollment; lock-state live + history monitors; assert-locked / assert-unlocked / assert-secure automation actions; rooted secure-keyguard overlay — self-grants SYSTEM_ALERT_WINDOW via appops and draws a bounded anti-phishing overlay, gated by `RootFeatureKey.LockSecureOverlay`, exposed as the `lock_root` action) | `:feature:lock` + `:feature:lock-rooted` | ✅ |
 | Actuators / Haptics (vibrator availability + amplitude control; haptic-click / heavy-click / assert-available automation actions; rooted extreme/PWM/dual/rumble capability rows) | `:feature:actuators` | ✅ |
-| Diagnostics (rooted shell dump overview; logcat / meminfo / cpuinfo / procstats automation actions via `:feature:diagnostics-rooted`) | `:feature:diagnostics` + `:feature:diagnostics-rooted` | ✅ |
+| Diagnostics (rooted shell dump overview; logcat / meminfo / cpuinfo / procstats automation actions via `:feature:diagnostics-rooted`; standard no-root `memory_used_percent` MetricSource — live + history monitors on-screen + automation trigger) | `:feature:diagnostics` + `:feature:diagnostics-rooted` | ✅ |
 | Health / BugReport (permission manager — grant-state scan + per-permission runtime request + App-Settings fallback + granted/total summary, refreshes on resume; assert-permission automation action; rooted ADB-diagnostics row + `pm grant` force-grant one-up via `:feature:bugreport-rooted`) | `:feature:bugreport` + `:feature:bugreport-rooted` | ✅ |
 | Help / Manual (static documentation screen for all modules, capabilities, and automation engine) | `:feature:manual` | ✅ |
 | Rooted Storage actions (diskstats / mounts / fstrim / drop_caches) | `:feature:storage-rooted` | ✅ |
@@ -158,10 +158,14 @@ allow-list), independent of the migrated controller.
   `Settings → Appearance → Palette`) and the in-depth permission UI (the Health
   screen is now an actionable permission manager — runtime grant requests +
   App-Settings fallback) plus its rooted one-up (`:feature:bugreport-rooted`
-  force-grants permissions via `pm grant`, gated by `RootSafetyGate`) and the
-  first widget-coverage slices (battery + internal-storage status home-screen
-  widgets on the `:core:widgetkit` content archetype). Still open:
-  widget/notification-panel coverage for the remaining features.
+  force-grants permissions via `pm grant`, gated by `RootSafetyGate`), the
+  first widget-coverage gauges (battery + internal-storage status home-screen
+  widgets on the `:core:widgetkit` content archetype), and a second Quick
+  Settings tile (`StrobeTileService` joins `FlashlightTileService` —
+  start/stop the flashlight strobe straight from the panel). In flight on
+  feature branches: WiFi-signal + ambient-light gauge widgets, and
+  theme-picker live preview swatches. Still open: remaining
+  notification-panel / QS-tile coverage where a feature has a clean toggle.
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.

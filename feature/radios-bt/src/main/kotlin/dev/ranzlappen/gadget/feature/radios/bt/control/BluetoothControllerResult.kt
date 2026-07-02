@@ -1,4 +1,4 @@
-package com.gadget.bluetooth
+package dev.ranzlappen.gadget.feature.radios.bt.control
 
 /**
  * Result returned by every [BluetoothController] extreme-tier method.

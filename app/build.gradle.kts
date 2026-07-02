@@ -345,6 +345,8 @@ dependencies {
     "rootedImplementation"(project(":feature:bugreport-rooted"))
     // Rooted Wi-Fi — rfkill / iw TX-power / channel / injection-probe actions.
     "rootedImplementation"(project(":feature:radios-wifi-rooted"))
+    // Rooted Bluetooth — rfkill / TX-power / HCI-snoop-tail controller.
+    "rootedImplementation"(project(":feature:radios-bt-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

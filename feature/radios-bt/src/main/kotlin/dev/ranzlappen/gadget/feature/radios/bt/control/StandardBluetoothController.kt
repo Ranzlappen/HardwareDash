@@ -1,4 +1,4 @@
-package com.gadget.bluetooth
+package dev.ranzlappen.gadget.feature.radios.bt.control
 
 import javax.inject.Inject
 import javax.inject.Singleton
