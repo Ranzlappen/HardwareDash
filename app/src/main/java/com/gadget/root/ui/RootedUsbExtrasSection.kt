@@ -25,8 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
-import com.gadget.usbdebug.UsbDebuggingControllerResult
-import com.gadget.usbdebug.UsbFunctionType
+import dev.ranzlappen.gadget.feature.usbdebug.control.UsbDebuggingControllerResult
+import dev.ranzlappen.gadget.feature.usbdebug.control.UsbFunctionType
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
