@@ -158,6 +158,18 @@ include(
 include(":benchmark")
 
 // -------------------------------------------------------------------------
+// :screenshots — test-only Roborazzi aggregator. Ships nothing to users.
+// It is the single sanctioned place that depends broadly on every
+// :feature:* + :core:ui module, so Roborazzi's Compose-preview scanner can
+// discover and render every @Preview in one pass (the app-preview gallery
+// pipeline — see .github/workflows/app-preview.yml). Rooted-only feature
+// modules are pulled in only when -PenableRootedPreviews=true, mirroring
+// the -PenableLsposedModule gate used elsewhere, so the default (standard)
+// render set never compiles against root code.
+// -------------------------------------------------------------------------
+include(":screenshots")
+
+// -------------------------------------------------------------------------
 // :lsposed-module — bundled Xposed module. Excluded unless the build
 // explicitly opts in via -PenableLsposedModule=true. Standard CI does not
 // set this; rooted CI does.
