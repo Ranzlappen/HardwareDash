@@ -23,10 +23,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.gadget.display.BrightnessOverrideConfig
-import com.gadget.display.DensityOverrideConfig
-import com.gadget.display.DisplayControllerResult
-import com.gadget.display.RefreshRateOverrideConfig
+import dev.ranzlappen.gadget.feature.display.control.BrightnessOverrideConfig
+import dev.ranzlappen.gadget.feature.display.control.DensityOverrideConfig
+import dev.ranzlappen.gadget.feature.display.control.DisplayControllerResult
+import dev.ranzlappen.gadget.feature.display.control.RefreshRateOverrideConfig
 import com.gadget.localization.LocalizationManager
 import com.gadget.localization.S
 import kotlinx.coroutines.MainScope

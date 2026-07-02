@@ -91,15 +91,20 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 
 ### Remaining legacy surface
 
-~179 legacy `com.gadget.*` Kotlin files remain across all `:app` source
+~136 legacy `com.gadget.*` Kotlin files remain across all `:app` source
 sets (of which one, the separate `:lsposed-module`'s
 `com.gadget.spoofer.xposed`, is out of scope), migrating feature-by-feature
 per the [Feature Migration Guide](Feature-Migration-Guide). The radios/GPS
 rooted controllers (wifi/bt/nfc/ir/cell/gps/gps-spoof), `diagnostics`,
-`storage`, `camera`, and `battery` are the most recent clean-cuts; **8 legacy
-rooted controllers remain** in the `RootFeaturesEntryPoint` seam (microphone,
-automation, notification, keepalive, display, audio, adbdebug, usbdebug).
-Canonical metric:
+`storage`, `camera`, `battery`, and now the five screenless rooted controllers
+`display` / `adbdebug` / `usbdebug` / `automation` / `notification` (each a new
+`:feature:<name>` + `:feature:<name>-rooted` pair) are the clean-cuts done so
+far; **3 legacy rooted controllers remain** in the `RootFeaturesEntryPoint`
+seam — `microphone`, `audio` (audio's rooted mute helper injects microphone's
+`AlsaMixerControl`, so the two migrate together, with the shared ALSA wrapper
+pushed down into `:core:root`), and `keepalive` (its controller depends on the
+app-shell `PersistentKeepAliveService` foreground service, so it needs that
+service relocated first). Canonical metric:
 
 ```bash
 find app/src -path "*com/gadget*" -name "*.kt" | wc -l

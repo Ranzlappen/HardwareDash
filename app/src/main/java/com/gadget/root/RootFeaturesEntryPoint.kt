@@ -1,25 +1,25 @@
 package com.gadget.root
 
 import dev.ranzlappen.gadget.core.root.*
-import com.gadget.adbdebug.AdbDebuggingController
+import dev.ranzlappen.gadget.feature.adbdebug.control.AdbDebuggingController
 import com.gadget.audio.AudioRoutingController
-import com.gadget.automation.AutomationController
+import dev.ranzlappen.gadget.feature.automation.control.AutomationController
 import dev.ranzlappen.gadget.feature.battery.control.BatteryController
 import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
 import dev.ranzlappen.gadget.feature.camera.control.CameraController
 import dev.ranzlappen.gadget.feature.radios.cell.control.CellController
 import dev.ranzlappen.gadget.feature.diagnostics.control.DiagnosticsController
-import com.gadget.display.DisplayController
+import dev.ranzlappen.gadget.feature.display.control.DisplayController
 import dev.ranzlappen.gadget.feature.gps.control.GpsController
 import dev.ranzlappen.gadget.feature.gps.spoof.GpsSpoofController
 import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
 import com.gadget.keepalive.KeepAliveController
 import com.gadget.microphone.MicrophoneController
 import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
-import com.gadget.notification.NotificationController
+import dev.ranzlappen.gadget.feature.notification.control.NotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
 import dev.ranzlappen.gadget.feature.storage.control.StorageController
-import com.gadget.usbdebug.UsbDebuggingController
+import dev.ranzlappen.gadget.feature.usbdebug.control.UsbDebuggingController
 import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiController
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -41,10 +41,12 @@ import dagger.hilt.components.SingletonComponent
  *
  * This file (and the 13 `ui/Rooted*` Compose composables that reach it)
  * stays at its legacy `com.gadget.root.*` location for one specific
- * reason: it depends on the remaining **8 legacy non-modular feature
- * controllers** (`MicrophoneController`, `AudioRoutingController`, …, each still in
- * `app/src/main/java/com/gadget/<feature>/`; the radios/GPS/diagnostics/storage/camera/battery
- * controllers have already migrated out to their feature modules). Pulling
+ * reason: it depends on the remaining **3 legacy non-modular feature
+ * controllers** (`MicrophoneController`, `AudioRoutingController`,
+ * `KeepAliveController`, each still in `app/src/main/java/com/gadget/<feature>/`;
+ * the radios/GPS/diagnostics/storage/camera/battery/display/adbdebug/usbdebug/
+ * automation/notification controllers have already migrated out to their feature
+ * modules). Pulling
  * the entry-point into `:core:root` would force `:core:root` to depend
  * on every one of those legacy controllers, defeating the purpose of
  * the extraction.

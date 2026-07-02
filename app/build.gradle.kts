@@ -227,6 +227,13 @@ dependencies {
     implementation(project(":feature:lock"))
     implementation(project(":feature:actuators"))
     implementation(project(":feature:diagnostics"))
+    // Screenless rooted-extras controller contracts (+ standard no-ops); the
+    // privileged impls ship in the matching -rooted siblings below.
+    implementation(project(":feature:display"))
+    implementation(project(":feature:adbdebug"))
+    implementation(project(":feature:usbdebug"))
+    implementation(project(":feature:automation"))
+    implementation(project(":feature:notification"))
     implementation(project(":feature:bugreport"))
     implementation(project(":feature:manual"))
     implementation(project(":feature:youtubedownloader"))
@@ -344,6 +351,16 @@ dependencies {
     "rootedImplementation"(project(":feature:storage-rooted"))
     // Rooted Diagnostics action handler — logcat tail, meminfo, cpuinfo, procstats.
     "rootedImplementation"(project(":feature:diagnostics-rooted"))
+    // Rooted Display controller — backlight sysfs / density / refresh-rate / SurfaceFlinger dump.
+    "rootedImplementation"(project(":feature:display-rooted"))
+    // Rooted ADB-debugging controller — wireless-ADB toggle / setprop / prop dump.
+    "rootedImplementation"(project(":feature:adbdebug-rooted"))
+    // Rooted USB-debugging controller — function switch / device-node + serial-service dump.
+    "rootedImplementation"(project(":feature:usbdebug-rooted"))
+    // Rooted Automation controller — privileged intents / system-settings override / dumpsys.
+    "rootedImplementation"(project(":feature:automation-rooted"))
+    // Rooted Notification controller — sticky override / listener-access grant / lock-screen overlay.
+    "rootedImplementation"(project(":feature:notification-rooted"))
     // Rooted Lock overlay — secure-keyguard TYPE_APPLICATION_OVERLAY action.
     "rootedImplementation"(project(":feature:lock-rooted"))
     // Rooted Flipper — root-granted USB device-node access (no permission dialog).
