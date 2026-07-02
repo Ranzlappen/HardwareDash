@@ -1,9 +1,9 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.rooted.control
 
 import android.content.Context
 import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.json.JSONObject
+import dev.ranzlappen.gadget.feature.battery.control.BatteryControllerResult
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -11,6 +11,7 @@ import java.util.Locale
 import java.util.TimeZone
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.json.JSONObject
 
 private const val LOGBOOK_DIR_NAME = "logbook"
 private const val HEALTH_FILENAME_PREFIX = "battery-health-"

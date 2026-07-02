@@ -1,4 +1,5 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.control
+
 
 /**
  * Override for charge-current and / or charge-voltage caps. Either field

@@ -1,4 +1,4 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.control
 
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -4,7 +4,7 @@ import dev.ranzlappen.gadget.core.root.*
 import com.gadget.adbdebug.AdbDebuggingController
 import com.gadget.audio.AudioRoutingController
 import com.gadget.automation.AutomationController
-import com.gadget.battery.BatteryController
+import dev.ranzlappen.gadget.feature.battery.control.BatteryController
 import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
 import dev.ranzlappen.gadget.feature.camera.control.CameraController
 import dev.ranzlappen.gadget.feature.radios.cell.control.CellController
@@ -41,9 +41,9 @@ import dagger.hilt.components.SingletonComponent
  *
  * This file (and the 13 `ui/Rooted*` Compose composables that reach it)
  * stays at its legacy `com.gadget.root.*` location for one specific
- * reason: it depends on the remaining **9 legacy non-modular feature
- * controllers** (`MicrophoneController`, `BatteryController`, …, each still in
- * `app/src/main/java/com/gadget/<feature>/`; the radios/GPS/diagnostics/storage/camera
+ * reason: it depends on the remaining **8 legacy non-modular feature
+ * controllers** (`MicrophoneController`, `AudioRoutingController`, …, each still in
+ * `app/src/main/java/com/gadget/<feature>/`; the radios/GPS/diagnostics/storage/camera/battery
  * controllers have already migrated out to their feature modules). Pulling
  * the entry-point into `:core:root` would force `:core:root` to depend
  * on every one of those legacy controllers, defeating the purpose of

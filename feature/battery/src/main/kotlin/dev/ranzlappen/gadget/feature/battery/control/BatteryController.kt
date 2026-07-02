@@ -1,4 +1,5 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.control
+
 
 /**
  * Rooted-only Battery capability surface. The standard-flavor

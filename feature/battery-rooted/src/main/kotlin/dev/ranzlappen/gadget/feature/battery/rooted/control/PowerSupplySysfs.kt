@@ -1,4 +1,4 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import javax.inject.Inject

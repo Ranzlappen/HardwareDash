@@ -1,12 +1,14 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.rooted.control
 
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.feature.battery.control.BatteryControllerResult
+import dev.ranzlappen.gadget.feature.battery.control.HoldSocConfig
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import javax.inject.Inject
-import javax.inject.Singleton
 
 internal const val HOLD_SOC_MIN_PERCENT = 20
 internal const val HOLD_SOC_MAX_PERCENT = 90

@@ -337,6 +337,9 @@ dependencies {
     // Rooted Camera extreme-tier controller — high-FPS / manual-exposure /
     // RAW-DNG / multi-camera / HAL-bypass / shutter-sound, each safety-gated.
     "rootedImplementation"(project(":feature:camera-rooted"))
+    // Rooted Battery extreme-tier controller — fuel-gauge / cell monitor /
+    // charging-profile + type override / hold-SoC / thermal bypass / coil current.
+    "rootedImplementation"(project(":feature:battery-rooted"))
     // Rooted Storage action handler — diskstats, mounts, fstrim, drop_caches.
     "rootedImplementation"(project(":feature:storage-rooted"))
     // Rooted Diagnostics action handler — logcat tail, meminfo, cpuinfo, procstats.

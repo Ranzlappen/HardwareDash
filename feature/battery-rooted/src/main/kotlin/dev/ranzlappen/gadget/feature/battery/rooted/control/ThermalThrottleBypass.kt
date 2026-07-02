@@ -1,10 +1,12 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.rooted.control
 
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.withContext
+import dev.ranzlappen.gadget.feature.battery.control.BatteryControllerResult
+import dev.ranzlappen.gadget.feature.battery.control.ThermalBypassConfig
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 
 internal const val THERMAL_BYPASS_HARD_CEILING_MILLIS = 60_000L
 private const val THERMAL_DISABLED_VALUE = "disabled"

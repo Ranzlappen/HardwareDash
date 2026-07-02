@@ -17,8 +17,8 @@ import com.gadget.audio.AudioRoutingController
 import com.gadget.audio.RootedAudioRoutingController
 import com.gadget.automation.AutomationController
 import com.gadget.automation.RootedAutomationController
-import com.gadget.battery.BatteryController
-import com.gadget.battery.RootedBatteryController
+import dev.ranzlappen.gadget.feature.battery.control.BatteryController
+import dev.ranzlappen.gadget.feature.battery.rooted.control.RootedBatteryController
 import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
 import dev.ranzlappen.gadget.feature.radios.bt.rooted.control.RootedBluetoothController
 import dev.ranzlappen.gadget.feature.camera.control.CameraController

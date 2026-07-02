@@ -119,6 +119,7 @@ include(
     ":feature:sensors",
     ":feature:actuators",
     ":feature:battery",
+    ":feature:battery-rooted",
     ":feature:audio",
     ":feature:camera",
     ":feature:camera-rooted",

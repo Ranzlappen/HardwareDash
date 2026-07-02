@@ -1,10 +1,12 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.rooted.control
 
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.withContext
+import dev.ranzlappen.gadget.feature.battery.control.BatteryControllerResult
+import dev.ranzlappen.gadget.feature.battery.control.ChargingProfileConfig
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 
 internal const val CHARGING_PROFILE_HARD_CEILING_MILLIS = 30_000L
 private const val CHARGE_CURRENT_NODE = "/sys/class/power_supply/battery/constant_charge_current_max"

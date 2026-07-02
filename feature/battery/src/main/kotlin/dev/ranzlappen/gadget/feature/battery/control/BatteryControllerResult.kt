@@ -1,4 +1,5 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.control
+
 
 /**
  * Result returned by every [BatteryController] extreme-tier method. Same

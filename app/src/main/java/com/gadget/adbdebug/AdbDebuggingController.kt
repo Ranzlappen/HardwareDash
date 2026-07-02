@@ -36,7 +36,7 @@ interface AdbDebuggingController {
     /**
      * Read-only `getprop` capture, tail-capped to 16 KB. Optionally persists
      * a JSON copy to the Logbook directory using the same convention as
-     * [com.gadget.battery.BatteryDumpWriter].
+     * [dev.ranzlappen.gadget.feature.battery.rooted.control.BatteryDumpWriter].
      */
     suspend fun dumpProperties(persist: Boolean = false): AdbDebuggingControllerResult
 

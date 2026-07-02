@@ -1,10 +1,10 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.rooted.control
 
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 internal const val THERMAL_WATCHER_POLL_INTERVAL_MILLIS = 500L
 

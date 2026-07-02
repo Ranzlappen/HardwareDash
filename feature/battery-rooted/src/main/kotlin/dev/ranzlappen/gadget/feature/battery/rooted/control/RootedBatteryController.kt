@@ -1,14 +1,22 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.rooted.control
 
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.feature.battery.control.BatteryController
+import dev.ranzlappen.gadget.feature.battery.control.BatteryControllerResult
+import dev.ranzlappen.gadget.feature.battery.control.CellReading
+import dev.ranzlappen.gadget.feature.battery.control.ChargingProfileConfig
+import dev.ranzlappen.gadget.feature.battery.control.ChargingTypeOverrideConfig
+import dev.ranzlappen.gadget.feature.battery.control.HoldSocConfig
+import dev.ranzlappen.gadget.feature.battery.control.ThermalBypassConfig
+import dev.ranzlappen.gadget.feature.battery.control.WirelessCoilCurrentConfig
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
 internal const val CHARGING_TYPE_OVERRIDE_HARD_CEILING_MILLIS = 30_000L
 

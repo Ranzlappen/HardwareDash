@@ -1,11 +1,13 @@
-package com.gadget.battery
+package dev.ranzlappen.gadget.feature.battery.rooted.control
 
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.feature.battery.control.BatteryControllerResult
+import dev.ranzlappen.gadget.feature.battery.control.WirelessCoilCurrentConfig
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
 internal const val WIRELESS_COIL_HARD_CEILING_UA = 1_500_000L
 internal const val WIRELESS_COIL_HARD_DURATION_MILLIS = 30_000L
