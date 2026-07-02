@@ -5,7 +5,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 internal const val MIC_GAIN_HARD_DB_CEILING = 30
-internal const val MIC_GAIN_HARD_CEILING_MILLIS = 60_000L
 internal const val MIC_GAIN_DB_PER_RAW_STEP = 1
 private const val TINYMIX_BIN = "tinymix"
 

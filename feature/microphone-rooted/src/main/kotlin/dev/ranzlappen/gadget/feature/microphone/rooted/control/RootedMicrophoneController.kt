@@ -17,6 +17,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
+internal const val MIC_GAIN_HARD_CEILING_MILLIS = 60_000L
 internal const val DIRECT_PCM_HARD_CEILING_MILLIS = 30_000L
 internal const val DIRECT_PCM_MIN_WINDOW_MILLIS = 5L
 internal const val CUSTOM_RATE_MIN_HZ = 4_000
