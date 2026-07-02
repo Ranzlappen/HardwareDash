@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No Android permissions: the raw NCI command exchange runs through the
+     root shell against the vendor sysfs node, gated by RootSafetyGate. -->
+<manifest />

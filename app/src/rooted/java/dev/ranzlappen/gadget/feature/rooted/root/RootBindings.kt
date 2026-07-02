@@ -39,8 +39,8 @@ import com.gadget.keepalive.KeepAliveController
 import com.gadget.keepalive.RootedKeepAliveController
 import com.gadget.microphone.MicrophoneController
 import com.gadget.microphone.RootedMicrophoneController
-import com.gadget.nfc.NfcController
-import com.gadget.nfc.RootedNfcController
+import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
+import dev.ranzlappen.gadget.feature.radios.nfc.rooted.control.RootedNfcController
 import com.gadget.notification.NotificationController
 import com.gadget.notification.RootedNotificationController
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator

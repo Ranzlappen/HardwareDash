@@ -1,4 +1,4 @@
-package com.gadget.nfc
+package dev.ranzlappen.gadget.feature.radios.nfc.control
 
 /**
  * Send an arbitrary NCI command to the NFC controller via vendor sysfs
