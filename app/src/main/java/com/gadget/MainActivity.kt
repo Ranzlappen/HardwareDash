@@ -23,7 +23,6 @@ import dev.ranzlappen.gadget.core.root.companion.CompanionModuleDetector
 import dev.ranzlappen.gadget.core.root.launch.LaunchGate
 import dev.ranzlappen.gadget.core.root.launch.LaunchGateOutcome
 import com.gadget.root.ui.FatalLaunchScreen
-import com.gadget.ui.logbook.LogbookReminderWorker
 import com.gadget.ui.theme.AccessibilityPreferencesManager
 import com.gadget.ui.theme.GadgetTheme
 import com.gadget.backup.ui.BackupCard
@@ -243,10 +242,14 @@ class MainActivity : ComponentActivity() {
         // providers that are no longer manifest-registered. Cancel it once on
         // upgraded installs so the orphaned 15-min wakeup stops; modular
         // widgets repaint via their own notifier seams.
-        androidx.work.WorkManager.getInstance(this)
-            .cancelUniqueWork("widget_periodic_update")
+        androidx.work.WorkManager.getInstance(this).apply {
+            cancelUniqueWork("widget_periodic_update")
+            // Legacy logbook purge: pending reminder works reference the
+            // deleted LogbookReminderWorker class and would fail on fire;
+            // cancel them once on upgraded installs.
+            cancelAllWorkByTag("logbook_reminder")
+        }
         appRepository.requestRefresh()
-        LogbookReminderWorker.ensureChannel(this)
     }
 
     private fun openCompanionInstructions() {

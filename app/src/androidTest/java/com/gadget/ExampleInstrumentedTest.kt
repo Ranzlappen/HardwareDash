@@ -17,8 +17,10 @@ import org.junit.Assert.*
 class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
-        // Context of the app under test.
+        // Context of the app under test. packageName is the applicationId
+        // (dev.ranzlappen.gadget / dev.ranzlappen.gadget.rooted), not the
+        // Kotlin namespace.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.gadget", appContext.packageName)
+        assertTrue(appContext.packageName.startsWith("dev.ranzlappen.gadget"))
     }
 }

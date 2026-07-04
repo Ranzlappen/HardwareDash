@@ -67,17 +67,15 @@
     <!-- ══════════════════════ OVERLAY (lock-screen widget) ════════ -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
-    <!-- ══════════════════════ DEVICE ADMIN ════════════════════════ -->
-    <!--  Allows locking the screen programmatically  -->
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-
     <!-- ══════════════════════ STEP COUNTER ══════════════════════ -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
     <!-- ══════════════════════ TELEPHONY (signal info) ════════════ -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-    <!-- ══════════════════════ LOGBOOK REMINDERS ═════════════════ -->
+    <!-- ══════════════════════ AUTOMATION SCHEDULE TRIGGERS ══════ -->
+    <!-- Opt-in exact alarms for :core:automation's Schedule trigger;
+         degrades to inexact setWindow when the user hasn't granted it. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <!-- ══════════════════════ BRIGHTNESS ═════════════════════════ -->
@@ -182,101 +180,14 @@
                 android:resource="@xml/nfc_tech_filter" />
         </activity>
 
-        <!-- ── Caller Screen Activity (phone ring overlay) ────────── -->
-        <activity
-            android:name=".CallerScreenActivity"
-            android:exported="false"
-            android:showWhenLocked="true"
-            android:turnScreenOn="true"
-            android:excludeFromRecents="true"
-            android:taskAffinity=""
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- ── Device Admin Receiver (for screen lock) ───────────── -->
-        <receiver
-            android:name=".receivers.AdminReceiver"
-            android:exported="true"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
-            <meta-data
-                android:name="android.app.device_admin"
-                android:resource="@xml/device_admin" />
-            <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-                <action android:name="android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED" />
-            </intent-filter>
-        </receiver>
-
-        <!-- ── Schedule Action Receiver ──────────────────────────────── -->
-        <receiver
-            android:name=".receivers.ScheduleActionReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.gadget.SCHEDULE_ACTION_FIRE" />
-            </intent-filter>
-        </receiver>
-
-        <!-- ── Foreground Service ─────────────────────────────────── -->
-        <service
-            android:name=".services.GadgetService"
-            android:exported="false"
-            android:foregroundServiceType="camera|microphone" />
-
-        <!-- ── Vibration Service ────────────────────────────────────── -->
-        <service
-            android:name=".services.VibrationService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Continuous vibration pattern playback toggled by user" />
-        </service>
-
-        <!-- ── Strobe Service ──────────────────────────────────────── -->
-        <service
-            android:name=".services.StrobeService"
-            android:exported="false"
-            android:foregroundServiceType="camera" />
-
-        <!-- ── Link Service ──────────────────────────────────────── -->
-        <service
-            android:name=".services.LinkService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Continuous sensor monitoring for user-defined link rules" />
-        </service>
-
-        <!-- ── Video Record Service ──────────────────────────────── -->
-        <service
-            android:name=".services.VideoRecordService"
-            android:exported="false"
-            android:foregroundServiceType="camera" />
-
-        <!-- ── Voice Record Service ──────────────────────────────── -->
-        <service
-            android:name=".services.VoiceRecordService"
-            android:exported="false"
-            android:foregroundServiceType="microphone" />
-
-        <!-- ── dB Meter Service ──────────────────────────────────── -->
-        <service
-            android:name=".services.DbMeterService"
-            android:exported="false"
-            android:foregroundServiceType="microphone" />
-
-        <!-- ── NFC HCE Emulation Service ─────────────────────────── -->
-        <service
-            android:name=".services.NfcEmulationService"
-            android:exported="true"
-            android:permission="android.permission.BIND_NFC_SERVICE">
-            <intent-filter>
-                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.nfc.cardemulation.host_apdu_service"
-                android:resource="@xml/nfc_hce_aid" />
-        </service>
+        <!-- Legacy dead-code purge: the pre-modular CallerScreenActivity,
+             AdminReceiver, ScheduleActionReceiver, and the eight legacy
+             foreground services (Gadget / Vibration / Strobe / Link /
+             VideoRecord / VoiceRecord / DbMeter / NfcEmulation) were
+             deleted — none was reachable at runtime. Their modular
+             replacements register in their own feature manifests
+             (torch strobe FGS, radios-nfc HCE, audio record FGS, …) and
+             merge in. -->
 
         <!-- The App-Organizer folder popup + folder widget now live in
              :feature:apps (modular migration); their manifest entries moved

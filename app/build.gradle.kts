@@ -261,15 +261,10 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.hilt.navigation.compose)
 
-    // ─── CameraX ───────────────────────────────────────────────
-    implementation(libs.androidx.camera.core)
-    implementation(libs.androidx.camera.camera2)
-    implementation(libs.androidx.camera.lifecycle)
-    implementation(libs.androidx.camera.view)
-    implementation(libs.androidx.camera.video)
-
-    // ─── Accompanist permissions helper ────────────────────────────
-    implementation(libs.accompanist.permissions)
+    // CameraX / Accompanist-permissions / biometric / EXIF / Vico /
+    // usb-serial / play-services-location left :app with the legacy
+    // dead-code purge — the features that need them (camera, gps, apps,
+    // flipper, …) declare their own copies.
 
     // ─── Coroutines ─────────────────────────────────────────────
     implementation(libs.kotlinx.coroutines.android)
@@ -279,21 +274,11 @@ dependencies {
     implementation(libs.hilt.work)
     ksp(libs.hilt.work.compiler)
 
-    // ─── Biometric / device-credential auth (App-Organizer locked folders) ─
-    implementation(libs.androidx.biometric)
-
-    // ─── Serialization + DataStore ────────────────────────────────
-    implementation(libs.kotlinx.serialization.json)
+    // ─── DataStore (rooted-flavor RootSafetyPrefs) ────────────────
     implementation(libs.androidx.datastore.preferences)
 
-    // ─── GPS (FusedLocationProvider) ───────────────────────────────
-    implementation(libs.play.services.location)
-
-    // ─── Map (OSMDroid — no API key needed) ───────────────────────────
+    // ─── Map (OSMDroid — no API key needed; MainActivity config) ──────
     implementation(libs.osmdroid.android)
-
-    // ─── EXIF metadata editing for images ────────────────────────────
-    implementation(libs.androidx.exifinterface)
 
     // ─── Room (still in :app for legacy reasons; later batch extracts to
     //     core:data via the `gadget.android.room` convention plugin) ─────
@@ -303,16 +288,6 @@ dependencies {
 
     // ─── Timber logging ───────────────────────────────────────────
     implementation(libs.timber)
-
-    // ─── Vico charts (Compose-native, Material 3) ──────────────────────
-    implementation(libs.vico.compose.m3)
-
-    // ─── USB serial (CDC-ACM) — Flipper Zero USB transport ─────────────
-    // Note: catalog key is `usb-serial-android` (not `usb-serial-for-android`)
-    // because Kotlin's `for` is a reserved word; the accessor would otherwise
-    // expand to `libs.usb.serial.for.android` and fail to parse. The Maven
-    // coordinates (`com.github.mik3y:usb-serial-for-android`) are unchanged.
-    implementation(libs.usb.serial.android)
 
     // ════════════════════ STANDARD-ONLY DEPENDENCIES ════════════════════
     // refactor-2026 Phase 2 / E2: standard Torch capability module — the
