@@ -192,6 +192,14 @@ allow-list), independent of the migrated controller.
 
 ## Forward plan
 
+> The full measured gap analysis (per-module definition-of-done matrix,
+> legacy inventory, cross-cutting coverage) and the phased workstreams
+> that take the app from here to **complete** — legacy extinction,
+> skeleton-feature builds, consistency sweep, widgets/tiles everywhere,
+> `:core:permissions`, root-flavor completion, high-end automation, full
+> localization, design/assets, and release engineering — live in the
+> **[Completion Master Plan](Completion-Master-Plan)**.
+
 - **Phase 3 — Core God-App Capabilities (🚧 started).** Shipped: the custom
   theme picker (high-contrast / amoled-true / pastel; `GadgetCustomTheme` +
   `Settings → Appearance → Palette`) and the in-depth permission UI (the Health
@@ -217,8 +225,6 @@ allow-list), independent of the migrated controller.
   `secondaryPane` below the primary content on `GadgetPosture.Tabletop`
   (side-by-side on Flat/Book). `DashboardScreen` is the first consumer
   (feature shortcut pane on wide/foldable screens).
-- **[#95](https://github.com/Ranzlappen/HardwareDash/issues/95)** — torch
-  brightness control (`WRITE_SETTINGS` UX). Feature enhancement.
 - **[#107](https://github.com/Ranzlappen/HardwareDash/issues/107)** —
   delete dead legacy `com.gadget.widget` torch providers; folded into the
   per-feature clean-cut deletion step.
@@ -261,6 +267,7 @@ published to GitHub Pages with a per-version archive and diffs. Entry point:
 
 ---
 
-> _Last reviewed: 2026-07-02 · Source: `MASTER-PLAN.md`,
-> `docs/refactor-2026/*`, `README.md`, `.github/workflows/app-preview.yml` ·
+> _Last reviewed: 2026-07-03 · Source: `MASTER-PLAN.md`,
+> `docs/refactor-2026/*`, `README.md`, `.github/workflows/app-preview.yml`,
+> [Completion Master Plan](Completion-Master-Plan) ·
 > Related modules: all, `:screenshots`._

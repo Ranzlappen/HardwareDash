@@ -31,18 +31,22 @@ through `LocalGadgetTheme.current`.
 
 ## Current development status
 
-- **Phase 2 — Accelerated Feature Migration — in progress.** Real
-  hardware features are migrating one module at a time onto the Phase-1
-  design system.
-- **Live in the shell:** Torch, Vibration, App-Organizer (folders +
-  folder widgets), Sensors, Automation (rules list + builder), Settings,
-  Dashboard.
+- **Phase 2 — Accelerated Feature Migration — ✅ feature-complete;
+  Phase 3 (Core God-App Capabilities) 🚧 started.** What remains of
+  Phase 2 is the per-feature clean-cut deletion of the legacy sources.
+- **Live in the shell:** Dashboard, Settings, Torch, Vibration,
+  App-Organizer, Sensors, Battery, GPS, Storage, IR, Camera/Barcode,
+  Motion, Ambient, Audio, NFC, Bluetooth, WiFi, Sub-GHz, Flipper Zero,
+  Lock, Actuators, Diagnostics, Health/Permissions, Manual, Automation
+  (rules list + builder), YouTube Downloader.
 - **Shared infrastructure landed:** `:core:root`, `:core:widgetkit`,
   `:core:monitoring`, the full cross-automation engine
   (`:core:automation` + `:core:hardware` + `automation.db` +
   `:feature:automation-ui`), and whole-app backup format v5.
-- **Remaining legacy surface:** ~297 `com.gadget.*` Kotlin files still in
-  `:app`, migrating feature-by-feature.
+- **Remaining legacy surface:** 96 `com.gadget.*` Kotlin files still in
+  `:app` source sets, migrating feature-by-feature.
+- **The road to done:** the gap analysis and phased completion roadmap
+  live in the **[Completion Master Plan](Completion-Master-Plan)**.
 
 Full detail: **[Roadmap & Status](Roadmap-and-Status)**.
 
@@ -76,6 +80,8 @@ Start here, in order:
 
 - **[Roadmap & Status](Roadmap-and-Status)** — phases, migrated features,
   open follow-up issues, release readiness.
+- **[Completion Master Plan](Completion-Master-Plan)** — the measured
+  gap analysis and the phased plan to a finished app.
 - **[Decision Records](Decision-Records)** — the ADRs.
 - **[Module Catalog](Module-Catalog)** / **[Asset Catalog](Asset-Catalog)**
   — the parts inventory.
@@ -105,5 +111,6 @@ Guide, and Roadmap pages before any planning or coding begins.
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `README.md`, `CLAUDE.md`,
-> `MASTER-PLAN.md` · Related modules: all._
+> _Last reviewed: 2026-07-03 · Source: `README.md`, `CLAUDE.md`,
+> [Roadmap & Status](Roadmap-and-Status),
+> [Completion Master Plan](Completion-Master-Plan) · Related modules: all._

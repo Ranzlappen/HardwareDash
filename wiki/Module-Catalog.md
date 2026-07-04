@@ -1,18 +1,21 @@
 # Module Catalog
 
 The "parts catalog" for the codebase — a human-readable index of every
-Gradle module. Source counts are `*.kt` under `src/main` as of 2026-06;
-treat them as a maturity signal, not a contract. Modules with **0**
-sources are wired skeletons awaiting their migration batch.
+Gradle module. Source counts are `*.kt` under `src/main` as of
+2026-07-03; treat them as a maturity signal, not a contract. Modules
+with **0** sources are wired skeletons awaiting their migration batch.
 
 Module graph and dependency rules: [Architecture](Architecture).
+Gap analysis and the road to done:
+[Completion Master Plan](Completion-Master-Plan).
 
 ## `:app`
 
 - **Purpose:** the single application module. Hosts `GadgetApplication`
   (`@HiltAndroidApp`), `MainActivity` + `GadgetApp { … }` nav wiring,
   flavor/applicationId/signing config, the flavor `RootBindings`, and the
-  not-yet-migrated legacy `com.gadget.*` surface (~284 files).
+  not-yet-migrated legacy `com.gadget.*` surface (96 files across all
+  source sets; 86 under `src/main`).
 - **Maturity:** production; shrinking as features migrate out.
 - **Dependencies:** every standard `feature/*`; rooted flavor adds
   `feature/*-rooted` via `rootedImplementation`.
@@ -33,22 +36,22 @@ Module graph and dependency rules: [Architecture](Architecture).
 
 | Module | Src | Purpose / public contracts | Key dependencies |
 |---|---:|---|---|
-| `core:common` | 0 | Pure-Kotlin utilities (Result types, dispatchers, time, log tags). | — |
+| `core:common` | 0 | Pure-Kotlin utilities (Result types, dispatchers, time, log tags). Empty — candidate for removal from the graph until needed ([Completion Master Plan](Completion-Master-Plan)). | — |
 | `core:model` | 1 | **`MetricSource` + `MetricDescriptor`** — the readable-signal seam. No Android. | `kotlinx-coroutines-core` |
-| `core:domain` | 0 | Use-cases / policy, no Android APIs. | `core:model` |
-| `core:data` | 22 | Repositories; modular Room DBs (`apps.db`, `monitoring.db`, `automation.db`); `MonitorSampleRepository`, `RoomRuleRepository`, `DatabaseCheckpointer`. | `core:model`, `core:automation`, Room |
-| `core:datastore` | 6 | `UserPreferences` + `FeaturePreferences<T>` factory (per-feature collections). | DataStore |
+| `core:domain` | 0 | Use-cases / policy, no Android APIs. Empty — candidate for removal from the graph until needed. | `core:model` |
+| `core:data` | 20 | Repositories; modular Room DBs (`apps.db`, `monitoring.db`, `automation.db`); `MonitorSampleRepository`, `RoomRuleRepository`, `DatabaseCheckpointer`. | `core:model`, `core:automation`, Room |
+| `core:datastore` | 5 | `UserPreferences` + `FeaturePreferences<T>` factory (per-feature collections). | DataStore |
 | `core:designsystem` | 9 | Theme, colour/typography/shape/spacing/motion/glass tokens, `LocalGadgetTheme`, `GadgetTheme`. | Compose |
-| `core:ui` | 35 | The component library (`GadgetPrimaryButton`, `DashCard`, `GlassSurface`, `ModuleScreenScaffold`, `ModuleInfo` sections, …). | `core:designsystem` |
+| `core:ui` | 23 | The component library (`GadgetPrimaryButton`, `DashCard`, `GlassSurface`, `ModuleScreenScaffold`, `ModuleInfo` sections, …). | `core:designsystem` |
 | `core:navigation` | 4 | `GadgetApp` shell + `GadgetDestination` contracts. | `core:ui` |
-| `core:permissions` | 0 | Permission state objects + resume advancers. | — |
-| `core:surfaces` | 0 | Widget / QS-tile / Wear surface registry. | — |
+| `core:permissions` | 0 | Permission state objects + resume advancers. Empty — to be built for real as the centralized permission framework (W5 of the [Completion Master Plan](Completion-Master-Plan)); runtime-permission logic currently lives ad-hoc inside features. | — |
+| `core:surfaces` | 0 | Widget / QS-tile / Wear surface registry. Empty and unreferenced — candidate for removal from the graph until needed. | — |
 | `core:notifications` | 2 | Shared notification channels / helpers. | — |
-| `core:automation` | 30 | **`ActionHandler` + `ModuleActionRegistry`** contract; `Rule` model + `RuleEvaluator` + `RuleRepository` contract; `AutomationService`/`AutomationScheduler`/receivers. | `core:model`, `core:root` |
+| `core:automation` | 22 | **`ActionHandler` + `ModuleActionRegistry`** contract; `Rule` model + `RuleEvaluator` + `RuleRepository` contract; `AutomationService`/`AutomationScheduler`/receivers. | `core:model`, `core:root` |
 | `core:hardware` | 2 | **`HardwareRegistry`** — read-side enumeration over the `MetricSource` map. | `core:model` |
-| `core:monitoring` | 18 | Monitor containers, charts, `MonitorService`, `CollapseStateRepository`, bitmap renderer. | `core:data`, `core:ui`, `core:widgetkit` |
-| `core:widgetkit` | 35 | Widget framework: `WidgetKitConfig`, `WidgetConfigStore<T>`, `PendingWidgetConfigs<T>`, `BaseGadgetWidgetProvider<T>`, `BaseContentWidgetProvider<T>`, `WidgetAppearanceRenderer`, boot re-arm. | `core:ui` |
-| `core:root` | 25 | Root-safety seam: `RootCapabilityRegistry`, `RootSafetyGate`, `RootFeatureKey`, `RootSafetyPreferences`, `RootSoftLimiter`. | — |
+| `core:monitoring` | 19 | Monitor containers, charts, `MonitorService`, `CollapseStateRepository`, bitmap renderer. | `core:data`, `core:ui`, `core:widgetkit` |
+| `core:widgetkit` | 33 | Widget framework: `WidgetKitConfig`, `WidgetConfigStore<T>`, `PendingWidgetConfigs<T>`, `BaseGadgetWidgetProvider<T>`, `BaseContentWidgetProvider<T>`, `WidgetAppearanceRenderer`, boot re-arm. | `core:ui` |
+| `core:root` | 26 | Root-safety seam: `RootCapabilityRegistry`, `RootSafetyGate`, `RootFeatureKey`, `RootSafetyPreferences`, `RootSoftLimiter`, shared `AlsaMixerControl`. | — |
 | `core:testing` | 2 | Hilt-aware test helpers, fakes, `GadgetTestTheme`. | Compose-test |
 
 Deep-dives: [Design System](Design-System) ·
@@ -59,46 +62,58 @@ Deep-dives: [Design System](Design-System) ·
 
 ## `feature/*`
 
-Migration status legend: ✅ migrated & live · 🟡 partial · ⬜ skeleton
-(no sources yet).
+Migration status legend: ✅ migrated & live · 🟡 partial (controllers
+migrated, **no screen / nav route / monitoring / automation wiring
+yet**) · ⬜ skeleton (no sources yet).
+
+Per-module definition-of-done matrix (MetricSource / ActionHandler /
+widgets / tiles / tests / strings): see the
+[Completion Master Plan](Completion-Master-Plan).
 
 | Module | Src | Status | Notes |
 |---|---:|:--:|---|
-| `feature:dashboard` | 2 | ✅ | Adaptive grid home screen. |
-| `feature:settings` | 6 | ✅ | About / Appearance / Accessibility + `backupSection` + `rootFeatureToggles` slots. |
-| `feature:torch` | 44 | ✅ | Advanced blueprint: hardware control + QS tile + 2 widgets + strobe FGS + monitoring + automation. |
+| `feature:dashboard` | 2 | ✅ | Adaptive grid home screen (thin; no user reorder/hide yet). |
+| `feature:settings` | 7 | ✅ | About / Appearance / Accessibility / Monitoring + `backupSection` + `rootFeatureToggles` slots. No language picker yet. |
+| `feature:torch` | 46 | ✅ | Advanced blueprint: hardware control + 2 QS tiles + 4 widgets + strobe FGS + monitoring + automation. |
 | `feature:torch-rooted` | 7 | ✅ | DutyCycle / MultiLed / Thermal via `RootedTorchController`. |
 | `feature:torch-standard` | 3 | ✅ | No-op root twin. |
-| `feature:vibration` | 43 | ✅ | Second blueprint consumer; modelled poll signal + draw-canvas pattern builder. |
+| `feature:vibration` | 43 | ✅ | Second blueprint consumer; modelled poll signal + draw-canvas pattern builder + 4 widgets. |
 | `feature:vibration-rooted` | 5 | ✅ | 4-capability rooted tier. |
 | `feature:vibration-standard` | 2 | ✅ | No-op root twin. |
-| `feature:apps` | 34 | ✅ | App-Organizer (folders + folder widgets + canvas background renderer); content-widget archetype. |
+| `feature:apps` | 36 | ✅ | App-Organizer (folders + folder widgets + canvas background renderer); content-widget archetype. No MetricSource/ActionHandler yet. |
 | `feature:apps-rooted` | 0 | ⬜ | Rooted app surface pending. |
-| `feature:sensors` | 6 | ✅ | Proximity / light / acceleration `MetricSource`s + rooted sensor capability rows. |
+| `feature:sensors` | 5 | ✅ | Proximity / light / acceleration `MetricSource`s + rooted sensor capability rows. |
 | `feature:automation-ui` | 6 | ✅ | Rules list + `RuleEditorSheet` builder. |
-| `feature:actuators` | 0 | ⬜ | Coming-soon placeholder in the rail. |
-| `feature:battery` | 9 | ✅ | Level / charging / temperature / voltage / health; dual live+history monitors; 3 rooted rows (FuelGaugeRaw, CellMonitor, ChargingProfile). |
-| `feature:audio` | 9 | ✅ | dB meter + WAV voice recording; live dB monitor; 3 rooted rows (MicGainBoost, MicDirectPcm, MicCustomSampleRate). |
-| `feature:camera` | 8 | ✅ | CameraX + MLKit barcode scanner (all formats), scan history, WiFi/URL deep-open; 3 rooted rows (HighFps, ManualOverride, HalBypass). |
-| `feature:gps` | 11 | ✅ | OSMDroid map + coordinates card; live speed + altitude monitors; 3 rooted rows (NmeaRawTap, ConstellationDump, LocationOverride). |
-| `feature:motion` | 9 | ✅ | Gyroscope / step counter / motion detect; live + history monitors per sensor; 3 rooted rows (HighPolling, RawUnfiltered, SysfsRead). |
-| `feature:ambient` | 0 | ⬜ | |
-| `feature:radios-wifi` | 0 | ⬜ | |
-| `feature:radios-bt` | 11 | ✅ | Adapter status + bonded device list; GATT battery + RSSI (standard); hidden battery API + A2DP codec name (rooted via `BtEnhancedInfoProvider` seam); live + history BT-enabled monitors. |
-| `feature:radios-nfc` | 10 | ✅ | NDEF tag read + HCE emulation + NDEF template library; live + history NFC-enabled monitor; rooted raw-NCI row. |
-| `feature:radios-subghz` | 9 | ✅ | USB SDR / Sub-GHz transceiver detection (RTL-SDR, HackRF, YARD Stick One, …) via `UsbManager`; `subghz_bridge_connected` push metric (live + history monitors); `subghz` ActionHandler (bridge-attached + Sub-GHz-capable asserts); 3 rooted rows (RawRegisters, CustomTuning, OokFskCapture). Detection-only on standard (Android has no Sub-GHz radio API). |
-| `feature:radios-ir` | 10 | ✅ | NEC / Pronto / RAW transmit; saved-signal library; remote-brand library; 2 rooted rows (CustomCarrier, RawGpioPattern). |
-| `feature:flipper` | 21 | ✅ | Flipper Zero bridge: USB CDC-ACM + BLE GATT transport, hand-rolled protobuf RPC (framing + PB_Main), System/Storage/Sub-GHz/Infrared command suites, connection manager. `flipper_connected` + `flipper_battery` monitors; `flipper` ActionHandler (assert-connected / ping / transmit .sub / transmit .ir). Migrated from legacy `com.gadget.flipper`. |
-| `feature:flipper-rooted` | 3 | ✅ | Root-grants USB access by relaxing the Flipper's `/dev/bus/usb` device-node permissions (`chmod 666`) so the port opens without the per-attach dialog. Gated by `RootFeatureKey.FlipperUsbGrant`; `flipper_root` ActionHandler. |
-| `feature:storage` | 9 | ✅ | Volume cards (internal + removable) with progress bars; live used-% monitor; 3 rooted rows (DumpDiskstats, EnumerateMounts, Fstrim). |
-| `feature:storage-rooted` | 0 | ⬜ | |
-| `feature:lock` | 9 | ✅ | Keyguard lock/secure state + biometric enrollment; lock-state live + history monitors; assert-locked / -unlocked / -secure automation actions; informational rooted overlay row. |
-| `feature:lock-rooted` | 4 | ✅ | Secure-keyguard `TYPE_APPLICATION_OVERLAY`: self-grants SYSTEM_ALERT_WINDOW via root appops, draws a bounded anti-phishing overlay above the lock screen, torn down in a `NonCancellable` finally. Gated by `RootFeatureKey.LockSecureOverlay`; `lock_root` ActionHandler. |
-| `feature:diagnostics` (+ `-rooted`) | 0 | ⬜ | |
-| `feature:bugreport` | 5 | ✅ | Permission manager: grant-state scan + per-permission runtime request + App-Settings fallback + granted/total summary (refreshes on resume); assert-permission automation action; informational rooted rows (ADB diagnostics, force-grant). |
-| `feature:bugreport-rooted` | 3 | ✅ | Force-grants a declared runtime permission via `pm grant` (validated token, gated by `RootFeatureKey.PermissionForceGrant`); `bugreport_root` ActionHandler. |
-| `feature:manual` | 0 | ⬜ | In-app manual / help. |
-| `feature:youtubedownloader` | 17 | ✅ | YouTube video/audio downloader (yt-dlp + ffmpeg via youtubedl-android); private playlists via in-app cookie login; dataSync FGS; MediaStore export to Movies/Music; `download_progress` monitor + `youtube_downloader` ActionHandler. Standard-only (runs unprivileged). |
+| `feature:automation` (+ `-rooted` 4) | 4 | 🟡 | Controller-only — no screen; role vs `automation-ui` to be resolved (fold into `:core:automation` or become the engine-status surface). |
+| `feature:actuators` | 5 | ✅ | Vibrator availability + amplitude; haptic-click / heavy-click / assert-available actions; rooted extreme/PWM/dual/rumble rows. No MetricSource yet. |
+| `feature:battery` (+ `-rooted` 9) | 16 | ✅ | Level / charging / temperature / voltage / health; dual live+history monitors; battery widget; rooted fuel-gauge / cell-monitor / charging-profile rows. No ActionHandler yet. |
+| `feature:audio` (+ `-rooted` 5) | 13 | ✅ | dB meter + WAV voice recording; live dB monitor; audio ActionHandler; rooted mic-gain / direct-PCM / custom-sample-rate rows. |
+| `feature:microphone` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — the dB/recording UI lives in `feature:audio`; own screen pending. |
+| `feature:camera` (+ `-rooted` 6) | 12 | ✅ | CameraX + MLKit barcode scanner (all formats), scan history, WiFi/URL deep-open; rooted HighFps / ManualOverride / HalBypass rows. Discrete-event module (MetricSource-exempt); no ActionHandler yet. |
+| `feature:gps` (+ `-rooted` 5) | 28 | ✅ | OSMDroid map + coordinates; live speed + altitude monitors; GPS-spoofing subsystem (GPX/KML playback, `LocationSpoofService`); rooted NMEA / constellation / override rows. No ActionHandler yet. |
+| `feature:motion` | 6 | ✅ | Gyroscope / step counter / motion detect; live + history monitors per sensor; rooted rows. No ActionHandler yet. |
+| `feature:ambient` | 8 | ✅ | Live lux + level descriptor; ambient-light history monitor; assert-bright / assert-dark actions; rooted brightness / refresh-rate / density rows. |
+| `feature:display` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — no screen / monitoring / automation yet. |
+| `feature:notification` (+ `-rooted` 4) | 4 | 🟡 | Controller-only — builder/channel-inspector screen pending (legacy `BuilderPresetStore` still in `:app`). |
+| `feature:adbdebug` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — no screen / monitoring / automation yet. |
+| `feature:usbdebug` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — no screen / monitoring / automation yet. |
+| `feature:radios-wifi` (+ `-rooted` 6) | 13 | ✅ | Adapter status + network details; live signal + enabled history monitors; enabled + connected actions; rooted `wifi_root` ActionHandler (rfkill / TX-power / channel / monitor-probe). |
+| `feature:radios-bt` (+ `-rooted` 3) | 15 | ✅ | Adapter status + bonded device list; GATT battery + RSSI (standard); hidden battery API + A2DP codec name (rooted via `BtEnhancedInfoProvider` seam); live + history BT-enabled monitors. |
+| `feature:radios-nfc` (+ `-rooted` 2) | 16 | ✅ | NDEF tag read + HCE emulation + NDEF template library; live + history NFC-enabled monitor; rooted raw-NCI row. |
+| `feature:radios-cell` (+ `-rooted` 2) | 3 | 🟡 | Screenless so far — rooted read-only `CellController` (Qualcomm modem dump, per-band RSRP/RSRQ/SINR). Standard `TelephonyManager` screen + `cell_signal` MetricSource pending. |
+| `feature:radios-subghz` | 9 | ✅ | USB SDR / Sub-GHz transceiver detection (RTL-SDR, HackRF, YARD Stick One, …); `subghz_bridge_connected` push metric (live + history monitors); `subghz` ActionHandler; 3 rooted rows. Detection-only on standard (Android has no Sub-GHz radio API); SDR data path is a rooted follow-up. |
+| `feature:radios-ir` (+ `-rooted` 3) | 16 | ✅ | NEC / Pronto / RAW transmit; saved-signal library; remote-brand library; ir ActionHandler; 2 rooted rows (CustomCarrier, RawGpioPattern). Discrete-event module (MetricSource-exempt). |
+| `feature:flipper` | 21 | ✅ | Flipper Zero bridge: USB CDC-ACM + BLE GATT transport, hand-rolled protobuf RPC (framing + PB_Main), System/Storage/Sub-GHz/Infrared command suites. `flipper_connected` + `flipper_battery` monitors; `flipper` ActionHandler. Migrated from legacy `com.gadget.flipper`. |
+| `feature:flipper-rooted` | 3 | ✅ | Root-grants USB access by relaxing the Flipper's `/dev/bus/usb` device-node permissions (`chmod 666`). Gated by `RootFeatureKey.FlipperUsbGrant`; `flipper_root` ActionHandler. |
+| `feature:storage` | 16 | ✅ | Volume cards (internal + removable) with progress bars; live used-% monitor; storage widget; 3 rooted rows. Standard-tier ActionHandler pending (rooted one exists). |
+| `feature:storage-rooted` | 6 | ✅ | Diskstats / mounts / fstrim (allow-listed) / drop_caches actions via `StorageController`; `storage_root` ActionHandler. |
+| `feature:lock` | 8 | ✅ | Keyguard lock/secure state + biometric enrollment; lock-state live + history monitors; assert-locked / -unlocked / -secure automation actions. |
+| `feature:lock-rooted` | 4 | ✅ | Secure-keyguard `TYPE_APPLICATION_OVERLAY`: self-grants SYSTEM_ALERT_WINDOW via root appops, bounded anti-phishing overlay. Gated by `RootFeatureKey.LockSecureOverlay`; `lock_root` ActionHandler. |
+| `feature:diagnostics` (+ `-rooted` 6) | 11 | ✅ | Standard `memory_used_percent` MetricSource (live + history + trigger); rooted logcat / meminfo / cpuinfo / procstats actions via `DiagnosticsController`. |
+| `feature:bugreport` | 5 | ✅ | Permission manager: grant-state scan + per-permission runtime request + App-Settings fallback + granted/total summary (refreshes on resume); assert-permission automation action. |
+| `feature:bugreport-rooted` | 3 | ✅ | Force-grants a declared runtime permission via `pm grant` (gated by `RootFeatureKey.PermissionForceGrant`); `bugreport_root` ActionHandler. |
+| `feature:manual` | 2 | ✅ | In-app manual / help (thin static screen; per-module deep links pending). |
+| `feature:youtubedownloader` | 17 | ✅ | YouTube video/audio downloader (yt-dlp + ffmpeg via youtubedl-android); private playlists via in-app cookie login; dataSync FGS; MediaStore export; `download_progress` monitor + `youtube_downloader` ActionHandler. Standard-only. |
 
 ## `benchmark`
 
@@ -109,10 +124,12 @@ Migration status legend: ✅ migrated & live · 🟡 partial · ⬜ skeleton
 
 - **Purpose:** bundled Xposed module for the rooted flavor.
 - **Maturity:** included only when `-PenableLsposedModule=true`. Standard
-  CI does not opt in; rooted CI does.
+  CI does not opt in; rooted CI does. Still packaged as
+  `com.gadget.spoofer.xposed` — repackage tracked in the
+  [Completion Master Plan](Completion-Master-Plan) (W1 endgame).
 - **Related:** [Flavors & Root Safety](Flavors-and-Root-Safety).
 
 ---
 
-> _Last reviewed: 2026-06-29 · Source: `settings.gradle.kts`, live
+> _Last reviewed: 2026-07-03 · Source: `settings.gradle.kts`, live
 > `find … -name '*.kt'` counts · Related: every module._

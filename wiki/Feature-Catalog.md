@@ -29,17 +29,19 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
 - **What:** Camera2 flashlight toggle; strobe / hold / Morse controls;
   on rooted, brightness boost + duty-cycle strobe + multi-LED + thermal
   override.
-- **Widgets:** flashlight toggle widget + strobe widget (both
-  function-driven). **QS tile:** `FlashlightTileService`.
+- **Widgets:** flashlight toggle, strobe, monitor gauge, and monitor
+  chart widgets (function-driven). **QS tiles:** `FlashlightTileService`
+  + `StrobeTileService`.
 - **Automation:** `TorchActionHandler` exposes on/off/toggle/strobe
   actions. **Monitoring:** `torch_intensity` `MetricSource` (poll →
   filled plateau); `MonitorContainer` + `LiveMonitorContainer`.
 - **Permissions:** none for standard `setTorchMode`;
-  `FOREGROUND_SERVICE` (`shortService`) for the strobe service;
-  `WRITE_SETTINGS` is deferred (#95).
+  `FOREGROUND_SERVICE` (`shortService`) for the strobe service.
 - **Rooted:** brightness cap 150 %, thermal override 45 s ceiling, all via
   `RootSafetyGate`.
-- **Known gaps:** brightness UX (#95).
+- **Recent:** brightness slider (#95, API 33+
+  `turnOnTorchWithStrengthLevel`) and floating overlay button (#101) are
+  done.
 - **Source:** `:feature:torch` (+ `-rooted`/`-standard`).
 - **Deep-dive:** [Torch Blueprint](Torch-Blueprint).
 
@@ -162,24 +164,56 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
 - **Source:** `feature/<name>-rooted` modules + `:core:root`.
 - **Deep-dive:** [Flavors & Root Safety](Flavors-and-Root-Safety).
 
-## Planned features ⬜
+## More live features ✅
 
-Skeleton modules awaiting their migration batch — each follows the
-[Feature Migration Guide](Feature-Migration-Guide):
+The former "planned features" have all shipped their v1 slice — each is
+live in the shell with monitoring/automation hooks as noted in the
+[Module Catalog](Module-Catalog) status table and the per-feature rows
+of [Roadmap & Status](Roadmap-and-Status):
 
-| Feature | Legacy hook | Module |
+- **Battery** (`:feature:battery` + `-rooted`) — level / charging /
+  temperature / voltage / health, dual monitors, battery widget, rooted
+  fuel-gauge & charging-profile rows.
+- **GPS / Location** (`:feature:gps` + `-rooted`) — OSMDroid map, live
+  speed + altitude monitors, GPS-spoofing subsystem, rooted NMEA /
+  constellation rows.
+- **Camera / Barcode** (`:feature:camera` + `-rooted`) — CameraX + MLKit
+  scanner, scan history, rooted high-FPS / RAW rows.
+- **Audio** (`:feature:audio` + `-rooted`) — dB meter + WAV recording,
+  live dB monitor, rooted mic rows.
+- **Motion / Ambient** (`:feature:motion`, `:feature:ambient`) — sensor
+  readouts + monitors + (ambient) assert actions.
+- **Storage** (`:feature:storage` + `-rooted`) — volume cards, used-%
+  monitor, storage widget, rooted diskstats / fstrim actions.
+- **Lock / Diagnostics / Health** (`:feature:lock`,
+  `:feature:diagnostics`, `:feature:bugreport`, each + `-rooted`) —
+  keyguard state + overlay, memory monitor + shell-dump actions, and the
+  permission manager + `pm grant` one-up.
+- **Radios** (`:feature:radios-wifi/-bt/-nfc/-ir` + `-rooted`) — all
+  live with monitors and ActionHandlers.
+- **Actuators** (`:feature:actuators`) — vibrator availability +
+  haptic actions.
+- **Manual** (`:feature:manual`) — thin static help screen.
+
+## Controller-only (no screen yet) 🟡
+
+Migrated rooted/standard controllers with **no UI, nav route,
+monitoring, or automation wiring** — the build-out is tracked in the
+[Completion Master Plan](Completion-Master-Plan) (W2):
+
+| Feature | Module | Note |
 |---|---|---|
-| Camera | Camera2 | `:feature:camera` |
-| Audio | `AudioManager` / `MediaRecorder` | `:feature:audio` |
-| GPS | `FusedLocationProvider` | `:feature:gps` |
-| Battery | `BatteryManager` | `:feature:battery` |
-| Motion / Ambient | `SensorManager` | `:feature:motion`, `:feature:ambient` |
-| Storage | StorageManager | `:feature:storage` (+ `-rooted`) |
-| Lock / Diagnostics / Bugreport | device admin / dumpsys | `:feature:lock`, `:feature:diagnostics`, `:feature:bugreport` (+ `-rooted`) |
-| Actuators (hub) | — | `:feature:actuators` |
-| Manual | — | `:feature:manual` |
+| Display | `:feature:display` (+ `-rooted`) | Brightness / refresh / rotation controllers only |
+| Microphone | `:feature:microphone` (+ `-rooted`) | dB/recording UI currently lives in `:feature:audio` |
+| Notification tools | `:feature:notification` (+ `-rooted`) | Legacy builder presets still in `:app` |
+| ADB / USB debugging | `:feature:adbdebug`, `:feature:usbdebug` (+ `-rooted`) | State + toggle controllers only |
+| Cellular | `:feature:radios-cell` (+ `-rooted`) | Rooted modem-dump controller; standard screen pending |
+| Automation controllers | `:feature:automation` (+ `-rooted`) | Role vs `automation-ui` to be resolved |
+
+Also still pending: `:feature:apps-rooted` (empty skeleton).
 
 ---
 
-> _Last reviewed: 2026-06-29 · Source: `MASTER-PLAN.md`, `settings.gradle.kts`,
-> feature source counts · Related: every `feature/*`._
+> _Last reviewed: 2026-07-03 · Source: `settings.gradle.kts`,
+> feature source counts, [Completion Master Plan](Completion-Master-Plan) ·
+> Related: every `feature/*`._
