@@ -6,6 +6,7 @@
 
 **Project**
 - [Roadmap & Status](Roadmap-and-Status)
+- [Completion Master Plan](Completion-Master-Plan)
 - [Architecture](Architecture)
 - [Decision Records](Decision-Records)
 
