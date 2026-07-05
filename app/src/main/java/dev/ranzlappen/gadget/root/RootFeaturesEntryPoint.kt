@@ -1,4 +1,4 @@
-package com.gadget.root
+package dev.ranzlappen.gadget.root
 
 import dev.ranzlappen.gadget.core.root.*
 import dev.ranzlappen.gadget.core.root.emergency.EmergencyResetCoordinator
@@ -28,7 +28,7 @@ import dagger.hilt.components.SingletonComponent
  * consumed live by `MainActivity` (`FatalLaunchScreen`), the
  * `RootedFeatureTogglesCard` (settings + torch nav), and the emergency-reset
  * surface. The framework types themselves live in `:core:root`; this thin
- * entry point stays in `:app/src/main/` only so those `com.gadget.root.ui.*`
+ * entry point stays in `:app/src/main/` only so those `dev.ranzlappen.gadget.root.ui.*`
  * composables can reach them without an `@Inject` site.
  *
  * Mirrors the `AppsEntryPoint` shape.

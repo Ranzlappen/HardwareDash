@@ -1,4 +1,4 @@
-package com.gadget.notifications
+package dev.ranzlappen.gadget.notifications
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

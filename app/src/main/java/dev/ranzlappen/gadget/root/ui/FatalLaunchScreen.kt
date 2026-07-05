@@ -1,4 +1,4 @@
-package com.gadget.root.ui
+package dev.ranzlappen.gadget.root.ui
 
 import dev.ranzlappen.gadget.core.root.*
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.root.launch.FatalReason
 
 /**
- * Hard-fail screen rendered by [com.gadget.MainActivity] when
+ * Hard-fail screen rendered by [dev.ranzlappen.gadget.MainActivity] when
  * [dev.ranzlappen.gadget.core.root.launch.LaunchGate] denies launch on the rooted flavor. The
  * standard flavor's no-op gate never returns a denial, so this screen never
  * appears in the standard APK at runtime.

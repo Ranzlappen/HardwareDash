@@ -1,4 +1,4 @@
-package com.gadget.root.ui
+package dev.ranzlappen.gadget.root.ui
 
 import dev.ranzlappen.gadget.core.root.*
 import androidx.compose.foundation.layout.Arrangement
@@ -29,12 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.gadget.localization.Language
-import com.gadget.localization.LocalizationManager
-import com.gadget.localization.S
+import dev.ranzlappen.gadget.localization.Language
+import dev.ranzlappen.gadget.localization.LocalizationManager
+import dev.ranzlappen.gadget.localization.S
 import dev.ranzlappen.gadget.core.root.RootFeatureDescriptor
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
-import com.gadget.root.RootFeaturesEntryPoint
+import dev.ranzlappen.gadget.root.RootFeaturesEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.launch
 

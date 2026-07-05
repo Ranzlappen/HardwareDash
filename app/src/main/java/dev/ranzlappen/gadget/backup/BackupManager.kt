@@ -1,4 +1,4 @@
-package com.gadget.backup
+package dev.ranzlappen.gadget.backup
 
 import android.content.Context
 import android.content.pm.PackageManager

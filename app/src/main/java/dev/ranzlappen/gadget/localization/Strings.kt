@@ -1,4 +1,4 @@
-package com.gadget.localization
+package dev.ranzlappen.gadget.localization
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

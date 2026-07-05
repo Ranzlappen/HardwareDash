@@ -1,4 +1,4 @@
-package com.gadget.backup.ui
+package dev.ranzlappen.gadget.backup.ui
 
 import android.content.Context
 import android.content.Intent
@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.gadget.R
-import com.gadget.backup.BackupManagerEntryPoint
+import dev.ranzlappen.gadget.R
+import dev.ranzlappen.gadget.backup.BackupManagerEntryPoint
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetCircularProgress
 import dev.ranzlappen.gadget.core.ui.component.GadgetDialog
@@ -42,7 +42,7 @@ import java.util.Locale
  * produced by the monolithic app — `BackupManager` lifts their `gadget_db`
  * App-Organizer rows into `apps.db` on the next launch).
  *
- * Lives in `:app` because [com.gadget.backup.BackupManager] spans modules no
+ * Lives in `:app` because [dev.ranzlappen.gadget.backup.BackupManager] spans modules no
  * leaf can see together (:core:data + :feature:apps); it's dropped into the
  * modular Settings screen via the `backupSection` slot (the
  * leaf-module-can't-see-`:app` seam). Reaches the manager through

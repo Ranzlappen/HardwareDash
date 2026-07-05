@@ -14,12 +14,11 @@
 //   * APK output renaming
 //   * detekt + ktlint configuration
 //
-// The Kotlin `namespace` stays `com.gadget` because the legacy code under
-// `app/src/main/` is still under that package. Each migrated screen will
-// move into a `feature/*` module with namespace
-// `dev.ranzlappen.gadget.feature.<name>`. The applicationId (the install
-// identifier on a device, distinct from `namespace`) is the part that
-// changes here.
+// The Kotlin `namespace` is `dev.ranzlappen.gadget` — the legacy
+// `com.gadget.*` surface has fully migrated out (into feature/core modules)
+// or been repackaged under `dev.ranzlappen.gadget.*` here in the app shell.
+// The namespace now matches the standard-flavor applicationId; the rooted
+// flavor still adds the `.rooted` applicationId suffix below.
 
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 
@@ -33,9 +32,10 @@ plugins {
 }
 
 android {
-    // Legacy code package. Migrates per-feature into modules with namespace
-    // `dev.ranzlappen.gadget.<core|feature>.<name>` in later batches.
-    namespace = "com.gadget"
+    // App-shell namespace. Matches the applicationId now that the legacy
+    // com.gadget.* surface has fully migrated into feature/core modules or
+    // been repackaged under dev.ranzlappen.gadget.* here in :app.
+    namespace = "dev.ranzlappen.gadget"
 
     defaultConfig {
         // ─── applicationId (install identifier) ────────────────────────

@@ -1,4 +1,4 @@
-package com.gadget.localization
+package dev.ranzlappen.gadget.localization
 
 enum class Language(val code: String, val displayName: String) {
     EN("en", "English"),

@@ -1,4 +1,4 @@
-package com.gadget.localization
+package dev.ranzlappen.gadget.localization
 
 import android.content.Context
 import android.content.SharedPreferences

@@ -1,4 +1,4 @@
-package com.gadget
+package dev.ranzlappen.gadget
 
 import android.content.Intent
 import android.net.Uri
@@ -18,13 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.navigation.compose.rememberNavController
-import com.gadget.localization.LocalizationManager
+import dev.ranzlappen.gadget.localization.LocalizationManager
 import dev.ranzlappen.gadget.core.root.companion.CompanionModuleDetector
 import dev.ranzlappen.gadget.core.root.launch.LaunchGate
 import dev.ranzlappen.gadget.core.root.launch.LaunchGateOutcome
-import com.gadget.root.ui.FatalLaunchScreen
-import com.gadget.backup.ui.BackupCard
-import com.gadget.root.ui.RootedFeatureTogglesCard
+import dev.ranzlappen.gadget.root.ui.FatalLaunchScreen
+import dev.ranzlappen.gadget.backup.ui.BackupCard
+import dev.ranzlappen.gadget.root.ui.RootedFeatureTogglesCard
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import android.nfc.NfcAdapter
 import androidx.activity.viewModels

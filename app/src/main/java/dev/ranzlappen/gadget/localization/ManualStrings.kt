@@ -1,4 +1,4 @@
-package com.gadget.localization
+package dev.ranzlappen.gadget.localization
 
 class Manual(private val l: Language) {
 

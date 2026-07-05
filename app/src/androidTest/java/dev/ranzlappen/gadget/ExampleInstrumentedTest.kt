@@ -1,4 +1,4 @@
-package com.gadget
+package dev.ranzlappen.gadget
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

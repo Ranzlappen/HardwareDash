@@ -122,10 +122,10 @@
         android:hardwareAccelerated="true">
 
         <!-- ══════════════════════ APP METADATA ══════════════════════ -->
-        <meta-data android:name="com.gadget.AUTHOR"      android:value="Ranzlappen" />
-        <meta-data android:name="com.gadget.LICENSE"      android:value="Proprietary — All Rights Reserved" />
-        <meta-data android:name="com.gadget.DESCRIPTION"  android:value="Gadget — monitor and control device sensors, camera, audio, and more" />
-        <meta-data android:name="com.gadget.REPOSITORY"   android:value="github.com/Ranzlappen/HardwareDash" />
+        <meta-data android:name="dev.ranzlappen.gadget.AUTHOR"      android:value="Ranzlappen" />
+        <meta-data android:name="dev.ranzlappen.gadget.LICENSE"      android:value="Proprietary — All Rights Reserved" />
+        <meta-data android:name="dev.ranzlappen.gadget.DESCRIPTION"  android:value="Gadget — monitor and control device sensors, camera, audio, and more" />
+        <meta-data android:name="dev.ranzlappen.gadget.REPOSITORY"   android:value="github.com/Ranzlappen/HardwareDash" />
 
         <!-- ══════════════════════ WORKMANAGER ON-DEMAND INIT ══════════ -->
         <!-- GadgetApplication implements androidx.work.Configuration.Provider so we
