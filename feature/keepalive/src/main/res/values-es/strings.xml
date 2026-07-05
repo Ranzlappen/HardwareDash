@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="keepalive_notification_title">Gadget keep-alive</string>
+    <string name="keepalive_notification_body">Tareas en segundo plano activas</string>
+    <string name="keepalive_notification_stop">Parar</string>
+</resources>

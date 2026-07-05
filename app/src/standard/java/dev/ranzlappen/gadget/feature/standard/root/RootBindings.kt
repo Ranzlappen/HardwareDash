@@ -30,8 +30,8 @@ import dev.ranzlappen.gadget.feature.gps.spoof.GpsSpoofController
 import dev.ranzlappen.gadget.feature.gps.spoof.StandardGpsSpoofController
 import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
 import dev.ranzlappen.gadget.feature.radios.ir.control.StandardIrController
-import com.gadget.keepalive.KeepAliveController
-import com.gadget.keepalive.StandardKeepAliveController
+import dev.ranzlappen.gadget.feature.keepalive.control.KeepAliveController
+import dev.ranzlappen.gadget.feature.keepalive.control.StandardKeepAliveController
 import dev.ranzlappen.gadget.feature.microphone.control.MicrophoneController
 import dev.ranzlappen.gadget.feature.microphone.control.StandardMicrophoneController
 import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController

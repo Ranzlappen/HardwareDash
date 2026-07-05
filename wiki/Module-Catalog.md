@@ -14,8 +14,11 @@ Gap analysis and the road to done:
 - **Purpose:** the single application module. Hosts `GadgetApplication`
   (`@HiltAndroidApp`), `MainActivity` + `GadgetApp { … }` nav wiring,
   flavor/applicationId/signing config, the flavor `RootBindings`, and the
-  not-yet-migrated legacy `com.gadget.*` surface (96 files across all
-  source sets; 86 under `src/main`).
+  app shell (backup / localization / notifications / root launch UI).
+  **The legacy `com.gadget.*` surface is fully migrated out** — `:app`'s
+  `namespace` is now `dev.ranzlappen.gadget` (equal to the standard
+  applicationId), and everything under `src/main` lives under
+  `dev.ranzlappen.gadget.*`.
 - **Maturity:** production; shrinking as features migrate out.
 - **Dependencies:** every standard `feature/*`; rooted flavor adds
   `feature/*-rooted` via `rootedImplementation`.
@@ -94,6 +97,7 @@ widgets / tiles / tests / strings): see the
 | `feature:motion` | 6 | ✅ | Gyroscope / step counter / motion detect; live + history monitors per sensor; rooted rows. No ActionHandler yet. |
 | `feature:ambient` | 8 | ✅ | Live lux + level descriptor; ambient-light history monitor; assert-bright / assert-dark actions; rooted brightness / refresh-rate / density rows. |
 | `feature:display` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — no screen / monitoring / automation yet. |
+| `feature:keepalive` (+ `-rooted` 3) | 5 | ✅ | Persistent keep-alive: contract + standard controller + the shared `PersistentKeepAliveService` (both flavors); rooted Doze-whitelist + `pm grant` via `RootedKeepAliveController`, gated by `RootSafetyGate`. Migrated from the legacy `com.gadget.keepalive` / `com.gadget.services`. Surfaced from Settings (no dedicated screen). |
 | `feature:notification` (+ `-rooted` 4) | 4 | 🟡 | Controller-only — builder/channel-inspector screen pending (legacy `BuilderPresetStore` still in `:app`). |
 | `feature:adbdebug` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — no screen / monitoring / automation yet. |
 | `feature:usbdebug` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — no screen / monitoring / automation yet. |
@@ -131,5 +135,5 @@ widgets / tiles / tests / strings): see the
 
 ---
 
-> _Last reviewed: 2026-07-03 · Source: `settings.gradle.kts`, live
+> _Last reviewed: 2026-07-05 · Source: `settings.gradle.kts`, live
 > `find … -name '*.kt'` counts · Related: every module._

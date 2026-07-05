@@ -13,11 +13,17 @@ panels, granular permission management, and hardware-safety guardrails.
 The rooted flavor safely extends functionality; the standard flavor stays
 fully functional and Play-store-safe.
 
-## Current phase — Phase 2: Accelerated Feature Migration (✅ feature-complete)
+## Current phase — Phase 2: Accelerated Feature Migration (✅ complete)
 
-> All Phase-2 skeleton modules are now filled — `flipper` (+ `-rooted`) was
-> the last, closing the tail. What remains of Phase 2 is the clean-cut
-> deletion of the ~legacy `com.gadget.*` sources, tracked per-feature.
+> All Phase-2 skeleton modules are filled **and the legacy `com.gadget.*`
+> surface is fully extinct.** The clean-cut deletion tail is done: the app
+> shell was repackaged and the `:app` namespace flipped from `com.gadget`
+> to `dev.ranzlappen.gadget`, so
+> `find app/src -path "*com/gadget*" -name "*.kt"` now returns **0**. The
+> only remaining `com.gadget` string is the out-of-scope `:lsposed-module`
+> package (`com.gadget.spoofer.xposed`), tracked separately. See the
+> [Completion Master Plan](Completion-Master-Plan) (W1) for the forward
+> workstreams.
 
 Each feature migrates directly from the archived `legacy-main` branch
 into a `:feature:<name>` module using the new design system (`:core:ui`),
@@ -94,23 +100,41 @@ the long-lived `claude/refactor-2026` integration branch is retired.
   staged alongside `gadget_db`; `LegacyAppsImporter` uses upsert to survive
   ID collisions; manual re-import UI added to Apps screen overflow.
 
-### Remaining legacy surface
+### Remaining legacy surface — none (✅ extinct)
 
-~96 legacy `com.gadget.*` Kotlin files remain across all `:app` source
-sets (of which one, the separate `:lsposed-module`'s
-`com.gadget.spoofer.xposed`, is out of scope), migrating feature-by-feature
-per the [Feature Migration Guide](Feature-Migration-Guide). The radios/GPS
-rooted controllers (wifi/bt/nfc/ir/cell/gps/gps-spoof), `diagnostics`,
-`storage`, `camera`, `battery`, the five screenless controllers `display` /
-`adbdebug` / `usbdebug` / `automation` / `notification`, and `microphone` +
-`audio` (their shared `AlsaMixerControl` tinymix wrapper pushed down into
-`:core:root` under `…core.root.audio` so neither feature depends on the other)
-have all been clean-cut into `:feature:<name>` (+ `-rooted`) pairs. **Just one
-legacy rooted controller remains** in the `RootFeaturesEntryPoint` seam —
-`keepalive`, held back because its controller depends on the app-shell
-`PersistentKeepAliveService` foreground service, which must be relocated (into
-`:feature:keepalive-rooted` or a core module) before the controller can follow
-the same clean-cut.
+**The `com.gadget.*` migration is complete.**
+`find app/src -path "*com/gadget*" -name "*.kt"` returns **0**; the `:app`
+namespace is `dev.ranzlappen.gadget` (equal to the standard applicationId).
+The final clean-cut wave, in order:
+
+1. **Dead-island purge** — the 10 unregistered legacy widget providers +
+   config activity + action handler + `WidgetMetric` registry, the 8
+   shadow foreground services still declared in the manifest, the
+   orphaned `LinkScreen` / `LogbookScreen`, the legacy `ui/components`
+   twins, the permissions onboarding coordinator, and the legacy
+   metric-logging Room pipeline — all deleted (unreachable at runtime).
+2. **Legacy Room `GadgetDatabase`** deleted; `BackupManager` reworked to
+   touch the leftover `gadget_db` file only via raw SQLite for
+   legacy-backup staging (backup **format v6** stops emitting it).
+3. **Legacy theme stack** (`com.gadget.ui.theme`) deleted — the launch
+   splash + fatal screen now use the modular `:core:designsystem`
+   `GadgetTheme`.
+4. **Keep-alive** — the last legacy rooted controller — split into
+   `:feature:keepalive` (contract + standard controller + the shared
+   `PersistentKeepAliveService`) and `:feature:keepalive-rooted`
+   (Doze whitelist + `pm grant`), decoupled from `:app` (the service
+   builds its tap intent from `getLaunchIntentForPackage` and reads
+   module string resources).
+5. **App-shell repackage + namespace flip** — `MainActivity`,
+   `GadgetApplication`, `backup`, `localization`, `notifications`, and
+   the root launch UI moved from `com.gadget.*` to
+   `dev.ranzlappen.gadget.*`; `namespace = "dev.ranzlappen.gadget"`; R /
+   BuildConfig / ProGuard keep-rules follow.
+
+The only surviving `com.gadget` string is the out-of-scope
+`:lsposed-module` package (`com.gadget.spoofer.xposed`) — repackaging it
+is interlocked with the GPS-spoofer LSPosed handshake and tracked as a
+separate follow-up.
 
 **Entry-point seam dissolution (partial, [#94](https://github.com/Ranzlappen/HardwareDash/issues/94)).**
 All 19 rooted feature-controller accessors were removed from

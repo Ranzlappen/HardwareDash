@@ -10,8 +10,8 @@ import javax.inject.Singleton
  * Rooted-flavor launch gate. Routes the first launch through
  * [RootCapabilityRegistry.probe] (which itself drives the libsu detector)
  * and translates the result into a [LaunchGateOutcome] that
- * [com.gadget.MainActivity] uses to decide between the normal nav graph and
- * [com.gadget.root.ui.FatalLaunchScreen].
+ * [dev.ranzlappen.gadget.MainActivity] uses to decide between the normal nav graph and
+ * [dev.ranzlappen.gadget.root.ui.FatalLaunchScreen].
  */
 @Singleton
 class RootedLaunchGate @Inject constructor(

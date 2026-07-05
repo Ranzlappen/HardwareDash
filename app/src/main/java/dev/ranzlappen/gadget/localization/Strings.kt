@@ -1,0 +1,2404 @@
+package dev.ranzlappen.gadget.localization
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+
+/**
+ * Centralized localization strings for Gadget.
+ * Access via: S.nav.logbook, S.logbook.title, etc.
+ * All composable reads automatically recompose when language changes.
+ */
+object S {
+    private val lang: Language
+        @Composable get() {
+            val l by LocalizationManager.currentLanguage
+            return l
+        }
+
+    // ── Navigation ──────────────────────────────────────────────────────
+    val nav: Nav @Composable get() = Nav(lang)
+
+    class Nav(private val l: Language) {
+        val logbook get() = m(l, "Logbook", "Logbuch", "Registro", "Journal")
+        val torch get() = m(l, "Torch", "Taschenlampe", "Linterna", "Lampe")
+        val camera get() = m(l, "Camera", "Kamera", "Cámara", "Caméra")
+        val vibration get() = m(l, "Vibration", "Vibration", "Vibración", "Vibration")
+        val mic get() = m(l, "Mic", "Mikrofon", "Micrófono", "Micro")
+        val radios get() = m(l, "Radios", "Funk", "Radios", "Radios")
+        val sensors get() = m(l, "Sensors", "Sensoren", "Sensores", "Capteurs")
+        val battery get() = m(l, "Battery", "Akku", "Batería", "Batterie")
+        val lock get() = m(l, "Lock", "Sperre", "Bloqueo", "Verrou")
+        val link get() = m(l, "Link", "Link", "Enlace", "Lien")
+        val settings get() = m(l, "Settings", "Einstellungen", "Ajustes", "Paramètres")
+        val fileMeta get() = m(l, "Files", "Dateien", "Archivos", "Fichiers")
+        val bug get() = m(l, "Bug", "Fehler", "Error", "Bug")
+        val manual get() = m(l, "Manual", "Handbuch", "Manual", "Manuel")
+        val apps get() = m(l, "Apps", "Apps", "Apps", "Applis")
+        // New top-level tab labels
+        val dashboard get() = m(l, "Dashboard", "Dashboard", "Panel", "Tableau de bord")
+        val tools get() = m(l, "Tools", "Werkzeuge", "Herramientas", "Outils")
+        val monitor get() = m(l, "Monitor", "Monitor", "Monitor", "Moniteur")
+        val more get() = m(l, "More", "Mehr", "Más", "Plus")
+    }
+
+    // ── Dashboard ───────────────────────────────────────────────────────
+    val dashboard: Dashboard @Composable get() = Dashboard(lang)
+
+    class Dashboard(private val l: Language) {
+        val title get() = m(l, "Dashboard", "Dashboard", "Panel", "Tableau de bord")
+        val subtitle get() = m(l, "Hardware Toolkit", "Hardware-Toolkit", "Kit de herramientas", "Boîte à outils")
+        val quickActions get() = m(l, "Quick Actions", "Schnellaktionen", "Acciones rápidas", "Actions rapides")
+        val status get() = m(l, "Status", "Status", "Estado", "Statut")
+        val recentLogEntry get() = m(l, "Recent Log Entry", "Letzter Eintrag", "Entrada reciente", "Entrée récente")
+        val noRecentEntries get() = m(l, "No recent entries", "Keine aktuellen Einträge", "Sin entradas recientes", "Aucune entrée récente")
+    }
+
+    // ── Hubs ────────────────────────────────────────────────────────────
+    val hubs: Hubs @Composable get() = Hubs(lang)
+
+    class Hubs(private val l: Language) {
+        // Tools hub
+        val toolsTitle get() = m(l, "Tools", "Werkzeuge", "Herramientas", "Outils")
+        val torchSubtitle get() = m(l, "Flashlight & Strobe", "Taschenlampe & Stroboskop", "Linterna y estrobo", "Lampe & Stroboscope")
+        val cameraSubtitle get() = m(l, "Multi-lens Capture", "Mehrlinsen-Aufnahme", "Captura multilente", "Capture multi-objectifs")
+        val vibrationSubtitle get() = m(l, "Pattern Builder", "Muster-Editor", "Editor de patrones", "Éditeur de motifs")
+        val micSubtitle get() = m(l, "dB Meter & Recorder", "dB-Messgerät & Rekorder", "Medidor dB y grabadora", "Sonomètre & enregistreur")
+        // Monitor hub
+        val monitorTitle get() = m(l, "Monitor", "Monitor", "Monitor", "Moniteur")
+        val sensorsSubtitle get() = m(l, "Live hardware sensor charts", "Live-Hardware-Sensordiagramme", "Gráficos de sensores en vivo", "Graphiques de capteurs en direct")
+        val batterySubtitle get() = m(l, "Level, health & temperature", "Ladezustand, Zustand & Temperatur", "Nivel, salud y temperatura", "Niveau, santé & température")
+        val radiosSubtitle get() = m(l, "WiFi, Bluetooth, NFC, GPS", "WLAN, Bluetooth, NFC, GPS", "WiFi, Bluetooth, NFC, GPS", "WiFi, Bluetooth, NFC, GPS")
+        // More hub
+        val moreTitle get() = m(l, "More", "Mehr", "Más", "Plus")
+        val notifications get() = m(l, "Notifications", "Benachrichtigungen", "Notificaciones", "Notifications")
+        val notificationsSubtitle get() = m(l, "Demos, builder & lock screen", "Demos, Builder & Sperrbildschirm", "Demos, constructor y pantalla de bloqueo", "Démos, constructeur & écran de verrouillage")
+        val automation get() = m(l, "Automation", "Automatisierung", "Automatización", "Automatisation")
+        val automationSubtitle get() = m(l, "IF/THEN metric rules", "WENN/DANN Metrik-Regeln", "Reglas SI/ENTONCES", "Règles SI/ALORS")
+        val fileMetaSubtitle get() = m(l, "EXIF & media metadata", "EXIF- & Medien-Metadaten", "Metadatos EXIF y multimedia", "Métadonnées EXIF & média")
+        val settingsSubtitle get() = m(l, "Language, config & logging", "Sprache, Konfiguration & Protokollierung", "Idioma, configuración y registro", "Langue, configuration & journalisation")
+        val bugReportSubtitle get() = m(l, "Permissions & device info", "Berechtigungen & Geräteinformationen", "Permisos e información del dispositivo", "Permissions & informations appareil")
+        val userManual get() = m(l, "User Manual", "Benutzerhandbuch", "Manual de usuario", "Manuel utilisateur")
+        val userManualSubtitle get() = m(l, "Features, usage & tips", "Funktionen, Nutzung & Tipps", "Funciones, uso y consejos", "Fonctionnalit\u00E9s, utilisation & conseils")
+    }
+
+    // ── Logbook (formerly Ticked) ───────────────────────────────────────
+    val logbook: Logbook @Composable get() = Logbook(lang)
+
+    class Logbook(private val l: Language) {
+        val title get() = m(l, "Logbook", "Logbuch", "Registro", "Journal")
+        val logTab get() = m(l, "Log", "Protokoll", "Registro", "Journal")
+        val processesTab get() = m(l, "Processes", "Prozesse", "Procesos", "Processus")
+        val noEntriesYet get() = m(l, "No entries yet", "Noch keine Einträge", "Sin entradas aún", "Aucune entrée")
+        val noMatches get() = m(l, "No matches", "Keine Treffer", "Sin coincidencias", "Aucune correspondance")
+        val noProcessesYet get() = m(l, "No processes yet", "Noch keine Prozesse", "Sin procesos aún", "Aucun processus")
+        val optionalNote get() = m(l, "Optional note\u2026", "Optionale Notiz\u2026", "Nota opcional\u2026", "Note facultative\u2026")
+        val log get() = m(l, "Log", "Loggen", "Registrar", "Enregistrer")
+        val add get() = m(l, "Add", "Hinzufügen", "Añadir", "Ajouter")
+        val filters get() = m(l, "Filters", "Filter", "Filtros", "Filtres")
+        val templates get() = m(l, "Templates", "Vorlagen", "Plantillas", "Modèles")
+        val toggleView get() = m(l, "Toggle view", "Ansicht wechseln", "Cambiar vista", "Changer la vue")
+        val clearAll get() = m(l, "Clear all", "Alle löschen", "Borrar todo", "Tout effacer")
+        val deleteAll get() = m(l, "Delete all", "Alle löschen", "Eliminar todo", "Tout supprimer")
+        val cancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
+        val delete get() = m(l, "Delete", "Löschen", "Eliminar", "Supprimer")
+        val save get() = m(l, "Save", "Speichern", "Guardar", "Enregistrer")
+        val customTimestamp get() = m(l, "Custom timestamp", "Eigener Zeitstempel", "Marca de tiempo personalizada", "Horodatage personnalisé")
+        val date get() = m(l, "Date", "Datum", "Fecha", "Date")
+        val time get() = m(l, "Time", "Zeit", "Hora", "Heure")
+        val name get() = m(l, "Name", "Name", "Nombre", "Nom")
+        val filterByDate get() = m(l, "Filter by date", "Nach Datum filtern", "Filtrar por fecha", "Filtrer par date")
+        val clearFilters get() = m(l, "Clear filters", "Filter zurücksetzen", "Borrar filtros", "Effacer les filtres")
+        val setBackground get() = m(l, "Set Background", "Hintergrund festlegen", "Establecer fondo", "Définir l'arrière-plan")
+        val setBorder get() = m(l, "Set Border", "Rand festlegen", "Establecer borde", "Définir la bordure")
+        val changeTime get() = m(l, "Change Time", "Zeit ändern", "Cambiar hora", "Changer l'heure")
+        val changeText get() = m(l, "Change Text", "Text ändern", "Cambiar texto", "Changer le texte")
+        val addCheckpoint get() = m(l, "Add Checkpoint", "Prüfpunkt hinzufügen", "Añadir punto de control", "Ajouter un point de contrôle")
+        val deleteCheckpoint get() = m(l, "Delete Checkpoint", "Prüfpunkt löschen", "Eliminar punto de control", "Supprimer le point de contrôle")
+        val overdue get() = m(l, "OVERDUE", "ÜBERFÄLLIG", "VENCIDO", "EN RETARD")
+        val today get() = m(l, "Today", "Heute", "Hoy", "Aujourd'hui")
+        val custom get() = m(l, "Custom", "Benutzerdefiniert", "Personalizado", "Personnalisé")
+        val current get() = m(l, "Current", "Aktuell", "Actual", "Actuel")
+        val jumpHere get() = m(l, "Jump here", "Hierher springen", "Saltar aquí", "Aller ici")
+        val dueDate get() = m(l, "Due Date", "Fälligkeitsdatum", "Fecha límite", "Date d'échéance")
+        val reminderTime get() = m(l, "Reminder Time", "Erinnerungszeit", "Hora de recordatorio", "Heure de rappel")
+        val enableReminder get() = m(l, "Enable reminder", "Erinnerung aktivieren", "Activar recordatorio", "Activer le rappel")
+        val checkpointUpdated get() = m(l, "Checkpoint updated", "Prüfpunkt aktualisiert", "Punto de control actualizado", "Point de contrôle mis à jour")
+        val setReminderFirst get() = m(l, "Set a reminder time first", "Erinnerungszeit zuerst festlegen", "Establezca primero una hora de recordatorio", "Définissez d'abord une heure de rappel")
+        val exportedSuccessfully get() = m(l, "Exported successfully", "Erfolgreich exportiert", "Exportado con éxito", "Exporté avec succès")
+        val exportFailed get() = m(l, "Export failed", "Export fehlgeschlagen", "Error al exportar", "Échec de l'exportation")
+        val importFailed get() = m(l, "Import failed", "Import fehlgeschlagen", "Error al importar", "Échec de l'importation")
+        fun imported(entries: Int, processes: Int) = m(l,
+            "Imported $entries entries, $processes processes",
+            "$entries Einträge, $processes Prozesse importiert",
+            "Importados $entries entradas, $processes procesos",
+            "$entries entrées, $processes processus importés")
+        val importLabel get() = m(l, "Import", "Importieren", "Importar", "Importer")
+        val exportLabel get() = m(l, "Export", "Exportieren", "Exportar", "Exporter")
+        val all get() = m(l, "All", "Alle", "Todos", "Tous")
+        val autoLogged get() = m(l, "Auto-logged", "Automatisch", "Automático", "Automatique")
+        val edited get() = m(l, "Edited", "Bearbeitet", "Editado", "Modifié")
+        // Dialog strings
+        val clearAllEntries get() = m(l, "Clear all entries?", "Alle Einträge löschen?", "¿Borrar todas las entradas?", "Effacer toutes les entrées ?")
+        fun clearAllEntriesMsg(count: Int) = m(l,
+            "This will delete all $count entries. This cannot be undone.",
+            "Dies löscht alle $count Einträge. Dies kann nicht rückgängig gemacht werden.",
+            "Esto eliminará todas las $count entradas. No se puede deshacer.",
+            "Cela supprimera toutes les $count entrées. Cette action est irréversible.")
+        val clearAllProcesses get() = m(l, "Clear all processes?", "Alle Prozesse löschen?", "¿Borrar todos los procesos?", "Effacer tous les processus ?")
+        fun clearAllProcessesMsg(count: Int) = m(l,
+            "This will delete all $count processes and their reminders. This cannot be undone.",
+            "Dies löscht alle $count Prozesse und deren Erinnerungen. Dies kann nicht rückgängig gemacht werden.",
+            "Esto eliminará todos los $count procesos y sus recordatorios. No se puede deshacer.",
+            "Cela supprimera tous les $count processus et leurs rappels. Cette action est irréversible.")
+        val deleteEntry get() = m(l, "Delete entry?", "Eintrag löschen?", "¿Eliminar entrada?", "Supprimer l'entrée ?")
+        fun deleteEntryMsg(text: String) = m(l,
+            "\"$text\" will be removed.",
+            "\"$text\" wird entfernt.",
+            "\"$text\" será eliminado.",
+            "\"$text\" sera supprimé.")
+        val deleteProcess get() = m(l, "Delete process?", "Prozess löschen?", "¿Eliminar proceso?", "Supprimer le processus ?")
+        fun deleteProcessMsg(text: String) = m(l,
+            "\"$text\" and all its checkpoints will be removed.",
+            "\"$text\" und alle Prüfpunkte werden entfernt.",
+            "\"$text\" y todos sus puntos de control serán eliminados.",
+            "\"$text\" et tous ses points de contrôle seront supprimés.")
+        val deleteCheckpointConfirm get() = m(l, "Delete checkpoint?", "Prüfpunkt löschen?", "¿Eliminar punto de control?", "Supprimer le point de contrôle ?")
+        val processNamePlaceholder get() = m(l, "Process name\u2026", "Prozessname\u2026", "Nombre del proceso\u2026", "Nom du processus\u2026")
+        val checkpointNamePlaceholder get() = m(l, "Checkpoint name\u2026", "Prüfpunktname\u2026", "Nombre del punto de control\u2026", "Nom du point de contrôle\u2026")
+        val commentNote get() = m(l, "Comment / Note", "Kommentar / Notiz", "Comentario / Nota", "Commentaire / Note")
+        val addNote get() = m(l, "Add a note\u2026", "Notiz hinzufügen\u2026", "Añadir una nota\u2026", "Ajouter une note\u2026")
+        val enterText get() = m(l, "Enter text\u2026", "Text eingeben\u2026", "Introduzca texto\u2026", "Entrez du texte\u2026")
+        val tapToSelect get() = m(l, "Tap to select", "Tippen zum Auswählen", "Toque para seleccionar", "Appuyez pour sélectionner")
+        val tapToSelectDateTime get() = m(l, "Tap to select date & time", "Tippen zum Auswählen von Datum und Uhrzeit", "Toque para seleccionar fecha y hora", "Appuyez pour sélectionner la date et l'heure")
+        fun movedTo(name: String) = m(l, "Moved to \"$name\"", "Verschoben zu \"$name\"", "Movido a \"$name\"", "Déplacé vers \"$name\"")
+        val textUpdated get() = m(l, "Text updated", "Text aktualisiert", "Texto actualizado", "Texte mis à jour")
+        val timeUpdated get() = m(l, "Time updated", "Zeit aktualisiert", "Hora actualizada", "Heure mise à jour")
+        val colorApplied get() = m(l, "Color applied", "Farbe angewendet", "Color aplicado", "Couleur appliquée")
+        val searchPlaceholder get() = m(l, "Search\u2026", "Suchen\u2026", "Buscar\u2026", "Rechercher\u2026")
+    }
+
+    // ── Settings ────────────────────────────────────────────────────────
+    val settings: Settings @Composable get() = Settings(lang)
+
+    class Settings(private val l: Language) {
+        val title get() = m(l, "Settings", "Einstellungen", "Ajustes", "Paramètres")
+        val language get() = m(l, "Language", "Sprache", "Idioma", "Langue")
+        val languageDesc get() = m(l, "Select your preferred language", "Wählen Sie Ihre bevorzugte Sprache", "Seleccione su idioma preferido", "Sélectionnez votre langue préférée")
+        val widgetCustomizer get() = m(l, "Widget Customizer", "Widget-Anpassung", "Personalización de widgets", "Personnalisation des widgets")
+        val phoneRingDelay get() = m(l, "Phone Ring Delay", "Klingelverzögerung", "Retraso del timbre", "Délai de sonnerie")
+        val phoneRingDelayDesc get() = m(l, "Wait time before the phone starts ringing", "Wartezeit, bevor das Telefon zu klingeln beginnt", "Tiempo de espera antes de que el teléfono comience a sonar", "Temps d'attente avant que le téléphone ne commence à sonner")
+        val phoneRingDuration get() = m(l, "Phone Ring Duration", "Klingeldauer", "Duración del timbre", "Durée de la sonnerie")
+        val notifyDelay get() = m(l, "Notification Delay", "Benachrichtigungsverzögerung", "Retraso de notificación", "Délai de notification")
+        val seconds get() = m(l, "seconds", "Sekunden", "segundos", "secondes")
+        val phoneRingDesc get() = m(l, "How long the phone rings once it starts", "Wie lange das Telefon klingelt, sobald es beginnt", "Cuánto tiempo suena el teléfono una vez que empieza", "Combien de temps le téléphone sonne une fois qu'il commence")
+        val notifyDesc get() = m(l, "Delay before notification appears", "Verzögerung vor der Benachrichtigung", "Retraso antes de que aparezca la notificación", "Délai avant l'apparition de la notification")
+        val metricLogging get() = m(l, "Metric Logging", "Metrik-Protokollierung", "Registro de métricas", "Journalisation des métriques")
+        val metricLoggingDesc get() = m(l, "Select metrics to capture with each log entry", "Metriken auswählen, die bei jedem Logbuch-Eintrag erfasst werden", "Seleccione métricas para capturar con cada entrada del registro", "Sélectionnez les métriques à capturer avec chaque entrée du journal")
+        val bypassDnd get() = m(l, "Bypass Do Not Disturb", "Nicht st\u00F6ren umgehen", "Omitir No molestar", "Contourner Ne pas d\u00E9ranger")
+        val bypassDndDesc get() = m(l, "Use alarm audio channel to bypass DND and silent mode for ring, vibration, and notification actions", "Alarm-Audiokanal verwenden, um DND und Lautlos-Modus f\u00FCr Klingeln, Vibration und Benachrichtigungen zu umgehen", "Usar canal de audio de alarma para omitir DND y modo silencioso para acciones de timbre, vibraci\u00F3n y notificaci\u00F3n", "Utiliser le canal audio d'alarme pour contourner NPD et le mode silencieux pour les actions de sonnerie, vibration et notification")
+        val restartToSeeOnboarding get() = m(l, "Restart the app to see onboarding", "Starten Sie die App neu, um das Onboarding zu sehen", "Reinicie la aplicaci\u00F3n para ver la introducci\u00F3n", "Red\u00E9marrez l'application pour voir l'introduction")
+    }
+
+    // ── Lock Screen & Notifications ─────────────────────────────────────
+    val lock: Lock @Composable get() = Lock(lang)
+
+    class Lock(private val l: Language) {
+        val title get() = m(l, "Lock Screen & Notifications", "Sperrbildschirm & Benachrichtigungen", "Pantalla de bloqueo y notificaciones", "Écran de verrouillage et notifications")
+        val send get() = m(l, "Send", "Senden", "Enviar", "Envoyer")
+        val titleLabel get() = m(l, "Title", "Titel", "Título", "Titre")
+        val bodyLabel get() = m(l, "Body", "Inhalt", "Cuerpo", "Corps")
+        val priority get() = m(l, "Priority", "Priorität", "Prioridad", "Priorité")
+        val lockScreenVisibility get() = m(l, "Lock Screen Visibility", "Sperrbildschirm-Sichtbarkeit", "Visibilidad en pantalla de bloqueo", "Visibilité sur écran de verrouillage")
+        val accentColor get() = m(l, "Accent Color", "Akzentfarbe", "Color de acento", "Couleur d'accentuation")
+        val emergencyAlerts get() = m(l, "Emergency Alerts", "Notfallwarnungen", "Alertas de emergencia", "Alertes d'urgence")
+        val cancelAllNotif get() = m(l, "Cancel All Notifications", "Alle Benachrichtigungen löschen", "Cancelar todas las notificaciones", "Annuler toutes les notifications")
+        val capabilities get() = m(l, "Lock Screen Capabilities", "Sperrbildschirm-Funktionen", "Capacidades de pantalla de bloqueo", "Capacités de l'écran de verrouillage")
+        val deviceAdmin get() = m(l, "Device Admin", "Geräteadministrator", "Administrador del dispositivo", "Administrateur de l'appareil")
+        val overlayPermission get() = m(l, "Overlay Permission", "Overlay-Berechtigung", "Permiso de superposición", "Permission de superposition")
+        val actions get() = m(l, "Actions", "Aktionen", "Acciones", "Actions")
+        val lockScreenNow get() = m(l, "Lock Screen Now", "Bildschirm jetzt sperren", "Bloquear pantalla ahora", "Verrouiller l'écran maintenant")
+        val scheduleAction get() = m(l, "Schedule Action", "Aktion planen", "Programar acción", "Planifier une action")
+        val sendNow get() = m(l, "Send Now", "Jetzt senden", "Enviar ahora", "Envoyer maintenant")
+        val schedule get() = m(l, "Schedule", "Planen", "Programar", "Planifier")
+        val notification get() = m(l, "Notification", "Benachrichtigung", "Notificación", "Notification")
+        val lockScreen get() = m(l, "Lock Screen", "Sperrbildschirm", "Pantalla de bloqueo", "Écran de verrouillage")
+        val phoneRing get() = m(l, "Phone Ring", "Telefonklingeln", "Timbre del teléfono", "Sonnerie du téléphone")
+        val alertText get() = m(l, "Alert text", "Alarmtext", "Texto de alerta", "Texte d'alerte")
+        val ok get() = m(l, "OK", "OK", "OK", "OK")
+        val cancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
+        val selectTime get() = m(l, "Select Time", "Zeit auswählen", "Seleccionar hora", "Sélectionner l'heure")
+        val grantPermission get() = m(l, "Grant Permission", "Berechtigung erteilen", "Conceder permiso", "Accorder la permission")
+        val activateDeviceAdmin get() = m(l, "Activate Device Admin", "Geräteadministrator aktivieren", "Activar administrador del dispositivo", "Activer l'administrateur de l'appareil")
+        val deactivateDeviceAdmin get() = m(l, "Deactivate Device Admin", "Geräteadministrator deaktivieren", "Desactivar administrador del dispositivo", "Désactiver l'administrateur de l'appareil")
+        val openOverlaySettings get() = m(l, "Open Overlay Permission Settings", "Overlay-Berechtigungseinstellungen öffnen", "Abrir configuración de permisos de superposición", "Ouvrir les paramètres de permission de superposition")
+        val openEmergencySettings get() = m(l, "Open Emergency Alert Settings", "Notfallwarnungseinstellungen öffnen", "Abrir configuración de alertas de emergencia", "Ouvrir les paramètres d'alertes d'urgence")
+        val scheduledActions get() = m(l, "Scheduled Actions", "Geplante Aktionen", "Acciones programadas", "Actions planifiées")
+        val publicVisibility get() = m(l, "Public -- Full content visible on lock screen", "Öffentlich -- Vollständiger Inhalt auf dem Sperrbildschirm sichtbar", "Público -- Contenido completo visible en pantalla de bloqueo", "Public -- Contenu complet visible sur l'écran de verrouillage")
+        val privateVisibility get() = m(l, "Private -- Icon only, content hidden", "Privat -- Nur Symbol, Inhalt verborgen", "Privado -- Solo icono, contenido oculto", "Privé -- Icône seulement, contenu masqué")
+        val secretVisibility get() = m(l, "Secret -- Completely hidden from lock screen", "Geheim -- Vollständig vom Sperrbildschirm verborgen", "Secreto -- Completamente oculto de la pantalla de bloqueo", "Secret -- Complètement masqué de l'écran de verrouillage")
+        val min get() = m(l, "Min", "Min", "Mín", "Min")
+        val low get() = m(l, "Low", "Niedrig", "Bajo", "Bas")
+        val default_ get() = m(l, "Default", "Standard", "Predeterminado", "Par défaut")
+        val high get() = m(l, "High", "Hoch", "Alto", "Élevé")
+        val max get() = m(l, "Max", "Max", "Máx", "Max")
+        val message get() = m(l, "Message", "Nachricht", "Mensaje", "Message")
+        val alarm get() = m(l, "Alarm", "Alarm", "Alarma", "Alarme")
+        val reminder get() = m(l, "Reminder", "Erinnerung", "Recordatorio", "Rappel")
+        val event get() = m(l, "Event", "Ereignis", "Evento", "Événement")
+        val granted get() = m(l, "Granted", "Erteilt", "Concedido", "Accordé")
+        val notGranted get() = m(l, "Not granted", "Nicht erteilt", "No concedido", "Non accordé")
+        // Notification builder additions (Batch 7)
+        val actionButtons get() = m(l, "Action Buttons", "Aktionsschaltflächen", "Botones de acción", "Boutons d'action")
+        val enableProgress get() = m(l, "Show Progress Bar", "Fortschrittsbalken anzeigen", "Mostrar barra de progreso", "Afficher la barre de progression")
+        val ongoing get() = m(l, "Ongoing (persistent)", "Fortlaufend (persistent)", "Continua (persistente)", "En cours (persistant)")
+        val autoCancel get() = m(l, "Auto-cancel on tap", "Automatisch schließen bei Tippen", "Cancelar automáticamente al tocar", "Annuler automatiquement au toucher")
+        val delay get() = m(l, "Delay", "Verzögerung", "Retraso", "Délai")
+        val preview get() = m(l, "Preview", "Vorschau", "Vista previa", "Aperçu")
+        val style get() = m(l, "Style", "Stil", "Estilo", "Style")
+        val bigText get() = m(l, "Big Text", "Großer Text", "Texto grande", "Grand texte")
+        val inbox get() = m(l, "Inbox", "Posteingang", "Bandeja", "Boîte de réception")
+        val determinate get() = m(l, "Determinate", "Bestimmt", "Determinado", "Déterminé")
+        val indeterminate get() = m(l, "Indeterminate", "Unbestimmt", "Indeterminado", "Indéterminé")
+        val normal get() = m(l, "Normal", "Normal", "Normal", "Normal")
+
+        // ── Notification builder option labels (overhaul) ───────────────
+        val composeNotification get() = m(l, "Compose Notification", "Benachrichtigung verfassen", "Componer notificación", "Composer une notification")
+        val lockScreenControls get() = m(l, "Lock Screen Controls", "Sperrbildschirm-Steuerung", "Controles de pantalla de bloqueo", "Contrôles de l'écran de verrouillage")
+        val subtextLabel get() = m(l, "Subtext", "Untertext", "Subtexto", "Sous-texte")
+        val categoryLabel get() = m(l, "Category", "Kategorie", "Categoría", "Catégorie")
+        val soundLabel get() = m(l, "Sound", "Ton", "Sonido", "Son")
+        val vibrateLabel get() = m(l, "Vibrate", "Vibration", "Vibrar", "Vibrer")
+        val timeoutLabel get() = m(l, "Timeout", "Zeitlimit", "Tiempo de espera", "Délai d'expiration")
+        val badgeLabel get() = m(l, "Badge", "Abzeichen", "Insignia", "Badge")
+        val quickReplyLabel get() = m(l, "Quick Reply Hint", "Schnellantwort-Hinweis", "Sugerencia de respuesta rápida", "Indice de réponse rapide")
+        val scheduleForLabel get() = m(l, "Schedule For", "Planen für", "Programar para", "Planifier pour")
+        val scheduleTypeLabel get() = m(l, "Schedule Type", "Planungstyp", "Tipo de programación", "Type de planification")
+        val saveAsTemplate get() = m(l, "Save as Template", "Als Vorlage speichern", "Guardar como plantilla", "Enregistrer comme modèle")
+        val presetName get() = m(l, "Template name…", "Vorlagenname…", "Nombre de plantilla…", "Nom du modèle…")
+        val savePreset get() = m(l, "Save", "Speichern", "Guardar", "Enregistrer")
+        val loadPreset get() = m(l, "Load", "Laden", "Cargar", "Charger")
+        val deletePreset get() = m(l, "Delete", "Löschen", "Eliminar", "Supprimer")
+
+        // ── Notification builder description text (overhaul) ────────────
+        val titleHelp get() = m(l, "The bold first line shown in the notification.", "Die fettgedruckte erste Zeile der Benachrichtigung.", "La primera línea en negrita mostrada en la notificación.", "La première ligne en gras affichée dans la notification.")
+        val bodyHelp get() = m(l, "Main message text shown under the title.", "Haupttext, der unter dem Titel angezeigt wird.", "Texto principal mostrado bajo el título.", "Texte principal affiché sous le titre.")
+        val subtextHelp get() = m(l, "Small label shown next to the app name.", "Kleines Etikett neben dem App-Namen.", "Etiqueta pequeña mostrada junto al nombre de la app.", "Petite étiquette affichée à côté du nom de l'app.")
+        val priorityHelp get() = m(l, "How prominent the notification is. High and Max can pop up as heads-up.", "Wie auffällig die Benachrichtigung ist. Hoch und Max können als Heads-up erscheinen.", "Qué tan prominente es la notificación. Alta y Máxima pueden aparecer como heads-up.", "Importance de la notification. Élevée et Max peuvent apparaître en heads-up.")
+        val visibilityHelp get() = m(l, "How much shows on the lock screen: full, icon-only, or hidden.", "Wie viel auf dem Sperrbildschirm angezeigt wird: vollständig, nur Symbol oder verborgen.", "Cuánto se muestra en la pantalla de bloqueo: completo, solo icono u oculto.", "Ce qui s'affiche sur l'écran de verrouillage : complet, icône seulement ou masqué.")
+        val categoryHelp get() = m(l, "System hint: message, alarm, reminder, or event. Affects Do Not Disturb.", "Systemhinweis: Nachricht, Alarm, Erinnerung oder Ereignis. Beeinflusst Nicht stören.", "Pista del sistema: mensaje, alarma, recordatorio o evento. Afecta a No molestar.", "Indication système : message, alarme, rappel ou événement. Affecte Ne pas déranger.")
+        val accentColorHelp get() = m(l, "Tint applied to the small icon and inline accents.", "Farbton für das kleine Symbol und Inline-Akzente.", "Tinte aplicado al icono pequeño y acentos integrados.", "Teinte appliquée à la petite icône et aux accents en ligne.")
+        val actionsHelp get() = m(l, "Up to three tappable buttons added to the notification.", "Bis zu drei antippbare Schaltflächen für die Benachrichtigung.", "Hasta tres botones tocables añadidos a la notificación.", "Jusqu'à trois boutons cliquables ajoutés à la notification.")
+        val progressHelp get() = m(l, "Show a progress bar. Indeterminate spins; determinate shows a percentage.", "Fortschrittsbalken anzeigen. Unbestimmt dreht sich; bestimmt zeigt einen Prozentsatz.", "Mostrar una barra de progreso. Indeterminada gira; determinada muestra un porcentaje.", "Afficher une barre de progression. Indéterminée tourne ; déterminée affiche un pourcentage.")
+        val styleHelp get() = m(l, "Layout when expanded: plain, long text, or stacked lines.", "Layout beim Erweitern: einfach, langer Text oder gestapelte Zeilen.", "Diseño al expandir: simple, texto largo o líneas apiladas.", "Mise en page développée : simple, texte long ou lignes empilées.")
+        val ongoingHelp get() = m(l, "Cannot be swiped away (used for foreground tasks).", "Kann nicht weggewischt werden (für Vordergrundaufgaben).", "No se puede deslizar para descartar (para tareas en primer plano).", "Ne peut pas être balayée (pour les tâches au premier plan).")
+        val autoCancelHelp get() = m(l, "Removed automatically when tapped.", "Wird beim Antippen automatisch entfernt.", "Se elimina automáticamente al tocar.", "Supprimée automatiquement au toucher.")
+        val soundHelp get() = m(l, "Play the channel's notification sound.", "Den Benachrichtigungston des Kanals abspielen.", "Reproducir el sonido de notificación del canal.", "Lire le son de notification du canal.")
+        val vibrateHelp get() = m(l, "Use the channel's vibration pattern.", "Das Vibrationsmuster des Kanals verwenden.", "Usar el patrón de vibración del canal.", "Utiliser le motif de vibration du canal.")
+        val timeoutHelp get() = m(l, "Dismiss automatically after this many seconds (0 disables).", "Nach dieser Anzahl von Sekunden automatisch ausblenden (0 deaktiviert).", "Descartar automáticamente tras estos segundos (0 desactiva).", "Ignorer automatiquement après ces secondes (0 désactive).")
+        val badgeHelp get() = m(l, "Number shown on the launcher icon's badge.", "Zahl auf dem Launcher-Symbol-Abzeichen.", "Número mostrado en la insignia del icono del lanzador.", "Nombre affiché sur le badge de l'icône du lanceur.")
+        val quickReplyHelp get() = m(l, "Hint text for an inline reply field on action 1.", "Hinweistext für ein Inline-Antwortfeld bei Aktion 1.", "Texto de sugerencia para un campo de respuesta integrado en la acción 1.", "Texte d'indice pour un champ de réponse en ligne sur l'action 1.")
+        val delayHelp get() = m(l, "Wait this long before posting the notification.", "So lange warten, bevor die Benachrichtigung gesendet wird.", "Esperar este tiempo antes de publicar la notificación.", "Attendre ce temps avant de publier la notification.")
+        val scheduleForHelp get() = m(l, "Pick an exact date and time to post the notification.", "Genaues Datum und Uhrzeit zum Senden der Benachrichtigung wählen.", "Elegir fecha y hora exactas para publicar la notificación.", "Choisir une date et heure exactes pour publier la notification.")
+        val scheduleTypeHelp get() = m(l, "What fires at the time: a notification, screen lock, or ring.", "Was zur Zeit ausgelöst wird: Benachrichtigung, Bildschirmsperre oder Klingelton.", "Qué se activa a la hora: notificación, bloqueo de pantalla o timbre.", "Ce qui se déclenche à l'heure : notification, verrouillage d'écran ou sonnerie.")
+
+        // ── Lock screen designer (overhaul) ──
+        val dateLabel get() = m(l, "Date", "Datum", "Fecha", "Date")
+        val timeLabel get() = m(l, "Time", "Uhrzeit", "Hora", "Heure")
+        val wirelessEmergencyAlerts get() = m(l, "Wireless Emergency Alerts (WEA)", "Drahtlose Notfallwarnungen (WEA)", "Alertas inalámbricas de emergencia (WEA)", "Alertes d'urgence sans fil (WEA)")
+        val whatIsPossibleWithoutRoot get() = m(l, "What is possible without root:", "Was ohne Root möglich ist:", "Lo que es posible sin root:", "Ce qui est possible sans root :")
+        val howShowOverLockScreenWorks get() = m(l, "How \"show over lock screen\" works", "Wie \"über Sperrbildschirm anzeigen\" funktioniert", "Cómo funciona \"mostrar sobre pantalla de bloqueo\"", "Comment \"afficher au-dessus de l'écran de verrouillage\" fonctionne")
+        val hiddenOnLockScreen get() = m(l, "Hidden on lock screen", "Auf dem Sperrbildschirm verborgen", "Oculto en pantalla de bloqueo", "Masqué sur l'écran de verrouillage")
+    }
+
+    // ── Link ────────────────────────────────────────────────────────────
+    val link: Link @Composable get() = Link(lang)
+
+    class Link(private val l: Language) {
+        val title get() = m(l, "Link", "Link", "Enlace", "Lien")
+        val addLink get() = m(l, "Add Link", "Link hinzufügen", "Añadir enlace", "Ajouter un lien")
+        val editLink get() = m(l, "Edit Link", "Link bearbeiten", "Editar enlace", "Modifier le lien")
+        val deleteLink get() = m(l, "Delete Link", "Link löschen", "Eliminar enlace", "Supprimer le lien")
+        val deleteConfirm get() = m(l, "Delete this link rule?", "Diese Link-Regel löschen?", "¿Eliminar esta regla de enlace?", "Supprimer cette règle de lien ?")
+        val ifLabel get() = m(l, "IF", "WENN", "SI", "SI")
+        val thenLabel get() = m(l, "THEN", "DANN", "ENTONCES", "ALORS")
+        val metric get() = m(l, "Metric", "Metrik", "Métrica", "Métrique")
+        val selectMetric get() = m(l, "Select metric\u2026", "Metrik auswählen\u2026", "Seleccionar métrica\u2026", "Sélectionner la métrique\u2026")
+        val operator get() = m(l, "Operator", "Operator", "Operador", "Opérateur")
+        val threshold get() = m(l, "Threshold", "Schwellenwert", "Umbral", "Seuil")
+        val action get() = m(l, "Action", "Aktion", "Acción", "Action")
+        val selectAction get() = m(l, "Select action\u2026", "Aktion auswählen\u2026", "Seleccionar acción\u2026", "Sélectionner l'action\u2026")
+        val cooldown get() = m(l, "Cooldown", "Abklingzeit", "Enfriamiento", "Temps de recharge")
+        val noLinksYet get() = m(l, "No link rules yet", "Noch keine Link-Regeln", "Sin reglas de enlace aún", "Aucune règle de lien")
+        val startMonitoring get() = m(l, "Start Monitoring", "Überwachung starten", "Iniciar monitoreo", "Démarrer la surveillance")
+        val stopMonitoring get() = m(l, "Stop Monitoring", "Überwachung stoppen", "Detener monitoreo", "Arrêter la surveillance")
+        val save get() = m(l, "Save", "Speichern", "Guardar", "Enregistrer")
+        val cancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
+        val delete get() = m(l, "Delete", "Löschen", "Eliminar", "Supprimer")
+        val ruleName get() = m(l, "Rule name\u2026", "Regelname\u2026", "Nombre de regla\u2026", "Nom de la règle\u2026")
+        val notifTitle get() = m(l, "Notification title", "Benachrichtigungstitel", "Título de notificación", "Titre de notification")
+        val notifBody get() = m(l, "Notification body", "Benachrichtigungstext", "Cuerpo de notificación", "Corps de notification")
+        val monitoring get() = m(l, "Monitoring", "Überwachung", "Monitoreo", "Surveillance")
+        val thresholdLow get() = m(l, "Lower bound", "Unterer Grenzwert", "Límite inferior", "Limite inférieure")
+        val thresholdHigh get() = m(l, "Upper bound", "Oberer Grenzwert", "Límite superior", "Limite supérieure")
+        val recommended get() = m(l, "Recommended", "Empfohlen", "Recomendado", "Recommandé")
+        val logEntryText get() = m(l, "Log entry text", "Logbuch-Text", "Texto de registro", "Texte du journal")
+        val logEntryPlaceholder get() = m(l, "Leave blank for auto text\u2026", "Leer lassen f\u00FCr Auto-Text\u2026", "Dejar vac\u00EDo para texto autom\u00E1tico\u2026", "Laisser vide pour texte auto\u2026")
+        val statsTitle get() = m(l, "Statistics", "Statistiken", "Estad\u00EDsticas", "Statistiques")
+        val triggered get() = m(l, "Triggered", "Ausgel\u00F6st", "Activado", "D\u00E9clench\u00E9")
+        val cooldownBlocked get() = m(l, "Cooldown blocked", "Abklingzeit blockiert", "Bloqueado por enfriamiento", "Bloqu\u00E9 par recharge")
+        val lastTriggered get() = m(l, "Last triggered", "Zuletzt ausgel\u00F6st", "\u00DAltima activaci\u00F3n", "Dernier d\u00E9clenchement")
+        val resetStats get() = m(l, "Reset statistics", "Statistiken zur\u00FCcksetzen", "Restablecer estad\u00EDsticas", "R\u00E9initialiser les statistiques")
+
+        // ── V2 Advanced Link strings ────────────────────────────────────
+        val andLogic get() = m(l, "AND", "UND", "Y", "ET")
+        val orLogic get() = m(l, "OR", "ODER", "O", "OU")
+        val addCondition get() = m(l, "Add Condition", "Bedingung hinzuf\u00FCgen", "A\u00F1adir condici\u00F3n", "Ajouter une condition")
+        val removeCondition get() = m(l, "Remove Condition", "Bedingung entfernen", "Eliminar condici\u00F3n", "Supprimer la condition")
+        val addAction get() = m(l, "Add Action", "Aktion hinzuf\u00FCgen", "A\u00F1adir acci\u00F3n", "Ajouter une action")
+        val removeAction get() = m(l, "Remove Action", "Aktion entfernen", "Eliminar acci\u00F3n", "Supprimer l'action")
+        val actionDelay get() = m(l, "Action Delay (ms)", "Aktionsverz\u00F6gerung (ms)", "Retraso de acci\u00F3n (ms)", "D\u00E9lai d'action (ms)")
+        val schedule get() = m(l, "Schedule", "Zeitplan", "Horario", "Planification")
+        val daysOfWeek get() = m(l, "Days of Week", "Wochentage", "D\u00EDas de la semana", "Jours de la semaine")
+        val startTime get() = m(l, "Start Time", "Startzeit", "Hora de inicio", "Heure de d\u00E9but")
+        val endTime get() = m(l, "End Time", "Endzeit", "Hora de fin", "Heure de fin")
+        val profile get() = m(l, "Profile", "Profil", "Perfil", "Profil")
+        val createProfile get() = m(l, "Create Profile", "Profil erstellen", "Crear perfil", "Cr\u00E9er un profil")
+
+        // \u2500\u2500 V2 expression-tree extensions \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        val notLabel get() = m(l, "NOT", "NICHT", "NO", "NON")
+        val addSubgroup get() = m(l, "Add Subgroup", "Untergruppe hinzuf\u00FCgen", "A\u00F1adir subgrupo", "Ajouter un sous-groupe")
+        val convertToGroup get() = m(l, "Convert to group", "In Gruppe umwandeln", "Convertir en grupo", "Convertir en groupe")
+        val sustainFor get() = m(l, "Sustain for", "Halten f\u00FCr", "Mantener durante", "Maintenir pendant")
+        val triggerDelay get() = m(l, "Trigger Delay", "Ausl\u00F6severz\u00F6gerung", "Retraso de activaci\u00F3n", "D\u00E9lai de d\u00E9clenchement")
+        val triggerDelayDesc get() = m(l, "Wait this long after the condition becomes true before firing", "Nach Erf\u00FCllung der Bedingung so lange warten, bevor ausgel\u00F6st wird", "Esperar este tiempo despu\u00E9s de que se cumpla la condici\u00F3n antes de activar", "Attendre ce d\u00E9lai apr\u00E8s que la condition soit vraie avant de d\u00E9clencher")
+        val cancelIfFalse get() = m(l, "Cancel if condition no longer true", "Abbrechen, wenn die Bedingung nicht mehr erf\u00FCllt ist", "Cancelar si la condici\u00F3n deja de cumplirse", "Annuler si la condition n'est plus vraie")
+        val applyPreset get() = m(l, "Apply preset", "Vorgabe anwenden", "Aplicar preajuste", "Appliquer le pr\u00E9r\u00E9glage")
+        val ruleSummaryEmpty get() = m(l, "(no conditions yet)", "(noch keine Bedingungen)", "(a\u00FAn sin condiciones)", "(aucune condition pour le moment)")
+        val seconds get() = m(l, "seconds", "Sekunden", "segundos", "secondes")
+        val noActions get() = m(l, "(no actions yet)", "(noch keine Aktionen)", "(a\u00FAn sin acciones)", "(aucune action pour le moment)")
+        val whenLabel get() = m(l, "WHEN", "WANN", "CU\u00C1NDO", "QUAND")
+        val alwaysActive get() = m(l, "Always active", "Immer aktiv", "Siempre activo", "Toujours actif")
+    }
+
+    // ── Torch ───────────────────────────────────────────────────────────
+    val torch: Torch @Composable get() = Torch(lang)
+
+    class Torch(private val l: Language) {
+        val title get() = m(l, "Torch / Flashlight", "Taschenlampe / Blitzlicht", "Linterna / Flash", "Lampe torche / Flash")
+        val flashDetected get() = m(l, "Flash hardware detected", "Flash-Hardware erkannt", "Hardware de flash detectado", "Matériel flash détecté")
+        val noFlash get() = m(l, "No flash hardware on this device", "Kein Flash-Hardware auf diesem Gerät", "Sin hardware de flash en este dispositivo", "Pas de matériel flash sur cet appareil")
+        val turnOn get() = m(l, "Turn ON", "Einschalten", "Encender", "Allumer")
+        val turnOff get() = m(l, "Turn OFF", "Ausschalten", "Apagar", "Éteindre")
+        val strobe get() = m(l, "Strobe", "Stroboskop", "Estrobo", "Stroboscope")
+        val stop get() = m(l, "Stop", "Stopp", "Parar", "Arrêter")
+        val torchUnavailable get() = m(l, "Torch unavailable -- camera in use?", "Taschenlampe nicht verfügbar -- Kamera in Benutzung?", "Linterna no disponible -- ¿cámara en uso?", "Lampe torche indisponible -- caméra en cours d'utilisation ?")
+        val torchNote get() = m(l, "Uses CameraManager.setTorchMode() -- no CAMERA permission needed for torch alone.", "Verwendet CameraManager.setTorchMode() -- keine CAMERA-Berechtigung für die Taschenlampe allein benötigt.", "Usa CameraManager.setTorchMode() -- no se necesita permiso de CÁMARA solo para la linterna.", "Utilise CameraManager.setTorchMode() -- aucune permission CAMÉRA nécessaire pour la lampe seule.")
+        val displayBrightness get() = m(l, "Display Brightness", "Bildschirmhelligkeit", "Brillo de pantalla", "Luminosité de l'écran")
+        val writeSettingsNeeded get() = m(l, "WRITE_SETTINGS permission needed to control brightness", "WRITE_SETTINGS-Berechtigung zur Steuerung der Helligkeit erforderlich", "Se necesita permiso WRITE_SETTINGS para controlar el brillo", "Permission WRITE_SETTINGS nécessaire pour contrôler la luminosité")
+        val grantWriteSettings get() = m(l, "Grant Write Settings", "Schreibeinstellungen gewähren", "Conceder configuración de escritura", "Accorder les paramètres d'écriture")
+        val autoBrightness get() = m(l, "Auto Brightness", "Automatische Helligkeit", "Brillo automático", "Luminosité automatique")
+        val strobeHz get() = m(l, "Strobe Frequency", "Stroboskop-Frequenz", "Frecuencia de estrobo", "Fréquence stroboscope")
+        val alsoAppliesToWidget get() = m(l, "Also applies to home screen widget", "Gilt auch für das Startbildschirm-Widget", "También se aplica al widget de pantalla de inicio", "S'applique également au widget de l'écran d'accueil")
+    }
+
+    // ── Camera ──────────────────────────────────────────────────────────
+    val camera: Camera @Composable get() = Camera(lang)
+
+    class Camera(private val l: Language) {
+        val title get() = m(l, "Camera", "Kamera", "Cámara", "Caméra")
+        val lens get() = m(l, "Lens", "Objektiv", "Lente", "Objectif")
+        val tapToFocus get() = m(l, "Tap-to-Focus", "Tippen-zum-Fokussieren", "Toque para enfocar", "Toucher pour la mise au point")
+        val cameraControls get() = m(l, "Camera controls", "Kamerasteuerung", "Controles de cámara", "Contrôles de la caméra")
+        val focusPointSet get() = m(l, "Focus point set", "Fokuspunkt gesetzt", "Punto de enfoque establecido", "Point de mise au point défini")
+        val grantCameraPerm get() = m(l, "Grant Camera Permission", "Kameraberechtigung erteilen", "Conceder permiso de cámara", "Accorder la permission caméra")
+        val cameraPermRationale get() = m(l, "Camera access is needed to show the live preview and capture photos.", "Kamerazugriff wird benötigt, um die Live-Vorschau anzuzeigen und Fotos aufzunehmen.", "Se necesita acceso a la cámara para mostrar la vista previa en vivo y capturar fotos.", "L'accès à la caméra est nécessaire pour afficher l'aperçu en direct et capturer des photos.")
+    }
+
+    // ── Vibration ───────────────────────────────────────────────────────
+    val vibration: Vibration @Composable get() = Vibration(lang)
+
+    class Vibration(private val l: Language) {
+        val title get() = m(l, "Vibration Motor", "Vibrationsmotor", "Motor de vibración", "Moteur de vibration")
+        val noAmplitude get() = m(l, "This device doesn't support amplitude control. Patterns will play at full strength.", "Dieses Gerät unterstützt keine Amplitudensteuerung. Muster werden mit voller Stärke abgespielt.", "Este dispositivo no soporta control de amplitud. Los patrones se reproducirán a máxima intensidad.", "Cet appareil ne prend pas en charge le contrôle d'amplitude. Les motifs seront joués à pleine puissance.")
+        val predefinedEffects get() = m(l, "Predefined Haptic Effects", "Vordefinierte haptische Effekte", "Efectos hápticos predefinidos", "Effets haptiques prédéfinis")
+        val customWaveform get() = m(l, "Custom Waveform Builder", "Benutzerdefinierter Wellenform-Builder", "Constructor de forma de onda personalizada", "Constructeur de forme d'onde personnalisé")
+        val speedPresets get() = m(l, "Speed Presets", "Geschwindigkeitsvoreinstellungen", "Preajustes de velocidad", "Préréglages de vitesse")
+        val loopWaveform get() = m(l, "Loop waveform", "Wellenform wiederholen", "Repetir forma de onda", "Boucler la forme d'onde")
+        val addStep get() = m(l, "Add Step", "Schritt hinzufügen", "Añadir paso", "Ajouter une étape")
+        val playLooping get() = m(l, "Play (Looping)", "Abspielen (Schleife)", "Reproducir (bucle)", "Lire (en boucle)")
+        val playCustom get() = m(l, "Play Custom Waveform", "Benutzerdefinierte Wellenform abspielen", "Reproducir forma de onda personalizada", "Lire la forme d'onde personnalisée")
+        val stop get() = m(l, "Stop", "Stopp", "Parar", "Arrêter")
+        val savePattern get() = m(l, "Save Pattern", "Muster speichern", "Guardar patrón", "Enregistrer le motif")
+        val loadPattern get() = m(l, "Load Pattern", "Muster laden", "Cargar patrón", "Charger le motif")
+        val drawPattern get() = m(l, "Draw Vibration Pattern", "Vibrationsmuster zeichnen", "Dibujar patrón de vibración", "Dessiner le motif de vibration")
+        val drawInstructions get() = m(l, "Draw with your finger: X = time (0\u20132s), Y = intensity (0\u2013100%)", "Mit dem Finger zeichnen: X = Zeit (0\u20132s), Y = Intensität (0\u2013100%)", "Dibuje con su dedo: X = tiempo (0\u20132s), Y = intensidad (0\u2013100%)", "Dessinez avec votre doigt: X = temps (0\u20132s), Y = intensité (0\u2013100%)")
+        val loopDrawn get() = m(l, "Loop drawn pattern", "Gezeichnetes Muster wiederholen", "Repetir patrón dibujado", "Boucler le motif dessiné")
+        val playDrawn get() = m(l, "Play Drawn", "Gezeichnetes abspielen", "Reproducir dibujado", "Lire le dessin")
+        val clearDrawing get() = m(l, "Clear Drawing", "Zeichnung löschen", "Borrar dibujo", "Effacer le dessin")
+        val patternName get() = m(l, "Pattern name", "Mustername", "Nombre del patrón", "Nom du motif")
+        val save get() = m(l, "Save", "Speichern", "Guardar", "Enregistrer")
+        val cancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
+        val close get() = m(l, "Close", "Schließen", "Cerrar", "Fermer")
+        val noSavedPatterns get() = m(l, "No saved patterns yet.", "Noch keine gespeicherten Muster.", "Aún no hay patrones guardados.", "Aucun motif enregistré.")
+        val slow get() = m(l, "Slow", "Langsam", "Lento", "Lent")
+        val medium get() = m(l, "Medium", "Mittel", "Medio", "Moyen")
+        val fast get() = m(l, "Fast", "Schnell", "Rápido", "Rapide")
+        val rapid get() = m(l, "Rapid", "Sehr schnell", "Muy rápido", "Très rapide")
+
+        // Time markers for the draw/waveform canvas (numeric, but rendered via Text)
+        val msZero get() = m(l, "0 ms", "0 ms", "0 ms", "0 ms")
+        val ms2000 get() = m(l, "2000 ms", "2000 ms", "2000 ms", "2000 ms")
+    }
+
+    // ── Mic ─────────────────────────────────────────────────────────────
+    val mic: Mic @Composable get() = Mic(lang)
+
+    class Mic(private val l: Language) {
+        val title get() = m(l, "Microphone Meter", "Mikrofon-Messgerät", "Medidor de micrófono", "Mètre de microphone")
+        val micPermRationale get() = m(l, "Microphone access is needed to show live audio levels.", "Mikrofonzugriff wird benötigt, um Live-Audiopegel anzuzeigen.", "Se necesita acceso al micrófono para mostrar niveles de audio en vivo.", "L'accès au microphone est nécessaire pour afficher les niveaux audio en direct.")
+        val grantPermission get() = m(l, "Grant Permission", "Berechtigung erteilen", "Conceder permiso", "Accorder la permission")
+        val spectrumAnalyzer get() = m(l, "Spectrum Analyzer", "Spektrumanalysator", "Analizador de espectro", "Analyseur de spectre")
+        val startMonitoring get() = m(l, "Start Monitoring", "Überwachung starten", "Iniciar monitoreo", "Démarrer la surveillance")
+        val stopMonitor get() = m(l, "Stop Monitor", "Überwachung stoppen", "Detener monitoreo", "Arrêter la surveillance")
+        val audioRecording get() = m(l, "Audio Recording", "Audioaufnahme", "Grabación de audio", "Enregistrement audio")
+        val savedRecordings get() = m(l, "Saved Recordings", "Gespeicherte Aufnahmen", "Grabaciones guardadas", "Enregistrements sauvegardés")
+        val playbackError get() = m(l, "Playback error", "Wiedergabefehler", "Error de reproducción", "Erreur de lecture")
+        fun savedFile(name: String) = m(l, "Saved: $name", "Gespeichert: $name", "Guardado: $name", "Enregistré : $name")
+    }
+
+    // ── Radios ──────────────────────────────────────────────────────────
+    val radios: Radios @Composable get() = Radios(lang)
+
+    class Radios(private val l: Language) {
+        val title get() = m(l, "Radios & Connectivity", "Funk & Konnektivität", "Radios y conectividad", "Radios et connectivité")
+        val wifi get() = m(l, "Wi-Fi", "WLAN", "Wi-Fi", "Wi-Fi")
+        val bluetooth get() = m(l, "Bluetooth", "Bluetooth", "Bluetooth", "Bluetooth")
+        val nfc get() = m(l, "NFC", "NFC", "NFC", "NFC")
+        val gpsLocation get() = m(l, "GPS / Location", "GPS / Standort", "GPS / Ubicación", "GPS / Localisation")
+        val gpsTracking get() = m(l, "GPS Tracking", "GPS-Tracking", "Seguimiento GPS", "Suivi GPS")
+        val latitude get() = m(l, "Latitude", "Breitengrad", "Latitud", "Latitude")
+        val longitude get() = m(l, "Longitude", "Längengrad", "Longitud", "Longitude")
+        val altitude get() = m(l, "Altitude", "Höhe", "Altitud", "Altitude")
+        val speed get() = m(l, "Speed", "Geschwindigkeit", "Velocidad", "Vitesse")
+        val accuracy get() = m(l, "Accuracy", "Genauigkeit", "Precisión", "Précision")
+        val bearing get() = m(l, "Bearing", "Richtung", "Rumbo", "Direction")
+        val provider get() = m(l, "Provider", "Anbieter", "Proveedor", "Fournisseur")
+        val gpsLog get() = m(l, "GPS Log", "GPS-Protokoll", "Registro GPS", "Journal GPS")
+        val locationPermRequired get() = m(l, "Location permission required for GPS", "Standortberechtigung für GPS erforderlich", "Se requiere permiso de ubicación para GPS", "Permission de localisation requise pour le GPS")
+        val grantLocationPerm get() = m(l, "Grant Location Permission", "Standortberechtigung erteilen", "Conceder permiso de ubicación", "Accorder la permission de localisation")
+        val currentLocation get() = m(l, "Current Location", "Aktueller Standort", "Ubicación actual", "Position actuelle")
+        val clearLog get() = m(l, "Clear log", "Protokoll löschen", "Borrar registro", "Effacer le journal")
+        val exampleDomain get() = m(l, "example.com", "beispiel.de", "ejemplo.com", "exemple.com")
+        val textPlain get() = m(l, "text/plain", "text/plain", "text/plain", "text/plain")
+        val hotspot get() = m(l, "Hotspot", "Hotspot", "Punto de acceso", "Point d'accès")
+        val wirelessProjection get() = m(l, "Wireless Projection", "Drahtlose Projektion", "Proyección inalámbrica", "Projection sans fil")
+        val saveTag get() = m(l, "Save Tag", "Tag speichern", "Guardar etiqueta", "Enregistrer le tag")
+        val savedNfcTags get() = m(l, "Saved NFC Tags", "Gespeicherte NFC-Tags", "Etiquetas NFC guardadas", "Tags NFC enregistrés")
+        val emulate get() = m(l, "Emulate", "Emulieren", "Emular", "Émuler")
+        val emulating get() = m(l, "Emulating — hold device near reader…", "Emuliert — Gerät an Leser halten…", "Emulando — acerque el dispositivo…", "Émulation — approchez l'appareil…")
+        val stopEmulating get() = m(l, "Stop", "Stoppen", "Detener", "Arrêter")
+        val tagName get() = m(l, "Tag name", "Tag-Name", "Nombre de etiqueta", "Nom du tag")
+        val noSavedTags get() = m(l, "No saved tags", "Keine gespeicherten Tags", "Sin etiquetas guardadas", "Aucun tag enregistré")
+        val loadFromSaved get() = m(l, "Load from saved tag…", "Aus gespeichertem Tag laden…", "Cargar desde etiqueta guardada…", "Charger depuis un tag enregistré…")
+        val selectTag get() = m(l, "Select a tag…", "Tag auswählen…", "Seleccionar etiqueta…", "Sélectionner un tag…")
+        val deleteTag get() = m(l, "Delete", "Löschen", "Eliminar", "Supprimer")
+        val cancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
+
+        // ── Infrared ──
+        val infrared get() = m(l, "Infrared", "Infrarot", "Infrarrojos", "Infrarouge")
+        val irNotSupported get() = m(l, "No IR emitter on this device — saved codes can still be stored.", "Kein IR-Sender auf diesem Gerät — gespeicherte Codes können trotzdem abgelegt werden.", "Sin emisor IR en este dispositivo — los códigos guardados aún se pueden almacenar.", "Pas d'émetteur IR sur cet appareil — les codes enregistrés peuvent toujours être conservés.")
+        val protocol get() = m(l, "Protocol", "Protokoll", "Protocolo", "Protocole")
+        val carrierHz get() = m(l, "Carrier (Hz)", "Träger (Hz)", "Portadora (Hz)", "Porteuse (Hz)")
+        val payload get() = m(l, "Payload", "Nutzdaten", "Carga útil", "Charge utile")
+        val repeats get() = m(l, "Repeats", "Wiederholungen", "Repeticiones", "Répétitions")
+        val transmit get() = m(l, "Transmit", "Senden", "Transmitir", "Émettre")
+        val transmitting get() = m(l, "Transmitting…", "Sende…", "Transmitiendo…", "Émission…")
+        val addCode get() = m(l, "Add code", "Code hinzufügen", "Añadir código", "Ajouter un code")
+        val savedIrCodes get() = m(l, "Saved IR Codes", "Gespeicherte IR-Codes", "Códigos IR guardados", "Codes IR enregistrés")
+        val noSavedIrCodes get() = m(l, "No saved IR codes", "Keine gespeicherten IR-Codes", "Sin códigos IR guardados", "Aucun code IR enregistré")
+        val codeName get() = m(l, "Code name", "Code-Name", "Nombre del código", "Nom du code")
+        val saveCode get() = m(l, "Save code", "Code speichern", "Guardar código", "Enregistrer le code")
+        val pasteFromClipboard get() = m(l, "Paste from clipboard", "Aus Zwischenablage einfügen", "Pegar desde portapapeles", "Coller depuis le presse-papiers")
+
+        // ── Sub-GHz ──
+        val subGhz get() = m(l, "Sub-GHz", "Sub-GHz", "Sub-GHz", "Sub-GHz")
+        val subGhzNotSupported get() = m(l, "No Sub-GHz radio on this device. External hardware (e.g. Flipper Zero) is required to transmit. You can still save and curate a library.", "Kein Sub-GHz-Funk auf diesem Gerät. Externe Hardware (z. B. Flipper Zero) ist zum Senden erforderlich. Eine Bibliothek lässt sich trotzdem pflegen.", "Sin radio Sub-GHz en este dispositivo. Se necesita hardware externo (p. ej. Flipper Zero) para transmitir. Aún puedes guardar y gestionar una biblioteca.", "Pas de radio Sub-GHz sur cet appareil. Du matériel externe (p. ex. Flipper Zero) est requis pour émettre. Vous pouvez tout de même enregistrer et organiser une bibliothèque.")
+        val externalHardwareRequired get() = m(l, "External hardware required", "Externe Hardware erforderlich", "Se requiere hardware externo", "Matériel externe requis")
+        val frequency get() = m(l, "Frequency (Hz)", "Frequenz (Hz)", "Frecuencia (Hz)", "Fréquence (Hz)")
+        val modulation get() = m(l, "Modulation", "Modulation", "Modulación", "Modulation")
+        val bitLength get() = m(l, "Bit length", "Bitlänge", "Longitud de bits", "Longueur de bits")
+        val key get() = m(l, "Key (hex)", "Schlüssel (hex)", "Clave (hex)", "Clé (hex)")
+        val rawData get() = m(l, "Raw data", "Rohdaten", "Datos brutos", "Données brutes")
+        val importSubFile get() = m(l, "Import .sub file", "Sub-Datei importieren", "Importar archivo .sub", "Importer un fichier .sub")
+        val savedSubGhzSignals get() = m(l, "Saved Sub-GHz Signals", "Gespeicherte Sub-GHz-Signale", "Señales Sub-GHz guardadas", "Signaux Sub-GHz enregistrés")
+        val noSavedSubGhzSignals get() = m(l, "No saved Sub-GHz signals", "Keine gespeicherten Sub-GHz-Signale", "Sin señales Sub-GHz guardadas", "Aucun signal Sub-GHz enregistré")
+        val signalName get() = m(l, "Signal name", "Signalname", "Nombre de la señal", "Nom du signal")
+        val saveSignal get() = m(l, "Save signal", "Signal speichern", "Guardar señal", "Enregistrer le signal")
+        val parseFailed get() = m(l, "Could not parse .sub file", "Sub-Datei konnte nicht gelesen werden", "No se pudo analizar el archivo .sub", "Impossible de lire le fichier .sub")
+
+        // ── Card titles & status (overhaul) ──
+        val wifiSignalDetails get() = m(l, "WiFi Signal Details", "WLAN-Signaldetails", "Detalles de señal WiFi", "Détails du signal Wi-Fi")
+        val cellularSignal get() = m(l, "Cellular Signal", "Mobilfunksignal", "Señal móvil", "Signal cellulaire")
+        val networkSpeed get() = m(l, "Network Speed", "Netzwerkgeschwindigkeit", "Velocidad de red", "Vitesse réseau")
+        val download get() = m(l, "Download", "Download", "Descarga", "Téléchargement")
+        val upload get() = m(l, "Upload", "Upload", "Subida", "Téléversement")
+        val mobileData get() = m(l, "Mobile Data", "Mobile Daten", "Datos móviles", "Données mobiles")
+        val activeTransport get() = m(l, "Active transport", "Aktiver Transport", "Transporte activo", "Transport actif")
+        val notActiveWifiPreferred get() = m(l, "Not active / WiFi preferred", "Nicht aktiv / WLAN bevorzugt", "Inactivo / WiFi preferido", "Inactif / Wi-Fi préféré")
+        val notAvailableOnDevice get() = m(l, "Not available on this device", "Auf diesem Gerät nicht verfügbar", "No disponible en este dispositivo", "Indisponible sur cet appareil")
+        val readyToScan get() = m(l, "Ready to scan", "Bereit zum Scannen", "Listo para escanear", "Prêt à scanner")
+        val statusDisabled get() = m(l, "Disabled", "Deaktiviert", "Desactivado", "Désactivé")
+
+        // ── NFC reader UI ──
+        val nfcTagReader get() = m(l, "NFC Tag Reader", "NFC-Tag-Leser", "Lector de etiquetas NFC", "Lecteur de tags NFC")
+        val ndefRecords get() = m(l, "NDEF Records:", "NDEF-Datensätze:", "Registros NDEF:", "Enregistrements NDEF :")
+        val holdNfcTagNearDevice get() = m(l, "Hold an NFC tag near the device...", "Halten Sie ein NFC-Tag in die Nähe des Geräts...", "Acerque una etiqueta NFC al dispositivo...", "Approchez un tag NFC de l'appareil...")
+        val writeProtectionAnalysis get() = m(l, "Write Protection Analysis", "Schreibschutz-Analyse", "Análisis de protección de escritura", "Analyse de protection en écriture")
+        val detailsLabel get() = m(l, "Details", "Details", "Detalles", "Détails")
+
+        // ── NFC writer UI ──
+        val writeToTag get() = m(l, "Write to Tag", "Auf Tag schreiben", "Escribir en etiqueta", "Écrire sur le tag")
+        val textToWrite get() = m(l, "Text to write", "Zu schreibender Text", "Texto a escribir", "Texte à écrire")
+        val uriPathLabel get() = m(l, "URI path", "URI-Pfad", "Ruta URI", "Chemin URI")
+        val mimeTypeLabel get() = m(l, "MIME type", "MIME-Typ", "Tipo MIME", "Type MIME")
+        val payloadLabel get() = m(l, "Payload", "Nutzdaten", "Carga útil", "Charge utile")
+        val writingStatus get() = m(l, "Writing...", "Schreibe...", "Escribiendo...", "Écriture...")
+        fun writeNdefFor(type: String) = m(l, "Write NDEF $type", "NDEF $type schreiben", "Escribir NDEF $type", "Écrire NDEF $type")
+        val noTagPresent get() = m(l, "No tag present", "Kein Tag vorhanden", "Sin etiqueta presente", "Aucun tag présent")
+        val bypassLogLabel get() = m(l, "Bypass log:", "Umgehungsprotokoll:", "Registro de bypass:", "Journal de contournement :")
+
+        // ── NFC guide ──
+        val nfcGuide get() = m(l, "NFC Guide", "NFC-Leitfaden", "Guía NFC", "Guide NFC")
+        val ndefRecordTypesTitle get() = m(l, "NDEF Record Types:", "NDEF-Datensatztypen:", "Tipos de registro NDEF:", "Types d'enregistrement NDEF :")
+        val ndefRecordTypesBody get() = m(l,
+            "  Text — Plain text with language code\n  URI — URLs, phone numbers, emails (compact encoding)\n  MIME — Any MIME type with custom payload\n  Smart Poster — URI + metadata (title, icon)",
+            "  Text — Klartext mit Sprachcode\n  URI — URLs, Telefonnummern, E-Mails (kompakte Kodierung)\n  MIME — Beliebiger MIME-Typ mit benutzerdefinierten Nutzdaten\n  Smart Poster — URI + Metadaten (Titel, Symbol)",
+            "  Text — Texto sin formato con código de idioma\n  URI — URLs, números de teléfono, correos (codificación compacta)\n  MIME — Cualquier tipo MIME con carga personalizada\n  Smart Poster — URI + metadatos (título, icono)",
+            "  Text — Texte brut avec code de langue\n  URI — URLs, numéros de téléphone, e-mails (encodage compact)\n  MIME — Tout type MIME avec charge personnalisée\n  Smart Poster — URI + métadonnées (titre, icône)")
+        val commonTagTypesTitle get() = m(l, "Common Tag Types:", "Häufige Tag-Typen:", "Tipos de etiqueta comunes:", "Types de tag courants :")
+        val commonTagTypesBody get() = m(l,
+            "  NTAG213 — 144 bytes, most common small tags\n  NTAG215 — 504 bytes, used for Amiibo\n  NTAG216 — 888 bytes, large capacity\n  Mifare Classic 1K — 1024 bytes, proprietary",
+            "  NTAG213 — 144 Bytes, häufigste kleine Tags\n  NTAG215 — 504 Bytes, für Amiibo verwendet\n  NTAG216 — 888 Bytes, große Kapazität\n  Mifare Classic 1K — 1024 Bytes, proprietär",
+            "  NTAG213 — 144 bytes, etiquetas pequeñas más comunes\n  NTAG215 — 504 bytes, usado para Amiibo\n  NTAG216 — 888 bytes, gran capacidad\n  Mifare Classic 1K — 1024 bytes, propietario",
+            "  NTAG213 — 144 octets, petits tags les plus courants\n  NTAG215 — 504 octets, utilisé pour Amiibo\n  NTAG216 — 888 octets, grande capacité\n  Mifare Classic 1K — 1024 octets, propriétaire")
+        val commonUsesTitle get() = m(l, "Common Uses:", "Häufige Verwendungen:", "Usos comunes:", "Utilisations courantes :")
+        val commonUsesBody get() = m(l,
+            "  URLs — Share links by tapping\n  Wi-Fi — Share network credentials\n  vCard — Share contact information\n  App Launch — Open specific apps\n  Smart Home — Trigger automations",
+            "  URLs — Links durch Antippen teilen\n  Wi-Fi — Netzwerkdaten teilen\n  vCard — Kontaktdaten teilen\n  App-Start — Bestimmte Apps öffnen\n  Smart Home — Automationen auslösen",
+            "  URLs — Compartir enlaces tocando\n  Wi-Fi — Compartir credenciales de red\n  vCard — Compartir información de contacto\n  Inicio de app — Abrir apps específicas\n  Smart Home — Activar automatizaciones",
+            "  URLs — Partager des liens en touchant\n  Wi-Fi — Partager les identifiants réseau\n  vCard — Partager des informations de contact\n  Lancement d'app — Ouvrir des apps spécifiques\n  Domotique — Déclencher des automatisations")
+        val bestPracticesTitle get() = m(l, "Best Practices:", "Bewährte Praktiken:", "Mejores prácticas:", "Bonnes pratiques :")
+        val bestPracticesBody get() = m(l,
+            "  - Use URI records for URLs (more compact than text)\n  - Keep payloads small for faster read/write\n  - Test with reader before writing to verify\n  - Lock tags after writing to prevent tampering",
+            "  - URI-Datensätze für URLs verwenden (kompakter als Text)\n  - Nutzdaten klein halten für schnelleres Lesen/Schreiben\n  - Vor dem Schreiben mit Leser testen, um zu verifizieren\n  - Tags nach dem Schreiben sperren, um Manipulation zu verhindern",
+            "  - Use registros URI para URLs (más compactos que texto)\n  - Mantenga las cargas pequeñas para lectura/escritura más rápida\n  - Pruebe con lector antes de escribir para verificar\n  - Bloquee etiquetas después de escribir para evitar manipulaciones",
+            "  - Utilisez des enregistrements URI pour les URLs (plus compacts que le texte)\n  - Gardez les charges petites pour une lecture/écriture plus rapide\n  - Testez avec un lecteur avant d'écrire pour vérifier\n  - Verrouillez les tags après écriture pour empêcher toute altération")
+
+        // ── Quick toggles ──
+        val quickToggles get() = m(l, "Quick Toggles (System Panel)", "Schnellschalter (System-Panel)", "Conmutadores rápidos (panel del sistema)", "Bascules rapides (panneau système)")
+        val wifiPanel get() = m(l, "WiFi Panel", "WLAN-Panel", "Panel WiFi", "Panneau Wi-Fi")
+        val btSettings get() = m(l, "BT Settings", "BT-Einstellungen", "Ajustes BT", "Réglages BT")
+        val internetPanel get() = m(l, "Internet Panel", "Internet-Panel", "Panel de Internet", "Panneau Internet")
+    }
+
+    // ── Sensors ─────────────────────────────────────────────────────────
+    val sensors: Sensors @Composable get() = Sensors(lang)
+
+    class Sensors(private val l: Language) {
+        val title get() = m(l, "Sensors", "Sensoren", "Sensores", "Capteurs")
+        val accelerometer get() = m(l, "Accelerometer", "Beschleunigungsmesser", "Acelerómetro", "Accéléromètre")
+        val gyroscope get() = m(l, "Gyroscope", "Gyroskop", "Giroscopio", "Gyroscope")
+        val magnetometer get() = m(l, "Magnetometer", "Magnetometer", "Magnetómetro", "Magnétomètre")
+        val proximity get() = m(l, "Proximity", "Näherung", "Proximidad", "Proximité")
+        val light get() = m(l, "Light", "Licht", "Luz", "Lumière")
+        val barometer get() = m(l, "Barometer", "Barometer", "Barómetro", "Baromètre")
+        val stepCounter get() = m(l, "Step Counter", "Schrittzähler", "Podómetro", "Compteur de pas")
+        val sensorReadingsCopied get() = m(l, "Sensor readings copied!", "Sensorwerte kopiert!", "¡Lecturas de sensores copiadas!", "Lectures de capteurs copiées !")
+    }
+
+    // ── Battery ─────────────────────────────────────────────────────────
+    val battery: Battery @Composable get() = Battery(lang)
+
+    class Battery(private val l: Language) {
+        val title get() = m(l, "Battery", "Akku", "Batería", "Batterie")
+        val level get() = m(l, "Level", "Ladezustand", "Nivel", "Niveau")
+        val status get() = m(l, "Status", "Status", "Estado", "Statut")
+        val health get() = m(l, "Health", "Zustand", "Salud", "Santé")
+        val temperature get() = m(l, "Temperature", "Temperatur", "Temperatura", "Température")
+        val voltage get() = m(l, "Voltage", "Spannung", "Voltaje", "Tension")
+        val technology get() = m(l, "Technology", "Technologie", "Tecnología", "Technologie")
+        val charging get() = m(l, "Charging", "Laden", "Cargando", "En charge")
+        val discharging get() = m(l, "Discharging", "Entladen", "Descargando", "Décharge")
+        val full get() = m(l, "Full", "Voll", "Completa", "Pleine")
+        val notCharging get() = m(l, "Not charging", "Nicht laden", "No cargando", "Pas en charge")
+    }
+
+    // ── File Metadata (Batch 10) ────────────────────────────────────────
+    val fileMeta: FileMeta @Composable get() = FileMeta(lang)
+
+    class FileMeta(private val l: Language) {
+        val title get() = m(l, "File Metadata", "Datei-Metadaten", "Metadatos de archivo", "Métadonnées de fichier")
+        val selectFile get() = m(l, "Select a File", "Datei auswählen", "Seleccionar un archivo", "Sélectionner un fichier")
+        val fileName get() = m(l, "File Name", "Dateiname", "Nombre de archivo", "Nom du fichier")
+        val fileSize get() = m(l, "File Size", "Dateigröße", "Tamaño de archivo", "Taille du fichier")
+        val mimeType get() = m(l, "MIME Type", "MIME-Typ", "Tipo MIME", "Type MIME")
+        val dateModified get() = m(l, "Date Modified", "Änderungsdatum", "Fecha de modificación", "Date de modification")
+        val addMetadata get() = m(l, "Add Metadata", "Metadaten hinzufügen", "Añadir metadatos", "Ajouter des métadonnées")
+        val editMetadata get() = m(l, "Edit Metadata", "Metadaten bearbeiten", "Editar metadatos", "Modifier les métadonnées")
+        val commonFields get() = m(l, "Common Metadata Fields", "Häufige Metadatenfelder", "Campos de metadatos comunes", "Champs de métadonnées courants")
+        val noFileSelected get() = m(l, "No file selected", "Keine Datei ausgewählt", "Ningún archivo seleccionado", "Aucun fichier sélectionné")
+        val saveChanges get() = m(l, "Save Changes", "Änderungen speichern", "Guardar cambios", "Enregistrer les modifications")
+        val author get() = m(l, "Author", "Autor", "Autor", "Auteur")
+        val version get() = m(l, "Version", "Version", "Versión", "Version")
+        val copyright get() = m(l, "Copyright", "Urheberrecht", "Derechos de autor", "Droits d'auteur")
+        val description get() = m(l, "Description", "Beschreibung", "Descripción", "Description")
+        val exifSection get() = m(l, "EXIF", "EXIF", "EXIF", "EXIF")
+        val mediaSection get() = m(l, "Media", "Medien", "Medios", "Médias")
+        val exifSaved get() = m(l, "EXIF data saved", "EXIF-Daten gespeichert", "Datos EXIF guardados", "Données EXIF enregistrées")
+        val exifSaveFailed get() = m(l, "Failed to save EXIF data", "EXIF-Daten konnten nicht gespeichert werden", "Error al guardar datos EXIF", "Échec de l'enregistrement des données EXIF")
+        val allFieldsPresent get() = m(l, "All common fields are already present.", "Alle gängigen Felder sind bereits vorhanden.", "Todos los campos comunes ya están presentes.", "Tous les champs courants sont déjà présents.")
+        val editMediaMetadata get() = m(l, "Edit Media Metadata", "Medien-Metadaten bearbeiten", "Editar metadatos multimedia", "Modifier les métadonnées média")
+        val mediaSaved get() = m(l, "Media metadata saved", "Medien-Metadaten gespeichert", "Metadatos multimedia guardados", "Métadonnées média enregistrées")
+        val mediaSaveFailed get() = m(l, "Failed to save media metadata", "Medien-Metadaten konnten nicht gespeichert werden", "Error al guardar metadatos multimedia", "Échec de l'enregistrement des métadonnées média")
+    }
+
+    // ── Caller Screen (Batch 8) ─────────────────────────────────────────
+    val caller: Caller @Composable get() = Caller(lang)
+
+    class Caller(private val l: Language) {
+        val incomingCall get() = m(l, "Incoming Call", "Eingehender Anruf", "Llamada entrante", "Appel entrant")
+        val gadget get() = m(l, "Gadget", "Gadget", "Gadget", "Gadget")
+        val decline get() = m(l, "Decline", "Ablehnen", "Rechazar", "Refuser")
+        val stopRinging get() = m(l, "Stop Ringing", "Klingeln stoppen", "Dejar de sonar", "Arrêter la sonnerie")
+    }
+
+    // ── Bug Report ──────────────────────────────────────────────────────
+    val bug: Bug @Composable get() = Bug(lang)
+
+    // ── User Manual (content in ManualStrings.kt) ──────────────────────
+    val manual: Manual @Composable get() = Manual(lang)
+
+    class Bug(private val l: Language) {
+        val title get() = m(l, "Bug Report", "Fehlerbericht", "Informe de error", "Rapport de bug")
+        val permissionsTitle get() = m(l, "Permission Status", "Berechtigungsstatus", "Estado de permisos", "État des permissions")
+        val deviceInfoTitle get() = m(l, "Device Information", "Geräteinformationen", "Información del dispositivo", "Informations sur l'appareil")
+        val describeBug get() = m(l, "Describe the Bug", "Fehler beschreiben", "Describir el error", "Décrire le bug")
+        val describeBugHint get() = m(l, "Describe the issue you encountered\u2026", "Beschreiben Sie das aufgetretene Problem\u2026", "Describa el problema que encontró\u2026", "Décrivez le problème rencontré\u2026")
+        val createBugReport get() = m(l, "Create Bug Report", "Fehlerbericht erstellen", "Crear informe de error", "Créer un rapport de bug")
+        val bugReportReady get() = m(l, "Bug Report Ready", "Fehlerbericht bereit", "Informe de error listo", "Rapport de bug prêt")
+        val emailBugReport get() = m(l, "Email Bug Report", "Fehlerbericht per E-Mail senden", "Enviar informe por correo", "Envoyer le rapport par e-mail")
+        val copyText get() = m(l, "Copy Text", "Text kopieren", "Copiar texto", "Copier le texte")
+        val copiedToClipboard get() = m(l, "Copied to clipboard", "In Zwischenablage kopiert", "Copiado al portapapeles", "Copié dans le presse-papiers")
+        val permissionLabel get() = m(l, "Permission", "Berechtigung", "Permiso", "Permission")
+        val statusLabel get() = m(l, "Status", "Status", "Estado", "Statut")
+        val granted get() = m(l, "Granted", "Erteilt", "Concedido", "Accordé")
+        val notGranted get() = m(l, "Not Granted", "Nicht erteilt", "No concedido", "Non accordé")
+        val disclaimerTitle get() = m(l, "Disclaimer", "Haftungsausschluss", "Aviso legal", "Avertissement")
+        val disclaimerBody get() = m(l,
+            "Firmware and hardware device-specific limitations apply. Some features may not be available or function correctly depending on your device type, manufacturer, and Android version. Certain features require specific permissions to be granted in order to operate. Audio features such as Phone Ring, vibration, and notifications may be silenced by Do Not Disturb or Silent mode \u2014 enable the Bypass DND option in Settings to override. Please submit feature requests and bug reports via the Bug Report menu.",
+            "Es gelten firmware- und hardwarespezifische Einschränkungen. Einige Funktionen sind möglicherweise nicht verfügbar oder funktionieren je nach Gerätetyp, Hersteller und Android-Version nicht korrekt. Bestimmte Funktionen erfordern die Erteilung spezifischer Berechtigungen. Audiofunktionen wie Telefonklingeln, Vibration und Benachrichtigungen können durch den Nicht-stören- oder Lautlos-Modus stummgeschaltet werden \u2014 aktivieren Sie die Option DND umgehen in den Einstellungen. Bitte reichen Sie Funktionswünsche und Fehlerberichte über das Fehlerbericht-Menü ein.",
+            "Se aplican limitaciones específicas de firmware y hardware del dispositivo. Algunas funciones pueden no estar disponibles o no funcionar correctamente según el tipo de dispositivo, el fabricante y la versión de Android. Ciertas funciones requieren permisos específicos para operar. Las funciones de audio como el timbre, la vibración y las notificaciones pueden ser silenciadas por el modo No molestar o Silencio \u2014 active la opción Omitir DND en Configuración. Envíe solicitudes de funciones e informes de errores a través del menú de informes de errores.",
+            "Des limitations spécifiques au micrologiciel et au matériel de l'appareil s'appliquent. Certaines fonctionnalités peuvent ne pas être disponibles ou ne pas fonctionner correctement selon le type d'appareil, le fabricant et la version Android. Certaines fonctionnalités nécessitent des autorisations spécifiques pour fonctionner. Les fonctions audio telles que la sonnerie, la vibration et les notifications peuvent être réduites au silence par le mode Ne pas déranger ou Silencieux \u2014 activez l'option Contourner NPD dans les Paramètres. Veuillez soumettre vos demandes de fonctionnalités et rapports de bugs via le menu Rapport de bug.",
+        )
+        val systemModesTitle get() = m(l, "System Modes", "Systemmodi", "Modos del sistema", "Modes syst\u00E8me")
+        val modeLabel get() = m(l, "Mode", "Modus", "Modo", "Mode")
+        val openSettings get() = m(l, "Open", "\u00D6ffnen", "Abrir", "Ouvrir")
+        val settingsPageUnavailable get() = m(l, "Settings page unavailable on this device", "Einstellungsseite auf diesem Ger\u00E4t nicht verf\u00FCgbar", "P\u00E1gina de ajustes no disponible en este dispositivo", "Page des param\u00E8tres indisponible sur cet appareil")
+    }
+
+    // ── Search ──────────────────────────────────────────────────────────
+    val search: Search @Composable get() = Search(lang)
+
+    class Search(private val l: Language) {
+        val search get() = m(l, "Search", "Suche", "Buscar", "Recherche")
+        val searchHint get() = m(l, "Search metrics, logbook, rules, settings\u2026", "Metriken, Logbuch, Regeln, Einstellungen suchen\u2026", "Buscar m\u00E9tricas, registro, reglas, ajustes\u2026", "Rechercher m\u00E9triques, journal, r\u00E8gles, param\u00E8tres\u2026")
+        val noResults get() = m(l, "No results found", "Keine Ergebnisse gefunden", "Sin resultados", "Aucun r\u00E9sultat trouv\u00E9")
+        val metrics get() = m(l, "Metrics", "Metriken", "M\u00E9tricas", "M\u00E9triques")
+        val logbook get() = m(l, "Logbook", "Logbuch", "Registro", "Journal")
+        val linkRules get() = m(l, "Link Rules", "Link-Regeln", "Reglas de enlace", "R\u00E8gles de lien")
+        val settings get() = m(l, "Settings", "Einstellungen", "Ajustes", "Param\u00E8tres")
+    }
+
+    // ── Apps (organizer module) ────────────────────────────────────────
+    val apps: Apps @Composable get() = Apps(lang)
+
+    class Apps(private val l: Language) {
+        val title get() = m(l, "Apps", "Apps", "Apps", "Applis")
+        val description get() = m(l, "Organize installed apps, PWAs, and web links into folders that double as designable home-screen widgets.", "Organisiere installierte Apps, PWAs und Web-Links in Ordnern, die zugleich gestaltbare Widgets für den Startbildschirm sind.", "Organiza apps instaladas, PWAs y enlaces web en carpetas que también funcionan como widgets personalizables para la pantalla de inicio.", "Organisez les applis installées, les PWA et les liens web en dossiers qui font aussi office de widgets personnalisables sur l'écran d'accueil.")
+        val createFolder get() = m(l, "Create folder", "Ordner erstellen", "Crear carpeta", "Créer un dossier")
+        val newFolder get() = m(l, "New folder", "Neuer Ordner", "Nueva carpeta", "Nouveau dossier")
+        val folderName get() = m(l, "Folder name", "Ordnername", "Nombre de la carpeta", "Nom du dossier")
+        val deleteFolderConfirm get() = m(l, "Delete this folder?", "Diesen Ordner löschen?", "¿Eliminar esta carpeta?", "Supprimer ce dossier ?")
+        val noFolders get() = m(l, "No folders yet — tap +", "Noch keine Ordner — tippe auf +", "Aún no hay carpetas — toca +", "Aucun dossier — appuyez sur +")
+        val color get() = m(l, "Color", "Farbe", "Color", "Couleur")
+        val appsInFolder get() = m(l, "Apps in this folder", "Apps in diesem Ordner", "Apps en esta carpeta", "Applis dans ce dossier")
+        val addWebLink get() = m(l, "Add web link", "Web-Link hinzufügen", "Añadir enlace web", "Ajouter un lien web")
+        val webLinkUrl get() = m(l, "URL", "URL", "URL", "URL")
+        val webLinkLabel get() = m(l, "Label (optional)", "Bezeichnung (optional)", "Etiqueta (opcional)", "Libellé (facultatif)")
+        val noApps get() = m(l, "No apps detected yet", "Noch keine Apps erkannt", "Aún no se detectaron apps", "Aucune appli détectée pour l'instant")
+        val pwaBadge get() = m(l, "PWA", "PWA", "PWA", "PWA")
+        val webLinkBadge get() = m(l, "Web", "Web", "Web", "Web")
+        val previewFolder get() = m(l, "Preview", "Vorschau", "Vista previa", "Aperçu")
+        val lockFolder get() = m(l, "Lock folder", "Ordner sperren", "Bloquear carpeta", "Verrouiller le dossier")
+        val unlockFolder get() = m(l, "Unlock folder", "Ordner entsperren", "Desbloquear carpeta", "Déverrouiller le dossier")
+        val biometricUnavailable get() = m(l, "Biometric unlock isn't set up on this device", "Biometrische Entsperrung ist auf diesem Gerät nicht eingerichtet", "El desbloqueo biométrico no está configurado en este dispositivo", "Le déverrouillage biométrique n'est pas configuré sur cet appareil")
+        val pinToHome get() = m(l, "Pin to home", "An Startbildschirm anheften", "Anclar en inicio", "Épingler à l'accueil")
+        val pinUnsupported get() = m(l, "Your launcher doesn't support one-tap pinning. Long-press your home screen and pick the App Folder widget instead.", "Dein Launcher unterstützt das Anheften mit einem Tippen nicht. Halte stattdessen den Startbildschirm gedrückt und wähle das App-Ordner-Widget.", "Tu launcher no admite el anclaje rápido. Mantén pulsada la pantalla de inicio y elige el widget Carpeta de apps.", "Votre launcher ne prend pas en charge l'épinglage en un tapotement. Appuyez longuement sur l'écran d'accueil et sélectionnez le widget Dossier d'applis.")
+        val rule get() = m(l, "Rules", "Regeln", "Reglas", "Règles")
+        val rulePackagePrefix get() = m(l, "Package starts with", "Paket beginnt mit", "Paquete empieza con", "Paquet commence par")
+        val ruleRecentlyInstalled get() = m(l, "Recently installed", "Neu installiert", "Instaladas recientemente", "Récemment installées")
+        val ruleWebApks get() = m(l, "Web PWAs only", "Nur Web-PWAs", "Solo PWAs", "PWAs uniquement")
+        val ruleUnused get() = m(l, "Unused for", "Ungenutzt seit", "Sin uso desde hace", "Inutilisées depuis")
+        val ruleOnInternalStorage get() = m(l, "On internal storage", "Auf internem Speicher", "En almacenamiento interno", "Sur la mémoire interne")
+        val ruleOnExternalStorage get() = m(l, "On SD card", "Auf SD-Karte", "En tarjeta SD", "Sur carte SD")
+        val ruleSystemApps get() = m(l, "System apps", "System-Apps", "Apps del sistema", "Applis système")
+        val ruleUserApps get() = m(l, "User-installed apps", "Vom Nutzer installiert", "Instaladas por el usuario", "Installées par l'utilisateur")
+        val ruleUnionHint get() = m(l, "Manual selections and rule matches are combined.", "Manuelle Auswahl und Regeln werden zusammengeführt.", "Las selecciones manuales se combinan con las reglas.", "Les sélections manuelles et les règles sont combinées.")
+        val ruleDays get() = m(l, "days", "Tage", "días", "jours")
+        val rulePackagePrefixHint get() = m(l, "e.g. com.google.", "z. B. com.google.", "p. ej. com.google.", "p. ex. com.google.")
+        val ruleUsageHint get() = m(l, "Requires \"Usage access\" permission. Grant in Settings → Apps → Special access.", "Benötigt die Berechtigung „Nutzungsdaten\". Gewähre sie unter Einstellungen → Apps → Spezieller Zugriff.", "Requiere el permiso \"Acceso de uso\". Concédelo en Ajustes → Apps → Acceso especial.", "Nécessite l'autorisation « Accès aux données d'utilisation ». Accordez-la dans Paramètres → Applis → Accès spécial.")
+        val searchAppsHint get() = m(l, "Search apps", "Apps suchen", "Buscar apps", "Rechercher des applis")
+        val noSearchMatches get() = m(l, "No apps match", "Keine Treffer", "Sin coincidencias", "Aucune correspondance")
+        val alreadyInFolder get() = m(l, "in:", "in:", "en:", "dans :")
+        val coverIcon get() = m(l, "Cover", "Titelbild", "Portada", "Couverture")
+        val coverPickImage get() = m(l, "Pick image", "Bild wählen", "Elegir imagen", "Choisir image")
+        val coverPickSymbol get() = m(l, "Pick symbol", "Symbol wählen", "Elegir símbolo", "Choisir symbole")
+        val coverClear get() = m(l, "Clear", "Entfernen", "Quitar", "Effacer")
+        val coverNone get() = m(l, "Auto", "Automatisch", "Auto", "Auto")
+    }
+
+    // ── Backup ─────────────────────────────────────────────────────────
+    val backup: Backup @Composable get() = Backup(lang)
+
+    class Backup(private val l: Language) {
+        val backup get() = m(l, "Backup", "Sicherung", "Copia de seguridad", "Sauvegarde")
+        val restore get() = m(l, "Restore", "Wiederherstellen", "Restaurar", "Restaurer")
+        val backupDesc get() = m(l, "Export all app data as a backup file", "Alle App-Daten als Sicherungsdatei exportieren", "Exportar todos los datos de la app como archivo de respaldo", "Exporter toutes les donn\u00E9es de l'app comme fichier de sauvegarde")
+        val restoreDesc get() = m(l, "Import data from a backup file", "Daten aus einer Sicherungsdatei importieren", "Importar datos de un archivo de respaldo", "Importer les donn\u00E9es depuis un fichier de sauvegarde")
+        val backupSuccess get() = m(l, "Backup created successfully", "Sicherung erfolgreich erstellt", "Copia de seguridad creada con \u00E9xito", "Sauvegarde cr\u00E9\u00E9e avec succ\u00E8s")
+        val restoreSuccess get() = m(l, "Restore completed \u2014 restart app to apply", "Wiederherstellung abgeschlossen \u2014 App neu starten", "Restauraci\u00F3n completada \u2014 reinicie la app", "Restauration termin\u00E9e \u2014 red\u00E9marrez l'app")
+        val backupFailed get() = m(l, "Backup failed", "Sicherung fehlgeschlagen", "Error en la copia de seguridad", "\u00C9chec de la sauvegarde")
+        val restoreFailed get() = m(l, "Restore failed", "Wiederherstellung fehlgeschlagen", "Error en la restauraci\u00F3n", "\u00C9chec de la restauration")
+    }
+
+    // \u2500\u2500 Flipper Zero \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    val flipper: Flipper @Composable get() = Flipper(lang)
+
+    class Flipper(private val l: Language) {
+        val title get() = m(l, "Flipper Zero", "Flipper Zero", "Flipper Zero", "Flipper Zero")
+        val description get() = m(l, "Connect a Flipper Zero to transmit Sub-GHz and IR signals from this app.", "Verbinde einen Flipper Zero, um Sub-GHz- und IR-Signale aus dieser App zu senden.", "Conecta un Flipper Zero para transmitir se\u00F1ales Sub-GHz e IR desde esta app.", "Connectez un Flipper Zero pour \u00E9mettre des signaux Sub-GHz et IR depuis cette app.")
+        val disconnected get() = m(l, "Not connected", "Nicht verbunden", "No conectado", "Non connect\u00E9")
+        val connecting get() = m(l, "Connecting\u2026", "Verbinden\u2026", "Conectando\u2026", "Connexion\u2026")
+        val connected get() = m(l, "Connected", "Verbunden", "Conectado", "Connect\u00E9")
+        val connectionFailed get() = m(l, "Connection failed", "Verbindung fehlgeschlagen", "Conexi\u00F3n fallida", "\u00C9chec de la connexion")
+        val connectUsb get() = m(l, "Connect via USB", "Per USB verbinden", "Conectar por USB", "Connecter en USB")
+        val connectBle get() = m(l, "Connect via Bluetooth", "Per Bluetooth verbinden", "Conectar por Bluetooth", "Connecter en Bluetooth")
+        val noDevices get() = m(l, "No paired Flipper found. Pair one in Bluetooth settings first.", "Kein gekoppelter Flipper gefunden. Bitte zuerst in den Bluetooth-Einstellungen koppeln.", "No se encontr\u00F3 ning\u00FAn Flipper emparejado. Empareja uno primero en los ajustes de Bluetooth.", "Aucun Flipper appair\u00E9 trouv\u00E9. Appairez-en un dans les param\u00E8tres Bluetooth.")
+        val disconnect get() = m(l, "Disconnect", "Trennen", "Desconectar", "D\u00E9connecter")
+        val sendToFlipper get() = m(l, "Send to Flipper", "An Flipper senden", "Enviar al Flipper", "Envoyer au Flipper")
+        val transmittedViaFlipper get() = m(l, "Sent to Flipper", "An Flipper gesendet", "Enviado al Flipper", "Envoy\u00E9 au Flipper")
+        val sendFailed get() = m(l, "Send failed", "Senden fehlgeschlagen", "Error al enviar", "\u00C9chec de l'envoi")
+        val firmware get() = m(l, "Firmware", "Firmware", "Firmware", "Micrologiciel")
+        val battery get() = m(l, "Battery", "Akku", "Bater\u00EDa", "Batterie")
+    }
+
+    // ── Common / Shared ─────────────────────────────────────────────────
+    val common: Common @Composable get() = Common(lang)
+
+    class Common(private val l: Language) {
+        val ok get() = m(l, "OK", "OK", "OK", "OK")
+        val cancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
+        val save get() = m(l, "Save", "Speichern", "Guardar", "Enregistrer")
+        val delete get() = m(l, "Delete", "Löschen", "Eliminar", "Supprimer")
+        val close get() = m(l, "Close", "Schließen", "Cerrar", "Fermer")
+        val confirm get() = m(l, "Confirm", "Bestätigen", "Confirmar", "Confirmer")
+        val error get() = m(l, "Error", "Fehler", "Error", "Erreur")
+        val success get() = m(l, "Success", "Erfolg", "Éxito", "Succès")
+        val loading get() = m(l, "Loading...", "Laden...", "Cargando...", "Chargement...")
+        val search get() = m(l, "Search", "Suchen", "Buscar", "Rechercher")
+        val back get() = m(l, "Back", "Zurück", "Atrás", "Retour")
+        val apply get() = m(l, "Apply", "Anwenden", "Aplicar", "Appliquer")
+        val add get() = m(l, "Add", "Hinzufügen", "Añadir", "Ajouter")
+        val sort get() = m(l, "Sort", "Sortieren", "Ordenar", "Trier")
+        val none get() = m(l, "None", "Keine", "Ninguno", "Aucun")
+        val next get() = m(l, "Next", "Weiter", "Siguiente", "Suivant")
+        val selectTime get() = m(l, "Select Time", "Zeit auswählen", "Seleccionar hora", "Sélectionner l'heure")
+        val selectDate get() = m(l, "Select Date", "Datum auswählen", "Seleccionar fecha", "Sélectionner la date")
+        val deleteAll get() = m(l, "Delete all", "Alle löschen", "Eliminar todo", "Tout supprimer")
+        val clearAll get() = m(l, "Clear all", "Alle löschen", "Borrar todo", "Tout effacer")
+    }
+
+    // ── Onboarding ──────────────────────────────────────────────────────
+    val onboarding: Onboarding @Composable get() = Onboarding(lang)
+
+    class Onboarding(private val l: Language) {
+        val welcomeTitle get() = m(l, "Welcome to Gadget", "Willkommen bei Gadget", "Bienvenido a Gadget", "Bienvenue sur Gadget")
+        val welcomeDesc get() = m(l,
+            "Your all-in-one hardware toolkit. Monitor sensors, control hardware, and automate your device.",
+            "Ihr All-in-One Hardware-Toolkit. Sensoren überwachen, Hardware steuern und Gerät automatisieren.",
+            "Tu kit de herramientas de hardware todo en uno. Monitorea sensores, controla hardware y automatiza tu dispositivo.",
+            "Votre boîte à outils matérielle tout-en-un. Surveillez les capteurs, contrôlez le matériel et automatisez votre appareil."
+        )
+        val toolsTitle get() = m(l, "Powerful Tools", "Leistungsstarke Werkzeuge", "Herramientas poderosas", "Outils puissants")
+        val toolsDesc get() = m(l,
+            "Torch, camera, vibration patterns, microphone — all with advanced controls and home screen widgets.",
+            "Taschenlampe, Kamera, Vibrationsmuster, Mikrofon — alles mit erweiterten Steuerungen und Startbildschirm-Widgets.",
+            "Linterna, cámara, patrones de vibración, micrófono — todo con controles avanzados y widgets de pantalla de inicio.",
+            "Lampe, caméra, motifs de vibration, microphone — tout avec des contrôles avancés et des widgets d'écran d'accueil."
+        )
+        val monitorTitle get() = m(l, "Live Monitoring", "Live-Überwachung", "Monitoreo en vivo", "Surveillance en direct")
+        val monitorDesc get() = m(l,
+            "Real-time sensor charts, battery analytics, WiFi and Bluetooth status — all at your fingertips.",
+            "Echtzeit-Sensordiagramme, Akku-Analysen, WLAN- und Bluetooth-Status — alles auf einen Blick.",
+            "Gráficos de sensores en tiempo real, análisis de batería, estado WiFi y Bluetooth — todo al alcance de tu mano.",
+            "Graphiques de capteurs en temps réel, analyses de batterie, état WiFi et Bluetooth — tout à portée de main."
+        )
+        val logbookTitle get() = m(l, "Smart Logbook", "Smartes Logbuch", "Registro inteligente", "Journal intelligent")
+        val logbookDesc get() = m(l,
+            "Log events, track processes with checkpoints, attach metric snapshots, and export your data.",
+            "Ereignisse protokollieren, Prozesse mit Prüfpunkten verfolgen, Metrik-Snapshots anhängen und Daten exportieren.",
+            "Registra eventos, rastrea procesos con puntos de control, adjunta instantáneas de métricas y exporta tus datos.",
+            "Enregistrez des événements, suivez des processus avec des points de contrôle, joignez des instantanés de métriques et exportez vos données."
+        )
+        val moreTitle get() = m(l, "And Much More", "Und vieles mehr", "Y mucho más", "Et bien plus encore")
+        val moreDesc get() = m(l,
+            "IF/THEN automation rules, file metadata editing, NFC tools, and 11 home screen widgets.",
+            "WENN/DANN Automatisierungsregeln, Dateimetadaten-Bearbeitung, NFC-Tools und 11 Startbildschirm-Widgets.",
+            "Reglas de automatización SI/ENTONCES, edición de metadatos de archivos, herramientas NFC y 11 widgets de pantalla de inicio.",
+            "Règles d'automatisation SI/ALORS, édition de métadonnées, outils NFC et 11 widgets d'écran d'accueil."
+        )
+        val skip get() = m(l, "Skip", "Überspringen", "Omitir", "Passer")
+        val next get() = m(l, "Next", "Weiter", "Siguiente", "Suivant")
+        val getStarted get() = m(l, "Get Started", "Loslegen", "Comenzar", "Commencer")
+        val showOnboarding get() = m(l, "Show Onboarding", "Einführung anzeigen", "Mostrar introducción", "Afficher l'introduction")
+    }
+
+    // ── Accessibility ──────────────────────────────────────────────────
+    val accessibility: Accessibility @Composable get() = Accessibility(lang)
+
+    class Accessibility(private val l: Language) {
+        // Screen announcements
+        val dashboardScreen get() = m(l, "Dashboard screen", "Dashboard-Bildschirm", "Pantalla del panel", "Écran du tableau de bord")
+        val toolsScreen get() = m(l, "Tools screen", "Werkzeuge-Bildschirm", "Pantalla de herramientas", "Écran des outils")
+        val monitorScreen get() = m(l, "Monitor screen", "Monitor-Bildschirm", "Pantalla de monitor", "Écran du moniteur")
+        val logbookScreen get() = m(l, "Logbook screen", "Logbuch-Bildschirm", "Pantalla del registro", "Écran du journal")
+        val moreScreen get() = m(l, "More screen", "Mehr-Bildschirm", "Pantalla de más opciones", "Écran plus")
+        val torchScreen get() = m(l, "Torch screen", "Taschenlampe-Bildschirm", "Pantalla de linterna", "Écran lampe torche")
+        val cameraScreen get() = m(l, "Camera screen", "Kamera-Bildschirm", "Pantalla de cámara", "Écran caméra")
+        val vibrationScreen get() = m(l, "Vibration screen", "Vibrations-Bildschirm", "Pantalla de vibración", "Écran vibration")
+        val micScreen get() = m(l, "Microphone screen", "Mikrofon-Bildschirm", "Pantalla de micrófono", "Écran microphone")
+        val sensorsScreen get() = m(l, "Sensors screen", "Sensoren-Bildschirm", "Pantalla de sensores", "Écran capteurs")
+        val batteryScreen get() = m(l, "Battery screen", "Akku-Bildschirm", "Pantalla de batería", "Écran batterie")
+        val radiosScreen get() = m(l, "Radios screen", "Funk-Bildschirm", "Pantalla de radios", "Écran radios")
+        val lockScreen get() = m(l, "Notifications screen", "Benachrichtigungs-Bildschirm", "Pantalla de notificaciones", "Écran notifications")
+        val linkScreen get() = m(l, "Link automation screen", "Link-Automatisierungs-Bildschirm", "Pantalla de automatización", "Écran automatisation")
+        val fileMetaScreen get() = m(l, "File metadata screen", "Datei-Metadaten-Bildschirm", "Pantalla de metadatos", "Écran métadonnées")
+        val settingsScreen get() = m(l, "Settings screen", "Einstellungs-Bildschirm", "Pantalla de ajustes", "Écran paramètres")
+        val bugReportScreen get() = m(l, "Bug report screen", "Fehlerbericht-Bildschirm", "Pantalla de informe de errores", "Écran rapport de bug")
+        val manualScreen get() = m(l, "User manual screen", "Benutzerhandbuch-Bildschirm", "Pantalla del manual de usuario", "\u00C9cran du manuel utilisateur")
+
+        // Settings section
+        val accessibilityTitle get() = m(l, "Accessibility", "Barrierefreiheit", "Accesibilidad", "Accessibilité")
+        val highContrast get() = m(l, "High contrast mode", "Hochkontrastmodus", "Modo de alto contraste", "Mode contraste élevé")
+        val highContrastDesc get() = m(l, "Increases color contrast for better visibility", "Erhöht den Farbkontrast für bessere Sichtbarkeit", "Aumenta el contraste de color para mejor visibilidad", "Augmente le contraste des couleurs pour une meilleure visibilité")
+        val largeText get() = m(l, "Large text", "Großer Text", "Texto grande", "Grand texte")
+        val largeTextDesc get() = m(l, "Increases text size throughout the app", "Vergrößert die Textgröße in der gesamten App", "Aumenta el tamaño del texto en toda la aplicación", "Augmente la taille du texte dans toute l'application")
+        val reducedMotion get() = m(l, "Reduce motion", "Bewegung reduzieren", "Reducir movimiento", "Réduire les animations")
+        val reducedMotionDesc get() = m(l, "Minimizes animations and motion effects", "Minimiert Animationen und Bewegungseffekte", "Minimiza las animaciones y efectos de movimiento", "Minimise les animations et effets de mouvement")
+
+        // State descriptions
+        val torchOn get() = m(l, "Torch is on", "Taschenlampe ist an", "Linterna encendida", "Lampe allumée")
+        val torchOff get() = m(l, "Torch is off", "Taschenlampe ist aus", "Linterna apagada", "Lampe éteinte")
+        val recording get() = m(l, "Recording", "Aufnahme", "Grabando", "Enregistrement")
+        val notRecording get() = m(l, "Not recording", "Keine Aufnahme", "Sin grabar", "Pas d'enregistrement")
+        val enabled get() = m(l, "Enabled", "Aktiviert", "Activado", "Activé")
+        val disabled get() = m(l, "Disabled", "Deaktiviert", "Desactivado", "Désactivé")
+        val expanded get() = m(l, "Expanded", "Erweitert", "Expandido", "Développé")
+        val collapsed get() = m(l, "Collapsed", "Eingeklappt", "Contraído", "Réduit")
+        val flashAvailable get() = m(l, "Flash available", "Blitz verfügbar", "Flash disponible", "Flash disponible")
+        val flashUnavailable get() = m(l, "Flash unavailable", "Blitz nicht verfügbar", "Flash no disponible", "Flash non disponible")
+
+        // Chart descriptions
+        fun sensorChartDesc(name: String, values: String) = m(l,
+            "Live chart for $name showing $values",
+            "Live-Diagramm für $name zeigt $values",
+            "Gráfico en vivo de $name mostrando $values",
+            "Graphique en direct de $name affichant $values")
+        fun batteryChartDesc(current: String) = m(l,
+            "Battery current draw chart, current value $current milliamps",
+            "Batteriestrom-Diagramm, aktueller Wert $current Milliampere",
+            "Gráfico de corriente de batería, valor actual $current miliamperios",
+            "Graphique de courant de batterie, valeur actuelle $current milliampères")
+        fun spectrumDesc(peakHz: String) = m(l,
+            "Audio spectrum analyzer, peak frequency $peakHz hertz",
+            "Audio-Spektrumanalysator, Spitzenfrequenz $peakHz Hertz",
+            "Analizador de espectro de audio, frecuencia pico $peakHz hercios",
+            "Analyseur de spectre audio, fréquence de pointe $peakHz hertz")
+        fun dbMeterDesc(db: String) = m(l,
+            "Sound level meter reading $db decibels",
+            "Schallpegelmesser zeigt $db Dezibel",
+            "Medidor de nivel sonoro leyendo $db decibelios",
+            "Sonomètre indiquant $db décibels")
+        fun waveformDesc() = m(l,
+            "Audio waveform history visualization",
+            "Audio-Wellenform-Verlaufsvisualisierung",
+            "Visualización del historial de forma de onda de audio",
+            "Visualisation de l'historique de la forme d'onde audio")
+        fun vibrationCanvasDesc() = m(l,
+            "Vibration pattern drawing canvas",
+            "Vibrationsmuster-Zeichnungsfläche",
+            "Lienzo de dibujo de patrón de vibración",
+            "Canevas de dessin de motif de vibration")
+        fun batteryLevelDesc(level: Int, status: String) = m(l,
+            "Battery at $level percent, $status",
+            "Akku bei $level Prozent, $status",
+            "Batería al $level por ciento, $status",
+            "Batterie à $level pour cent, $status")
+
+        // Navigation
+        val skipToContent get() = m(l, "Skip to content", "Zum Inhalt springen", "Saltar al contenido", "Aller au contenu")
+
+        // Actions
+        val expandSection get() = m(l, "Expand section", "Abschnitt erweitern", "Expandir sección", "Développer la section")
+        val collapseSection get() = m(l, "Collapse section", "Abschnitt einklappen", "Contraer sección", "Réduire la section")
+        val playRecording get() = m(l, "Play recording", "Aufnahme abspielen", "Reproducir grabación", "Lire l'enregistrement")
+        val stopPlayback get() = m(l, "Stop playback", "Wiedergabe stoppen", "Detener reproducción", "Arrêter la lecture")
+        val removeStep get() = m(l, "Remove step", "Schritt entfernen", "Eliminar paso", "Supprimer l'étape")
+        val copyReadings get() = m(l, "Copy all sensor readings to clipboard", "Alle Sensorwerte in die Zwischenablage kopieren", "Copiar todas las lecturas del sensor al portapapeles", "Copier toutes les lectures des capteurs dans le presse-papiers")
+        val startRecording get() = m(l, "Start recording", "Aufnahme starten", "Iniciar grabación", "Démarrer l'enregistrement")
+        val stopRecording get() = m(l, "Stop recording", "Aufnahme stoppen", "Detener grabación", "Arrêter l'enregistrement")
+        val loadPattern get() = m(l, "Load pattern", "Muster laden", "Cargar patrón", "Charger le motif")
+        val deletePattern get() = m(l, "Delete pattern", "Muster löschen", "Eliminar patrón", "Supprimer le motif")
+        val permissionGranted get() = m(l, "Granted", "Erteilt", "Concedido", "Accordée")
+        val permissionDenied get() = m(l, "Denied", "Verweigert", "Denegado", "Refusée")
+
+        // Interactive icon labels
+        val toggleDetails get() = m(l, "Toggle details", "Details umschalten", "Alternar detalles", "Basculer les détails")
+        val toggleInfo get() = m(l, "Toggle info", "Info umschalten", "Alternar información", "Basculer les infos")
+        val toggleLog get() = m(l, "Toggle log", "Protokoll umschalten", "Alternar registro", "Basculer le journal")
+        val clearLog get() = m(l, "Clear log", "Protokoll löschen", "Borrar registro", "Effacer le journal")
+        val help get() = m(l, "Help", "Hilfe", "Ayuda", "Aide")
+    }
+
+    // ── Widget / Service toasts (non-Composable context) ─────────────────
+    object Widget {
+        fun phoneRingToast(lang: Language, delaySec: Int, durationSec: Int) = if (delaySec > 0) {
+            m(lang,
+                "Phone will ring in $delaySec s for $durationSec s",
+                "Telefon klingelt in $delaySec s für $durationSec s",
+                "El teléfono sonará en $delaySec s durante $durationSec s",
+                "Le téléphone sonnera dans $delaySec s pendant $durationSec s")
+        } else {
+            m(lang,
+                "Phone ringing for $durationSec s",
+                "Telefon klingelt für $durationSec s",
+                "El teléfono suena durante $durationSec s",
+                "Le téléphone sonne pendant $durationSec s")
+        }
+
+        fun notifyToast(lang: Language, seconds: Int) = m(lang,
+            "Notification in $seconds seconds",
+            "Benachrichtigung in $seconds Sekunden",
+            "Notificación en $seconds segundos",
+            "Notification dans $seconds secondes")
+
+        // Flashlight widget
+        fun torchOn(lang: Language) = m(lang, "Torch ON", "Taschenlampe AN", "Linterna encendida", "Lampe allumée")
+        fun torchOff(lang: Language) = m(lang, "Torch OFF", "Taschenlampe AUS", "Linterna apagada", "Lampe éteinte")
+        fun noFlashAvailable(lang: Language) = m(lang, "No flash available", "Kein Blitz verfügbar", "Sin flash disponible", "Pas de flash disponible")
+
+        // Strobe widget
+        fun strobeStarted(lang: Language) = m(lang, "Strobe started", "Stroboskop gestartet", "Estrobo iniciado", "Stroboscope démarré")
+        fun strobeStopped(lang: Language) = m(lang, "Strobe stopped", "Stroboskop gestoppt", "Estrobo detenido", "Stroboscope arrêté")
+
+        // Vibration widget
+        fun vibrationOn(lang: Language) = m(lang, "Vibration ON", "Vibration AN", "Vibración encendida", "Vibration activée")
+        fun vibrationOff(lang: Language) = m(lang, "Vibration OFF", "Vibration AUS", "Vibración apagada", "Vibration désactivée")
+
+        // Widget config
+        fun chooseMetric(lang: Language) = m(lang, "Choose a Metric", "Metrik auswählen", "Elegir una métrica", "Choisir une métrique")
+        fun unit(lang: Language) = m(lang, "Unit", "Einheit", "Unidad", "Unité")
+    }
+
+    // ── Service notifications (non-Composable context) ─────────────────
+    object Services {
+        // Vibration service
+        fun vibrationActive(lang: Language) = m(lang, "Vibration Active", "Vibration aktiv", "Vibración activa", "Vibration active")
+
+        // Strobe service
+        fun strobeActive(lang: Language) = m(lang, "Strobe Active", "Stroboskop aktiv", "Estrobo activo", "Stroboscope actif")
+        fun tapToStop(lang: Language) = m(lang, "Tap to stop", "Tippen zum Stoppen", "Toque para detener", "Appuyez pour arrêter")
+
+        // Link service
+        fun linkMonitoring(lang: Language) = m(lang, "Link Monitoring Active", "Link-Überwachung aktiv", "Monitoreo de enlaces activo", "Surveillance des liens active")
+        fun linkTapToStop(lang: Language) = m(lang, "Evaluating link rules", "Link-Regeln werden ausgewertet", "Evaluando reglas de enlace", "Évaluation des règles de lien")
+        fun linkTriggered(lang: Language, name: String) = m(lang, "Link triggered: $name", "Link ausgelöst: $name", "Enlace activado: $name", "Lien déclenché : $name")
+
+        // Voice record service
+        fun recordingAudio(lang: Language) = m(lang, "Recording Audio", "Audioaufnahme", "Grabando audio", "Enregistrement audio")
+        fun tapToStopSave(lang: Language) = m(lang, "Tap to stop and save", "Tippen zum Stoppen und Speichern", "Toque para detener y guardar", "Appuyez pour arrêter et enregistrer")
+        fun micInitFailed(lang: Language) = m(lang, "Mic init failed", "Mikrofon-Initialisierung fehlgeschlagen", "Error al inicializar el micrófono", "Échec d'initialisation du micro")
+        fun savedFile(lang: Language, name: String) = m(lang, "Saved: $name", "Gespeichert: $name", "Guardado: $name", "Enregistré : $name")
+        fun nothingRecorded(lang: Language) = m(lang, "Nothing recorded", "Nichts aufgenommen", "Nada grabado", "Rien enregistré")
+
+        // dB Meter service
+        fun dbMeterActive(lang: Language) = m(lang, "dB Meter Active", "dB-Messgerät aktiv", "Medidor dB activo", "Mètre dB actif")
+        fun monitoringMicLevel(lang: Language) = m(lang, "Monitoring microphone level", "Mikrofonpegel wird überwacht", "Monitoreando nivel del micrófono", "Surveillance du niveau du microphone")
+
+        // Video record service
+        fun recordingVideo(lang: Language) = m(lang, "Recording Video", "Video wird aufgenommen", "Grabando video", "Enregistrement vidéo")
+        fun cameraError(lang: Language, detail: String) = m(lang, "Camera error: $detail", "Kamerafehler: $detail", "Error de cámara: $detail", "Erreur caméra : $detail")
+        fun videoError(lang: Language, detail: String) = m(lang, "Video error: $detail", "Videofehler: $detail", "Error de vídeo: $detail", "Erreur vidéo : $detail")
+
+        // Hardware service
+        fun hardwareMonitoring(lang: Language) = m(lang, "Hardware monitoring is running in the background.", "Hardware-Überwachung läuft im Hintergrund.", "La monitorización de hardware se ejecuta en segundo plano.", "La surveillance matérielle fonctionne en arrière-plan.")
+        fun stop(lang: Language) = m(lang, "Stop", "Stopp", "Parar", "Arrêter")
+
+        // Admin receiver
+        fun deviceAdminEnabled(lang: Language) = m(lang, "Gadget Device Admin: enabled", "Gadget Geräteadministrator: aktiviert", "Gadget Administrador del dispositivo: habilitado", "Gadget Administrateur de l'appareil : activé")
+        fun deviceAdminDisabled(lang: Language) = m(lang, "Gadget Device Admin: disabled", "Gadget Geräteadministrator: deaktiviert", "Gadget Administrador del dispositivo: deshabilitado", "Gadget Administrateur de l'appareil : désactivé")
+
+        // Sensors
+        fun sensorReadingsCopied(lang: Language) = m(lang, "Sensor readings copied!", "Sensorwerte kopiert!", "¡Lecturas de sensores copiadas!", "Lectures de capteurs copiées !")
+
+        // Logbook reminder
+        fun checkpointTitle(lang: Language, name: String) = m(lang, "Checkpoint: $name", "Prüfpunkt: $name", "Punto de control: $name", "Point de contrôle : $name")
+        fun checkpointDue(lang: Language, procName: String, cpName: String) = m(lang,
+            "Process \"$procName\" \u2014 $cpName is due now.",
+            "Prozess \"$procName\" \u2014 $cpName ist jetzt fällig.",
+            "Proceso \"$procName\" \u2014 $cpName vence ahora.",
+            "Processus \"$procName\" \u2014 $cpName est dû maintenant.")
+
+        // Persistent keep-alive service
+        fun keepAliveTitle(lang: Language) = m(
+            lang,
+            "Gadget keep-alive",
+            "Gadget Keep-Alive",
+            "Gadget keep-alive",
+            "Gadget keep-alive",
+        )
+        fun keepAliveBody(lang: Language) = m(
+            lang,
+            "Background tasks running",
+            "Hintergrundaufgaben aktiv",
+            "Tareas en segundo plano activas",
+            "Taches en arriere-plan actives",
+        )
+    }
+
+    // Batch-7: Keep Alive setting
+    object KeepAlive {
+        fun title(lang: Language) = m(
+            lang,
+            "Keep Alive",
+            "Aktiv halten",
+            "Mantener activo",
+            "Maintenir actif",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Run a sticky foreground service so automation rules and pollers survive Doze.",
+            "Persistenten Vordergrund-Dienst ausfuehren, damit Automatisierungsregeln und " +
+                "Polling den Doze-Modus ueberleben.",
+            "Ejecutar un servicio en primer plano persistente para que las reglas de " +
+                "automatizacion y sondeos sobrevivan al modo Doze.",
+            "Executer un service de premier plan persistant pour que les regles " +
+                "d'automatisation et les sondages survivent au mode Doze.",
+        )
+        fun rootedFootnote(lang: Language) = m(
+            lang,
+            "Rooted: Doze whitelist + pm grant applied automatically.",
+            "Rooted: Doze-Whitelist + pm grant werden automatisch angewendet.",
+            "Con root: lista blanca Doze + pm grant aplicados automaticamente.",
+            "Avec root : liste blanche Doze + pm grant appliques automatiquement.",
+        )
+        fun standardFootnote(lang: Language) = m(
+            lang,
+            "Standard: tapping on opens battery-optimization exemption settings.",
+            "Standard: Antippen oeffnet die Akku-Ausnahme-Einstellungen.",
+            "Estandar: tocar abre los ajustes de excepcion de optimizacion de bateria.",
+            "Standard : appuyer ouvre les parametres d'exception d'optimisation de batterie.",
+        )
+    }
+
+    // Batch-7: Permissions onboarding
+    object PermissionsOnboarding {
+        fun requestAllButton(lang: Language) = m(
+            lang,
+            "Request all missing permissions",
+            "Alle fehlenden Berechtigungen anfordern",
+            "Solicitar todos los permisos faltantes",
+            "Demander toutes les autorisations manquantes",
+        )
+        fun progress(lang: Language, current: Int, total: Int) = m(
+            lang,
+            "Step $current of $total",
+            "Schritt $current von $total",
+            "Paso $current de $total",
+            "Etape $current sur $total",
+        )
+        fun complete(lang: Language) = m(
+            lang,
+            "All permission flows finished",
+            "Alle Berechtigungs-Ablaeufe abgeschlossen",
+            "Todos los flujos de permisos completados",
+            "Tous les flux d'autorisation termines",
+        )
+    }
+
+    // Batch-7: Automation root extras
+    object AutomationRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Automation)",
+            "Root-Erweiterungen (Automatisierung)",
+            "Extras root (Automatizacion)",
+            "Extras root (Automatisation)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Privileged intent fire (deny-listed actions), settings put against an " +
+                "allow-list, dumpsys snapshot. All writes snapshot+restore.",
+            "Privilegierte Intents (gesperrte Aktionen), Settings put gegen eine " +
+                "Allow-Liste, dumpsys-Snapshot. Alle Schreibvorgaenge mit Snapshot+Restore.",
+            "Disparo de intent privilegiado (acciones en lista de denegacion), settings put " +
+                "contra lista permitida, instantanea de dumpsys. Todas las escrituras con snapshot+restore.",
+            "Tir d'intent privilegie (actions sur liste de refus), settings put contre une " +
+                "liste autorisee, capture dumpsys. Toutes les ecritures avec snapshot+restore.",
+        )
+        fun firePrivilegedIntent(lang: Language) = m(
+            lang,
+            "Fire privileged intent (demo)",
+            "Privilegierten Intent feuern (Demo)",
+            "Disparar intent privilegiado (demo)",
+            "Tirer un intent privilegie (demo)",
+        )
+        fun overrideSetting(lang: Language) = m(
+            lang,
+            "Override system setting (demo)",
+            "Systemeinstellung ueberschreiben (Demo)",
+            "Anular ajuste del sistema (demo)",
+            "Remplacer un parametre systeme (demo)",
+        )
+        fun dumpsysSnapshot(lang: Language) = m(
+            lang,
+            "Dumpsys snapshot",
+            "Dumpsys-Snapshot",
+            "Instantanea de dumpsys",
+            "Capture dumpsys",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all automation mutations",
+            "Alle Automatisierungs-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de automatizacion",
+            "Reinitialiser toutes les mutations d'automatisation",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Privileged intents and settings overrides may alter system behaviour. " +
+                "Use at your own risk.",
+            "Privilegierte Intents und Einstellungen koennen das Systemverhalten aendern. " +
+                "Verwendung auf eigene Gefahr.",
+            "Los intents privilegiados y anulaciones de ajustes pueden alterar el " +
+                "comportamiento del sistema. Uselo bajo su propia responsabilidad.",
+            "Les intents privilegies et les remplacements de parametres peuvent alterer " +
+                "le comportement du systeme. Utilisation a vos risques.",
+        )
+    }
+
+    // Batch-7: Notification root extras
+    object NotificationRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Notifications)",
+            "Root-Erweiterungen (Benachrichtigungen)",
+            "Extras root (Notificaciones)",
+            "Extras root (Notifications)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Sticky channel-importance override (raise only), one-shot " +
+                "notification-listener access, and a 60 s lock-screen overlay.",
+            "Sticky-Kanal-Wichtigkeitsueberschreibung (nur erhoehen), Einmal-" +
+                "Listener-Zugriff und 60 s-Sperrbildschirm-Overlay.",
+            "Anulacion de importancia de canal sticky (solo elevar), acceso unico al " +
+                "listener de notificaciones y overlay de pantalla de bloqueo de 60 s.",
+            "Remplacement d'importance de canal sticky (elever uniquement), acces unique " +
+                "au listener de notification, et overlay verrouille 60 s.",
+        )
+        fun stickyOverride(lang: Language) = m(
+            lang,
+            "Raise channel importance (demo)",
+            "Kanal-Wichtigkeit erhoehen (Demo)",
+            "Elevar importancia del canal (demo)",
+            "Elever l'importance du canal (demo)",
+        )
+        fun listenerAccess(lang: Language) = m(
+            lang,
+            "Grant listener access (auto-revert on exit)",
+            "Listener-Zugriff erteilen (Auto-Revert beim Verlassen)",
+            "Conceder acceso al listener (auto-revertir al salir)",
+            "Accorder l'acces listener (auto-revocation a la sortie)",
+        )
+        fun overlay(lang: Language) = m(
+            lang,
+            "Show lock-screen overlay (10 s)",
+            "Sperrbildschirm-Overlay zeigen (10 s)",
+            "Mostrar overlay de bloqueo (10 s)",
+            "Afficher overlay de verrouillage (10 s)",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all notification mutations",
+            "Alle Benachrichtigungs-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de notificaciones",
+            "Reinitialiser toutes les mutations de notifications",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Listener access and lock-screen overlays carry phishing risk. " +
+                "Auto-reverted on screen exit.",
+            "Listener-Zugriff und Sperrbildschirm-Overlays bergen Phishing-Risiken. " +
+                "Auto-Revert beim Verlassen.",
+            "El acceso al listener y los overlays conllevan riesgo de phishing. " +
+                "Revertidos automaticamente al salir.",
+            "L'acces listener et les overlays comportent un risque de phishing. " +
+                "Auto-revoques a la sortie.",
+        )
+    }
+
+    // Batch-8: Storage root extras
+    object StorageRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Storage)",
+            "Root-Erweiterungen (Speicher)",
+            "Extras root (Almacenamiento)",
+            "Extras root (Stockage)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Privileged disk diagnostics, mount enumeration, fstrim against " +
+                "an allow-list, and kernel page-cache drop. fstrim and drop_caches " +
+                "are non-reversible.",
+            "Privilegierte Diagnose, Mount-Enumeration, fstrim gegen eine Allow-Liste " +
+                "und Kernel-Cache-Drop. fstrim und drop_caches sind nicht umkehrbar.",
+            "Diagnostico privilegiado, enumeracion de montajes, fstrim contra una " +
+                "lista permitida y drop_caches del kernel. No reversibles.",
+            "Diagnostic privilegie, enumeration de montages, fstrim contre une liste " +
+                "autorisee et drop_caches du noyau. Non reversibles.",
+        )
+        fun dumpDiskstats(lang: Language) = m(
+            lang,
+            "Dump diskstats snapshot",
+            "Diskstats-Snapshot speichern",
+            "Capturar snapshot de diskstats",
+            "Capturer snapshot diskstats",
+        )
+        fun enumerateMounts(lang: Language) = m(
+            lang,
+            "Enumerate mountinfo",
+            "Mountinfo aufzaehlen",
+            "Enumerar mountinfo",
+            "Enumerer mountinfo",
+        )
+        fun fstrim(lang: Language) = m(
+            lang,
+            "fstrim /data /cache (non-reversible)",
+            "fstrim /data /cache (nicht umkehrbar)",
+            "fstrim /data /cache (no reversible)",
+            "fstrim /data /cache (non reversible)",
+        )
+        fun dropCaches(lang: Language) = m(
+            lang,
+            "Drop kernel caches (page+dentry+inode)",
+            "Kernel-Caches leeren (page+dentry+inode)",
+            "Vaciar caches del kernel (page+dentry+inode)",
+            "Vider caches du noyau (page+dentry+inode)",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all storage mutations",
+            "Alle Speicher-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de almacenamiento",
+            "Reinitialiser toutes les mutations de stockage",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "fstrim and drop_caches are intrinsically non-reversible. fstrim is " +
+                "filtered to /data and /cache only.",
+            "fstrim und drop_caches sind nicht umkehrbar. fstrim ist auf " +
+                "/data und /cache beschraenkt.",
+            "fstrim y drop_caches son no reversibles. fstrim solo se permite en " +
+                "/data y /cache.",
+            "fstrim et drop_caches sont non reversibles. fstrim limite a " +
+                "/data et /cache.",
+        )
+    }
+
+    // Batch-8: Display root extras
+    object DisplayRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Display)",
+            "Root-Erweiterungen (Anzeige)",
+            "Extras root (Pantalla)",
+            "Extras root (Affichage)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Direct backlight write past framework cap (130 % clamp), refresh-rate " +
+                "override (165 Hz cap), runtime DPI (120-560), SurfaceFlinger snapshot.",
+            "Direkter Backlight-Write ueber Framework-Cap (130 %), " +
+                "Bildwiederholrate (165 Hz), DPI (120-560), SurfaceFlinger-Snapshot.",
+            "Escritura directa del backlight (limite 130 %), frecuencia (165 Hz), " +
+                "DPI (120-560), snapshot de SurfaceFlinger.",
+            "Ecriture directe du backlight (clamp 130 %), rafraichissement (165 Hz), " +
+                "DPI (120-560), snapshot SurfaceFlinger.",
+        )
+        fun overrideBrightness(lang: Language) = m(
+            lang,
+            "Override backlight (130% cap)",
+            "Backlight ueberschreiben (130%-Klemmung)",
+            "Anular backlight (limite 130%)",
+            "Remplacer backlight (clamp 130%)",
+        )
+        fun overrideRefreshRate(lang: Language) = m(
+            lang,
+            "Override refresh rate (165 Hz cap)",
+            "Bildwiederholrate ueberschreiben (165 Hz Cap)",
+            "Anular frecuencia (cap 165 Hz)",
+            "Remplacer rafraichissement (plafond 165 Hz)",
+        )
+        fun overrideDensity(lang: Language) = m(
+            lang,
+            "Override DPI (120-560 clamp)",
+            "DPI ueberschreiben (120-560 geklemmt)",
+            "Anular DPI (limite 120-560)",
+            "Remplacer DPI (clamp 120-560)",
+        )
+        fun surfaceFlingerSnapshot(lang: Language) = m(
+            lang,
+            "SurfaceFlinger snapshot",
+            "SurfaceFlinger-Snapshot",
+            "Snapshot de SurfaceFlinger",
+            "Snapshot SurfaceFlinger",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all display mutations",
+            "Alle Display-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de pantalla",
+            "Reinitialiser toutes les mutations d'affichage",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Sustained brightness above OEM cap stresses the panel; refresh-rate " +
+                "and DPI overrides may break apps. Auto-revert on exit.",
+            "Anhaltende Helligkeit ueber OEM-Cap belastet das Panel; Bildwiederhol" +
+                "rate und DPI koennen Apps brechen. Auto-Revert beim Verlassen.",
+            "El brillo sostenido sobre el cap del OEM estresa el panel; frecuencia " +
+                "y DPI pueden romper apps. Auto-revertido al salir.",
+            "Une luminosite soutenue au-dessus du plafond OEM stresse l'ecran; " +
+                "frequence et DPI peuvent casser des applis. Auto-revoque a la sortie.",
+        )
+    }
+
+    // Batch-8: Audio routing root extras
+    object AudioRoutingRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Audio routing)",
+            "Root-Erweiterungen (Audio-Routing)",
+            "Extras root (Enrutamiento audio)",
+            "Extras root (Routage audio)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Stream-volume cap bypass (130 % clamp), forced routing, mute-all " +
+                "(allow-listed), audio policy dump. STREAM_VOICE_CALL refused.",
+            "Stream-Volume-Bypass (130 %), erzwungenes Routing, Mute-All " +
+                "(Allow-List), Audio-Policy-Dump. STREAM_VOICE_CALL gesperrt.",
+            "Bypass del cap de volumen (130 %), enrutamiento forzado, mute-all, " +
+                "volcado de policy. STREAM_VOICE_CALL rechazado.",
+            "Bypass plafond volume (130 %), routage force, mute-all, dump policy. " +
+                "STREAM_VOICE_CALL refuse.",
+        )
+        fun bypassVolume(lang: Language) = m(
+            lang,
+            "Bypass safe-listening cap (60 s)",
+            "Safe-Listening-Cap umgehen (60 s)",
+            "Bypass del limite de escucha segura (60 s)",
+            "Bypass plafond ecoute sure (60 s)",
+        )
+        fun forceRouting(lang: Language) = m(
+            lang,
+            "Force speaker output",
+            "Lautsprecher erzwingen",
+            "Forzar altavoz",
+            "Forcer haut-parleur",
+        )
+        fun muteAll(lang: Language) = m(
+            lang,
+            "Mute streams (60 s, except A11y/DTMF/Call)",
+            "Streams stumm (60 s, ausser A11y/DTMF/Anruf)",
+            "Silenciar streams (60 s, excepto A11y/DTMF/Llamada)",
+            "Couper flux (60 s, sauf A11y/DTMF/Appel)",
+        )
+        fun dumpAudioPolicy(lang: Language) = m(
+            lang,
+            "Audio policy snapshot",
+            "Audio-Policy-Snapshot",
+            "Snapshot de la audio policy",
+            "Snapshot audio policy",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all audio routing mutations",
+            "Alle Audio-Routing-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de audio",
+            "Reinitialiser toutes les mutations audio",
+        )
+        fun hearingSafetyWarning(lang: Language) = m(
+            lang,
+            "WARNING: Bypassing the volume cap can cause permanent hearing loss. " +
+                "STREAM_VOICE_CALL is always refused.",
+            "WARNUNG: Das Umgehen des Lautstaerke-Caps kann dauerhafte Hoerschaeden " +
+                "verursachen. STREAM_VOICE_CALL stets abgelehnt.",
+            "ADVERTENCIA: Bypassear el limite de volumen puede causar perdida " +
+                "auditiva permanente. STREAM_VOICE_CALL siempre rechazado.",
+            "AVERTISSEMENT: Contourner le plafond peut causer une perte auditive " +
+                "permanente. STREAM_VOICE_CALL toujours refuse.",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Volume bypass and forced routing carry hearing-safety risk. Auto-revert " +
+                "on exit; ACCESSIBILITY/DTMF/Call always preserved.",
+            "Volume-Bypass und erzwungenes Routing bergen Hoerschutzrisiken. " +
+                "Auto-Revert beim Verlassen; ACCESSIBILITY/DTMF/Anruf erhalten.",
+            "El bypass de volumen y enrutamiento conllevan riesgo auditivo. " +
+                "Auto-revertido al salir; ACCESSIBILITY/DTMF/Llamada preservados.",
+            "Le bypass de volume et le routage comportent des risques auditifs. " +
+                "Auto-revoque a la sortie; ACCESSIBILITY/DTMF/Appel preserves.",
+        )
+    }
+
+    // Batch-9: ADB Debugging root extras
+    object AdbDebuggingRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (ADB Debugging)",
+            "Root-Erweiterungen (ADB-Debug)",
+            "Extras root (Depuracion ADB)",
+            "Extras root (Debogage ADB)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Toggle ADB enabled, ADB-over-network on an allow-listed port (5555-5599), " +
+                "getprop snapshot, and allow-listed setprop override. Auto-revert on exit.",
+            "ADB-Schalter, ADB-ueber-Netzwerk auf zugelassenem Port (5555-5599), " +
+                "getprop-Snapshot und allow-listete setprop-Ueberschreibung. Auto-Revert.",
+            "Cambiar ADB, ADB por red en puerto permitido (5555-5599), snapshot " +
+                "de getprop y override de setprop con allow-list. Auto-revertido al salir.",
+            "Bascule ADB, ADB-reseau sur port autorise (5555-5599), snapshot getprop, " +
+                "override setprop avec allow-list. Auto-revoque a la sortie.",
+        )
+        fun toggleAdb(lang: Language) = m(
+            lang,
+            "Toggle ADB enabled",
+            "ADB-Schalter umschalten",
+            "Cambiar ADB activado",
+            "Basculer ADB active",
+        )
+        fun toggleNetwork(lang: Language) = m(
+            lang,
+            "Enable ADB-over-network @ 5555",
+            "ADB-ueber-Netzwerk @ 5555 aktivieren",
+            "Activar ADB por red @ 5555",
+            "Activer ADB-reseau @ 5555",
+        )
+        fun dumpProperties(lang: Language) = m(
+            lang,
+            "Dump getprop snapshot",
+            "getprop-Snapshot speichern",
+            "Capturar snapshot de getprop",
+            "Capturer snapshot getprop",
+        )
+        fun setpropOverride(lang: Language) = m(
+            lang,
+            "Override allow-listed property",
+            "Erlaubte Property ueberschreiben",
+            "Anular property con allow-list",
+            "Remplacer propriete allow-list",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all ADB mutations",
+            "Alle ADB-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de ADB",
+            "Reinitialiser toutes les mutations ADB",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Enabling ADB exposes the device to USB / Wi-Fi attackers. setprop allow-list " +
+                "refuses ro.* keys; ADB-over-network port allow-list 5555-5599.",
+            "ADB-Aktivierung setzt das Geraet USB-/Wi-Fi-Angriffen aus. setprop-Allow-List " +
+                "lehnt ro.* ab; ADB-Netzwerk-Allow-Liste 5555-5599.",
+            "Activar ADB expone el dispositivo a atacantes USB/Wi-Fi. setprop rechaza " +
+                "ro.*; allow-list de ADB por red 5555-5599.",
+            "Activer ADB expose l'appareil a des attaquants USB/Wi-Fi. setprop refuse " +
+                "ro.*; allow-list ADB-reseau 5555-5599.",
+        )
+    }
+
+    // Batch-9: USB Debugging root extras
+    object UsbDebuggingRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (USB Debugging)",
+            "Root-Erweiterungen (USB-Debug)",
+            "Extras root (Depuracion USB)",
+            "Extras root (Debogage USB)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Switch USB function (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+), and /sys/kernel/debug/usb/devices probe.",
+            "USB-Funktion umschalten (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+) und debugfs-USB-Devices-Probe.",
+            "Cambiar funcion USB (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+) y sondeo de /sys/kernel/debug/usb/devices.",
+            "Changer fonction USB (mtp/ptp/rndis/midi/ncm/accessory/none), dumpsys usb, " +
+                "dumpsys SerialService (API 30+) et sonde /sys/kernel/debug/usb/devices.",
+        )
+        fun switchFunction(lang: Language) = m(
+            lang,
+            "Switch USB function -> MTP",
+            "USB-Funktion -> MTP",
+            "Cambiar funcion USB -> MTP",
+            "Changer fonction USB -> MTP",
+        )
+        fun dumpUsb(lang: Language) = m(
+            lang,
+            "dumpsys usb snapshot",
+            "dumpsys-usb-Snapshot",
+            "Snapshot de dumpsys usb",
+            "Snapshot dumpsys usb",
+        )
+        fun dumpSerialService(lang: Language) = m(
+            lang,
+            "dumpsys SerialService (API 30+)",
+            "dumpsys SerialService (API 30+)",
+            "dumpsys SerialService (API 30+)",
+            "dumpsys SerialService (API 30+)",
+        )
+        fun dumpDevicesDebug(lang: Language) = m(
+            lang,
+            "debugfs USB devices probe",
+            "debugfs-USB-Devices-Probe",
+            "Sondeo debugfs de USB devices",
+            "Sonde debugfs USB devices",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all USB mutations",
+            "Alle USB-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de USB",
+            "Reinitialiser toutes les mutations USB",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Switching the USB function role can break MTP file transfer or charging. " +
+                "Auto-revert on screen exit. Diagnostics tail-capped to 8 KB.",
+            "Wechsel der USB-Funktion kann MTP-Uebertragung oder Laden brechen. " +
+                "Auto-Revert beim Verlassen. Diagnose auf 8 KB gekappt.",
+            "Cambiar la funcion USB puede romper la transferencia MTP o la carga. " +
+                "Auto-revertido al salir. Diagnostico limitado a 8 KB.",
+            "Changer la fonction USB peut casser le transfert MTP ou la charge. " +
+                "Auto-revoque a la sortie. Diagnostic limite a 8 KB.",
+        )
+    }
+
+    // Batch-10: Diagnostics root extras
+    object DiagnosticsRootExtras {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Root extras (Diagnostics)",
+            "Root-Erweiterungen (Diagnose)",
+            "Extras root (Diagnostico)",
+            "Extras root (Diagnostic)",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Privileged diagnostic snapshots: logcat tails (per-buffer), dumpsys meminfo, " +
+                "cpuinfo, and 3-hour procstats. All read-only and tail-capped.",
+            "Privilegierte Diagnose-Snapshots: logcat-Tails (pro Buffer), dumpsys meminfo, " +
+                "cpuinfo und 3-Stunden-procstats. Read-only und gekappt.",
+            "Snapshots de diagnostico privilegiado: tails de logcat (por buffer), " +
+                "dumpsys meminfo, cpuinfo y procstats de 3 horas. Solo lectura.",
+            "Snapshots de diagnostic privilegies: queues logcat (par buffer), dumpsys " +
+                "meminfo, cpuinfo et procstats sur 3 heures. Lecture seule.",
+        )
+        fun tailLogcatMain(lang: Language) = m(
+            lang,
+            "logcat tail (main buffer)",
+            "logcat-Tail (Main-Buffer)",
+            "Tail de logcat (buffer main)",
+            "Queue logcat (buffer main)",
+        )
+        fun tailLogcatRadio(lang: Language) = m(
+            lang,
+            "logcat tail (radio buffer)",
+            "logcat-Tail (Radio-Buffer)",
+            "Tail de logcat (buffer radio)",
+            "Queue logcat (buffer radio)",
+        )
+        fun dumpMemInfo(lang: Language) = m(
+            lang,
+            "dumpsys meminfo snapshot",
+            "dumpsys-meminfo-Snapshot",
+            "Snapshot de dumpsys meminfo",
+            "Snapshot dumpsys meminfo",
+        )
+        fun dumpCpuInfo(lang: Language) = m(
+            lang,
+            "dumpsys cpuinfo snapshot",
+            "dumpsys-cpuinfo-Snapshot",
+            "Snapshot de dumpsys cpuinfo",
+            "Snapshot dumpsys cpuinfo",
+        )
+        fun dumpProcstats(lang: Language) = m(
+            lang,
+            "dumpsys procstats (3 hours)",
+            "dumpsys-procstats (3 Stunden)",
+            "dumpsys procstats (3 horas)",
+            "dumpsys procstats (3 heures)",
+        )
+        fun resetAll(lang: Language) = m(
+            lang,
+            "Reset all diagnostics state",
+            "Alle Diagnose-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones de diagnostico",
+            "Reinitialiser toutes les mutations de diagnostic",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "Logcat radio buffer can include IMSI fragments and tower IDs. Captured " +
+                "snapshots are written to the Logbook directory if you opt in.",
+            "Der logcat-Radio-Buffer kann IMSI-Fragmente und Funkmast-IDs enthalten. " +
+                "Snapshots werden bei Opt-in im Logbook-Ordner gespeichert.",
+            "El buffer radio de logcat puede contener fragmentos de IMSI e IDs de antena. " +
+                "Los snapshots se guardan en Logbook si se opta.",
+            "Le buffer radio de logcat peut contenir des fragments IMSI et des IDs " +
+                "d'antennes. Les snapshots sont enregistres dans Logbook si opt-in.",
+        )
+    }
+
+    // Batch-10: Emergency Reset card + dialog
+    object EmergencyReset {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Emergency: Reset all root mutations",
+            "Notfall: Alle Root-Mutationen zuruecksetzen",
+            "Emergencia: Restablecer todas las mutaciones root",
+            "Urgence: Reinitialiser toutes les mutations root",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "One-tap safety net. Reverts every tracked sysfs / setprop / cmd-* / " +
+                "adb-toggle / cmd-usb mutation; stops the keep-alive service; resets " +
+                "the battery-optimization app-op. Does NOT touch your per-feature " +
+                "opt-outs unless you explicitly check that box.",
+            "Ein-Tap-Sicherheitsnetz. Setzt jede sysfs/setprop/cmd-*-Mutation zurueck, " +
+                "stoppt den Keep-Alive-Service und setzt das Battery-Optimization-App-Op " +
+                "zurueck. Beruehrt NICHT die Pro-Feature-Opt-outs, ausser explizit " +
+                "angekreuzt.",
+            "Red de seguridad de un toque. Revierte todas las mutaciones registradas, " +
+                "detiene el servicio keep-alive y restablece el app-op de bateria. NO " +
+                "toca los opt-outs por feature a menos que lo marques.",
+            "Filet de securite en un tap. Revoque toutes les mutations enregistrees, " +
+                "arrete le service keep-alive et reinitialise l'app-op de batterie. NE " +
+                "touche PAS les opt-outs par fonctionnalite sauf si coche.",
+        )
+        fun trigger(lang: Language) = m(
+            lang,
+            "Reset all root mutations",
+            "Alle Root-Mutationen zuruecksetzen",
+            "Restablecer todas las mutaciones root",
+            "Reinitialiser toutes les mutations root",
+        )
+        fun dialogTitle(lang: Language) = m(
+            lang,
+            "Confirm emergency reset",
+            "Notfall-Reset bestaetigen",
+            "Confirmar reset de emergencia",
+            "Confirmer la reinitialisation d'urgence",
+        )
+        fun dialogBody(lang: Language) = m(
+            lang,
+            "This will revert every privileged write the app has tracked, stop the " +
+                "keep-alive foreground service, and reset the battery-optimization " +
+                "app-op. Currently active timed-window operations (charge profiles, " +
+                "audio routing, etc.) will be cancelled and restored.",
+            "Dies setzt jeden privilegierten Schreibzugriff zurueck, stoppt den " +
+                "Keep-Alive-Vordergrunddienst und setzt das Battery-Optimization-App-Op " +
+                "zurueck. Aktive Zeitfenster-Operationen werden abgebrochen.",
+            "Esto revertira cada escritura privilegiada registrada, detendra el servicio " +
+                "keep-alive y restablecera el app-op de bateria. Las operaciones temporizadas " +
+                "activas se cancelaran.",
+            "Cela revoquera toutes les ecritures privilegiees enregistrees, arretera le " +
+                "service keep-alive et reinitialisera l'app-op de batterie. Les operations " +
+                "temporisees actives seront annulees.",
+        )
+        fun checkboxStopKeepAlive(lang: Language) = m(
+            lang,
+            "Also stop keep-alive service",
+            "Auch Keep-Alive-Service stoppen",
+            "Tambien detener el servicio keep-alive",
+            "Aussi arreter le service keep-alive",
+        )
+        fun checkboxResetOptOuts(lang: Language) = m(
+            lang,
+            "Also reset every per-feature opt-in to default OFF",
+            "Auch jede Pro-Feature-Aktivierung auf Standard zuruecksetzen (AUS)",
+            "Tambien restablecer cada opt-in por feature al valor por defecto (OFF)",
+            "Aussi reinitialiser chaque opt-in par fonctionnalite a la valeur par defaut",
+        )
+        fun confirmButton(lang: Language) = m(
+            lang,
+            "Confirm reset",
+            "Reset bestaetigen",
+            "Confirmar reset",
+            "Confirmer reset",
+        )
+        fun cancelButton(lang: Language) = m(
+            lang,
+            "Cancel",
+            "Abbrechen",
+            "Cancelar",
+            "Annuler",
+        )
+        fun disclaimer(lang: Language) = m(
+            lang,
+            "This is the safety net for the rooted-features split. Use it whenever " +
+                "you suspect a privileged operation has left the device in a weird " +
+                "state. Use at your own risk; the developer assumes no liability for " +
+                "any hardware, software, data, or regulatory damage.",
+            "Dies ist das Sicherheitsnetz fuer den Root-Features-Split. Bei verdaechtigem " +
+                "Geraetezustand nach privilegierten Operationen anwenden. Nutzung auf " +
+                "eigene Gefahr; der Entwickler uebernimmt keine Haftung fuer Hardware-, " +
+                "Software-, Daten- oder regulatorische Schaeden.",
+            "Esta es la red de seguridad para la separacion de funciones root. Usalo si " +
+                "una operacion privilegiada deja el dispositivo en un estado raro. Uso " +
+                "bajo tu propio riesgo; el desarrollador no asume responsabilidad por " +
+                "danos de hardware, software, datos o regulatorios.",
+            "C'est le filet de securite pour la separation des fonctions root. A utiliser " +
+                "si une operation privilegiee laisse l'appareil dans un etat bizarre. " +
+                "Utilisation a vos propres risques ; le developpeur n'assume aucune " +
+                "responsabilite pour les dommages materiels, logiciels, de donnees ou " +
+                "reglementaires.",
+        )
+    }
+
+    // Batch-11: Rooted-mode permanent legal notice (Card on SettingsScreen)
+    object RootedLegalNotice {
+        fun cardTitle(lang: Language) = m(
+            lang,
+            "Rooted mode — legal notice",
+            "Root-Modus — rechtlicher Hinweis",
+            "Modo root — aviso legal",
+            "Mode root — avis legal",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "The privileged operations exposed by this app can damage your device " +
+                "hardware or OS, void your warranty, and may violate radio regulations " +
+                "in your jurisdiction. Use at your own risk. The developer assumes no " +
+                "liability for any hardware, software, data, or regulatory damage " +
+                "resulting from use of these features. The Emergency Reset above " +
+                "reverts every tracked privileged write but cannot undo physical " +
+                "hardware damage.",
+            "Die privilegierten Operationen dieser App koennen Hardware oder OS " +
+                "beschaedigen, die Garantie aufheben und gegen Funkregulierungen in " +
+                "Ihrer Region verstossen. Nutzung auf eigene Gefahr. Der Entwickler " +
+                "uebernimmt keine Haftung fuer Hardware-, Software-, Daten- oder " +
+                "regulatorische Schaeden. Der Notfall-Reset oben setzt verfolgte " +
+                "Schreibzugriffe zurueck, kann aber keine physischen Schaeden " +
+                "rueckgaengig machen.",
+            "Las operaciones privilegiadas que expone esta app pueden danar el hardware " +
+                "o el OS, anular la garantia y violar las regulaciones de radio en tu " +
+                "jurisdiccion. Uso bajo tu propio riesgo. El desarrollador no asume " +
+                "responsabilidad por danos de hardware, software, datos o regulatorios. " +
+                "El Reset de emergencia revierte cada escritura registrada pero no puede " +
+                "deshacer danos fisicos.",
+            "Les operations privilegiees exposees par cette app peuvent endommager le " +
+                "materiel ou l'OS, annuler la garantie et violer les regulations radio " +
+                "de votre juridiction. Utilisation a vos propres risques. Le developpeur " +
+                "n'assume aucune responsabilite pour les dommages materiels, logiciels, " +
+                "de donnees ou reglementaires. La Reinitialisation d'urgence revoque " +
+                "toutes les ecritures enregistrees mais ne peut pas annuler les dommages " +
+                "physiques.",
+        )
+    }
+
+    // Batch-11: First-launch acknowledgement modal (one-shot, persisted)
+    object RootedFirstAck {
+        fun dialogTitle(lang: Language) = m(
+            lang,
+            "Acknowledge rooted-mode risks",
+            "Root-Modus-Risiken bestaetigen",
+            "Confirmar riesgos del modo root",
+            "Reconnaitre les risques du mode root",
+        )
+        fun body(lang: Language) = m(
+            lang,
+            "Before using any rooted feature, confirm that you understand: " +
+                "(1) privileged writes can damage hardware, the OS, and your data; " +
+                "(2) some operations may violate FCC/ETSI/MIC radio regulations in " +
+                "your jurisdiction; (3) use of these features may void your warranty; " +
+                "(4) the developer assumes no liability for any damage resulting from " +
+                "use of these features. Tap I understand to continue.",
+            "Vor der Nutzung einer Root-Funktion bestaetigen Sie: " +
+                "(1) privilegierte Schreibvorgaenge koennen Hardware, OS und Daten " +
+                "beschaedigen; (2) einige Operationen verstossen moeglicherweise gegen " +
+                "FCC/ETSI/MIC-Funkregulierungen Ihrer Region; (3) die Nutzung kann die " +
+                "Garantie aufheben; (4) der Entwickler uebernimmt keine Haftung. " +
+                "Tippen Sie auf 'Verstanden' zum Fortfahren.",
+            "Antes de usar funciones root, confirma que entiendes: " +
+                "(1) las escrituras privilegiadas pueden danar hardware, OS y datos; " +
+                "(2) algunas operaciones pueden violar regulaciones FCC/ETSI/MIC; " +
+                "(3) el uso puede anular la garantia; (4) el desarrollador no asume " +
+                "responsabilidad. Pulsa Entendido para continuar.",
+            "Avant d'utiliser une fonction root, confirmez que vous comprenez : " +
+                "(1) les ecritures privilegiees peuvent endommager le materiel, l'OS " +
+                "et les donnees ; (2) certaines operations peuvent violer les " +
+                "regulations FCC/ETSI/MIC ; (3) l'usage peut annuler la garantie ; " +
+                "(4) le developpeur n'assume aucune responsabilite. Touchez 'Compris' " +
+                "pour continuer.",
+        )
+        fun acknowledge(lang: Language) = m(
+            lang,
+            "I understand",
+            "Verstanden",
+            "Entendido",
+            "Compris",
+        )
+    }
+
+    // Batch-11: Per-toggle risk dialog when requiresExplicitConfirm = true
+    object RootFeatureRisk {
+        fun dialogTitle(lang: Language) = m(
+            lang,
+            "Confirm hardware risk",
+            "Hardware-Risiko bestaetigen",
+            "Confirmar riesgo de hardware",
+            "Confirmer le risque materiel",
+        )
+        fun confirmEnable(lang: Language) = m(
+            lang,
+            "Enable",
+            "Aktivieren",
+            "Activar",
+            "Activer",
+        )
+        fun cancel(lang: Language) = m(
+            lang,
+            "Cancel",
+            "Abbrechen",
+            "Cancelar",
+            "Annuler",
+        )
+
+        fun thermal(lang: Language) = m(
+            lang,
+            "Sustained over-cap operation can damage LEDs, panels, motors, or the " +
+                "battery, and trigger thermal runaway. Use only briefly and watch " +
+                "device temperature.",
+            "Anhaltender Betrieb ueber den Werks-Limits kann LEDs, Panels, Motoren " +
+                "oder den Akku beschaedigen und thermisches Durchgehen ausloesen. Nur " +
+                "kurz benutzen und Geraetetemperatur beobachten.",
+            "El funcionamiento sostenido sobre los limites puede danar LEDs, paneles, " +
+                "motores o la bateria, y causar fuga termica. Usalo brevemente y " +
+                "vigila la temperatura del dispositivo.",
+            "Un fonctionnement soutenu au-dessus des limites peut endommager LEDs, " +
+                "ecrans, moteurs ou la batterie et provoquer un emballement thermique. " +
+                "A utiliser brievement en surveillant la temperature.",
+        )
+        fun batteryCell(lang: Language) = m(
+            lang,
+            "Direct charging-IC and fuel-gauge writes can damage cells, cause " +
+                "swelling or thermal runaway, and void the warranty. The chosen " +
+                "values may exceed OEM-validated limits.",
+            "Direkte Schreibvorgaenge auf Charging-IC und Fuel-Gauge koennen Zellen " +
+                "beschaedigen, Aufblaehung oder thermisches Durchgehen verursachen und " +
+                "die Garantie aufheben. Die Werte koennen OEM-Limits ueberschreiten.",
+            "Las escrituras directas al IC de carga y al fuel-gauge pueden danar " +
+                "celdas, causar hinchazon o fuga termica, y anular la garantia. Los " +
+                "valores pueden exceder los limites validados por el OEM.",
+            "Les ecritures directes sur l'IC de charge et le fuel-gauge peuvent " +
+                "endommager les cellules, causer un gonflement ou un emballement " +
+                "thermique et annuler la garantie. Les valeurs peuvent depasser les " +
+                "limites validees par l'OEM.",
+        )
+        fun hearing(lang: Language) = m(
+            lang,
+            "Bypassing safe-listening volume caps and microphone gain limits can " +
+                "cause permanent hearing loss within minutes. Remove headphones " +
+                "before enabling.",
+            "Das Umgehen von Lautstaerke- und Mikrofonverstaerkungsgrenzen kann " +
+                "innerhalb von Minuten dauerhafte Hoerschaeden verursachen. Vor " +
+                "dem Aktivieren Kopfhoerer abnehmen.",
+            "Saltarse los limites de volumen y de ganancia del microfono puede " +
+                "causar perdida auditiva permanente en minutos. Quitate los " +
+                "auriculares antes de activarlo.",
+            "Le contournement des limites de volume et de gain du microphone peut " +
+                "causer une perte auditive permanente en quelques minutes. Retirez " +
+                "les ecouteurs avant d'activer.",
+        )
+        fun sensorIntegrity(lang: Language) = m(
+            lang,
+            "Direct IIO/i2c writes and fusion-override may corrupt sensor " +
+                "calibration data and the readings of every other app on the " +
+                "device until reboot.",
+            "Direkte IIO/i2c-Schreibvorgaenge und Fusion-Override koennen die " +
+                "Sensor-Kalibrierung und die Werte aller anderen Apps bis zum " +
+                "Neustart beschaedigen.",
+            "Las escrituras directas IIO/i2c y la sobrescritura de fusion pueden " +
+                "corromper la calibracion de sensores y las lecturas de las demas " +
+                "apps hasta reiniciar.",
+            "Les ecritures directes IIO/i2c et la surcharge de fusion peuvent " +
+                "corrompre l'etalonnage des capteurs et les lectures des autres " +
+                "applications jusqu'au redemarrage.",
+        )
+        fun radioRegulatory(lang: Language) = m(
+            lang,
+            "TX-power, channel, frequency, and rfkill changes may violate FCC, " +
+                "ETSI, or MIC regulations. Use only on hardware you own and outside " +
+                "protected radio bands.",
+            "Aenderungen an Sendeleistung, Kanal, Frequenz und rfkill koennen gegen " +
+                "FCC, ETSI oder MIC verstossen. Nur auf eigener Hardware und " +
+                "ausserhalb geschuetzter Baender verwenden.",
+            "Los cambios de potencia TX, canal, frecuencia y rfkill pueden violar " +
+                "FCC, ETSI o MIC. Usalos solo en tu propio hardware y fuera de " +
+                "bandas protegidas.",
+            "Les modifications de puissance TX, canal, frequence et rfkill peuvent " +
+                "violer la FCC, l'ETSI ou la MIC. A utiliser uniquement sur du " +
+                "materiel vous appartenant, hors des bandes protegees.",
+        )
+        fun storageNonReversible(lang: Language) = m(
+            lang,
+            "fstrim and drop_caches are intrinsically non-reversible. Active I/O " +
+                "may stall briefly; data loss is unlikely but possible if storage " +
+                "is failing.",
+            "fstrim und drop_caches sind nicht rueckgaengig zu machen. Aktive I/O " +
+                "kann kurz blockieren; Datenverlust ist unwahrscheinlich, aber " +
+                "moeglich bei defektem Speicher.",
+            "fstrim y drop_caches son intrinsecamente irreversibles. La E/S activa " +
+                "puede pausarse brevemente; la perdida de datos es improbable pero " +
+                "posible si el almacenamiento falla.",
+            "fstrim et drop_caches sont intrinsequement irreversibles. Les E/S " +
+                "actives peuvent se bloquer brievement ; la perte de donnees est " +
+                "peu probable mais possible si le stockage est defaillant.",
+        )
+        fun uxDeadlock(lang: Language) = m(
+            lang,
+            "Doze-bypass, sticky overlays, and lock-screen overrides can lock the " +
+                "UI, drain the battery quickly, or block notification dismissal " +
+                "until reboot.",
+            "Doze-Bypass, persistente Overlays und Lock-Screen-Overrides koennen " +
+                "die UI sperren, den Akku schnell entladen oder das Schliessen von " +
+                "Benachrichtigungen bis zum Neustart blockieren.",
+            "El bypass de doze, los overlays fijos y la sobrescritura del lock " +
+                "screen pueden bloquear la UI, descargar la bateria rapido, o " +
+                "impedir descartar notificaciones hasta reiniciar.",
+            "Le contournement de doze, les overlays persistants et les surcharges " +
+                "de l'ecran de verrouillage peuvent bloquer l'UI, vider la batterie " +
+                "rapidement ou empecher de fermer les notifications jusqu'au " +
+                "redemarrage.",
+        )
+        fun attackSurface(lang: Language) = m(
+            lang,
+            "Enabling ADB, ADB-over-network, USB role switches, or setprop " +
+                "overrides exposes the device to USB and Wi-Fi attackers and may " +
+                "break MTP transfer.",
+            "ADB, ADB-uebers-Netzwerk, USB-Rollenwechsel und setprop-Overrides " +
+                "setzen das Geraet USB- und Wi-Fi-Angreifern aus und koennen MTP " +
+                "stoeren.",
+            "Activar ADB, ADB-por-red, cambios de funcion USB o overrides setprop " +
+                "expone el dispositivo a atacantes USB y Wi-Fi y puede romper la " +
+                "transferencia MTP.",
+            "Activer ADB, ADB-sur-reseau, le changement de role USB ou les " +
+                "surcharges setprop expose l'appareil aux attaquants USB et Wi-Fi " +
+                "et peut casser le transfert MTP.",
+        )
+        fun infoDisclosure(lang: Language) = m(
+            lang,
+            "The logcat radio buffer can include IMSI fragments, cell-tower IDs, " +
+                "and other privacy-sensitive data. Snapshots land in the Logbook " +
+                "if you opt in.",
+            "Der logcat-Radio-Puffer kann IMSI-Fragmente, Funkzellen-IDs und " +
+                "andere datenschutzrelevante Daten enthalten. Snapshots landen im " +
+                "Logbuch, wenn aktiviert.",
+            "El buffer radio de logcat puede contener fragmentos IMSI, IDs de " +
+                "antenas y otros datos sensibles. Los snapshots se guardan en " +
+                "Logbook si se opta.",
+            "Le buffer radio de logcat peut contenir des fragments IMSI, des IDs " +
+                "d'antennes et d'autres donnees sensibles. Les snapshots sont " +
+                "enregistres dans Logbook si opt-in.",
+        )
+        fun generic(lang: Language) = m(
+            lang,
+            "Privileged operation. May cause hardware or OS damage, void the " +
+                "warranty, or violate local regulations. Read the feature " +
+                "description before enabling.",
+            "Privilegierte Operation. Kann Hardware oder OS beschaedigen, die " +
+                "Garantie aufheben oder lokale Vorschriften verletzen. Vor dem " +
+                "Aktivieren die Feature-Beschreibung lesen.",
+            "Operacion privilegiada. Puede danar hardware u OS, anular la " +
+                "garantia o violar regulaciones locales. Lee la descripcion del " +
+                "feature antes de activarlo.",
+            "Operation privilegiee. Peut endommager le materiel ou l'OS, annuler " +
+                "la garantie ou violer les regulations locales. Lisez la " +
+                "description avant d'activer.",
+        )
+    }
+
+    // Batch-11: Generic disclaimer Card text shared by Torch / Vibration /
+    // Sensors / Battery / Camera / Microphone rooted extras Cards.
+    object RootExtrasGenericDisclaimer {
+        fun text(lang: Language) = m(
+            lang,
+            "Direct privileged hardware access. Each call is rate-limited and " +
+                "requires the matching feature to be enabled in Settings, which " +
+                "in turn requires the Master Safety Mode to be off and a per-feature " +
+                "confirmation. Use at your own risk; the developer assumes no " +
+                "liability.",
+            "Direkter privilegierter Hardware-Zugriff. Jeder Aufruf ist " +
+                "ratenbegrenzt und setzt voraus, dass das Feature in den Einstellungen " +
+                "aktiviert ist; das wiederum setzt voraus, dass der Master-Safety-Modus " +
+                "aus ist und eine Pro-Feature-Bestaetigung vorliegt. Nutzung auf " +
+                "eigene Gefahr; der Entwickler uebernimmt keine Haftung.",
+            "Acceso directo privilegiado al hardware. Cada llamada esta limitada y " +
+                "requiere que el feature este activado en Settings, lo cual a su vez " +
+                "requiere que el Modo Master de Seguridad este OFF y una confirmacion " +
+                "por feature. Uso bajo tu propio riesgo; sin responsabilidad del " +
+                "desarrollador.",
+            "Acces materiel privilegie direct. Chaque appel est limite et necessite " +
+                "que la fonctionnalite soit activee dans les Reglages, ce qui necessite " +
+                "que le Mode Securite Maitre soit desactive et une confirmation par " +
+                "fonctionnalite. Utilisation a vos propres risques ; le developpeur " +
+                "n'assume aucune responsabilite.",
+        )
+    }
+
+    // Batch-12: Onboarding extras (Background Behavior, Permissions, Rooted Legal)
+    object OnboardingExtras {
+        fun backgroundBehaviorTitle(lang: Language) = m(
+            lang,
+            "Background behavior",
+            "Hintergrund-Verhalten",
+            "Comportamiento en segundo plano",
+            "Comportement en arriere-plan",
+        )
+        fun backgroundBehaviorBody(lang: Language) = m(
+            lang,
+            "HardwareDash can run a sticky foreground service so automation rules, " +
+                "widget pollers, and persistent notifications keep working even when " +
+                "Android Doze tries to pause the app. The service shows a permanent " +
+                "notification with a Stop button. You can toggle it any time in " +
+                "Settings; you may also be asked to grant a battery-optimization " +
+                "exemption so the system doesn't kill the service.",
+            "HardwareDash kann einen permanenten Vordergrunddienst ausfuehren, damit " +
+                "Automatisierungsregeln, Widget-Aktualisierungen und persistente " +
+                "Benachrichtigungen auch bei Doze weiterlaufen. Der Dienst zeigt eine " +
+                "dauerhafte Benachrichtigung mit Stopp-Schaltflaeche. Umschaltbar in den " +
+                "Einstellungen; eine Akku-Optimierungsausnahme kann angefordert werden.",
+            "HardwareDash puede ejecutar un servicio en primer plano persistente para " +
+                "que las reglas de automatizacion, las actualizaciones de widgets y las " +
+                "notificaciones persistentes sigan funcionando incluso cuando Android " +
+                "Doze intenta pausar la app. Muestra una notificacion permanente con un " +
+                "boton Detener. Se puede alternar en Ajustes; tambien puede solicitar " +
+                "una exencion de optimizacion de bateria.",
+            "HardwareDash peut executer un service de premier plan persistant pour que " +
+                "les regles d'automatisation, les mises a jour de widgets et les " +
+                "notifications persistantes continuent meme avec Doze. Affiche une " +
+                "notification permanente avec un bouton Arreter. Modifiable dans les " +
+                "Reglages ; une exemption d'optimisation de batterie peut etre demandee.",
+        )
+        fun privacyNote(lang: Language) = m(
+            lang,
+            "This app never sends data off-device. All diagnostics stay on your phone.",
+            "Diese App sendet niemals Daten nach aussen. Alle Diagnosedaten bleiben auf " +
+                "Ihrem Geraet.",
+            "Esta app nunca envia datos fuera del dispositivo. Todas las diagnosticas " +
+                "se quedan en tu telefono.",
+            "Cette app n'envoie jamais de donnees hors de l'appareil. Toutes les " +
+                "diagnostics restent sur votre telephone.",
+        )
+        fun permissionsTitle(lang: Language) = m(
+            lang,
+            "Permissions",
+            "Berechtigungen",
+            "Permisos",
+            "Autorisations",
+        )
+        fun permissionsBody(lang: Language) = m(
+            lang,
+            "HardwareDash needs runtime permissions to read sensors, the camera, the " +
+                "microphone, location, and other hardware. Tap the button below to " +
+                "grant them all in one flow. You can revoke any of them later in " +
+                "Android Settings.",
+            "HardwareDash benoetigt Laufzeit-Berechtigungen fuer Sensoren, Kamera, " +
+                "Mikrofon, Standort und andere Hardware. Mit der Schaltflaeche unten " +
+                "alles in einem Ablauf erteilen. Jederzeit in den Android-Einstellungen " +
+                "widerrufbar.",
+            "HardwareDash necesita permisos de tiempo de ejecucion para leer sensores, " +
+                "la camara, el microfono, la ubicacion y otro hardware. Pulsa el boton " +
+                "para concederlos todos en un solo flujo. Revocables en Ajustes de " +
+                "Android.",
+            "HardwareDash a besoin d'autorisations d'execution pour lire les capteurs, " +
+                "la camera, le microphone, la localisation et d'autres materiels. " +
+                "Touchez le bouton pour les accorder en une fois. Revocables dans les " +
+                "Reglages Android.",
+        )
+        fun permissionsGrantAll(lang: Language) = m(
+            lang,
+            "Grant all recommended permissions",
+            "Alle empfohlenen Berechtigungen erteilen",
+            "Conceder todos los permisos recomendados",
+            "Accorder toutes les autorisations recommandees",
+        )
+
+        // Rooted-only first onboarding page
+        fun rootedLegalPageTitle(lang: Language) = m(
+            lang,
+            "Rooted mode — read this first",
+            "Root-Modus — zuerst lesen",
+            "Modo root — lee esto primero",
+            "Mode root — a lire en premier",
+        )
+        fun rootedLegalRisksHeader(lang: Language) = m(
+            lang,
+            "What you're enabling",
+            "Was Sie aktivieren",
+            "Lo que estas activando",
+            "Ce que vous activez",
+        )
+        fun rootedLegalRiskThermal(lang: Language) = m(
+            lang,
+            "Thermal damage to LEDs, panels, motors, and the battery from " +
+                "sustained over-cap operation.",
+            "Thermische Schaeden an LEDs, Panels, Motoren und Akku durch " +
+                "anhaltenden Betrieb ueber den Werks-Limits.",
+            "Danos termicos a LEDs, paneles, motores y bateria por funcionamiento " +
+                "sostenido sobre los limites.",
+            "Dommages thermiques aux LEDs, ecrans, moteurs et batterie par " +
+                "fonctionnement soutenu au-dessus des limites.",
+        )
+        fun rootedLegalRiskRegulatory(lang: Language) = m(
+            lang,
+            "Regulatory violations from TX-power, channel, frequency, and rfkill " +
+                "changes (FCC / ETSI / MIC).",
+            "Regulatorische Verstoesse durch Aenderungen an Sendeleistung, Kanal, " +
+                "Frequenz und rfkill (FCC / ETSI / MIC).",
+            "Violaciones regulatorias por cambios de potencia TX, canal, frecuencia " +
+                "y rfkill (FCC / ETSI / MIC).",
+            "Violations reglementaires par changements de puissance TX, canal, " +
+                "frequence et rfkill (FCC / ETSI / MIC).",
+        )
+        fun rootedLegalRiskBattery(lang: Language) = m(
+            lang,
+            "Battery cell damage, swelling, or thermal runaway from direct " +
+                "charging-IC writes.",
+            "Akku-Zellschaeden, Aufblaehen oder thermisches Durchgehen durch " +
+                "direkte Charging-IC-Schreibvorgaenge.",
+            "Danos a celdas de bateria, hinchazon o fuga termica por escrituras " +
+                "directas al IC de carga.",
+            "Dommages aux cellules de batterie, gonflement ou emballement " +
+                "thermique par ecritures directes a l'IC de charge.",
+        )
+        fun rootedLegalRiskHearing(lang: Language) = m(
+            lang,
+            "Permanent hearing loss within minutes from bypassing safe-listening " +
+                "volume caps and microphone gain limits.",
+            "Dauerhafte Hoerschaeden innerhalb von Minuten durch Umgehung von " +
+                "Lautstaerke- und Mikrofonverstaerkungsgrenzen.",
+            "Perdida auditiva permanente en minutos por saltarse limites de " +
+                "volumen y ganancia del microfono.",
+            "Perte auditive permanente en minutes par contournement des limites " +
+                "de volume et de gain du microphone.",
+        )
+        fun rootedLegalRiskUx(lang: Language) = m(
+            lang,
+            "UI deadlocks, rapid battery drain, attack-surface exposure (ADB, " +
+                "USB), and information disclosure (logcat radio buffer).",
+            "UI-Sperren, schneller Akkuverbrauch, Angriffsflaechen-Aussetzung " +
+                "(ADB, USB) und Informations-Offenlegung (logcat-Funkpuffer).",
+            "Bloqueos de UI, consumo rapido de bateria, exposicion de superficie " +
+                "de ataque (ADB, USB) y divulgacion de informacion (buffer radio " +
+                "logcat).",
+            "Blocages d'UI, decharge rapide de la batterie, exposition de la " +
+                "surface d'attaque (ADB, USB) et divulgation d'informations " +
+                "(buffer radio logcat).",
+        )
+        fun rootedLegalRiskOther(lang: Language) = m(
+            lang,
+            "Sensor calibration corruption, non-reversible storage operations, " +
+                "and any other privileged side-effects of the rooted features.",
+            "Sensor-Kalibrierungs-Schaeden, nicht-umkehrbare Speicheroperationen " +
+                "und andere privilegierte Nebenwirkungen der Root-Features.",
+            "Corrupcion de calibracion de sensores, operaciones de almacenamiento " +
+                "irreversibles y otros efectos secundarios privilegiados.",
+            "Corruption d'etalonnage de capteurs, operations de stockage " +
+                "irreversibles et autres effets privilegies.",
+        )
+        fun rootedLegalEmergencyResetReminder(lang: Language) = m(
+            lang,
+            "If anything goes wrong, use the Emergency Reset button at the top of " +
+                "Settings — it reverts every tracked privileged write but cannot " +
+                "undo physical hardware damage.",
+            "Bei Problemen: Notfall-Reset-Schaltflaeche oben in den Einstellungen " +
+                "verwenden — sie setzt verfolgte privilegierte Schreibvorgaenge " +
+                "zurueck, kann aber keine physischen Schaeden rueckgaengig machen.",
+            "Si algo sale mal, usa el boton de Reset de Emergencia arriba en " +
+                "Ajustes — revierte cada escritura privilegiada registrada pero no " +
+                "puede deshacer danos fisicos.",
+            "En cas de probleme, utilisez le bouton de Reinitialisation d'urgence " +
+                "en haut des Reglages — il revoque toutes les ecritures privilegiees " +
+                "enregistrees mais ne peut pas annuler les dommages physiques.",
+        )
+        fun rootedLegalAcknowledgeCheckbox(lang: Language) = m(
+            lang,
+            "I understand the risks and accept full responsibility",
+            "Ich verstehe die Risiken und uebernehme die volle Verantwortung",
+            "Entiendo los riesgos y acepto la responsabilidad completa",
+            "Je comprends les risques et accepte l'entiere responsabilite",
+        )
+        fun rootedLegalGetStartedDisabledHint(lang: Language) = m(
+            lang,
+            "Tick the box on the first page to continue.",
+            "Markieren Sie das Kaestchen auf der ersten Seite, um fortzufahren.",
+            "Marca la casilla en la primera pagina para continuar.",
+            "Cochez la case sur la premiere page pour continuer.",
+        )
+    }
+
+    // ── GPS Spoofing (Batch 13) ────────────────────────────────────────
+    val spoof: Spoof @Composable get() = Spoof(lang)
+
+    class Spoof(private val l: Language) {
+        val title get() = m(l, "GPS Spoofing", "GPS-Spoofing", "Suplantar GPS", "Usurpation GPS")
+        val navButton get() = m(l, "GPS Spoofing", "GPS-Spoofing", "Suplantar GPS", "Usurpation GPS")
+        val capabilities get() = m(l, "Capabilities", "Funktionen", "Capacidades", "Capacités")
+        val rootRow get() = m(l, "Root", "Root", "Root", "Root")
+        val mockLocationAppRow get() = m(l, "Mock Location App", "Mock-Standort-App", "App de ubicación simulada", "App de localisation factice")
+        val competingMockApp get() = m(l, "Another Mock-Location app holds the slot", "Eine andere Mock-Standort-App belegt den Platz", "Otra app de ubicación simulada ocupa el espacio", "Une autre app détient le créneau de localisation factice")
+        val lsposedFrameworkRow get() = m(l, "LSPosed framework", "LSPosed-Framework", "Marco LSPosed", "Cadre LSPosed")
+        val lsposedModuleRow get() = m(l, "LSPosed module", "LSPosed-Modul", "Módulo LSPosed", "Module LSPosed")
+        val lsposedNotInstalled get() = m(l, "Not installed", "Nicht installiert", "No instalado", "Non installé")
+        val lsposedInstalledNotLoaded get() = m(l, "Installed (reboot to activate)", "Installiert (Neustart zum Aktivieren)", "Instalado (reinicia para activar)", "Installé (redémarrer pour activer)")
+        val lsposedLoaded get() = m(l, "Loaded", "Geladen", "Cargado", "Chargé")
+        val installLsposed get() = m(l, "Install LSPosed module", "LSPosed-Modul installieren", "Instalar módulo LSPosed", "Installer le module LSPosed")
+        val uninstallLsposed get() = m(l, "Uninstall LSPosed module", "LSPosed-Modul deinstallieren", "Desinstalar módulo LSPosed", "Désinstaller le module LSPosed")
+        val lsposedAfterInstall get() = m(
+            l,
+            "Now open LSPosed Manager: enable HardwareDash Spoofer, set scope to System Framework + your target apps, then reboot.",
+            "Jetzt LSPosed Manager öffnen: HardwareDash Spoofer aktivieren, Bereich auf System Framework + Ziel-Apps setzen, dann Neustart.",
+            "Abre LSPosed Manager: activa HardwareDash Spoofer, define el alcance a System Framework + tus apps objetivo, y reinicia.",
+            "Ouvrez LSPosed Manager: activez HardwareDash Spoofer, définissez la portée sur System Framework + vos apps cibles, puis redémarrez.",
+        )
+        val tabStatic get() = m(l, "Static", "Statisch", "Estático", "Statique")
+        val tabGpx get() = m(l, "GPX", "GPX", "GPX", "GPX")
+        val tabKml get() = m(l, "KML", "KML", "KML", "KML")
+        val tabRoute get() = m(l, "Route", "Route", "Ruta", "Itinéraire")
+        val latitude get() = m(l, "Latitude", "Breitengrad", "Latitud", "Latitude")
+        val longitude get() = m(l, "Longitude", "Längengrad", "Longitud", "Longitude")
+        val altitude get() = m(l, "Altitude (m)", "Höhe (m)", "Altitud (m)", "Altitude (m)")
+        val accuracy get() = m(l, "Accuracy (m)", "Genauigkeit (m)", "Precisión (m)", "Précision (m)")
+        val bearing get() = m(l, "Bearing (°)", "Kurs (°)", "Rumbo (°)", "Cap (°)")
+        val speed get() = m(l, "Speed (m/s)", "Geschwindigkeit (m/s)", "Velocidad (m/s)", "Vitesse (m/s)")
+        val pickFile get() = m(l, "Pick file", "Datei wählen", "Elegir archivo", "Choisir un fichier")
+        val speedMultiplier get() = m(l, "Speed multiplier", "Geschwindigkeitsfaktor", "Multiplicador de velocidad", "Multiplicateur de vitesse")
+        val loop get() = m(l, "Loop", "Schleife", "Repetir", "Boucler")
+        val start get() = m(l, "Start", "Start", "Iniciar", "Démarrer")
+        val stop get() = m(l, "Stop", "Stopp", "Detener", "Arrêter")
+        val running get() = m(l, "Running", "Läuft", "En ejecución", "En cours")
+        val idle get() = m(l, "Idle", "Im Leerlauf", "Inactivo", "Inactif")
+        val activeMode get() = m(l, "Active mode", "Aktiver Modus", "Modo activo", "Mode actif")
+        val sessionLimit get() = m(l, "Session limit", "Sitzungslimit", "Límite de sesión", "Limite de session")
+        val openDevOptions get() = m(l, "Open Developer Options", "Entwickleroptionen öffnen", "Abrir opciones de desarrollador", "Ouvrir les options de développeur")
+        val needsMockApp get() = m(
+            l,
+            "Enable HardwareDash as Mock Location App in Developer Options.",
+            "HardwareDash als Mock-Standort-App in den Entwickleroptionen aktivieren.",
+            "Activa HardwareDash como App de ubicación simulada en Opciones de desarrollador.",
+            "Activez HardwareDash comme App de localisation factice dans les options de développeur.",
+        )
+        val notificationActive get() = m(l, "GPS Spoofing active", "GPS-Spoofing aktiv", "Suplantación GPS activa", "Usurpation GPS active")
+        val matrixHeader get() = m(l, "Anti-detection coverage", "Anti-Erkennung", "Cobertura anti-detección", "Couverture anti-détection")
+        val matrixDetected get() = m(l, "Detected", "Erkannt", "Detectado", "Détecté")
+        val matrixBypassed get() = m(l, "Bypassed", "Umgangen", "Eludido", "Contourné")
+        val matrixNotApplicable get() = m(l, "n/a", "n/a", "n/a", "n/a")
+        val matrixIsFromMock get() = m(l, "Location.isFromMockProvider()", "Location.isFromMockProvider()", "Location.isFromMockProvider()", "Location.isFromMockProvider()")
+        val matrixIsMock get() = m(l, "Location.isMock() (API 31+)", "Location.isMock() (API 31+)", "Location.isMock() (API 31+)", "Location.isMock() (API 31+)")
+        val matrixAppOps get() = m(l, "AppOpsManager.checkOp(MOCK_LOCATION)", "AppOpsManager.checkOp(MOCK_LOCATION)", "AppOpsManager.checkOp(MOCK_LOCATION)", "AppOpsManager.checkOp(MOCK_LOCATION)")
+        val matrixSettingsSecure get() = m(l, "Settings.Secure.mock_location (legacy)", "Settings.Secure.mock_location (Legacy)", "Settings.Secure.mock_location (heredado)", "Settings.Secure.mock_location (hérité)")
+        val matrixGnssStatus get() = m(l, "GnssStatus.Callback satellites", "GnssStatus.Callback Satelliten", "Satélites GnssStatus.Callback", "Satellites GnssStatus.Callback")
+        val matrixFused get() = m(l, "FusedLocationProvider mock bit", "FusedLocationProvider Mock-Bit", "Bit mock FusedLocationProvider", "Bit factice FusedLocationProvider")
+        val matrixSensorFusion get() = m(l, "Sensor fusion (gyro/accel)", "Sensor-Fusion (Gyro/Beschl.)", "Fusión de sensores (giro/acel)", "Fusion de capteurs (gyro/accel)")
+        val matrixWifiBssid get() = m(l, "WiFi BSSID correlation", "WiFi-BSSID-Korrelation", "Correlación BSSID WiFi", "Corrélation BSSID WiFi")
+        val matrixCellTower get() = m(l, "Cell tower correlation", "Mobilfunkmast-Korrelation", "Correlación de torres celulares", "Corrélation cellules mobiles")
+        val legalTitle get() = m(l, "Geolocation spoofing — read first", "Geolokations-Spoofing — zuerst lesen", "Suplantación de geolocalización — leer primero", "Usurpation de géolocalisation — lire d'abord")
+        val legalBody get() = m(
+            l,
+            "Spoofing your location can violate the terms of service of many apps " +
+                "(games, ride-share, dating, social, navigation, banking) and may " +
+                "be illegal in your jurisdiction when used to impersonate, defraud, " +
+                "or evade legal obligations. Banking, anti-fraud, and game-integrity " +
+                "systems often detect spoofing despite our anti-detection layer. " +
+                "By acknowledging you accept full responsibility.",
+            "Standort-Spoofing kann gegen die Nutzungsbedingungen vieler Apps " +
+                "verstossen (Spiele, Mitfahrgelegenheiten, Dating, Soziales, " +
+                "Navigation, Banking) und ist je nach Rechtsraum illegal, wenn es " +
+                "zur Täuschung, zum Betrug oder zur Umgehung gesetzlicher Pflichten " +
+                "verwendet wird. Banking-, Anti-Betrugs- und Spielintegritätssysteme " +
+                "erkennen Spoofing oft trotz unserer Anti-Erkennungsschicht. " +
+                "Mit der Bestätigung übernehmen Sie die volle Verantwortung.",
+            "Suplantar tu ubicación puede infringir las condiciones de servicio " +
+                "de muchas apps (juegos, transporte, citas, redes sociales, " +
+                "navegación, banca) y puede ser ilegal en tu jurisdicción si se " +
+                "usa para suplantar, defraudar o eludir obligaciones legales. Los " +
+                "sistemas bancarios, antifraude y de integridad de juegos suelen " +
+                "detectar la suplantación a pesar de nuestra capa anti-detección. " +
+                "Al confirmar, aceptas la responsabilidad completa.",
+            "L'usurpation de votre localisation peut violer les conditions " +
+                "d'utilisation de nombreuses applications (jeux, VTC, rencontres, " +
+                "réseaux sociaux, navigation, banque) et peut être illégale dans " +
+                "votre juridiction si elle est utilisée pour usurper, frauder ou " +
+                "échapper à des obligations légales. Les systèmes bancaires, " +
+                "anti-fraude et d'intégrité de jeu détectent souvent l'usurpation " +
+                "malgré notre couche anti-détection. En confirmant vous acceptez " +
+                "l'entière responsabilité.",
+        )
+        val legalAccept get() = m(l, "I understand and accept", "Ich verstehe und akzeptiere", "Entiendo y acepto", "Je comprends et accepte")
+        val legalCancel get() = m(l, "Cancel", "Abbrechen", "Cancelar", "Annuler")
+        val routeWaypointsLabel get() = m(l, "Waypoints (lat,lon per line)", "Wegpunkte (Breit,Läng pro Zeile)", "Puntos (lat,lon por línea)", "Points (lat,lon par ligne)")
+        val routeAddWaypoint get() = m(l, "Add waypoint at center", "Wegpunkt am Zentrum hinzufügen", "Añadir punto en el centro", "Ajouter un point au centre")
+        val routeClearWaypoints get() = m(l, "Clear waypoints", "Wegpunkte löschen", "Borrar puntos", "Effacer les points")
+        val needsAtLeastTwo get() = m(l, "Need at least 2 waypoints", "Mindestens 2 Wegpunkte erforderlich", "Se requieren al menos 2 puntos", "Au moins 2 points requis")
+        val statusLegalNotAcknowledged get() = m(l, "Legal disclaimer not acknowledged", "Rechtlicher Hinweis nicht bestätigt", "Aviso legal no confirmado", "Avis légal non confirmé")
+        val statusBlocked get() = m(l, "Blocked by safety gate (toggle, rate limit)", "Durch Safety Gate blockiert (Schalter, Ratenlimit)", "Bloqueado por la puerta de seguridad (interruptor, límite de tasa)", "Bloqué par la barrière de sécurité (bascule, limite de débit)")
+        val statusFailed get() = m(l, "Failed", "Fehlgeschlagen", "Falló", "Échec")
+        val installSucceeded get() = m(l, "Install succeeded", "Installation erfolgreich", "Instalación exitosa", "Installation réussie")
+    }
+}
+
+/** Helper: pick the string for the given language. Order: EN, DE, ES, FR. */
+internal fun m(lang: Language, en: String, de: String, es: String, fr: String): String =
+    when (lang) {
+        Language.EN -> en
+        Language.DE -> de
+        Language.ES -> es
+        Language.FR -> fr
+    }

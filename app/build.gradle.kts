@@ -14,12 +14,11 @@
 //   * APK output renaming
 //   * detekt + ktlint configuration
 //
-// The Kotlin `namespace` stays `com.gadget` because the legacy code under
-// `app/src/main/` is still under that package. Each migrated screen will
-// move into a `feature/*` module with namespace
-// `dev.ranzlappen.gadget.feature.<name>`. The applicationId (the install
-// identifier on a device, distinct from `namespace`) is the part that
-// changes here.
+// The Kotlin `namespace` is `dev.ranzlappen.gadget` — the legacy
+// `com.gadget.*` surface has fully migrated out (into feature/core modules)
+// or been repackaged under `dev.ranzlappen.gadget.*` here in the app shell.
+// The namespace now matches the standard-flavor applicationId; the rooted
+// flavor still adds the `.rooted` applicationId suffix below.
 
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 
@@ -33,9 +32,10 @@ plugins {
 }
 
 android {
-    // Legacy code package. Migrates per-feature into modules with namespace
-    // `dev.ranzlappen.gadget.<core|feature>.<name>` in later batches.
-    namespace = "com.gadget"
+    // App-shell namespace. Matches the applicationId now that the legacy
+    // com.gadget.* surface has fully migrated into feature/core modules or
+    // been repackaged under dev.ranzlappen.gadget.* here in :app.
+    namespace = "dev.ranzlappen.gadget"
 
     defaultConfig {
         // ─── applicationId (install identifier) ────────────────────────
@@ -142,12 +142,6 @@ android {
         buildConfig = true
     }
 
-    ksp {
-        // Room migration test fixtures live next to the database; checked
-        // in via git so migration tests can diff schema versions.
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
-
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
@@ -231,6 +225,10 @@ dependencies {
     // Screenless rooted-extras controller contracts (+ standard no-ops); the
     // privileged impls ship in the matching -rooted siblings below.
     implementation(project(":feature:display"))
+    // Keep-alive contract + standard controller + the shared
+    // PersistentKeepAliveService (both flavors); rooted impl is the -rooted
+    // sibling below.
+    implementation(project(":feature:keepalive"))
     implementation(project(":feature:adbdebug"))
     implementation(project(":feature:usbdebug"))
     implementation(project(":feature:automation"))
@@ -261,15 +259,10 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.hilt.navigation.compose)
 
-    // ─── CameraX ───────────────────────────────────────────────
-    implementation(libs.androidx.camera.core)
-    implementation(libs.androidx.camera.camera2)
-    implementation(libs.androidx.camera.lifecycle)
-    implementation(libs.androidx.camera.view)
-    implementation(libs.androidx.camera.video)
-
-    // ─── Accompanist permissions helper ────────────────────────────
-    implementation(libs.accompanist.permissions)
+    // CameraX / Accompanist-permissions / biometric / EXIF / Vico /
+    // usb-serial / play-services-location left :app with the legacy
+    // dead-code purge — the features that need them (camera, gps, apps,
+    // flipper, …) declare their own copies.
 
     // ─── Coroutines ─────────────────────────────────────────────
     implementation(libs.kotlinx.coroutines.android)
@@ -279,40 +272,19 @@ dependencies {
     implementation(libs.hilt.work)
     ksp(libs.hilt.work.compiler)
 
-    // ─── Biometric / device-credential auth (App-Organizer locked folders) ─
-    implementation(libs.androidx.biometric)
-
-    // ─── Serialization + DataStore ────────────────────────────────
-    implementation(libs.kotlinx.serialization.json)
+    // ─── DataStore (rooted-flavor RootSafetyPrefs) ────────────────
     implementation(libs.androidx.datastore.preferences)
 
-    // ─── GPS (FusedLocationProvider) ───────────────────────────────
-    implementation(libs.play.services.location)
-
-    // ─── Map (OSMDroid — no API key needed) ───────────────────────────
+    // ─── Map (OSMDroid — no API key needed; MainActivity config) ──────
     implementation(libs.osmdroid.android)
 
-    // ─── EXIF metadata editing for images ────────────────────────────
-    implementation(libs.androidx.exifinterface)
-
-    // ─── Room (still in :app for legacy reasons; later batch extracts to
-    //     core:data via the `gadget.android.room` convention plugin) ─────
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    // Room left :app with the legacy GadgetDatabase deletion — the modular
+    // Room DBs (apps.db / monitoring.db / automation.db) live in :core:data
+    // and :feature:apps; BackupManager touches the leftover gadget_db file
+    // only via raw SQLite for legacy-backup staging.
 
     // ─── Timber logging ───────────────────────────────────────────
     implementation(libs.timber)
-
-    // ─── Vico charts (Compose-native, Material 3) ──────────────────────
-    implementation(libs.vico.compose.m3)
-
-    // ─── USB serial (CDC-ACM) — Flipper Zero USB transport ─────────────
-    // Note: catalog key is `usb-serial-android` (not `usb-serial-for-android`)
-    // because Kotlin's `for` is a reserved word; the accessor would otherwise
-    // expand to `libs.usb.serial.for.android` and fail to parse. The Maven
-    // coordinates (`com.github.mik3y:usb-serial-for-android`) are unchanged.
-    implementation(libs.usb.serial.android)
 
     // ════════════════════ STANDARD-ONLY DEPENDENCIES ════════════════════
     // refactor-2026 Phase 2 / E2: standard Torch capability module — the
@@ -354,6 +326,8 @@ dependencies {
     "rootedImplementation"(project(":feature:diagnostics-rooted"))
     // Rooted Display controller — backlight sysfs / density / refresh-rate / SurfaceFlinger dump.
     "rootedImplementation"(project(":feature:display-rooted"))
+    // Rooted Keep-alive controller — Doze whitelist (cmd deviceidle) + pm grant of an allow-list.
+    "rootedImplementation"(project(":feature:keepalive-rooted"))
     // Rooted ADB-debugging controller — wireless-ADB toggle / setprop / prop dump.
     "rootedImplementation"(project(":feature:adbdebug-rooted"))
     // Rooted USB-debugging controller — function switch / device-node + serial-service dump.

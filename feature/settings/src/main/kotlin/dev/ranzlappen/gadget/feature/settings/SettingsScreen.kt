@@ -66,8 +66,8 @@ fun SettingsScreen(
                 onNotificationActionsEnabledChange = viewModel::setMonitorNotificationActionsEnabled,
             )
             // Whole-app backup / restore. Empty default; supplied by :app
-            // (BackupManager depends on the legacy GadgetDatabase a leaf
-            // module can't see).
+            // (BackupManager spans :core:data + :feature:apps, which a leaf
+            // module can't see together).
             backupSection()
             // Rooted-only — empty on standard / no-root (the slot's own
             // composable returns early). Supplied by :app.

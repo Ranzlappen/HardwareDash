@@ -1,7 +1,7 @@
 package dev.ranzlappen.gadget.core.root.launch
 
 /**
- * Hard-fail gate consulted by [com.gadget.MainActivity] before the normal
+ * Hard-fail gate consulted by [dev.ranzlappen.gadget.MainActivity] before the normal
  * navigation graph is mounted. Standard flavor's no-op implementation always
  * returns [LaunchGateOutcome.Allowed] on the first composition, so it adds
  * zero overhead to the non-rooted launch path.

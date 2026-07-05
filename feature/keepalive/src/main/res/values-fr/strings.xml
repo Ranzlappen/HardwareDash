@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="keepalive_notification_title">Gadget keep-alive</string>
+    <string name="keepalive_notification_body">Tâches en arrière-plan actives</string>
+    <string name="keepalive_notification_stop">Arrêter</string>
+</resources>
