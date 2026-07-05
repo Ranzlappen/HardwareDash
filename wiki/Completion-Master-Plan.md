@@ -23,10 +23,13 @@
 - **Navigation is fully modular.** Every route in `MainActivity`'s nav
   graph targets a `dev.ranzlappen.gadget.feature.*` screen. No legacy
   screen is user-reachable.
-- **96 legacy `com.gadget.*` Kotlin files remain** across `:app` source
-  sets (86 `main`, 1 `standard`, 3 `rooted`, 5 `test`, 1 `androidTest`),
-  plus `:lsposed-module` (still `com.gadget.spoofer.xposed`). `:app`
-  still compiles with `namespace = "com.gadget"`.
+- **Legacy `com.gadget.*` is extinct (W1 ✅).** As first audited there
+  were 96 files across `:app` source sets; they have all been deleted,
+  migrated into feature/core modules, or repackaged under
+  `dev.ranzlappen.gadget.*`, and `:app` now compiles with
+  `namespace = "dev.ranzlappen.gadget"`. Only `:lsposed-module` (still
+  `com.gadget.spoofer.xposed`) remains, out of scope. The rest of §1
+  describes the state that motivated the plan.
 - **Only `:feature:torch` and `:feature:vibration` meet the full
   definition of done** (screen + design system + MetricSource +
   ActionHandler + widgets + tile [torch] + rooted sibling + tests +
@@ -170,7 +173,17 @@ Every PR keeps the standing invariants: new code under
 components only, monitoring- **and** automation-ready before "done",
 wiki updated in the same PR.
 
-### W1 — Legacy extinction (finish Phase 2) · **L**
+### W1 — Legacy extinction (finish Phase 2) · **L** · ✅ DONE
+
+> **Completed.** `find app/src -path "*com/gadget*" -name "*.kt"` returns
+> **0** and the `:app` namespace is now `dev.ranzlappen.gadget`. The wave:
+> dead-island purge → delete legacy Room `GadgetDatabase` (backup reworked
+> to format v6 on raw files) → delete legacy theme stack → split keep-alive
+> into `:feature:keepalive` (+`-rooted`), the last legacy rooted controller
+> → repackage the app shell + flip the namespace (R / BuildConfig /
+> ProGuard follow). Only the out-of-scope `:lsposed-module`
+> (`com.gadget.spoofer.xposed`) remains, interlocked with the GPS-spoofer
+> handshake and tracked separately. Original plan for the record:
 
 1. **Dead-code purge (S):** delete `com/gadget/widget/**` + the two
    widget XML layouts, the 8 shadow-service manifest entries **and**
@@ -417,7 +430,7 @@ graph TD
 
 ---
 
-> _Last reviewed: 2026-07-03 · Source: measured tree audit @ `29b2bc3`
+> _Last reviewed: 2026-07-05 · Source: measured tree audit @ `29b2bc3`
 > (`find`/`grep` counts over `app/`, `core/`, `feature/`,
 > `settings.gradle.kts`, `app/src/main/AndroidManifest.xml`) · Related
 > modules: all._
