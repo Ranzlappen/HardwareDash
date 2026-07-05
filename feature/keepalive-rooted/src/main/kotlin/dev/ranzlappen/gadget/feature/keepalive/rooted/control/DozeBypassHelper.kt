@@ -1,13 +1,15 @@
-package com.gadget.keepalive
+package dev.ranzlappen.gadget.feature.keepalive.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.feature.keepalive.control.KeepAliveControllerResult
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * `cmd deviceidle whitelist` wrapper. Always scoped to the app's own
- * package — passing a foreign package via [DozeBypassConfig] is
+ * package — passing a foreign package via
+ * [dev.ranzlappen.gadget.feature.keepalive.control.DozeBypassConfig] is
  * accepted but ignored; the helper substitutes the own pkg.
  *
  * Mutation registered with the shared log under the synthesized

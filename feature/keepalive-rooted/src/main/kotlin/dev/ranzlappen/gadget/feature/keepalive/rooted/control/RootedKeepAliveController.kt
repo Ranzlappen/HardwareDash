@@ -1,14 +1,18 @@
-package com.gadget.keepalive
+package dev.ranzlappen.gadget.feature.keepalive.rooted.control
 
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.root.RootFeatureKey
 import dev.ranzlappen.gadget.core.root.RootGateDecision
 import dev.ranzlappen.gadget.core.root.RootSafetyGate
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
-import com.gadget.services.PersistentKeepAliveService
-import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.ranzlappen.gadget.feature.keepalive.control.KeepAliveController
+import dev.ranzlappen.gadget.feature.keepalive.control.KeepAliveControllerResult
+import dev.ranzlappen.gadget.feature.keepalive.control.PmGrantConfig
+import dev.ranzlappen.gadget.feature.keepalive.control.PmGrantVerb
+import dev.ranzlappen.gadget.feature.keepalive.service.PersistentKeepAliveService
 import javax.inject.Inject
 import javax.inject.Singleton
 

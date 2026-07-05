@@ -1,8 +1,8 @@
-package com.gadget.keepalive
+package dev.ranzlappen.gadget.feature.keepalive.control
 
 /**
  * Result returned by every [KeepAliveController] method. Same shape
- * as the other Batch-7 controller result types.
+ * as the other rooted-extras controller result types.
  */
 sealed class KeepAliveControllerResult {
     data class Ok(val statusNote: String? = null) : KeepAliveControllerResult()

@@ -225,6 +225,10 @@ dependencies {
     // Screenless rooted-extras controller contracts (+ standard no-ops); the
     // privileged impls ship in the matching -rooted siblings below.
     implementation(project(":feature:display"))
+    // Keep-alive contract + standard controller + the shared
+    // PersistentKeepAliveService (both flavors); rooted impl is the -rooted
+    // sibling below.
+    implementation(project(":feature:keepalive"))
     implementation(project(":feature:adbdebug"))
     implementation(project(":feature:usbdebug"))
     implementation(project(":feature:automation"))
@@ -322,6 +326,8 @@ dependencies {
     "rootedImplementation"(project(":feature:diagnostics-rooted"))
     // Rooted Display controller — backlight sysfs / density / refresh-rate / SurfaceFlinger dump.
     "rootedImplementation"(project(":feature:display-rooted"))
+    // Rooted Keep-alive controller — Doze whitelist (cmd deviceidle) + pm grant of an allow-list.
+    "rootedImplementation"(project(":feature:keepalive-rooted"))
     // Rooted ADB-debugging controller — wireless-ADB toggle / setprop / prop dump.
     "rootedImplementation"(project(":feature:adbdebug-rooted"))
     // Rooted USB-debugging controller — function switch / device-node + serial-service dump.

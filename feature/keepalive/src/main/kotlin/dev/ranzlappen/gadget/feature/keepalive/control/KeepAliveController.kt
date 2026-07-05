@@ -1,4 +1,4 @@
-package com.gadget.keepalive
+package dev.ranzlappen.gadget.feature.keepalive.control
 
 /**
  * Persistent keep-alive capability surface. Both flavors implement
@@ -6,7 +6,8 @@ package com.gadget.keepalive
  * exemption intent; the rooted flavor automates Doze whitelisting +
  * `pm grant` of a hard-listed set of normal permissions.
  *
- * Either way, [enable] starts the shared [com.gadget.services.PersistentKeepAliveService].
+ * Either way, [enable] starts the shared
+ * [dev.ranzlappen.gadget.feature.keepalive.service.PersistentKeepAliveService].
  */
 interface KeepAliveController {
 
@@ -27,10 +28,9 @@ interface KeepAliveController {
     suspend fun disable(): KeepAliveControllerResult
 
     /**
-     * Canonical hook called by the future Batch-11 "Emergency Reset
-     * All Root Mutations" button. Same as [disable] today, but kept
-     * as a separate method so the future global reset code path is
-     * stable.
+     * Canonical hook called by the "Emergency Reset All Root
+     * Mutations" flow. Same as [disable] today, but kept as a
+     * separate method so the global reset code path is stable.
      */
     suspend fun disableAndStopService(): KeepAliveControllerResult
 

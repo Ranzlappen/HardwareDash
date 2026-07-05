@@ -115,6 +115,8 @@ include(
     ":feature:settings",
     ":feature:diagnostics",
     ":feature:diagnostics-rooted",
+    ":feature:keepalive",
+    ":feature:keepalive-rooted",
     ":feature:display",
     ":feature:display-rooted",
     ":feature:adbdebug",

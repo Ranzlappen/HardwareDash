@@ -1,4 +1,4 @@
-package com.gadget.services
+package dev.ranzlappen.gadget.feature.keepalive.service
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -9,22 +9,20 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
-import com.gadget.MainActivity
-import com.gadget.localization.LocalizationManager
-import com.gadget.localization.S
-import dagger.hilt.android.AndroidEntryPoint
+import dev.ranzlappen.gadget.feature.keepalive.R
 
 /**
  * Shared (both flavors) foreground service that keeps in-process
- * background work (existing rule evaluators, widget pollers,
- * scheduled actions) alive across Doze and idle. Started by
+ * background work (rule evaluators, widget pollers, scheduled actions)
+ * alive across Doze and idle. Started by
  * `KeepAliveController.enable()`; stopped by `disable()` /
  * `disableAndStopService()`.
  *
  * The notification is `setOngoing(true)`, posted on a high-importance
- * channel, and uses `CATEGORY_SERVICE` per the Batch-7 plan.
+ * channel, and uses `CATEGORY_SERVICE`. The content-tap intent resolves
+ * the app's own launcher activity (via PackageManager) so this module
+ * doesn't depend on `:app`'s MainActivity.
  */
-@AndroidEntryPoint
 class PersistentKeepAliveService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -43,13 +41,15 @@ class PersistentKeepAliveService : Service() {
 
     private fun startForegroundLifeline() {
         ensureChannel()
-        val lang = LocalizationManager.loadLanguage(this)
-        val tapIntent = PendingIntent.getActivity(
-            this,
-            0,
-            Intent(this, MainActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        val tapIntent = launchIntent?.let {
+            PendingIntent.getActivity(
+                this,
+                0,
+                it,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+        }
         val stopIntent = PendingIntent.getService(
             this,
             1,
@@ -57,16 +57,16 @@ class PersistentKeepAliveService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val notification = Notification.Builder(this, CH_KEEPALIVE)
-            .setContentTitle(S.Services.keepAliveTitle(lang))
-            .setContentText(S.Services.keepAliveBody(lang))
+            .setContentTitle(getString(R.string.keepalive_notification_title))
+            .setContentText(getString(R.string.keepalive_notification_body))
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setOngoing(true)
             .setCategory(Notification.CATEGORY_SERVICE)
-            .setContentIntent(tapIntent)
+            .apply { if (tapIntent != null) setContentIntent(tapIntent) }
             .addAction(
                 Notification.Action.Builder(
                     null,
-                    S.Services.stop(lang),
+                    getString(R.string.keepalive_notification_stop),
                     stopIntent,
                 ).build(),
             )
@@ -100,6 +100,6 @@ class PersistentKeepAliveService : Service() {
     companion object {
         const val CH_KEEPALIVE: String = "keep_alive"
         const val NOTIF_ID: Int = 0xCAFE_E1
-        const val ACTION_STOP: String = "com.gadget.action.KEEPALIVE_STOP"
+        const val ACTION_STOP: String = "dev.ranzlappen.gadget.action.KEEPALIVE_STOP"
     }
 }

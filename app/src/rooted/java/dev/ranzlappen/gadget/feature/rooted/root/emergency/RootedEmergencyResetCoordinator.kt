@@ -2,8 +2,8 @@ package dev.ranzlappen.gadget.feature.rooted.root.emergency
 
 import dev.ranzlappen.gadget.core.root.emergency.*
 import android.content.Context
-import com.gadget.keepalive.KeepAliveController
-import com.gadget.keepalive.KeepAliveControllerResult
+import dev.ranzlappen.gadget.feature.keepalive.control.KeepAliveController
+import dev.ranzlappen.gadget.feature.keepalive.control.KeepAliveControllerResult
 import dev.ranzlappen.gadget.core.root.RootFeatureToggles
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog

@@ -1,7 +1,10 @@
-package com.gadget.keepalive
+package dev.ranzlappen.gadget.feature.keepalive.rooted.control
 
 import dev.ranzlappen.gadget.core.root.core.RootShell
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
+import dev.ranzlappen.gadget.feature.keepalive.control.KeepAliveControllerResult
+import dev.ranzlappen.gadget.feature.keepalive.control.PmGrantConfig
+import dev.ranzlappen.gadget.feature.keepalive.control.PmGrantVerb
 import javax.inject.Inject
 import javax.inject.Singleton
 
