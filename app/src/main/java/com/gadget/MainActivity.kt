@@ -23,11 +23,9 @@ import dev.ranzlappen.gadget.core.root.companion.CompanionModuleDetector
 import dev.ranzlappen.gadget.core.root.launch.LaunchGate
 import dev.ranzlappen.gadget.core.root.launch.LaunchGateOutcome
 import com.gadget.root.ui.FatalLaunchScreen
-import com.gadget.ui.theme.AccessibilityPreferencesManager
-import com.gadget.ui.theme.GadgetTheme
 import com.gadget.backup.ui.BackupCard
 import com.gadget.root.ui.RootedFeatureTogglesCard
-import com.gadget.ui.theme.ThemePreferencesManager
+import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import android.nfc.NfcAdapter
 import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
@@ -228,8 +226,6 @@ class MainActivity : ComponentActivity() {
 
     private fun bootstrapLegacyManagers() {
         LocalizationManager.init(this)
-        AccessibilityPreferencesManager.init(this)
-        ThemePreferencesManager.init(this)
 
         Configuration.getInstance().apply {
             userAgentValue = packageName
