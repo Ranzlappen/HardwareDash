@@ -180,8 +180,8 @@ class MainActivity : ComponentActivity() {
                         automationScreen()
                         settingsScreen(
                             // Backup/restore lives in :app (BackupManager
-                            // depends on the legacy GadgetDatabase a leaf
-                            // module can't see).
+                            // spans :core:data + :feature:apps, which no
+                            // leaf module can see together).
                             backupSection = { BackupCard() },
                             // The rooted opt-in toggles live in :app (they
                             // reach the legacy RootFeaturesEntryPoint); the

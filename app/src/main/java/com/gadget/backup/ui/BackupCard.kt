@@ -42,10 +42,11 @@ import java.util.Locale
  * produced by the monolithic app — `BackupManager` lifts their `gadget_db`
  * App-Organizer rows into `apps.db` on the next launch).
  *
- * Lives in `:app` because [com.gadget.backup.BackupManager] depends on the
- * legacy `GadgetDatabase`; it's dropped into the modular Settings screen via the
- * `backupSection` slot (the leaf-module-can't-see-`:app` seam). Reaches the
- * manager through [BackupManagerEntryPoint].
+ * Lives in `:app` because [com.gadget.backup.BackupManager] spans modules no
+ * leaf can see together (:core:data + :feature:apps); it's dropped into the
+ * modular Settings screen via the `backupSection` slot (the
+ * leaf-module-can't-see-`:app` seam). Reaches the manager through
+ * [BackupManagerEntryPoint].
  *
  * Restore replaces all current data and applies the modular DBs only on the
  * next process start, so a successful restore prompts a restart.

@@ -142,12 +142,6 @@ android {
         buildConfig = true
     }
 
-    ksp {
-        // Room migration test fixtures live next to the database; checked
-        // in via git so migration tests can diff schema versions.
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
-
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
@@ -280,11 +274,10 @@ dependencies {
     // ─── Map (OSMDroid — no API key needed; MainActivity config) ──────
     implementation(libs.osmdroid.android)
 
-    // ─── Room (still in :app for legacy reasons; later batch extracts to
-    //     core:data via the `gadget.android.room` convention plugin) ─────
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    // Room left :app with the legacy GadgetDatabase deletion — the modular
+    // Room DBs (apps.db / monitoring.db / automation.db) live in :core:data
+    // and :feature:apps; BackupManager touches the leftover gadget_db file
+    // only via raw SQLite for legacy-backup staging.
 
     // ─── Timber logging ───────────────────────────────────────────
     implementation(libs.timber)
