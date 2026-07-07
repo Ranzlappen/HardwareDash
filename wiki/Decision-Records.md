@@ -10,7 +10,6 @@ long-form ADR files. New ADRs are added here as numbered sections; record
 | 0001 | Monorepo refactor onto module-per-feature layout | Accepted | 2026-05-12 |
 | 0002 | Cross-automation engine — model, runtime, persistence | Accepted | 2026-06-10 |
 | 0003 | YouTube downloader — youtubedl-android engine + cookie auth | Accepted | 2026-06-25 |
-| 0004 | App preview gallery via Roborazzi preview scanner | Accepted | 2026-07-02 |
 
 ---
 
@@ -186,71 +185,6 @@ YouTube's ToS — left to the user.
 
 ---
 
-## ADR-0004 — App preview gallery via Roborazzi preview scanner
-
-**Status:** Accepted · **Deciders:** project owner, Claude (implementer).
-
-### Context
-
-There was no way to see the app's UI without building and installing an APK,
-and no way to compare how screens looked across versions. We wanted an
-"approximate live preview of the entire app" in a Markdown file, driven by
-GitHub workflows, to visualise changes between versions. Two hard facts shaped
-the design: GitHub's Markdown sanitizer strips `<script>`/`<iframe>` (so a
-genuinely interactive app can't run inside an `.md` on github.com), and there
-is no local Android SDK (CI is the compile gate). The app already carries a
-rich Compose `@Preview` matrix (`@GadgetPreviewLightDark` et al.), most
-screens previewing their Hilt-free stateless `<Feature>ScreenContent`.
-
-### Decisions
-
-1. **Render with Roborazzi's `generateComposePreviewRobolectricTests`** — it
-   auto-discovers every `@Preview` and renders it under Robolectric on the JVM,
-   no per-screen test code and **no emulator**. *Rejected:* Paparazzi (needs a
-   test written per preview, thornier Compose pinning) and emulator screenshots
-   (slower, flakier, needs navigation-driving test code).
-2. **A single test-only `:screenshots` aggregator module** depends broadly on
-   `:core:ui` + every standard `:feature:*` so the scanner sees the whole app.
-   It ships nothing to users. Rooted feature modules are opt-in via
-   `-PenableRootedPreviews=true`, so the default render never compiles against
-   root code — the flavor-separation invariant holds without a
-   `BuildConfig.IS_ROOTED` branch.
-3. **Deliver both an inline Markdown gallery and an interactive HTML container
-   on GitHub Pages.** The interactive controls (filter, theme toggle,
-   cross-version compare) need JS, which only runs on Pages; the same shots are
-   mirrored inline as image tables that render on github.com.
-4. **Keep binaries out of `main`.** Rendered PNGs + generated galleries live on
-   a dedicated `app-previews` orphan branch and on Pages; `main` carries only a
-   static `PREVIEW.md` pointer. *Rejected:* committing PNGs to `main` (history
-   bloat) and committing generated Markdown to `main` each run (churn +
-   self-trigger risk).
-5. **Per-version archive + pixel diff.** Each build is archived under its
-   version; the generator diffs the two latest versions (ImageMagick `compare`)
-   into a before│after│diff view — the "visualise inter versions" goal.
-
-### Consequences
-
-**Positive:** the whole app is visible per version with zero per-screen test
-code; reuses the existing preview matrix (light/dark/RTL/large-font/size
-classes render as separate shots for free); JVM-only, so it's fast and needs no
-emulator; `main` stays lean. **Negative:** a new Roborazzi/Robolectric
-toolchain to keep compatible with Kotlin 1.9.10 (validated on CI, pinned in the
-catalog); any `@Preview` not wrapped in `GadgetTheme` fails the render and must
-be fixed or excluded; GitHub Pages must be enabled once by hand; the preview is
-*approximate* (Robolectric rendering, not a running device).
-
-### Alternatives rejected
-
-- **Compose-for-Web / Kotlin-Wasm live app in the `.md`:** truly interactive
-  but requires a KMP/web target this Android-only codebase doesn't have — a
-  large, off-scope undertaking.
-- **Always-current single gallery (no archive):** simpler but loses the
-  version-to-version comparison that was the point.
-
-Full design: [App Preview Gallery](App-Preview-Gallery).
-
----
-
 ## Adding a new ADR
 
 Append a numbered `## ADR-000N — <title>` section here (Status / Deciders /
@@ -261,8 +195,7 @@ Records" rule if the process changes.
 
 ---
 
-> _Last reviewed: 2026-07-02 · Source: `docs/adr/0001-monorepo-refactor.md`,
-> `docs/adr/0002-automation-engine.md`, `screenshots/build.gradle.kts`,
-> `.github/workflows/app-preview.yml` · Related: [Architecture](Architecture),
+> _Last reviewed: 2026-07-07 · Source: `docs/adr/0001-monorepo-refactor.md`,
+> `docs/adr/0002-automation-engine.md` · Related: [Architecture](Architecture),
 > [Automation Engine](Automation-Engine), [Flavors & Root
-> Safety](Flavors-and-Root-Safety), [App Preview Gallery](App-Preview-Gallery)._
+> Safety](Flavors-and-Root-Safety)._

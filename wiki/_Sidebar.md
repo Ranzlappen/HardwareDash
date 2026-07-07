@@ -28,7 +28,6 @@
 - [Flavors & Root Safety](Flavors-and-Root-Safety)
 - [Automation Engine](Automation-Engine)
 - [Testing & CI](Testing-and-CI)
-- [App Preview Gallery](App-Preview-Gallery)
 - [Troubleshooting](Troubleshooting)
 
 **AI collaborators**
