@@ -46,7 +46,7 @@ lsposed-module/          bundled Xposed module (rooted flavor, opt-in)
    rooted flavor adds them via `rootedImplementation` only — so the
    standard APK is physically incapable of compiling against root code.
 4. Each module declares its own `namespace`; cross-module flags move to
-   `core/common` configuration objects rather than a shared `BuildConfig`.
+   per-module `BuildConfig` fields rather than a shared `BuildConfig`.
 
 See **[Decision Records → ADR-0001](Decision-Records)** for why this
 layout was chosen over staying monolithic, multi-repo, dynamic feature
@@ -56,16 +56,13 @@ modules, or layer-only modularisation.
 
 | Module | Purpose |
 |---|---|
-| `core:common` | Pure-Kotlin utilities — `Result` types, dispatchers, time helpers, log tags. |
 | `core:model` | Cross-feature data classes; **`MetricSource`** (readable-signal seam). No Android. |
-| `core:domain` | Use-cases / policy that don't touch Android APIs. |
 | `core:data` | Repositories backed by Room / Files / DataStore; the modular DBs (`apps.db`, `monitoring.db`, `automation.db`) + `DatabaseCheckpointer`. |
 | `core:datastore` | Preferences DataStore wrappers (`UserPreferences`, generic `FeaturePreferences<T>`). |
 | `core:designsystem` | Compose theme, colour, typography, spacing/motion/glass tokens, `LocalGadgetTheme`. |
 | `core:ui` | Higher-level Compose components built on `core:designsystem`. |
 | `core:navigation` | `GadgetApp` shell + typed `GadgetDestination` contracts. |
 | `core:permissions` | Permission state objects + resume advancers. |
-| `core:surfaces` | Widget / QS-tile / Wear surface registry. |
 | `core:notifications` | Shared notification channels / helpers. |
 | `core:automation` | The `ActionHandler` contract + rule model + pure evaluator + runtime (FGS/AlarmManager). |
 | `core:hardware` | `HardwareRegistry` — read-side enumeration over the `MetricSource` map. |
@@ -135,6 +132,6 @@ Full procedure: **[Feature Migration Guide](Feature-Migration-Guide)**.
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `docs/architecture/overview.md`,
+> _Last reviewed: 2026-07-09 · Source: `docs/architecture/overview.md`,
 > `settings.gradle.kts`, `docs/adr/0001-monorepo-refactor.md` · Related
 > modules: all `core/*` and `feature/*`._

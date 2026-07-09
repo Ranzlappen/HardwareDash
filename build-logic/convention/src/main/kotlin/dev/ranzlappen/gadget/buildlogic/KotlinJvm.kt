@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 /**
  * Apply the pure-Kotlin / pure-JVM configuration shared by every Gadget
- * non-Android module (e.g. `core:model`, `core:common`, `core:domain`):
+ * non-Android module (e.g. `core:model`):
  *
  *   * Java 17 source/target compatibility
  *   * Kotlin compiler `jvmTarget = JVM_17`

@@ -84,7 +84,6 @@ include(":app")
 // :core — reusable infrastructure
 // -------------------------------------------------------------------------
 include(
-    ":core:common",
     ":core:designsystem",
     ":core:ui",
     ":core:model",
@@ -93,11 +92,9 @@ include(
     ":core:widgetkit",
     ":core:notifications",
     ":core:datastore",
-    ":core:domain",
     ":core:navigation",
     ":core:permissions",
     ":core:root",
-    ":core:surfaces",
     ":core:automation",
     ":core:hardware",
     ":core:testing",

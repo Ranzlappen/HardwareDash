@@ -39,16 +39,13 @@ Gap analysis and the road to done:
 
 | Module | Src | Purpose / public contracts | Key dependencies |
 |---|---:|---|---|
-| `core:common` | 0 | Pure-Kotlin utilities (Result types, dispatchers, time, log tags). Empty — candidate for removal from the graph until needed ([Completion Master Plan](Completion-Master-Plan)). | — |
 | `core:model` | 1 | **`MetricSource` + `MetricDescriptor`** — the readable-signal seam. No Android. | `kotlinx-coroutines-core` |
-| `core:domain` | 0 | Use-cases / policy, no Android APIs. Empty — candidate for removal from the graph until needed. | `core:model` |
 | `core:data` | 20 | Repositories; modular Room DBs (`apps.db`, `monitoring.db`, `automation.db`); `MonitorSampleRepository`, `RoomRuleRepository`, `DatabaseCheckpointer`. | `core:model`, `core:automation`, Room |
 | `core:datastore` | 5 | `UserPreferences` + `FeaturePreferences<T>` factory (per-feature collections). | DataStore |
 | `core:designsystem` | 9 | Theme, colour/typography/shape/spacing/motion/glass tokens, `LocalGadgetTheme`, `GadgetTheme`. | Compose |
 | `core:ui` | 23 | The component library (`GadgetPrimaryButton`, `DashCard`, `GlassSurface`, `ModuleScreenScaffold`, `ModuleInfo` sections, …). | `core:designsystem` |
 | `core:navigation` | 4 | `GadgetApp` shell + `GadgetDestination` contracts. | `core:ui` |
 | `core:permissions` | 0 | Permission state objects + resume advancers. Empty — to be built for real as the centralized permission framework (W5 of the [Completion Master Plan](Completion-Master-Plan)); runtime-permission logic currently lives ad-hoc inside features. | — |
-| `core:surfaces` | 0 | Widget / QS-tile / Wear surface registry. Empty and unreferenced — candidate for removal from the graph until needed. | — |
 | `core:notifications` | 2 | Shared notification channels / helpers. | — |
 | `core:automation` | 22 | **`ActionHandler` + `ModuleActionRegistry`** contract; `Rule` model + `RuleEvaluator` + `RuleRepository` contract; `AutomationService`/`AutomationScheduler`/receivers. | `core:model`, `core:root` |
 | `core:hardware` | 2 | **`HardwareRegistry`** — read-side enumeration over the `MetricSource` map. | `core:model` |

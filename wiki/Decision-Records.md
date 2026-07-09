@@ -34,9 +34,10 @@ Adopt the Now-in-Android modular layout: `app/` (single application),
 `feature/<name>-rooted/` (root-only sibling), `benchmark/`, `build-logic/`
 (convention plugins), `lsposed-module/`. Invariants: `core/*` never depends
 on `feature/*`; a feature never depends on another feature directly
-(contracts go through `core:domain` / `core:navigation` / `core:hardware`);
-the standard APK never compiles against a `*-rooted` module
-(`rootedImplementation` only); each module declares its own `namespace`.
+(contracts go through `core:model` / `core:navigation` / `core:hardware` /
+`core:automation`); the standard APK never compiles against a `*-rooted`
+module (`rootedImplementation` only); each module declares its own
+`namespace`.
 
 ### Consequences
 
@@ -195,7 +196,7 @@ Records" rule if the process changes.
 
 ---
 
-> _Last reviewed: 2026-07-07 · Source: `docs/adr/0001-monorepo-refactor.md`,
+> _Last reviewed: 2026-07-09 · Source: `docs/adr/0001-monorepo-refactor.md`,
 > `docs/adr/0002-automation-engine.md` · Related: [Architecture](Architecture),
 > [Automation Engine](Automation-Engine), [Flavors & Root
 > Safety](Flavors-and-Root-Safety)._

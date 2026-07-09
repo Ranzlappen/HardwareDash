@@ -117,9 +117,6 @@ skeletons (W2, unstarted).
 | `core:testing` | 2 / 0 | Thin — needs fixtures for the test push |
 | `core:model` | 1 / 0 | Deliberately tiny (`MetricSource` seam) |
 | **`core:permissions`** | **0** | **Empty** — permission logic is ad-hoc per feature |
-| **`core:surfaces`** | **0** | **Empty, unreferenced** |
-| **`core:domain`** | **0** | **Empty** |
-| **`core:common`** | **0** | **Empty** |
 
 ### 1.4 Legacy inventory — `com.gadget.**` (96 files)
 
@@ -431,11 +428,10 @@ graph TD
 1. **P-A (truth):** this page + catalog reconciliation. ✅ (this change)
 2. **P-B (deletion & foundations):** W1 dead-purge, then the live
    migrations; start W5 (`:core:permissions`) early — it unblocks the W2
-   screens. Decide the empty core modules: **keep `core:permissions`**
-   (W5 fills it); **drop `core:surfaces` / `core:domain` /
-   `core:common` from the module graph** until a concrete need exists
-   (an empty module wired into settings.gradle is pure upkeep — easy to
-   re-add).
+   screens. Empty core modules: **keep `core:permissions`** (W5 fills
+   it); **`core:surfaces` / `core:domain` / `core:common` are dropped**
+   from the module graph (2026-07-09) — none had any dependents, easy to
+   re-add if a concrete need shows up.
 3. **P-C (completion):** W2 + W3, parallelizable per feature family.
 4. **P-D (breadth):** W4 + W6 + W7.
 5. **P-E (polish):** W8 + W9 (localize **after** the string surface
