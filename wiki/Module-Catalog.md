@@ -95,7 +95,7 @@ widgets / tiles / tests / strings): see the
 | `feature:ambient` | 8 | ✅ | Live lux + level descriptor; ambient-light history monitor; assert-bright / assert-dark actions; rooted brightness / refresh-rate / density rows. |
 | `feature:display` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — no screen / monitoring / automation yet. |
 | `feature:keepalive` (+ `-rooted` 3) | 5 | ✅ | Persistent keep-alive: contract + standard controller + the shared `PersistentKeepAliveService` (both flavors); rooted Doze-whitelist + `pm grant` via `RootedKeepAliveController`, gated by `RootSafetyGate`. Migrated from the legacy `com.gadget.keepalive` / `com.gadget.services`. Surfaced from Settings (no dedicated screen). |
-| `feature:notification` (+ `-rooted` 4) | 4 | 🟡 | Controller-only — builder/channel-inspector screen pending (legacy `BuilderPresetStore` still in `:app`). |
+| `feature:notification` (+ `-rooted` 4) | 4 | 🟡 | Controller-only — builder/channel-inspector screen pending. Legacy `BuilderPresetStore`/`NotificationPreviewCard` were already deleted in the W1 purge (commit `3908ed2`); nothing to port from `:app`, only the concept to rebuild. |
 | `feature:adbdebug` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — no screen / monitoring / automation yet. |
 | `feature:usbdebug` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — no screen / monitoring / automation yet. |
 | `feature:radios-wifi` (+ `-rooted` 6) | 13 | ✅ | Adapter status + network details; live signal + enabled history monitors; enabled + connected actions; rooted `wifi_root` ActionHandler (rfkill / TX-power / channel / monitor-probe). |
