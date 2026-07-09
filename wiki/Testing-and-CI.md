@@ -11,7 +11,7 @@ traps that don't show up in a local syntax check.
 |---|---|---|---|
 | **Unit (JVM)** | `src/test/` | CI (`ci-refactor.yml`) | Pure logic — serialization round-trips, the `RuleEvaluator`, maths, in-memory structures. `junit` + `mockk` + `turbine` + `coroutines-test`. |
 | **Instrumented (Compose)** | `src/androidTest/` | CI emulator (`instrumented-tests.yml`) | Stateless `<Feature>ScreenContent` under `GadgetTestTheme`; modal/sheet hosting. |
-| **Preview matrix** | `@Preview` fns | rendered by Studio / CI lint / the app-preview gallery | Visual coverage across theme / font / RTL / size class. Also rendered to PNGs by `:screenshots` (Roborazzi) → [App Preview Gallery](App-Preview-Gallery). |
+| **Preview matrix** | `@Preview` fns | rendered by Studio / CI lint | Visual coverage across theme / font / RTL / size class. |
 | **Macrobenchmark** | `:benchmark` | Phase 4 | Recomposition counts, frame timing. |
 
 ### Unit tests — `:core:testing`
@@ -57,7 +57,6 @@ System](Design-System).
 | `ci-refactor.yml` | PR iteration | JVM unit tests (curated module list) + assembles standard+rooted debug APKs + posts an APK-size delta vs main. |
 | `instrumented-tests.yml` | PR | `connectedDebugAndroidTest` on an API 30 emulator for the migrated modules. |
 | `build-release.yml` | manual | Signed release APK + AAB (build-only; gates ran upstream). |
-| `app-preview.yml` | push to `main` / PR / manual | Renders every `@Preview` to PNG via Roborazzi (`:screenshots`, JVM/Robolectric — no emulator), builds a per-version gallery + version diff, publishes to GitHub Pages + the `app-previews` branch. See [App Preview Gallery](App-Preview-Gallery). |
 | `cleanup-ci-storage.yml` | manual | Prunes workflow artifacts + un-flagged releases. |
 
 ## Flavor builds & the leak gate
@@ -104,7 +103,6 @@ real compile** and pre-check against that list.
 
 ---
 
-> _Last reviewed: 2026-07-02 · Source: `.github/workflows/*`, `CLAUDE.md`
-> (preview matrix + pitfalls), `docs/migration-guide.md`,
-> `screenshots/build.gradle.kts` · Related modules: `:core:testing`,
-> `:core:ui`, `:screenshots`, all tested features._
+> _Last reviewed: 2026-07-07 · Source: `.github/workflows/*`, `CLAUDE.md`
+> (preview matrix + pitfalls), `docs/migration-guide.md` · Related modules:
+> `:core:testing`, `:core:ui`, all tested features._

@@ -89,7 +89,7 @@ should be recorded inline in each module.
 families; ActionHandler in **15 standard + 6 rooted** modules; widgets in
 **5** features (torch ×4, vibration ×4, battery, storage, apps); QS tiles
 in **1** (torch ×2); **8** `@Preview` composables in the whole tree;
-`:screenshots` has **0** test sources; **1,002** base string entries
+**1,002** base string entries
 across 24 feature modules with **zero** translations (only `:app` has
 `values-de/es/fr`, each 24 of 42 entries ≈ 57 %, and stale).
 
@@ -355,11 +355,9 @@ Build `:core:permissions` for real (empty today):
   modules), custom palette builder on top of the preset themes,
   dynamic-color (Monet) opt-in, per-feature settings pages under a
   unified settings tree.
-- **Preview & screenshot infrastructure:** full `@Preview` matrix per
-  component/screen (8 exist today), populate the `:screenshots`
-  Roborazzi suite (0 test sources today) so the
-  [App Preview Gallery](App-Preview-Gallery) renders real content;
-  extend foldable/tablet adaptive layouts beyond dashboard + scaffold.
+- **Preview coverage:** full `@Preview` matrix per component/screen (8
+  exist today); extend foldable/tablet adaptive layouts beyond dashboard
+  + scaffold.
 - **Motion & interaction polish:** predictive back, shared-element /
   motion transitions, edge-to-edge audit, haptic feedback consistency.
 

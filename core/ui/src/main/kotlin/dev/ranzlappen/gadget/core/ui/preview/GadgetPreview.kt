@@ -50,8 +50,8 @@ fun GadgetThemedPreview(
         // Derive a WindowSizeClass from the preview canvas and provide it via
         // LocalWindowSizeClass. Screens built on ModuleScreenScaffold read it
         // through rememberLayoutMode(); outside GadgetApp (Android Studio
-        // previews AND the Roborazzi gallery render) the local's default
-        // `error(...)` would otherwise throw. Deriving from the actual
+        // previews) the local's default `error(...)` would otherwise throw.
+        // Deriving from the actual
         // constraints keeps @GadgetPreviewSizeClasses meaningful — a 700/1024dp
         // preview still resolves Medium/Expanded → TwoPane/ThreePane. GadgetApp
         // supplies the real value at runtime; this wrapper is preview-only.
