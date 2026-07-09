@@ -1,6 +1,9 @@
 package dev.ranzlappen.gadget.feature.actuators.monitor
 
 import android.content.Context
+import android.os.Build
+import android.os.Vibrator
+import android.os.VibratorManager
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -19,38 +22,48 @@ import javax.inject.Singleton
  * Actuators' readable signal for the monitoring framework (and, later, for
  * automation triggers).
  *
- * Pulse strength is reported as a percent of full scale: `0` while idle,
- * `100` for the duration of a dispatched haptic action
- * (`ActuatorsActionHandler`'s click/heavy-click triggers), decaying back to
- * 0 once that pulse's approximate duration elapses. Because the OS exposes
- * **no** "currently vibrating" query — same constraint as
- * `:feature:vibration` — the value comes from the modelled [ActuatorsRuntime]
- * rather than the hardware.
+ * Reports whether the device's vibrator actuator is present — `1` when
+ * [Vibrator.hasVibrator] is true, `0` otherwise — the same
+ * `VIBRATOR_MANAGER_SERVICE`/`VIBRATOR_SERVICE` lookup and availability
+ * check [ActuatorsViewModel][dev.ranzlappen.gadget.feature.actuators.ActuatorsViewModel]
+ * publishes as `ActuatorsState.vibratorAvailable` and
+ * `ActuatorsActionHandler` guards its haptic actions on. Unlike the torch
+ * (a continuously commandable brightness level) or vibration's modelled
+ * amplitude, `:feature:actuators`'s haptic actions
+ * (`ACTION_HAPTIC_CLICK`/`ACTION_HAPTIC_HEAVY`) are fire-and-forget one-shots
+ * with no "currently vibrating at X" state to sample — the only state this
+ * controller actually tracks is hardware presence, so that's the signal.
  *
- * Polled (not push): a continuously-displayed chart needs a sample in every
- * downsample bucket, so [sample] reads the runtime on the monitor cadence and
- * produces a filled plateau that drops to 0 at pulse end.
+ * Polled (not push): device vibrator presence is effectively static for a
+ * running process, so a plain poll on the monitor cadence is sufficient —
+ * no OS broadcast exists for "vibrator attached/detached" to push from.
  */
 @Singleton
 class ActuatorsMetricSource @Inject constructor(
-    @ApplicationContext context: Context,
-    private val runtime: ActuatorsRuntime,
+    @ApplicationContext private val context: Context,
 ) : MetricSource {
+
+    private val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager)
+            ?.defaultVibrator
+    } else {
+        @Suppress("DEPRECATION")
+        context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+    }
 
     override val descriptor: MetricDescriptor = MetricDescriptor(
         metricKey = METRIC_KEY,
         displayName = context.getString(R.string.actuators_monitor_metric_name),
-        unit = "%",
+        unit = "",
         min = 0f,
-        max = FULL_SCALE_PERCENT,
+        max = 1f,
         category = MetricCategory.Actuator,
     )
 
-    override suspend fun sample(): Float = runtime.pulsePercent.value
+    override suspend fun sample(): Float = if (vibrator?.hasVibrator() == true) 1f else 0f
 
     companion object {
-        const val METRIC_KEY = "actuators_pulse"
-        private const val FULL_SCALE_PERCENT = 100f
+        const val METRIC_KEY = "vibrator_available"
     }
 }
 

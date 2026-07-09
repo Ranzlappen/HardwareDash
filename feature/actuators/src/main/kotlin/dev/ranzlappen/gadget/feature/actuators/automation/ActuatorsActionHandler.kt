@@ -15,14 +15,12 @@ import dagger.multibindings.StringKey
 import dev.ranzlappen.gadget.core.automation.ActionHandler
 import dev.ranzlappen.gadget.core.automation.ActionResult
 import dev.ranzlappen.gadget.core.automation.ModuleAction
-import dev.ranzlappen.gadget.feature.actuators.monitor.ActuatorsRuntime
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class ActuatorsActionHandler @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val runtime: ActuatorsRuntime,
 ) : ActionHandler {
 
     private val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -54,7 +52,6 @@ class ActuatorsActionHandler @Inject constructor(
                     @Suppress("DEPRECATION")
                     vib.vibrate(50)
                 }
-                runtime.notifyTriggered(CLICK_PULSE_MS)
                 ActionResult.Success
             }
             ACTION_HAPTIC_HEAVY -> {
@@ -67,7 +64,6 @@ class ActuatorsActionHandler @Inject constructor(
                     @Suppress("DEPRECATION")
                     vib.vibrate(150)
                 }
-                runtime.notifyTriggered(HEAVY_PULSE_MS)
                 ActionResult.Success
             }
             ACTION_ASSERT_AVAILABLE -> {
@@ -83,13 +79,6 @@ class ActuatorsActionHandler @Inject constructor(
         const val ACTION_HAPTIC_CLICK = "actuators_haptic_click"
         const val ACTION_HAPTIC_HEAVY = "actuators_haptic_heavy"
         const val ACTION_ASSERT_AVAILABLE = "actuators_assert_available"
-
-        // Approximate pulse durations fed to ActuatorsRuntime — mirrors the
-        // same milliseconds used for the pre-O VibrationEffect fallbacks
-        // above, since predefined effects (EFFECT_CLICK/EFFECT_HEAVY_CLICK)
-        // don't expose an actual duration.
-        private const val CLICK_PULSE_MS = 50L
-        private const val HEAVY_PULSE_MS = 150L
     }
 }
 
