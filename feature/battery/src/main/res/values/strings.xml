@@ -61,6 +61,16 @@
     <string name="battery_cap_charging_profile_name">Charging profile control</string>
     <string name="battery_cap_charging_profile_detail">Override charge current and voltage cutoff limits</string>
 
+    <!-- ─── Automation actions (rooted) ──────────────────────────────── -->
+    <string name="battery_action_charging_profile_override">Charging profile override (rooted)</string>
+    <string name="battery_action_thermal_bypass">Thermal throttle bypass (rooted)</string>
+    <string name="battery_action_charging_type_override">Charging type override (rooted)</string>
+    <string name="battery_action_full_dump">Full sysfs dump (rooted)</string>
+    <string name="battery_action_reset_mutations">Reset battery overrides (rooted)</string>
+    <string name="battery_action_hold_soc">Hold state of charge (rooted)</string>
+    <string name="battery_action_wireless_coil_current">Cap wireless coil current (rooted)</string>
+    <string name="battery_action_health_snapshot">Battery health snapshot (rooted)</string>
+
     <!-- Home-screen widget -->
     <string name="battery_widget_label">Battery</string>
     <string name="battery_widget_description">Live battery level and charging state</string>

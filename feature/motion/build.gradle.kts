@@ -14,6 +14,10 @@ dependencies {
     implementation(project(":core:monitoring"))
     implementation(project(":core:hardware"))  // DeviceSensors
     implementation(project(":core:root"))
+    // :core:automation — the action contract (ModuleAction / ActionHandler).
+    // Motion exposes threshold-assert actions over its existing MetricSources
+    // so the automation engine can gate a rule on a sensor reading.
+    implementation(project(":core:automation"))
 
     androidTestImplementation(project(":core:testing"))
     androidTestImplementation(libs.androidx.junit)

@@ -82,4 +82,13 @@
     <string name="apps_widget_folder_description">A customizable home-screen folder of installed apps, PWAs, and web links.</string>
     <string name="apps_widget_pick_folder">Pick a folder</string>
     <string name="apps_widget_folder_selected">Selected</string>
+
+    <!-- Monitoring: readable signal for the monitoring framework / automation. -->
+    <string name="apps_monitor_metric_folder_count_name">Folders configured</string>
+    <string name="apps_monitor_metric_folder_count_unit">folders</string>
+
+    <!-- Automation: invocable action labels. -->
+    <string name="apps_action_refresh_apps">Refresh app catalog</string>
+    <string name="apps_action_open_folder">Open folder</string>
+    <string name="apps_action_launch_app">Launch app</string>
 </resources>

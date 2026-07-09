@@ -29,4 +29,8 @@
     <string name="motion_capability_sysfs_read_detail">Direct kernel sysfs access to sensor hardware nodes</string>
     <string name="motion_capability_rooted_active">Active — rooted build</string>
     <string name="motion_capability_rooted_required">Requires rooted build</string>
+    <string name="motion_action_assert_motion_detected">Assert motion detected</string>
+    <string name="motion_action_assert_motion_idle">Assert no motion</string>
+    <string name="motion_action_assert_steps_above">Assert step count above threshold</string>
+    <string name="motion_action_assert_rotation_above">Assert rotation rate above threshold</string>
 </resources>

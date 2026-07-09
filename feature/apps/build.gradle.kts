@@ -41,6 +41,13 @@ dependencies {
     // :core:datastore — FeaturePreferencesFactory backs the per-appWidgetId
     // WidgetConfigStore<FolderWidgetConfig>.
     implementation(project(":core:datastore"))
+    // :core:monitoring — the MetricSource seam (api-exposes :core:model and
+    // :core:data, so it also covers AppsMetricSource's MetricDescriptor /
+    // MetricCategory imports without a second explicit :core:model dep).
+    implementation(project(":core:monitoring"))
+    // :core:automation — the action contract (ModuleAction / ActionHandler)
+    // AppsActionHandler binds into.
+    implementation(project(":core:automation"))
 
     // androidx.core for Drawable.toBitmap (icon resolution).
     implementation(libs.androidx.core.ktx)

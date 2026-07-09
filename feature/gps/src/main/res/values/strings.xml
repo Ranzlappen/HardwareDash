@@ -46,4 +46,13 @@
     <string name="gps_live_monitor_altitude">Altitude (live)</string>
     <string name="gps_monitor_speed">Speed history</string>
     <string name="gps_monitor_altitude">Altitude history</string>
+
+    <!-- ─── Automation actions ─────────────────────────────────────────────── -->
+    <string name="gps_action_track_start">Start location tracking</string>
+    <string name="gps_action_track_stop">Stop location tracking</string>
+    <string name="gps_action_spoof_start">Start location spoof</string>
+    <string name="gps_action_spoof_stop">Stop location spoof</string>
+    <string name="gps_action_nmea_raw_tap">NMEA raw tap (rooted)</string>
+    <string name="gps_action_constellation_dump">Constellation dump (rooted)</string>
+    <string name="gps_action_reset_gps_mutations">Reset GPS mutations (rooted)</string>
 </resources>

@@ -20,6 +20,10 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:monitoring"))
     implementation(project(":core:root"))
+    // :core:automation — the action contract (ModuleAction / ActionHandler).
+    // GpsActionHandler exposes tracking + spoofing + rooted diagnostics as
+    // invocable actions for the future automation tool.
+    implementation(project(":core:automation"))
     // Spoofing subsystem: legal-ack DataStore + the foreground-service
     // notification-channel seam.
     implementation(project(":core:datastore"))
@@ -38,6 +42,8 @@ dependencies {
 
     // GpxParser / KmlParser / RouteEngine JVM unit tests.
     testImplementation(libs.junit)
+    // GpsActionHandlerTest mocks GpsLocationTracker / GpsSpoofController / GpsController.
+    testImplementation(libs.mockk)
 
     androidTestImplementation(project(":core:testing"))
     androidTestImplementation(libs.androidx.junit)
