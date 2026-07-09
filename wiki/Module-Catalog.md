@@ -83,18 +83,18 @@ widgets / tiles / tests / strings): see the
 | `feature:vibration` | 43 | ✅ | Second blueprint consumer; modelled poll signal + draw-canvas pattern builder + 4 widgets. |
 | `feature:vibration-rooted` | 5 | ✅ | 4-capability rooted tier. |
 | `feature:vibration-standard` | 2 | ✅ | No-op root twin. |
-| `feature:apps` | 36 | ✅ | App-Organizer (folders + folder widgets + canvas background renderer); content-widget archetype. No MetricSource/ActionHandler yet. |
+| `feature:apps` | 38 | ✅ | App-Organizer (folders + folder widgets + canvas background renderer); content-widget archetype; `apps_folder_count` `MetricSource` + `AppsActionHandler` (`refresh_apps`/`open_folder`/`launch_app`). |
 | `feature:apps-rooted` | 0 | ⬜ | Rooted app surface pending. |
-| `feature:sensors` | 5 | ✅ | Proximity / light / acceleration `MetricSource`s + rooted sensor capability rows. |
+| `feature:sensors` | 6 | ✅ | Proximity / light / acceleration `MetricSource`s + rooted sensor capability rows; proximity-near/far / light-bright/dark / acceleration-above/below assert actions (no controller to drive — mirrors `feature:ambient`'s assert pattern, with an extra `stream() == null` presence guard so an absent sensor fails rather than trusting its zero absent-value). |
 | `feature:automation-ui` | 6 | ✅ | Rules list + `RuleEditorSheet` builder. |
 | `feature:automation` (+ `-rooted` 4) | 4 | 🟡 | Controller-only — no screen; role vs `automation-ui` to be resolved (fold into `:core:automation` or become the engine-status surface). |
-| `feature:actuators` | 5 | ✅ | Vibrator availability + amplitude; haptic-click / heavy-click / assert-available actions; rooted extreme/PWM/dual/rumble rows. No MetricSource yet. |
-| `feature:battery` (+ `-rooted` 9) | 16 | ✅ | Level / charging / temperature / voltage / health; dual live+history monitors; battery widget; rooted fuel-gauge / cell-monitor / charging-profile rows. No ActionHandler yet. |
+| `feature:actuators` | 6 | ✅ | Vibrator availability + amplitude; haptic-click / heavy-click / assert-available actions; rooted extreme/PWM/dual/rumble rows; `vibrator_available` `MetricSource` (static `Vibrator.hasVibrator()` presence poll — haptic pulses are fire-and-forget with no "currently vibrating at X" state to model). |
+| `feature:battery` (+ `-rooted` 9) | 17 | ✅ | Level / charging / temperature / voltage / health; dual live+history monitors; battery widget; rooted fuel-gauge / cell-monitor / charging-profile rows; `battery` ActionHandler (charging-profile override / thermal bypass / charging-type override / full dump / reset overrides / hold-SoC / wireless coil-current cap / health snapshot — all rooted-only, since baseline telemetry is read-only). |
 | `feature:audio` (+ `-rooted` 5) | 13 | ✅ | dB meter + WAV voice recording; live dB monitor; audio ActionHandler; rooted mic-gain / direct-PCM / custom-sample-rate rows. |
 | `feature:microphone` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — the dB/recording UI lives in `feature:audio`; own screen pending. |
-| `feature:camera` (+ `-rooted` 6) | 12 | ✅ | CameraX + MLKit barcode scanner (all formats), scan history, WiFi/URL deep-open; rooted HighFps / ManualOverride / HalBypass rows. Discrete-event module (MetricSource-exempt); no ActionHandler yet. |
-| `feature:gps` (+ `-rooted` 5) | 28 | ✅ | OSMDroid map + coordinates; live speed + altitude monitors; GPS-spoofing subsystem (GPX/KML playback, `LocationSpoofService`); rooted NMEA / constellation / override rows. No ActionHandler yet. |
-| `feature:motion` | 6 | ✅ | Gyroscope / step counter / motion detect; live + history monitors per sensor; rooted rows. No ActionHandler yet. |
+| `feature:camera` (+ `-rooted` 6) | 13 | ✅ | CameraX + MLKit barcode scanner (all formats), scan history, WiFi/URL deep-open; rooted HighFps / ManualOverride / RawCapture / MultiCamera / HalBypass / shutter-sound rows via `CameraController`; `camera` ActionHandler (`clear_scan_history` plus the six rooted `CameraController` extreme-tier ops, each `requiresRoot = true`). Discrete-event module (MetricSource-exempt). |
+| `feature:gps` (+ `-rooted` 5) | 29 | ✅ | OSMDroid map + coordinates; live speed + altitude monitors; GPS-spoofing subsystem (GPX/KML playback, `LocationSpoofService`); rooted NMEA / constellation / override rows; `GpsActionHandler` (track start/stop, static spoof start/stop, rooted NMEA-tap / constellation-dump / reset-mutations). |
+| `feature:motion` | 7 | ✅ | Gyroscope / step counter / motion detect; live + history monitors per sensor; assert-motion-detected / assert-idle / assert-steps-above / assert-rotation-above actions (no controller to drive — mirrors `feature:ambient`'s assert pattern); rooted rows. |
 | `feature:ambient` | 8 | ✅ | Live lux + level descriptor; ambient-light history monitor; assert-bright / assert-dark actions; rooted brightness / refresh-rate / density rows. |
 | `feature:display` (+ `-rooted` 5) | 4 | 🟡 | Controller-only — no screen / monitoring / automation yet. |
 | `feature:keepalive` (+ `-rooted` 3) | 5 | ✅ | Persistent keep-alive: contract + standard controller + the shared `PersistentKeepAliveService` (both flavors); rooted Doze-whitelist + `pm grant` via `RootedKeepAliveController`, gated by `RootSafetyGate`. Migrated from the legacy `com.gadget.keepalive` / `com.gadget.services`. Surfaced from Settings (no dedicated screen). |
@@ -114,7 +114,7 @@ widgets / tiles / tests / strings): see the
 | `feature:lock` | 8 | ✅ | Keyguard lock/secure state + biometric enrollment; lock-state live + history monitors; assert-locked / -unlocked / -secure automation actions. |
 | `feature:lock-rooted` | 4 | ✅ | Secure-keyguard `TYPE_APPLICATION_OVERLAY`: self-grants SYSTEM_ALERT_WINDOW via root appops, bounded anti-phishing overlay. Gated by `RootFeatureKey.LockSecureOverlay`; `lock_root` ActionHandler. |
 | `feature:diagnostics` (+ `-rooted` 6) | 11 | ✅ | Standard `memory_used_percent` MetricSource (live + history + trigger); rooted logcat / meminfo / cpuinfo / procstats actions via `DiagnosticsController`. |
-| `feature:bugreport` | 5 | ✅ | Permission manager: grant-state scan + per-permission runtime request + App-Settings fallback + granted/total summary (refreshes on resume); assert-permission automation action. |
+| `feature:bugreport` | 6 | ✅ | Permission manager: grant-state scan + per-permission runtime request + App-Settings fallback + granted/total summary (refreshes on resume); assert-permission automation action; `bugreport_permission_readiness` `MetricSource` (granted/total percent, the same state the summary chip already shows). |
 | `feature:bugreport-rooted` | 3 | ✅ | Force-grants a declared runtime permission via `pm grant` (gated by `RootFeatureKey.PermissionForceGrant`); `bugreport_root` ActionHandler. |
 | `feature:manual` | 2 | ✅ | In-app manual / help (thin static screen; per-module deep links pending). |
 | `feature:youtubedownloader` | 17 | ✅ | YouTube video/audio downloader (yt-dlp + ffmpeg via youtubedl-android); private playlists via in-app cookie login; dataSync FGS; MediaStore export; `download_progress` monitor + `youtube_downloader` ActionHandler. Standard-only. |
@@ -135,5 +135,5 @@ widgets / tiles / tests / strings): see the
 
 ---
 
-> _Last reviewed: 2026-07-05 · Source: `settings.gradle.kts`, live
+> _Last reviewed: 2026-07-09 · Source: `settings.gradle.kts`, live
 > `find … -name '*.kt'` counts · Related: every module._

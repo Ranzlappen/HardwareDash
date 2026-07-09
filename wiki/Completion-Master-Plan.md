@@ -47,28 +47,28 @@ QS tiles · Str = base `strings.xml` entries.
 |---|---:|---:|:--:|:--:|:--:|:--:|---:|---|
 | `torch` (+`-rooted` 7, `-standard` 3) | 46 | 9 | ✅ | ✅ | ✅ | 4 W + 2 T | 120 | **Done** — the blueprint |
 | `vibration` (+`-rooted` 5, `-standard` 2) | 43 | 8 | ✅ | ✅ | ✅ | 4 W | 124 | **Done** — no tile |
-| `apps` (+`-rooted` **0**) | 36 | 4 | ✅ | ❌ | ❌ | 1 W | 69 | Missing MS/AH; rooted sibling **empty** |
-| `gps` (+`-rooted` 5) | 28 | 3 | ✅ | ✅ | ❌ | — | 32 | Missing AH, widget |
+| `apps` (+`-rooted` **0**) | 38 | 4 | ✅ | ✅ | ✅ | 1 W | 74 | `folder_count` MS; refresh/open-folder/launch-app AH; rooted sibling **empty**; no `MonitorContainer` in screen yet |
+| `gps` (+`-rooted` 5) | 29 | 4 | ✅ | ✅ | ✅ | — | 39 | track/spoof + rooted NMEA/constellation/reset AH; widget still missing |
 | `flipper` (+`-rooted` 3) | 21 | 3 | ✅ | ✅×2 | ✅ | — | 28 | Missing widget/tile |
 | `youtubedownloader` | 17 | 1 | ✅ | ✅ | ✅ | — | 65 | Missing progress widget |
-| `battery` (+`-rooted` 9) | 16 | 1 | ✅ | ✅ | ❌ | 1 W | 49 | Missing AH |
+| `battery` (+`-rooted` 9) | 17 | 1 | ✅ | ✅ | ✅ (rooted only) | 1 W | 57 | AH wraps rooted `BatteryController`; no standard-tier assert (read-only telemetry) |
 | `storage` (+`-rooted` 6) | 16 | 1 | ✅ | ✅ | ✅ (rooted only) | 1 W | 27 | Standard-tier AH missing |
 | `radios-ir` (+`-rooted` 3) | 16 | 0 | ✅ | exempt* | ✅ | — | 38 | No tests |
 | `radios-nfc` (+`-rooted` 2) | 16 | 0 | ✅ | ✅ | ✅ | — | 32 | No tests |
 | `radios-bt` (+`-rooted` 3) | 15 | 0 | ✅ | ✅ | ✅ | — | 29 | No tests, no widget |
 | `radios-wifi` (+`-rooted` 6) | 13 | 0 | ✅ | ✅×2 | ✅ | — | 40 | Signal widget in flight |
 | `audio` (+`-rooted` 5) | 13 | 0 | ✅ | ✅ | ✅ | — | 30 | No tests |
-| `camera` (+`-rooted` 6) | 12 | 0 | ✅ | exempt* | ❌ | — | 30 | Missing AH (scan-trigger) |
+| `camera` (+`-rooted` 6) | 13 | 0 | ✅ | exempt* | ✅ | — | 37 | AH covers rooted capture rows + scan-history clear; no test dir yet |
 | `diagnostics` (+`-rooted` 6) | 11 | 1 | ✅ | ✅ | ✅ | — | 14 | Memory widget candidate |
 | `radios-subghz` | 9 | 2 | ✅ | ✅ | ✅ | — | 26 | SDR data path = rooted follow-up |
 | `ambient` | 8 | 0 | ✅ | ✅ | ✅ | — | 24 | Lux widget in flight |
 | `lock` (+`-rooted` 4) | 8 | 0 | ✅ | ✅ | ✅ | — | 22 | Tile candidate |
 | `settings` | 7 | 0 | ✅ | n/a | n/a | — | — | No language picker; strings hardcoded |
 | `automation-ui` | 6 | 1 | ✅ | n/a | n/a | — | 95 | Rule editor live |
-| `motion` | 6 | 0 | ✅ | ✅ | ❌ | — | 29 | Missing AH |
-| `sensors` | 5 | 1 | ✅ | ✅ | ❌ | — | 17 | Missing AH |
-| `bugreport` (+`-rooted` 3) | 5 | 1 | ✅ | ❌ | ✅ | — | 25 | Missing MS (granted-count) |
-| `actuators` | 5 | 0 | ✅ | ❌ | ✅ | — | 20 | Missing MS |
+| `motion` | 7 | 0 | ✅ | ✅ | ✅ | — | 29 | assert-motion/steps/rotation actions |
+| `sensors` | 6 | 2 | ✅ | ✅ | ✅ | — | 23 | assert-near/far, assert-bright/dark, assert-above/below |
+| `bugreport` (+`-rooted` 3) | 6 | 1 | ✅ | ✅ | ✅ | — | 26 | `bugreport_permission_readiness` MS (granted %) |
+| `actuators` | 6 | 0 | ✅ | ✅ | ✅ | — | 21 | `vibrator_available` MS (presence, not a modelled pulse) |
 | **`display`** (+`-rooted` 5) | 4 | 0 | ❌ | ❌ | ❌ | — | 0 | **Controller-only skeleton** |
 | **`microphone`** (+`-rooted` 5) | 4 | 0 | ❌ | ❌ | ❌ | — | 0 | **Controller-only** (dB/record UI lives in `audio`) |
 | **`notification`** (+`-rooted` 4) | 4 | 0 | ❌ | ❌ | ❌ | — | 0 | **Controller-only skeleton** |
@@ -85,13 +85,19 @@ monitoring-container requirement per the
 [Module Authoring Contract](Module-Authoring-Contract); the exemption
 should be recorded inline in each module.
 
-**Cross-cutting coverage (measured):** MetricSource in **17** feature
-families; ActionHandler in **15 standard + 6 rooted** modules; widgets in
-**5** features (torch ×4, vibration ×4, battery, storage, apps); QS tiles
-in **1** (torch ×2); **8** `@Preview` composables in the whole tree;
-**1,002** base string entries
-across 24 feature modules with **zero** translations (only `:app` has
-`values-de/es/fr`, each 24 of 42 entries ≈ 57 %, and stale).
+**Cross-cutting coverage (measured after the W3 consistency sweep):**
+MetricSource in **20** feature families (was 17 — `apps`/`bugreport`/
+`actuators` added); ActionHandler in **22** feature families (was 15+6 —
+`gps`/`motion`/`sensors`/`camera`/`battery`/`apps` added, the last two
+rooted-tier only); widgets in **5** features (torch ×4, vibration ×4,
+battery, storage, apps); QS tiles in **1** (torch ×2); **8** `@Preview`
+composables in the whole tree; **1,002+** base string entries across 24
+feature modules with **zero** translations (only `:app` has
+`values-de/es/fr`, each 24 of 42 entries ≈ 57 %, and stale). Remaining
+gap against the matrix in §1.2: `gps`/`storage`/`camera`/`apps` still
+lack widget coverage, and `display`/`microphone`/`notification`/
+`adbdebug`/`usbdebug`/`automation`/`radios-cell` remain controller-only
+skeletons (W2, unstarted).
 
 ### 1.3 Core-module status (measured)
 
@@ -247,19 +253,42 @@ previews, tests), using torch/vibration as the blueprint:
 - **`:feature:logbook`** — rebuild the legacy logbook (session notes +
   reminders) as a modular feature; **`:feature:keepalive`** — from W1.
 
-### W3 — Consistency sweep to the definition of done · **M**
+### W3 — Consistency sweep to the definition of done · **M** (✅ done, 2026-07-09)
 
-Close the matrix in §1.2 for the already-built modules:
+Closed the ActionHandler/MetricSource half of the matrix in §1.2 for the
+already-built modules — each handler/source reuses the module's existing
+controller/state rather than inventing new hardware logic, per the
+torch/vibration reference pattern:
 
-- **Add missing ActionHandlers:** battery (assert-level / charging),
-  gps (assert-inside-area / location-mode), motion (assert-still /
-  moving), sensors (assert-near / light-above), storage standard tier
-  (assert-free-space), camera (scan-trigger), apps (open-folder /
-  launch-app).
-- **Add missing MetricSources:** apps (`folder_count` / launches),
-  bugreport (`permissions_granted_percent`), actuators
-  (`vibrator_available`); record the camera / radios-ir exemptions
-  inline.
+- **ActionHandlers added:** `gps` (track start/stop, spoof start/stop,
+  rooted NMEA-tap / constellation-dump / reset-mutations); `motion`
+  (assert-motion-detected / assert-motion-idle / assert-steps-above /
+  assert-rotation-above, mirroring `ambient`'s assert pattern); `sensors`
+  (proximity assert-near/far, light assert-bright/dark, acceleration
+  assert-above/below — each fails rather than trusting the `0f`
+  absent-value when the sensor isn't present); `camera` (rooted
+  high-fps/manual-override/raw/multi-camera/HAL-bypass/shutter-sound
+  capture rows + standard-tier scan-history clear; no baseline
+  photo-capture or torch-toggle action exists to wrap — neither has a
+  headless/FGS path); `battery` (rooted `BatteryController` wrap —
+  charging-profile override / thermal bypass / charging-type override /
+  full dump / reset overrides / hold-SoC / wireless coil-current cap /
+  health snapshot; no standard-tier assert since baseline telemetry is
+  read-only `BatteryManager` reads with no controller state); `apps`
+  (refresh-apps, open-folder, launch-app by `appKey`).
+- **MetricSources added:** `apps` (`apps_folder_count`, pushed from the
+  same `AppsDao.observeFolders()` flow `FolderWidgetController` already
+  watches); `bugreport` (`bugreport_permission_readiness`, the granted/
+  total diagnostic-permission percent the screen already surfaces as a
+  warning chip); `actuators` (`vibrator_available`, a static
+  `Vibrator.hasVibrator()` presence check — the haptic actions are
+  fire-and-forget one-shots with no "currently vibrating at X" state
+  worth modelling).
+- **Still open (out of this sweep's scope):** `storage` standard-tier
+  ActionHandler (assert-free-space); widget coverage for `gps`/`camera`/
+  `apps`-beyond-its-existing-folder-widget; embedding `MonitorContainer`/
+  `LiveMonitorContainer` in the `apps` screen (the MetricSource exists,
+  the screen wiring doesn't yet).
 - Every screen embeds `MonitorContainer` + `LiveMonitorContainer` where
   signals exist; tri-state capability rows cover all rooted functions;
   `ModuleInfo` blocks complete; all entry points converge on the same
@@ -428,7 +457,7 @@ graph TD
 
 ---
 
-> _Last reviewed: 2026-07-05 · Source: measured tree audit @ `29b2bc3`
+> _Last reviewed: 2026-07-09 · Source: measured tree audit @ `29b2bc3`
 > (`find`/`grep` counts over `app/`, `core/`, `feature/`,
 > `settings.gradle.kts`, `app/src/main/AndroidManifest.xml`) · Related
 > modules: all._
