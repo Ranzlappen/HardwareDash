@@ -15,6 +15,6 @@ dependencies {
     implementation(project(":core:automation"))
     // :core:monitoring — the reusable monitoring container + MetricSource
     // seam (api-exposes :core:ui and :core:model). Actuators contributes an
-    // ActuatorsMetricSource for the modelled haptic-pulse signal.
+    // ActuatorsMetricSource for the vibrator-presence signal.
     implementation(project(":core:monitoring"))
 }
