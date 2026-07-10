@@ -18,12 +18,15 @@ traps that don't show up in a local syntax check.
 
 JVM tests carry pure-logic correctness. The CI list is curated (grow it as
 modules gain tests): `:core:automation`, `:core:data`, `:core:hardware`,
-`:core:widgetkit` run `testDebugUnitTest`. The `RuleEvaluator` is the
-flagship — exhaustive JVM tests for threshold edges, ALL/ANY folding,
-midnight-wrapping windows, root filtering, cooldown boundary, and
-hysteresis arm/re-arm, all with **zero emulator** (it's a pure function).
-Serialization is regression-tested by `RuleSerializationTest` and
-`WidgetAppearanceSerializationTest` (the `@SerialName` pins).
+`:core:widgetkit`, plus 22 `feature:*` modules that have picked up real
+`ActionHandler`/`MetricSource`/screen-content unit tests (2026-07-10) —
+see `ci-refactor.yml`'s `unit-tests` job for the exact list. The
+`RuleEvaluator` is the flagship — exhaustive JVM tests for threshold
+edges, ALL/ANY folding, midnight-wrapping windows, root filtering,
+cooldown boundary, and hysteresis arm/re-arm, all with **zero emulator**
+(it's a pure function). Serialization is regression-tested by
+`RuleSerializationTest` and `WidgetAppearanceSerializationTest` (the
+`@SerialName` pins).
 
 ### Instrumented tests
 

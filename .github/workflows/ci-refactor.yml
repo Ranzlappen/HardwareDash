@@ -59,6 +59,28 @@ jobs:
             :core:data:testDebugUnitTest \
             :core:hardware:testDebugUnitTest \
             :core:widgetkit:testDebugUnitTest \
+            :feature:adbdebug:testDebugUnitTest \
+            :feature:apps:testDebugUnitTest \
+            :feature:automation:testDebugUnitTest \
+            :feature:battery:testDebugUnitTest \
+            :feature:bugreport-rooted:testDebugUnitTest \
+            :feature:diagnostics:testDebugUnitTest \
+            :feature:display:testDebugUnitTest \
+            :feature:flipper:testDebugUnitTest \
+            :feature:flipper-rooted:testDebugUnitTest \
+            :feature:gps:testDebugUnitTest \
+            :feature:lock-rooted:testDebugUnitTest \
+            :feature:microphone:testDebugUnitTest \
+            :feature:notification:testDebugUnitTest \
+            :feature:radios-cell:testDebugUnitTest \
+            :feature:radios-subghz:testDebugUnitTest \
+            :feature:radios-wifi-rooted:testDebugUnitTest \
+            :feature:sensors:testDebugUnitTest \
+            :feature:storage:testDebugUnitTest \
+            :feature:torch:testDebugUnitTest \
+            :feature:usbdebug:testDebugUnitTest \
+            :feature:vibration:testDebugUnitTest \
+            :feature:youtubedownloader:testDebugUnitTest \
             --stacktrace
 
       - name: Upload unit-test reports
@@ -71,6 +93,7 @@ jobs:
             core/data/build/reports/tests/
             core/hardware/build/reports/tests/
             core/widgetkit/build/reports/tests/
+            feature/*/build/reports/tests/
           retention-days: 7
 
   build:
