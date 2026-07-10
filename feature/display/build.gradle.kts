@@ -13,3 +13,20 @@ plugins {
 android {
     namespace = "dev.ranzlappen.gadget.feature.display"
 }
+
+dependencies {
+    // RootCapabilityRegistry — the flavor seam DisplayViewModel reads
+    // instead of branching on BuildConfig.IS_ROOTED.
+    implementation(project(":core:root"))
+    implementation(project(":core:ui"))
+    implementation(project(":core:navigation"))
+    implementation(project(":core:monitoring"))
+    implementation(project(":core:automation"))
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    androidTestImplementation(project(":core:testing"))
+    androidTestImplementation(libs.androidx.junit)
+}

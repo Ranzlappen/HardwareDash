@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adbdebug_screen_title">ADB Debug</string>
+
+    <!-- Monitor titles -->
+    <string name="adbdebug_live_monitor_enabled">ADB enabled (live)</string>
+    <string name="adbdebug_monitor_enabled">ADB enabled history</string>
+
+    <!-- Shared actions -->
+    <string name="adbdebug_action_open_dev_options">Open Developer options</string>
+
+    <!-- Capability rows -->
+    <string name="adbdebug_cap_state_name">ADB debugging state</string>
+    <string name="adbdebug_cap_state_detail">Reads Settings.Global.ADB_ENABLED directly — no special permission required</string>
+    <string name="adbdebug_cap_state_enabled">ADB debugging is enabled</string>
+    <string name="adbdebug_cap_state_disabled">ADB debugging is disabled</string>
+    <string name="adbdebug_cap_toggle_name">ADB enabled toggle</string>
+    <string name="adbdebug_cap_toggle_detail">Writes settings put global adb_enabled 0|1</string>
+    <string name="adbdebug_cap_network_name">ADB over network</string>
+    <string name="adbdebug_cap_network_detail">Enables wireless ADB on an allow-listed port (5555-5599)</string>
+    <string name="adbdebug_cap_dump_name">getprop snapshot</string>
+    <string name="adbdebug_cap_dump_detail">Read-only getprop capture, tail-capped to 16 KB, with optional Logbook persistence</string>
+    <string name="adbdebug_cap_setprop_name">setprop override</string>
+    <string name="adbdebug_cap_setprop_detail">Allow-listed setprop override across 7 exact keys plus log.tag.* entries</string>
+    <string name="adbdebug_cap_rooted_active">Active — rooted build</string>
+    <string name="adbdebug_cap_rooted_required">Requires rooted build</string>
+
+    <!-- Standard-tier state card -->
+    <string name="adbdebug_card_state_title">ADB Debug State</string>
+    <string name="adbdebug_card_state_detail">Rooted builds can toggle ADB in-app below; the standard build only reads the current state and can jump to Developer options.</string>
+    <string name="adbdebug_chip_enabled">ADB enabled</string>
+    <string name="adbdebug_chip_disabled">ADB disabled</string>
+
+    <!-- Rooted: ADB toggle -->
+    <string name="adbdebug_card_toggle_title">ADB Toggle (rooted)</string>
+    <string name="adbdebug_toggle_label">ADB debugging enabled</string>
+
+    <!-- Rooted: ADB over network -->
+    <string name="adbdebug_card_network_title">ADB Over Network (rooted)</string>
+    <string name="adbdebug_network_range_hint">Allowed port range: %1$d–%2$d</string>
+    <string name="adbdebug_network_port_label">Port</string>
+    <string name="adbdebug_network_apply">Apply network settings</string>
+
+    <!-- Rooted: getprop dump -->
+    <string name="adbdebug_card_dump_title">Property Dump (rooted)</string>
+    <string name="adbdebug_dump_persist_label">Save to device storage (Logbook)</string>
+    <string name="adbdebug_dump_action">Dump getprop snapshot</string>
+    <string name="adbdebug_dump_saved_to">Saved to %1$s</string>
+
+    <!-- Rooted: setprop editor -->
+    <string name="adbdebug_card_setprop_title">Setprop Override (rooted)</string>
+    <string name="adbdebug_setprop_logtag_chip">log.tag.*</string>
+    <string name="adbdebug_setprop_logtag_suffix_label">log.tag. suffix</string>
+    <string name="adbdebug_setprop_value_label">Value</string>
+    <string name="adbdebug_setprop_apply">Apply override</string>
+</resources>

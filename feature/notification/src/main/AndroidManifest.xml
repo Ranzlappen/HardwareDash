@@ -1,2 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Android 13+ runtime permission for posting the in-app test
+         notification. Optional at the module-blueprint level — the builder
+         card degrades to a disabled Post button with an explanatory message
+         when denied, it never crashes. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+        <!-- Real NotificationListenerService backing the `active_notifications`
+             MetricSource. Works on BOTH flavors: the user grants access via
+             the system "Notification access" settings screen on standard, or
+             the rooted RootedNotificationController.grantListenerAccess()
+             (cmd notification allow_listener) programmatically grants it on
+             rooted — either path binds the same component. -->
+        <service
+            android:name=".listener.GadgetNotificationListenerService"
+            android:exported="true"
+            android:label="@string/notification_listener_service_label"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>

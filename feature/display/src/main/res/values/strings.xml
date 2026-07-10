@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="display_screen_title">Display</string>
+
+    <!-- Readouts card -->
+    <string name="display_readouts_title">Readouts</string>
+    <string name="display_readout_refresh_rate">Refresh rate</string>
+    <string name="display_readout_rotation">Rotation</string>
+    <string name="display_readout_resolution">Resolution</string>
+    <string name="display_value_hz">%1$d Hz</string>
+    <string name="display_value_degrees">%1$d°</string>
+    <string name="display_value_resolution">%1$d × %2$d</string>
+
+    <!-- Brightness card (standard tier, Settings.System.SCREEN_BRIGHTNESS) -->
+    <string name="display_brightness_title">Brightness</string>
+    <string name="display_brightness_label">Brightness</string>
+
+    <!-- Refresh-rate card (readable on both tiers; applying an override requires root) -->
+    <string name="display_refresh_rate_title">Refresh rate override</string>
+    <string name="display_refresh_rate_subtitle_rooted">Select a mode to force the display to that refresh rate.</string>
+    <string name="display_refresh_rate_subtitle_standard">Available modes on this display. Applying an override requires the rooted app version.</string>
+
+    <!-- Density card (rooted only) -->
+    <string name="display_density_title">Density override</string>
+    <string name="display_density_label">Density</string>
+    <string name="display_density_subtitle_rooted">Runtime DPI override via `wm density`, clamped to 120–560.</string>
+    <string name="display_density_subtitle_standard">Requires the rooted app version.</string>
+
+    <!-- SurfaceFlinger diagnostic panel (rooted only, read-only) -->
+    <string name="display_surfaceflinger_title">SurfaceFlinger snapshot</string>
+    <string name="display_surfaceflinger_subtitle_rooted">Read-only `dumpsys SurfaceFlinger` tail, capped to 8 KB.</string>
+    <string name="display_surfaceflinger_subtitle_standard">Requires the rooted app version.</string>
+    <string name="display_surfaceflinger_capture">Capture snapshot</string>
+
+    <!-- Reset-all -->
+    <string name="display_reset_title">Reset</string>
+    <string name="display_reset_detail">Reverts every active brightness, refresh-rate, and density override.</string>
+    <string name="display_reset_action">Reset all overrides</string>
+
+    <!-- Status row -->
+    <string name="display_status_title">Last result</string>
+
+    <!-- ModuleInfo: permissions -->
+    <string name="display_permission_write_settings_label">Modify system settings</string>
+    <string name="display_permission_write_settings_rationale">Lets the brightness slider write Settings.System.SCREEN_BRIGHTNESS. Read-only readouts work without it.</string>
+    <string name="display_action_grant_write_settings">Grant permission</string>
+
+    <!-- ModuleInfo: OS compatibility -->
+    <string name="display_os_note_refresh_rate_api30">Refresh-rate override requires Android 11 (API 30) or newer.</string>
+
+    <!-- ModuleInfo: capabilities -->
+    <string name="display_cap_brightness_name">Brightness control</string>
+    <string name="display_cap_brightness_detail">Read/write Settings.System.SCREEN_BRIGHTNESS.</string>
+    <string name="display_cap_brightness_granted">Permission granted</string>
+    <string name="display_cap_brightness_denied">WRITE_SETTINGS not granted</string>
+    <string name="display_cap_refresh_rate_name">Refresh-rate override</string>
+    <string name="display_cap_refresh_rate_detail">Force the display to a specific supported mode.</string>
+    <string name="display_cap_density_name">Density (DPI) override</string>
+    <string name="display_cap_density_detail">Runtime `wm density` override.</string>
+    <string name="display_cap_surfaceflinger_name">SurfaceFlinger snapshot</string>
+    <string name="display_cap_surfaceflinger_detail">Read-only `dumpsys SurfaceFlinger` tail.</string>
+    <string name="display_cap_rooted_active">Active — rooted build</string>
+    <string name="display_cap_rooted_required">Requires the rooted app version</string>
+
+    <!-- Monitoring -->
+    <string name="display_live_monitor_brightness">Live brightness</string>
+    <string name="display_monitor_brightness">Brightness history</string>
+    <string name="display_monitor_metric_name">Screen brightness</string>
+
+    <!-- Status messages (DisplayControllerResult mapping) -->
+    <string name="display_status_ok">Applied</string>
+    <string name="display_status_unsupported">Requires the rooted app version</string>
+    <string name="display_status_rate_limited">Rate-limited — retry in %1$dms</string>
+    <string name="display_status_opted_out">Turned off in Settings</string>
+    <string name="display_status_reset_completed">%1$d override(s) reverted, %2$d failed</string>
+    <string name="display_status_brightness_applied">Brightness set to %1$d/%2$d</string>
+    <string name="display_status_refresh_applied">Refresh-rate mode %1$d applied</string>
+    <string name="display_status_density_applied">Density set to %1$d dpi</string>
+    <string name="display_status_write_settings_denied">WRITE_SETTINGS permission not granted</string>
+
+    <!-- Automation actions -->
+    <string name="display_action_set_brightness">Set brightness</string>
+    <string name="display_action_override_brightness_extreme">Overdrive brightness (rooted)</string>
+    <string name="display_action_override_refresh_rate">Override refresh rate (rooted)</string>
+    <string name="display_action_override_density">Override density (rooted)</string>
+    <string name="display_action_reset_all">Reset all overrides (rooted)</string>
+</resources>

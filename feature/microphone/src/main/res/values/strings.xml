@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="microphone_screen_title">Mic Tools</string>
+
+    <!-- Tools card -->
+    <string name="microphone_tools_title">Extreme Mic Tools</string>
+    <string name="microphone_tools_subtitle">Rooted-only diagnostic and override tools that bypass AudioRecord. Baseline mic capture (level meter, voice recorder) lives on the Audio screen.</string>
+    <string name="microphone_root_required_badge">Requires a rooted build — every control below is disabled on this device</string>
+    <string name="microphone_duration_label">Duration</string>
+    <string name="microphone_confirm_cancel">Cancel</string>
+
+    <!-- Gain boost -->
+    <string name="microphone_section_gain_boost">Gain boost</string>
+    <string name="microphone_gain_boost_db_label">Boost</string>
+    <string name="microphone_gain_boost_detail">Direct ALSA mixer write. Hard +30 dB raw cap, 60 s ceiling; original mixer values are restored automatically.</string>
+    <string name="microphone_action_gain_boost">Boost gain</string>
+
+    <!-- Direct PCM -->
+    <string name="microphone_section_direct_pcm">Direct PCM capture</string>
+    <string name="microphone_direct_pcm_format">Fixed diagnostic format: %1$d kHz mono, %2$d-bit — raw tinycap read from /dev/snd, bypassing AudioRecord entirely.</string>
+    <string name="microphone_action_direct_pcm">Capture raw PCM</string>
+
+    <!-- Custom sample rate -->
+    <string name="microphone_section_custom_rate">Custom sample rate</string>
+    <string name="microphone_custom_rate_hz_label">Rate</string>
+    <string name="microphone_custom_rate_risk_note">Some kernels lock up on unsupported rates and need a reboot to recover.</string>
+    <string name="microphone_action_custom_rate">Request custom rate…</string>
+    <string name="microphone_custom_rate_confirm_title">Unusual sample rate risk</string>
+    <string name="microphone_custom_rate_confirm_body">Requesting a non-standard capture rate (e.g. above 192 kHz for ultrasonic capture) is unsupported on some kernels and has been known to lock up the audio driver, requiring a device reboot to recover. Continue only if you understand this risk.</string>
+    <string name="microphone_custom_rate_confirm_action">Request anyway</string>
+
+    <!-- Multi-mic raw -->
+    <string name="microphone_section_multi_mic">Multi-mic simultaneous capture</string>
+    <string name="microphone_multi_mic_streams_label">Streams</string>
+    <string name="microphone_action_multi_mic">Capture all mics at once</string>
+
+    <!-- Disable hardware effects -->
+    <string name="microphone_section_disable_effects">Hardware noise suppression</string>
+    <string name="microphone_disable_effects_detail">Zeroes the ALSA ANC / AGC / AEC / beamforming mixer controls, then restores them immediately — a momentary pulse, not a persistent setting.</string>
+    <string name="microphone_disable_effects_toggle_label">Disable noise suppression now</string>
+
+    <!-- System audio capture -->
+    <string name="microphone_section_system_audio">System audio capture</string>
+    <string name="microphone_system_audio_legal_note">Grants CAPTURE_AUDIO_OUTPUT via pm grant for the capture window, then revokes it automatically. 5-minute hard ceiling.</string>
+    <string name="microphone_system_audio_toggle_label">Capture system / call audio</string>
+    <string name="microphone_system_audio_confirm_title">Call-recording legality</string>
+    <string name="microphone_system_audio_confirm_body">System-audio capture can record phone calls and other app audio. Recording calls without consent is illegal in many jurisdictions (including one-party and two-party consent states/countries). You are solely responsible for complying with the law where you and any other participants are located. Continue only if you have the legal right to record.</string>
+    <string name="microphone_system_audio_confirm_action">I have the legal right — capture</string>
+
+    <!-- Result snackbar -->
+    <string name="microphone_result_ok">Done</string>
+    <string name="microphone_result_unsupported">Requires the rooted app version</string>
+    <string name="microphone_result_opted_out">Turned off in Settings</string>
+    <string name="microphone_result_rate_limited">Rate-limited — try again shortly</string>
+    <string name="microphone_result_error">Failed: %s</string>
+
+    <!-- ModuleInfo capabilities -->
+    <string name="microphone_cap_rooted_active">Active — rooted build</string>
+    <string name="microphone_cap_rooted_required">Requires rooted build</string>
+    <string name="microphone_cap_gain_boost_name">Mic gain boost</string>
+    <string name="microphone_cap_gain_boost_detail">Direct ALSA mixer write, +30 dB raw cap, 60 s ceiling</string>
+    <string name="microphone_cap_direct_pcm_name">Direct PCM capture</string>
+    <string name="microphone_cap_direct_pcm_detail">Raw tinycap read from /dev/snd, bypassing AudioRecord</string>
+    <string name="microphone_cap_custom_rate_name">Custom sample rate</string>
+    <string name="microphone_cap_custom_rate_detail">Unusual capture rates (e.g. ultrasonic); requires explicit confirm</string>
+    <string name="microphone_cap_multi_mic_name">Multi-mic raw capture</string>
+    <string name="microphone_cap_multi_mic_detail">Concurrent capture from every available input node, up to 3 streams</string>
+    <string name="microphone_cap_disable_effects_name">Disable hardware effects</string>
+    <string name="microphone_cap_disable_effects_detail">Momentarily zeroes ALSA ANC / AGC / AEC / beamforming controls</string>
+    <string name="microphone_cap_system_audio_name">System audio capture</string>
+    <string name="microphone_cap_system_audio_detail">Grants CAPTURE_AUDIO_OUTPUT for a bounded window; requires legal-warning confirm</string>
+
+    <!-- ─── Automation actions (MicrophoneActionHandler) ────────────────── -->
+    <string name="microphone_action_disable_effects">Disable hardware noise suppression</string>
+    <string name="microphone_action_system_audio">System audio capture</string>
+</resources>
