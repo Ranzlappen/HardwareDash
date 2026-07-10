@@ -187,9 +187,7 @@ private fun Int.toSimStateUi(): SimStateUi = when (this) {
     -> SimStateUi.Locked
     TelephonyManager.SIM_STATE_NETWORK_LOCKED -> SimStateUi.NetworkLocked
     TelephonyManager.SIM_STATE_NOT_READY -> SimStateUi.NotReady
-    TelephonyManager.SIM_STATE_READY,
-    TelephonyManager.SIM_STATE_LOADED,
-    -> SimStateUi.Ready
+    TelephonyManager.SIM_STATE_READY -> SimStateUi.Ready
     else -> SimStateUi.Unknown
 }
 
