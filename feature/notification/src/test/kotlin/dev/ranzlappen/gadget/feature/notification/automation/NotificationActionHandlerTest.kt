@@ -11,7 +11,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.withArg
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -117,10 +116,7 @@ class NotificationActionHandlerTest {
         assertEquals(ActionResult.Success, result)
         coVerify {
             controller.showLockScreenOverlay(
-                withArg { config ->
-                    assertEquals("hello", config.message)
-                    assertEquals(9000L, config.durationMillis)
-                },
+                match { it.message == "hello" && it.durationMillis == 9000L },
             )
         }
     }
