@@ -29,10 +29,17 @@ object RuleCodec {
         json.encodeToString(FolderRuleSet.serializer(), set)
 
     fun decode(jsonString: String): FolderRuleSet {
-        // Try the modern set-shaped format first.
-        runCatching { json.decodeFromString(FolderRuleSet.serializer(), jsonString) }
-            .getOrNull()
-            ?.let { return it }
+        // Try the modern set-shaped format first -- but only when the JSON
+        // actually looks like {"rules":[...]}. Every FolderRuleSet field has
+        // a default, so with ignoreUnknownKeys=true a legacy single-rule blob
+        // like {"type":"package_prefix",...} would otherwise decode
+        // "successfully" as an empty set instead of falling through to the
+        // legacy branches below, silently dropping the rule.
+        if (jsonString.contains("\"rules\"")) {
+            runCatching { json.decodeFromString(FolderRuleSet.serializer(), jsonString) }
+                .getOrNull()
+                ?.let { return it }
+        }
 
         // Legacy "manual" tag → empty set.
         if (jsonString.contains("\"type\":\"manual\"")) return FolderRuleSet(emptyList())
