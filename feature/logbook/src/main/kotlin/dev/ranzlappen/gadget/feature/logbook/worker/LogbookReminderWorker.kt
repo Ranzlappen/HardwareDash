@@ -69,6 +69,10 @@ class LogbookReminderWorker @AssistedInject constructor(
         // permissions it does not throw) — the checkpoint itself still shows
         // as due/overdue in-app either way, so a missing grant degrades
         // gracefully rather than failing the work.
+        // checkpointId.toInt(): safe truncation — a local single-user Room
+        // autoincrement id never approaches Int.MAX_VALUE, and reusing the
+        // checkpoint id as the notification id means a re-fired reminder for
+        // the same checkpoint replaces rather than stacks.
         NotificationManagerCompat.from(applicationContext).notify(checkpointId.toInt(), notification)
         return Result.success()
     }
