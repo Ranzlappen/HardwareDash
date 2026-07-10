@@ -11,6 +11,8 @@ import dev.ranzlappen.gadget.core.data.MonitorSampleDao
 import dev.ranzlappen.gadget.core.data.MonitoringDatabase
 import dev.ranzlappen.gadget.core.data.apps.AppsDao
 import dev.ranzlappen.gadget.core.data.apps.AppsDatabase
+import dev.ranzlappen.gadget.core.data.logbook.LogbookDao
+import dev.ranzlappen.gadget.core.data.logbook.LogbookDatabase
 import javax.inject.Singleton
 
 @Module
@@ -43,4 +45,17 @@ object DataModule {
 
     @Provides
     fun provideAppsDao(database: AppsDatabase): AppsDao = database.appsDao()
+
+    @Provides
+    @Singleton
+    fun provideLogbookDatabase(
+        @ApplicationContext context: Context,
+    ): LogbookDatabase = Room.databaseBuilder(
+        context,
+        LogbookDatabase::class.java,
+        "logbook.db",
+    ).build()
+
+    @Provides
+    fun provideLogbookDao(database: LogbookDatabase): LogbookDao = database.logbookDao()
 }
