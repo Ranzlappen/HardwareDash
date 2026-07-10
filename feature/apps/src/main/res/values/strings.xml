@@ -91,4 +91,17 @@
     <string name="apps_action_refresh_apps">Refresh app catalog</string>
     <string name="apps_action_open_folder">Open folder</string>
     <string name="apps_action_launch_app">Launch app</string>
+
+    <!-- Rooted per-app management row (folder editor's app list; self-hides
+         on the standard flavor and for web-link entries — see AppRow /
+         AppRootActionsMenu). Backed by :feature:apps-rooted's
+         RootedAppsRootController via the AppsRootController seam. -->
+    <string name="apps_root_menu_manage">Manage app</string>
+    <string name="apps_root_menu_freeze">Freeze</string>
+    <string name="apps_root_menu_unfreeze">Unfreeze</string>
+    <string name="apps_root_menu_force_stop">Force stop</string>
+    <string name="apps_root_result_ok">Done</string>
+    <string name="apps_root_result_unsupported">Requires the rooted app version</string>
+    <string name="apps_root_result_opted_out">Turned off in Settings</string>
+    <string name="apps_root_result_rate_limited">Rate limited — try again shortly</string>
 </resources>

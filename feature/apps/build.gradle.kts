@@ -48,6 +48,11 @@ dependencies {
     // :core:automation — the action contract (ModuleAction / ActionHandler)
     // AppsActionHandler binds into.
     implementation(project(":core:automation"))
+    // :core:root — RootCapabilityRegistry (isRootedFlavor gate for the
+    // folder editor's per-app rooted rows). The AppsRootController contract
+    // + its standard no-op live in this module (see root/AppsRootController.kt),
+    // mirroring :feature:storage's StorageController split.
+    implementation(project(":core:root"))
 
     // androidx.core for Drawable.toBitmap (icon resolution).
     implementation(libs.androidx.core.ktx)
