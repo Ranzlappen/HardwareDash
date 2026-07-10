@@ -44,6 +44,13 @@ dependencies {
     testImplementation(libs.junit)
     // GpsActionHandlerTest mocks GpsLocationTracker / GpsSpoofController / GpsController.
     testImplementation(libs.mockk)
+    // GpxParser/KmlParser call XmlPullParserFactory.newInstance(), which is
+    // one of the android.jar stub classes -- with unitTests.isReturnDefaultValues
+    // = true it returns null instead of throwing, causing an NPE on
+    // .newPullParser(). A real XmlPull implementation on the test classpath
+    // (found via its own META-INF/services entry, ahead of the android.jar
+    // stub) makes the factory resolve to a working parser instead.
+    testImplementation(libs.kxml2)
 
     androidTestImplementation(project(":core:testing"))
     androidTestImplementation(libs.androidx.junit)

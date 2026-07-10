@@ -4,6 +4,7 @@ kotlin = "1.9.10"
 composeCompiler = "1.5.3"
 coreKtx = "1.13.1"
 junit = "4.13.2"
+kxml2 = "2.3.0"
 junitVersion = "1.2.1"
 testRunner = "1.6.2"
 espressoCore = "3.6.1"
@@ -57,6 +58,7 @@ youtubedlAndroid = "0.18.1"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
+kxml2 = { group = "net.sf.kxml", name = "kxml2", version.ref = "kxml2" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testRunner" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

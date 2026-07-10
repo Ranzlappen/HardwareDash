@@ -33,13 +33,7 @@ class GpxParserTest {
     }
 
     private fun parseResource(path: String): List<Waypoint> {
-        // AGP's isReturnDefaultValues unit-test classloader doesn't reliably
-        // resolve test resources via the defining class's own classLoader;
-        // the thread context classLoader does. Try both, context first.
-        val stream = checkNotNull(
-            Thread.currentThread().contextClassLoader?.getResourceAsStream(path)
-                ?: javaClass.classLoader?.getResourceAsStream(path),
-        )
+        val stream = checkNotNull(javaClass.classLoader?.getResourceAsStream(path))
         return stream.use { GpxParser.parse(it) }
     }
 }
