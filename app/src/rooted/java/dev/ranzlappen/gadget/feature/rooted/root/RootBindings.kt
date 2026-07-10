@@ -49,6 +49,8 @@ import dev.ranzlappen.gadget.feature.rooted.root.sysfs.RootedSysfsMutationLog
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import dev.ranzlappen.gadget.feature.storage.rooted.control.RootedStorageController
 import dev.ranzlappen.gadget.feature.storage.control.StorageController
+import dev.ranzlappen.gadget.feature.apps.rooted.control.RootedAppsRootController
+import dev.ranzlappen.gadget.feature.apps.root.AppsRootController
 import dev.ranzlappen.gadget.feature.radios.wifi.rooted.control.RootedWifiController
 import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiController
 import dev.ranzlappen.gadget.feature.usbdebug.rooted.control.RootedUsbDebuggingController
@@ -201,4 +203,9 @@ abstract class RootBindings {
     abstract fun bindEmergencyResetCoordinator(
         impl: RootedEmergencyResetCoordinator,
     ): EmergencyResetCoordinator
+
+    // ──── Batch 17: App-Organizer (apps-rooted) controller ────
+
+    @Binds @Singleton
+    abstract fun bindAppsRootController(impl: RootedAppsRootController): AppsRootController
 }

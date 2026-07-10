@@ -167,4 +167,12 @@ sealed class RootFeatureKey(val id: String) {
     // Force-grant a declared runtime permission to this app via `pm grant`,
     // bypassing the system permission dialog.
     data object PermissionForceGrant : RootFeatureKey("permission_force_grant")
+
+    // ──── Batch-17 App-Organizer (apps-rooted) features ────
+    // pm-based freeze / unfreeze / force-stop, each hard-gated by
+    // RootedAppsRootController's system-package deny-list before the
+    // shell command ever runs.
+    data object AppsFreezeApp : RootFeatureKey("apps_freeze_app")
+    data object AppsUnfreezeApp : RootFeatureKey("apps_unfreeze_app")
+    data object AppsForceStopApp : RootFeatureKey("apps_force_stop_app")
 }

@@ -1,18 +1,24 @@
 package dev.ranzlappen.gadget.feature.apps.ui
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.data.apps.AppRecord
 import dev.ranzlappen.gadget.core.data.apps.AppsDao
 import dev.ranzlappen.gadget.core.data.apps.Folder
 import dev.ranzlappen.gadget.core.data.apps.FolderApp
 import dev.ranzlappen.gadget.core.data.apps.FolderRuleEntity
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
+import dev.ranzlappen.gadget.feature.apps.R
 import dev.ranzlappen.gadget.feature.apps.WebLinkRepository
 import dev.ranzlappen.gadget.feature.apps.icons.CoverImageStore
+import dev.ranzlappen.gadget.feature.apps.root.AppsRootController
+import dev.ranzlappen.gadget.feature.apps.root.AppsRootControllerResult
 import dev.ranzlappen.gadget.feature.apps.rules.FolderRule
 import dev.ranzlappen.gadget.feature.apps.rules.FolderRuleSet
 import dev.ranzlappen.gadget.feature.apps.rules.RuleCodec
