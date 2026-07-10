@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Brightness6
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DirectionsRun
@@ -39,6 +40,7 @@ import androidx.compose.material.icons.outlined.BatteryFull
 import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Brightness6
+import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DeveloperMode
 import androidx.compose.material.icons.outlined.DirectionsRun
@@ -494,6 +496,22 @@ sealed interface GadgetDestination {
     }
 
     /**
+     * Logbook feature module — dated/tagged session-note log entries plus a
+     * lightweight "process" tracker (named checkpoint sequences with due
+     * dates and an optional per-checkpoint reminder). Standard-flavor only;
+     * a pure productivity feature with no hardware/root surface, so
+     * [dev.ranzlappen.gadget.core.ui.module.ModuleInfo.capabilities] stays
+     * empty (the one optional runtime permission is `POST_NOTIFICATIONS`
+     * for checkpoint-reminder notifications on API 33+).
+     */
+    data object Logbook : GadgetDestination {
+        override val route = "logbook"
+        override val label = "Logbook"
+        override val iconFilled = Icons.Filled.Checklist
+        override val iconOutlined = Icons.Outlined.Checklist
+    }
+
+    /**
      * YouTube Downloader feature module — downloads videos and audio
      * (including private playlists) via the bundled yt-dlp + ffmpeg runtime.
      * Standard-flavor; runs unprivileged. Ships monitoring
@@ -533,7 +551,7 @@ sealed interface GadgetDestination {
             Torch, Vibration, Apps, Sensors,
             Battery, Gps, Storage, RadiosIr, Camera,
             Motion, Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosCell, RadiosSubghz, Flipper,
-            Ambient, Lock, Actuators, Youtubedownloader, Diagnostics, Display, Microphone, Notification, UsbDebug, AdbDebug, BugReport, Manual, Automation,
+            Ambient, Lock, Actuators, Youtubedownloader, Diagnostics, Display, Microphone, Notification, UsbDebug, AdbDebug, BugReport, Manual, Logbook, Automation,
         )
 
         /**
@@ -556,5 +574,17 @@ sealed interface GadgetDestination {
          */
         fun byRouteOrNull(route: String?): GadgetDestination? =
             route?.let { r -> railDestinations.firstOrNull { it.route == r } }
+
+        /**
+         * Intent-extra key an `Intent` (e.g. a notification's tap
+         * `PendingIntent`) sets to a [GadgetDestination.route] string to
+         * ask `:app`'s `MainActivity` to navigate there after launch —
+         * resolved back to a destination via [byRouteOrNull]. First
+         * consumer: `:feature:logbook`'s checkpoint-reminder notification.
+         * Feature modules never reference `MainActivity` directly (it
+         * lives in `:app`, downstream of every feature module), so this
+         * constant is the shared contract both sides compile against.
+         */
+        const val EXTRA_ROUTE: String = "dev.ranzlappen.gadget.core.navigation.EXTRA_ROUTE"
     }
 }
