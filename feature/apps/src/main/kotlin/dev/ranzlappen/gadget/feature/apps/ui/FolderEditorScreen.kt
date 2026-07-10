@@ -36,9 +36,12 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -135,6 +138,10 @@ fun FolderEditorScreen(onBack: () -> Unit) {
         onRemoveRuleOfKind = viewModel::removeRuleOfKind,
         onSearchChange = { viewModel.searchQuery.value = it },
         onDeleteWidget = viewModel::deleteWidget,
+        isRootedFlavor = viewModel.isRootedFlavor,
+        onFreezeApp = viewModel::freezeApp,
+        onUnfreezeApp = viewModel::unfreezeApp,
+        onForceStopApp = viewModel::forceStopApp,
     )
 }
 
@@ -178,6 +185,10 @@ fun FolderEditorContent(
     onRemoveRuleOfKind: ((FolderRule) -> Boolean) -> Unit,
     onSearchChange: (String) -> Unit,
     onDeleteWidget: (Int) -> Unit = {},
+    isRootedFlavor: Boolean = false,
+    onFreezeApp: suspend (String) -> String = { "" },
+    onUnfreezeApp: suspend (String) -> String = { "" },
+    onForceStopApp: suspend (String) -> String = { "" },
     modifier: Modifier = Modifier,
 ) {
     var nameDraft by remember { mutableStateOf("") }
@@ -338,6 +349,22 @@ fun FolderEditorContent(
                         selected = record.appKey in state.membership,
                         otherFolders = state.otherFolderMembership[record.appKey].orEmpty(),
                         onToggle = { onToggleMember(record.appKey) },
+                        showRootActions = isRootedFlavor && !record.isWebLink,
+                        onFreeze = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(onFreezeApp(record.packageName))
+                            }
+                        },
+                        onUnfreeze = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(onUnfreezeApp(record.packageName))
+                            }
+                        },
+                        onForceStop = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(onForceStopApp(record.packageName))
+                            }
+                        },
                     )
                 }
             }
@@ -666,6 +693,10 @@ private fun AppRow(
     selected: Boolean,
     otherFolders: List<String>,
     onToggle: () -> Unit,
+    showRootActions: Boolean = false,
+    onFreeze: () -> Unit = {},
+    onUnfreeze: () -> Unit = {},
+    onForceStop: () -> Unit = {},
 ) {
     val subtitle = when {
         record.isWebLink -> stringResource(R.string.apps_web_link_badge)
@@ -707,7 +738,48 @@ private fun AppRow(
                     )
                 }
             }
+            if (showRootActions) {
+                AppRootActionsMenu(onFreeze = onFreeze, onUnfreeze = onUnfreeze, onForceStop = onForceStop)
+            }
             Checkbox(checked = selected, onCheckedChange = { onToggle() })
+        }
+    }
+}
+
+/**
+ * Rooted-tier per-app management menu (freeze / unfreeze / force-stop),
+ * shown only on the rooted flavor and only for real installed packages
+ * (never web links). Backed by [dev.ranzlappen.gadget.feature.apps.root.AppsRootController]
+ * via the folder editor's ViewModel — this composable is purely the
+ * trigger + menu chrome, matching [AppsScreenContent]'s existing overflow-menu pattern.
+ */
+@Composable
+private fun AppRootActionsMenu(
+    onFreeze: () -> Unit,
+    onUnfreeze: () -> Unit,
+    onForceStop: () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = stringResource(R.string.apps_root_menu_manage),
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.apps_root_menu_freeze)) },
+                onClick = { expanded = false; onFreeze() },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.apps_root_menu_unfreeze)) },
+                onClick = { expanded = false; onUnfreeze() },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.apps_root_menu_force_stop)) },
+                onClick = { expanded = false; onForceStop() },
+            )
         }
     }
 }

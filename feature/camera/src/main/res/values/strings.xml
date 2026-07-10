@@ -45,4 +45,13 @@
     <string name="camera_cap_manual_detail">Direct HAL parameters: ISO, shutter speed, white balance, and focus distance</string>
     <string name="camera_cap_hal_bypass_name">HAL bypass</string>
     <string name="camera_cap_hal_bypass_detail">Raw frame delivery from camera driver, bypassing the Camera2 API stack</string>
+
+    <!-- ─── Automation actions (CameraActionHandler) ───────────────────── -->
+    <string name="camera_action_clear_scan_history">Clear scan history</string>
+    <string name="camera_action_high_fps_capture">High-FPS capture (rooted)</string>
+    <string name="camera_action_manual_override">Manual exposure override (rooted)</string>
+    <string name="camera_action_raw_capture">RAW frame capture (rooted)</string>
+    <string name="camera_action_multi_camera_capture">Multi-camera capture (rooted)</string>
+    <string name="camera_action_hal_bypass_frame">HAL bypass frame (rooted)</string>
+    <string name="camera_action_set_shutter_sound">Set shutter sound (rooted)</string>
 </resources>

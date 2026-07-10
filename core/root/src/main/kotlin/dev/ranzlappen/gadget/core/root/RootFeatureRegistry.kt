@@ -63,6 +63,9 @@ private const val LOCK_OVERLAY_WINDOW_SECONDS = 60
 private const val FLIPPER_USB_GRANT_WINDOW_SECONDS = 60
 private const val PERMISSION_GRANT_WINDOW_SECONDS = 60
 
+private const val APPS_FREEZE_WINDOW_SECONDS = 60
+private const val APPS_FORCE_STOP_WINDOW_SECONDS = 60
+
 /**
  * Single source of truth mapping every [RootFeatureKey] to its
  * [RootFeatureDescriptor]. Both flavors read this; the standard flavor's
@@ -905,6 +908,38 @@ class RootFeatureRegistry @Inject constructor() {
             defaultOn = false,
             limit = RootLimitPolicy(
                 window = PERMISSION_GRANT_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+
+        // ──── Batch-17 App-Organizer (apps-rooted) features ────
+        RootFeatureKey.AppsFreezeApp to RootFeatureDescriptor(
+            key = RootFeatureKey.AppsFreezeApp,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = APPS_FREEZE_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_LOW_CAP,
+            ),
+            requiresExplicitConfirm = true,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.AppsUnfreezeApp to RootFeatureDescriptor(
+            key = RootFeatureKey.AppsUnfreezeApp,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = APPS_FREEZE_WINDOW_SECONDS.seconds,
+                maxInvocations = EXTREME_OPS_MED_CAP,
+            ),
+            requiresExplicitConfirm = false,
+            isWriteCapable = true,
+        ),
+        RootFeatureKey.AppsForceStopApp to RootFeatureDescriptor(
+            key = RootFeatureKey.AppsForceStopApp,
+            defaultOn = false,
+            limit = RootLimitPolicy(
+                window = APPS_FORCE_STOP_WINDOW_SECONDS.seconds,
                 maxInvocations = EXTREME_OPS_MED_CAP,
             ),
             requiresExplicitConfirm = true,

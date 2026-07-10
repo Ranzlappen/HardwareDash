@@ -1,18 +1,24 @@
 package dev.ranzlappen.gadget.feature.apps.ui
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.data.apps.AppRecord
 import dev.ranzlappen.gadget.core.data.apps.AppsDao
 import dev.ranzlappen.gadget.core.data.apps.Folder
 import dev.ranzlappen.gadget.core.data.apps.FolderApp
 import dev.ranzlappen.gadget.core.data.apps.FolderRuleEntity
+import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
+import dev.ranzlappen.gadget.feature.apps.R
 import dev.ranzlappen.gadget.feature.apps.WebLinkRepository
 import dev.ranzlappen.gadget.feature.apps.icons.CoverImageStore
+import dev.ranzlappen.gadget.feature.apps.root.AppsRootController
+import dev.ranzlappen.gadget.feature.apps.root.AppsRootControllerResult
 import dev.ranzlappen.gadget.feature.apps.rules.FolderRule
 import dev.ranzlappen.gadget.feature.apps.rules.FolderRuleSet
 import dev.ranzlappen.gadget.feature.apps.rules.RuleCodec
@@ -35,15 +41,23 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class FolderEditorViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val dao: AppsDao,
     private val webLinkRepository: WebLinkRepository,
     private val pinFolderHelper: PinFolderHelper,
     private val coverImageStore: CoverImageStore,
     private val widgetStore: WidgetConfigStore<FolderWidgetConfig>,
+    private val appsRootController: AppsRootController,
+    rootCapabilityRegistry: RootCapabilityRegistry,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val folderId: Long = savedStateHandle.get<Long>(ARG_FOLDER_ID) ?: 0L
+
+    /** Gates the freeze/unfreeze/force-stop rows in [AppRow] — rooted-tier
+     *  capability, self-hidden on the standard flavor rather than shown
+     *  disabled (these are privileged actions, not informational status). */
+    val isRootedFlavor: Boolean = rootCapabilityRegistry.isRootedFlavor
 
     val folder: StateFlow<Folder?> = dao.observeFolders()
         .map { folders -> folders.firstOrNull { it.id == folderId } }
@@ -222,6 +236,27 @@ class FolderEditorViewModel @Inject constructor(
     }
 
     private fun sameKind(a: FolderRule, b: FolderRule): Boolean = a::class == b::class
+
+    /** Freezes [packageName] via the rooted controller; returns a snackbar-ready message. */
+    suspend fun freezeApp(packageName: String): String =
+        appsRootController.freezeApp(packageName).toSnackbarMessage()
+
+    /** Unfreezes [packageName] via the rooted controller; returns a snackbar-ready message. */
+    suspend fun unfreezeApp(packageName: String): String =
+        appsRootController.unfreezeApp(packageName).toSnackbarMessage()
+
+    /** Force-stops [packageName] via the rooted controller; returns a snackbar-ready message. */
+    suspend fun forceStopApp(packageName: String): String =
+        appsRootController.forceStopApp(packageName).toSnackbarMessage()
+
+    private fun AppsRootControllerResult.toSnackbarMessage(): String = when (this) {
+        is AppsRootControllerResult.Ok -> statusNote ?: context.getString(R.string.apps_root_result_ok)
+        AppsRootControllerResult.Unsupported -> context.getString(R.string.apps_root_result_unsupported)
+        AppsRootControllerResult.OptedOut -> context.getString(R.string.apps_root_result_opted_out)
+        is AppsRootControllerResult.Denied -> message
+        is AppsRootControllerResult.RateLimited -> context.getString(R.string.apps_root_result_rate_limited)
+        is AppsRootControllerResult.HardwareError -> message
+    }
 
     companion object {
         const val ARG_FOLDER_ID = "folderId"

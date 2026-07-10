@@ -44,6 +44,8 @@ import dev.ranzlappen.gadget.feature.standard.root.sysfs.StandardSysfsMutationLo
 import dev.ranzlappen.gadget.core.root.sysfs.SysfsMutationLog
 import dev.ranzlappen.gadget.feature.storage.control.StandardStorageController
 import dev.ranzlappen.gadget.feature.storage.control.StorageController
+import dev.ranzlappen.gadget.feature.apps.root.StandardAppsRootController
+import dev.ranzlappen.gadget.feature.apps.root.AppsRootController
 import dev.ranzlappen.gadget.feature.radios.wifi.control.StandardWifiController
 import dev.ranzlappen.gadget.feature.radios.wifi.control.WifiController
 import dev.ranzlappen.gadget.feature.usbdebug.control.StandardUsbDebuggingController
@@ -230,4 +232,10 @@ object RootBindings {
     fun provideEmergencyResetCoordinator(
         impl: StandardEmergencyResetCoordinator,
     ): EmergencyResetCoordinator = impl
+
+    // ──── Batch 17: App-Organizer (apps-rooted) controller ────
+
+    @Provides
+    @Singleton
+    fun provideAppsRootController(impl: StandardAppsRootController): AppsRootController = impl
 }

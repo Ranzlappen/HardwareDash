@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_screen_title">Notifications</string>
+
+    <!-- Manifest -->
+    <string name="notification_listener_service_label">HardwareDash notification access</string>
+
+    <!-- Monitoring -->
+    <string name="notification_metric_active_notifications_name">Active notifications</string>
+
+    <!-- Builder test channels (fixed importance per Android 8+ channel rules) -->
+    <string name="notification_channel_low_name">Test — Low importance</string>
+    <string name="notification_channel_default_name">Test — Default importance</string>
+    <string name="notification_channel_high_name">Test — High importance</string>
+    <string name="notification_channel_description">Test notifications posted from the Notifications module builder.</string>
+
+    <!-- Builder defaults -->
+    <string name="notification_builder_default_title">Test notification</string>
+    <string name="notification_builder_default_body">Posted from the Notifications module builder.</string>
+    <string name="notification_overlay_default_message">Rooted lock-screen overlay test</string>
+
+    <!-- Module permissions -->
+    <string name="notification_perm_post_label">Post notifications</string>
+    <string name="notification_perm_post_rationale">Required on Android 13+ to show the in-app test notification the builder posts.</string>
+
+    <!-- Module capability rows -->
+    <string name="notification_cap_ok">Available</string>
+    <string name="notification_cap_needs_root">Requires the rooted app version</string>
+    <string name="notification_cap_root_ready">Active — rooted build</string>
+    <string name="notification_cap_builder_name">Notification builder</string>
+    <string name="notification_cap_builder_detail">Compose and post a test notification (title / body / importance) via NotificationManager — no root required</string>
+    <string name="notification_cap_channel_inspector_name">Channel inspector</string>
+    <string name="notification_cap_channel_inspector_detail">Lists every notification channel this app owns, with its live importance level</string>
+    <string name="notification_cap_listener_name">Notification-listener access</string>
+    <string name="notification_cap_listener_detail">Grants NotificationListenerService access to unlock the active-notifications count monitor</string>
+    <string name="notification_cap_listener_granted">Granted — active_notifications is live</string>
+    <string name="notification_cap_listener_not_granted">Not granted</string>
+    <string name="notification_cap_listener_open_settings">Open notification access settings</string>
+    <string name="notification_cap_sticky_override_name">Sticky channel importance override</string>
+    <string name="notification_cap_sticky_override_detail">Raises a channel\'s importance from Low to High via `cmd notification` — never silences a channel</string>
+    <string name="notification_cap_listener_grant_name">Programmatic listener grant</string>
+    <string name="notification_cap_listener_grant_detail">Grants this module\'s own listener service access via `cmd notification allow_listener` — no user tap required</string>
+    <string name="notification_cap_overlay_name">Lock-screen notification overlay</string>
+    <string name="notification_cap_overlay_detail">Shows a bounded system-alert overlay above the keyguard (hard cap: 60 s) with an immutable anti-phishing footer</string>
+    <string name="notification_cap_overlay_caveat">Requires SYSTEM_ALERT_WINDOW; time-boxed</string>
+
+    <!-- Builder card -->
+    <string name="notification_builder_card_title">Notification builder</string>
+    <string name="notification_builder_title_label">Title</string>
+    <string name="notification_builder_body_label">Body</string>
+    <string name="notification_builder_importance_label">Importance</string>
+    <string name="notification_builder_importance_low">Low</string>
+    <string name="notification_builder_importance_default">Default</string>
+    <string name="notification_builder_importance_high">High</string>
+    <string name="notification_builder_post">Post test notification</string>
+    <string name="notification_builder_cancel">Cancel</string>
+
+    <!-- Channel inspector card -->
+    <string name="notification_channel_inspector_card_title">Channel inspector</string>
+    <string name="notification_channel_inspector_empty">No channels yet — post a test notification to create one.</string>
+    <string name="notification_channel_inspector_refresh">Refresh</string>
+    <string name="notification_channel_importance_row">%1$s — %2$s</string>
+
+    <!-- Sticky override card (rooted) -->
+    <string name="notification_sticky_override_card_title">Sticky channel importance override</string>
+    <string name="notification_sticky_override_description">Raises the given channel\'s importance from Low to High. Never silences a channel. Reverts automatically when you leave this screen.</string>
+    <string name="notification_sticky_override_channel_id_label">Channel ID</string>
+    <string name="notification_sticky_override_button">Raise importance to High</string>
+
+    <!-- Listener access card (rooted) -->
+    <string name="notification_listener_access_card_title">Programmatic listener access</string>
+    <string name="notification_listener_access_description">Grants this module\'s own notification-listener service access without an app-settings trip, via `cmd notification allow_listener`.</string>
+    <string name="notification_listener_access_button">Grant listener access</string>
+    <string name="notification_listener_access_status_granted">Listener connected</string>
+    <string name="notification_listener_access_status_not_granted">Listener not connected</string>
+
+    <!-- Lock-screen overlay card (rooted) -->
+    <string name="notification_overlay_card_title">Lock-screen overlay test</string>
+    <string name="notification_overlay_description">Shows a bounded overlay above the keyguard. Always carries an immutable \"(Rooted overlay)\" footer. Hard-capped at 60 seconds.</string>
+    <string name="notification_overlay_message_label">Message</string>
+    <string name="notification_overlay_duration_label">Duration</string>
+    <string name="notification_overlay_button">Show overlay</string>
+
+    <!-- Reset-all card (rooted) -->
+    <string name="notification_reset_card_title">Reset all mutations</string>
+    <string name="notification_reset_description">Reverts every sticky-channel-importance override and any active overlay back to its original state.</string>
+    <string name="notification_reset_button">Reset all</string>
+
+    <!-- Monitors -->
+    <string name="notification_active_notifications_live_monitor">Active notifications (live)</string>
+    <string name="notification_active_notifications_monitor">Active notifications history</string>
+
+    <!-- Rooted-result snackbar copy (mirrors torch_root_result_*) -->
+    <string name="notification_root_result_ok">Done</string>
+    <string name="notification_root_result_unsupported">Requires the rooted app version</string>
+    <string name="notification_root_result_opted_out">Turned off in Settings</string>
+    <string name="notification_root_result_rate_limited">Rate-limited — try again shortly</string>
+    <string name="notification_root_result_error">Failed: %1$s</string>
+    <string name="notification_root_result_reset">Reset complete: %1$d restored, %2$d failed</string>
+    <string name="notification_root_result_channel_snapshot">%1$s: importance %2$d → %3$d</string>
+    <string name="notification_root_opted_out_action">Enable</string>
+
+    <!-- ActionHandler labels (automation rule builder) -->
+    <string name="notification_action_post_test">Post test notification</string>
+    <string name="notification_action_cancel_test">Cancel test notification</string>
+    <string name="notification_action_assert_importance">Assert channel importance</string>
+    <string name="notification_action_sticky_override">Raise channel importance to High</string>
+    <string name="notification_action_grant_listener">Grant listener access</string>
+    <string name="notification_action_show_overlay">Show lock-screen overlay</string>
+    <string name="notification_action_reset_all">Reset all notification mutations</string>
+</resources>

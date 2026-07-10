@@ -34,6 +34,11 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 add("implementation", libs.findLibrary("hilt-navigation-compose").get())
                 add("implementation", libs.findLibrary("androidx-material3").get())
                 add("implementation", libs.findLibrary("androidx-activity-compose").get())
+                // kotlin-test — every feature module's unit tests use kotlin.test.assertEquals /
+                // assertTrue (the torch/vibration reference-blueprint style). Declared once here
+                // rather than per-module so a fresh ActionHandler/MetricSource test compiles
+                // out of the box instead of failing on "Unresolved reference: test" in CI.
+                add("testImplementation", libs.findLibrary("kotlin-test").get())
             }
         }
     }

@@ -17,4 +17,10 @@
     <string name="sensors_capability_raw_unfiltered_detail">Bypass Android\'s sensor fusion and low-pass filter pipeline</string>
     <string name="sensors_capability_sysfs_read">Sysfs direct read</string>
     <string name="sensors_capability_sysfs_read_detail">Kernel-level sysfs access to sensor hardware nodes</string>
+    <string name="sensors_action_proximity_near">Proximity below threshold</string>
+    <string name="sensors_action_proximity_far">Proximity above threshold</string>
+    <string name="sensors_action_light_bright">Ambient light above threshold</string>
+    <string name="sensors_action_light_dark">Ambient light below threshold</string>
+    <string name="sensors_action_acceleration_above">Acceleration above threshold</string>
+    <string name="sensors_action_acceleration_below">Acceleration below threshold</string>
 </resources>

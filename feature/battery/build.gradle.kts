@@ -22,6 +22,9 @@ dependencies {
     // :core:model which defines MetricDescriptor / MetricCategory).
     implementation(project(":core:monitoring"))
     implementation(project(":core:root"))
+    // :core:automation — the action contract (ModuleAction / ActionHandler)
+    // backing BatteryActionHandler.
+    implementation(project(":core:automation"))
     // :core:widgetkit — the battery home-screen widget rides the kit's
     // content/display archetype (BaseContentWidgetProvider); :core:datastore
     // backs the per-appWidgetId config store via FeaturePreferencesFactory.

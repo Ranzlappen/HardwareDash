@@ -33,4 +33,7 @@
     <string name="bugreport_cap_adb_detail">Toggle ADB over network and dump device properties via setprop-safe shell commands</string>
     <string name="bugreport_cap_force_grant_name">Force-grant permissions</string>
     <string name="bugreport_cap_force_grant_detail">Grant a declared runtime permission via pm grant, bypassing the system permission dialog (gated by RootSafetyGate)</string>
+
+    <!-- Monitoring -->
+    <string name="bugreport_monitor_metric_name">Diagnostic permission readiness</string>
 </resources>

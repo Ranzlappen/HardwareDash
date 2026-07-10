@@ -41,6 +41,18 @@ dependencies {
     // :core:datastore — FeaturePreferencesFactory backs the per-appWidgetId
     // WidgetConfigStore<FolderWidgetConfig>.
     implementation(project(":core:datastore"))
+    // :core:monitoring — the MetricSource seam (api-exposes :core:model and
+    // :core:data, so it also covers AppsMetricSource's MetricDescriptor /
+    // MetricCategory imports without a second explicit :core:model dep).
+    implementation(project(":core:monitoring"))
+    // :core:automation — the action contract (ModuleAction / ActionHandler)
+    // AppsActionHandler binds into.
+    implementation(project(":core:automation"))
+    // :core:root — RootCapabilityRegistry (isRootedFlavor gate for the
+    // folder editor's per-app rooted rows). The AppsRootController contract
+    // + its standard no-op live in this module (see root/AppsRootController.kt),
+    // mirroring :feature:storage's StorageController split.
+    implementation(project(":core:root"))
 
     // androidx.core for Drawable.toBitmap (icon resolution).
     implementation(libs.androidx.core.ktx)

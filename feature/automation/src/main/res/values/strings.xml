@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="automation_action_fire_intent">Fire privileged intent</string>
+    <string name="automation_action_override_setting">Override system setting</string>
+    <string name="automation_action_dumpsys_snapshot">Dumpsys snapshot</string>
+    <string name="automation_action_reset_all">Reset all mutations</string>
+</resources>

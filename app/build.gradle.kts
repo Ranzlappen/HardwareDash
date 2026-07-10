@@ -358,6 +358,9 @@ dependencies {
     "rootedImplementation"(project(":feature:radios-cell-rooted"))
     // Rooted GPS — read-only NMEA raw tap + constellation dump over vendor nodes.
     "rootedImplementation"(project(":feature:gps-rooted"))
+    // Rooted App-Organizer controller — pm-based freeze/unfreeze + am force-stop,
+    // surfaced as rooted rows on the existing :feature:apps folder editor.
+    "rootedImplementation"(project(":feature:apps-rooted"))
 
     // ─── Unit tests ─────────────────────────────────────────────
     testImplementation(libs.junit)

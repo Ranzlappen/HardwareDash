@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  :feature:logbook — dated/tagged session-note log entries plus a
+  lightweight checkpoint/process tracker with per-checkpoint reminders.
+
+  Standard-flavor only; no hardware/root surface, no widgets, no
+  foreground service. The manifest only needs the runtime notification
+  permission for LogbookReminderWorker's checkpoint-due notifications.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      POST_NOTIFICATIONS required on API 33+ for LogbookReminderWorker's
+      checkpoint-reminder notification. Declared optional in this
+      module's ModuleInfo.permissions (ModulePermissionsSection renders
+      the grant/open-settings affordance) — a denied grant only means the
+      reminder silently doesn't show; the checkpoint itself, its due date,
+      and the rest of the module keep working normally.
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+</manifest>

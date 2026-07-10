@@ -36,7 +36,7 @@ the plugin applies the right configuration.
 | `gadget.android.feature`               | Composite: applies `library` + `library.compose` + `hilt` + standard feature dependencies.    | `feature/*`                            |
 | `gadget.android.hilt`                  | Hilt Gradle plugin + KSP + `hilt-android` runtime + `hilt-compiler` KSP processor.            | Any module using Hilt                  |
 | `gadget.android.room`                  | androidx.room Gradle plugin + KSP + Room runtime + KSP processor + schema directory.          | `core:data`                            |
-| `gadget.jvm.library`                   | Kotlin JVM + JDK 17. Pure-Kotlin module (no Android dependencies).                            | `core:model`, `core:common`            |
+| `gadget.jvm.library`                   | Kotlin JVM + JDK 17. Pure-Kotlin module (no Android dependencies).                            | `core:model`                           |
 
 ## Adding a new plugin
 

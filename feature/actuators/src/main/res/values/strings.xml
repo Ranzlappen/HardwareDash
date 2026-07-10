@@ -26,4 +26,7 @@
     <string name="actuators_cap_dual_detail">Drive LRA (linear resonant) and ERM (eccentric rotating mass) actuators concurrently with phase-offset synchronization</string>
     <string name="actuators_cap_rumble_name">Sustained rumble</string>
     <string name="actuators_cap_rumble_detail">Loop a haptic pattern beyond the OS 500 ms limit while monitoring battery drain and motor temperature via a watchdog</string>
+
+    <!-- Monitoring -->
+    <string name="actuators_monitor_metric_name">Vibrator available</string>
 </resources>

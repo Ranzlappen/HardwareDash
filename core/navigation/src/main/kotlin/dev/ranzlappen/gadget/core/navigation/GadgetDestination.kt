@@ -6,10 +6,14 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.Brightness6
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.LightMode
@@ -18,13 +22,16 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Nfc
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SettingsInputAntenna
 import androidx.compose.material.icons.filled.SettingsRemote
+import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.outlined.Analytics
@@ -32,10 +39,14 @@ import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.BatteryFull
 import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Brightness6
+import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.DeveloperMode
 import androidx.compose.material.icons.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FlashlightOn
+import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.HealthAndSafety
 import androidx.compose.material.icons.outlined.Help
 import androidx.compose.material.icons.outlined.LightMode
@@ -44,13 +55,16 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Nfc
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SettingsInputAntenna
 import androidx.compose.material.icons.outlined.SettingsRemote
+import androidx.compose.material.icons.outlined.SignalCellularAlt
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.Usb
 import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.runtime.Immutable
@@ -295,6 +309,26 @@ sealed interface GadgetDestination {
     }
 
     /**
+     * Cellular feature module — SIM state, carrier name, readable
+     * network-type label, and live 0-4 signal-bars from
+     * [android.telephony.TelephonyManager] (requires
+     * [android.Manifest.permission.READ_PHONE_STATE]); the rooted extreme
+     * tier is a capability-row surface over
+     * [dev.ranzlappen.gadget.feature.radios.cell.control.CellController]'s
+     * two read-only Qualcomm sysfs dumps (no AT-command write path exists
+     * or is planned). `CellController` is bound per-flavor in `:app`'s
+     * `RootBindings` (standard no-op / rooted impl in
+     * `:feature:radios-cell-rooted`) — this screen never branches on
+     * `BuildConfig.IS_ROOTED`.
+     */
+    data object RadiosCell : GadgetDestination {
+        override val route = "radios_cell"
+        override val label = "Cellular"
+        override val iconFilled = Icons.Filled.SignalCellularAlt
+        override val iconOutlined = Icons.Outlined.SignalCellularAlt
+    }
+
+    /**
      * Sub-GHz feature module — detects an attached SDR / Sub-GHz USB
      * transceiver (RTL-SDR, HackRF, YARD Stick One, …) on the host bus,
      * exposes a bridge-connected metric source for monitoring/automation,
@@ -355,6 +389,91 @@ sealed interface GadgetDestination {
     }
 
     /**
+     * Display feature module — standard-tier brightness / refresh-rate /
+     * rotation / resolution readouts with a `Settings.System.SCREEN_BRIGHTNESS`
+     * read/write slider, plus rooted-only density (DPI) override,
+     * refresh-rate override, and a read-only SurfaceFlinger diagnostic
+     * snapshot. `DisplayController` is bound per-flavor in `:app`'s
+     * `RootBindings` (standard no-op / rooted impl in
+     * `:feature:display-rooted`) — this screen never branches on
+     * `BuildConfig.IS_ROOTED`.
+     */
+    data object Display : GadgetDestination {
+        override val route = "display"
+        override val label = "Display"
+        override val iconFilled = Icons.Filled.Brightness6
+        override val iconOutlined = Icons.Outlined.Brightness6
+    }
+
+    /**
+     * ADB Debugging feature module — a debug-state readout
+     * (`Settings.Global.ADB_ENABLED`, readable on every flavor with no special
+     * permission) with a Developer-options deep link on the standard flavor;
+     * an ADB-enabled toggle, ADB-over-network port control, a `getprop`
+     * dump (with optional Logbook persistence), and an allow-listed `setprop`
+     * override editor on the rooted flavor. `AdbDebuggingController` is bound
+     * per-flavor in `:app`'s `RootBindings` (standard no-op / rooted impl in
+     * `:feature:adbdebug-rooted`) — this screen never branches on
+     * `BuildConfig.IS_ROOTED`.
+     */
+    data object AdbDebug : GadgetDestination {
+        override val route = "adb_debug"
+        override val label = "ADB Debug"
+        override val iconFilled = Icons.Filled.DeveloperMode
+        override val iconOutlined = Icons.Outlined.DeveloperMode
+    }
+
+    /**
+     * Microphone extreme-tools feature module — a rooted-only panel for
+     * `MicrophoneController`'s six extreme-tier operations (ALSA gain boost,
+     * direct-PCM tinycap capture, custom sample rate, multi-mic raw capture,
+     * hardware effect override, system-audio capture). Distinct from [Audio]:
+     * baseline mic capture (the dB meter / voice recorder) stays on that
+     * route; every row here is disabled on the standard flavor.
+     */
+    data object Microphone : GadgetDestination {
+        override val route = "microphone"
+        override val label = "Mic Tools"
+        override val iconFilled = Icons.Filled.GraphicEq
+        override val iconOutlined = Icons.Outlined.GraphicEq
+    }
+
+    /**
+     * Notification feature module — channel inspector + a simplified
+     * notification builder (post/cancel a test notification) on the standard
+     * flavor; a sticky-channel-importance override picker, a listener-access
+     * opt-in toggle (unlocks the [dev.ranzlappen.gadget.core.model.MetricSource]
+     * `active_notifications`), and a bounded lock-screen overlay test panel on
+     * the rooted flavor. `NotificationController` is bound per-flavor in
+     * `:app`'s `RootBindings` (standard no-op / rooted `cmd notification`
+     * impl in `:feature:notification-rooted`) — this screen never branches on
+     * `BuildConfig.IS_ROOTED`.
+     */
+    data object Notification : GadgetDestination {
+        override val route = "notification"
+        override val label = "Notifications"
+        override val iconFilled = Icons.Filled.Notifications
+        override val iconOutlined = Icons.Outlined.Notifications
+    }
+
+    /**
+     * USB Debug feature module — a debug-state readout (`Settings.Global.ADB_ENABLED`,
+     * the same OS setting `:feature:adbdebug` reads under its own concept) with a
+     * Developer-options deep link on the standard flavor; a USB function-role
+     * picker (`cmd usb set-functions`) and a labelled "USB Diagnostics" panel
+     * (`dumpsys usb` / `dumpsys SerialService` / debugfs `usb/devices`) on the
+     * rooted flavor. `UsbDebuggingController` is bound per-flavor in `:app`'s
+     * `RootBindings` (standard no-op / rooted impl in `:feature:usbdebug-rooted`)
+     * — this screen never branches on `BuildConfig.IS_ROOTED`.
+     */
+    data object UsbDebug : GadgetDestination {
+        override val route = "usb_debug"
+        override val label = "USB Debug"
+        override val iconFilled = Icons.Filled.Usb
+        override val iconOutlined = Icons.Outlined.Usb
+    }
+
+    /**
      * Health / BugReport feature module — scans all runtime permission grant
      * states and surfaces missing permissions. No runtime requests are triggered.
      */
@@ -374,6 +493,22 @@ sealed interface GadgetDestination {
         override val label = "Help"
         override val iconFilled = Icons.Filled.Help
         override val iconOutlined = Icons.Outlined.Help
+    }
+
+    /**
+     * Logbook feature module — dated/tagged session-note log entries plus a
+     * lightweight "process" tracker (named checkpoint sequences with due
+     * dates and an optional per-checkpoint reminder). Standard-flavor only;
+     * a pure productivity feature with no hardware/root surface, so
+     * [dev.ranzlappen.gadget.core.ui.module.ModuleInfo.capabilities] stays
+     * empty (the one optional runtime permission is `POST_NOTIFICATIONS`
+     * for checkpoint-reminder notifications on API 33+).
+     */
+    data object Logbook : GadgetDestination {
+        override val route = "logbook"
+        override val label = "Logbook"
+        override val iconFilled = Icons.Filled.Checklist
+        override val iconOutlined = Icons.Outlined.Checklist
     }
 
     /**
@@ -415,8 +550,8 @@ sealed interface GadgetDestination {
         val modules: List<GadgetDestination> = listOf(
             Torch, Vibration, Apps, Sensors,
             Battery, Gps, Storage, RadiosIr, Camera,
-            Motion, Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosSubghz, Flipper,
-            Ambient, Lock, Actuators, Youtubedownloader, Diagnostics, BugReport, Manual, Automation,
+            Motion, Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosCell, RadiosSubghz, Flipper,
+            Ambient, Lock, Actuators, Youtubedownloader, Diagnostics, Display, Microphone, Notification, UsbDebug, AdbDebug, BugReport, Manual, Logbook, Automation,
         )
 
         /**
@@ -439,5 +574,17 @@ sealed interface GadgetDestination {
          */
         fun byRouteOrNull(route: String?): GadgetDestination? =
             route?.let { r -> railDestinations.firstOrNull { it.route == r } }
+
+        /**
+         * Intent-extra key an `Intent` (e.g. a notification's tap
+         * `PendingIntent`) sets to a [GadgetDestination.route] string to
+         * ask `:app`'s `MainActivity` to navigate there after launch —
+         * resolved back to a destination via [byRouteOrNull]. First
+         * consumer: `:feature:logbook`'s checkpoint-reminder notification.
+         * Feature modules never reference `MainActivity` directly (it
+         * lives in `:app`, downstream of every feature module), so this
+         * constant is the shared contract both sides compile against.
+         */
+        const val EXTRA_ROUTE: String = "dev.ranzlappen.gadget.core.navigation.EXTRA_ROUTE"
     }
 }

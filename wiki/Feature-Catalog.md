@@ -65,6 +65,15 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
   tray-drop configure + in-app pin paths.
 - **Persistence:** `apps.db` (Room) + folder cover photos + web-link
   favicons (all in the backup sweep).
+- **Automation:** `AppsActionHandler` (`featureId = "apps"`) exposes
+  `refresh_apps` / `open_folder` / `launch_app` actions, reusing
+  `AppRepository`, `FolderPopupActivity`, and `AppLauncher` rather than
+  duplicating any launch logic. **Monitoring:** `apps_folder_count`
+  `MetricSource` (push, from `AppsDao.observeFolders()`) — folder count is
+  the only already-modelled numeric signal in the domain layer; no
+  `MonitorWidgetNotifier` yet (the folder widget is a content widget, not
+  a metric gauge) and the screen doesn't embed `MonitorContainer` /
+  `LiveMonitorContainer` yet.
 - **Standard:** ✅ · **Rooted:** ⬜ (`:feature:apps-rooted` skeleton).
 - **Source:** `:feature:apps`.
 
@@ -73,7 +82,13 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
 - **What:** proximity / light / acceleration readouts as push
   `MetricSource`s over the `DeviceSensors` seam.
 - **Monitoring:** chartable + automatable (same `MetricSource`).
-- **Automation:** these signals feed automation triggers/conditions.
+- **Automation:** these signals feed automation triggers/conditions; the
+  module also has no controller of its own to drive, so its `sensors`
+  `ActionHandler` exposes threshold **assert** actions instead (mirroring
+  `ambient`/`motion`) — proximity near/far, light bright/dark, acceleration
+  above/below — each sampling the same `MetricSource` directly, guarding on
+  `stream() == null` so an absent sensor fails the assertion rather than
+  silently passing on its zero absent-value.
 - **Source:** `:feature:sensors`.
 
 ## Automation ✅
@@ -182,7 +197,7 @@ of [Roadmap & Status](Roadmap-and-Status):
 - **Audio** (`:feature:audio` + `-rooted`) — dB meter + WAV recording,
   live dB monitor, rooted mic rows.
 - **Motion / Ambient** (`:feature:motion`, `:feature:ambient`) — sensor
-  readouts + monitors + (ambient) assert actions.
+  readouts + monitors + assert actions (both modules).
 - **Storage** (`:feature:storage` + `-rooted`) — volume cards, used-%
   monitor, storage widget, rooted diskstats / fstrim actions.
 - **Lock / Diagnostics / Health** (`:feature:lock`,
@@ -214,6 +229,6 @@ Also still pending: `:feature:apps-rooted` (empty skeleton).
 
 ---
 
-> _Last reviewed: 2026-07-03 · Source: `settings.gradle.kts`,
+> _Last reviewed: 2026-07-09 · Source: `settings.gradle.kts`,
 > feature source counts, [Completion Master Plan](Completion-Master-Plan) ·
 > Related: every `feature/*`._

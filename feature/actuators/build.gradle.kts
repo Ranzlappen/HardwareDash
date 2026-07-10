@@ -13,4 +13,8 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
     implementation(project(":core:automation"))
+    // :core:monitoring — the reusable monitoring container + MetricSource
+    // seam (api-exposes :core:ui and :core:model). Actuators contributes an
+    // ActuatorsMetricSource for the vibrator-presence signal.
+    implementation(project(":core:monitoring"))
 }

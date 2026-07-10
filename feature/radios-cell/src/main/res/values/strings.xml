@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cell_screen_title">Cellular</string>
+
+    <!-- Permission section -->
+    <string name="cell_permission_label">Phone state</string>
+    <string name="cell_permission_rationale">Reads SIM state, carrier name, network type, and signal strength from the modem</string>
+    <string name="cell_permission_card_title">Phone state permission needed</string>
+    <string name="cell_permission_card_body">Grant Phone state to see carrier, network type, and live signal strength.</string>
+    <string name="cell_permission_grant_button">Grant permission</string>
+
+    <!-- Status card -->
+    <string name="cell_card_status_title">Cellular status</string>
+    <string name="cell_label_sim_state">SIM state</string>
+    <string name="cell_label_carrier">Carrier</string>
+    <string name="cell_label_network_type">Network type</string>
+    <string name="cell_label_signal">Signal</string>
+
+    <!-- SIM state labels -->
+    <string name="cell_sim_state_ready">Ready</string>
+    <string name="cell_sim_state_absent">No SIM</string>
+    <string name="cell_sim_state_locked">Locked (PIN/PUK)</string>
+    <string name="cell_sim_state_network_locked">Network locked</string>
+    <string name="cell_sim_state_not_ready">Not ready</string>
+    <string name="cell_sim_state_unknown">Unknown</string>
+
+    <!-- Network type labels -->
+    <string name="cell_network_type_5g_plus">5G+</string>
+    <string name="cell_network_type_5g">5G</string>
+    <string name="cell_network_type_lte">4G LTE</string>
+    <string name="cell_network_type_3g">3G</string>
+    <string name="cell_network_type_2g">2G</string>
+    <string name="cell_network_type_unknown">Unknown</string>
+
+    <!-- Monitor titles -->
+    <string name="cell_live_monitor_signal">Cell signal (live)</string>
+    <string name="cell_monitor_signal">Cell signal history</string>
+
+    <!-- Capability rows -->
+    <string name="cell_cap_sim_name">SIM state</string>
+    <string name="cell_cap_sim_detail">Reads the SIM card state via TelephonyManager.getSimState() — no permission required</string>
+    <string name="cell_cap_carrier_name">Carrier name</string>
+    <string name="cell_cap_carrier_detail">Reads the registered network operator name</string>
+    <string name="cell_cap_carrier_unknown">Unknown</string>
+    <string name="cell_cap_network_type_name">Network type</string>
+    <string name="cell_cap_network_type_detail">Readable network-generation label (2G/3G/4G LTE/5G/5G+), via TelephonyDisplayInfo on Android 12+ or getDataNetworkType() on Android 10-11</string>
+    <string name="cell_cap_signal_name">Signal strength</string>
+    <string name="cell_cap_signal_detail">Live 0-4 signal bars from a TelephonyCallback / PhoneStateListener signal-strength listener</string>
+    <string name="cell_cap_no_permission">Grant Phone state to read live signal</string>
+    <string name="cell_cap_signal_bars">%1$d of 4 bars</string>
+
+    <!-- Rooted capability rows -->
+    <string name="cell_cap_rooted_active">Active — rooted build</string>
+    <string name="cell_cap_rooted_required">Requires rooted build</string>
+    <string name="cell_cap_raw_modem_name">Raw modem diagnostics</string>
+    <string name="cell_cap_raw_modem_detail">Read-only walk of Qualcomm qcom_smd*/qmi_devices/rmnet&lt;N&gt; sysfs nodes; shows \"Unsupported\" cleanly on non-Qualcomm SoCs</string>
+    <string name="cell_cap_signal_deep_name">Per-band signal deep dump</string>
+    <string name="cell_cap_signal_deep_detail">Read-only per-band RSRP/RSRQ/SINR breakdown via vendor sysfs nodes, when present</string>
+
+    <!-- Rooted diagnostics panel -->
+    <string name="cell_root_modem_dump_title">Raw modem diagnostics</string>
+    <string name="cell_root_signal_deep_title">Per-band signal deep dump</string>
+    <string name="cell_dump_idle">Not fetched yet — this walks a root shell over several sysfs paths.</string>
+    <string name="cell_dump_fetch_button">Fetch</string>
+    <string name="cell_dump_refresh_button">Refresh</string>
+    <string name="cell_dump_retry_button">Retry</string>
+    <string name="cell_dump_empty">No nodes returned.</string>
+    <string name="cell_dump_unsupported">Unsupported on this SoC — no Qualcomm diagnostic nodes were found.</string>
+</resources>

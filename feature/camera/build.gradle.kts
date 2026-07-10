@@ -14,6 +14,10 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:datastore"))
     implementation(project(":core:root"))
+    // :core:automation — the action contract (ModuleAction / ActionHandler).
+    // CameraActionHandler exposes the module's rooted extreme-tier
+    // capabilities (CameraController) plus scan-history housekeeping.
+    implementation(project(":core:automation"))
 
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)

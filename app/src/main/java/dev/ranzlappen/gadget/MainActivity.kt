@@ -53,12 +53,17 @@ import dev.ranzlappen.gadget.feature.radios.ir.irScreen
 import dev.ranzlappen.gadget.feature.camera.cameraScreen
 import dev.ranzlappen.gadget.feature.motion.motionScreen
 import dev.ranzlappen.gadget.feature.actuators.actuatorsScreen
+import dev.ranzlappen.gadget.feature.adbdebug.adbDebugScreen
 import dev.ranzlappen.gadget.feature.ambient.ambientScreen
 import dev.ranzlappen.gadget.feature.bugreport.bugReportScreen
 import dev.ranzlappen.gadget.feature.diagnostics.diagnosticsScreen
+import dev.ranzlappen.gadget.feature.display.displayScreen
 import dev.ranzlappen.gadget.feature.lock.lockScreen
 import dev.ranzlappen.gadget.feature.manual.manualScreen
+import dev.ranzlappen.gadget.feature.microphone.microphoneScreen
+import dev.ranzlappen.gadget.feature.notification.notificationScreen
 import dev.ranzlappen.gadget.feature.radios.bt.btScreen
+import dev.ranzlappen.gadget.feature.radios.cell.cellScreen
 import dev.ranzlappen.gadget.feature.radios.nfc.NfcViewModel
 import dev.ranzlappen.gadget.feature.radios.wifi.wifiScreen
 import dev.ranzlappen.gadget.feature.radios.subghz.subghzScreen
@@ -67,6 +72,7 @@ import dev.ranzlappen.gadget.feature.radios.nfc.nfcScreen
 import dev.ranzlappen.gadget.feature.sensors.sensorsScreen
 import dev.ranzlappen.gadget.feature.settings.settingsScreen
 import dev.ranzlappen.gadget.feature.torch.torchScreen
+import dev.ranzlappen.gadget.feature.usbdebug.usbDebugScreen
 import dev.ranzlappen.gadget.feature.vibration.vibrationScreen
 import dev.ranzlappen.gadget.feature.youtubedownloader.youtubeDownloaderScreen
 import org.osmdroid.config.Configuration
@@ -167,12 +173,17 @@ class MainActivity : ComponentActivity() {
                         nfcScreen()
                         btScreen()
                         wifiScreen()
+                        cellScreen()
                         subghzScreen()
                         flipperScreen()
                         ambientScreen()
                         lockScreen()
                         actuatorsScreen()
                         diagnosticsScreen()
+                        displayScreen()
+                        microphoneScreen()
+                        usbDebugScreen()
+                        adbDebugScreen()
                         bugReportScreen()
                         manualScreen()
                         automationScreen()
@@ -194,6 +205,11 @@ class MainActivity : ComponentActivity() {
                             },
                         )
                         vibrationScreen(
+                            onNavigateToSettings = {
+                                navController.navigateTopLevel(GadgetDestination.Settings)
+                            },
+                        )
+                        notificationScreen(
                             onNavigateToSettings = {
                                 navController.navigateTopLevel(GadgetDestination.Settings)
                             },

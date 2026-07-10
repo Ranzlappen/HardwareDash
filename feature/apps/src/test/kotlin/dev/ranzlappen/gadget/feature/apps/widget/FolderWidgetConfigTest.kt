@@ -46,7 +46,7 @@ class FolderWidgetConfigTest {
         assertEquals(WidgetSizePreset.Medium, decoded.sizePreset)
         assertEquals("", decoded.displayName)
         assertEquals(false, decoded.removed)
-        assertEquals(1, decoded.schemaVersion)
+        assertEquals(2, decoded.schemaVersion)
         // New content-customizer fields fall back to their defaults.
         assertEquals(true, decoded.showLabel)
         assertEquals(FolderWidgetConfig.FOLLOW_FOLDER_COLOR, decoded.coverTintArgb)

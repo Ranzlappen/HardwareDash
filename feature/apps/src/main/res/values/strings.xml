@@ -82,4 +82,26 @@
     <string name="apps_widget_folder_description">A customizable home-screen folder of installed apps, PWAs, and web links.</string>
     <string name="apps_widget_pick_folder">Pick a folder</string>
     <string name="apps_widget_folder_selected">Selected</string>
+
+    <!-- Monitoring: readable signal for the monitoring framework / automation. -->
+    <string name="apps_monitor_metric_folder_count_name">Folders configured</string>
+    <string name="apps_monitor_metric_folder_count_unit">folders</string>
+
+    <!-- Automation: invocable action labels. -->
+    <string name="apps_action_refresh_apps">Refresh app catalog</string>
+    <string name="apps_action_open_folder">Open folder</string>
+    <string name="apps_action_launch_app">Launch app</string>
+
+    <!-- Rooted per-app management row (folder editor's app list; self-hides
+         on the standard flavor and for web-link entries — see AppRow /
+         AppRootActionsMenu). Backed by :feature:apps-rooted's
+         RootedAppsRootController via the AppsRootController seam. -->
+    <string name="apps_root_menu_manage">Manage app</string>
+    <string name="apps_root_menu_freeze">Freeze</string>
+    <string name="apps_root_menu_unfreeze">Unfreeze</string>
+    <string name="apps_root_menu_force_stop">Force stop</string>
+    <string name="apps_root_result_ok">Done</string>
+    <string name="apps_root_result_unsupported">Requires the rooted app version</string>
+    <string name="apps_root_result_opted_out">Turned off in Settings</string>
+    <string name="apps_root_result_rate_limited">Rate limited — try again shortly</string>
 </resources>
