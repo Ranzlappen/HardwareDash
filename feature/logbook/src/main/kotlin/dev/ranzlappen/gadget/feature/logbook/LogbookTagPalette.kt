@@ -17,9 +17,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.data.logbook.LogbookTagColor
+import dev.ranzlappen.gadget.feature.logbook.R
 
 /**
  * Resolves a [LogbookTagColor] to a design-system token color — never a raw
@@ -69,6 +71,19 @@ fun LogbookTagSwatch(
             .clip(CircleShape)
             .background(tag.paint()),
     )
+}
+
+/** Human-readable label for a [LogbookTagColor], used both as the tag
+ *  swatch's a11y [contentDescription] and as an inline text label on
+ *  tagged entry rows. */
+@Composable
+fun LogbookTagColor.label(): String = when (this) {
+    LogbookTagColor.None -> stringResource(R.string.logbook_tag_none)
+    LogbookTagColor.Teal -> stringResource(R.string.logbook_tag_teal)
+    LogbookTagColor.Amber -> stringResource(R.string.logbook_tag_amber)
+    LogbookTagColor.Rose -> stringResource(R.string.logbook_tag_rose)
+    LogbookTagColor.Violet -> stringResource(R.string.logbook_tag_violet)
+    LogbookTagColor.Slate -> stringResource(R.string.logbook_tag_slate)
 }
 
 private object LogbookTagSwatchDefaults {
