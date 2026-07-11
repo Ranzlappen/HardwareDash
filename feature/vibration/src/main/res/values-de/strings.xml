@@ -157,4 +157,5 @@
     <string name="vibration_root_result_error">Fehlgeschlagen: %1$s</string>
     <string name="vibration_root_opted_out_action">Einstellungen</string>
 
+    <string name="vibration_tile_label">Vibrieren</string>
 </resources>

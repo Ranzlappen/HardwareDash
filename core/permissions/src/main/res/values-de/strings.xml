@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="permissions_card_title">Berechtigungen</string>
+    <string name="permissions_summary">%1$d von %2$d erteilt</string>
+    <string name="permissions_all_granted">Alle Berechtigungen erteilt</string>
+    <string name="permissions_grant">Erteilen</string>
+    <string name="permissions_granted">Erteilt</string>
+    <string name="permissions_open_settings">App-Einstellungen öffnen</string>
+    <string name="permissions_manage">Verwalten</string>
+    <string name="permissions_special_overlay">Über anderen Apps anzeigen</string>
+    <string name="permissions_special_exact_alarm">Wecker &amp; Erinnerungen</string>
+    <string name="permissions_special_write_settings">Systemeinstellungen ändern</string>
+    <string name="permissions_special_notification_listener">Benachrichtigungszugriff</string>
+    <string name="permissions_special_all_files">Zugriff auf alle Dateien</string>
+    <string name="permissions_special_rationale">Wird über einen System-Einstellungsbildschirm erteilt.</string>
+</resources>

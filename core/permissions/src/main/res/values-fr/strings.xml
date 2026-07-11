@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="permissions_card_title">Autorisations</string>
+    <string name="permissions_summary">%1$d sur %2$d accordées</string>
+    <string name="permissions_all_granted">Toutes les autorisations accordées</string>
+    <string name="permissions_grant">Accorder</string>
+    <string name="permissions_granted">Accordée</string>
+    <string name="permissions_open_settings">Ouvrir les paramètres de l\'app</string>
+    <string name="permissions_manage">Gérer</string>
+    <string name="permissions_special_overlay">Afficher par-dessus les autres applis</string>
+    <string name="permissions_special_exact_alarm">Alarmes et rappels</string>
+    <string name="permissions_special_write_settings">Modifier les paramètres système</string>
+    <string name="permissions_special_notification_listener">Accès aux notifications</string>
+    <string name="permissions_special_all_files">Accès à tous les fichiers</string>
+    <string name="permissions_special_rationale">Accordée depuis un écran des paramètres système.</string>
+</resources>
