@@ -125,6 +125,7 @@ include(
     ":feature:notification",
     ":feature:notification-rooted",
     ":feature:manual",
+    ":feature:logbook",
     ":feature:sensors",
     ":feature:actuators",
     ":feature:battery",

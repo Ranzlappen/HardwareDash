@@ -59,6 +59,7 @@ import dev.ranzlappen.gadget.feature.bugreport.bugReportScreen
 import dev.ranzlappen.gadget.feature.diagnostics.diagnosticsScreen
 import dev.ranzlappen.gadget.feature.display.displayScreen
 import dev.ranzlappen.gadget.feature.lock.lockScreen
+import dev.ranzlappen.gadget.feature.logbook.logbookScreen
 import dev.ranzlappen.gadget.feature.manual.manualScreen
 import dev.ranzlappen.gadget.feature.microphone.microphoneScreen
 import dev.ranzlappen.gadget.feature.notification.notificationScreen
@@ -186,6 +187,7 @@ class MainActivity : ComponentActivity() {
                         adbDebugScreen()
                         bugReportScreen()
                         manualScreen()
+                        logbookScreen()
                         automationScreen()
                         settingsScreen(
                             // Backup/restore lives in :app (BackupManager
