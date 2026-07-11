@@ -226,6 +226,33 @@ jobs:
             || { echo "::error::Rooted APK missing libsu — rooted source set may be broken"; exit 1; }
           echo "✅ Rooted APK contains libsu signature"
 
+      # ─── Rooted RELEASE APK signature assertion ─────────────────────────
+      # Close the loop on the signed rooted-release pipeline: prove the
+      # R8-minified rooted release APK that ships as a GitHub Release asset
+      # is actually signed with the production keystore (injected above via
+      # -Pandroid.injected.signing.*). Without this, a mis-wired signing
+      # injection would silently ship an UNSIGNED rooted release that no
+      # device can install — invisible until a user tries to sideload it.
+      - name: Assert rooted release APK is signed
+        if: matrix.flavor == 'rooted'
+        run: |
+          set -euo pipefail
+          RELEASE_APK=$(find ${{ matrix.releaseOutputDir }} -name "*.apk" -print -quit)
+          test -n "$RELEASE_APK" || { echo "::error::No rooted release APK produced in ${{ matrix.releaseOutputDir }}"; exit 1; }
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          APKSIGNER=""
+          if [ -n "$SDK_ROOT" ] && [ -d "$SDK_ROOT/build-tools" ]; then
+            APKSIGNER=$(find "$SDK_ROOT/build-tools" -name apksigner -type f | sort -V | tail -1)
+          fi
+          if [ -z "$APKSIGNER" ]; then
+            echo "::warning::apksigner not found on this runner — skipping signature verification"
+            exit 0
+          fi
+          echo "Verifying signature of $RELEASE_APK with $APKSIGNER"
+          "$APKSIGNER" verify --verbose "$RELEASE_APK" \
+            || { echo "::error::Rooted release APK is NOT signed — check the -Pandroid.injected.signing.* keystore injection"; exit 1; }
+          echo "✅ Rooted release APK is signed"
+
       # Upload only the R8-minified release APK — the debug APK exists on
       # disk for the leak gate / libsu assertion but is intentionally not
       # persisted. retention-days: 1 keeps the artifact only as long as
