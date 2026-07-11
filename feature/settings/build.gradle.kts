@@ -42,4 +42,9 @@ dependencies {
     implementation(project(":core:datastore"))
     // :core:monitoring exposes MonitorGlobalPrefs for the monitoring settings card.
     implementation(project(":core:monitoring"))
+    // AppCompatDelegate.setApplicationLocales() — the officially documented
+    // per-app language API, backported below API 33's native LocaleManager
+    // (minSdk 29) and self-persisting (no DataStore field needed). Pulled in
+    // just for this one call; no AppCompatActivity/View-based UI involved.
+    implementation(libs.androidx.appcompat)
 }
