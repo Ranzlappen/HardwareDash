@@ -83,10 +83,14 @@ Falling }`.
 
 ### Conditions
 
-`MetricCompare(metricKey, op, value)` and `TimeWindow(startMinutes,
-endMinutes)`, folded by `conditionLogic` (ALL/ANY). A nested boolean tree
-is intentionally **not** in v1 — the sealed shape leaves room for a `Group`
-later.
+`MetricCompare(metricKey, op, value)`, `TimeWindow(startMinutes,
+endMinutes)`, and **`Group(logic, children)`** — the nested boolean node
+(W7). A top-level `conditions` list folds by `conditionLogic` (ALL/ANY);
+each `Group` folds its own `children` by its own `logic`, recursing to any
+depth (so `A AND (B OR C)` is expressible). `Group` carries the pinned
+`@SerialName("…Condition.Group")`; the evaluator's `Condition.holds`
+recurses and `referencedMetricKeys()` gathers grouped metric keys so
+`RuleFireExecutor` samples them. An empty group is vacuously true.
 
 ## Evaluator (pure Kotlin)
 
@@ -153,13 +157,34 @@ throttled" notification.
 
 ## Persistence
 
-`automation.db` in `:core:data` (sibling to `apps.db` / `monitoring.db`),
-one `rules` table. The sealed `Trigger` / `Condition[]` / `RuleAction[]`
-graphs are stored as **kotlinx-serialization JSON columns** (flat schema;
-sealed hierarchies evolve via `@SerialName` pinning + a `Migrator`).
-`last_fired_at` is persisted so per-rule cooldowns survive process death
-and reboot. `automation.db` rides the backup ZIP (format v5) and
-`DatabaseCheckpointer.checkpointAll()`.
+`automation.db` in `:core:data` (**v2** as of W7), holding a `rules` table
+and a `rule_fire_history` audit table. The sealed `Trigger` /
+`Condition[]` / `RuleAction[]` graphs are stored as
+**kotlinx-serialization JSON columns** (flat schema; sealed hierarchies
+evolve via `@SerialName` pinning + a `Migrator`). `last_fired_at` is
+persisted so per-rule cooldowns survive process death and reboot.
+`automation.db` rides the backup ZIP (format v5) and
+`DatabaseCheckpointer.checkpointAll()`. The v1→v2 migration
+(`AutomationDatabase.MIGRATION_1_2`) is additive — it creates
+`rule_fire_history` and leaves `rules` untouched.
+
+## High-end features (W7)
+
+- **Nested condition groups** — `Condition.Group` (see above).
+- **Rule templates + transfer** — `RuleTemplates` is a built-in recipe
+  catalog (`create(id)` mints a concrete `Rule`); `AutomationTransfer`
+  export/imports a versioned `RuleBundle` JSON document reusing the shared
+  `AutomationJson`, surfaced in the builder as a template picker, clipboard
+  export, and paste-to-import. Import saves each rule with a fresh id
+  through `RuleRepository.save` (which normalizes).
+- **Firing history** — `RuleFireExecutor` writes a `RuleFireRecord`
+  (`Fired` / `Skipped` / `Throttled`, dispatched count, dry-run flag) on
+  every evaluation to `RuleFireHistoryRepository` (bounded to 100 rows);
+  the builder shows the trail with a clear action.
+- **Dry-run / test-fire** — `RuleFireExecutor.dryRun` evaluates a rule
+  without dispatching or touching the cooldown clock (models a Manual
+  evaluation to report the true action set), surfaced as a per-rule
+  "Test fire" button; it records a dry-run history entry.
 
 ## Safety — three-layer root gating
 
@@ -202,7 +227,7 @@ See also: [Monitoring Framework](Monitoring-Framework) (the same
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `docs/automation-engine.md`,
+> _Last reviewed: 2026-07-11 · Source: `docs/automation-engine.md`,
 > `docs/adr/0002-automation-engine.md`, `CLAUDE.md` (automation) · Related
 > modules: `:core:automation`, `:core:hardware`, `:core:data`,
 > `:feature:automation-ui`._

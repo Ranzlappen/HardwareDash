@@ -66,6 +66,7 @@ the long-lived `claude/refactor-2026` integration branch is retired.
 | Diagnostics (rooted shell dump overview; logcat / meminfo / cpuinfo / procstats automation actions via `:feature:diagnostics-rooted`; standard no-root `memory_used_percent` MetricSource — live + history monitors on-screen + automation trigger; rooted extreme-tier `DiagnosticsController` — read-only `logcat -b` tail + `dumpsys meminfo/cpuinfo/procstats` excerpts, tail-capped, gated by `RootSafetyGate` — clean-cut migrated out of legacy `com.gadget.diagnostics` into the modules) | `:feature:diagnostics` + `:feature:diagnostics-rooted` | ✅ |
 | Health / BugReport (permission manager — grant-state scan + per-permission runtime request + App-Settings fallback + granted/total summary, refreshes on resume; assert-permission automation action; `bugreport_permission_readiness` MetricSource (granted/total percent); rooted ADB-diagnostics row + `pm grant` force-grant one-up via `:feature:bugreport-rooted`) | `:feature:bugreport` + `:feature:bugreport-rooted` | ✅ |
 | Help / Manual (static documentation screen for all modules, capabilities, and automation engine) | `:feature:manual` | ✅ |
+| Logbook (session-note entries + tagged log; checkpoint/process tracker with per-checkpoint due dates + WorkManager reminders; `logbook_open_checkpoints` MetricSource — push over the open-checkpoint flow; `LogbookActionHandler` — add-entry / assert-open-below) | `:feature:logbook` + `:core:data` | ✅ |
 | Rooted Storage actions (diskstats / mounts / fstrim / drop_caches) | `:feature:storage-rooted` | ✅ |
 | Sub-GHz Radio (USB SDR / transceiver detection — RTL-SDR / HackRF / YARD Stick One / LimeSDR / CC1101; bridge-connected push monitor; assert-bridge / assert-Sub-GHz-capable automation actions; rooted raw-register / custom-tuning / OOK-FSK-capture rows) | `:feature:radios-subghz` | ✅ |
 | YouTube Downloader (yt-dlp + ffmpeg video/audio downloads, private playlists via cookie login, MediaStore export, dataSync FGS; `download_progress` monitor + `youtube_downloader` action) — standard-only, runs unprivileged | `:feature:youtubedownloader` | ✅ |
@@ -237,6 +238,23 @@ allow-list), independent of the migrated controller.
   feature branches: WiFi-signal + ambient-light gauge widgets, and
   theme-picker live preview swatches. Still open: remaining
   notification-panel / QS-tile coverage where a feature has a clean toggle.
+- **Completion workstreams (🚧 in progress, branch
+  `claude/feature-roadmap-gaps-jjef2r`).** Landed together:
+  **`:feature:logbook`** finished (screen + nav + MetricSource +
+  ActionHandler, registered in the build); the **storage standard-tier
+  `assert-free-space`** ActionHandler (closing the last W3 sweep item);
+  **`:core:permissions`** (W5) built for real — per-feature `@IntoMap`
+  registry + app baseline + special-permission orchestration + a Settings
+  Permissions dashboard; a **vibration QS tile** (W4); **high-end automation**
+  (W7) — nested `Condition.Group`, rule templates + JSON export/import,
+  `automation.db` v2 firing-history + UI, and dry-run/test-fire; the
+  **signed rooted release** verification gate (W6/W10); and the **W6 rooted
+  in-screen UX foundation** (`:core:ui` `RootToolsSection`/`RootActionRow`
+  with `:feature:storage` as the first live consumer). Deferred: the generic
+  configurable metric widget and lock/automation-engine tiles (need the full
+  pin-reliability contract / new `DevicePolicyManager` + engine-master-switch
+  plumbing); rolling `RootToolsSection` out to the other dormant rooted
+  features.
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.
@@ -269,11 +287,12 @@ Tabletop layout + `DashboardScreen` secondary pane), #90 (theme wiring),
 
 ## Release readiness
 
-CI produces `standard-debug.apk`, `standard-release.apk` + `.aab`, and
-`rooted-debug.apk` on every push. The standard-APK leak gate hard-fails
-any PR that lets rooted code/assets/permissions into the standard APK.
-`rooted-release.apk` (signed) ships once the rooted modules are feature
-complete. See [Testing & CI](Testing-and-CI).
+CI produces `standard-debug.apk`, `standard-release.apk` + `.aab`,
+`rooted-debug.apk`, **and a signed `rooted-release.apk`** on every push. The
+standard-APK leak gate hard-fails any PR that lets rooted
+code/assets/permissions into the standard APK; the rooted release APK is
+signed with the production keystore (injected in `build-apk.yml`) and
+verified with an `apksigner verify` gate. See [Testing & CI](Testing-and-CI).
 
 ## Historical milestones
 
@@ -286,7 +305,7 @@ complete. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-07-09 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-07-11 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md`,
 > [Completion Master Plan](Completion-Master-Plan) ·
 > Related modules: all._

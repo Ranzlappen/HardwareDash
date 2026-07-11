@@ -279,8 +279,32 @@ Reusable sections (`module/ModuleInfoSections.kt`):
 
 Reference impl: `feature/torch`'s `torchModuleInfo()`.
 
+### `RootToolsSection` / `RootActionRow` (`module/RootToolsSection.kt`)
+
+The reusable rooted-tools substrate (W6 / #94): a collapsible
+`GadgetExpandableCard` a feature screen drops in to surface its dormant
+rooted controller's interactive UI behind the root gate. `available` (the
+feature's `RootReady` snapshot, resolved through the `:core:root` Hilt seam —
+never `BuildConfig.IS_ROOTED`) toggles between the controls and an honest
+"requires the rooted app" state. `RootActionRow` renders one labeled action
+with an optional description, a run button, and a `GadgetStatusKind`-tinted
+status line (the last `*ControllerResult` mapped to a string). Copy is passed
+already-resolved (the `ModuleInfo` convention). First consumer:
+`feature/storage`'s `StorageScreen`.
+
+### `PermissionsDashboardCard` (`:core:permissions`)
+
+The centralized permissions dashboard (W5) — a self-contained Hilt-injected
+`DashCard` the Settings screen drops in via its `permissionsSection` slot.
+Scans grant state through `PermissionRegistry` (per-feature `@IntoMap`
+`FeaturePermissions` + an app baseline), requests runtime permissions
+in-app, deep-links special permissions (overlay / exact-alarm /
+WRITE_SETTINGS / notification-listener / all-files via `SpecialPermissions`),
+and re-scans on `ON_RESUME`.
+
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `CLAUDE.md` (component catalog),
-> `core/ui/src/main/.../component/*`, `core/ui/.../module/*` · Related
+> _Last reviewed: 2026-07-11 · Source: `CLAUDE.md` (component catalog),
+> `core/ui/src/main/.../component/*`, `core/ui/.../module/*`,
+> `core/permissions/*` · Related
 > module: `:core:ui`._

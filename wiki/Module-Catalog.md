@@ -45,7 +45,7 @@ Gap analysis and the road to done:
 | `core:designsystem` | 9 | Theme, colour/typography/shape/spacing/motion/glass tokens, `LocalGadgetTheme`, `GadgetTheme`. | Compose |
 | `core:ui` | 23 | The component library (`GadgetPrimaryButton`, `DashCard`, `GlassSurface`, `ModuleScreenScaffold`, `ModuleInfo` sections, …). | `core:designsystem` |
 | `core:navigation` | 4 | `GadgetApp` shell + `GadgetDestination` contracts. | `core:ui` |
-| `core:permissions` | 0 | Permission state objects + resume advancers. Empty — to be built for real as the centralized permission framework (W5 of the [Completion Master Plan](Completion-Master-Plan)); runtime-permission logic currently lives ad-hoc inside features. | — |
+| `core:permissions` | 7 | **Built (W5).** Centralized permission framework: per-feature `@IntoMap` `FeaturePermissions` registry + app baseline (`PermissionRegistry`), `SpecialPermissions` (overlay / exact-alarm / WRITE_SETTINGS / notification-listener / all-files → live query + Settings deep-link), and a `PermissionsDashboardCard` rendered in Settings via a `permissionsSection` slot. | `:core:ui` |
 | `core:notifications` | 2 | Shared notification channels / helpers. | — |
 | `core:automation` | 22 | **`ActionHandler` + `ModuleActionRegistry`** contract; `Rule` model + `RuleEvaluator` + `RuleRepository` contract; `AutomationService`/`AutomationScheduler`/receivers. | `core:model`, `core:root` |
 | `core:hardware` | 2 | **`HardwareRegistry`** — read-side enumeration over the `MetricSource` map. | `core:model` |
@@ -114,6 +114,7 @@ widgets / tiles / tests / strings): see the
 | `feature:bugreport` | 6 | ✅ | Permission manager: grant-state scan + per-permission runtime request + App-Settings fallback + granted/total summary (refreshes on resume); assert-permission automation action; `bugreport_permission_readiness` `MetricSource` (granted/total percent, the same state the summary chip already shows). |
 | `feature:bugreport-rooted` | 3 | ✅ | Force-grants a declared runtime permission via `pm grant` (gated by `RootFeatureKey.PermissionForceGrant`); `bugreport_root` ActionHandler. |
 | `feature:manual` | 2 | ✅ | In-app manual / help (thin static screen; per-module deep links pending). |
+| `feature:logbook` | 18 | ✅ | Session-note log entries (tagged) + a checkpoint/process tracker with per-checkpoint due dates and WorkManager reminders. `logbook_open_checkpoints` MetricSource (push over the open-checkpoint flow); `LogbookActionHandler` (add-entry / assert-open-below). Standard-only; data layer in `:core:data`. |
 | `feature:youtubedownloader` | 17 | ✅ | YouTube video/audio downloader (yt-dlp + ffmpeg via youtubedl-android); private playlists via in-app cookie login; dataSync FGS; MediaStore export; `download_progress` monitor + `youtube_downloader` ActionHandler. Standard-only. |
 
 ## `benchmark`
@@ -132,5 +133,5 @@ widgets / tiles / tests / strings): see the
 
 ---
 
-> _Last reviewed: 2026-07-09 · Source: `settings.gradle.kts`, live
+> _Last reviewed: 2026-07-11 · Source: `settings.gradle.kts`, live
 > `find … -name '*.kt'` counts · Related: every module._

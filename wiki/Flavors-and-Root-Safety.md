@@ -107,9 +107,16 @@ Blueprint](Torch-Blueprint).
 ## Build outputs & versionCode
 
 CI produces `standard-debug.apk`, `standard-release.apk` +
-`standard-release.aab`, and `rooted-debug.apk` on every push.
-`versionCode = CI_VERSION_CODE * 10 + flavorOffset` (standard +0, rooted
-+1) — keeps the two APKs side-by-side and upgrades monotonic per flavor.
+`standard-release.aab`, `rooted-debug.apk`, **and a signed
+`rooted-release.apk`** on every push to `main` (`build-apk.yml`'s matrix
+runs `assembleRootedRelease` with the production keystore injected via
+`-Pandroid.injected.signing.*`, and attaches it to the GitHub Release
+alongside the standard release). The manual `build-release.yml` produces the
+same signed pair plus the standard AAB. Both workflows now run an
+`apksigner verify` gate on the release APK so a mis-wired keystore injection
+can't ship an unsigned build. `versionCode = CI_VERSION_CODE * 10 +
+flavorOffset` (standard +0, rooted +1) — keeps the two APKs side-by-side and
+upgrades monotonic per flavor.
 
 ## The standard-APK leak gate
 
@@ -135,6 +142,6 @@ ADR-0001](Decision-Records).
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `docs/flavors.md`, `CLAUDE.md`
+> _Last reviewed: 2026-07-11 · Source: `docs/flavors.md`, `CLAUDE.md`
 > (flavors + leak gate), `.github/workflows/build-apk.yml` · Related
 > modules: `:core:root`, every `feature/*-rooted`/`-standard`, `:app`._
