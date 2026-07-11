@@ -36,4 +36,22 @@ sealed interface Condition {
         val startMinutes: Int,
         val endMinutes: Int,
     ) : Condition
+
+    /**
+     * A nested boolean group — the deferred `Group` node the flat v1 sealed
+     * shape reserved room for. Its [children] fold to one boolean via the
+     * group's own [logic] (ALL/ANY), so a rule can express
+     * `A AND (B OR C) AND …` without a flat single-level fold. Groups nest
+     * arbitrarily deep; the evaluator recurses.
+     *
+     * An empty group is vacuously **true** for both logics (matching the
+     * top-level [Rule.conditions] empty semantics), so a half-built group in
+     * the editor never silently blocks a rule.
+     */
+    @Serializable
+    @SerialName("dev.ranzlappen.gadget.core.automation.Condition.Group")
+    data class Group(
+        val logic: ConditionLogic = ConditionLogic.All,
+        val children: List<Condition> = emptyList(),
+    ) : Condition
 }

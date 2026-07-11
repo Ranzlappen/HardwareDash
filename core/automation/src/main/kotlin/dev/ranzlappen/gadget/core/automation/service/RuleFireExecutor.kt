@@ -9,10 +9,13 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.automation.ModuleActionRegistry
+import dev.ranzlappen.gadget.core.automation.RuleFireHistoryRepository
+import dev.ranzlappen.gadget.core.automation.RuleFireOutcome
+import dev.ranzlappen.gadget.core.automation.RuleFireRecord
 import dev.ranzlappen.gadget.core.automation.RuleRepository
 import dev.ranzlappen.gadget.core.automation.engine.AutomationBudget
 import dev.ranzlappen.gadget.core.automation.engine.RuleEvaluator
-import dev.ranzlappen.gadget.core.automation.model.Condition
+import dev.ranzlappen.gadget.core.automation.engine.referencedMetricKeys
 import dev.ranzlappen.gadget.core.automation.model.Rule
 import dev.ranzlappen.gadget.core.automation.model.Trigger
 import dev.ranzlappen.gadget.core.model.MetricSource
@@ -58,6 +61,7 @@ class RuleFireExecutor @Inject constructor(
     private val rootRegistry: RootCapabilityRegistry,
     private val evaluator: RuleEvaluator,
     private val channelRegistry: NotificationChannelRegistry,
+    private val fireHistory: RuleFireHistoryRepository,
 ) {
     // Single-lane execution: serializes the budget + dispatch critical
     // section across the service and every receiver (see class KDoc).
@@ -92,15 +96,90 @@ class RuleFireExecutor @Inject constructor(
                 rootAvailable = rootRegistry.hasRootAccess(),
                 sinceLastFiredMillis = sinceLastFired,
             )
-            if (actions.isEmpty()) return@withContext 0
+            if (actions.isEmpty()) {
+                fireHistory.record(record(rule, now, RuleFireOutcome.Skipped, dispatched = 0))
+                return@withContext 0
+            }
 
             val admission = budget.admit(now, actions.size)
             val dispatched = actions.take(admission.allowed)
             dispatched.forEach { actionRegistry.dispatch(it.featureId, it.actionKey, it.params) }
             if (dispatched.isNotEmpty()) ruleRepository.markFired(rule.id, now)
             if (admission.throttled) postThrottleNotification()
+            val outcome = when {
+                dispatched.isEmpty() && admission.throttled -> RuleFireOutcome.Throttled
+                dispatched.isEmpty() -> RuleFireOutcome.Skipped
+                else -> RuleFireOutcome.Fired
+            }
+            fireHistory.record(
+                record(rule, now, outcome, dispatched.size, throttled = admission.throttled),
+            )
             dispatched.size
         }
+
+    /**
+     * Evaluate [rule] exactly as [fire] would, but **dispatch nothing** and
+     * **do not** update the cooldown clock — a "test fire" that reports what
+     * the rule *would* do (how many actions would run, or why it's a no-op)
+     * and records a dry-run entry in the firing history. The Manual "run
+     * now" bypasses cooldown, so the dry-run models a Manual evaluation to
+     * report the true action set regardless of the rule's automated cooldown.
+     */
+    suspend fun dryRun(rule: Rule): DryRunResult =
+        withContext(dispatcher) {
+            val readings = gatherReadings(rule, preSampledTriggerValue = null)
+            val actions = evaluator.evaluate(
+                rule = rule,
+                firedTrigger = rule.trigger,
+                readings = readings,
+                now = LocalTime.now(),
+                rootAvailable = rootRegistry.hasRootAccess(),
+                // Manual consent bypasses cooldown — report the real action set.
+                sinceLastFiredMillis = null,
+            )
+            val now = System.currentTimeMillis()
+            val detail = if (actions.isEmpty()) {
+                "Conditions not met — nothing would run"
+            } else {
+                "${actions.size} action(s) would run"
+            }
+            fireHistory.record(
+                record(
+                    rule = rule,
+                    firedAtMs = now,
+                    outcome = if (actions.isEmpty()) RuleFireOutcome.Skipped else RuleFireOutcome.Fired,
+                    dispatched = 0,
+                    dryRun = true,
+                    detail = detail,
+                ),
+            )
+            DryRunResult(wouldDispatch = actions.size, actions = actions)
+        }
+
+    private fun record(
+        rule: Rule,
+        firedAtMs: Long,
+        outcome: RuleFireOutcome,
+        dispatched: Int,
+        throttled: Boolean = false,
+        dryRun: Boolean = false,
+        detail: String? = null,
+    ): RuleFireRecord = RuleFireRecord(
+        ruleId = rule.id,
+        ruleName = rule.name,
+        firedAtMs = firedAtMs,
+        outcome = outcome,
+        dispatched = dispatched,
+        throttled = throttled,
+        dryRun = dryRun,
+        detail = detail,
+    )
+
+    /** Outcome of [dryRun]: what the rule would do, without doing it. */
+    data class DryRunResult(
+        val wouldDispatch: Int,
+        val actions: List<dev.ranzlappen.gadget.core.automation.model.RuleAction>,
+    )
 
     /** The trigger metric (pre-sampled when available) + each condition metric. */
     private suspend fun gatherReadings(rule: Rule, triggerValue: Float?): Map<String, Float> {
@@ -111,10 +190,14 @@ class RuleFireExecutor @Inject constructor(
                 ?.let { sampleWithTimeout(it) }
             value?.let { readings[metricTrigger.metricKey] = it }
         }
-        for (condition in rule.conditions) {
-            if (condition is Condition.MetricCompare && condition.metricKey !in readings) {
-                val source = metricSources[condition.metricKey] ?: continue
-                sampleWithTimeout(source)?.let { readings[condition.metricKey] = it }
+        // Every metric referenced anywhere in the condition tree, including
+        // keys nested inside Condition.Group nodes (referencedMetricKeys
+        // recurses), so a grouped condition still has its reading sampled.
+        val conditionKeys = rule.conditions.flatMap { it.referencedMetricKeys() }.distinct()
+        for (metricKey in conditionKeys) {
+            if (metricKey !in readings) {
+                val source = metricSources[metricKey] ?: continue
+                sampleWithTimeout(source)?.let { readings[metricKey] = it }
             }
         }
         return readings

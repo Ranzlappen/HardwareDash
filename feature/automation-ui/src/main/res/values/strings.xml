@@ -83,8 +83,11 @@
     <string name="automation_logic_any">Any</string>
     <string name="automation_editor_condition_add_metric">Add signal check</string>
     <string name="automation_editor_condition_add_time">Add time window</string>
+    <string name="automation_editor_condition_add_group">Add group</string>
     <string name="automation_condition_metric_title">Signal check</string>
     <string name="automation_condition_time_title">Time window</string>
+    <string name="automation_condition_group_title">Group</string>
+    <string name="automation_editor_group_empty">Empty group — add checks below. An empty group always passes.</string>
     <string name="automation_editor_condition_remove">Remove condition</string>
     <string name="automation_editor_condition_value_is">Value is</string>
     <string name="automation_editor_window_start">From</string>
@@ -103,6 +106,32 @@
     <string name="automation_editor_cooldown">Cooldown</string>
     <string name="automation_editor_cooldown_suffix">s</string>
     <string name="automation_editor_cooldown_hint">Minimum time between automatic firings — 0 = none. A manual “Run now” bypasses it but still delays the next automatic fire.</string>
+
+    <!-- Templates, transfer, dry-run, history (W7) -->
+    <string name="automation_templates">Templates</string>
+    <string name="automation_templates_title">Start from a template</string>
+    <string name="automation_template_added">Added “%1$s” — tap it to customize</string>
+    <string name="automation_export">Export rules</string>
+    <string name="automation_import">Import rules</string>
+    <string name="automation_import_title">Paste exported rules</string>
+    <string name="automation_import_hint">Paste a rules JSON document exported from Gadget.</string>
+    <string name="automation_import_confirm">Import</string>
+    <string name="automation_import_result">Imported %1$d rule(s)</string>
+    <string name="automation_import_failed">Import failed: %1$s</string>
+    <string name="automation_export_result">Exported %1$d rule(s) to the clipboard</string>
+    <string name="automation_export_empty">No rules to export yet</string>
+    <string name="automation_test_fire">Test fire</string>
+    <string name="automation_test_fire_result">Test: %1$d action(s) would run — nothing was dispatched</string>
+    <string name="automation_test_fire_nothing">Test: conditions not met — nothing would run</string>
+    <string name="automation_history">History</string>
+    <string name="automation_history_title">Firing history</string>
+    <string name="automation_history_empty">No firings recorded yet.</string>
+    <string name="automation_history_clear">Clear history</string>
+    <string name="automation_history_dispatched">%1$d dispatched</string>
+    <string name="automation_history_outcome_fired">Fired</string>
+    <string name="automation_history_outcome_skipped">Skipped</string>
+    <string name="automation_history_outcome_throttled">Throttled</string>
+    <string name="automation_history_dry_run">Test</string>
 
     <!-- Day-of-week short labels -->
     <string name="automation_day_mon">Mon</string>
