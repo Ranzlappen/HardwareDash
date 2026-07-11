@@ -55,4 +55,10 @@
     <string name="gps_action_nmea_raw_tap">NMEA-Rohdaten-Tap (gerootet)</string>
     <string name="gps_action_constellation_dump">Konstellations-Dump (gerootet)</string>
     <string name="gps_action_reset_gps_mutations">GPS-Änderungen zurücksetzen (gerootet)</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="gps_root_tools_title">Root-Tools</string>
+    <string name="gps_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="gps_root_run">Ausführen</string>
+    <string name="gps_root_constellation_label">Konstellation ausgeben</string>
+    <string name="gps_root_constellation_detail">Schreibgeschützte Auflistung aller sichtbaren Satelliten.</string>
 </resources>

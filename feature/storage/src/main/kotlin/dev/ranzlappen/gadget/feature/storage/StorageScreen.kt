@@ -61,11 +61,7 @@ fun StorageScreen(
                     onRun = viewModel::onDumpDiskstats,
                     enabled = !rootTools.diskstats.running,
                     statusMessage = rootTools.diskstats.message,
-                    statusKind = if (rootTools.diskstats.isError) {
-                        GadgetStatusKind.Error
-                    } else {
-                        GadgetStatusKind.Success
-                    },
+                    statusKind = rootTools.diskstats.statusKind,
                 )
                 RootActionRow(
                     label = stringResource(R.string.storage_root_mounts_label),
@@ -74,11 +70,7 @@ fun StorageScreen(
                     onRun = viewModel::onEnumerateMounts,
                     enabled = !rootTools.mounts.running,
                     statusMessage = rootTools.mounts.message,
-                    statusKind = if (rootTools.mounts.isError) {
-                        GadgetStatusKind.Error
-                    } else {
-                        GadgetStatusKind.Success
-                    },
+                    statusKind = rootTools.mounts.statusKind,
                 )
             }
         },

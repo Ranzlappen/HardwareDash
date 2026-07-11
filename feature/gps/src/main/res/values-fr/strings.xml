@@ -55,4 +55,10 @@
     <string name="gps_action_nmea_raw_tap">Capture brute NMEA (rooté)</string>
     <string name="gps_action_constellation_dump">Extraction de la constellation (rooté)</string>
     <string name="gps_action_reset_gps_mutations">Réinitialiser les modifications GPS (rooté)</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="gps_root_tools_title">Outils root</string>
+    <string name="gps_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
+    <string name="gps_root_run">Exécuter</string>
+    <string name="gps_root_constellation_label">Vider la constellation</string>
+    <string name="gps_root_constellation_detail">Énumération en lecture seule de tous les satellites visibles.</string>
 </resources>

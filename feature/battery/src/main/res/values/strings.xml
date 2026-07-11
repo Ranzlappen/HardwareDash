@@ -71,6 +71,15 @@
     <string name="battery_action_wireless_coil_current">Cap wireless coil current (rooted)</string>
     <string name="battery_action_health_snapshot">Battery health snapshot (rooted)</string>
 
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="battery_root_tools_title">Rooted tools</string>
+    <string name="battery_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="battery_root_run">Run</string>
+    <string name="battery_root_fuelgauge_label">Dump fuel gauge</string>
+    <string name="battery_root_fuelgauge_detail">Read-only /sys/class/power_supply raw node snapshot.</string>
+    <string name="battery_root_health_label">Deep health dump</string>
+    <string name="battery_root_health_detail">Read-only fuel-gauge IC health (cycle count, capacities).</string>
+
     <!-- Home-screen widget -->
     <string name="battery_widget_label">Battery</string>
     <string name="battery_widget_description">Live battery level and charging state</string>

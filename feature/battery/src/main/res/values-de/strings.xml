@@ -78,4 +78,12 @@
     <string name="battery_widget_unknown">—</string>
     <string name="battery_widget_charging">Wird geladen</string>
     <string name="battery_widget_discharging">Entlädt sich</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="battery_root_tools_title">Root-Tools</string>
+    <string name="battery_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="battery_root_run">Ausführen</string>
+    <string name="battery_root_fuelgauge_label">Ladestandsanzeige ausgeben</string>
+    <string name="battery_root_fuelgauge_detail">Schreibgeschützter /sys/class/power_supply-Rohknoten-Snapshot.</string>
+    <string name="battery_root_health_label">Tiefer Zustandsbericht</string>
+    <string name="battery_root_health_detail">Schreibgeschützter Zustand des Ladestandsanzeige-ICs (Ladezyklen, Kapazitäten).</string>
 </resources>

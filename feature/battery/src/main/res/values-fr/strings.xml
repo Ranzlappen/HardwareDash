@@ -78,4 +78,12 @@
     <string name="battery_widget_unknown">—</string>
     <string name="battery_widget_charging">En charge</string>
     <string name="battery_widget_discharging">En décharge</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="battery_root_tools_title">Outils root</string>
+    <string name="battery_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
+    <string name="battery_root_run">Exécuter</string>
+    <string name="battery_root_fuelgauge_label">Vider la jauge de charge</string>
+    <string name="battery_root_fuelgauge_detail">Instantané en lecture seule des nœuds bruts de /sys/class/power_supply.</string>
+    <string name="battery_root_health_label">Vidage approfondi de l\'état</string>
+    <string name="battery_root_health_detail">État en lecture seule du circuit de jauge (nombre de cycles, capacités).</string>
 </resources>

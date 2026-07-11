@@ -12,6 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,6 +30,8 @@ import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.ModulePermission
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.RootActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -43,6 +48,8 @@ fun AudioScreen(
     viewModel: AudioViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val rootTools by viewModel.rootTools.collectAsState()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -56,6 +63,25 @@ fun AudioScreen(
         onGrantPermission = { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) },
         onStartRecording = { viewModel.startRecording() },
         onStopRecording = { viewModel.stopRecording() },
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.audio_root_tools_title),
+                available = state.isRootedFlavor,
+                unavailableMessage = stringResource(R.string.audio_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootActionRow(
+                    label = stringResource(R.string.audio_root_policy_label),
+                    description = stringResource(R.string.audio_root_policy_detail),
+                    runLabel = stringResource(R.string.audio_root_run),
+                    onRun = viewModel::onDumpAudioPolicy,
+                    enabled = !rootTools.audioPolicy.running,
+                    statusMessage = rootTools.audioPolicy.message,
+                    statusKind = rootTools.audioPolicy.statusKind,
+                )
+            }
+        },
         liveMonitors = {
             if (state.permissionGranted) {
                 LiveMonitorContainer(
@@ -91,6 +117,7 @@ internal fun AudioScreenContent(
     onGrantPermission: () -> Unit = {},
     onStartRecording: () -> Unit = {},
     onStopRecording: () -> Unit = {},
+    rootTools: @Composable () -> Unit = {},
     liveMonitors: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
@@ -111,6 +138,7 @@ internal fun AudioScreenContent(
             )
             liveMonitors()
             monitors()
+            rootTools()
         },
     )
 }

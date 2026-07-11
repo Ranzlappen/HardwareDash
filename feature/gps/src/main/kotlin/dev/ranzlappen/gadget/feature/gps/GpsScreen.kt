@@ -12,7 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -39,6 +41,8 @@ import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.ModulePermission
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.RootActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -55,6 +59,8 @@ fun GpsScreen(
     viewModel: GpsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val rootTools by viewModel.rootTools.collectAsStateWithLifecycle()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
     val isRootedFlavor = viewModel.isRootedFlavor
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
@@ -84,6 +90,25 @@ fun GpsScreen(
         ),
         onRequestPermission = { permissionState.launchPermissionRequest() },
         modifier = modifier,
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.gps_root_tools_title),
+                available = isRootedFlavor,
+                unavailableMessage = stringResource(R.string.gps_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootActionRow(
+                    label = stringResource(R.string.gps_root_constellation_label),
+                    description = stringResource(R.string.gps_root_constellation_detail),
+                    runLabel = stringResource(R.string.gps_root_run),
+                    onRun = viewModel::onDumpConstellation,
+                    enabled = !rootTools.constellation.running,
+                    statusMessage = rootTools.constellation.message,
+                    statusKind = rootTools.constellation.statusKind,
+                )
+            }
+        },
         liveMonitors = {
             LiveMonitorContainer(
                 metricKey = GpsSpeedMetricSource.METRIC_KEY,
@@ -208,6 +233,7 @@ internal fun GpsScreenContent(
     moduleInfo: ModuleInfo?,
     onRequestPermission: () -> Unit,
     modifier: Modifier = Modifier,
+    rootTools: @Composable () -> Unit = {},
     liveMonitors: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
@@ -225,6 +251,7 @@ internal fun GpsScreenContent(
                 liveMonitors()
                 monitors()
             }
+            rootTools()
         },
     )
 }

@@ -52,4 +52,11 @@
     <string name="wifi_cap_tx_power_detail">Set transmit power via iw phy set txpower (hard ceiling: 20 dBm) to reduce interference or extend range</string>
     <string name="wifi_cap_channel_name">Explicit channel selection</string>
     <string name="wifi_cap_channel_detail">Lock onto a specific 2.4 or 5 GHz channel via iw dev set channel, bypassing automatic selection</string>
+
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="wifi_root_tools_title">Rooted tools</string>
+    <string name="wifi_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="wifi_root_run">Run</string>
+    <string name="wifi_root_injection_label">Probe injection capability</string>
+    <string name="wifi_root_injection_detail">Read-only iw phy info probe (monitor / IBSS support).</string>
 </resources>

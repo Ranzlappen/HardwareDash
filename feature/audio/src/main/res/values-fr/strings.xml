@@ -30,4 +30,10 @@
     <string name="audio_capability_direct_pcm_detail">Contourne la pile AudioRecord pour une capture brute au niveau du noyau</string>
     <string name="audio_capability_custom_sample_rate">Fréquence d\'échantillonnage personnalisée</string>
     <string name="audio_capability_custom_sample_rate_detail">Demande des fréquences de capture non standard (par ex. 96 kHz)</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="audio_root_tools_title">Outils root</string>
+    <string name="audio_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
+    <string name="audio_root_run">Exécuter</string>
+    <string name="audio_root_policy_label">Vider la politique audio</string>
+    <string name="audio_root_policy_detail">Instantané en lecture seule de cmd audio dump.</string>
 </resources>

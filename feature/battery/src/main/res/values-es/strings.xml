@@ -78,4 +78,12 @@
     <string name="battery_widget_unknown">—</string>
     <string name="battery_widget_charging">Cargando</string>
     <string name="battery_widget_discharging">Descargando</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="battery_root_tools_title">Herramientas root</string>
+    <string name="battery_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="battery_root_run">Ejecutar</string>
+    <string name="battery_root_fuelgauge_label">Volcar medidor de carga</string>
+    <string name="battery_root_fuelgauge_detail">Instantánea de solo lectura de nodos sin procesar de /sys/class/power_supply.</string>
+    <string name="battery_root_health_label">Volcado profundo de estado</string>
+    <string name="battery_root_health_detail">Estado de solo lectura del IC del medidor de carga (ciclos, capacidades).</string>
 </resources>

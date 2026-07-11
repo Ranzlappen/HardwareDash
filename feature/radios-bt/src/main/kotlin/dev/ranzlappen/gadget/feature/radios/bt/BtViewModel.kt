@@ -10,22 +10,62 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.ui.module.RootActionState
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController
+import dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothControllerResult
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+/** The rooted-tools panel state for the Bluetooth screen (W6 in-screen surface). */
+data class BtRootToolsState(
+    val hciSnoop: RootActionState = RootActionState(),
+)
 
 @HiltViewModel
 class BtViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val adapter: BluetoothAdapterWrapper,
     private val enhancedInfo: BtEnhancedInfoProvider,
+    private val bluetoothController: BluetoothController,
     rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BtState(isRootedFlavor = rootCapabilityRegistry.isRootedFlavor))
     val state: StateFlow<BtState> = _state
+
+    private val _rootTools = MutableStateFlow(BtRootToolsState())
+
+    /** Live status of the rooted read-only HCI snoop-log dump. */
+    val rootTools: StateFlow<BtRootToolsState> = _rootTools.asStateFlow()
+
+    fun onDumpHciSnoop() {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(hciSnoop = it.hciSnoop.copy(running = true)) }
+            val result = bluetoothController.hciSnoopDump()
+            _rootTools.update { it.copy(hciSnoop = result.toActionState()) }
+        }
+    }
+
+    private fun BluetoothControllerResult.toActionState(): RootActionState = when (this) {
+        is BluetoothControllerResult.Ok ->
+            RootActionState(message = statusNote ?: "Done")
+        BluetoothControllerResult.Unsupported ->
+            RootActionState(message = "Requires the rooted app version", isError = true)
+        is BluetoothControllerResult.RateLimited ->
+            RootActionState(message = "Rate limited — retry in ${retryAfterMillis}ms", isError = true)
+        BluetoothControllerResult.OptedOut ->
+            RootActionState(message = "Blocked by your root-safety opt-out", isError = true)
+        is BluetoothControllerResult.HardwareError ->
+            RootActionState(message = message, isError = true)
+        is BluetoothControllerResult.ResetCompleted ->
+            RootActionState(message = "Reset $restored restored, $failed failed")
+        is BluetoothControllerResult.HciSnoopExcerpt ->
+            RootActionState(message = "Captured ${tailLines.size} HCI snoop lines")
+    }
 
     init { refresh() }
 
