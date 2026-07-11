@@ -129,5 +129,23 @@
             android:exported="false"
             android:foregroundServiceType="shortService" />
 
+        <!--
+          Quick Settings tile — one-tap start/stop of a held continuous
+          vibration through the shared VibrationController (torch's
+          FlashlightTileService pattern). exported=true + the
+          BIND_QUICK_SETTINGS_TILE permission are required for the system
+          to bind the tile.
+        -->
+        <service
+            android:name=".tile.VibrateTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_vibration_on"
+            android:label="@string/vibration_tile_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
     </application>
 </manifest>
