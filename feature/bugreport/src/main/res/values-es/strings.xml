@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bugreport_screen_title">Estado</string>
+
+    <!-- Status card -->
+    <string name="bugreport_card_title">Permisos de la app</string>
+    <string name="bugreport_all_granted">Todos los permisos concedidos</string>
+    <string name="bugreport_some_missing">Faltan algunos permisos</string>
+    <string name="bugreport_open_settings">Abrir configuración de la app</string>
+    <string name="bugreport_summary">%1$d de %2$d concedidos</string>
+    <string name="bugreport_perm_grant">Conceder</string>
+
+    <!-- Permission row labels -->
+    <string name="bugreport_perm_camera">Cámara</string>
+    <string name="bugreport_perm_microphone">Micrófono</string>
+    <string name="bugreport_perm_location">Ubicación (precisa)</string>
+    <string name="bugreport_perm_bluetooth">Conexión Bluetooth</string>
+    <string name="bugreport_perm_notifications">Publicar notificaciones</string>
+    <string name="bugreport_perm_phone">Estado del teléfono</string>
+    <string name="bugreport_perm_granted">Concedido</string>
+    <string name="bugreport_perm_denied">Denegado</string>
+
+    <!-- Capability rows -->
+    <string name="bugreport_cap_health_name">Comprobación de estado de la app</string>
+    <string name="bugreport_cap_health_detail">Comprueba el estado de los permisos y solicita los que falten, o accede a la configuración de la app para los denegados permanentemente</string>
+    <string name="bugreport_cap_health_ok">Todos los permisos concedidos</string>
+    <string name="bugreport_cap_health_missing">Faltan %1$d permiso(s)</string>
+
+    <!-- Rooted capability rows -->
+    <string name="bugreport_cap_rooted_active">Activo — compilación rooteada</string>
+    <string name="bugreport_cap_rooted_required">Requiere compilación rooteada</string>
+    <string name="bugreport_cap_adb_name">Diagnóstico ADB</string>
+    <string name="bugreport_cap_adb_detail">Activa o desactiva ADB por red y vuelca las propiedades del dispositivo mediante comandos de shell seguros con setprop</string>
+    <string name="bugreport_cap_force_grant_name">Forzar concesión de permisos</string>
+    <string name="bugreport_cap_force_grant_detail">Concede un permiso de tiempo de ejecución declarado mediante pm grant, sin pasar por el diálogo de permisos del sistema (protegido por RootSafetyGate)</string>
+
+    <!-- Monitoring -->
+    <string name="bugreport_monitor_metric_name">Disponibilidad de permisos de diagnóstico</string>
+</resources>

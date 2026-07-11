@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="microphone_screen_title">Mikrofon-Tools</string>
+
+    <!-- Tools card -->
+    <string name="microphone_tools_title">Extreme Mikrofon-Tools</string>
+    <string name="microphone_tools_subtitle">Nur für gerootete Builds verfügbare Diagnose- und Override-Tools, die AudioRecord umgehen. Die grundlegende Mikrofonaufnahme (Pegelmesser, Sprachrekorder) befindet sich auf dem Audio-Bildschirm.</string>
+    <string name="microphone_root_required_badge">Erfordert einen gerooteten Build — alle Steuerelemente unten sind auf diesem Gerät deaktiviert</string>
+    <string name="microphone_duration_label">Dauer</string>
+    <string name="microphone_confirm_cancel">Abbrechen</string>
+
+    <!-- Gain boost -->
+    <string name="microphone_section_gain_boost">Verstärkungserhöhung</string>
+    <string name="microphone_gain_boost_db_label">Verstärkung</string>
+    <string name="microphone_gain_boost_detail">Direkter ALSA-Mixer-Schreibzugriff. Feste Obergrenze von +30 dB, 60-Sekunden-Limit; die ursprünglichen Mixerwerte werden automatisch wiederhergestellt.</string>
+    <string name="microphone_action_gain_boost">Verstärkung erhöhen</string>
+
+    <!-- Direct PCM -->
+    <string name="microphone_section_direct_pcm">Direkte PCM-Aufnahme</string>
+    <string name="microphone_direct_pcm_format">Festes Diagnoseformat: %1$d kHz mono, %2$d-Bit — Rohaufnahme per Tinycap aus /dev/snd, unter vollständiger Umgehung von AudioRecord.</string>
+    <string name="microphone_action_direct_pcm">Rohe PCM-Daten aufnehmen</string>
+
+    <!-- Custom sample rate -->
+    <string name="microphone_section_custom_rate">Benutzerdefinierte Abtastrate</string>
+    <string name="microphone_custom_rate_hz_label">Rate</string>
+    <string name="microphone_custom_rate_risk_note">Manche Kernel blockieren bei nicht unterstützten Raten und benötigen einen Neustart zur Wiederherstellung.</string>
+    <string name="microphone_action_custom_rate">Benutzerdefinierte Rate anfordern…</string>
+    <string name="microphone_custom_rate_confirm_title">Risiko durch ungewöhnliche Abtastrate</string>
+    <string name="microphone_custom_rate_confirm_body">Das Anfordern einer nicht standardmäßigen Aufnahmerate (z. B. über 192 kHz für Ultraschallaufnahmen) wird von manchen Kernels nicht unterstützt und kann den Audiotreiber blockieren, sodass ein Geräteneustart zur Wiederherstellung erforderlich ist. Fahren Sie nur fort, wenn Sie dieses Risiko verstehen.</string>
+    <string name="microphone_custom_rate_confirm_action">Trotzdem anfordern</string>
+
+    <!-- Multi-mic raw -->
+    <string name="microphone_section_multi_mic">Gleichzeitige Multi-Mikrofon-Aufnahme</string>
+    <string name="microphone_multi_mic_streams_label">Streams</string>
+    <string name="microphone_action_multi_mic">Alle Mikrofone gleichzeitig aufnehmen</string>
+
+    <!-- Disable hardware effects -->
+    <string name="microphone_section_disable_effects">Hardware-Rauschunterdrückung</string>
+    <string name="microphone_disable_effects_detail">Setzt die ALSA-Mixersteuerungen für ANC/AGC/AEC/Beamforming auf null und stellt sie sofort wieder her — ein kurzer Impuls, keine dauerhafte Einstellung.</string>
+    <string name="microphone_disable_effects_toggle_label">Rauschunterdrückung jetzt deaktivieren</string>
+
+    <!-- System audio capture -->
+    <string name="microphone_section_system_audio">Systemaudio-Aufnahme</string>
+    <string name="microphone_system_audio_legal_note">Gewährt CAPTURE_AUDIO_OUTPUT über pm grant für das Aufnahmefenster und widerruft es danach automatisch. Feste Obergrenze von 5 Minuten.</string>
+    <string name="microphone_system_audio_toggle_label">System-/Anrufaudio aufnehmen</string>
+    <string name="microphone_system_audio_confirm_title">Rechtmäßigkeit der Anrufaufzeichnung</string>
+    <string name="microphone_system_audio_confirm_body">Die Systemaudio-Aufnahme kann Telefonanrufe und andere App-Audiodaten aufzeichnen. Das Aufzeichnen von Anrufen ohne Zustimmung ist in vielen Rechtsordnungen illegal (einschließlich Staaten/Ländern mit Ein- oder Zwei-Parteien-Zustimmungspflicht). Sie sind allein dafür verantwortlich, die an Ihrem Standort und dem der anderen Teilnehmer geltenden Gesetze einzuhalten. Fahren Sie nur fort, wenn Sie das gesetzliche Recht zur Aufzeichnung haben.</string>
+    <string name="microphone_system_audio_confirm_action">Ich habe das gesetzliche Recht — aufnehmen</string>
+
+    <!-- Result snackbar -->
+    <string name="microphone_result_ok">Fertig</string>
+    <string name="microphone_result_unsupported">Erfordert die gerootete App-Version</string>
+    <string name="microphone_result_opted_out">In den Einstellungen deaktiviert</string>
+    <string name="microphone_result_rate_limited">Rate begrenzt — bitte später erneut versuchen</string>
+    <string name="microphone_result_error">Fehlgeschlagen: %s</string>
+
+    <!-- ModuleInfo capabilities -->
+    <string name="microphone_cap_rooted_active">Aktiv — gerooteter Build</string>
+    <string name="microphone_cap_rooted_required">Erfordert gerooteten Build</string>
+    <string name="microphone_cap_gain_boost_name">Mikrofonverstärkung erhöhen</string>
+    <string name="microphone_cap_gain_boost_detail">Direkter ALSA-Mixer-Schreibzugriff, feste Obergrenze von +30 dB, 60-Sekunden-Limit</string>
+    <string name="microphone_cap_direct_pcm_name">Direkte PCM-Aufnahme</string>
+    <string name="microphone_cap_direct_pcm_detail">Rohaufnahme per Tinycap aus /dev/snd, unter Umgehung von AudioRecord</string>
+    <string name="microphone_cap_custom_rate_name">Benutzerdefinierte Abtastrate</string>
+    <string name="microphone_cap_custom_rate_detail">Ungewöhnliche Aufnahmeraten (z. B. Ultraschall); erfordert ausdrückliche Bestätigung</string>
+    <string name="microphone_cap_multi_mic_name">Multi-Mikrofon-Rohaufnahme</string>
+    <string name="microphone_cap_multi_mic_detail">Gleichzeitige Aufnahme von jedem verfügbaren Eingangsknoten, bis zu 3 Streams</string>
+    <string name="microphone_cap_disable_effects_name">Hardware-Effekte deaktivieren</string>
+    <string name="microphone_cap_disable_effects_detail">Setzt kurzzeitig die ALSA-Steuerungen für ANC/AGC/AEC/Beamforming auf null</string>
+    <string name="microphone_cap_system_audio_name">Systemaudio-Aufnahme</string>
+    <string name="microphone_cap_system_audio_detail">Gewährt CAPTURE_AUDIO_OUTPUT für ein begrenztes Zeitfenster; erfordert Bestätigung eines rechtlichen Hinweises</string>
+
+    <!-- ─── Automation actions (MicrophoneActionHandler) ────────────────── -->
+    <string name="microphone_action_disable_effects">Hardware-Rauschunterdrückung deaktivieren</string>
+    <string name="microphone_action_system_audio">Systemaudio-Aufnahme</string>
+</resources>

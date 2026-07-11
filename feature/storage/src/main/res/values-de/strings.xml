@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="storage_screen_title">Speicher</string>
+
+    <!-- ─── Volume cards ──────────────────────────────────────────────── -->
+    <string name="storage_card_title_internal">Interner Speicher</string>
+    <string name="storage_card_title_removable">%1$s</string>
+    <string name="storage_reading">Speicher wird gelesen…</string>
+    <string name="storage_used_label">%1$s von %2$s belegt</string>
+    <string name="storage_used_percent">%1$d%%</string>
+    <string name="storage_free_label">%1$s frei</string>
+
+    <!-- ─── Module capabilities ─────────────────────────────────────────── -->
+    <string name="storage_cap_name">Speicherlaufwerke</string>
+    <string name="storage_cap_detail">StatFs-Blockzahlen — keine Berechtigungen erforderlich.</string>
+    <string name="storage_cap_available">%1$d Laufwerk(e) erkannt.</string>
+    <string name="storage_cap_unavailable">Keine Speicherlaufwerke gefunden.</string>
+
+    <!-- ─── Monitoring containers ──────────────────────────────────────── -->
+    <string name="storage_live_monitor_used">Speichernutzung (live)</string>
+    <string name="storage_monitor_used">Speichernutzungsverlauf</string>
+    <string name="storage_monitor_free">Verlauf des freien Speichers</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="storage_cap_rooted_active">Aktiv — gerootete Version</string>
+    <string name="storage_cap_rooted_required">Erfordert gerootete Version</string>
+    <string name="storage_cap_diskstats_name">Diskstats-Dump</string>
+    <string name="storage_cap_diskstats_detail">Kernel-E/A-Statistiken aus /proc/diskstats (Lese-/Schreibvorgänge, Latenz pro Blockgerät)</string>
+    <string name="storage_cap_mounts_name">Mount-Auflistung</string>
+    <string name="storage_cap_mounts_detail">Vollständige Mount-Tabelle über /proc/mounts, einschließlich versteckter Partitionen, die über StorageManager nicht sichtbar sind</string>
+    <string name="storage_cap_fstrim_name">Speicher-Trim (fstrim)</string>
+    <string name="storage_cap_fstrim_detail">Erzwingt einen Discard-Vorgang auf eingehängten Dateisystemen, um die SSD-Lebensdauer zu verbessern</string>
+
+    <!-- Home-screen widget -->
+    <string name="storage_widget_label">Speicher</string>
+    <string name="storage_widget_description">Belegter und freier interner Speicher</string>
+    <string name="storage_widget_percent_format">%1$d %% belegt</string>
+    <string name="storage_widget_free_format">%1$s frei</string>
+    <string name="storage_widget_unknown">—</string>
+</resources>

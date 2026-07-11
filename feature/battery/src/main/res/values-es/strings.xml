@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="battery_screen_title">Batería</string>
+
+    <!-- ─── Status card ─────────────────────────────────────────────── -->
+    <string name="battery_card_status_title">Estado</string>
+    <string name="battery_level_value">%1$d%%</string>
+    <string name="battery_level_unknown">Nivel desconocido</string>
+    <string name="battery_unavailable">Información de la batería no disponible.</string>
+    <!-- health · temp · voltage on a single summary line -->
+    <string name="battery_detail_line">%s · %.1f°C · %.2f V</string>
+
+    <!-- ─── Charging card ────────────────────────────────────────────── -->
+    <string name="battery_card_charging_title">Carga</string>
+    <string name="battery_plugged_via">vía %1$s</string>
+
+    <!-- Charging status labels -->
+    <string name="battery_status_charging">Cargando</string>
+    <string name="battery_status_discharging">Descargando</string>
+    <string name="battery_status_not_charging">No cargando</string>
+    <string name="battery_status_full">Completa</string>
+    <string name="battery_status_unknown">Desconocido</string>
+
+    <!-- Plug type labels -->
+    <string name="battery_plug_ac">CA</string>
+    <string name="battery_plug_usb">USB</string>
+    <string name="battery_plug_wireless">Inalámbrico</string>
+    <string name="battery_plug_none">Desconectado</string>
+
+    <!-- Health labels -->
+    <string name="battery_health_good">Buena</string>
+    <string name="battery_health_overheat">Sobrecalentamiento</string>
+    <string name="battery_health_dead">Agotada</string>
+    <string name="battery_health_overvoltage">Sobretensión</string>
+    <string name="battery_health_failure">Fallo no especificado</string>
+    <string name="battery_health_cold">Fría</string>
+    <string name="battery_health_unknown">Desconocido</string>
+
+    <!-- ─── Module capabilities ──────────────────────────────────────── -->
+    <string name="battery_cap_level_name">Nivel de batería</string>
+    <string name="battery_cap_level_detail">Porcentaje de carga en tiempo real mediante BatteryManager.</string>
+    <string name="battery_cap_temp_name">Temperatura</string>
+    <string name="battery_cap_temp_detail">Temperatura de la batería reportada por el sistema.</string>
+    <string name="battery_cap_available">Funciona — no requiere permisos.</string>
+    <string name="battery_cap_unavailable">Datos de la batería aún no recibidos.</string>
+    <string name="battery_cap_temp_ok">%.1f°C — dentro del rango normal.</string>
+
+    <!-- ─── Monitoring containers ────────────────────────────────────── -->
+    <string name="battery_live_monitor_level">Nivel de batería (en vivo)</string>
+    <string name="battery_live_monitor_temp">Temperatura (en vivo)</string>
+    <string name="battery_monitor_level">Historial de nivel de batería</string>
+    <string name="battery_monitor_temp">Historial de temperatura</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="battery_cap_rooted_active">Activo — compilación rooteada</string>
+    <string name="battery_cap_rooted_required">Requiere compilación rooteada</string>
+    <string name="battery_cap_fuel_gauge_name">Lectura directa del medidor de carga</string>
+    <string name="battery_cap_fuel_gauge_detail">Lectura sysfs directa del chip medidor de carga (SoC, voltaje, corriente)</string>
+    <string name="battery_cap_cell_monitor_name">Monitor de voltaje por celda</string>
+    <string name="battery_cap_cell_monitor_detail">Telemetría de voltaje por celda desde el medidor de carga</string>
+    <string name="battery_cap_charging_profile_name">Control del perfil de carga</string>
+    <string name="battery_cap_charging_profile_detail">Anula los límites de corriente de carga y corte de voltaje</string>
+
+    <!-- ─── Automation actions (rooted) ──────────────────────────────── -->
+    <string name="battery_action_charging_profile_override">Anulación del perfil de carga (rooteado)</string>
+    <string name="battery_action_thermal_bypass">Omisión de limitación térmica (rooteado)</string>
+    <string name="battery_action_charging_type_override">Anulación del tipo de carga (rooteado)</string>
+    <string name="battery_action_full_dump">Volcado completo de sysfs (rooteado)</string>
+    <string name="battery_action_reset_mutations">Restablecer anulaciones de batería (rooteado)</string>
+    <string name="battery_action_hold_soc">Mantener estado de carga (rooteado)</string>
+    <string name="battery_action_wireless_coil_current">Limitar corriente de la bobina inalámbrica (rooteado)</string>
+    <string name="battery_action_health_snapshot">Instantánea de salud de la batería (rooteado)</string>
+
+    <!-- Home-screen widget -->
+    <string name="battery_widget_label">Batería</string>
+    <string name="battery_widget_description">Nivel de batería y estado de carga en vivo</string>
+    <string name="battery_widget_percent_format">%1$d%%</string>
+    <string name="battery_widget_unknown">—</string>
+    <string name="battery_widget_charging">Cargando</string>
+    <string name="battery_widget_discharging">Descargando</string>
+</resources>

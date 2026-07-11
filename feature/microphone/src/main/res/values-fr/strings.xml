@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="microphone_screen_title">Outils micro</string>
+
+    <!-- Tools card -->
+    <string name="microphone_tools_title">Outils micro extrêmes</string>
+    <string name="microphone_tools_subtitle">Outils de diagnostic et de dérogation réservés aux builds rootés, contournant AudioRecord. La capture micro de base (sonomètre, dictaphone) se trouve sur l\'écran Audio.</string>
+    <string name="microphone_root_required_badge">Nécessite un build rooté — toutes les commandes ci-dessous sont désactivées sur cet appareil</string>
+    <string name="microphone_duration_label">Durée</string>
+    <string name="microphone_confirm_cancel">Annuler</string>
+
+    <!-- Gain boost -->
+    <string name="microphone_section_gain_boost">Amplification du gain</string>
+    <string name="microphone_gain_boost_db_label">Amplification</string>
+    <string name="microphone_gain_boost_detail">Écriture directe dans le mixeur ALSA. Plafond strict de +30 dB, limite de 60 s ; les valeurs d\'origine du mixeur sont restaurées automatiquement.</string>
+    <string name="microphone_action_gain_boost">Amplifier le gain</string>
+
+    <!-- Direct PCM -->
+    <string name="microphone_section_direct_pcm">Capture PCM directe</string>
+    <string name="microphone_direct_pcm_format">Format de diagnostic fixe : %1$d kHz mono, %2$d bits — lecture tinycap brute depuis /dev/snd, en contournant entièrement AudioRecord.</string>
+    <string name="microphone_action_direct_pcm">Capturer le PCM brut</string>
+
+    <!-- Custom sample rate -->
+    <string name="microphone_section_custom_rate">Fréquence d\'échantillonnage personnalisée</string>
+    <string name="microphone_custom_rate_hz_label">Fréquence</string>
+    <string name="microphone_custom_rate_risk_note">Certains noyaux se bloquent avec des fréquences non prises en charge et nécessitent un redémarrage pour se rétablir.</string>
+    <string name="microphone_action_custom_rate">Demander une fréquence personnalisée…</string>
+    <string name="microphone_custom_rate_confirm_title">Risque lié à une fréquence d\'échantillonnage inhabituelle</string>
+    <string name="microphone_custom_rate_confirm_body">Demander une fréquence de capture non standard (par ex. au-delà de 192 kHz pour la capture ultrasonique) n\'est pas pris en charge par certains noyaux et peut bloquer le pilote audio, nécessitant un redémarrage de l\'appareil pour s\'en remettre. Ne continuez que si vous comprenez ce risque.</string>
+    <string name="microphone_custom_rate_confirm_action">Demander quand même</string>
+
+    <!-- Multi-mic raw -->
+    <string name="microphone_section_multi_mic">Capture simultanée multi-micro</string>
+    <string name="microphone_multi_mic_streams_label">Flux</string>
+    <string name="microphone_action_multi_mic">Capturer tous les micros à la fois</string>
+
+    <!-- Disable hardware effects -->
+    <string name="microphone_section_disable_effects">Suppression du bruit matérielle</string>
+    <string name="microphone_disable_effects_detail">Met à zéro les commandes du mixeur ALSA ANC / AGC / AEC / formation de faisceaux, puis les restaure immédiatement — une impulsion momentanée, pas un réglage permanent.</string>
+    <string name="microphone_disable_effects_toggle_label">Désactiver la suppression du bruit maintenant</string>
+
+    <!-- System audio capture -->
+    <string name="microphone_section_system_audio">Capture audio système</string>
+    <string name="microphone_system_audio_legal_note">Accorde CAPTURE_AUDIO_OUTPUT via pm grant pour la fenêtre de capture, puis le révoque automatiquement. Plafond strict de 5 minutes.</string>
+    <string name="microphone_system_audio_toggle_label">Capturer l\'audio système / des appels</string>
+    <string name="microphone_system_audio_confirm_title">Légalité de l\'enregistrement des appels</string>
+    <string name="microphone_system_audio_confirm_body">La capture audio système peut enregistrer les appels téléphoniques et l\'audio d\'autres applications. Enregistrer des appels sans consentement est illégal dans de nombreuses juridictions (y compris les États/pays exigeant le consentement d\'une ou des deux parties). Vous êtes seul responsable du respect de la loi en vigueur là où vous et les autres participants vous trouvez. Ne continuez que si vous avez le droit légal d\'enregistrer.</string>
+    <string name="microphone_system_audio_confirm_action">J\'ai le droit légal — capturer</string>
+
+    <!-- Result snackbar -->
+    <string name="microphone_result_ok">Terminé</string>
+    <string name="microphone_result_unsupported">Nécessite la version rootée de l\'application</string>
+    <string name="microphone_result_opted_out">Désactivé dans les Paramètres</string>
+    <string name="microphone_result_rate_limited">Limite de fréquence atteinte — réessayez bientôt</string>
+    <string name="microphone_result_error">Échec : %s</string>
+
+    <!-- ModuleInfo capabilities -->
+    <string name="microphone_cap_rooted_active">Actif — build rooté</string>
+    <string name="microphone_cap_rooted_required">Nécessite un build rooté</string>
+    <string name="microphone_cap_gain_boost_name">Amplification du gain micro</string>
+    <string name="microphone_cap_gain_boost_detail">Écriture directe dans le mixeur ALSA, plafond strict de +30 dB, limite de 60 s</string>
+    <string name="microphone_cap_direct_pcm_name">Capture PCM directe</string>
+    <string name="microphone_cap_direct_pcm_detail">Lecture tinycap brute depuis /dev/snd, en contournant AudioRecord</string>
+    <string name="microphone_cap_custom_rate_name">Fréquence d\'échantillonnage personnalisée</string>
+    <string name="microphone_cap_custom_rate_detail">Fréquences de capture inhabituelles (par ex. ultrasoniques) ; nécessite une confirmation explicite</string>
+    <string name="microphone_cap_multi_mic_name">Capture brute multi-micro</string>
+    <string name="microphone_cap_multi_mic_detail">Capture simultanée depuis chaque nœud d\'entrée disponible, jusqu\'à 3 flux</string>
+    <string name="microphone_cap_disable_effects_name">Désactiver les effets matériels</string>
+    <string name="microphone_cap_disable_effects_detail">Met momentanément à zéro les commandes ALSA ANC / AGC / AEC / formation de faisceaux</string>
+    <string name="microphone_cap_system_audio_name">Capture audio système</string>
+    <string name="microphone_cap_system_audio_detail">Accorde CAPTURE_AUDIO_OUTPUT pour une fenêtre limitée ; nécessite la confirmation d\'un avertissement légal</string>
+
+    <!-- ─── Automation actions (MicrophoneActionHandler) ────────────────── -->
+    <string name="microphone_action_disable_effects">Désactiver la suppression du bruit matérielle</string>
+    <string name="microphone_action_system_audio">Capture audio système</string>
+</resources>

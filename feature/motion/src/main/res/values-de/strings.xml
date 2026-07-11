@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="motion_capability_gyroscope">Gyroskop</string>
+    <string name="motion_capability_gyroscope_detail">Drehratensensor</string>
+    <string name="motion_capability_step_counter">Schrittzähler</string>
+    <string name="motion_capability_step_counter_detail">Schrittzähler-Sensor</string>
+    <string name="motion_capability_motion_detect">Bewegungsmelder</string>
+    <string name="motion_capability_motion_detect_detail">Ereignisbasierte Bewegungserkennung</string>
+    <string name="motion_capability_card_title">Bewegungssensoren</string>
+    <string name="motion_permission_title">Aktivitätsberechtigung erforderlich</string>
+    <string name="motion_permission_body">Die Berechtigung ACTIVITY_RECOGNITION wird benötigt, um Schrittzählerdaten zu lesen.</string>
+    <string name="motion_permission_grant">Berechtigung erteilen</string>
+    <string name="motion_gyroscope_card_title">Gyroskop</string>
+    <string name="motion_gyroscope_value">Drehrate</string>
+    <string name="motion_step_counter_card_title">Schrittzähler</string>
+    <string name="motion_steps_label">Schritte (seit letztem Neustart)</string>
+    <string name="motion_detect_card_title">Bewegungsmelder</string>
+    <string name="motion_detected">Bewegung erkannt</string>
+    <string name="motion_idle">Keine Bewegung</string>
+    <string name="motion_live_monitor_title">%1$s — live</string>
+    <string name="motion_monitor_title">%1$s-Verlauf</string>
+    <string name="motion_capability_present">Vorhanden</string>
+    <string name="motion_capability_not_present">Nicht vorhanden</string>
+    <string name="motion_capability_high_polling">Hochfrequenz-Abtastung</string>
+    <string name="motion_capability_high_polling_detail">Sensor-Meldefrequenz unterhalb des öffentlichen API-Minimums erzwingen</string>
+    <string name="motion_capability_raw_unfiltered">Unverarbeitete Rohdaten</string>
+    <string name="motion_capability_raw_unfiltered_detail">Umgeht Androids Sensor-Fusion- und Filterpipeline</string>
+    <string name="motion_capability_sysfs_read">Sysfs-Sensorauslesung</string>
+    <string name="motion_capability_sysfs_read_detail">Direkter Kernel-Sysfs-Zugriff auf Sensor-Hardwareknoten</string>
+    <string name="motion_capability_rooted_active">Aktiv — gerootete Build-Version</string>
+    <string name="motion_capability_rooted_required">Erfordert gerootete Build-Version</string>
+    <string name="motion_action_assert_motion_detected">Bewegung erkannt prüfen</string>
+    <string name="motion_action_assert_motion_idle">Keine Bewegung prüfen</string>
+    <string name="motion_action_assert_steps_above">Schrittzahl über Schwellenwert prüfen</string>
+    <string name="motion_action_assert_rotation_above">Drehrate über Schwellenwert prüfen</string>
+</resources>

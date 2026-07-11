@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ambient_screen_title">Ambiente</string>
+
+    <!-- Status card -->
+    <string name="ambient_card_title">Luz ambiental</string>
+    <string name="ambient_label_lux">Iluminancia</string>
+    <string name="ambient_lux_format">%.1f lux</string>
+    <string name="ambient_sensor_unavailable">El sensor de luz ambiental no está disponible en este dispositivo</string>
+
+    <!-- Light level descriptors -->
+    <string name="ambient_level_dark">Oscuro</string>
+    <string name="ambient_level_dim">Tenue</string>
+    <string name="ambient_level_indoor">Luz interior</string>
+    <string name="ambient_level_bright">Brillante</string>
+    <string name="ambient_level_sunlight">Luz solar directa</string>
+
+    <!-- Monitor titles -->
+    <string name="ambient_live_monitor_lux">Luz ambiental (en vivo)</string>
+    <string name="ambient_monitor_lux">Historial de luz ambiental</string>
+
+    <!-- Capability rows -->
+    <string name="ambient_cap_sensor_name">Sensor de luz ambiental</string>
+    <string name="ambient_cap_sensor_detail">Sensor TYPE_LIGHT que mide la iluminancia en lux</string>
+    <string name="ambient_cap_sensor_available">Sensor disponible</string>
+    <string name="ambient_cap_sensor_unavailable">Sensor no encontrado</string>
+
+    <!-- Rooted capability rows -->
+    <string name="ambient_cap_rooted_active">Activo — versión rooteada</string>
+    <string name="ambient_cap_rooted_required">Requiere versión rooteada</string>
+    <string name="ambient_cap_brightness_name">Anulación de brillo de pantalla</string>
+    <string name="ambient_cap_brightness_detail">Ajusta el brillo de la pantalla directamente vía sysfs, evitando el brillo automático de Android</string>
+    <string name="ambient_cap_refresh_name">Anulación de tasa de refresco</string>
+    <string name="ambient_cap_refresh_detail">Fuerza una tasa de refresco de pantalla específica a través del servicio SurfaceFlinger</string>
+    <string name="ambient_cap_density_name">Anulación de densidad de pantalla</string>
+    <string name="ambient_cap_density_detail">Cambia el DPI de la pantalla mediante el equivalente a nivel de kernel de adb/wm density</string>
+</resources>

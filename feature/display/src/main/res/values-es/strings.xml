@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="display_screen_title">Pantalla</string>
+
+    <!-- Readouts card -->
+    <string name="display_readouts_title">Lecturas</string>
+    <string name="display_readout_refresh_rate">Tasa de refresco</string>
+    <string name="display_readout_rotation">Rotación</string>
+    <string name="display_readout_resolution">Resolución</string>
+    <string name="display_value_hz">%1$d Hz</string>
+    <string name="display_value_degrees">%1$d°</string>
+    <string name="display_value_resolution">%1$d × %2$d</string>
+
+    <!-- Brightness card (standard tier, Settings.System.SCREEN_BRIGHTNESS) -->
+    <string name="display_brightness_title">Brillo</string>
+    <string name="display_brightness_label">Brillo</string>
+
+    <!-- Refresh-rate card (readable on both tiers; applying an override requires root) -->
+    <string name="display_refresh_rate_title">Anulación de tasa de refresco</string>
+    <string name="display_refresh_rate_subtitle_rooted">Selecciona un modo para forzar esa tasa de refresco en la pantalla.</string>
+    <string name="display_refresh_rate_subtitle_standard">Modos disponibles en esta pantalla. Aplicar una anulación requiere la versión rooteada de la app.</string>
+
+    <!-- Density card (rooted only) -->
+    <string name="display_density_title">Anulación de densidad</string>
+    <string name="display_density_label">Densidad</string>
+    <string name="display_density_subtitle_rooted">Anulación de DPI en tiempo de ejecución mediante `wm density`, limitada a 120–560.</string>
+    <string name="display_density_subtitle_standard">Requiere la versión rooteada de la app.</string>
+
+    <!-- SurfaceFlinger diagnostic panel (rooted only, read-only) -->
+    <string name="display_surfaceflinger_title">Instantánea de SurfaceFlinger</string>
+    <string name="display_surfaceflinger_subtitle_rooted">Extracto de solo lectura de `dumpsys SurfaceFlinger`, limitado a 8 KB.</string>
+    <string name="display_surfaceflinger_subtitle_standard">Requiere la versión rooteada de la app.</string>
+    <string name="display_surfaceflinger_capture">Capturar instantánea</string>
+
+    <!-- Reset-all -->
+    <string name="display_reset_title">Restablecer</string>
+    <string name="display_reset_detail">Revierte todas las anulaciones activas de brillo, tasa de refresco y densidad.</string>
+    <string name="display_reset_action">Restablecer todas las anulaciones</string>
+
+    <!-- Status row -->
+    <string name="display_status_title">Último resultado</string>
+
+    <!-- ModuleInfo: permissions -->
+    <string name="display_permission_write_settings_label">Modificar la configuración del sistema</string>
+    <string name="display_permission_write_settings_rationale">Permite que el control deslizante de brillo escriba en Settings.System.SCREEN_BRIGHTNESS. Las lecturas de solo lectura funcionan sin este permiso.</string>
+    <string name="display_action_grant_write_settings">Conceder permiso</string>
+
+    <!-- ModuleInfo: OS compatibility -->
+    <string name="display_os_note_refresh_rate_api30">La anulación de tasa de refresco requiere Android 11 (API 30) o superior.</string>
+
+    <!-- ModuleInfo: capabilities -->
+    <string name="display_cap_brightness_name">Control de brillo</string>
+    <string name="display_cap_brightness_detail">Lectura/escritura de Settings.System.SCREEN_BRIGHTNESS.</string>
+    <string name="display_cap_brightness_granted">Permiso concedido</string>
+    <string name="display_cap_brightness_denied">WRITE_SETTINGS no concedido</string>
+    <string name="display_cap_refresh_rate_name">Anulación de tasa de refresco</string>
+    <string name="display_cap_refresh_rate_detail">Fuerza la pantalla a un modo compatible específico.</string>
+    <string name="display_cap_density_name">Anulación de densidad (DPI)</string>
+    <string name="display_cap_density_detail">Anulación en tiempo de ejecución mediante `wm density`.</string>
+    <string name="display_cap_surfaceflinger_name">Instantánea de SurfaceFlinger</string>
+    <string name="display_cap_surfaceflinger_detail">Extracto de solo lectura de `dumpsys SurfaceFlinger`.</string>
+    <string name="display_cap_rooted_active">Activo — versión rooteada</string>
+    <string name="display_cap_rooted_required">Requiere la versión rooteada de la app</string>
+
+    <!-- Monitoring -->
+    <string name="display_live_monitor_brightness">Brillo en vivo</string>
+    <string name="display_monitor_brightness">Historial de brillo</string>
+    <string name="display_monitor_metric_name">Brillo de pantalla</string>
+
+    <!-- Status messages (DisplayControllerResult mapping) -->
+    <string name="display_status_ok">Aplicado</string>
+    <string name="display_status_unsupported">Requiere la versión rooteada de la app</string>
+    <string name="display_status_rate_limited">Límite de frecuencia alcanzado — reintentar en %1$dms</string>
+    <string name="display_status_opted_out">Desactivado en Configuración</string>
+    <string name="display_status_reset_completed">%1$d anulación(es) revertida(s), %2$d fallida(s)</string>
+    <string name="display_status_brightness_applied">Brillo ajustado a %1$d/%2$d</string>
+    <string name="display_status_refresh_applied">Modo de tasa de refresco %1$d aplicado</string>
+    <string name="display_status_density_applied">Densidad ajustada a %1$d dpi</string>
+    <string name="display_status_write_settings_denied">Permiso WRITE_SETTINGS no concedido</string>
+
+    <!-- Automation actions -->
+    <string name="display_action_set_brightness">Ajustar brillo</string>
+    <string name="display_action_override_brightness_extreme">Sobrecargar brillo (rooteado)</string>
+    <string name="display_action_override_refresh_rate">Anular tasa de refresco (rooteado)</string>
+    <string name="display_action_override_density">Anular densidad (rooteado)</string>
+    <string name="display_action_reset_all">Restablecer todas las anulaciones (rooteado)</string>
+</resources>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="flipper_screen_title">Flipper Zero</string>
+
+    <!-- Connection card -->
+    <string name="flipper_card_connection_title">Connexion</string>
+    <string name="flipper_disconnected">Aucun Flipper connecté. Connectez-en un via USB ou choisissez un appareil associé par Bluetooth.</string>
+    <string name="flipper_connecting">Connexion via %1$s…</string>
+    <string name="flipper_failed">Échec de la connexion : %1$s</string>
+    <string name="flipper_label_transport">Transport</string>
+    <string name="flipper_label_device">Appareil</string>
+    <string name="flipper_label_firmware">Firmware</string>
+    <string name="flipper_label_battery">Batterie</string>
+    <string name="flipper_unknown">Inconnu</string>
+    <string name="flipper_battery_format">%1$d%%</string>
+
+    <!-- Actions -->
+    <string name="flipper_action_connect_usb">Connecter en USB</string>
+    <string name="flipper_action_connect_ble">Connecter en Bluetooth</string>
+    <string name="flipper_action_connect">Connecter</string>
+    <string name="flipper_action_disconnect">Déconnecter</string>
+    <string name="flipper_action_ping">Ping</string>
+
+    <!-- BLE picker card -->
+    <string name="flipper_card_ble_title">Flipper associés</string>
+
+    <!-- Monitor titles -->
+    <string name="flipper_live_monitor_battery">Batterie du Flipper (en direct)</string>
+    <string name="flipper_monitor_connected">Historique de connexion</string>
+
+    <!-- Capability rows -->
+    <string name="flipper_cap_supported">Pris en charge</string>
+    <string name="flipper_cap_usb_name">USB CDC-ACM</string>
+    <string name="flipper_cap_usb_detail">Communique avec un Flipper Zero via son port série virtuel USB (115200-8-N-1)</string>
+    <string name="flipper_cap_ble_name">BLE GATT</string>
+    <string name="flipper_cap_ble_detail">Communique avec un Flipper Zero associé via son service série Bluetooth Nordic-UART</string>
+
+    <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
+    <string name="flipper_cap_rooted_active">Actif — version rootée</string>
+    <string name="flipper_cap_rooted_required">Nécessite une version rootée</string>
+    <string name="flipper_cap_usb_grant_name">Attribution automatique USB root</string>
+    <string name="flipper_cap_usb_grant_detail">Accorde l\'accès au périphérique USB via les appops root, afin que le Flipper se connecte sans la boîte de dialogue d\'autorisation à chaque branchement</string>
+</resources>

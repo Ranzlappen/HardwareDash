@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="automation_title">Automatización</string>
+    <string name="automation_new_rule">Nueva regla</string>
+    <string name="automation_empty_title">Aún no hay reglas</string>
+    <string name="automation_empty_subtitle">Crea tu primera regla — cuando se active su activador, Gadget ejecutará las acciones que elijas.</string>
+    <string name="automation_run_now">Ejecutar ahora</string>
+    <string name="automation_delete_rule">Eliminar regla</string>
+    <string name="automation_rule_enabled_toggle">Regla activada</string>
+    <string name="automation_rule_actions_summary">Acciones: %1$s</string>
+    <string name="automation_rule_actions_none">Aún no hay acciones</string>
+    <string name="automation_delete_confirm_title">¿Eliminar regla?</string>
+    <string name="automation_delete_confirm_text">“%1$s” se eliminará. Esto no se puede deshacer.</string>
+    <string name="automation_delete_confirm_yes">Eliminar</string>
+    <string name="automation_cancel">Cancelar</string>
+    <string name="automation_run_now_result">“%1$s” se ejecutó — %2$d acción(es) enviada(s)</string>
+    <string name="automation_run_now_nothing">“%1$s” no se ejecutó — no se cumplen las condiciones o la regla está en tiempo de espera</string>
+
+    <!-- Exact-alarm capability -->
+    <string name="automation_capability_exact">Programaciones con hora exacta</string>
+    <string name="automation_capability_exact_detail">Los activadores de programación marcados como “exactos” se disparan al minuto, incluso en modo Doze</string>
+    <string name="automation_capability_exact_ok">Permitido — las programaciones exactas se disparan en el minuto establecido</string>
+    <string name="automation_capability_exact_missing">No permitido — las programaciones exactas usan una ventana de ±10 min</string>
+    <string name="automation_capability_exact_action">Permitir</string>
+    <string name="automation_os_note_31">Android 12+: las programaciones con hora exacta necesitan el permiso especial “Alarmas &amp; recordatorios”.</string>
+    <string name="automation_os_note_34">Android 14+: ese permiso se deniega de forma predeterminada en instalaciones nuevas — las programaciones usan una ventana de ±10 min hasta que lo permitas.</string>
+
+    <!-- Rule summaries -->
+    <string name="automation_summary_metric">Cuando %1$s %2$s %3$s</string>
+    <string name="automation_summary_schedule_daily">Diariamente a las %1$s</string>
+    <string name="automation_summary_schedule_days">%1$s a las %2$s</string>
+    <string name="automation_summary_schedule_exact_suffix">· exacto</string>
+    <string name="automation_summary_boot">Al arrancar el dispositivo</string>
+    <string name="automation_summary_power_connected">Al conectar la alimentación</string>
+    <string name="automation_summary_power_disconnected">Al desconectar la alimentación</string>
+    <string name="automation_summary_connectivity">Al cambiar la conectividad</string>
+    <string name="automation_summary_manual">Manual — toca “Ejecutar ahora”</string>
+
+    <!-- Editor: shared -->
+    <string name="automation_editor_title_new">Nueva regla</string>
+    <string name="automation_editor_title_edit">Editar regla</string>
+    <string name="automation_editor_name_label">Nombre</string>
+    <string name="automation_editor_section_trigger">Cuando (activador)</string>
+    <string name="automation_editor_section_conditions">Solo si (condiciones)</string>
+    <string name="automation_editor_section_actions">Entonces (acciones)</string>
+    <string name="automation_editor_section_options">Opciones</string>
+    <string name="automation_editor_save">Guardar regla</string>
+
+    <!-- Editor: trigger -->
+    <string name="automation_editor_trigger_kind">Activador</string>
+    <string name="automation_trigger_kind_metric">Umbral de señal</string>
+    <string name="automation_trigger_kind_schedule">Programación</string>
+    <string name="automation_trigger_kind_event">Evento del sistema</string>
+    <string name="automation_trigger_kind_manual">Manual</string>
+    <string name="automation_editor_signal">Señal</string>
+    <string name="automation_editor_operator">Se activa cuando el valor es</string>
+    <string name="automation_editor_threshold">Umbral</string>
+    <string name="automation_editor_edge">Activar en</string>
+    <string name="automation_edge_rising">Al entrar</string>
+    <string name="automation_edge_falling">Al salir</string>
+    <string name="automation_editor_hysteresis">Valor de reactivación (histéresis)</string>
+    <string name="automation_editor_hysteresis_hint">Tras activarse, solo se reactiva cuando el valor vuelve a cruzar este punto — evita que una señal inestable dispare la regla repetidamente.</string>
+    <string name="automation_editor_rearm">Reactivar en</string>
+    <string name="automation_editor_time">Hora</string>
+    <string name="automation_editor_days">Días</string>
+    <string name="automation_editor_exact">Hora exacta</string>
+    <string name="automation_editor_exact_hint_inexact">Se activa dentro de una ventana de ±10 min alrededor de la hora establecida.</string>
+    <string name="automation_editor_exact_hint_exact">Se activa al minuto exacto, incluso en modo Doze.</string>
+    <string name="automation_editor_exact_denied">Las alarmas exactas no están permitidas para Gadget — esta regla usa una ventana de ±10 min.</string>
+    <string name="automation_editor_exact_allow">Permitir alarmas exactas</string>
+    <string name="automation_editor_event">Evento</string>
+    <string name="automation_event_boot">Dispositivo iniciado</string>
+    <string name="automation_event_power_connected">Alimentación conectada</string>
+    <string name="automation_event_power_disconnected">Alimentación desconectada</string>
+    <string name="automation_event_connectivity">Conectividad cambiada</string>
+    <string name="automation_editor_manual_hint">Solo se ejecuta cuando tocas “Ejecutar ahora” en esta pantalla.</string>
+
+    <!-- Editor: conditions -->
+    <string name="automation_editor_conditions_empty">Sin condiciones — solo decide el activador.</string>
+    <string name="automation_editor_condition_logic">Debe cumplirse</string>
+    <string name="automation_logic_all">Todas</string>
+    <string name="automation_logic_any">Cualquiera</string>
+    <string name="automation_editor_condition_add_metric">Añadir comprobación de señal</string>
+    <string name="automation_editor_condition_add_time">Añadir ventana horaria</string>
+    <string name="automation_condition_metric_title">Comprobación de señal</string>
+    <string name="automation_condition_time_title">Ventana horaria</string>
+    <string name="automation_editor_condition_remove">Eliminar condición</string>
+    <string name="automation_editor_condition_value_is">El valor es</string>
+    <string name="automation_editor_window_start">Desde</string>
+    <string name="automation_editor_window_end">Hasta</string>
+    <string name="automation_editor_window_wrap_hint">Un final anterior al inicio cruza la medianoche (22:00–06:00).</string>
+
+    <!-- Editor: actions -->
+    <string name="automation_editor_action_pick">Acción</string>
+    <string name="automation_editor_action_add">Añadir acción</string>
+    <string name="automation_editor_actions_empty">Añade al menos una acción.</string>
+    <string name="automation_editor_action_remove">Eliminar acción</string>
+    <string name="automation_editor_action_unavailable">%1$s — no disponible en esta versión</string>
+    <string name="automation_action_label">%1$s · %2$s</string>
+
+    <!-- Editor: options -->
+    <string name="automation_editor_cooldown">Tiempo de espera</string>
+    <string name="automation_editor_cooldown_suffix">s</string>
+    <string name="automation_editor_cooldown_hint">Tiempo mínimo entre activaciones automáticas — 0 = ninguno. Un “Ejecutar ahora” manual lo omite, pero igualmente retrasa la siguiente activación automática.</string>
+
+    <!-- Day-of-week short labels -->
+    <string name="automation_day_mon">lun</string>
+    <string name="automation_day_tue">mar</string>
+    <string name="automation_day_wed">mié</string>
+    <string name="automation_day_thu">jue</string>
+    <string name="automation_day_fri">vie</string>
+    <string name="automation_day_sat">sáb</string>
+    <string name="automation_day_sun">dom</string>
+</resources>

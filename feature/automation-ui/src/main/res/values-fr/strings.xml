@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="automation_title">Automatisation</string>
+    <string name="automation_new_rule">Nouvelle règle</string>
+    <string name="automation_empty_title">Aucune règle pour l’instant</string>
+    <string name="automation_empty_subtitle">Créez votre première règle — quand son déclencheur se déclenche, Gadget exécute les actions que vous choisissez.</string>
+    <string name="automation_run_now">Exécuter maintenant</string>
+    <string name="automation_delete_rule">Supprimer la règle</string>
+    <string name="automation_rule_enabled_toggle">Règle activée</string>
+    <string name="automation_rule_actions_summary">Actions : %1$s</string>
+    <string name="automation_rule_actions_none">Aucune action pour l’instant</string>
+    <string name="automation_delete_confirm_title">Supprimer la règle ?</string>
+    <string name="automation_delete_confirm_text">“%1$s” sera supprimée. Cette action est irréversible.</string>
+    <string name="automation_delete_confirm_yes">Supprimer</string>
+    <string name="automation_cancel">Annuler</string>
+    <string name="automation_run_now_result">“%1$s” a été exécutée — %2$d action(s) déclenchée(s)</string>
+    <string name="automation_run_now_nothing">“%1$s” ne s’est pas exécutée — conditions non remplies ou règle en délai de récupération</string>
+
+    <!-- Exact-alarm capability -->
+    <string name="automation_capability_exact">Planifications à heure exacte</string>
+    <string name="automation_capability_exact_detail">Les déclencheurs de planification marqués “exact” se déclenchent à la minute près, même en mode Doze</string>
+    <string name="automation_capability_exact_ok">Autorisé — les planifications exactes se déclenchent à la minute définie</string>
+    <string name="automation_capability_exact_missing">Non autorisé — les planifications exactes utilisent une fenêtre de ±10 min</string>
+    <string name="automation_capability_exact_action">Autoriser</string>
+    <string name="automation_os_note_31">Android 12+ : les planifications à heure exacte nécessitent l’autorisation spéciale “Alarmes &amp; rappels”.</string>
+    <string name="automation_os_note_34">Android 14+ : cette autorisation est refusée par défaut sur les nouvelles installations — les planifications utilisent une fenêtre de ±10 min tant que vous ne l’autorisez pas.</string>
+
+    <!-- Rule summaries -->
+    <string name="automation_summary_metric">Quand %1$s %2$s %3$s</string>
+    <string name="automation_summary_schedule_daily">Tous les jours à %1$s</string>
+    <string name="automation_summary_schedule_days">%1$s à %2$s</string>
+    <string name="automation_summary_schedule_exact_suffix">· exact</string>
+    <string name="automation_summary_boot">Au démarrage de l’appareil</string>
+    <string name="automation_summary_power_connected">À la connexion de l’alimentation</string>
+    <string name="automation_summary_power_disconnected">À la déconnexion de l’alimentation</string>
+    <string name="automation_summary_connectivity">Au changement de connectivité</string>
+    <string name="automation_summary_manual">Manuel — appuyez sur “Exécuter maintenant”</string>
+
+    <!-- Editor: shared -->
+    <string name="automation_editor_title_new">Nouvelle règle</string>
+    <string name="automation_editor_title_edit">Modifier la règle</string>
+    <string name="automation_editor_name_label">Nom</string>
+    <string name="automation_editor_section_trigger">Quand (déclencheur)</string>
+    <string name="automation_editor_section_conditions">Seulement si (conditions)</string>
+    <string name="automation_editor_section_actions">Alors (actions)</string>
+    <string name="automation_editor_section_options">Options</string>
+    <string name="automation_editor_save">Enregistrer la règle</string>
+
+    <!-- Editor: trigger -->
+    <string name="automation_editor_trigger_kind">Déclencheur</string>
+    <string name="automation_trigger_kind_metric">Seuil de signal</string>
+    <string name="automation_trigger_kind_schedule">Planification</string>
+    <string name="automation_trigger_kind_event">Événement système</string>
+    <string name="automation_trigger_kind_manual">Manuel</string>
+    <string name="automation_editor_signal">Signal</string>
+    <string name="automation_editor_operator">Se déclenche quand la valeur est</string>
+    <string name="automation_editor_threshold">Seuil</string>
+    <string name="automation_editor_edge">Se déclencher sur</string>
+    <string name="automation_edge_rising">En entrant</string>
+    <string name="automation_edge_falling">En sortant</string>
+    <string name="automation_editor_hysteresis">Valeur de réarmement (hystérésis)</string>
+    <string name="automation_editor_hysteresis_hint">Après déclenchement, le réarmement n’a lieu que lorsque la valeur repasse ce seuil — évite qu’un signal instable ne redéclenche la règle trop souvent.</string>
+    <string name="automation_editor_rearm">Réarmer à</string>
+    <string name="automation_editor_time">Heure</string>
+    <string name="automation_editor_days">Jours</string>
+    <string name="automation_editor_exact">Heure exacte</string>
+    <string name="automation_editor_exact_hint_inexact">Se déclenche dans une fenêtre de ±10 min autour de l’heure définie.</string>
+    <string name="automation_editor_exact_hint_exact">Se déclenche à la minute près, même en mode Doze.</string>
+    <string name="automation_editor_exact_denied">Les alarmes exactes ne sont pas autorisées pour Gadget — cette règle utilise une fenêtre de ±10 min.</string>
+    <string name="automation_editor_exact_allow">Autoriser les alarmes exactes</string>
+    <string name="automation_editor_event">Événement</string>
+    <string name="automation_event_boot">Appareil démarré</string>
+    <string name="automation_event_power_connected">Alimentation connectée</string>
+    <string name="automation_event_power_disconnected">Alimentation déconnectée</string>
+    <string name="automation_event_connectivity">Connectivité modifiée</string>
+    <string name="automation_editor_manual_hint">Ne s’exécute que lorsque vous appuyez sur “Exécuter maintenant” sur cet écran.</string>
+
+    <!-- Editor: conditions -->
+    <string name="automation_editor_conditions_empty">Aucune condition — seul le déclencheur décide.</string>
+    <string name="automation_editor_condition_logic">Doit être vrai</string>
+    <string name="automation_logic_all">Toutes</string>
+    <string name="automation_logic_any">Au moins une</string>
+    <string name="automation_editor_condition_add_metric">Ajouter une vérification de signal</string>
+    <string name="automation_editor_condition_add_time">Ajouter une plage horaire</string>
+    <string name="automation_condition_metric_title">Vérification de signal</string>
+    <string name="automation_condition_time_title">Plage horaire</string>
+    <string name="automation_editor_condition_remove">Supprimer la condition</string>
+    <string name="automation_editor_condition_value_is">La valeur est</string>
+    <string name="automation_editor_window_start">De</string>
+    <string name="automation_editor_window_end">Jusqu’à</string>
+    <string name="automation_editor_window_wrap_hint">Une fin antérieure au début traverse minuit (22:00–06:00).</string>
+
+    <!-- Editor: actions -->
+    <string name="automation_editor_action_pick">Action</string>
+    <string name="automation_editor_action_add">Ajouter une action</string>
+    <string name="automation_editor_actions_empty">Ajoutez au moins une action.</string>
+    <string name="automation_editor_action_remove">Supprimer l’action</string>
+    <string name="automation_editor_action_unavailable">%1$s — indisponible sur cette version</string>
+    <string name="automation_action_label">%1$s · %2$s</string>
+
+    <!-- Editor: options -->
+    <string name="automation_editor_cooldown">Délai de récupération</string>
+    <string name="automation_editor_cooldown_suffix">s</string>
+    <string name="automation_editor_cooldown_hint">Délai minimum entre deux déclenchements automatiques — 0 = aucun. Un “Exécuter maintenant” manuel l’ignore, mais retarde quand même le prochain déclenchement automatique.</string>
+
+    <!-- Day-of-week short labels -->
+    <string name="automation_day_mon">lun.</string>
+    <string name="automation_day_tue">mar.</string>
+    <string name="automation_day_wed">mer.</string>
+    <string name="automation_day_thu">jeu.</string>
+    <string name="automation_day_fri">ven.</string>
+    <string name="automation_day_sat">sam.</string>
+    <string name="automation_day_sun">dim.</string>
+</resources>

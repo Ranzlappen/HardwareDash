@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="battery_screen_title">Batterie</string>
+
+    <!-- ─── Status card ─────────────────────────────────────────────── -->
+    <string name="battery_card_status_title">État</string>
+    <string name="battery_level_value">%1$d %%</string>
+    <string name="battery_level_unknown">Niveau inconnu</string>
+    <string name="battery_unavailable">Informations sur la batterie indisponibles.</string>
+    <!-- health · temp · voltage on a single summary line -->
+    <string name="battery_detail_line">%s · %.1f°C · %.2f V</string>
+
+    <!-- ─── Charging card ────────────────────────────────────────────── -->
+    <string name="battery_card_charging_title">Charge</string>
+    <string name="battery_plugged_via">via %1$s</string>
+
+    <!-- Charging status labels -->
+    <string name="battery_status_charging">En charge</string>
+    <string name="battery_status_discharging">En décharge</string>
+    <string name="battery_status_not_charging">Ne charge pas</string>
+    <string name="battery_status_full">Pleine</string>
+    <string name="battery_status_unknown">Inconnu</string>
+
+    <!-- Plug type labels -->
+    <string name="battery_plug_ac">Secteur</string>
+    <string name="battery_plug_usb">USB</string>
+    <string name="battery_plug_wireless">Sans fil</string>
+    <string name="battery_plug_none">Débranchée</string>
+
+    <!-- Health labels -->
+    <string name="battery_health_good">Bonne</string>
+    <string name="battery_health_overheat">Surchauffe</string>
+    <string name="battery_health_dead">Hors service</string>
+    <string name="battery_health_overvoltage">Surtension</string>
+    <string name="battery_health_failure">Défaillance non spécifiée</string>
+    <string name="battery_health_cold">Froide</string>
+    <string name="battery_health_unknown">Inconnu</string>
+
+    <!-- ─── Module capabilities ──────────────────────────────────────── -->
+    <string name="battery_cap_level_name">Niveau de batterie</string>
+    <string name="battery_cap_level_detail">Pourcentage de charge en temps réel via BatteryManager.</string>
+    <string name="battery_cap_temp_name">Température</string>
+    <string name="battery_cap_temp_detail">Température de la batterie signalée par le système.</string>
+    <string name="battery_cap_available">Fonctionne — aucune autorisation requise.</string>
+    <string name="battery_cap_unavailable">Données de batterie pas encore reçues.</string>
+    <string name="battery_cap_temp_ok">%.1f°C — dans la plage normale.</string>
+
+    <!-- ─── Monitoring containers ────────────────────────────────────── -->
+    <string name="battery_live_monitor_level">Niveau de batterie (en direct)</string>
+    <string name="battery_live_monitor_temp">Température (en direct)</string>
+    <string name="battery_monitor_level">Historique du niveau de batterie</string>
+    <string name="battery_monitor_temp">Historique de température</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="battery_cap_rooted_active">Actif — build rooté</string>
+    <string name="battery_cap_rooted_required">Nécessite un build rooté</string>
+    <string name="battery_cap_fuel_gauge_name">Lecture brute de la jauge de batterie</string>
+    <string name="battery_cap_fuel_gauge_detail">Lecture sysfs directe de la puce de jauge de batterie (SoC, tension, courant)</string>
+    <string name="battery_cap_cell_monitor_name">Surveillance de tension par cellule</string>
+    <string name="battery_cap_cell_monitor_detail">Télémétrie de tension par cellule depuis la jauge de batterie</string>
+    <string name="battery_cap_charging_profile_name">Contrôle du profil de charge</string>
+    <string name="battery_cap_charging_profile_detail">Remplace les limites de courant de charge et de coupure de tension</string>
+
+    <!-- ─── Automation actions (rooted) ──────────────────────────────── -->
+    <string name="battery_action_charging_profile_override">Remplacement du profil de charge (rooté)</string>
+    <string name="battery_action_thermal_bypass">Contournement de la limitation thermique (rooté)</string>
+    <string name="battery_action_charging_type_override">Remplacement du type de charge (rooté)</string>
+    <string name="battery_action_full_dump">Vidage sysfs complet (rooté)</string>
+    <string name="battery_action_reset_mutations">Réinitialiser les modifications de batterie (rooté)</string>
+    <string name="battery_action_hold_soc">Maintenir l\'état de charge (rooté)</string>
+    <string name="battery_action_wireless_coil_current">Limiter le courant de la bobine sans fil (rooté)</string>
+    <string name="battery_action_health_snapshot">Instantané de l\'état de la batterie (rooté)</string>
+
+    <!-- Home-screen widget -->
+    <string name="battery_widget_label">Batterie</string>
+    <string name="battery_widget_description">Niveau de batterie et état de charge en direct</string>
+    <string name="battery_widget_percent_format">%1$d %%</string>
+    <string name="battery_widget_unknown">—</string>
+    <string name="battery_widget_charging">En charge</string>
+    <string name="battery_widget_discharging">En décharge</string>
+</resources>

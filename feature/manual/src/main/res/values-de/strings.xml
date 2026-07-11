@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="manual_screen_title">Handbuch</string>
+
+    <!-- Intro -->
+    <string name="manual_intro_title">Über Gadget</string>
+    <string name="manual_intro_body">Mit Gadget kannst du jeden Sensor und Aktuator deines Android-Geräts untersuchen und sie mit der Automatisierungs-Engine miteinander verknüpfen. Jedes Modul ist eigenständig; die gerootete Variante schaltet tieferen Hardwarezugriff frei, ohne die Standard-UI zu verändern.</string>
+
+    <!-- Sections -->
+    <string name="manual_section_sensors">Sensoren</string>
+    <string name="manual_section_sensors_body">Näherung, Licht, Beschleunigungsmesser, Gyroskop und Schrittzähler. Jeder Sensor liefert Live-Daten und zeichnet einen Verlauf auf. Gerootete Versionen können mit höheren Abtastraten abfragen.</string>
+
+    <string name="manual_section_radios">Funkmodule</string>
+    <string name="manual_section_radios_body">Bluetooth, WLAN, NFC und IR-Blaster. Zeigt Adapterstatus, verbundene Geräte, Signalstärke und Netzwerkdetails. IR kann NEC-/Pronto-/RAW-Codes senden.</string>
+
+    <string name="manual_section_actuators">Aktuatoren</string>
+    <string name="manual_section_actuators_body">Taschenlampe und Vibration sind die primären Aktuatoren. Die gerootete Variante fügt direkte PWM-Steuerung der LRA- und ERM-Motoren für komplexe haptische Muster hinzu.</string>
+
+    <string name="manual_section_system">System</string>
+    <string name="manual_section_system_body">Akkuzustand, GPS-Position, Speichervolumen, Sperrstatus und Umgebungslicht werden hier überwacht. Gerootete Versionen ergänzen sysfs-Schreibzugriffe, Live-Daten der Akkumessung und Kernel-Diagnosen.</string>
+
+    <string name="manual_section_automation">Automatisierung</string>
+    <string name="manual_section_automation_body">Erstelle Regeln, die beliebige Sensorwerte oder Hardware-Ereignisse mit einer Aktuator-Aktion verknüpfen. Regeln werden in Echtzeit ausgewertet; die Engine läuft im aktiven Zustand als Vordergrunddienst.</string>
+
+    <string name="manual_section_rooted">Gerootete Variante</string>
+    <string name="manual_section_rooted_body">Installiere die gerootete APK zusätzlich zur Standardversion. Jede privilegierte Operation läuft über RootSafetyGate — sie respektiert deine funktionsspezifischen Deaktivierungen und die weiche Ratenbegrenzung. Nichts geschieht ohne deine Zustimmung.</string>
+
+    <string name="manual_section_monitoring">Überwachung</string>
+    <string name="manual_section_monitoring_body">Jedes Modul mit einem kontinuierlichen Signal bietet ein Live-Diagramm und ein scrollbares Verlaufsdiagramm. Starte eine Überwachungssitzung über den Modulbildschirm; die Daten bleiben auch nach einem Neustart erhalten.</string>
+</resources>

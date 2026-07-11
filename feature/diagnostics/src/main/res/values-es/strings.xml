@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_screen_title">Diagnóstico</string>
+
+    <!-- Memory monitor (standard MetricSource hosted on the screen) -->
+    <string name="diagnostics_live_monitor_memory">Memoria en uso (en vivo)</string>
+    <string name="diagnostics_monitor_memory">Historial de memoria en uso</string>
+
+    <!-- Info text -->
+    <string name="diagnostics_info">Todas las instantáneas de diagnóstico se ejecutan a través del motor de automatización. Actívalas desde una regla de automatización o toca «Ejecutar» en una acción conectada.</string>
+
+    <!-- Capability rows -->
+    <string name="diagnostics_cap_rooted_active">Activo — compilación rooteada</string>
+    <string name="diagnostics_cap_rooted_required">Requiere compilación rooteada</string>
+    <string name="diagnostics_cap_logcat_name">Cola de Logcat</string>
+    <string name="diagnostics_cap_logcat_detail">Captura las últimas 500 líneas de logcat (todos los búferes, RADIO/SYSTEM censurados automáticamente) mediante adb logcat</string>
+    <string name="diagnostics_cap_meminfo_name">Volcado de memoria</string>
+    <string name="diagnostics_cap_meminfo_detail">Instantánea de dumpsys meminfo (limitada a 8 KB) de los principales consumidores de memoria</string>
+    <string name="diagnostics_cap_cpuinfo_name">Volcado de información de CPU</string>
+    <string name="diagnostics_cap_cpuinfo_detail">Instantánea de dumpsys cpuinfo (limitada a 8 KB) del uso de CPU por proceso</string>
+    <string name="diagnostics_cap_procstats_name">Volcado de estadísticas de procesos</string>
+    <string name="diagnostics_cap_procstats_detail">Instantánea de dumpsys procstats para el historial de memoria y CPU de procesos a largo plazo</string>
+</resources>

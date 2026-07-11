@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bt_screen_title">Bluetooth</string>
+    <string name="bt_capability_adapter">Bluetooth-Adapter</string>
+    <string name="bt_capability_adapter_detail">Classic- und BLE-Funkmodul</string>
+    <string name="bt_capability_card_title">Bluetooth-Status</string>
+    <string name="bt_adapter_present">Adapter vorhanden</string>
+    <string name="bt_adapter_enabled">Bluetooth an</string>
+    <string name="bt_adapter_disabled">Bluetooth aus</string>
+    <string name="bt_adapter_name">Adaptername</string>
+    <string name="bt_permission_required">Bluetooth-Berechtigung erforderlich</string>
+    <string name="bt_permission_grant">Berechtigung erteilen</string>
+    <string name="bt_bonded_devices_title">Gekoppelte Geräte</string>
+    <string name="bt_no_bonded_devices">Keine gekoppelten Geräte</string>
+    <string name="bt_device_type_classic">Classic</string>
+    <string name="bt_device_type_le">BLE</string>
+    <string name="bt_device_type_dual">Dual</string>
+    <string name="bt_device_type_unknown">Unbekannt</string>
+    <string name="bt_monitor_title">Bluetooth-Statusverlauf</string>
+    <string name="bt_refresh">Aktualisieren</string>
+
+    <!-- Per-device connection and battery info. -->
+    <string name="bt_device_connected">Verbunden</string>
+    <string name="bt_device_disconnected">Getrennt</string>
+    <string name="bt_device_battery">%1$d%%</string>
+    <string name="bt_device_rssi">%1$d dBm</string>
+
+    <!-- Monitor titles -->
+    <string name="bt_live_monitor_title">Bluetooth-Status (live)</string>
+
+    <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
+    <string name="bt_cap_rooted_active">Aktiv — gerooteter Build</string>
+    <string name="bt_cap_rooted_required">Erfordert gerooteten Build</string>
+    <string name="bt_cap_hidden_battery_name">Versteckte Akkustand-API</string>
+    <string name="bt_cap_hidden_battery_detail">Liest den Akkustand des Geräts in % über versteckte Bluetooth-Reflection-APIs aus, für Classic-, BLE- und Dual-Geräte</string>
+    <string name="bt_cap_a2dp_codec_name">A2DP-Codec-Erkennung</string>
+    <string name="bt_cap_a2dp_codec_detail">Erkennt den aktiven A2DP-Streaming-Codec (AAC, aptX, LDAC) über den versteckten BluetoothA2dp-Proxy</string>
+</resources>

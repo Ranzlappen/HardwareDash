@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usbdebug_screen_title">USB-Debugging</string>
+
+    <!-- Monitor titles -->
+    <string name="usbdebug_live_monitor_title">USB-Debugging (live)</string>
+    <string name="usbdebug_monitor_title">USB-Debugging-Verlauf</string>
+    <string name="usbdebug_monitor_metric_name">USB-Debugging</string>
+
+    <!-- Standard-tier status card -->
+    <string name="usbdebug_status_card_title">Debug-Status</string>
+    <string name="usbdebug_status_chip_enabled">USB-Debugging aktiviert</string>
+    <string name="usbdebug_status_chip_disabled">USB-Debugging deaktiviert</string>
+    <string name="usbdebug_open_developer_options">Entwickleroptionen öffnen</string>
+
+    <!-- Rooted-tier USB function role picker -->
+    <string name="usbdebug_function_card_title">USB-Funktionsrolle</string>
+    <string name="usbdebug_function_applied">Angewendet: %1$s</string>
+    <string name="usbdebug_function_none_applied">In dieser Sitzung nicht gewechselt</string>
+    <string name="usbdebug_function_prior">Zuvor: %1$s</string>
+    <string name="usbdebug_function_chip_none">Keine</string>
+    <string name="usbdebug_function_chip_mtp">MTP</string>
+    <string name="usbdebug_function_chip_ptp">PTP</string>
+    <string name="usbdebug_function_chip_rndis">RNDIS</string>
+    <string name="usbdebug_function_chip_midi">MIDI</string>
+    <string name="usbdebug_function_chip_ncm">NCM</string>
+    <string name="usbdebug_function_chip_accessory">Zubehör</string>
+
+    <!-- Rooted-tier "USB Diagnostics" expandable panel -->
+    <string name="usbdebug_diagnostics_panel_title">USB-Diagnose</string>
+    <string name="usbdebug_diagnostics_usb_title">USB (dumpsys usb)</string>
+    <string name="usbdebug_diagnostics_serial_title">Serial-Dienst</string>
+    <string name="usbdebug_diagnostics_debugfs_title">USB-Geräte (debugfs)</string>
+    <string name="usbdebug_diagnostics_run">Ausführen</string>
+    <string name="usbdebug_diagnostics_source">Quelle: %1$s</string>
+    <string name="usbdebug_diagnostics_empty">Noch nicht ausgeführt</string>
+
+    <!-- Controller-result error copy -->
+    <string name="usbdebug_error_unsupported">Erfordert die gerootete App-Version</string>
+    <string name="usbdebug_error_opted_out">In den Einstellungen deaktiviert</string>
+    <string name="usbdebug_error_rate_limited">Rate-Limit erreicht — in %1$d ms erneut versuchen</string>
+    <string name="usbdebug_error_generic">Aktion fehlgeschlagen</string>
+
+    <!-- Capability rows -->
+    <string name="usbdebug_cap_debug_state_name">USB-Debugging (ADB)</string>
+    <string name="usbdebug_cap_debug_state_detail">Liest Settings.Global.ADB_ENABLED aus — die einzige Systemeinstellung, die sowohl \"USB-Debugging\" als auch dem ADB-Zugriff zugrunde liegt</string>
+    <string name="usbdebug_cap_debug_state_enabled">Aktiviert</string>
+    <string name="usbdebug_cap_debug_state_disabled">Deaktiviert</string>
+    <string name="usbdebug_cap_function_switch_name">USB-Funktionsrollenwechsel</string>
+    <string name="usbdebug_cap_function_switch_detail">Legt die USB-Gadget-Funktion (MTP, PTP, RNDIS, …) über cmd usb set-functions fest</string>
+    <string name="usbdebug_cap_dump_usb_name">USB-Dump</string>
+    <string name="usbdebug_cap_dump_usb_detail">Schreibgeschützter dumpsys-usb-Snapshot, auf 8 KB begrenzt</string>
+    <string name="usbdebug_cap_dump_serial_name">Serial-Dienst-Dump</string>
+    <string name="usbdebug_cap_dump_serial_detail">Schreibgeschützter dumpsys-SerialService-Snapshot (ab API 30, sonst Rückgriff auf dumpsys serial)</string>
+    <string name="usbdebug_cap_dump_debugfs_name">USB-Geräte-Dump (debugfs)</string>
+    <string name="usbdebug_cap_dump_debugfs_detail">Schreibgeschützter Snapshot von /sys/kernel/debug/usb/devices, Rückgriff auf dumpsys usb, falls debugfs nicht eingebunden ist</string>
+    <string name="usbdebug_cap_rooted_active">Aktiv — gerooteter Build</string>
+    <string name="usbdebug_cap_rooted_required">Erfordert gerooteten Build</string>
+
+    <!-- Automation action labels -->
+    <string name="usbdebug_action_switch_function">USB-Funktionsrolle wechseln</string>
+    <string name="usbdebug_action_dump_usb">USB dumpen (dumpsys usb)</string>
+    <string name="usbdebug_action_dump_serial_service">Serial-Dienst dumpen</string>
+    <string name="usbdebug_action_dump_usb_devices_debug">USB-Geräte dumpen (debugfs)</string>
+</resources>

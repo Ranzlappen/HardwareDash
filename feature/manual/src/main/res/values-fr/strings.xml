@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="manual_screen_title">Manuel</string>
+
+    <!-- Intro -->
+    <string name="manual_intro_title">À propos de Gadget</string>
+    <string name="manual_intro_body">Gadget te permet d\'examiner tous les capteurs et actionneurs de ton appareil Android et de les relier entre eux grâce au moteur d\'automatisation. Chaque module est autonome ; la version rootée débloque un accès matériel plus poussé sans modifier l\'interface standard.</string>
+
+    <!-- Sections -->
+    <string name="manual_section_sensors">Capteurs</string>
+    <string name="manual_section_sensors_body">Proximité, luminosité, accéléromètre, gyroscope et podomètre. Chaque capteur diffuse des données en direct et enregistre un historique. Les versions rootées peuvent échantillonner à des fréquences plus élevées.</string>
+
+    <string name="manual_section_radios">Radios</string>
+    <string name="manual_section_radios_body">Bluetooth, WiFi, NFC et émetteur infrarouge. Affiche l\'état de l\'adaptateur, les appareils connectés, la puissance du signal et les détails du réseau. L\'infrarouge peut transmettre des codes NEC/Pronto/RAW.</string>
+
+    <string name="manual_section_actuators">Actionneurs</string>
+    <string name="manual_section_actuators_body">La torche (lampe) et la vibration sont les principaux actionneurs. La version rootée ajoute un contrôle PWM direct des moteurs LRA et ERM pour des motifs haptiques complexes.</string>
+
+    <string name="manual_section_system">Système</string>
+    <string name="manual_section_system_body">L\'état de la batterie, la position GPS, les volumes de stockage, l\'état de verrouillage et la luminosité ambiante sont tous surveillés ici. Les versions rootées ajoutent des écritures sysfs, des données en direct de la jauge de batterie et des diagnostics du noyau.</string>
+
+    <string name="manual_section_automation">Automatisation</string>
+    <string name="manual_section_automation_body">Crée des règles qui relient n\'importe quelle mesure de capteur ou événement matériel à une action d\'actionneur. Les règles sont évaluées en temps réel ; le moteur s\'exécute comme service au premier plan lorsqu\'il est actif.</string>
+
+    <string name="manual_section_rooted">Version rootée</string>
+    <string name="manual_section_rooted_body">Installe l\'APK rootée à côté de la version standard. Chaque opération privilégiée passe par RootSafetyGate, qui respecte tes désactivations par fonctionnalité et le limiteur de fréquence progressif. Rien ne se déclenche sans ton consentement.</string>
+
+    <string name="manual_section_monitoring">Surveillance</string>
+    <string name="manual_section_monitoring_body">Chaque module disposant d\'un signal continu propose un graphique en direct et un graphique d\'historique déroulant. Démarre une session de surveillance depuis l\'écran du module ; les données persistent après un redémarrage.</string>
+</resources>

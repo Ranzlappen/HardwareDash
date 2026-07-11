@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="manual_screen_title">Manual</string>
+
+    <!-- Intro -->
+    <string name="manual_intro_title">Acerca de Gadget</string>
+    <string name="manual_intro_body">Gadget te permite inspeccionar todos los sensores y actuadores de tu dispositivo Android y conectarlos entre sí con el motor de Automatización. Cada módulo es independiente; la variante rooteada desbloquea un acceso más profundo al hardware sin cambiar la interfaz estándar.</string>
+
+    <!-- Sections -->
+    <string name="manual_section_sensors">Sensores</string>
+    <string name="manual_section_sensors_body">Proximidad, luz, acelerómetro, giroscopio y podómetro. Cada sensor transmite datos en directo y registra un historial. Las compilaciones rooteadas pueden muestrear a frecuencias más altas.</string>
+
+    <string name="manual_section_radios">Radios</string>
+    <string name="manual_section_radios_body">Bluetooth, WiFi, NFC e infrarrojos (IR Blaster). Muestra el estado del adaptador, los dispositivos conectados, la intensidad de la señal y los detalles de red. El IR puede transmitir códigos NEC/Pronto/RAW.</string>
+
+    <string name="manual_section_actuators">Actuadores</string>
+    <string name="manual_section_actuators_body">La linterna y la vibración son los actuadores principales. La variante rooteada añade control PWM directo de los motores LRA y ERM para patrones hápticos complejos.</string>
+
+    <string name="manual_section_system">Sistema</string>
+    <string name="manual_section_system_body">Aquí se supervisan la salud de la batería, la posición GPS, los volúmenes de almacenamiento, el estado de bloqueo y la luz ambiental. Las compilaciones rooteadas añaden escrituras en sysfs, datos en directo del medidor de carga y diagnósticos del kernel.</string>
+
+    <string name="manual_section_automation">Automatización</string>
+    <string name="manual_section_automation_body">Crea reglas que conectan cualquier lectura de sensor o evento de hardware con una acción de actuador. Las reglas se evalúan en tiempo real; el motor se ejecuta como servicio en primer plano mientras está activo.</string>
+
+    <string name="manual_section_rooted">Variante rooteada</string>
+    <string name="manual_section_rooted_body">Instala el APK rooteado junto con el estándar. Cada operación privilegiada pasa por RootSafetyGate, que respeta tus exclusiones por función y el limitador de frecuencia. Nada se ejecuta sin tu consentimiento.</string>
+
+    <string name="manual_section_monitoring">Monitorización</string>
+    <string name="manual_section_monitoring_body">Cada módulo con una señal continua ofrece un gráfico en directo y un gráfico de historial desplazable. Inicia una sesión de monitorización desde la pantalla del módulo; los datos persisten entre reinicios.</string>
+</resources>

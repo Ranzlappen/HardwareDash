@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_screen_title">Notifications</string>
+
+    <!-- Manifest -->
+    <string name="notification_listener_service_label">Accès aux notifications HardwareDash</string>
+
+    <!-- Monitoring -->
+    <string name="notification_metric_active_notifications_name">Notifications actives</string>
+
+    <!-- Builder test channels (fixed importance per Android 8+ channel rules) -->
+    <string name="notification_channel_low_name">Test — Importance faible</string>
+    <string name="notification_channel_default_name">Test — Importance par défaut</string>
+    <string name="notification_channel_high_name">Test — Importance élevée</string>
+    <string name="notification_channel_description">Notifications de test envoyées depuis le générateur du module Notifications.</string>
+
+    <!-- Builder defaults -->
+    <string name="notification_builder_default_title">Notification de test</string>
+    <string name="notification_builder_default_body">Envoyée depuis le générateur du module Notifications.</string>
+    <string name="notification_overlay_default_message">Test de superposition d\'écran de verrouillage rootée</string>
+
+    <!-- Module permissions -->
+    <string name="notification_perm_post_label">Publier des notifications</string>
+    <string name="notification_perm_post_rationale">Requis sous Android 13+ pour afficher la notification de test envoyée par le générateur.</string>
+
+    <!-- Module capability rows -->
+    <string name="notification_cap_ok">Disponible</string>
+    <string name="notification_cap_needs_root">Nécessite la version rootée de l\'application</string>
+    <string name="notification_cap_root_ready">Actif — version rootée</string>
+    <string name="notification_cap_builder_name">Générateur de notifications</string>
+    <string name="notification_cap_builder_detail">Compose et publie une notification de test (titre/corps/importance) via NotificationManager — aucun accès root requis</string>
+    <string name="notification_cap_channel_inspector_name">Inspecteur de canaux</string>
+    <string name="notification_cap_channel_inspector_detail">Répertorie tous les canaux de notification appartenant à cette application, avec leur niveau d\'importance actuel</string>
+    <string name="notification_cap_listener_name">Accès à l\'écoute des notifications</string>
+    <string name="notification_cap_listener_detail">Accorde l\'accès à NotificationListenerService pour débloquer le moniteur du nombre de notifications actives</string>
+    <string name="notification_cap_listener_granted">Accordé — active_notifications est en direct</string>
+    <string name="notification_cap_listener_not_granted">Non accordé</string>
+    <string name="notification_cap_listener_open_settings">Ouvrir les paramètres d\'accès aux notifications</string>
+    <string name="notification_cap_sticky_override_name">Substitution persistante de l\'importance du canal</string>
+    <string name="notification_cap_sticky_override_detail">Fait passer l\'importance d\'un canal de Faible à Élevée via `cmd notification` — ne rend jamais un canal silencieux</string>
+    <string name="notification_cap_listener_grant_name">Octroi programmatique de l\'accès à l\'écoute</string>
+    <string name="notification_cap_listener_grant_detail">Accorde à ce module l\'accès à son propre service d\'écoute via `cmd notification allow_listener` — aucune action de l\'utilisateur requise</string>
+    <string name="notification_cap_overlay_name">Superposition de notification sur écran de verrouillage</string>
+    <string name="notification_cap_overlay_detail">Affiche une superposition d\'alerte système limitée au-dessus du keyguard (plafond strict : 60 s) avec un pied de page antiphishing immuable</string>
+    <string name="notification_cap_overlay_caveat">Nécessite SYSTEM_ALERT_WINDOW ; durée limitée</string>
+
+    <!-- Builder card -->
+    <string name="notification_builder_card_title">Générateur de notifications</string>
+    <string name="notification_builder_title_label">Titre</string>
+    <string name="notification_builder_body_label">Corps</string>
+    <string name="notification_builder_importance_label">Importance</string>
+    <string name="notification_builder_importance_low">Faible</string>
+    <string name="notification_builder_importance_default">Par défaut</string>
+    <string name="notification_builder_importance_high">Élevée</string>
+    <string name="notification_builder_post">Publier la notification de test</string>
+    <string name="notification_builder_cancel">Annuler</string>
+
+    <!-- Channel inspector card -->
+    <string name="notification_channel_inspector_card_title">Inspecteur de canaux</string>
+    <string name="notification_channel_inspector_empty">Aucun canal pour l\'instant — publiez une notification de test pour en créer un.</string>
+    <string name="notification_channel_inspector_refresh">Actualiser</string>
+    <string name="notification_channel_importance_row">%1$s — %2$s</string>
+
+    <!-- Sticky override card (rooted) -->
+    <string name="notification_sticky_override_card_title">Substitution persistante de l\'importance du canal</string>
+    <string name="notification_sticky_override_description">Fait passer l\'importance du canal indiqué de Faible à Élevée. Ne rend jamais un canal silencieux. Revient automatiquement en arrière lorsque vous quittez cet écran.</string>
+    <string name="notification_sticky_override_channel_id_label">ID du canal</string>
+    <string name="notification_sticky_override_button">Passer l\'importance à Élevée</string>
+
+    <!-- Listener access card (rooted) -->
+    <string name="notification_listener_access_card_title">Accès programmatique à l\'écoute</string>
+    <string name="notification_listener_access_description">Accorde à ce module l\'accès à son propre service d\'écoute des notifications sans passer par les paramètres de l\'application, via `cmd notification allow_listener`.</string>
+    <string name="notification_listener_access_button">Accorder l\'accès à l\'écoute</string>
+    <string name="notification_listener_access_status_granted">Écouteur connecté</string>
+    <string name="notification_listener_access_status_not_granted">Écouteur non connecté</string>
+
+    <!-- Lock-screen overlay card (rooted) -->
+    <string name="notification_overlay_card_title">Test de superposition sur écran de verrouillage</string>
+    <string name="notification_overlay_description">Affiche une superposition limitée au-dessus du keyguard. Comporte toujours un pied de page immuable \"(Rooted overlay)\". Plafonnée à 60 secondes.</string>
+    <string name="notification_overlay_message_label">Message</string>
+    <string name="notification_overlay_duration_label">Durée</string>
+    <string name="notification_overlay_button">Afficher la superposition</string>
+
+    <!-- Reset-all card (rooted) -->
+    <string name="notification_reset_card_title">Réinitialiser toutes les modifications</string>
+    <string name="notification_reset_description">Annule toutes les substitutions persistantes d\'importance de canal et toute superposition active, en revenant à leur état d\'origine.</string>
+    <string name="notification_reset_button">Tout réinitialiser</string>
+
+    <!-- Monitors -->
+    <string name="notification_active_notifications_live_monitor">Notifications actives (en direct)</string>
+    <string name="notification_active_notifications_monitor">Historique des notifications actives</string>
+
+    <!-- Rooted-result snackbar copy (mirrors torch_root_result_*) -->
+    <string name="notification_root_result_ok">Terminé</string>
+    <string name="notification_root_result_unsupported">Nécessite la version rootée de l\'application</string>
+    <string name="notification_root_result_opted_out">Désactivé dans les paramètres</string>
+    <string name="notification_root_result_rate_limited">Limite de fréquence atteinte — réessayez sous peu</string>
+    <string name="notification_root_result_error">Échec : %1$s</string>
+    <string name="notification_root_result_reset">Réinitialisation terminée : %1$d restaurée(s), %2$d échouée(s)</string>
+    <string name="notification_root_result_channel_snapshot">%1$s : importance %2$d → %3$d</string>
+    <string name="notification_root_opted_out_action">Activer</string>
+
+    <!-- ActionHandler labels (automation rule builder) -->
+    <string name="notification_action_post_test">Publier la notification de test</string>
+    <string name="notification_action_cancel_test">Annuler la notification de test</string>
+    <string name="notification_action_assert_importance">Vérifier l\'importance du canal</string>
+    <string name="notification_action_sticky_override">Passer l\'importance du canal à Élevée</string>
+    <string name="notification_action_grant_listener">Accorder l\'accès à l\'écoute</string>
+    <string name="notification_action_show_overlay">Afficher la superposition sur écran de verrouillage</string>
+    <string name="notification_action_reset_all">Réinitialiser toutes les modifications de notification</string>
+</resources>

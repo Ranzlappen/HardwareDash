@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monitor_toggle_label">Dieses Signal überwachen</string>
+    <string name="monitor_poll_interval_label">Abtastintervall</string>
+    <string name="monitor_poll_interval_suffix">s</string>
+    <string name="monitor_window_label">Zeitfenster</string>
+    <string name="monitor_layout_section">Diagrammstil</string>
+    <string name="monitor_layout_line">Linie</string>
+    <string name="monitor_layout_area">Fläche</string>
+    <string name="monitor_layout_bars">Balken</string>
+    <string name="monitor_show_widget">Als Widget anzeigen</string>
+    <string name="monitor_show_notification">Als Benachrichtigung anzeigen</string>
+    <string name="monitor_chart_collecting">Daten werden gesammelt…</string>
+    <string name="monitor_chart_enable_hint">Aktiviere die Überwachung, um mit der Verlaufsaufzeichnung zu beginnen</string>
+
+    <!-- Live monitor (in-memory realtime chart) -->
+    <string name="live_monitor_toggle_label">Livestream</string>
+    <string name="live_monitor_freeze">Einfrieren</string>
+    <string name="live_monitor_auto">Automatisch</string>
+    <string name="live_monitor_stat_now">Jetzt</string>
+    <string name="live_monitor_stat_min">Min</string>
+    <string name="live_monitor_stat_max">Max</string>
+    <string name="live_monitor_stat_avg">Durchschn.</string>
+    <string name="live_monitor_interval_label">Aktualisierung</string>
+    <string name="live_monitor_interval_suffix">ms</string>
+    <string name="live_monitor_window_label">Live-Fenster</string>
+    <string name="live_monitor_window_suffix">s</string>
+    <string name="live_monitor_stat_empty">—</string>
+
+    <string name="monitor_notification_channel">Überwachung</string>
+    <string name="monitor_notification_summary_title">Überwachung aktiv</string>
+    <plurals name="monitor_notification_summary_text">
+        <item quantity="one">%d Signal</item>
+        <item quantity="other">%d Signale</item>
+    </plurals>
+    <string name="monitor_notification_action_stop">Überwachung beenden</string>
+</resources>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_screen_title">Benachrichtigungen</string>
+
+    <!-- Manifest -->
+    <string name="notification_listener_service_label">HardwareDash-Benachrichtigungszugriff</string>
+
+    <!-- Monitoring -->
+    <string name="notification_metric_active_notifications_name">Aktive Benachrichtigungen</string>
+
+    <!-- Builder test channels (fixed importance per Android 8+ channel rules) -->
+    <string name="notification_channel_low_name">Test — Niedrige Wichtigkeit</string>
+    <string name="notification_channel_default_name">Test — Standard-Wichtigkeit</string>
+    <string name="notification_channel_high_name">Test — Hohe Wichtigkeit</string>
+    <string name="notification_channel_description">Testbenachrichtigungen, die vom Builder des Benachrichtigungsmoduls gesendet werden.</string>
+
+    <!-- Builder defaults -->
+    <string name="notification_builder_default_title">Testbenachrichtigung</string>
+    <string name="notification_builder_default_body">Gesendet vom Builder des Benachrichtigungsmoduls.</string>
+    <string name="notification_overlay_default_message">Test des gerooteten Sperrbildschirm-Overlays</string>
+
+    <!-- Module permissions -->
+    <string name="notification_perm_post_label">Benachrichtigungen senden</string>
+    <string name="notification_perm_post_rationale">Ab Android 13 erforderlich, um die vom Builder gesendete Testbenachrichtigung anzuzeigen.</string>
+
+    <!-- Module capability rows -->
+    <string name="notification_cap_ok">Verfügbar</string>
+    <string name="notification_cap_needs_root">Erfordert die gerootete App-Version</string>
+    <string name="notification_cap_root_ready">Aktiv — gerootete Build-Version</string>
+    <string name="notification_cap_builder_name">Benachrichtigungs-Builder</string>
+    <string name="notification_cap_builder_detail">Erstellt und sendet eine Testbenachrichtigung (Titel/Text/Wichtigkeit) über NotificationManager — kein Root erforderlich</string>
+    <string name="notification_cap_channel_inspector_name">Kanal-Inspektor</string>
+    <string name="notification_cap_channel_inspector_detail">Listet alle Benachrichtigungskanäle dieser App mit ihrer aktuellen Wichtigkeitsstufe auf</string>
+    <string name="notification_cap_listener_name">Benachrichtigungs-Listener-Zugriff</string>
+    <string name="notification_cap_listener_detail">Gewährt NotificationListenerService-Zugriff, um den Monitor für aktive Benachrichtigungen freizuschalten</string>
+    <string name="notification_cap_listener_granted">Erteilt — active_notifications ist live</string>
+    <string name="notification_cap_listener_not_granted">Nicht erteilt</string>
+    <string name="notification_cap_listener_open_settings">Einstellungen für Benachrichtigungszugriff öffnen</string>
+    <string name="notification_cap_sticky_override_name">Dauerhafte Kanal-Wichtigkeits-Override</string>
+    <string name="notification_cap_sticky_override_detail">Hebt die Wichtigkeit eines Kanals über `cmd notification` von Niedrig auf Hoch an — schaltet einen Kanal nie stumm</string>
+    <string name="notification_cap_listener_grant_name">Programmatische Listener-Freigabe</string>
+    <string name="notification_cap_listener_grant_detail">Gewährt dem eigenen Listener-Dienst dieses Moduls Zugriff über `cmd notification allow_listener` — kein Nutzer-Tap erforderlich</string>
+    <string name="notification_cap_overlay_name">Sperrbildschirm-Benachrichtigungs-Overlay</string>
+    <string name="notification_cap_overlay_detail">Zeigt ein begrenztes System-Overlay über dem Sperrbildschirm (max. 60 s) mit einer festen Anti-Phishing-Fußzeile</string>
+    <string name="notification_cap_overlay_caveat">Erfordert SYSTEM_ALERT_WINDOW; zeitlich begrenzt</string>
+
+    <!-- Builder card -->
+    <string name="notification_builder_card_title">Benachrichtigungs-Builder</string>
+    <string name="notification_builder_title_label">Titel</string>
+    <string name="notification_builder_body_label">Text</string>
+    <string name="notification_builder_importance_label">Wichtigkeit</string>
+    <string name="notification_builder_importance_low">Niedrig</string>
+    <string name="notification_builder_importance_default">Standard</string>
+    <string name="notification_builder_importance_high">Hoch</string>
+    <string name="notification_builder_post">Testbenachrichtigung senden</string>
+    <string name="notification_builder_cancel">Abbrechen</string>
+
+    <!-- Channel inspector card -->
+    <string name="notification_channel_inspector_card_title">Kanal-Inspektor</string>
+    <string name="notification_channel_inspector_empty">Noch keine Kanäle — sende eine Testbenachrichtigung, um einen zu erstellen.</string>
+    <string name="notification_channel_inspector_refresh">Aktualisieren</string>
+    <string name="notification_channel_importance_row">%1$s — %2$s</string>
+
+    <!-- Sticky override card (rooted) -->
+    <string name="notification_sticky_override_card_title">Dauerhafte Kanal-Wichtigkeits-Override</string>
+    <string name="notification_sticky_override_description">Hebt die Wichtigkeit des angegebenen Kanals von Niedrig auf Hoch an. Schaltet einen Kanal nie stumm. Wird automatisch rückgängig gemacht, sobald du diesen Bildschirm verlässt.</string>
+    <string name="notification_sticky_override_channel_id_label">Kanal-ID</string>
+    <string name="notification_sticky_override_button">Wichtigkeit auf Hoch anheben</string>
+
+    <!-- Listener access card (rooted) -->
+    <string name="notification_listener_access_card_title">Programmatischer Listener-Zugriff</string>
+    <string name="notification_listener_access_description">Gewährt dem eigenen Benachrichtigungs-Listener-Dienst dieses Moduls Zugriff ohne Umweg über die App-Einstellungen, über `cmd notification allow_listener`.</string>
+    <string name="notification_listener_access_button">Listener-Zugriff gewähren</string>
+    <string name="notification_listener_access_status_granted">Listener verbunden</string>
+    <string name="notification_listener_access_status_not_granted">Listener nicht verbunden</string>
+
+    <!-- Lock-screen overlay card (rooted) -->
+    <string name="notification_overlay_card_title">Sperrbildschirm-Overlay-Test</string>
+    <string name="notification_overlay_description">Zeigt ein begrenztes Overlay über dem Sperrbildschirm. Trägt immer eine feste Fußzeile \"(Rooted overlay)\". Maximal 60 Sekunden begrenzt.</string>
+    <string name="notification_overlay_message_label">Nachricht</string>
+    <string name="notification_overlay_duration_label">Dauer</string>
+    <string name="notification_overlay_button">Overlay anzeigen</string>
+
+    <!-- Reset-all card (rooted) -->
+    <string name="notification_reset_card_title">Alle Änderungen zurücksetzen</string>
+    <string name="notification_reset_description">Setzt jede dauerhafte Kanal-Wichtigkeits-Override und jedes aktive Overlay auf den ursprünglichen Zustand zurück.</string>
+    <string name="notification_reset_button">Alles zurücksetzen</string>
+
+    <!-- Monitors -->
+    <string name="notification_active_notifications_live_monitor">Aktive Benachrichtigungen (live)</string>
+    <string name="notification_active_notifications_monitor">Verlauf aktiver Benachrichtigungen</string>
+
+    <!-- Rooted-result snackbar copy (mirrors torch_root_result_*) -->
+    <string name="notification_root_result_ok">Fertig</string>
+    <string name="notification_root_result_unsupported">Erfordert die gerootete App-Version</string>
+    <string name="notification_root_result_opted_out">In den Einstellungen deaktiviert</string>
+    <string name="notification_root_result_rate_limited">Ratenbegrenzt — bitte gleich erneut versuchen</string>
+    <string name="notification_root_result_error">Fehlgeschlagen: %1$s</string>
+    <string name="notification_root_result_reset">Zurücksetzen abgeschlossen: %1$d wiederhergestellt, %2$d fehlgeschlagen</string>
+    <string name="notification_root_result_channel_snapshot">%1$s: Wichtigkeit %2$d → %3$d</string>
+    <string name="notification_root_opted_out_action">Aktivieren</string>
+
+    <!-- ActionHandler labels (automation rule builder) -->
+    <string name="notification_action_post_test">Testbenachrichtigung senden</string>
+    <string name="notification_action_cancel_test">Testbenachrichtigung abbrechen</string>
+    <string name="notification_action_assert_importance">Kanal-Wichtigkeit prüfen</string>
+    <string name="notification_action_sticky_override">Kanal-Wichtigkeit auf Hoch anheben</string>
+    <string name="notification_action_grant_listener">Listener-Zugriff gewähren</string>
+    <string name="notification_action_show_overlay">Sperrbildschirm-Overlay anzeigen</string>
+    <string name="notification_action_reset_all">Alle Benachrichtigungsänderungen zurücksetzen</string>
+</resources>

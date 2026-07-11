@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_screen_title">Diagnose</string>
+
+    <!-- Memory monitor (standard MetricSource hosted on the screen) -->
+    <string name="diagnostics_live_monitor_memory">Speicher in Verwendung (live)</string>
+    <string name="diagnostics_monitor_memory">Verlauf der Speichernutzung</string>
+
+    <!-- Info text -->
+    <string name="diagnostics_info">Alle Diagnose-Snapshots laufen über die Automatisierungs-Engine. Löse sie über eine Automatisierungsregel aus oder tippe bei einer verbundenen Aktion auf „Ausführen“.</string>
+
+    <!-- Capability rows -->
+    <string name="diagnostics_cap_rooted_active">Aktiv — gerootete Version</string>
+    <string name="diagnostics_cap_rooted_required">Erfordert gerootete Version</string>
+    <string name="diagnostics_cap_logcat_name">Logcat-Tail</string>
+    <string name="diagnostics_cap_logcat_detail">Erfasst die letzten 500 Zeilen von Logcat (alle Puffer, RADIO/SYSTEM automatisch geschwärzt) über adb logcat</string>
+    <string name="diagnostics_cap_meminfo_name">Speicher-Dump</string>
+    <string name="diagnostics_cap_meminfo_detail">Snapshot von dumpsys meminfo (auf 8 KB begrenzt) für die größten Speicherverbraucher</string>
+    <string name="diagnostics_cap_cpuinfo_name">CPU-Info-Dump</string>
+    <string name="diagnostics_cap_cpuinfo_detail">Snapshot von dumpsys cpuinfo (auf 8 KB begrenzt) für die CPU-Auslastung pro Prozess</string>
+    <string name="diagnostics_cap_procstats_name">Prozessstatistik-Dump</string>
+    <string name="diagnostics_cap_procstats_detail">Snapshot von dumpsys procstats für den langfristigen Verlauf von Prozessspeicher und CPU-Nutzung</string>
+</resources>

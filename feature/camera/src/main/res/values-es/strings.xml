@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="camera_screen_title">Escáner</string>
+
+    <!-- Permission -->
+    <string name="camera_perm_label">Cámara</string>
+    <string name="camera_perm_rationale">Se necesita acceso a la cámara para escanear códigos de barras y códigos QR</string>
+    <string name="camera_perm_card_title">Permiso de cámara requerido</string>
+    <string name="camera_perm_card_body">Concede acceso a la cámara para escanear códigos de barras y códigos QR con la cámara de tu dispositivo.</string>
+    <string name="camera_perm_grant_btn">Conceder acceso a la cámara</string>
+
+    <!-- ModuleInfo capability -->
+    <string name="camera_cap_scanner_name">Escáner de códigos de barras</string>
+    <string name="camera_cap_scanner_detail">Escanea todos los formatos principales de códigos de barras y QR con MLKit</string>
+    <string name="camera_cap_scanner_ok">Acceso a la cámara concedido</string>
+    <string name="camera_cap_scanner_denied">Se requiere permiso de cámara</string>
+
+    <!-- Scanner card -->
+    <string name="camera_card_scanner_title">Cámara</string>
+    <string name="camera_torch_toggle">Alternar linterna</string>
+
+    <!-- Result card -->
+    <string name="camera_card_result_title">Último escaneo</string>
+    <string name="camera_btn_copy">Copiar al portapapeles</string>
+    <string name="camera_btn_share">Compartir</string>
+    <string name="camera_btn_open_url">Abrir URL</string>
+
+    <!-- WiFi result -->
+    <string name="camera_wifi_ssid">Red: %s</string>
+    <string name="camera_wifi_password">Contraseña: %s</string>
+    <string name="camera_wifi_type">Seguridad: %s</string>
+
+    <!-- History card -->
+    <string name="camera_card_history_title">Historial de escaneos</string>
+    <string name="camera_history_empty">Aún no hay escaneos. Apunta la cámara a un código de barras o QR.</string>
+    <string name="camera_btn_clear_history">Borrar historial</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="camera_cap_rooted_active">Activo — compilación rooteada</string>
+    <string name="camera_cap_rooted_required">Requiere compilación rooteada</string>
+    <string name="camera_cap_high_fps_name">Captura a alta velocidad de fotogramas</string>
+    <string name="camera_cap_high_fps_detail">Fuerza tasas de fotogramas por encima del máximo publicado de la cámara mediante parámetros HAL</string>
+    <string name="camera_cap_manual_name">Control manual de la cámara</string>
+    <string name="camera_cap_manual_detail">Parámetros HAL directos: ISO, velocidad de obturación, balance de blancos y distancia de enfoque</string>
+    <string name="camera_cap_hal_bypass_name">Omisión de HAL</string>
+    <string name="camera_cap_hal_bypass_detail">Entrega de fotogramas sin procesar desde el controlador de la cámara, evitando la pila de la API Camera2</string>
+
+    <!-- ─── Automation actions (CameraActionHandler) ───────────────────── -->
+    <string name="camera_action_clear_scan_history">Borrar historial de escaneos</string>
+    <string name="camera_action_high_fps_capture">Captura a alta velocidad de fotogramas (rooteado)</string>
+    <string name="camera_action_manual_override">Anulación manual de exposición (rooteado)</string>
+    <string name="camera_action_raw_capture">Captura de fotograma RAW (rooteado)</string>
+    <string name="camera_action_multi_camera_capture">Captura multi-cámara (rooteado)</string>
+    <string name="camera_action_hal_bypass_frame">Fotograma con omisión de HAL (rooteado)</string>
+    <string name="camera_action_set_shutter_sound">Establecer sonido del obturador (rooteado)</string>
+</resources>

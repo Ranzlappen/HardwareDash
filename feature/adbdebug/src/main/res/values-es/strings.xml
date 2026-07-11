@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adbdebug_screen_title">Depuración ADB</string>
+
+    <!-- Monitor titles -->
+    <string name="adbdebug_live_monitor_enabled">ADB habilitado (en vivo)</string>
+    <string name="adbdebug_monitor_enabled">Historial de ADB habilitado</string>
+
+    <!-- Shared actions -->
+    <string name="adbdebug_action_open_dev_options">Abrir opciones de desarrollador</string>
+
+    <!-- Capability rows -->
+    <string name="adbdebug_cap_state_name">Estado de depuración ADB</string>
+    <string name="adbdebug_cap_state_detail">Lee Settings.Global.ADB_ENABLED directamente; no se requiere ningún permiso especial</string>
+    <string name="adbdebug_cap_state_enabled">La depuración ADB está habilitada</string>
+    <string name="adbdebug_cap_state_disabled">La depuración ADB está deshabilitada</string>
+    <string name="adbdebug_cap_toggle_name">Interruptor de ADB habilitado</string>
+    <string name="adbdebug_cap_toggle_detail">Escribe settings put global adb_enabled 0|1</string>
+    <string name="adbdebug_cap_network_name">ADB por red</string>
+    <string name="adbdebug_cap_network_detail">Habilita ADB inalámbrico en un puerto permitido (5555-5599)</string>
+    <string name="adbdebug_cap_dump_name">Instantánea de getprop</string>
+    <string name="adbdebug_cap_dump_detail">Captura de getprop de solo lectura, limitada a 16 KB, con persistencia opcional en Logbook</string>
+    <string name="adbdebug_cap_setprop_name">Anulación de setprop</string>
+    <string name="adbdebug_cap_setprop_detail">Anulación de setprop permitida en 7 claves exactas más entradas log.tag.*</string>
+    <string name="adbdebug_cap_rooted_active">Activo: compilación rooteada</string>
+    <string name="adbdebug_cap_rooted_required">Requiere compilación rooteada</string>
+
+    <!-- Standard-tier state card -->
+    <string name="adbdebug_card_state_title">Estado de depuración ADB</string>
+    <string name="adbdebug_card_state_detail">Las compilaciones rooteadas pueden alternar ADB desde la app a continuación; la compilación estándar solo lee el estado actual y puede acceder a Opciones de desarrollador.</string>
+    <string name="adbdebug_chip_enabled">ADB habilitado</string>
+    <string name="adbdebug_chip_disabled">ADB deshabilitado</string>
+
+    <!-- Rooted: ADB toggle -->
+    <string name="adbdebug_card_toggle_title">Interruptor de ADB (rooteado)</string>
+    <string name="adbdebug_toggle_label">Depuración ADB habilitada</string>
+
+    <!-- Rooted: ADB over network -->
+    <string name="adbdebug_card_network_title">ADB por red (rooteado)</string>
+    <string name="adbdebug_network_range_hint">Rango de puertos permitido: %1$d–%2$d</string>
+    <string name="adbdebug_network_port_label">Puerto</string>
+    <string name="adbdebug_network_apply">Aplicar configuración de red</string>
+
+    <!-- Rooted: getprop dump -->
+    <string name="adbdebug_card_dump_title">Volcado de propiedades (rooteado)</string>
+    <string name="adbdebug_dump_persist_label">Guardar en el almacenamiento del dispositivo (Logbook)</string>
+    <string name="adbdebug_dump_action">Generar instantánea de getprop</string>
+    <string name="adbdebug_dump_saved_to">Guardado en %1$s</string>
+
+    <!-- Rooted: setprop editor -->
+    <string name="adbdebug_card_setprop_title">Anulación de setprop (rooteado)</string>
+    <string name="adbdebug_setprop_logtag_chip">log.tag.*</string>
+    <string name="adbdebug_setprop_logtag_suffix_label">Sufijo log.tag.</string>
+    <string name="adbdebug_setprop_value_label">Valor</string>
+    <string name="adbdebug_setprop_apply">Aplicar anulación</string>
+</resources>

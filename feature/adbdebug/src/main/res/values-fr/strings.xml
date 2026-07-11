@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adbdebug_screen_title">Débogage ADB</string>
+
+    <!-- Monitor titles -->
+    <string name="adbdebug_live_monitor_enabled">ADB activé (en direct)</string>
+    <string name="adbdebug_monitor_enabled">Historique ADB activé</string>
+
+    <!-- Shared actions -->
+    <string name="adbdebug_action_open_dev_options">Ouvrir les options pour les développeurs</string>
+
+    <!-- Capability rows -->
+    <string name="adbdebug_cap_state_name">État du débogage ADB</string>
+    <string name="adbdebug_cap_state_detail">Lit directement Settings.Global.ADB_ENABLED — aucune autorisation particulière requise</string>
+    <string name="adbdebug_cap_state_enabled">Le débogage ADB est activé</string>
+    <string name="adbdebug_cap_state_disabled">Le débogage ADB est désactivé</string>
+    <string name="adbdebug_cap_toggle_name">Interrupteur ADB activé</string>
+    <string name="adbdebug_cap_toggle_detail">Écrit settings put global adb_enabled 0|1</string>
+    <string name="adbdebug_cap_network_name">ADB via le réseau</string>
+    <string name="adbdebug_cap_network_detail">Active l\'ADB sans fil sur un port autorisé (5555-5599)</string>
+    <string name="adbdebug_cap_dump_name">Instantané getprop</string>
+    <string name="adbdebug_cap_dump_detail">Capture getprop en lecture seule, limitée à 16 Ko, avec persistance facultative dans Logbook</string>
+    <string name="adbdebug_cap_setprop_name">Substitution setprop</string>
+    <string name="adbdebug_cap_setprop_detail">Substitution setprop autorisée sur 7 clés exactes et les entrées log.tag.*</string>
+    <string name="adbdebug_cap_rooted_active">Actif — build rooté</string>
+    <string name="adbdebug_cap_rooted_required">Nécessite un build rooté</string>
+
+    <!-- Standard-tier state card -->
+    <string name="adbdebug_card_state_title">État du débogage ADB</string>
+    <string name="adbdebug_card_state_detail">Les builds rootés peuvent activer/désactiver l\'ADB directement dans l\'app ci-dessous ; le build standard se contente de lire l\'état actuel et peut accéder aux options pour les développeurs.</string>
+    <string name="adbdebug_chip_enabled">ADB activé</string>
+    <string name="adbdebug_chip_disabled">ADB désactivé</string>
+
+    <!-- Rooted: ADB toggle -->
+    <string name="adbdebug_card_toggle_title">Interrupteur ADB (rooté)</string>
+    <string name="adbdebug_toggle_label">Débogage ADB activé</string>
+
+    <!-- Rooted: ADB over network -->
+    <string name="adbdebug_card_network_title">ADB via le réseau (rooté)</string>
+    <string name="adbdebug_network_range_hint">Plage de ports autorisée : %1$d–%2$d</string>
+    <string name="adbdebug_network_port_label">Port</string>
+    <string name="adbdebug_network_apply">Appliquer les paramètres réseau</string>
+
+    <!-- Rooted: getprop dump -->
+    <string name="adbdebug_card_dump_title">Vidage des propriétés (rooté)</string>
+    <string name="adbdebug_dump_persist_label">Enregistrer dans le stockage de l\'appareil (Logbook)</string>
+    <string name="adbdebug_dump_action">Générer l\'instantané getprop</string>
+    <string name="adbdebug_dump_saved_to">Enregistré dans %1$s</string>
+
+    <!-- Rooted: setprop editor -->
+    <string name="adbdebug_card_setprop_title">Substitution setprop (rooté)</string>
+    <string name="adbdebug_setprop_logtag_chip">log.tag.*</string>
+    <string name="adbdebug_setprop_logtag_suffix_label">Suffixe log.tag.</string>
+    <string name="adbdebug_setprop_value_label">Valeur</string>
+    <string name="adbdebug_setprop_apply">Appliquer la substitution</string>
+</resources>
