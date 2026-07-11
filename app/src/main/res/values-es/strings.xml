@@ -29,4 +29,26 @@
     <!-- Vibration widget -->
     <string name="widget_label_vibration">Activar vibración</string>
     <string name="widget_desc_vibration">Activar o desactivar la vibración desde la pantalla de inicio.</string>
+
+    <!-- App Folder widget -->
+    <string name="widget_folder_label">Carpeta de apps</string>
+    <string name="widget_folder_desc">Una carpeta personalizable de la pantalla de inicio con apps instaladas, PWA y enlaces web.</string>
+    <string name="widget_folder_1x1_label">Carpeta de apps (pequeña)</string>
+    <string name="widget_folder_1x1_desc">Una versión de 1x1 celdas del widget Carpeta de apps — útil cuando quieres un solo punto de toque para una carpeta.</string>
+
+    <!-- Backup & restore -->
+    <string name="backup_title">Copia de seguridad y restauración</string>
+    <string name="backup_description">Exporta todos los datos de la app a un archivo o restáuralos desde uno. Se admiten copias de seguridad de versiones anteriores de la app.</string>
+    <string name="backup_export">Exportar</string>
+    <string name="backup_restore">Restaurar</string>
+    <string name="backup_working">Procesando…</string>
+    <string name="backup_exported">Copia de seguridad guardada.</string>
+    <string name="backup_error">Error: %1$s</string>
+    <string name="backup_restore_confirm_title">¿Restaurar copia de seguridad?</string>
+    <string name="backup_restore_confirm_body">Esto reemplaza todos los datos actuales de la app con el contenido de la copia de seguridad. La app se reiniciará para completar el proceso.</string>
+    <string name="backup_cancel">Cancelar</string>
+    <string name="backup_restart_title">Reinicio necesario</string>
+    <string name="backup_restart_body">La copia de seguridad se restauró. Reinicia la app para aplicarla.</string>
+    <string name="backup_restart_now">Reiniciar ahora</string>
+    <string name="backup_later">Más tarde</string>
 </resources>
