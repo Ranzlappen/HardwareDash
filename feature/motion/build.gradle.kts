@@ -19,6 +19,10 @@ dependencies {
     // so the automation engine can gate a rule on a sensor reading.
     implementation(project(":core:automation"))
 
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+
     androidTestImplementation(project(":core:testing"))
     androidTestImplementation(libs.androidx.junit)
 }
