@@ -20,4 +20,13 @@
     <string name="diagnostics_cap_cpuinfo_detail">Snapshot von dumpsys cpuinfo (auf 8 KB begrenzt) für die CPU-Auslastung pro Prozess</string>
     <string name="diagnostics_cap_procstats_name">Prozessstatistik-Dump</string>
     <string name="diagnostics_cap_procstats_detail">Snapshot von dumpsys procstats für den langfristigen Verlauf von Prozessspeicher und CPU-Nutzung</string>
+    <string name="diagnostics_root_tools_title">Root-Werkzeuge</string>
+    <string name="diagnostics_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="diagnostics_root_run">Ausführen</string>
+    <string name="diagnostics_root_meminfo_label">Meminfo ausgeben</string>
+    <string name="diagnostics_root_meminfo_detail">Schreibgeschützter dumpsys-meminfo-Snapshot.</string>
+    <string name="diagnostics_root_cpuinfo_label">Cpuinfo ausgeben</string>
+    <string name="diagnostics_root_cpuinfo_detail">Schreibgeschützter dumpsys-cpuinfo-Snapshot.</string>
+    <string name="diagnostics_root_procstats_label">Procstats ausgeben</string>
+    <string name="diagnostics_root_procstats_detail">Schreibgeschützter dumpsys-procstats-Snapshot (3 Std.).</string>
 </resources>

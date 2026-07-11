@@ -20,4 +20,13 @@
     <string name="diagnostics_cap_cpuinfo_detail">Instantánea de dumpsys cpuinfo (limitada a 8 KB) del uso de CPU por proceso</string>
     <string name="diagnostics_cap_procstats_name">Volcado de estadísticas de procesos</string>
     <string name="diagnostics_cap_procstats_detail">Instantánea de dumpsys procstats para el historial de memoria y CPU de procesos a largo plazo</string>
+    <string name="diagnostics_root_tools_title">Herramientas root</string>
+    <string name="diagnostics_root_tools_unavailable">Requiere la versión root de la app.</string>
+    <string name="diagnostics_root_run">Ejecutar</string>
+    <string name="diagnostics_root_meminfo_label">Volcar meminfo</string>
+    <string name="diagnostics_root_meminfo_detail">Instantánea de solo lectura de dumpsys meminfo.</string>
+    <string name="diagnostics_root_cpuinfo_label">Volcar cpuinfo</string>
+    <string name="diagnostics_root_cpuinfo_detail">Instantánea de solo lectura de dumpsys cpuinfo.</string>
+    <string name="diagnostics_root_procstats_label">Volcar procstats</string>
+    <string name="diagnostics_root_procstats_detail">Instantánea de solo lectura de dumpsys procstats (3 h).</string>
 </resources>

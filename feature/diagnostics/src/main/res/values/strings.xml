@@ -20,4 +20,15 @@
     <string name="diagnostics_cap_cpuinfo_detail">Snapshot dumpsys cpuinfo (tail-capped 8 KB) for CPU utilization per process</string>
     <string name="diagnostics_cap_procstats_name">Process stats dump</string>
     <string name="diagnostics_cap_procstats_detail">Snapshot dumpsys procstats for long-term process memory and CPU history</string>
+
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="diagnostics_root_tools_title">Rooted tools</string>
+    <string name="diagnostics_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="diagnostics_root_run">Run</string>
+    <string name="diagnostics_root_meminfo_label">Dump meminfo</string>
+    <string name="diagnostics_root_meminfo_detail">Read-only dumpsys meminfo snapshot.</string>
+    <string name="diagnostics_root_cpuinfo_label">Dump cpuinfo</string>
+    <string name="diagnostics_root_cpuinfo_detail">Read-only dumpsys cpuinfo snapshot.</string>
+    <string name="diagnostics_root_procstats_label">Dump procstats</string>
+    <string name="diagnostics_root_procstats_detail">Read-only dumpsys procstats (3 h) snapshot.</string>
 </resources>
