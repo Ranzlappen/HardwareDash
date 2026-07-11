@@ -28,7 +28,7 @@ import androidx.compose.runtime.Composable
  * `CANVAS_HEIGHT` is a per-file fixed design dimension (the only allowed raw
  * `dp` per CLAUDE.md — a sizing token documented here, not a call-site literal).
  */
-internal val CANVAS_HEIGHT: Dp = 160.dp
+internal val CANVAS_HEIGHT: Dp = PatternCanvasDefaults.CanvasHeight
 
 /** Number of evenly-spaced intensity samples the drawn curve is reduced to. */
 internal const val PATTERN_SAMPLE_COUNT = 40
@@ -92,4 +92,8 @@ internal fun PatternCanvas(
         drawPath(fillPath, fillColor)
         drawPath(linePath, lineColor, style = Stroke(width = 4f))
     }
+}
+
+private object PatternCanvasDefaults {
+    val CanvasHeight: Dp = 160.dp
 }

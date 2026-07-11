@@ -32,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
@@ -468,7 +467,7 @@ private fun IrLibraryCard(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 2.dp),
+                                    .padding(vertical = spacing.pico),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 Text(

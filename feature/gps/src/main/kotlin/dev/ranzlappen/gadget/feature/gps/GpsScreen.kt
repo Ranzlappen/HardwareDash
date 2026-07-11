@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -287,7 +288,7 @@ private fun GpsMapCard(
             factory = { mapView },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(260.dp),
+                .height(GpsScreenDefaults.MapHeight),
             update = { view ->
                 if (state.hasLocation) {
                     val center = GeoPoint(state.latitude, state.longitude)
@@ -414,4 +415,8 @@ private fun GpsScreenNoPermissionPreview() = GadgetThemedPreview {
         moduleInfo = null,
         onRequestPermission = {},
     )
+}
+
+private object GpsScreenDefaults {
+    val MapHeight: Dp = 260.dp
 }

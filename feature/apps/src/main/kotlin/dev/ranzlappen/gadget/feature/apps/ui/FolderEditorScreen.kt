@@ -191,6 +191,7 @@ fun FolderEditorContent(
     onForceStopApp: suspend (String) -> String = { "" },
     modifier: Modifier = Modifier,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     var nameDraft by remember { mutableStateOf("") }
     var showWebLinkDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -232,8 +233,8 @@ fun FolderEditorContent(
 
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(spacing.medium),
+            verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
             item {
                 GadgetTextField(
@@ -296,16 +297,16 @@ fun FolderEditorContent(
                 )
             }
             item {
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(spacing.micro))
                 Text(
                     text = stringResource(R.string.apps_apps_in_folder),
                     modifier = Modifier.fillMaxWidth(),
                     style = MaterialTheme.typography.titleMedium,
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(spacing.tiny))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(spacing.tiny),
                 ) {
                     GadgetSecondaryButton(
                         modifier = Modifier.weight(1f),
@@ -389,15 +390,16 @@ private fun CoverIconSection(
     onPickSymbol: (String) -> Unit,
     onClear: () -> Unit,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     var showSymbols by remember { mutableStateOf(false) }
     val accent = Color(folder.baseColorArgb)
     val cover = folder.coverIcon
     val hasCustom = cover.startsWith("image:") || cover.startsWith("symbol:")
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            CoverPreview(coverIcon = cover, accent = accent, sizeDp = 40.dp)
-            Spacer(Modifier.size(12.dp))
+            CoverPreview(coverIcon = cover, accent = accent, sizeDp = FolderEditorDefaults.CoverPreviewSize)
+            Spacer(Modifier.size(spacing.small))
             Text(
                 text = stringResource(R.string.apps_cover_icon),
                 modifier = Modifier.weight(1f),
@@ -418,8 +420,8 @@ private fun CoverIconSection(
         if (showSymbols) {
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(spacing.micro),
+                verticalArrangement = Arrangement.spacedBy(spacing.micro),
             ) {
                 MaterialSymbol.entries.forEach { sym ->
                     IconButton(onClick = { onPickSymbol(sym.id); showSymbols = false }) {
@@ -476,16 +478,17 @@ private fun RuleSection(
     onAddOrReplace: (FolderRule) -> Unit,
     onRemoveKind: ((FolderRule) -> Boolean) -> Unit,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     val active = ruleSet.rules
     val packagePrefix = active.firstOrNull { it is FolderRule.PackagePrefix } as? FolderRule.PackagePrefix
     val recently = active.firstOrNull { it is FolderRule.RecentlyInstalled } as? FolderRule.RecentlyInstalled
     val unused = active.firstOrNull { it is FolderRule.UnusedSinceDays } as? FolderRule.UnusedSinceDays
 
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.micro)) {
         Text(
             text = stringResource(R.string.apps_rule),
             style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(bottom = 4.dp),
+            modifier = Modifier.padding(bottom = spacing.micro),
         )
         RuleCheckRow(
             checked = packagePrefix != null,
@@ -530,7 +533,7 @@ private fun RuleSection(
             },
         ) {
             unused?.let { r ->
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(spacing.micro)) {
                     DaysField(r.days, stringResource(R.string.apps_rule_days)) {
                         onAddOrReplace(FolderRule.UnusedSinceDays(it))
                     }
@@ -566,7 +569,7 @@ private fun RuleSection(
             text = stringResource(R.string.apps_rule_union_hint),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = spacing.micro),
         )
     }
 }
@@ -578,7 +581,8 @@ private fun RuleCheckRow(
     onToggle: (Boolean) -> Unit,
     config: @Composable (() -> Unit)? = null,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.micro)) {
         Row(
             modifier = Modifier.fillMaxWidth().clickable { onToggle(!checked) },
             verticalAlignment = Alignment.CenterVertically,
@@ -587,7 +591,7 @@ private fun RuleCheckRow(
             Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
         }
         if (checked && config != null) {
-            Box(modifier = Modifier.padding(start = 48.dp)) { config() }
+            Box(modifier = Modifier.padding(start = spacing.huge)) { config() }
         }
     }
 }
@@ -623,7 +627,8 @@ private fun FolderColorSection(selectedArgb: Int, onSelect: (Int) -> Unit) {
         )
     }
     val isPreset = swatches.any { it.toArgb() == selectedArgb }
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = stringResource(R.string.apps_color),
@@ -638,8 +643,8 @@ private fun FolderColorSection(selectedArgb: Int, onSelect: (Int) -> Unit) {
         }
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(spacing.tiny),
+            verticalArrangement = Arrangement.spacedBy(spacing.tiny),
         ) {
             if (!isPreset) {
                 ColorSwatch(
@@ -670,11 +675,15 @@ private fun FolderColorSection(selectedArgb: Int, onSelect: (Int) -> Unit) {
 private fun ColorSwatch(color: Color, selected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(32.dp)
+            .size(FolderEditorDefaults.ColorSwatchSize)
             .clip(CircleShape)
             .background(color)
             .border(
-                width = if (selected) 3.dp else 1.dp,
+                width = if (selected) {
+                    FolderEditorDefaults.ColorSwatchSelectedBorderWidth
+                } else {
+                    FolderEditorDefaults.ColorSwatchBorderWidth
+                },
                 color = if (selected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.outline,
                 shape = CircleShape,
             )
@@ -682,7 +691,12 @@ private fun ColorSwatch(color: Color, selected: Boolean, onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         if (selected) {
-            Icon(Icons.Filled.Check, null, tint = Color.White, modifier = Modifier.size(16.dp))
+            Icon(
+                Icons.Filled.Check,
+                null,
+                tint = Color.White,
+                modifier = Modifier.size(FolderEditorDefaults.ColorSwatchCheckIconSize),
+            )
         }
     }
 }
@@ -705,14 +719,15 @@ private fun AppRow(
     }
     val inOther = otherFolders.isNotEmpty()
     val alreadyIn = stringResource(R.string.apps_already_in_folder)
+    val spacing = LocalGadgetTheme.current.spacing
     GlassSurface(
         modifier = Modifier.fillMaxWidth(),
         intensity = GlassIntensity.Subtle,
         onClick = onToggle,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            AppIcon(record = record, sizeDp = 36.dp)
-            Spacer(Modifier.size(12.dp))
+            AppIcon(record = record, sizeDp = FolderEditorDefaults.AppRowIconSize)
+            Spacer(Modifier.size(spacing.small))
             Column(Modifier.weight(1f)) {
                 Text(
                     text = record.label,
@@ -796,7 +811,7 @@ private fun FolderWidgetsSection(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(spacing.small),
     ) {
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(spacing.micro))
         Text(
             text = stringResource(R.string.apps_widgets_section_title),
             style = MaterialTheme.typography.titleMedium,
@@ -852,13 +867,14 @@ private fun FolderColorSectionPreview() = GadgetThemedPreview {
 
 @Composable
 private fun AddWebLinkDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
+    val spacing = LocalGadgetTheme.current.spacing
     var url by remember { mutableStateOf("") }
     var label by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.apps_add_web_link)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
                 GadgetTextField(value = url, onValueChange = { url = it }, label = stringResource(R.string.apps_web_link_url))
                 GadgetTextField(value = label, onValueChange = { label = it }, label = stringResource(R.string.apps_web_link_label))
             }
@@ -870,4 +886,13 @@ private fun AddWebLinkDialog(onDismiss: () -> Unit, onConfirm: (String, String) 
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.apps_cancel)) } },
     )
+}
+
+private object FolderEditorDefaults {
+    val CoverPreviewSize: Dp = 40.dp
+    val ColorSwatchSize: Dp = 32.dp
+    val ColorSwatchSelectedBorderWidth: Dp = 3.dp
+    val ColorSwatchBorderWidth: Dp = 1.dp
+    val ColorSwatchCheckIconSize: Dp = 16.dp
+    val AppRowIconSize: Dp = 36.dp
 }

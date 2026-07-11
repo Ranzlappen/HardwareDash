@@ -35,7 +35,7 @@ import dev.ranzlappen.gadget.feature.apps.AppsEntryPoint
 fun AppIcon(
     record: AppRecord,
     modifier: Modifier = Modifier,
-    sizeDp: Dp = 48.dp,
+    sizeDp: Dp = AppIconDefaults.DefaultSize,
 ) {
     val context = LocalContext.current
     val loader = remember {
@@ -63,4 +63,8 @@ fun AppIcon(
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         )
     }
+}
+
+private object AppIconDefaults {
+    val DefaultSize: Dp = 48.dp
 }

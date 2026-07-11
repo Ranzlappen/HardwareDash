@@ -31,9 +31,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ranzlappen.gadget.core.data.apps.AppRecord
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.feature.apps.R
 import dev.ranzlappen.gadget.feature.apps.icons.AppIcon
 
@@ -48,6 +50,7 @@ fun FolderPopupContent(
     folderId: Long,
     onAppClick: (AppRecord) -> Unit,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     val viewModel: FolderPopupViewModel = hiltViewModel()
     LaunchedEffect(folderId) { viewModel.load(folderId) }
 
@@ -58,27 +61,27 @@ fun FolderPopupContent(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(FolderPopupContentDefaults.CardCornerRadius),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(spacing.medium)) {
             FolderHeader(name = folder?.name.orEmpty(), accent = accent)
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(spacing.small))
             if (apps.isEmpty()) {
                 Text(
                     text = stringResource(R.string.apps_no_apps),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(vertical = 24.dp),
+                    modifier = Modifier.padding(vertical = spacing.large),
                 )
             } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(4),
-                    contentPadding = PaddingValues(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(vertical = spacing.tiny),
+                    horizontalArrangement = Arrangement.spacedBy(spacing.tiny),
+                    verticalArrangement = Arrangement.spacedBy(spacing.small),
                 ) {
                     items(apps, key = { it.appKey }) { record ->
                         AppCell(record = record, onClick = { onAppClick(record) })
@@ -91,14 +94,15 @@ fun FolderPopupContent(
 
 @Composable
 private fun FolderHeader(name: String, accent: Color) {
+    val spacing = LocalGadgetTheme.current.spacing
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
-                .size(28.dp)
+                .size(FolderPopupContentDefaults.HeaderDotSize)
                 .clip(CircleShape)
                 .background(accent),
         )
-        Spacer(Modifier.size(12.dp))
+        Spacer(Modifier.size(spacing.small))
         Text(
             text = name,
             style = MaterialTheme.typography.titleLarge,
@@ -112,23 +116,32 @@ private fun AppCell(
     record: AppRecord,
     onClick: () -> Unit,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(FolderPopupContentDefaults.CellCornerRadius))
             .clickable(onClick = onClick)
-            .padding(vertical = 6.dp),
+            .padding(vertical = FolderPopupContentDefaults.CellVerticalPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        AppIcon(record = record, sizeDp = 48.dp)
-        Spacer(Modifier.height(4.dp))
+        AppIcon(record = record, sizeDp = FolderPopupContentDefaults.CellIconSize)
+        Spacer(Modifier.height(spacing.micro))
         Text(
             text = record.label,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 4.dp),
+            modifier = Modifier.padding(horizontal = spacing.micro),
         )
     }
+}
+
+private object FolderPopupContentDefaults {
+    val CardCornerRadius: Dp = 28.dp
+    val HeaderDotSize: Dp = 28.dp
+    val CellCornerRadius: Dp = 12.dp
+    val CellVerticalPadding: Dp = 6.dp
+    val CellIconSize: Dp = 48.dp
 }
