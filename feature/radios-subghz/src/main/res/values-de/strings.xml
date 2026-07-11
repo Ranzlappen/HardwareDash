@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subghz_screen_title">Sub-GHz</string>
+
+    <!-- Bridge card -->
+    <string name="subghz_card_bridge_title">Sub-GHz-Bridge</string>
+    <string name="subghz_chip_connected">Bridge verbunden</string>
+    <string name="subghz_chip_none">Keine Bridge</string>
+    <string name="subghz_chip_capable">Sub-GHz-fähig</string>
+    <string name="subghz_label_device">Gerät</string>
+    <string name="subghz_label_coverage">Abdeckung</string>
+    <string name="subghz_coverage_subghz">300–928 MHz ISM (Sub-GHz)</string>
+    <string name="subghz_coverage_wideband">Breitband (nicht auf Sub-GHz abgestimmt)</string>
+    <string name="subghz_no_bridge">Schließe einen unterstützten SDR- oder Sub-GHz-Transceiver (RTL-SDR, HackRF, YARD Stick One, …) über USB an, um dieses Modul zu nutzen</string>
+    <string name="subghz_no_usb_host">Dieses Gerät verfügt über keinen USB-Host-Bus, daher kann kein externes Sub-GHz-Funkgerät angeschlossen werden</string>
+
+    <!-- Monitor titles -->
+    <string name="subghz_live_monitor_bridge">Bridge-Status (live)</string>
+    <string name="subghz_monitor_bridge">Bridge-Statusverlauf</string>
+
+    <!-- Standard capability -->
+    <string name="subghz_cap_bridge_name">USB-SDR-Erkennung</string>
+    <string name="subghz_cap_bridge_detail">Erkennt einen unterstützten SDR-/Sub-GHz-Transceiver am USB-Host-Bus; Android bietet keine eigene Sub-GHz-Funk-API</string>
+    <string name="subghz_cap_bridge_connected">Bridge verbunden</string>
+    <string name="subghz_cap_bridge_none">Keine Bridge angeschlossen</string>
+    <string name="subghz_cap_bridge_no_host">Kein USB-Host unterstützt</string>
+
+    <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
+    <string name="subghz_cap_rooted_active">Aktiv — gerootete Version</string>
+    <string name="subghz_cap_rooted_required">Erfordert gerootete Version</string>
+    <string name="subghz_cap_registers_name">Direkter Registerzugriff</string>
+    <string name="subghz_cap_registers_detail">Liest und schreibt die Funkregister des Transceivers direkt über den USB-Gerätenode, unter Umgehung des Userspace-Treibers</string>
+    <string name="subghz_cap_tuning_name">Benutzerdefinierte Trägerabstimmung</string>
+    <string name="subghz_cap_tuning_detail">Auf eine explizite Sub-GHz-Trägerfrequenz abstimmen (z. B. 315 / 433,92 / 868 / 915 MHz) und die Abweichung außerhalb der Standard-Treibervoreinstellungen einstellen</string>
+    <string name="subghz_cap_capture_name">OOK-/2-FSK-Erfassung</string>
+    <string name="subghz_cap_capture_detail">Streamt rohe On-Off-Keying- und 2-FSK-Symbole vom Funkmodul für Wiedergabe und Analyse</string>
+</resources>

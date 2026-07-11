@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="display_screen_title">Display</string>
+
+    <!-- Readouts card -->
+    <string name="display_readouts_title">Messwerte</string>
+    <string name="display_readout_refresh_rate">Bildwiederholrate</string>
+    <string name="display_readout_rotation">Rotation</string>
+    <string name="display_readout_resolution">Auflösung</string>
+    <string name="display_value_hz">%1$d Hz</string>
+    <string name="display_value_degrees">%1$d°</string>
+    <string name="display_value_resolution">%1$d × %2$d</string>
+
+    <!-- Brightness card (standard tier, Settings.System.SCREEN_BRIGHTNESS) -->
+    <string name="display_brightness_title">Helligkeit</string>
+    <string name="display_brightness_label">Helligkeit</string>
+
+    <!-- Refresh-rate card (readable on both tiers; applying an override requires root) -->
+    <string name="display_refresh_rate_title">Bildwiederholraten-Override</string>
+    <string name="display_refresh_rate_subtitle_rooted">Wähle einen Modus, um die Bildwiederholrate des Displays zu erzwingen.</string>
+    <string name="display_refresh_rate_subtitle_standard">Verfügbare Modi für dieses Display. Zum Anwenden eines Overrides ist die gerootete App-Version erforderlich.</string>
+
+    <!-- Density card (rooted only) -->
+    <string name="display_density_title">Dichte-Override</string>
+    <string name="display_density_label">Dichte</string>
+    <string name="display_density_subtitle_rooted">Laufzeit-DPI-Override über `wm density`, begrenzt auf 120–560.</string>
+    <string name="display_density_subtitle_standard">Erfordert die gerootete App-Version.</string>
+
+    <!-- SurfaceFlinger diagnostic panel (rooted only, read-only) -->
+    <string name="display_surfaceflinger_title">SurfaceFlinger-Snapshot</string>
+    <string name="display_surfaceflinger_subtitle_rooted">Schreibgeschütztes `dumpsys SurfaceFlinger`-Ende, begrenzt auf 8 KB.</string>
+    <string name="display_surfaceflinger_subtitle_standard">Erfordert die gerootete App-Version.</string>
+    <string name="display_surfaceflinger_capture">Snapshot erfassen</string>
+
+    <!-- Reset-all -->
+    <string name="display_reset_title">Zurücksetzen</string>
+    <string name="display_reset_detail">Setzt alle aktiven Helligkeits-, Bildwiederholraten- und Dichte-Overrides zurück.</string>
+    <string name="display_reset_action">Alle Overrides zurücksetzen</string>
+
+    <!-- Status row -->
+    <string name="display_status_title">Letztes Ergebnis</string>
+
+    <!-- ModuleInfo: permissions -->
+    <string name="display_permission_write_settings_label">Systemeinstellungen ändern</string>
+    <string name="display_permission_write_settings_rationale">Ermöglicht dem Helligkeitsregler das Schreiben von Settings.System.SCREEN_BRIGHTNESS. Schreibgeschützte Messwerte funktionieren auch ohne.</string>
+    <string name="display_action_grant_write_settings">Berechtigung erteilen</string>
+
+    <!-- ModuleInfo: OS compatibility -->
+    <string name="display_os_note_refresh_rate_api30">Der Bildwiederholraten-Override erfordert Android 11 (API 30) oder neuer.</string>
+
+    <!-- ModuleInfo: capabilities -->
+    <string name="display_cap_brightness_name">Helligkeitssteuerung</string>
+    <string name="display_cap_brightness_detail">Lesen/Schreiben von Settings.System.SCREEN_BRIGHTNESS.</string>
+    <string name="display_cap_brightness_granted">Berechtigung erteilt</string>
+    <string name="display_cap_brightness_denied">WRITE_SETTINGS nicht erteilt</string>
+    <string name="display_cap_refresh_rate_name">Bildwiederholraten-Override</string>
+    <string name="display_cap_refresh_rate_detail">Erzwingt einen bestimmten unterstützten Modus für das Display.</string>
+    <string name="display_cap_density_name">Dichte (DPI)-Override</string>
+    <string name="display_cap_density_detail">Laufzeit-Override über `wm density`.</string>
+    <string name="display_cap_surfaceflinger_name">SurfaceFlinger-Snapshot</string>
+    <string name="display_cap_surfaceflinger_detail">Schreibgeschütztes `dumpsys SurfaceFlinger`-Ende.</string>
+    <string name="display_cap_rooted_active">Aktiv — gerootete Build-Version</string>
+    <string name="display_cap_rooted_required">Erfordert die gerootete App-Version</string>
+
+    <!-- Monitoring -->
+    <string name="display_live_monitor_brightness">Helligkeit (live)</string>
+    <string name="display_monitor_brightness">Helligkeitsverlauf</string>
+    <string name="display_monitor_metric_name">Bildschirmhelligkeit</string>
+
+    <!-- Status messages (DisplayControllerResult mapping) -->
+    <string name="display_status_ok">Angewendet</string>
+    <string name="display_status_unsupported">Erfordert die gerootete App-Version</string>
+    <string name="display_status_rate_limited">Ratenbegrenzt — erneut versuchen in %1$dms</string>
+    <string name="display_status_opted_out">In den Einstellungen deaktiviert</string>
+    <string name="display_status_reset_completed">%1$d Override(s) zurückgesetzt, %2$d fehlgeschlagen</string>
+    <string name="display_status_brightness_applied">Helligkeit auf %1$d/%2$d gesetzt</string>
+    <string name="display_status_refresh_applied">Bildwiederholratenmodus %1$d angewendet</string>
+    <string name="display_status_density_applied">Dichte auf %1$d dpi gesetzt</string>
+    <string name="display_status_write_settings_denied">WRITE_SETTINGS-Berechtigung nicht erteilt</string>
+
+    <!-- Automation actions -->
+    <string name="display_action_set_brightness">Helligkeit einstellen</string>
+    <string name="display_action_override_brightness_extreme">Helligkeit übersteuern (gerootet)</string>
+    <string name="display_action_override_refresh_rate">Bildwiederholrate überschreiben (gerootet)</string>
+    <string name="display_action_override_density">Dichte überschreiben (gerootet)</string>
+    <string name="display_action_reset_all">Alle Overrides zurücksetzen (gerootet)</string>
+</resources>

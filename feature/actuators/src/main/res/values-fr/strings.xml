@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="actuators_screen_title">Actionneurs</string>
+
+    <!-- Status card -->
+    <string name="actuators_card_title">Matériel de vibration</string>
+    <string name="actuators_chip_available">Vibreur disponible</string>
+    <string name="actuators_chip_unavailable">Aucun vibreur</string>
+    <string name="actuators_chip_amplitude">Contrôle de l\'amplitude</string>
+    <string name="actuators_chip_no_amplitude">Amplitude fixe</string>
+
+    <!-- Capability rows -->
+    <string name="actuators_cap_vibrator_name">Actionneur de vibration</string>
+    <string name="actuators_cap_vibrator_detail">API Android VibrationEffect pour les motifs de retour haptique</string>
+    <string name="actuators_cap_vibrator_available">Vibreur présent</string>
+    <string name="actuators_cap_vibrator_unavailable">Vibreur introuvable</string>
+
+    <!-- Rooted capability rows -->
+    <string name="actuators_cap_rooted_active">Actif — build rooté</string>
+    <string name="actuators_cap_rooted_required">Nécessite un build rooté</string>
+    <string name="actuators_cap_extreme_name">Amplitude extrême</string>
+    <string name="actuators_cap_extreme_detail">Pilote le moteur de vibration au-delà du plafond d\'amplitude du système via sysfs, en maintenant un rapport cyclique maximal (plafond strict de 80 % pour protéger le matériel)</string>
+    <string name="actuators_cap_pwm_name">Contrôle PWM direct</string>
+    <string name="actuators_cap_pwm_detail">Écrit la fréquence PWM et le rapport cyclique directement dans les nœuds sysfs du pilote de vibration, en contournant VibrationEffect</string>
+    <string name="actuators_cap_dual_name">Contrôle à double actionneur</string>
+    <string name="actuators_cap_dual_detail">Pilote simultanément les actionneurs LRA (résonant linéaire) et ERM (masse excentrique rotative) avec synchronisation par décalage de phase</string>
+    <string name="actuators_cap_rumble_name">Vibration prolongée</string>
+    <string name="actuators_cap_rumble_detail">Boucle un motif haptique au-delà de la limite de 500 ms du système, tout en surveillant la consommation de batterie et la température du moteur via un watchdog</string>
+
+    <!-- Monitoring -->
+    <string name="actuators_monitor_metric_name">Vibreur disponible</string>
+</resources>

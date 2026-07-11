@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="ir_screen_title">Émetteur IR</string>
+
+    <!-- Hardware card -->
+    <string name="ir_card_hardware_title">Matériel</string>
+    <string name="ir_emitter_present">Émetteur IR détecté</string>
+    <string name="ir_emitter_absent">Aucun émetteur IR sur cet appareil. Vous pouvez tout de même enregistrer des codes.</string>
+
+    <!-- ModuleInfo capability -->
+    <string name="ir_cap_emitter_name">Émetteur IR</string>
+    <string name="ir_cap_emitter_detail">Permet à l\'appareil d\'émettre des signaux IR pour contrôler des appareils compatibles</string>
+    <string name="ir_cap_emitter_ok">Émetteur disponible</string>
+    <string name="ir_cap_emitter_missing">Aucun émetteur IR</string>
+
+    <!-- Composer card -->
+    <string name="ir_card_composer_title">Composer un signal</string>
+    <string name="ir_label_protocol">Protocole</string>
+    <string name="ir_label_payload_nec">Code NEC (hex)</string>
+    <string name="ir_label_payload_pronto">Code Pronto</string>
+    <string name="ir_label_payload_raw">Temporisations brutes (µs, séparées par des virgules)</string>
+    <string name="ir_btn_paste">Coller depuis le presse-papiers</string>
+    <string name="ir_label_carrier_hz">Fréquence porteuse (Hz)</string>
+    <string name="ir_label_repeats">Répétitions : %d</string>
+    <string name="ir_transmit_ok">Transmis avec succès</string>
+    <string name="ir_transmitting">Transmission en cours…</string>
+    <string name="ir_btn_transmit">Transmettre</string>
+    <string name="ir_btn_save">Enregistrer</string>
+
+    <!-- Save dialog -->
+    <string name="ir_save_dialog_title">Enregistrer le signal</string>
+    <string name="ir_save_dialog_label">Nom</string>
+
+    <!-- Saved signals card -->
+    <string name="ir_card_saved_title">Signaux enregistrés</string>
+    <string name="ir_no_saved_codes">Aucun code enregistré pour l\'instant. Composez et enregistrez un signal ci-dessus.</string>
+    <string name="ir_btn_replay">Rejouer</string>
+    <string name="ir_btn_delete">Supprimer</string>
+
+    <!-- Library card -->
+    <string name="ir_card_library_title">Bibliothèque de télécommandes</string>
+    <string name="ir_btn_browse_library">Parcourir la bibliothèque de télécommandes</string>
+    <string name="ir_library_pick_brand">Sélectionner une marque</string>
+    <string name="ir_library_close">Fermer la bibliothèque</string>
+    <string name="ir_library_back">Retour aux marques</string>
+    <string name="ir_btn_import">Importer un signal</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="ir_cap_rooted_active">Actif — version rootée</string>
+    <string name="ir_cap_rooted_required">Nécessite une version rootée</string>
+    <string name="ir_cap_custom_carrier_name">Fréquence porteuse personnalisée</string>
+    <string name="ir_cap_custom_carrier_detail">Émission à des fréquences porteuses arbitraires en dehors de la plage de ConsumerIrManager</string>
+    <string name="ir_cap_gpio_burst_name">Rafale GPIO brute</string>
+    <string name="ir_cap_gpio_burst_detail">Sortie directe d\'un train d\'impulsions GPIO via sysfs, en contournant le HAL IR</string>
+</resources>

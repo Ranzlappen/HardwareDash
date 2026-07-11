@@ -28,4 +28,15 @@ dependencies {
     implementation(libs.mlkit.barcode.scanning)
 
     implementation(libs.kotlinx.serialization.json)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+}
+
+// CameraViewModelTest uses mockkStatic (to intercept ClipData.newPlainText) —
+// mockk's inline mock maker needs to self-attach its instrumentation agent,
+// which JDK 21 blocks by default unless this is set.
+tasks.withType<Test> {
+    jvmArgs("-Djdk.attach.allowAttachSelf=true")
 }

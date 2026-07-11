@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Declares the app's supported UI locales for Android 13+'s native
+  per-app language picker (Settings > System > Languages > App languages)
+  and for AppCompatDelegate.setApplicationLocales()'s backport on older
+  API levels. Keep this list in lock-step with the values-<lang>/ resource
+  directories that exist across the module graph (W8, full localization).
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="de" />
+    <locale android:name="es" />
+    <locale android:name="fr" />
+</locale-config>

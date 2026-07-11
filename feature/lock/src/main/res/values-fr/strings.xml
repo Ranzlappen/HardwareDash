@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lock_screen_title">Verrouillage</string>
+
+    <!-- Status card -->
+    <string name="lock_card_title">État du verrouillage</string>
+    <string name="lock_chip_locked">Verrouillé</string>
+    <string name="lock_chip_unlocked">Déverrouillé</string>
+    <string name="lock_chip_secure">Sécurisé</string>
+    <string name="lock_chip_insecure">Aucun verrouillage de l\'écran</string>
+    <string name="lock_chip_biometric">Biométrie enregistrée</string>
+    <string name="lock_chip_no_biometric">Aucune biométrie</string>
+
+    <!-- Monitor titles -->
+    <string name="lock_live_monitor_state">État du verrouillage (en direct)</string>
+    <string name="lock_monitor_state">Historique de l\'état du verrouillage</string>
+
+    <!-- Capability rows -->
+    <string name="lock_cap_keyguard_name">Verrouillage de l\'appareil</string>
+    <string name="lock_cap_keyguard_detail">Surveille l\'état de verrouillage Keyguard via KeyguardManager</string>
+    <string name="lock_cap_keyguard_active">Écran de verrouillage actif</string>
+    <string name="lock_cap_keyguard_inactive">Aucun écran de verrouillage configuré</string>
+    <string name="lock_cap_biometric_name">Authentification biométrique</string>
+    <string name="lock_cap_biometric_detail">Vérifie l\'état d\'enregistrement biométrique (empreinte digitale, visage, iris)</string>
+    <string name="lock_cap_biometric_available">Biométrie enregistrée</string>
+    <string name="lock_cap_biometric_unavailable">Aucune biométrie enregistrée</string>
+
+    <!-- Rooted capability rows -->
+    <string name="lock_cap_rooted_active">Actif — version rootée</string>
+    <string name="lock_cap_rooted_required">Nécessite une version rootée</string>
+    <string name="lock_cap_overlay_name">Superposition de notification sur l\'écran de verrouillage</string>
+    <string name="lock_cap_overlay_detail">Affiche une fenêtre de notification d\'alerte système par-dessus l\'écran de verrouillage pour des alertes sécurisées limitées dans le temps (plafond fixe : 60 s)</string>
+</resources>

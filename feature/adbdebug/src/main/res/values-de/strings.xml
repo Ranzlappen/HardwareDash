@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adbdebug_screen_title">ADB-Debugging</string>
+
+    <!-- Monitor titles -->
+    <string name="adbdebug_live_monitor_enabled">ADB aktiviert (live)</string>
+    <string name="adbdebug_monitor_enabled">ADB-Aktivierungsverlauf</string>
+
+    <!-- Shared actions -->
+    <string name="adbdebug_action_open_dev_options">Entwickleroptionen öffnen</string>
+
+    <!-- Capability rows -->
+    <string name="adbdebug_cap_state_name">ADB-Debugging-Status</string>
+    <string name="adbdebug_cap_state_detail">Liest Settings.Global.ADB_ENABLED direkt aus — keine besondere Berechtigung erforderlich</string>
+    <string name="adbdebug_cap_state_enabled">ADB-Debugging ist aktiviert</string>
+    <string name="adbdebug_cap_state_disabled">ADB-Debugging ist deaktiviert</string>
+    <string name="adbdebug_cap_toggle_name">ADB-Aktivierungsschalter</string>
+    <string name="adbdebug_cap_toggle_detail">Schreibt settings put global adb_enabled 0|1</string>
+    <string name="adbdebug_cap_network_name">ADB über Netzwerk</string>
+    <string name="adbdebug_cap_network_detail">Aktiviert kabelloses ADB auf einem freigegebenen Port (5555–5599)</string>
+    <string name="adbdebug_cap_dump_name">getprop-Snapshot</string>
+    <string name="adbdebug_cap_dump_detail">Schreibgeschützte getprop-Erfassung, auf 16 KB begrenzt, mit optionaler Logbook-Speicherung</string>
+    <string name="adbdebug_cap_setprop_name">setprop-Override</string>
+    <string name="adbdebug_cap_setprop_detail">Freigegebener setprop-Override über 7 exakte Schlüssel sowie log.tag.*-Einträge</string>
+    <string name="adbdebug_cap_rooted_active">Aktiv — gerooteter Build</string>
+    <string name="adbdebug_cap_rooted_required">Erfordert gerooteten Build</string>
+
+    <!-- Standard-tier state card -->
+    <string name="adbdebug_card_state_title">ADB-Debugging-Status</string>
+    <string name="adbdebug_card_state_detail">Gerootete Builds können ADB unten direkt in der App umschalten; der Standard-Build liest nur den aktuellen Status und kann zu den Entwickleroptionen springen.</string>
+    <string name="adbdebug_chip_enabled">ADB aktiviert</string>
+    <string name="adbdebug_chip_disabled">ADB deaktiviert</string>
+
+    <!-- Rooted: ADB toggle -->
+    <string name="adbdebug_card_toggle_title">ADB-Schalter (gerootet)</string>
+    <string name="adbdebug_toggle_label">ADB-Debugging aktiviert</string>
+
+    <!-- Rooted: ADB over network -->
+    <string name="adbdebug_card_network_title">ADB über Netzwerk (gerootet)</string>
+    <string name="adbdebug_network_range_hint">Zulässiger Portbereich: %1$d–%2$d</string>
+    <string name="adbdebug_network_port_label">Port</string>
+    <string name="adbdebug_network_apply">Netzwerkeinstellungen anwenden</string>
+
+    <!-- Rooted: getprop dump -->
+    <string name="adbdebug_card_dump_title">Property-Dump (gerootet)</string>
+    <string name="adbdebug_dump_persist_label">Auf Gerätespeicher speichern (Logbook)</string>
+    <string name="adbdebug_dump_action">getprop-Snapshot erstellen</string>
+    <string name="adbdebug_dump_saved_to">Gespeichert unter %1$s</string>
+
+    <!-- Rooted: setprop editor -->
+    <string name="adbdebug_card_setprop_title">Setprop-Override (gerootet)</string>
+    <string name="adbdebug_setprop_logtag_chip">log.tag.*</string>
+    <string name="adbdebug_setprop_logtag_suffix_label">log.tag.-Suffix</string>
+    <string name="adbdebug_setprop_value_label">Wert</string>
+    <string name="adbdebug_setprop_apply">Override anwenden</string>
+</resources>

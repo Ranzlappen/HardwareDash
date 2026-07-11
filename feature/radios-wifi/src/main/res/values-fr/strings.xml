@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wifi_screen_title">WiFi</string>
+
+    <!-- Status card -->
+    <string name="wifi_card_status_title">État du WiFi</string>
+    <string name="wifi_chip_enabled">WiFi activé</string>
+    <string name="wifi_chip_disabled">WiFi désactivé</string>
+    <string name="wifi_chip_connected">Connecté</string>
+    <string name="wifi_chip_disconnected">Déconnecté</string>
+    <string name="wifi_not_connected">Non connecté à un réseau</string>
+    <string name="wifi_disabled">Le WiFi est désactivé</string>
+
+    <!-- Network details card -->
+    <string name="wifi_card_network_title">Réseau</string>
+    <string name="wifi_label_ssid">SSID</string>
+    <string name="wifi_label_rssi">Signal</string>
+    <string name="wifi_label_speed">Débit de la liaison</string>
+    <string name="wifi_label_frequency">Fréquence</string>
+    <string name="wifi_label_bssid">BSSID</string>
+    <string name="wifi_rssi_format">%1$d dBm</string>
+    <string name="wifi_speed_format">%1$d Mbit/s</string>
+    <string name="wifi_freq_format">%1$d MHz</string>
+    <string name="wifi_ssid_unknown">Inconnu (autorisation de localisation requise)</string>
+    <string name="wifi_band_2_4ghz">2,4 GHz</string>
+    <string name="wifi_band_5ghz">5 GHz</string>
+    <string name="wifi_band_6ghz">6 GHz</string>
+
+    <!-- Signal quality -->
+    <string name="wifi_signal_excellent">Excellent</string>
+    <string name="wifi_signal_good">Bon</string>
+    <string name="wifi_signal_fair">Correct</string>
+    <string name="wifi_signal_weak">Faible</string>
+
+    <!-- Capability rows -->
+    <string name="wifi_cap_adapter_name">Adaptateur WiFi</string>
+    <string name="wifi_cap_adapter_detail">Radio 802.11 pour la connectivité réseau sans fil</string>
+    <string name="wifi_cap_adapter_enabled">WiFi activé</string>
+    <string name="wifi_cap_adapter_disabled">WiFi désactivé</string>
+
+    <!-- Monitor titles -->
+    <string name="wifi_live_monitor_signal">Signal WiFi (en direct)</string>
+    <string name="wifi_monitor_signal">Historique du signal WiFi</string>
+    <string name="wifi_monitor_enabled">Historique de l\'état du WiFi</string>
+
+    <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
+    <string name="wifi_cap_rooted_active">Actif — build rooté</string>
+    <string name="wifi_cap_rooted_required">Nécessite un build rooté</string>
+    <string name="wifi_cap_rfkill_name">Contrôle radio rfkill</string>
+    <string name="wifi_cap_rfkill_detail">Bloque ou débloque la radio WiFi au niveau du noyau via rfkill, en contournant la pile WiFi d\'Android</string>
+    <string name="wifi_cap_tx_power_name">Substitution de la puissance d\'émission (TX)</string>
+    <string name="wifi_cap_tx_power_detail">Définit la puissance d\'émission via iw phy set txpower (plafond fixe : 20 dBm) pour réduire les interférences ou étendre la portée</string>
+    <string name="wifi_cap_channel_name">Sélection explicite du canal</string>
+    <string name="wifi_cap_channel_detail">Verrouille un canal 2,4 ou 5 GHz spécifique via iw dev set channel, en contournant la sélection automatique</string>
+</resources>

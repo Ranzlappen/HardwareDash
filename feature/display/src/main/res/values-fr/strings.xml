@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="display_screen_title">Écran</string>
+
+    <!-- Readouts card -->
+    <string name="display_readouts_title">Relevés</string>
+    <string name="display_readout_refresh_rate">Taux de rafraîchissement</string>
+    <string name="display_readout_rotation">Rotation</string>
+    <string name="display_readout_resolution">Résolution</string>
+    <string name="display_value_hz">%1$d Hz</string>
+    <string name="display_value_degrees">%1$d°</string>
+    <string name="display_value_resolution">%1$d × %2$d</string>
+
+    <!-- Brightness card (standard tier, Settings.System.SCREEN_BRIGHTNESS) -->
+    <string name="display_brightness_title">Luminosité</string>
+    <string name="display_brightness_label">Luminosité</string>
+
+    <!-- Refresh-rate card (readable on both tiers; applying an override requires root) -->
+    <string name="display_refresh_rate_title">Substitution du taux de rafraîchissement</string>
+    <string name="display_refresh_rate_subtitle_rooted">Sélectionnez un mode pour forcer l\'écran à ce taux de rafraîchissement.</string>
+    <string name="display_refresh_rate_subtitle_standard">Modes disponibles sur cet écran. L\'application d\'une substitution nécessite la version rootée de l\'application.</string>
+
+    <!-- Density card (rooted only) -->
+    <string name="display_density_title">Substitution de densité</string>
+    <string name="display_density_label">Densité</string>
+    <string name="display_density_subtitle_rooted">Substitution du DPI à l\'exécution via `wm density`, limitée à 120–560.</string>
+    <string name="display_density_subtitle_standard">Nécessite la version rootée de l\'application.</string>
+
+    <!-- SurfaceFlinger diagnostic panel (rooted only, read-only) -->
+    <string name="display_surfaceflinger_title">Instantané SurfaceFlinger</string>
+    <string name="display_surfaceflinger_subtitle_rooted">Extrait en lecture seule de `dumpsys SurfaceFlinger`, plafonné à 8 Ko.</string>
+    <string name="display_surfaceflinger_subtitle_standard">Nécessite la version rootée de l\'application.</string>
+    <string name="display_surfaceflinger_capture">Capturer l\'instantané</string>
+
+    <!-- Reset-all -->
+    <string name="display_reset_title">Réinitialiser</string>
+    <string name="display_reset_detail">Annule toutes les substitutions actives de luminosité, de taux de rafraîchissement et de densité.</string>
+    <string name="display_reset_action">Réinitialiser toutes les substitutions</string>
+
+    <!-- Status row -->
+    <string name="display_status_title">Dernier résultat</string>
+
+    <!-- ModuleInfo: permissions -->
+    <string name="display_permission_write_settings_label">Modifier les paramètres système</string>
+    <string name="display_permission_write_settings_rationale">Permet au curseur de luminosité d\'écrire dans Settings.System.SCREEN_BRIGHTNESS. Les relevés en lecture seule fonctionnent sans cette autorisation.</string>
+    <string name="display_action_grant_write_settings">Accorder l\'autorisation</string>
+
+    <!-- ModuleInfo: OS compatibility -->
+    <string name="display_os_note_refresh_rate_api30">La substitution du taux de rafraîchissement nécessite Android 11 (API 30) ou version ultérieure.</string>
+
+    <!-- ModuleInfo: capabilities -->
+    <string name="display_cap_brightness_name">Contrôle de la luminosité</string>
+    <string name="display_cap_brightness_detail">Lecture/écriture de Settings.System.SCREEN_BRIGHTNESS.</string>
+    <string name="display_cap_brightness_granted">Autorisation accordée</string>
+    <string name="display_cap_brightness_denied">WRITE_SETTINGS non accordé</string>
+    <string name="display_cap_refresh_rate_name">Substitution du taux de rafraîchissement</string>
+    <string name="display_cap_refresh_rate_detail">Force l\'écran à adopter un mode pris en charge spécifique.</string>
+    <string name="display_cap_density_name">Substitution de densité (DPI)</string>
+    <string name="display_cap_density_detail">Substitution à l\'exécution via `wm density`.</string>
+    <string name="display_cap_surfaceflinger_name">Instantané SurfaceFlinger</string>
+    <string name="display_cap_surfaceflinger_detail">Extrait en lecture seule de `dumpsys SurfaceFlinger`.</string>
+    <string name="display_cap_rooted_active">Actif — version rootée</string>
+    <string name="display_cap_rooted_required">Nécessite la version rootée de l\'application</string>
+
+    <!-- Monitoring -->
+    <string name="display_live_monitor_brightness">Luminosité en direct</string>
+    <string name="display_monitor_brightness">Historique de luminosité</string>
+    <string name="display_monitor_metric_name">Luminosité de l\'écran</string>
+
+    <!-- Status messages (DisplayControllerResult mapping) -->
+    <string name="display_status_ok">Appliqué</string>
+    <string name="display_status_unsupported">Nécessite la version rootée de l\'application</string>
+    <string name="display_status_rate_limited">Limite de fréquence atteinte — réessayez dans %1$dms</string>
+    <string name="display_status_opted_out">Désactivé dans les paramètres</string>
+    <string name="display_status_reset_completed">%1$d substitution(s) annulée(s), %2$d échec(s)</string>
+    <string name="display_status_brightness_applied">Luminosité réglée sur %1$d/%2$d</string>
+    <string name="display_status_refresh_applied">Mode de taux de rafraîchissement %1$d appliqué</string>
+    <string name="display_status_density_applied">Densité réglée sur %1$d dpi</string>
+    <string name="display_status_write_settings_denied">Autorisation WRITE_SETTINGS non accordée</string>
+
+    <!-- Automation actions -->
+    <string name="display_action_set_brightness">Régler la luminosité</string>
+    <string name="display_action_override_brightness_extreme">Surcharger la luminosité (rooté)</string>
+    <string name="display_action_override_refresh_rate">Substituer le taux de rafraîchissement (rooté)</string>
+    <string name="display_action_override_density">Substituer la densité (rooté)</string>
+    <string name="display_action_reset_all">Réinitialiser toutes les substitutions (rooté)</string>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lock_screen_title">Sperre</string>
+
+    <!-- Status card -->
+    <string name="lock_card_title">Sperrstatus</string>
+    <string name="lock_chip_locked">Gesperrt</string>
+    <string name="lock_chip_unlocked">Entsperrt</string>
+    <string name="lock_chip_secure">Sicher</string>
+    <string name="lock_chip_insecure">Keine Bildschirmsperre</string>
+    <string name="lock_chip_biometric">Biometrie eingerichtet</string>
+    <string name="lock_chip_no_biometric">Keine Biometrie</string>
+
+    <!-- Monitor titles -->
+    <string name="lock_live_monitor_state">Sperrstatus (live)</string>
+    <string name="lock_monitor_state">Sperrstatusverlauf</string>
+
+    <!-- Capability rows -->
+    <string name="lock_cap_keyguard_name">Gerätesperre</string>
+    <string name="lock_cap_keyguard_detail">Überwacht den Keyguard-Sperrstatus über KeyguardManager</string>
+    <string name="lock_cap_keyguard_active">Sperrbildschirm aktiv</string>
+    <string name="lock_cap_keyguard_inactive">Kein Sperrbildschirm eingerichtet</string>
+    <string name="lock_cap_biometric_name">Biometrische Authentifizierung</string>
+    <string name="lock_cap_biometric_detail">Prüft den biometrischen Registrierungsstatus (Fingerabdruck, Gesicht, Iris)</string>
+    <string name="lock_cap_biometric_available">Biometrie eingerichtet</string>
+    <string name="lock_cap_biometric_unavailable">Keine Biometrie eingerichtet</string>
+
+    <!-- Rooted capability rows -->
+    <string name="lock_cap_rooted_active">Aktiv — gerootete Version</string>
+    <string name="lock_cap_rooted_required">Erfordert gerootete Version</string>
+    <string name="lock_cap_overlay_name">Benachrichtigungs-Overlay für den Sperrbildschirm</string>
+    <string name="lock_cap_overlay_detail">Zeigt ein Systemwarnungsfenster über dem Sperrbildschirm für zeitlich begrenzte sichere Warnungen an (feste Obergrenze: 60 s)</string>
+</resources>

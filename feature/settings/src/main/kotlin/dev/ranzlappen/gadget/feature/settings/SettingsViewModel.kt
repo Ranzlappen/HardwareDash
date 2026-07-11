@@ -3,6 +3,8 @@ package dev.ranzlappen.gadget.feature.settings
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,8 +15,10 @@ import dev.ranzlappen.gadget.core.datastore.TriStatePreference
 import dev.ranzlappen.gadget.core.datastore.UserPreferences
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
 import dev.ranzlappen.gadget.core.monitoring.MonitorGlobalPrefs
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -49,6 +53,23 @@ class SettingsViewModel @Inject constructor(
 
     val monitorNotificationActionsEnabled: StateFlow<Boolean> =
         monitorGlobalPrefs.notificationActionsEnabled
+
+    // AppCompatDelegate self-persists the per-app locale (SharedPreferences
+    // pre-API-33, the native LocaleManager on 33+) — no UserPreferences /
+    // DataStore field needed. Seeded once at construction; setLanguage()
+    // updates it locally too since AppCompatDelegate's own change callback
+    // is activity-lifecycle-shaped, not a Flow, and a language switch
+    // recreates the process/activity anyway on most API levels.
+    private val _language = MutableStateFlow(
+        AppLanguage.fromTag(AppCompatDelegate.getApplicationLocales().toLanguageTags().takeIf { it.isNotEmpty() }),
+    )
+    val language: StateFlow<AppLanguage> = _language.asStateFlow()
+
+    fun setLanguage(language: AppLanguage) {
+        _language.value = language
+        val locales = language.tag?.let { LocaleListCompat.forLanguageTags(it) } ?: LocaleListCompat.getEmptyLocaleList()
+        AppCompatDelegate.setApplicationLocales(locales)
+    }
 
     fun setDarkThemeMode(mode: DarkThemeMode) {
         viewModelScope.launch { repository.setDarkThemeMode(mode) }

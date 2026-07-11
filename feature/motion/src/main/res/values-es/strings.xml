@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="motion_capability_gyroscope">Giroscopio</string>
+    <string name="motion_capability_gyroscope_detail">Sensor de velocidad angular</string>
+    <string name="motion_capability_step_counter">Podómetro</string>
+    <string name="motion_capability_step_counter_detail">Sensor podómetro</string>
+    <string name="motion_capability_motion_detect">Detector de movimiento</string>
+    <string name="motion_capability_motion_detect_detail">Detección de movimiento basada en eventos</string>
+    <string name="motion_capability_card_title">Sensores de movimiento</string>
+    <string name="motion_permission_title">Se requiere permiso de actividad física</string>
+    <string name="motion_permission_body">Se necesita el permiso ACTIVITY_RECOGNITION para leer los datos del podómetro.</string>
+    <string name="motion_permission_grant">Conceder permiso</string>
+    <string name="motion_gyroscope_card_title">Giroscopio</string>
+    <string name="motion_gyroscope_value">Velocidad de rotación</string>
+    <string name="motion_step_counter_card_title">Podómetro</string>
+    <string name="motion_steps_label">Pasos (desde el último reinicio)</string>
+    <string name="motion_detect_card_title">Detector de movimiento</string>
+    <string name="motion_detected">Movimiento detectado</string>
+    <string name="motion_idle">Sin movimiento</string>
+    <string name="motion_live_monitor_title">%1$s — en vivo</string>
+    <string name="motion_monitor_title">Historial de %1$s</string>
+    <string name="motion_capability_present">Presente</string>
+    <string name="motion_capability_not_present">No presente</string>
+    <string name="motion_capability_high_polling">Muestreo de alta frecuencia</string>
+    <string name="motion_capability_high_polling_detail">Anula la frecuencia de reporte del sensor por debajo del mínimo de la API pública</string>
+    <string name="motion_capability_raw_unfiltered">Datos sin procesar y sin filtrar</string>
+    <string name="motion_capability_raw_unfiltered_detail">Omite la fusión de sensores y el filtrado de Android</string>
+    <string name="motion_capability_sysfs_read">Lectura de sensor por sysfs</string>
+    <string name="motion_capability_sysfs_read_detail">Acceso directo del kernel por sysfs a los nodos de hardware del sensor</string>
+    <string name="motion_capability_rooted_active">Activo — versión rooteada</string>
+    <string name="motion_capability_rooted_required">Requiere versión rooteada</string>
+    <string name="motion_action_assert_motion_detected">Verificar movimiento detectado</string>
+    <string name="motion_action_assert_motion_idle">Verificar ausencia de movimiento</string>
+    <string name="motion_action_assert_steps_above">Verificar pasos por encima del umbral</string>
+    <string name="motion_action_assert_rotation_above">Verificar velocidad de rotación por encima del umbral</string>
+</resources>

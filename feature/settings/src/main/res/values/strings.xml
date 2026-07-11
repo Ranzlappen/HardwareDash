@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Language card (W8 — per-app language picker). The rest of
+         :feature:settings still carries hardcoded English literals in
+         Kotlin rather than string resources — a pre-existing gap, tracked
+         separately, not part of this addition's scope. -->
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_system_default">System default</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_language_es">Español</string>
+    <string name="settings_language_fr">Français</string>
+</resources>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="camera_screen_title">Scanner</string>
+
+    <!-- Permission -->
+    <string name="camera_perm_label">Kamera</string>
+    <string name="camera_perm_rationale">Kamerazugriff wird benötigt, um Barcodes und QR-Codes zu scannen</string>
+    <string name="camera_perm_card_title">Kamera-Berechtigung erforderlich</string>
+    <string name="camera_perm_card_body">Erteilen Sie den Kamerazugriff, um mit der Gerätekamera Barcodes und QR-Codes zu scannen.</string>
+    <string name="camera_perm_grant_btn">Kamerazugriff erteilen</string>
+
+    <!-- ModuleInfo capability -->
+    <string name="camera_cap_scanner_name">Barcode-Scanner</string>
+    <string name="camera_cap_scanner_detail">Scannt alle gängigen Barcode- und QR-Code-Formate mit MLKit</string>
+    <string name="camera_cap_scanner_ok">Kamerazugriff erteilt</string>
+    <string name="camera_cap_scanner_denied">Kamera-Berechtigung erforderlich</string>
+
+    <!-- Scanner card -->
+    <string name="camera_card_scanner_title">Kamera</string>
+    <string name="camera_torch_toggle">Taschenlampe umschalten</string>
+
+    <!-- Result card -->
+    <string name="camera_card_result_title">Letzter Scan</string>
+    <string name="camera_btn_copy">In Zwischenablage kopieren</string>
+    <string name="camera_btn_share">Teilen</string>
+    <string name="camera_btn_open_url">URL öffnen</string>
+
+    <!-- WiFi result -->
+    <string name="camera_wifi_ssid">Netzwerk: %s</string>
+    <string name="camera_wifi_password">Passwort: %s</string>
+    <string name="camera_wifi_type">Sicherheit: %s</string>
+
+    <!-- History card -->
+    <string name="camera_card_history_title">Scanverlauf</string>
+    <string name="camera_history_empty">Noch keine Scans. Richten Sie die Kamera auf einen Barcode oder QR-Code.</string>
+    <string name="camera_btn_clear_history">Verlauf löschen</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="camera_cap_rooted_active">Aktiv — gerooteter Build</string>
+    <string name="camera_cap_rooted_required">Erfordert gerooteten Build</string>
+    <string name="camera_cap_high_fps_name">Hohe FPS-Aufnahme</string>
+    <string name="camera_cap_high_fps_detail">Erzwingt Bildwiederholraten über dem angegebenen Kameramaximum über HAL-Parameter</string>
+    <string name="camera_cap_manual_name">Manuelle Kamerasteuerung</string>
+    <string name="camera_cap_manual_detail">Direkte HAL-Parameter: ISO, Verschlusszeit, Weißabgleich und Fokusabstand</string>
+    <string name="camera_cap_hal_bypass_name">HAL-Umgehung</string>
+    <string name="camera_cap_hal_bypass_detail">Rohe Bildübertragung vom Kameratreiber unter Umgehung des Camera2-API-Stacks</string>
+
+    <!-- ─── Automation actions (CameraActionHandler) ───────────────────── -->
+    <string name="camera_action_clear_scan_history">Scanverlauf löschen</string>
+    <string name="camera_action_high_fps_capture">Hohe-FPS-Aufnahme (gerootet)</string>
+    <string name="camera_action_manual_override">Manuelle Belichtungsüberschreibung (gerootet)</string>
+    <string name="camera_action_raw_capture">RAW-Bildaufnahme (gerootet)</string>
+    <string name="camera_action_multi_camera_capture">Multi-Kamera-Aufnahme (gerootet)</string>
+    <string name="camera_action_hal_bypass_frame">HAL-Umgehungs-Frame (gerootet)</string>
+    <string name="camera_action_set_shutter_sound">Auslöserton festlegen (gerootet)</string>
+</resources>

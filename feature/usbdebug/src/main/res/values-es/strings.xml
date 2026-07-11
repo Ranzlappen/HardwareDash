@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usbdebug_screen_title">Depuración por USB</string>
+
+    <!-- Monitor titles -->
+    <string name="usbdebug_live_monitor_title">Depuración por USB (en vivo)</string>
+    <string name="usbdebug_monitor_title">Historial de depuración por USB</string>
+    <string name="usbdebug_monitor_metric_name">Depuración por USB</string>
+
+    <!-- Standard-tier status card -->
+    <string name="usbdebug_status_card_title">Estado de depuración</string>
+    <string name="usbdebug_status_chip_enabled">Depuración por USB habilitada</string>
+    <string name="usbdebug_status_chip_disabled">Depuración por USB deshabilitada</string>
+    <string name="usbdebug_open_developer_options">Abrir opciones de desarrollador</string>
+
+    <!-- Rooted-tier USB function role picker -->
+    <string name="usbdebug_function_card_title">Rol de función USB</string>
+    <string name="usbdebug_function_applied">Aplicado: %1$s</string>
+    <string name="usbdebug_function_none_applied">No cambiado en esta sesión</string>
+    <string name="usbdebug_function_prior">Anterior: %1$s</string>
+    <string name="usbdebug_function_chip_none">Ninguno</string>
+    <string name="usbdebug_function_chip_mtp">MTP</string>
+    <string name="usbdebug_function_chip_ptp">PTP</string>
+    <string name="usbdebug_function_chip_rndis">RNDIS</string>
+    <string name="usbdebug_function_chip_midi">MIDI</string>
+    <string name="usbdebug_function_chip_ncm">NCM</string>
+    <string name="usbdebug_function_chip_accessory">Accesorio</string>
+
+    <!-- Rooted-tier "USB Diagnostics" expandable panel -->
+    <string name="usbdebug_diagnostics_panel_title">Diagnóstico USB</string>
+    <string name="usbdebug_diagnostics_usb_title">USB (dumpsys usb)</string>
+    <string name="usbdebug_diagnostics_serial_title">Servicio serie</string>
+    <string name="usbdebug_diagnostics_debugfs_title">Dispositivos USB (debugfs)</string>
+    <string name="usbdebug_diagnostics_run">Ejecutar</string>
+    <string name="usbdebug_diagnostics_source">Fuente: %1$s</string>
+    <string name="usbdebug_diagnostics_empty">Aún no ejecutado</string>
+
+    <!-- Controller-result error copy -->
+    <string name="usbdebug_error_unsupported">Requiere la versión rooteada de la app</string>
+    <string name="usbdebug_error_opted_out">Desactivado en Ajustes</string>
+    <string name="usbdebug_error_rate_limited">Límite de frecuencia alcanzado — reintentar en %1$d ms</string>
+    <string name="usbdebug_error_generic">La acción falló</string>
+
+    <!-- Capability rows -->
+    <string name="usbdebug_cap_debug_state_name">Depuración USB (ADB)</string>
+    <string name="usbdebug_cap_debug_state_detail">Lee Settings.Global.ADB_ENABLED, el único ajuste del sistema detrás de \"Depuración por USB\" y del acceso ADB</string>
+    <string name="usbdebug_cap_debug_state_enabled">Habilitado</string>
+    <string name="usbdebug_cap_debug_state_disabled">Deshabilitado</string>
+    <string name="usbdebug_cap_function_switch_name">Cambio de rol de función USB</string>
+    <string name="usbdebug_cap_function_switch_detail">Establece la función del gadget USB (MTP, PTP, RNDIS, …) mediante cmd usb set-functions</string>
+    <string name="usbdebug_cap_dump_usb_name">Volcado USB</string>
+    <string name="usbdebug_cap_dump_usb_detail">Instantánea de solo lectura de dumpsys usb, limitada a 8 KB</string>
+    <string name="usbdebug_cap_dump_serial_name">Volcado del servicio serie</string>
+    <string name="usbdebug_cap_dump_serial_detail">Instantánea de solo lectura de dumpsys SerialService (API 30+, recurre a dumpsys serial)</string>
+    <string name="usbdebug_cap_dump_debugfs_name">Volcado de dispositivos USB (debugfs)</string>
+    <string name="usbdebug_cap_dump_debugfs_detail">Instantánea de solo lectura de /sys/kernel/debug/usb/devices, recurre a dumpsys usb si debugfs no está montado</string>
+    <string name="usbdebug_cap_rooted_active">Activo: compilación rooteada</string>
+    <string name="usbdebug_cap_rooted_required">Requiere compilación rooteada</string>
+
+    <!-- Automation action labels -->
+    <string name="usbdebug_action_switch_function">Cambiar rol de función USB</string>
+    <string name="usbdebug_action_dump_usb">Volcar USB (dumpsys usb)</string>
+    <string name="usbdebug_action_dump_serial_service">Volcar servicio serie</string>
+    <string name="usbdebug_action_dump_usb_devices_debug">Volcar dispositivos USB (debugfs)</string>
+</resources>

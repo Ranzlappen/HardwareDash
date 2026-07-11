@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monitor_toggle_label">Surveiller ce signal</string>
+    <string name="monitor_poll_interval_label">Intervalle d\'échantillonnage</string>
+    <string name="monitor_poll_interval_suffix">s</string>
+    <string name="monitor_window_label">Fenêtre temporelle</string>
+    <string name="monitor_layout_section">Style de graphique</string>
+    <string name="monitor_layout_line">Ligne</string>
+    <string name="monitor_layout_area">Aire</string>
+    <string name="monitor_layout_bars">Barres</string>
+    <string name="monitor_show_widget">Afficher en tant que widget</string>
+    <string name="monitor_show_notification">Afficher en tant que notification</string>
+    <string name="monitor_chart_collecting">Collecte des données…</string>
+    <string name="monitor_chart_enable_hint">Active la surveillance pour commencer à enregistrer l\'historique</string>
+
+    <!-- Live monitor (in-memory realtime chart) -->
+    <string name="live_monitor_toggle_label">Flux en direct</string>
+    <string name="live_monitor_freeze">Figer</string>
+    <string name="live_monitor_auto">Auto</string>
+    <string name="live_monitor_stat_now">Maintenant</string>
+    <string name="live_monitor_stat_min">Min</string>
+    <string name="live_monitor_stat_max">Max</string>
+    <string name="live_monitor_stat_avg">Moy.</string>
+    <string name="live_monitor_interval_label">Actualisation</string>
+    <string name="live_monitor_interval_suffix">ms</string>
+    <string name="live_monitor_window_label">Fenêtre en direct</string>
+    <string name="live_monitor_window_suffix">s</string>
+    <string name="live_monitor_stat_empty">—</string>
+
+    <string name="monitor_notification_channel">Surveillance</string>
+    <string name="monitor_notification_summary_title">Surveillance active</string>
+    <plurals name="monitor_notification_summary_text">
+        <item quantity="one">%d signal</item>
+        <item quantity="other">%d signaux</item>
+    </plurals>
+    <string name="monitor_notification_action_stop">Arrêter la surveillance</string>
+</resources>

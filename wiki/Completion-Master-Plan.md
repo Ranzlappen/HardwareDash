@@ -47,7 +47,7 @@ QS tiles · Str = base `strings.xml` entries.
 |---|---:|---:|:--:|:--:|:--:|:--:|---:|---|
 | `torch` (+`-rooted` 7, `-standard` 3) | 46 | 9 | ✅ | ✅ | ✅ | 4 W + 2 T | 120 | **Done** — the blueprint |
 | `vibration` (+`-rooted` 5, `-standard` 2) | 43 | 8 | ✅ | ✅ | ✅ | 4 W | 124 | **Done** — no tile |
-| `apps` (+`-rooted` **0**) | 38 | 4 | ✅ | ✅ | ✅ | 1 W | 74 | `folder_count` MS; refresh/open-folder/launch-app AH; rooted sibling **empty**; no `MonitorContainer` in screen yet |
+| `apps` (+`-rooted` 2) | 40 | 5 | ✅ | ✅ | ✅ | 1 W | 82 | `folder_count` MS; refresh/open-folder/launch-app AH; rooted freeze/unfreeze/force-stop menu via `apps-rooted`; no `MonitorContainer` in screen yet |
 | `gps` (+`-rooted` 5) | 29 | 4 | ✅ | ✅ | ✅ | — | 39 | track/spoof + rooted NMEA/constellation/reset AH; widget still missing |
 | `flipper` (+`-rooted` 3) | 21 | 3 | ✅ | ✅×2 | ✅ | — | 28 | Missing widget/tile |
 | `youtubedownloader` | 17 | 1 | ✅ | ✅ | ✅ | — | 65 | Missing progress widget |
@@ -69,35 +69,34 @@ QS tiles · Str = base `strings.xml` entries.
 | `sensors` | 6 | 2 | ✅ | ✅ | ✅ | — | 23 | assert-near/far, assert-bright/dark, assert-above/below |
 | `bugreport` (+`-rooted` 3) | 6 | 1 | ✅ | ✅ | ✅ | — | 26 | `bugreport_permission_readiness` MS (granted %) |
 | `actuators` | 6 | 0 | ✅ | ✅ | ✅ | — | 21 | `vibrator_available` MS (presence, not a modelled pulse) |
-| **`display`** (+`-rooted` 5) | 4 | 0 | ❌ | ❌ | ❌ | — | 0 | **Controller-only skeleton** |
-| **`microphone`** (+`-rooted` 5) | 4 | 0 | ❌ | ❌ | ❌ | — | 0 | **Controller-only** (dB/record UI lives in `audio`) |
-| **`notification`** (+`-rooted` 4) | 4 | 0 | ❌ | ❌ | ❌ | — | 0 | **Controller-only skeleton** |
-| **`adbdebug`** (+`-rooted` 5) | 4 | 0 | ❌ | ❌ | ❌ | — | 0 | **Controller-only skeleton** |
-| **`usbdebug`** (+`-rooted` 5) | 4 | 0 | ❌ | ❌ | ❌ | — | 0 | **Controller-only skeleton** |
-| **`automation`** (+`-rooted` 4) | 4 | 0 | ❌ | ❌ | ❌ | — | 0 | **Controller-only** — confusing twin of `automation-ui` |
-| **`radios-cell`** (+`-rooted` 2) | 3 | 0 | ❌ | ❌ | ❌ | — | 0 | Screenless by design so far; standard tier unbuilt |
+| `display` (+`-rooted` 5) | 10 | 2 | ✅ | ✅ | ✅ | — | 58 | `screen_brightness` MS; brightness (standard, WRITE_SETTINGS) + density/refresh-rate/SurfaceFlinger-snapshot (rooted) AH |
+| `microphone` (+`-rooted` 5) | 12 | 2 | ✅ | exempt* | ✅ | — | 53 | Rooted-only extreme-tools screen (gain/PCM/rate/multi-mic/effects/system-audio); dB/record UI stays in `audio` |
+| `notification` (+`-rooted` 4) | 16 | 2 | ✅ | ✅ | ✅ | — | 78 | `active_notifications` MS via a real `GadgetNotificationListenerService`; channel-inspector + builder (standard) + sticky-override/listener/overlay (rooted) AH |
+| `adbdebug` (+`-rooted` 5) | 12 | 2 | ✅ | ✅ | ✅ | — | 37 | `adb_enabled` MS; toggle/network/getprop-dump/setprop AH |
+| `usbdebug` (+`-rooted` 5) | 11 | 2 | ✅ | ✅ | ✅ | — | 48 | `usb_debugging` MS; function-role + 3-source diagnostics dump AH |
+| `automation` (+`-rooted` 4) | 5 | 1 | n/a | n/a | ✅ | — | 4 | Screenless by design — `automation_extras` AH surfaces its 3 rooted power-tools as rule-builder actions in `automation-ui`; resolves the former empty-twin question |
+| `radios-cell` (+`-rooted` 2) | 11 | 2 | ✅ | ✅ | ✅ | — | 50 | Net-new standard `TelephonyManager` tier (no prior code to wrap); `cell_signal` MS (push); assert-above/below AH (read-only module) |
 | `manual` | 2 | 0 | ✅ (thin) | n/a | n/a | — | 17 | Static; no per-module deep links |
 | `dashboard` | 2 | 0 | ✅ (thin) | n/a | n/a | — | 0 | No user customization (reorder/hide) |
-| **`apps-rooted`** | 0 | 0 | — | — | — | — | — | **Empty (`.gitkeep`)** |
+| `apps-rooted` | 2 | 1 | n/a | n/a | ✅ | — | 3 | pm freeze/unfreeze/force-stop, `apps_root` AH; surfaced as rows in `apps`'s own screen, not a dedicated one |
+| **`logbook`** | 12 | 0 | ❌ | ❌ | ❌ | — | 0 | **Not registered in `settings.gradle.kts` — inert.** Partial: Room data layer + some UI components; interrupted by an API spend limit. Missing: screen/nav, AH, MS, strings |
 
-\* `camera` and `radios-ir` are discrete-event modules — exempt from the
-monitoring-container requirement per the
+\* `camera`, `radios-ir`, and `microphone` are discrete-event / no-signal
+modules — exempt from the monitoring-container requirement per the
 [Module Authoring Contract](Module-Authoring-Contract); the exemption
 should be recorded inline in each module.
 
-**Cross-cutting coverage (measured after the W3 consistency sweep):**
-MetricSource in **20** feature families (was 17 — `apps`/`bugreport`/
-`actuators` added); ActionHandler in **22** feature families (was 15+6 —
-`gps`/`motion`/`sensors`/`camera`/`battery`/`apps` added, the last two
-rooted-tier only); widgets in **5** features (torch ×4, vibration ×4,
-battery, storage, apps); QS tiles in **1** (torch ×2); **8** `@Preview`
-composables in the whole tree; **1,002+** base string entries across 24
-feature modules with **zero** translations (only `:app` has
-`values-de/es/fr`, each 24 of 42 entries ≈ 57 %, and stale). Remaining
-gap against the matrix in §1.2: `gps`/`storage`/`camera`/`apps` still
-lack widget coverage, and `display`/`microphone`/`notification`/
-`adbdebug`/`usbdebug`/`automation`/`radios-cell` remain controller-only
-skeletons (W2, unstarted).
+**Cross-cutting coverage (measured after W2 + W3, 2026-07-11):**
+MetricSource in **25** feature families; ActionHandler in **30** feature
+families (`automation` and `apps-rooted` are screenless action-only
+contributors, resolved via the registry rather than a dedicated screen);
+widgets in **5** features (torch ×4, vibration ×4, battery, storage,
+apps); QS tiles in **1** (torch ×2); **1,000+** base string entries with
+**zero** translations (only `:app` has stale partial `values-de/es/fr`).
+Remaining gaps: `gps`/`storage`/`camera`/`apps` still lack widget
+coverage; `storage` standard-tier ActionHandler (assert-free-space) is
+the one W3 item left out of scope; `:feature:logbook` is a partial,
+unregistered draft (not in `settings.gradle.kts`).
 
 ### 1.3 Core-module status (measured)
 
@@ -217,38 +216,65 @@ wiki updated in the same PR.
    `:lsposed-module`.
    **Exit criterion:** `find app/src -path "*com/gadget*" -name "*.kt" | wc -l` → **0**.
 
-### W2 — Finish the skeleton features · **L**
+### W2 — Finish the skeleton features · **L** (✅ done except `:feature:logbook`, 2026-07-11)
 
 Full [Module Authoring Contract](Module-Authoring-Contract) builds
 (`ModuleScreenScaffold` + `ModuleInfo` + tri-state capabilities screen,
-MetricSource, ActionHandler, nav route + dashboard tile, strings,
-previews, tests), using torch/vibration as the blueprint:
+MetricSource where applicable, ActionHandler, nav route, strings,
+previews, tests), using torch/vibration as the blueprint. Landed with a
+few deliberate scope calls against the original brief, noted inline:
 
-- **`display`** — brightness / refresh rate / rotation / resolution
-  readouts, `screen_brightness` MetricSource, assert/set actions
-  (`WRITE_SETTINGS` flow from W5); rooted density / refresh / extreme
-  rows via the existing `display-rooted` controllers.
-- **`microphone`** — input-device inventory, gain, live level (reuse the
-  `AudioRecorder` seam from `:feature:audio` via a `core` promotion, not
-  a feature-to-feature import); rooted gain / direct-PCM rows exist.
-- **`notification`** — channel inspector + notification builder /
-  presets (absorbs legacy `BuilderPresetStore` + `NotificationPreviewCard`),
-  post/cancel/assert actions, notification-listener opt-in for a
-  `active_notifications` MetricSource.
-- **`adbdebug` / `usbdebug`** — debug-state readouts + Settings
-  deep-links on standard, toggle via the existing rooted controllers,
-  `adb_enabled` / `usb_debugging` MetricSources (they make strong
-  automation triggers).
-- **`radios-cell`** — standard `TelephonyManager` screen (SIM / network
-  type / signal), `cell_signal` MetricSource; the rooted Qualcomm dump
-  stays a capability-row surface.
-- **`apps-rooted`** — pm-based freeze / disable / force-stop behind
-  `RootFeatureKey`s, surfaced as rooted rows + `apps_root` ActionHandler.
-- **`feature:automation` (controllers)** — fold into `:core:automation`
-  or make it the engine's own module surface (engine on/off tile +
-  status screen); remove the confusing empty twin of `automation-ui`.
-- **`:feature:logbook`** — rebuild the legacy logbook (session notes +
-  reminders) as a modular feature; **`:feature:keepalive`** — from W1.
+- **`display`** — done. Brightness slider (standard, direct
+  `Settings.System.SCREEN_BRIGHTNESS` read/write + `ACTION_MANAGE_WRITE_SETTINGS`
+  deep-link, rather than waiting on W5) + rooted density/refresh-rate
+  override + read-only SurfaceFlinger snapshot; `screen_brightness` MetricSource.
+- **`microphone`** — done, scoped down. Rooted-only "extreme mic tools"
+  screen (gain/PCM/rate/multi-mic/effects/system-audio); the planned
+  `AudioRecorder`-via-`core`-promotion live-level reuse was dropped as
+  unnecessary scope creep — `feature:audio` already fully owns baseline
+  capture, and the controller's own doc comment already scoped it out.
+  MetricSource-exempt (no continuous signal, every action fire-and-forget).
+- **`notification`** — done, scoped down. Channel inspector + a
+  *simplified* test-notification builder (title/body/priority/post),
+  not the full named-preset save/reuse system the legacy
+  `BuilderPresetStore` had (nothing was ported — it was already deleted
+  in the W1 purge, only the concept was rebuilt, proportionately). A
+  real `GadgetNotificationListenerService` was built (not left as the
+  documented no-op the rooted controller shipped with), unlocking
+  `active_notifications`.
+- **`adbdebug` / `usbdebug`** — done as specified. Debug-state readouts +
+  Developer-options deep-links on standard, full rooted controller
+  wrapping; `adb_enabled` / `usb_debugging` MetricSources (both read the
+  same underlying OS setting under two different feature-facing
+  concepts — expected, not a bug).
+- **`radios-cell`** — done as specified, and the largest of the six: no
+  standard-tier code existed to wrap, so the `TelephonyManager`/
+  `TelephonyCallback` tier (SIM state, carrier, network-type badge, live
+  signal bars, READ_PHONE_STATE flow) was built from scratch. `cell_signal`
+  MetricSource (push); assert-above/below ActionHandler (no write path
+  by design — read-only module).
+- **`apps-rooted`** — done as specified. pm-based freeze / unfreeze /
+  force-stop behind 3 new `RootFeatureKey`s, `apps_root` ActionHandler,
+  a dynamic deny-list protecting core system packages + this app's own
+  package. Surfaced as a per-app overflow menu inside `:feature:apps`'s
+  existing screen, not a dedicated one — the controller interface lives
+  in `:feature:apps` itself (rooted/standard split), mirroring
+  `StorageController`.
+- **`feature:automation`** — resolved without deletion or a new screen.
+  It's screenless by design: its 3 rooted power-tools (privileged intent
+  fire, allow-listed settings override, dumpsys snapshot) are exposed
+  only via an `automation_extras` ActionHandler, so they surface as
+  rule-builder actions in `automation-ui`'s existing action picker,
+  which already resolves every bound ActionHandler from the registry.
+  That's the fix for the "confusing empty twin" — it isn't a competing
+  UI, it's the engine's own rooted-capability contributor.
+- **`:feature:logbook`** — **not done.** A build agent got partway
+  through the Room data layer + some UI components (12 files) before
+  hitting an API spend limit. Left committed but **not registered in
+  `settings.gradle.kts`**, so it's inert. Still needed: the top-level
+  screen/nav entry point, `LogbookActionHandler`, `LogbookMetricSource`,
+  `strings.xml`, and the registration itself.
+- **`:feature:keepalive`** — done, landed in W1.
 
 ### W3 — Consistency sweep to the definition of done · **M** (✅ done, 2026-07-09)
 
@@ -453,7 +479,6 @@ graph TD
 
 ---
 
-> _Last reviewed: 2026-07-09 · Source: measured tree audit @ `29b2bc3`
-> (`find`/`grep` counts over `app/`, `core/`, `feature/`,
-> `settings.gradle.kts`, `app/src/main/AndroidManifest.xml`) · Related
-> modules: all._
+> _Last reviewed: 2026-07-11 · Source: measured tree audit (PR #199,
+> `find`/`grep` counts over `app/`, `core/`, `feature/`,
+> `settings.gradle.kts`) · Related modules: all._

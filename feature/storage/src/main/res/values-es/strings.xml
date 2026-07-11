@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="storage_screen_title">Almacenamiento</string>
+
+    <!-- ─── Volume cards ──────────────────────────────────────────────── -->
+    <string name="storage_card_title_internal">Almacenamiento interno</string>
+    <string name="storage_card_title_removable">%1$s</string>
+    <string name="storage_reading">Leyendo almacenamiento…</string>
+    <string name="storage_used_label">%1$s de %2$s usados</string>
+    <string name="storage_used_percent">%1$d%%</string>
+    <string name="storage_free_label">%1$s libres</string>
+
+    <!-- ─── Module capabilities ─────────────────────────────────────────── -->
+    <string name="storage_cap_name">Volúmenes de almacenamiento</string>
+    <string name="storage_cap_detail">Recuentos de bloques StatFs — no se requieren permisos.</string>
+    <string name="storage_cap_available">%1$d volumen(es) detectado(s).</string>
+    <string name="storage_cap_unavailable">No se encontraron volúmenes de almacenamiento.</string>
+
+    <!-- ─── Monitoring containers ──────────────────────────────────────── -->
+    <string name="storage_live_monitor_used">Uso de almacenamiento (en vivo)</string>
+    <string name="storage_monitor_used">Historial de uso de almacenamiento</string>
+    <string name="storage_monitor_free">Historial de espacio libre</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="storage_cap_rooted_active">Activo — compilación rooteada</string>
+    <string name="storage_cap_rooted_required">Requiere compilación rooteada</string>
+    <string name="storage_cap_diskstats_name">Volcado de diskstats</string>
+    <string name="storage_cap_diskstats_detail">Estadísticas de E/S del kernel desde /proc/diskstats (lecturas, escrituras, latencia por dispositivo de bloques)</string>
+    <string name="storage_cap_mounts_name">Enumeración de puntos de montaje</string>
+    <string name="storage_cap_mounts_detail">Tabla de montaje completa a través de /proc/mounts, incluidas particiones ocultas no visibles mediante StorageManager</string>
+    <string name="storage_cap_fstrim_name">Trim de almacenamiento (fstrim)</string>
+    <string name="storage_cap_fstrim_detail">Fuerza una operación discard en los sistemas de archivos montados para mejorar la longevidad de la SSD</string>
+
+    <!-- Home-screen widget -->
+    <string name="storage_widget_label">Almacenamiento</string>
+    <string name="storage_widget_description">Espacio usado y libre del almacenamiento interno</string>
+    <string name="storage_widget_percent_format">%1$d %% usado</string>
+    <string name="storage_widget_free_format">%1$s libres</string>
+    <string name="storage_widget_unknown">—</string>
+</resources>

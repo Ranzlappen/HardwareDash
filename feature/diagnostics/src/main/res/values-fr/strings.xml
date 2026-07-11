@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_screen_title">Diagnostic</string>
+
+    <!-- Memory monitor (standard MetricSource hosted on the screen) -->
+    <string name="diagnostics_live_monitor_memory">Mémoire utilisée (en direct)</string>
+    <string name="diagnostics_monitor_memory">Historique de la mémoire utilisée</string>
+
+    <!-- Info text -->
+    <string name="diagnostics_info">Tous les instantanés de diagnostic s\'exécutent via le moteur d\'automatisation. Déclenchez-les depuis une règle d\'automatisation ou appuyez sur « Exécuter » dans une action connectée.</string>
+
+    <!-- Capability rows -->
+    <string name="diagnostics_cap_rooted_active">Actif — version rootée</string>
+    <string name="diagnostics_cap_rooted_required">Nécessite une version rootée</string>
+    <string name="diagnostics_cap_logcat_name">Fin de Logcat</string>
+    <string name="diagnostics_cap_logcat_detail">Capture les 500 dernières lignes de logcat (tous les buffers, RADIO/SYSTEM automatiquement masqués) via adb logcat</string>
+    <string name="diagnostics_cap_meminfo_name">Vidage mémoire</string>
+    <string name="diagnostics_cap_meminfo_detail">Instantané de dumpsys meminfo (limité à 8 Ko) des principaux consommateurs de mémoire</string>
+    <string name="diagnostics_cap_cpuinfo_name">Vidage des informations CPU</string>
+    <string name="diagnostics_cap_cpuinfo_detail">Instantané de dumpsys cpuinfo (limité à 8 Ko) de l\'utilisation du CPU par processus</string>
+    <string name="diagnostics_cap_procstats_name">Vidage des statistiques de processus</string>
+    <string name="diagnostics_cap_procstats_detail">Instantané de dumpsys procstats pour l\'historique à long terme de la mémoire et du CPU des processus</string>
+</resources>

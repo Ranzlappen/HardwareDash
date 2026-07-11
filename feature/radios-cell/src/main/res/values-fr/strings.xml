@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cell_screen_title">Réseau mobile</string>
+
+    <!-- Permission section -->
+    <string name="cell_permission_label">État du téléphone</string>
+    <string name="cell_permission_rationale">Lit l\'état de la carte SIM, le nom de l\'opérateur, le type de réseau et l\'intensité du signal depuis le modem</string>
+    <string name="cell_permission_card_title">Autorisation d\'état du téléphone requise</string>
+    <string name="cell_permission_card_body">Accordez l\'autorisation d\'état du téléphone pour voir l\'opérateur, le type de réseau et l\'intensité du signal en direct.</string>
+    <string name="cell_permission_grant_button">Accorder l\'autorisation</string>
+
+    <!-- Status card -->
+    <string name="cell_card_status_title">État du réseau mobile</string>
+    <string name="cell_label_sim_state">État de la carte SIM</string>
+    <string name="cell_label_carrier">Opérateur</string>
+    <string name="cell_label_network_type">Type de réseau</string>
+    <string name="cell_label_signal">Signal</string>
+
+    <!-- SIM state labels -->
+    <string name="cell_sim_state_ready">Prête</string>
+    <string name="cell_sim_state_absent">Aucune SIM</string>
+    <string name="cell_sim_state_locked">Verrouillée (PIN/PUK)</string>
+    <string name="cell_sim_state_network_locked">Verrouillée par le réseau</string>
+    <string name="cell_sim_state_not_ready">Non prête</string>
+    <string name="cell_sim_state_unknown">Inconnu</string>
+
+    <!-- Network type labels -->
+    <string name="cell_network_type_5g_plus">5G+</string>
+    <string name="cell_network_type_5g">5G</string>
+    <string name="cell_network_type_lte">4G LTE</string>
+    <string name="cell_network_type_3g">3G</string>
+    <string name="cell_network_type_2g">2G</string>
+    <string name="cell_network_type_unknown">Inconnu</string>
+
+    <!-- Monitor titles -->
+    <string name="cell_live_monitor_signal">Signal mobile (en direct)</string>
+    <string name="cell_monitor_signal">Historique du signal mobile</string>
+
+    <!-- Capability rows -->
+    <string name="cell_cap_sim_name">État de la carte SIM</string>
+    <string name="cell_cap_sim_detail">Lit l\'état de la carte SIM via TelephonyManager.getSimState() — aucune autorisation requise</string>
+    <string name="cell_cap_carrier_name">Nom de l\'opérateur</string>
+    <string name="cell_cap_carrier_detail">Lit le nom de l\'opérateur réseau enregistré</string>
+    <string name="cell_cap_carrier_unknown">Inconnu</string>
+    <string name="cell_cap_network_type_name">Type de réseau</string>
+    <string name="cell_cap_network_type_detail">Libellé lisible de génération de réseau (2G/3G/4G LTE/5G/5G+), via TelephonyDisplayInfo sur Android 12+ ou getDataNetworkType() sur Android 10-11</string>
+    <string name="cell_cap_signal_name">Intensité du signal</string>
+    <string name="cell_cap_signal_detail">Barres de signal en direct (0 à 4) provenant d\'un écouteur d\'intensité de signal TelephonyCallback / PhoneStateListener</string>
+    <string name="cell_cap_no_permission">Accordez l\'autorisation d\'état du téléphone pour lire le signal en direct</string>
+    <string name="cell_cap_signal_bars">%1$d sur 4 barres</string>
+
+    <!-- Rooted capability rows -->
+    <string name="cell_cap_rooted_active">Actif — build rooté</string>
+    <string name="cell_cap_rooted_required">Nécessite un build rooté</string>
+    <string name="cell_cap_raw_modem_name">Diagnostics bruts du modem</string>
+    <string name="cell_cap_raw_modem_detail">Parcours en lecture seule des nœuds sysfs Qualcomm qcom_smd*/qmi_devices/rmnet&lt;N&gt; ; affiche proprement \"Non pris en charge\" sur les SoC non Qualcomm</string>
+    <string name="cell_cap_signal_deep_name">Vidage détaillé du signal par bande</string>
+    <string name="cell_cap_signal_deep_detail">Répartition en lecture seule RSRP/RSRQ/SINR par bande via les nœuds sysfs du fabricant, lorsqu\'ils sont présents</string>
+
+    <!-- Rooted diagnostics panel -->
+    <string name="cell_root_modem_dump_title">Diagnostics bruts du modem</string>
+    <string name="cell_root_signal_deep_title">Vidage détaillé du signal par bande</string>
+    <string name="cell_dump_idle">Pas encore récupéré — ceci parcourt plusieurs chemins sysfs via un shell root.</string>
+    <string name="cell_dump_fetch_button">Récupérer</string>
+    <string name="cell_dump_refresh_button">Actualiser</string>
+    <string name="cell_dump_retry_button">Réessayer</string>
+    <string name="cell_dump_empty">Aucun nœud renvoyé.</string>
+    <string name="cell_dump_unsupported">Non pris en charge sur ce SoC — aucun nœud de diagnostic Qualcomm trouvé.</string>
+</resources>

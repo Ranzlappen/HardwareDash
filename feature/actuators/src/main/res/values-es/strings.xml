@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="actuators_screen_title">Actuadores</string>
+
+    <!-- Status card -->
+    <string name="actuators_card_title">Hardware de vibración</string>
+    <string name="actuators_chip_available">Vibrador disponible</string>
+    <string name="actuators_chip_unavailable">Sin vibrador</string>
+    <string name="actuators_chip_amplitude">Control de amplitud</string>
+    <string name="actuators_chip_no_amplitude">Amplitud fija</string>
+
+    <!-- Capability rows -->
+    <string name="actuators_cap_vibrator_name">Actuador de vibración</string>
+    <string name="actuators_cap_vibrator_detail">API VibrationEffect de Android para patrones de retroalimentación háptica</string>
+    <string name="actuators_cap_vibrator_available">Vibrador presente</string>
+    <string name="actuators_cap_vibrator_unavailable">Vibrador no encontrado</string>
+
+    <!-- Rooted capability rows -->
+    <string name="actuators_cap_rooted_active">Activo — compilación rooteada</string>
+    <string name="actuators_cap_rooted_required">Requiere compilación rooteada</string>
+    <string name="actuators_cap_extreme_name">Amplitud extrema</string>
+    <string name="actuators_cap_extreme_detail">Controla el motor de vibración por encima del límite de amplitud del sistema mediante sysfs, manteniendo el ciclo de trabajo máximo (límite estricto del 80 % para proteger el hardware)</string>
+    <string name="actuators_cap_pwm_name">Control PWM directo</string>
+    <string name="actuators_cap_pwm_detail">Escribe la frecuencia PWM y el ciclo de trabajo directamente en los nodos sysfs del controlador de vibración, evitando VibrationEffect</string>
+    <string name="actuators_cap_dual_name">Control de doble actuador</string>
+    <string name="actuators_cap_dual_detail">Controla actuadores LRA (resonante lineal) y ERM (masa rotativa excéntrica) simultáneamente con sincronización por desfase de fase</string>
+    <string name="actuators_cap_rumble_name">Vibración sostenida</string>
+    <string name="actuators_cap_rumble_detail">Repite un patrón háptico más allá del límite de 500 ms del sistema, mientras un watchdog supervisa el consumo de batería y la temperatura del motor</string>
+
+    <!-- Monitoring -->
+    <string name="actuators_monitor_metric_name">Vibrador disponible</string>
+</resources>

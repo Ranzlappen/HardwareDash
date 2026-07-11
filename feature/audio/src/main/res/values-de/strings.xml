@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="audio_capability_mic">Mikrofon</string>
+    <string name="audio_capability_mic_detail">dB-Messung und WAV-Aufnahme</string>
+    <string name="audio_permission_card_title">Berechtigung erforderlich</string>
+    <string name="audio_permission_body">Für die Messung des Schallpegels und die Audioaufnahme wird Mikrofonzugriff benötigt.</string>
+    <string name="audio_permission_grant">Berechtigung erteilen</string>
+    <string name="audio_db_meter_card_title">dB-Messgerät</string>
+    <string name="audio_db_level">Schallpegel</string>
+    <string name="audio_db_unit">dB</string>
+    <string name="audio_monitor_title">dB-Messgerät-Verlauf</string>
+    <string name="audio_record_card_title">Sprachaufnahme</string>
+    <string name="audio_record_start">Aufnahme starten</string>
+    <string name="audio_record_stop">Stopp</string>
+    <string name="audio_record_saved">Im Musikordner gespeichert</string>
+    <string name="audio_record_share">Teilen</string>
+    <string name="audio_record_idle">Zum Starten der Aufnahme tippen</string>
+    <string name="audio_notification_channel">Audioaufnahme</string>
+    <string name="audio_notification_title">Audio wird aufgenommen</string>
+    <string name="audio_notification_text">Zum Öffnen von Gadget tippen</string>
+    <string name="audio_notification_stop">Aufnahme stoppen</string>
+    <string name="audio_capability_available">Aufnahme verfügbar</string>
+    <string name="audio_capability_permission_required">Berechtigung erforderlich</string>
+    <string name="audio_live_monitor_title">dB-Messgerät — live</string>
+    <string name="audio_capability_rooted_active">Aktiv — gerooteter Build</string>
+    <string name="audio_capability_rooted_required">Erfordert gerooteten Build</string>
+    <string name="audio_capability_gain_boost">Mikrofonverstärkung erhöhen</string>
+    <string name="audio_capability_gain_boost_detail">Überschreibt das Hardware-Verstärkungsregister über die Betriebssystemgrenzen hinaus</string>
+    <string name="audio_capability_direct_pcm">Direkte PCM-Aufnahme</string>
+    <string name="audio_capability_direct_pcm_detail">Umgeht den AudioRecord-Stack für Rohaufnahme auf Kernel-Ebene</string>
+    <string name="audio_capability_custom_sample_rate">Benutzerdefinierte Abtastrate</string>
+    <string name="audio_capability_custom_sample_rate_detail">Fordert nicht standardmäßige Aufnahmeraten an (z. B. 96 kHz)</string>
+</resources>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ─── System UI surfaces (tile + widget chrome) ──────────── -->
+    <string name="torch_tile_label">Linterna</string>
+    <string name="strobe_tile_label">Estroboscopio</string>
+    <string name="widget_flashlight_label">Linterna</string>
+    <string name="widget_strobe_label">Estroboscopio</string>
+    <string name="widget_flashlight_description">Activa o desactiva la linterna del dispositivo.</string>
+    <string name="widget_strobe_description">Activa o desactiva un estroboscopio de linterna configurable.</string>
+    <string name="widget_monitor_label">Actividad de la linterna</string>
+    <string name="widget_monitor_description">Lectura en vivo de la actividad de la linterna con una barra de progreso.</string>
+    <string name="widget_monitor_value">Intensidad de la linterna: %1$d%%</string>
+    <string name="widget_monitor_toggle_on">Monitorización activada</string>
+    <string name="widget_monitor_toggle_off">Monitorización desactivada</string>
+    <string name="widget_monitor_reload">Actualizar</string>
+    <string name="widget_monitor_chart_label">Gráfico de actividad de la linterna</string>
+    <string name="widget_monitor_chart_description">Minigráfico en vivo de la actividad de la linterna durante el intervalo de tiempo configurado.</string>
+    <string name="widget_monitor_chart_empty">Recopilando datos…</string>
+
+    <!-- ─── Foreground-service notification ─────────────────────── -->
+    <string name="strobe_notification_channel_name">Servicio de estroboscopio</string>
+    <string name="strobe_notification_title">Estroboscopio activo</string>
+    <string name="strobe_notification_text">Toca el widget para detenerlo.</string>
+    <string name="strobe_notification_stop">Detener</string>
+    <string name="strobe_widget_start_failed">No se pudo iniciar el estroboscopio; abre la app</string>
+
+    <!-- ─── Widget toggle-feedback channel ──────────────────────── -->
+    <string name="widget_feedback_channel_name">Comentarios del widget</string>
+    <string name="widget_feedback_channel_description">Mensajes emergentes y notificaciones de confirmación opcionales al activar o desactivar un widget.</string>
+
+    <!-- ─── TorchScreen ─────────────────────────────────────────── -->
+    <string name="torch_screen_title">Linterna</string>
+    <string name="torch_state_on">Activado</string>
+    <string name="torch_state_off">Desactivado</string>
+    <string name="torch_action_turn_on">Encender linterna</string>
+    <string name="torch_action_turn_off">Apagar linterna</string>
+    <string name="torch_action_toggle_caption">Linterna</string>
+    <string name="torch_action_hold">Mantén pulsado para luz</string>
+    <string name="torch_action_strobe">Estroboscopio</string>
+    <string name="torch_action_strobe_toggle">Alternar estroboscopio</string>
+    <string name="torch_action_strobe_hold">Mantener estroboscopio</string>
+    <string name="torch_action_morse">Morse</string>
+    <string name="torch_action_morse_toggle">Alternar Morse</string>
+    <string name="torch_action_morse_hold">Mantener Morse</string>
+    <string name="torch_morse_message_label">Mensaje en Morse</string>
+    <string name="torch_status_no_flash">Este dispositivo no tiene unidad de flash.</string>
+    <string name="torch_status_hardware_error">Error de hardware; inténtalo de nuevo.</string>
+    <string name="torch_status_permission_denied">Acceso a la cámara denegado; concédelo en los ajustes del sistema.</string>
+    <string name="torch_status_on">La linterna está encendida.</string>
+    <string name="torch_status_off">Toca el botón para encender la linterna.</string>
+
+    <!-- In-app strobe toggle button (under the flashlight FAB). -->
+    <string name="torch_action_strobe_start">Iniciar estroboscopio</string>
+    <string name="torch_action_strobe_stop">Detener estroboscopio</string>
+    <string name="torch_action_strobe_start_a11y">Iniciar el estroboscopio a la velocidad predeterminada actual</string>
+    <string name="torch_action_strobe_stop_a11y">Detener el estroboscopio en curso</string>
+
+    <!-- ─── Monitoring (torch instantiation of MonitorContainer) ──── -->
+    <string name="torch_monitor_title">Actividad de la linterna</string>
+    <string name="torch_live_monitor_title">Actividad de la linterna (en vivo)</string>
+    <string name="torch_monitor_metric_name">Intensidad de la linterna</string>
+
+    <!-- ─── Strobe defaults section ─────────────────────────────── -->
+    <string name="torch_section_defaults_title">Valores predeterminados del estroboscopio</string>
+    <string name="torch_section_defaults_subtitle">Se usa como valor predeterminado para los nuevos widgets de estroboscopio que crees.</string>
+    <string name="torch_strobe_rate_label">Frecuencia</string>
+    <string name="torch_brightness_label">Brillo</string>
+    <string name="torch_strobe_rate_value">%1$d Hz</string>
+
+    <!-- ─── Widgets management section ──────────────────────────── -->
+    <string name="torch_section_widgets_title">Tus widgets</string>
+    <!-- Single "Add widget" entry point — the function (flashlight / strobe /
+         morse) is picked inside the customization sheet. -->
+    <string name="torch_widget_add">Añadir widget</string>
+    <string name="torch_widget_pin_unsupported">Tu launcher no admite añadir widgets directamente. Mantén pulsada la pantalla de inicio para añadir uno manualmente.</string>
+    <string name="torch_widget_removed_hint">Eliminado de tu lista. Para quitarlo de la pantalla de inicio, mantén pulsado el widget allí y elimínalo.</string>
+    <string name="torch_widget_cap_reached">Puedes fijar como máximo %1$d widgets de cada tipo. Elimina uno primero.</string>
+    <string name="torch_widget_default_name_flashlight">Linterna</string>
+    <string name="torch_widget_default_name_strobe">Estroboscopio</string>
+    <string name="torch_widget_list_empty_title">Aún no hay widgets</string>
+    <string name="torch_widget_list_empty_subtitle">Usa el botón de arriba para añadir un widget a tu pantalla de inicio.</string>
+    <string name="torch_widget_list_action_edit">Editar widget</string>
+    <string name="torch_widget_list_action_delete">Quitar widget</string>
+
+    <!-- ─── Widget customization sheet (function picker) ─────────── -->
+    <!-- The customization sheet chrome (name / size / appearance / footer
+         labels) now lives in :core:widgetkit. Torch only contributes the
+         function labels the picker offers. -->
+    <string name="torch_widget_function_flashlight">Linterna</string>
+    <string name="torch_widget_function_strobe">Estroboscopio</string>
+    <string name="torch_widget_function_morse">Morse / SOS</string>
+
+    <!-- Appearance / tap / feedback / preview sub-sections moved to
+         :core:widgetkit (refactor-2026 Phase 2 / C6b). 38 strings
+         relocated under widget_kit_appearance_* prefix; the kit's
+         WidgetAppearanceSection composable is the single consumer. -->
+
+    <!-- Module-blueprint OS-compatibility notes (rendered by ModuleCompatibilitySection) -->
+    <string name="torch_module_perm_notifications_label">Notificaciones</string>
+    <string name="torch_module_perm_notifications_rationale">Permite que el servicio de estroboscopio muestre su estado y que aparezcan las confirmaciones de los widgets.</string>
+    <string name="torch_module_compat_note_fgs_active">El estroboscopio se ejecuta como servicio en primer plano mientras está activo, por lo que sigue destellando aunque salgas de la pantalla.</string>
+    <string name="torch_module_compat_note_fgs_short">En Android 14 o superior, el estroboscopio se ejecuta como un servicio en primer plano corto y limitado en el tiempo (unos 3 minutos).</string>
+
+    <!-- Per-function capability badges (Functions & compatibility section) -->
+    <string name="torch_cap_no_flash">Este dispositivo no tiene unidad de flash.</string>
+    <string name="torch_cap_needs_root">Requiere la versión rooteada de la app con acceso root concedido.</string>
+    <string name="torch_cap_basic_name">Linterna encendida/apagada + mantener</string>
+    <string name="torch_cap_basic_detail">Alternar y mantener pulsado momentáneamente para luz.</string>
+    <string name="torch_cap_basic_ok">Unidad de flash detectada; funciona.</string>
+    <string name="torch_cap_strobe_name">Estroboscopio y Morse</string>
+    <string name="torch_cap_strobe_detail">Estroboscopio configurable y reproducción en Morse.</string>
+    <string name="torch_cap_strobe_ok">Funciona.</string>
+    <string name="torch_cap_strobe_caveat">Funciona; en Android 14 o superior, un estroboscopio en segundo plano se ejecuta como servicio en primer plano limitado en el tiempo (~3 min) y muestra una notificación.</string>
+    <string name="torch_cap_root_ready">Acceso root y hardware de linterna disponibles.</string>
+    <string name="torch_cap_root_no_led">Acceso root disponible, pero no se encontró ningún nodo sysfs de LED compatible en este dispositivo.</string>
+    <string name="torch_cap_root_brightness_name">Brillo extremo (root)</string>
+    <string name="torch_cap_root_brightness_detail">Impulsa el LED más allá del límite de fábrica (hasta el 150 %).</string>
+    <string name="torch_cap_root_strobe_name">Estroboscopio de ciclo de trabajo de alta frecuencia (root)</string>
+    <string name="torch_cap_root_strobe_detail">Pulsos de ciclo bajo a alta frecuencia para dejar margen térmico.</string>
+    <string name="torch_cap_root_multiled_name">Activación multi-LED (root)</string>
+    <string name="torch_cap_root_multiled_detail">Enciende todos los emisores detectados a la vez.</string>
+    <string name="torch_cap_root_multiled_caveat">Disponible; el conjunto exacto de emisores depende del dispositivo.</string>
+    <string name="torch_cap_root_thermal_name">Anulación térmica (root)</string>
+    <string name="torch_cap_root_thermal_detail">Suspende brevemente la limitación térmica del LED para un estroboscopio.</string>
+    <string name="torch_cap_root_thermal_caveat">Disponible: suspende los límites térmicos (tope fijo de 45 s). Puede calentar el dispositivo; úsalo brevemente.</string>
+
+    <!-- Root tools card (rooted app version only) -->
+    <string name="torch_root_tools_title">Herramientas root</string>
+    <string name="torch_root_tools_subtitle">Controles de linterna privilegiados, limitados por la puerta de seguridad root. Cada herramienta viene desactivada de forma predeterminada; actívala (y desactiva el modo de seguridad) en Ajustes → Interruptores de funciones rooteadas antes de usarla.</string>
+    <string name="torch_root_action_brightness">Ejecutar impulso</string>
+    <string name="torch_root_action_strobe">Ejecutar estroboscopio</string>
+    <string name="torch_root_action_multiled">Ejecutar ráfaga</string>
+    <string name="torch_root_action_thermal">Ejecutar estroboscopio térmico</string>
+    <!-- Rooted-tool section headers -->
+    <string name="torch_root_section_brightness">Aumentar brillo</string>
+    <string name="torch_root_section_strobe">Estroboscopio de ciclo de trabajo</string>
+    <string name="torch_root_section_multiled">Ráfaga multi-LED</string>
+    <string name="torch_root_section_thermal">Estroboscopio con anulación térmica</string>
+    <!-- Rooted-tool slider / control labels -->
+    <string name="torch_root_brightness_label">Brillo</string>
+    <string name="torch_root_freq_label">Frecuencia</string>
+    <string name="torch_root_duty_label">Ciclo de trabajo</string>
+    <string name="torch_root_duration_label">Duración</string>
+    <string name="torch_root_include_screen_label">Incluir pantalla</string>
+    <string name="torch_root_thermal_ceiling_note">La anulación térmica está limitada a 45 segundos.</string>
+    <string name="torch_root_no_boost_headroom">No hay margen de brillo en este dispositivo; no se encontró ningún nodo LED que se pueda impulsar.</string>
+    <string name="torch_root_result_ok">Listo.</string>
+    <string name="torch_root_result_unsupported">No disponible en este dispositivo.</string>
+    <string name="torch_root_result_opted_out">Desactivado en Ajustes → Interruptores de funciones rooteadas (revisa también el modo de seguridad).</string>
+    <string name="torch_root_opted_out_action">Ajustes</string>
+    <string name="torch_root_result_rate_limited">Limitado por frecuencia; inténtalo de nuevo en breve.</string>
+    <string name="torch_root_result_error">Error: %1$s</string>
+
+    <!-- ─── Floating overlay button ─────────────────────────────────── -->
+    <string name="overlay_button_description">Alternar linterna</string>
+    <string name="overlay_notification_channel_name">Botón flotante de linterna</string>
+    <string name="overlay_notification_title">Botón flotante de linterna activo</string>
+    <string name="overlay_notification_text">Arrastra el botón para reposicionarlo.</string>
+    <string name="overlay_notification_dismiss">Descartar</string>
+</resources>

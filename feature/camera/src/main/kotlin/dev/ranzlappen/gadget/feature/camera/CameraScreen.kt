@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -259,6 +260,7 @@ private fun BarcodeScannerCard(
     onToggleTorch: (CameraControl) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     var cameraControl by remember { mutableStateOf<CameraControl?>(null) }
@@ -301,11 +303,11 @@ private fun BarcodeScannerCard(
                         }, context.mainExecutor)
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(300.dp),
+                modifier = Modifier.fillMaxWidth().height(CameraScreenDefaults.PreviewHeight),
             )
 
             // Scanning overlay
-            Canvas(modifier = Modifier.fillMaxWidth().height(300.dp)) {
+            Canvas(modifier = Modifier.fillMaxWidth().height(CameraScreenDefaults.PreviewHeight)) {
                 val scanRect = Rect(
                     offset = Offset((size.width - size.width * 0.6f) / 2f, (size.height - size.height * 0.6f) / 2f),
                     size = Size(size.width * 0.6f, size.height * 0.6f),
@@ -315,12 +317,12 @@ private fun BarcodeScannerCard(
                     color = Color.Transparent,
                     topLeft = scanRect.topLeft,
                     size = scanRect.size,
-                    cornerRadius = CornerRadius(12.dp.toPx()),
+                    cornerRadius = CornerRadius(CameraScreenDefaults.ScanRectCornerRadius.toPx()),
                     blendMode = BlendMode.Clear,
                 )
                 // Corner markers
-                val cornerLen = 24.dp.toPx()
-                val strokeWidth = 3.dp.toPx()
+                val cornerLen = CameraScreenDefaults.CornerMarkerLength.toPx()
+                val strokeWidth = CameraScreenDefaults.CornerMarkerStrokeWidth.toPx()
                 val corners = listOf(
                     scanRect.topLeft to Pair(Offset(cornerLen, 0f), Offset(0f, cornerLen)),
                     Offset(scanRect.right, scanRect.top) to Pair(Offset(-cornerLen, 0f), Offset(0f, cornerLen)),
@@ -336,7 +338,7 @@ private fun BarcodeScannerCard(
             // Torch toggle
             IconButton(
                 onClick = { cameraControl?.let(onToggleTorch) },
-                modifier = Modifier.align(Alignment.TopEnd).padding(4.dp),
+                modifier = Modifier.align(Alignment.TopEnd).padding(spacing.micro),
             ) {
                 Icon(
                     if (isTorchOn) Icons.Outlined.FlashlightOff else Icons.Outlined.FlashlightOn,
@@ -454,7 +456,7 @@ private fun ScanHistoryCard(
                         }
                         IconButton(
                             onClick = { onCopy(result) },
-                            modifier = Modifier.size(36.dp),
+                            modifier = Modifier.size(CameraScreenDefaults.HistoryCopyIconButtonSize),
                         ) {
                             Icon(
                                 Icons.Outlined.ContentCopy,
@@ -486,4 +488,12 @@ private fun shareText(context: Context, text: String) {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
     context.startActivity(Intent.createChooser(intent, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+}
+
+private object CameraScreenDefaults {
+    val PreviewHeight: Dp = 300.dp
+    val ScanRectCornerRadius: Dp = 12.dp
+    val CornerMarkerLength: Dp = 24.dp
+    val CornerMarkerStrokeWidth: Dp = 3.dp
+    val HistoryCopyIconButtonSize: Dp = 36.dp
 }

@@ -48,10 +48,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ranzlappen.gadget.core.data.apps.Folder
 import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.GadgetDialog
 import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GadgetFab
@@ -117,6 +119,7 @@ fun AppsScreenContent(
     showLegacyImport: Boolean = false,
     onImportLegacy: () -> Unit = {},
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     var showCreate by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<Folder?>(null) }
     var showOverflow by remember { mutableStateOf(false) }
@@ -169,11 +172,11 @@ fun AppsScreenContent(
             )
         } else {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 150.dp),
+                columns = GridCells.Adaptive(minSize = AppsScreenDefaults.FolderGridMinCellSize),
                 modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(spacing.medium),
+                horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                verticalArrangement = Arrangement.spacedBy(spacing.small),
             ) {
                 items(folders, key = { it.id }) { folder ->
                     FolderTile(
@@ -218,6 +221,7 @@ fun AppsScreenContent(
 
 @Composable
 private fun FolderTile(folder: Folder, onClick: () -> Unit, onLongClick: () -> Unit) {
+    val spacing = LocalGadgetTheme.current.spacing
     GlassSurface(
         modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick),
         intensity = GlassIntensity.Standard,
@@ -225,11 +229,11 @@ private fun FolderTile(folder: Folder, onClick: () -> Unit, onLongClick: () -> U
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(AppsScreenDefaults.FolderColorDotSize)
                     .clip(CircleShape)
                     .background(Color(folder.baseColorArgb)),
             )
-            Spacer(Modifier.size(12.dp))
+            Spacer(Modifier.size(spacing.small))
             Text(
                 text = folder.name,
                 style = MaterialTheme.typography.titleMedium,
@@ -287,4 +291,9 @@ private fun FolderTilePreview() = GadgetThemedPreview {
         onClick = {},
         onLongClick = {},
     )
+}
+
+private object AppsScreenDefaults {
+    val FolderGridMinCellSize: Dp = 150.dp
+    val FolderColorDotSize: Dp = 20.dp
 }

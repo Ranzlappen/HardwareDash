@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="monitor_toggle_label">Monitorizar esta señal</string>
+    <string name="monitor_poll_interval_label">Intervalo de muestreo</string>
+    <string name="monitor_poll_interval_suffix">s</string>
+    <string name="monitor_window_label">Ventana de tiempo</string>
+    <string name="monitor_layout_section">Estilo de gráfico</string>
+    <string name="monitor_layout_line">Línea</string>
+    <string name="monitor_layout_area">Área</string>
+    <string name="monitor_layout_bars">Barras</string>
+    <string name="monitor_show_widget">Mostrar como widget</string>
+    <string name="monitor_show_notification">Mostrar como notificación</string>
+    <string name="monitor_chart_collecting">Recopilando datos…</string>
+    <string name="monitor_chart_enable_hint">Activa la monitorización para empezar a registrar el historial</string>
+
+    <!-- Live monitor (in-memory realtime chart) -->
+    <string name="live_monitor_toggle_label">Transmisión en directo</string>
+    <string name="live_monitor_freeze">Congelar</string>
+    <string name="live_monitor_auto">Auto</string>
+    <string name="live_monitor_stat_now">Ahora</string>
+    <string name="live_monitor_stat_min">Mín</string>
+    <string name="live_monitor_stat_max">Máx</string>
+    <string name="live_monitor_stat_avg">Media</string>
+    <string name="live_monitor_interval_label">Actualización</string>
+    <string name="live_monitor_interval_suffix">ms</string>
+    <string name="live_monitor_window_label">Ventana en directo</string>
+    <string name="live_monitor_window_suffix">s</string>
+    <string name="live_monitor_stat_empty">—</string>
+
+    <string name="monitor_notification_channel">Monitorización</string>
+    <string name="monitor_notification_summary_title">Monitorización activa</string>
+    <plurals name="monitor_notification_summary_text">
+        <item quantity="one">%d señal</item>
+        <item quantity="other">%d señales</item>
+    </plurals>
+    <string name="monitor_notification_action_stop">Detener monitorización</string>
+</resources>

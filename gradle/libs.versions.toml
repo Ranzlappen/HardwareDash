@@ -10,6 +10,7 @@ testRunner = "1.6.2"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.10.1"
+appcompat = "1.6.1"
 composeBom = "2024.04.01"
 # material3-adaptive ships outside the Compose BOM on its own version line.
 # Pinned to the 1.0.0-alpha07 (Apr-2024) series that targets Compose 1.6.x —
@@ -56,6 +57,7 @@ youtubedlAndroid = "0.18.1"
 [libraries]
 # Application / library dependencies (consumed by modules)
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kxml2 = { group = "net.sf.kxml", name = "kxml2", version.ref = "kxml2" }
