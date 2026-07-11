@@ -62,4 +62,14 @@
     <string name="usbdebug_action_dump_usb">Vider l\'USB (dumpsys usb)</string>
     <string name="usbdebug_action_dump_serial_service">Vider le service série</string>
     <string name="usbdebug_action_dump_usb_devices_debug">Vider les périphériques USB (debugfs)</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="usbdebug_root_tools_title">Outils root</string>
+    <string name="usbdebug_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
+    <string name="usbdebug_root_run">Exécuter</string>
+    <string name="usbdebug_root_dumpusb_label">Vider l\'USB</string>
+    <string name="usbdebug_root_dumpusb_detail">Instantané en lecture seule de dumpsys usb.</string>
+    <string name="usbdebug_root_serial_label">Vider le service série</string>
+    <string name="usbdebug_root_serial_detail">Instantané en lecture seule de dumpsys SerialService.</string>
+    <string name="usbdebug_root_devices_label">Vider les périphériques USB</string>
+    <string name="usbdebug_root_devices_detail">Instantané en lecture seule de /sys/kernel/debug/usb/devices.</string>
 </resources>

@@ -66,4 +66,13 @@
     <string name="cell_dump_retry_button">Retry</string>
     <string name="cell_dump_empty">No nodes returned.</string>
     <string name="cell_dump_unsupported">Unsupported on this SoC — no Qualcomm diagnostic nodes were found.</string>
+
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="cell_root_tools_title">Rooted tools</string>
+    <string name="cell_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="cell_root_run">Run</string>
+    <string name="cell_root_modem_label">Dump modem</string>
+    <string name="cell_root_modem_detail">Read-only vendor modem-node walk.</string>
+    <string name="cell_root_signal_label">Deep signal dump</string>
+    <string name="cell_root_signal_detail">Read-only per-band RSRP / RSRQ / SINR breakdown.</string>
 </resources>

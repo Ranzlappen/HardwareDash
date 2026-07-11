@@ -62,4 +62,14 @@
     <string name="usbdebug_action_dump_usb">Volcar USB (dumpsys usb)</string>
     <string name="usbdebug_action_dump_serial_service">Volcar servicio serie</string>
     <string name="usbdebug_action_dump_usb_devices_debug">Volcar dispositivos USB (debugfs)</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="usbdebug_root_tools_title">Herramientas root</string>
+    <string name="usbdebug_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="usbdebug_root_run">Ejecutar</string>
+    <string name="usbdebug_root_dumpusb_label">Volcar USB</string>
+    <string name="usbdebug_root_dumpusb_detail">Instantánea de solo lectura de dumpsys usb.</string>
+    <string name="usbdebug_root_serial_label">Volcar servicio serie</string>
+    <string name="usbdebug_root_serial_detail">Instantánea de solo lectura de dumpsys SerialService.</string>
+    <string name="usbdebug_root_devices_label">Volcar dispositivos USB</string>
+    <string name="usbdebug_root_devices_detail">Instantánea de solo lectura de /sys/kernel/debug/usb/devices.</string>
 </resources>

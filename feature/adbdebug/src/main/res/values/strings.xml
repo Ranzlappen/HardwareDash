@@ -53,4 +53,11 @@
     <string name="adbdebug_setprop_logtag_suffix_label">log.tag. suffix</string>
     <string name="adbdebug_setprop_value_label">Value</string>
     <string name="adbdebug_setprop_apply">Apply override</string>
+
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="adbdebug_root_tools_title">Rooted tools</string>
+    <string name="adbdebug_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="adbdebug_root_run">Run</string>
+    <string name="adbdebug_root_getprop_label">Dump properties</string>
+    <string name="adbdebug_root_getprop_detail">Read-only getprop snapshot.</string>
 </resources>

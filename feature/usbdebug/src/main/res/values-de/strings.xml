@@ -62,4 +62,14 @@
     <string name="usbdebug_action_dump_usb">USB dumpen (dumpsys usb)</string>
     <string name="usbdebug_action_dump_serial_service">Serial-Dienst dumpen</string>
     <string name="usbdebug_action_dump_usb_devices_debug">USB-Geräte dumpen (debugfs)</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="usbdebug_root_tools_title">Root-Tools</string>
+    <string name="usbdebug_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="usbdebug_root_run">Ausführen</string>
+    <string name="usbdebug_root_dumpusb_label">USB ausgeben</string>
+    <string name="usbdebug_root_dumpusb_detail">Schreibgeschützter dumpsys-usb-Snapshot.</string>
+    <string name="usbdebug_root_serial_label">Serial-Service ausgeben</string>
+    <string name="usbdebug_root_serial_detail">Schreibgeschützter dumpsys-SerialService-Snapshot.</string>
+    <string name="usbdebug_root_devices_label">USB-Geräte ausgeben</string>
+    <string name="usbdebug_root_devices_detail">Schreibgeschützter /sys/kernel/debug/usb/devices-Snapshot.</string>
 </resources>

@@ -50,6 +50,8 @@ import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.ModulePermission
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
 import dev.ranzlappen.gadget.core.ui.module.OsNote
+import dev.ranzlappen.gadget.core.ui.module.RootActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -64,6 +66,8 @@ fun DisplayScreen(
     viewModel: DisplayViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val rootTools by viewModel.rootTools.collectAsState()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
     val context = LocalContext.current
     DisplayScreenContent(
         state = state,
@@ -79,6 +83,25 @@ fun DisplayScreen(
         ),
         onEvent = viewModel::onEvent,
         modifier = modifier,
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.display_root_tools_title),
+                available = state.isRootedFlavor,
+                unavailableMessage = stringResource(R.string.display_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootActionRow(
+                    label = stringResource(R.string.display_root_surfaceflinger_label),
+                    description = stringResource(R.string.display_root_surfaceflinger_detail),
+                    runLabel = stringResource(R.string.display_root_run),
+                    onRun = viewModel::onDumpSurfaceFlinger,
+                    enabled = !rootTools.surfaceFlinger.running,
+                    statusMessage = rootTools.surfaceFlinger.message,
+                    statusKind = rootTools.surfaceFlinger.statusKind,
+                )
+            }
+        },
         monitors = {
             LiveMonitorContainer(
                 metricKey = DisplayBrightnessMetricSource.METRIC_KEY,
@@ -198,6 +221,7 @@ internal fun DisplayScreenContent(
     onEvent: (DisplayUiEvent) -> Unit,
     modifier: Modifier = Modifier,
     monitors: @Composable () -> Unit = {},
+    rootTools: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
         title = stringResource(R.string.display_screen_title),
@@ -212,6 +236,7 @@ internal fun DisplayScreenContent(
             DisplayResetCard(state = state, onEvent = onEvent)
             state.statusMessage?.let { DisplayStatusRow(message = it) }
             monitors()
+            rootTools()
         },
     )
 }

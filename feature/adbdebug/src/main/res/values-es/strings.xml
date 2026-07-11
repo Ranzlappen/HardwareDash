@@ -53,4 +53,10 @@
     <string name="adbdebug_setprop_logtag_suffix_label">Sufijo log.tag.</string>
     <string name="adbdebug_setprop_value_label">Valor</string>
     <string name="adbdebug_setprop_apply">Aplicar anulación</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="adbdebug_root_tools_title">Herramientas root</string>
+    <string name="adbdebug_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="adbdebug_root_run">Ejecutar</string>
+    <string name="adbdebug_root_getprop_label">Volcar propiedades</string>
+    <string name="adbdebug_root_getprop_detail">Instantánea de solo lectura de getprop.</string>
 </resources>

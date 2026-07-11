@@ -15,6 +15,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -43,6 +44,8 @@ import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.ModulePermission
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.RootActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -66,6 +69,8 @@ fun CellScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val rawModemDump by viewModel.rawModemDump.collectAsStateWithLifecycle()
     val signalDeepDump by viewModel.signalDeepDump.collectAsStateWithLifecycle()
+    val rootTools by viewModel.rootTools.collectAsStateWithLifecycle()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
     val isRootedFlavor = viewModel.isRootedFlavor
     val permissionState = rememberPermissionState(Manifest.permission.READ_PHONE_STATE)
 
@@ -104,6 +109,34 @@ fun CellScreen(
         onLoadRawModemDump = viewModel::loadRawModemDump,
         onLoadSignalDeepDump = viewModel::loadSignalDeepDump,
         modifier = modifier,
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.cell_root_tools_title),
+                available = isRootedFlavor,
+                unavailableMessage = stringResource(R.string.cell_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootActionRow(
+                    label = stringResource(R.string.cell_root_modem_label),
+                    description = stringResource(R.string.cell_root_modem_detail),
+                    runLabel = stringResource(R.string.cell_root_run),
+                    onRun = viewModel::onDumpModem,
+                    enabled = !rootTools.modem.running,
+                    statusMessage = rootTools.modem.message,
+                    statusKind = rootTools.modem.statusKind,
+                )
+                RootActionRow(
+                    label = stringResource(R.string.cell_root_signal_label),
+                    description = stringResource(R.string.cell_root_signal_detail),
+                    runLabel = stringResource(R.string.cell_root_run),
+                    onRun = viewModel::onDumpSignal,
+                    enabled = !rootTools.signal.running,
+                    statusMessage = rootTools.signal.message,
+                    statusKind = rootTools.signal.statusKind,
+                )
+            }
+        },
         liveMonitors = {
             LiveMonitorContainer(
                 metricKey = CellSignalMetricSource.METRIC_KEY,
@@ -280,6 +313,7 @@ internal fun CellScreenContent(
     onRequestPermission: () -> Unit = {},
     onLoadRawModemDump: () -> Unit = {},
     onLoadSignalDeepDump: () -> Unit = {},
+    rootTools: @Composable () -> Unit = {},
     liveMonitors: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
@@ -306,6 +340,7 @@ internal fun CellScreenContent(
                     onLoadSignalDeepDump = onLoadSignalDeepDump,
                 )
             }
+            rootTools()
         },
     )
 }

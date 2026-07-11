@@ -66,4 +66,12 @@
     <string name="cell_dump_retry_button">Erneut versuchen</string>
     <string name="cell_dump_empty">Keine Knoten zurückgegeben.</string>
     <string name="cell_dump_unsupported">Auf diesem SoC nicht unterstützt — es wurden keine Qualcomm-Diagnoseknoten gefunden.</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="cell_root_tools_title">Root-Tools</string>
+    <string name="cell_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="cell_root_run">Ausführen</string>
+    <string name="cell_root_modem_label">Modem ausgeben</string>
+    <string name="cell_root_modem_detail">Schreibgeschützter Walk über die Modem-Knoten des Herstellers.</string>
+    <string name="cell_root_signal_label">Tiefer Signalauszug</string>
+    <string name="cell_root_signal_detail">Schreibgeschützte Aufschlüsselung von RSRP / RSRQ / SINR pro Band.</string>
 </resources>

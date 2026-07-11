@@ -84,4 +84,10 @@
     <string name="display_action_override_refresh_rate">Bildwiederholrate überschreiben (gerootet)</string>
     <string name="display_action_override_density">Dichte überschreiben (gerootet)</string>
     <string name="display_action_reset_all">Alle Overrides zurücksetzen (gerootet)</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="display_root_tools_title">Root-Tools</string>
+    <string name="display_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="display_root_run">Ausführen</string>
+    <string name="display_root_surfaceflinger_label">SurfaceFlinger ausgeben</string>
+    <string name="display_root_surfaceflinger_detail">Schreibgeschützter dumpsys-SurfaceFlinger-Snapshot.</string>
 </resources>

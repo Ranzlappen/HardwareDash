@@ -84,4 +84,11 @@
     <string name="display_action_override_refresh_rate">Override refresh rate (rooted)</string>
     <string name="display_action_override_density">Override density (rooted)</string>
     <string name="display_action_reset_all">Reset all overrides (rooted)</string>
+
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="display_root_tools_title">Rooted tools</string>
+    <string name="display_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="display_root_run">Run</string>
+    <string name="display_root_surfaceflinger_label">Dump SurfaceFlinger</string>
+    <string name="display_root_surfaceflinger_detail">Read-only dumpsys SurfaceFlinger snapshot.</string>
 </resources>
