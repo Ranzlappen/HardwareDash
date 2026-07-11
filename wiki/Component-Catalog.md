@@ -289,8 +289,15 @@ never `BuildConfig.IS_ROOTED`) toggles between the controls and an honest
 "requires the rooted app" state. `RootActionRow` renders one labeled action
 with an optional description, a run button, and a `GadgetStatusKind`-tinted
 status line (the last `*ControllerResult` mapped to a string). Copy is passed
-already-resolved (the `ModuleInfo` convention). First consumer:
-`feature/storage`'s `StorageScreen`.
+already-resolved (the `ModuleInfo` convention).
+
+Each consumer maps its own `*ControllerResult` sealed type onto the shared
+**`RootActionState`** (`module/RootActionState.kt`) holder —
+`message` / `isError` / `running`, plus a derived `statusKind` so the row
+tint stays consistent — rather than re-declaring a per-feature copy. Live
+consumers: `storage`, `diagnostics`, `audio`, `radios-wifi`, `radios-bt`,
+`gps`, `battery`, `display`, `radios-cell`, `usbdebug`, `adbdebug` (all
+read-only rooted actions), on top of torch/vibration's own rooted cards.
 
 ### `PermissionsDashboardCard` (`:core:permissions`)
 

@@ -259,8 +259,18 @@ allow-list), independent of the migrated controller.
   with `:feature:storage` as the first live consumer). Deferred: the generic
   configurable metric widget and lock/automation-engine tiles (need the full
   pin-reliability contract / new `DevicePolicyManager` + engine-master-switch
-  plumbing); rolling `RootToolsSection` out to the other dormant rooted
-  features.
+  plumbing).
+- **Follow-up (post-#201) — W6 read-only rollout completed.** The
+  `RootToolsSection` in-screen surface now reaches every read-only dormant
+  rooted feature: `audio`, `radios-wifi`, `radios-bt`, `gps`, `battery`,
+  `display`, `radios-cell`, `usbdebug`, and `adbdebug` (joining `storage`
+  and `diagnostics` from #201, and the pre-existing torch/vibration cards).
+  The per-action state holder is hoisted into a single canonical
+  `:core:ui` `RootActionState` (`message`/`isError`/`running` + a derived
+  `statusKind`), and the two earlier consumers were migrated onto it.
+  Still deferred: the write-tier features (`camera`, `microphone`,
+  `notification`, `radios-ir`, `radios-nfc`, `apps`, `lock`) — those need
+  per-action confirm dialogs / config inputs, not the read-only row pattern.
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.

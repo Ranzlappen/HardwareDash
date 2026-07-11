@@ -371,17 +371,20 @@ Original scope — build `:core:permissions` for real (was empty):
   integration; **first-run onboarding** flow (replaces the deleted
   legacy coordinator).
 
-### W6 — Root flavor completion · **M** · 🚧 started
+### W6 — Root flavor completion · **M** · 🚧 read-only rollout complete
 
-> **In progress:** the reusable `:core:ui` **`RootToolsSection`** +
-> **`RootActionRow`** substrate now standardizes surfacing a dormant rooted
-> controller in a feature screen (torch/vibration had hand-rolled cards);
-> **`:feature:storage`** is the first live consumer (read-only
-> diskstats/mounts through `StorageController`, gated by the `:core:root`
-> seam). The signed **`rooted-release.apk`** pipeline is verified in CI (an
-> `apksigner verify` gate). Remaining: roll `RootToolsSection` out to the
-> other dormant features, the Sub-GHz SDR data path, and the LSPosed
-> repackage.
+> **Done (read-only tier):** the reusable `:core:ui` **`RootToolsSection`** +
+> **`RootActionRow`** substrate (with the shared **`RootActionState`** holder)
+> standardizes surfacing a dormant rooted controller in a feature screen
+> (torch/vibration had hand-rolled cards). Every read-only dormant feature is
+> now a live consumer — `storage`, `diagnostics`, `audio`, `radios-wifi`,
+> `radios-bt`, `gps`, `battery`, `display`, `radios-cell`, `usbdebug`,
+> `adbdebug` — each gated by the `:core:root` seam. The signed
+> **`rooted-release.apk`** pipeline is verified in CI (an `apksigner verify`
+> gate). **Remaining:** the write-tier features (`camera`, `microphone`,
+> `notification`, `radios-ir`, `radios-nfc`, `apps`, `lock`) need per-action
+> confirm dialogs / config inputs before they get the section; plus the
+> Sub-GHz SDR data path and the LSPosed repackage.
 
 - **Re-surface rooted UX natively in every feature screen** (the #94
   Phase-3 epic): the migrated controllers are wired but dormant — add
