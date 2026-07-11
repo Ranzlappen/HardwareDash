@@ -8,6 +8,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,6 +26,8 @@ import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
 import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.RootActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -35,10 +40,48 @@ fun StorageScreen(
 ) {
     val volumes by viewModel.volumes.collectAsStateWithLifecycle()
     val isRootedFlavor = viewModel.isRootedFlavor
+    val rootTools by viewModel.rootTools.collectAsStateWithLifecycle()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
     StorageScreenContent(
         volumes = volumes,
         moduleInfo = storageModuleInfo(volumes, isRootedFlavor),
         modifier = modifier,
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.storage_root_tools_title),
+                available = isRootedFlavor,
+                unavailableMessage = stringResource(R.string.storage_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootActionRow(
+                    label = stringResource(R.string.storage_root_diskstats_label),
+                    description = stringResource(R.string.storage_root_diskstats_detail),
+                    runLabel = stringResource(R.string.storage_root_run),
+                    onRun = viewModel::onDumpDiskstats,
+                    enabled = !rootTools.diskstats.running,
+                    statusMessage = rootTools.diskstats.message,
+                    statusKind = if (rootTools.diskstats.isError) {
+                        GadgetStatusKind.Error
+                    } else {
+                        GadgetStatusKind.Success
+                    },
+                )
+                RootActionRow(
+                    label = stringResource(R.string.storage_root_mounts_label),
+                    description = stringResource(R.string.storage_root_mounts_detail),
+                    runLabel = stringResource(R.string.storage_root_run),
+                    onRun = viewModel::onEnumerateMounts,
+                    enabled = !rootTools.mounts.running,
+                    statusMessage = rootTools.mounts.message,
+                    statusKind = if (rootTools.mounts.isError) {
+                        GadgetStatusKind.Error
+                    } else {
+                        GadgetStatusKind.Success
+                    },
+                )
+            }
+        },
         liveMonitors = {
             LiveMonitorContainer(
                 metricKey = StorageUsedPercentMetricSource.METRIC_KEY,
@@ -140,6 +183,7 @@ internal fun StorageScreenContent(
     volumes: List<StorageVolumeInfo>,
     moduleInfo: ModuleInfo?,
     modifier: Modifier = Modifier,
+    rootTools: @Composable () -> Unit = {},
     liveMonitors: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
@@ -154,6 +198,7 @@ internal fun StorageScreenContent(
                 volumes.forEach { volume -> StorageVolumeCard(volume) }
                 liveMonitors()
                 monitors()
+                rootTools()
             }
         },
     )
