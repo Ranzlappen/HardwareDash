@@ -31,6 +31,7 @@ importing any feature — the symmetric partner to `ModuleActionRegistry`.
 | `:core:automation` | The contract + the rule model + pure `RuleEvaluator` + `RuleRepository` contract + runtime (`AutomationService` + `AutomationScheduler` + receivers). | No |
 | `:core:data` | Room `automation.db` + `RoomRuleRepository`. | No |
 | `:feature:automation-ui` | The Compose rules list + `RuleEditorSheet` builder. | Yes |
+| `:feature:automation` (+ `-rooted`) | Screenless by design — 3 generic rooted power-tools (privileged intent fire, allow-listed settings override, dumpsys snapshot) exposed only via its `automation_extras` `ActionHandler`, so they surface as rule-builder actions inside `automation-ui`'s existing action picker rather than a competing screen. | No |
 
 Dependency edge: `:core:data → :core:automation` (the `RuleRepository`
 **contract** lives in `:core:automation`; `:core:data` implements it over
@@ -202,7 +203,7 @@ See also: [Monitoring Framework](Monitoring-Framework) (the same
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `docs/automation-engine.md`,
+> _Last reviewed: 2026-07-11 · Source: `docs/automation-engine.md`,
 > `docs/adr/0002-automation-engine.md`, `CLAUDE.md` (automation) · Related
 > modules: `:core:automation`, `:core:hardware`, `:core:data`,
-> `:feature:automation-ui`._
+> `:feature:automation-ui`, `:feature:automation`._
