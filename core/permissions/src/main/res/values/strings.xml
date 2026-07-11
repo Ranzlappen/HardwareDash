@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="permissions_card_title">Permissions</string>
+    <string name="permissions_summary">%1$d of %2$d granted</string>
+    <string name="permissions_all_granted">All permissions granted</string>
+    <string name="permissions_grant">Grant</string>
+    <string name="permissions_granted">Granted</string>
+    <string name="permissions_open_settings">Open App Settings</string>
+    <string name="permissions_manage">Manage</string>
+
+    <!-- Special-permission labels -->
+    <string name="permissions_special_overlay">Display over other apps</string>
+    <string name="permissions_special_exact_alarm">Alarms &amp; reminders</string>
+    <string name="permissions_special_write_settings">Modify system settings</string>
+    <string name="permissions_special_notification_listener">Notification access</string>
+    <string name="permissions_special_all_files">All files access</string>
+    <string name="permissions_special_rationale">Granted from a system Settings screen.</string>
+</resources>

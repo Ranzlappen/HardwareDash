@@ -97,6 +97,29 @@ jobs:
             -PAPP_DESCRIPTION="${{ env.APP_DESCRIPTION }}" \
             ${{ matrix.extraGradleProps }}
 
+      # Prove every signed-release artifact really is signed before it is
+      # attached to a GitHub Release — a mis-wired keystore injection would
+      # otherwise ship an unsigned APK no device can install. Applies to
+      # both flavors (the rooted-release APK is the one that historically
+      # lacked a signed pipeline).
+      - name: Assert release APK is signed (${{ matrix.flavor }})
+        run: |
+          set -euo pipefail
+          RELEASE_APK=$(find ${{ matrix.outputDir }} -name "*.apk" -print -quit)
+          test -n "$RELEASE_APK" || { echo "::error::No ${{ matrix.flavor }} release APK produced in ${{ matrix.outputDir }}"; exit 1; }
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          APKSIGNER=""
+          if [ -n "$SDK_ROOT" ] && [ -d "$SDK_ROOT/build-tools" ]; then
+            APKSIGNER=$(find "$SDK_ROOT/build-tools" -name apksigner -type f | sort -V | tail -1)
+          fi
+          if [ -z "$APKSIGNER" ]; then
+            echo "::warning::apksigner not found on this runner — skipping signature verification"
+            exit 0
+          fi
+          "$APKSIGNER" verify --verbose "$RELEASE_APK" \
+            || { echo "::error::${{ matrix.flavor }} release APK is NOT signed — check the keystore injection"; exit 1; }
+          echo "✅ ${{ matrix.flavor }} release APK is signed"
+
       # retention-days: 1 — the workflow artifact only needs to live long
       # enough for the release job to attach it to the GitHub Release;
       # the Release asset is the durable record. Minimises GitHub Actions

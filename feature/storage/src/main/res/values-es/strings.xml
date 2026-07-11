@@ -37,4 +37,12 @@
     <string name="storage_widget_percent_format">%1$d %% usado</string>
     <string name="storage_widget_free_format">%1$s libres</string>
     <string name="storage_widget_unknown">—</string>
+    <string name="storage_action_assert_free_space">Comprobar que el espacio libre supera el umbral</string>
+    <string name="storage_root_tools_title">Herramientas root</string>
+    <string name="storage_root_tools_unavailable">Requiere la versión root de la app.</string>
+    <string name="storage_root_run">Ejecutar</string>
+    <string name="storage_root_diskstats_label">Volcar diskstats</string>
+    <string name="storage_root_diskstats_detail">dumpsys diskstats de solo lectura: E/S por dispositivo de bloques.</string>
+    <string name="storage_root_mounts_label">Enumerar montajes</string>
+    <string name="storage_root_mounts_detail">Solo lectura de /proc/mountinfo, incluidas particiones ocultas.</string>
 </resources>

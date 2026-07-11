@@ -116,6 +116,12 @@ internal fun ConditionsSection(
                 },
                 text = stringResource(R.string.automation_editor_condition_add_time),
             )
+            GadgetTertiaryButton(
+                onClick = {
+                    onConditionsChange(conditions + Condition.Group())
+                },
+                text = stringResource(R.string.automation_editor_condition_add_group),
+            )
         }
     }
 }
@@ -142,6 +148,7 @@ private fun ConditionBlock(
                         when (condition) {
                             is Condition.MetricCompare -> R.string.automation_condition_metric_title
                             is Condition.TimeWindow -> R.string.automation_condition_time_title
+                            is Condition.Group -> R.string.automation_condition_group_title
                         },
                     ),
                     style = MaterialTheme.typography.titleSmall,
@@ -158,8 +165,85 @@ private fun ConditionBlock(
                     MetricConditionEditor(condition, signals, onConditionChange)
                 is Condition.TimeWindow ->
                     TimeWindowConditionEditor(condition, onConditionChange)
+                is Condition.Group ->
+                    GroupConditionEditor(condition, signals, onConditionChange)
             }
         }
+    }
+}
+
+/**
+ * Editor for a nested [Condition.Group]: an ALL/ANY logic chip row, its
+ * children rendered recursively through [ConditionBlock], and add-buttons
+ * that append a metric / time / nested group child. Groups nest arbitrarily
+ * deep; each level owns its own logic.
+ */
+@Composable
+private fun GroupConditionEditor(
+    condition: Condition.Group,
+    signals: List<MetricDescriptor>,
+    onConditionChange: (Condition) -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    LabeledChipRow(label = stringResource(R.string.automation_editor_condition_logic)) {
+        GadgetChip(
+            selected = condition.logic == ConditionLogic.All,
+            onClick = { onConditionChange(condition.copy(logic = ConditionLogic.All)) },
+            label = stringResource(R.string.automation_logic_all),
+        )
+        GadgetChip(
+            selected = condition.logic == ConditionLogic.Any,
+            onClick = { onConditionChange(condition.copy(logic = ConditionLogic.Any)) },
+            label = stringResource(R.string.automation_logic_any),
+        )
+    }
+    if (condition.children.isEmpty()) {
+        HintText(stringResource(R.string.automation_editor_group_empty))
+    }
+    condition.children.forEachIndexed { index, child ->
+        ConditionBlock(
+            condition = child,
+            signals = signals,
+            onConditionChange = { updated ->
+                onConditionChange(condition.copy(children = condition.children.replaceAt(index, updated)))
+            },
+            onRemove = {
+                onConditionChange(condition.copy(children = condition.children.withoutAt(index)))
+            },
+        )
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(spacing.small)) {
+        GadgetTertiaryButton(
+            onClick = {
+                val first = signals.firstOrNull()
+                if (first != null) {
+                    onConditionChange(
+                        condition.copy(
+                            children = condition.children + Condition.MetricCompare(
+                                metricKey = first.metricKey,
+                                op = ComparisonOp.Lt,
+                                value = (first.min + first.currentMax()) / 2f,
+                            ),
+                        ),
+                    )
+                }
+            },
+            text = stringResource(R.string.automation_editor_condition_add_metric),
+            enabled = signals.isNotEmpty(),
+        )
+        GadgetTertiaryButton(
+            onClick = {
+                onConditionChange(
+                    condition.copy(
+                        children = condition.children + Condition.TimeWindow(
+                            startMinutes = DEFAULT_WINDOW_START,
+                            endMinutes = DEFAULT_WINDOW_END,
+                        ),
+                    ),
+                )
+            },
+            text = stringResource(R.string.automation_editor_condition_add_time),
+        )
     }
 }
 

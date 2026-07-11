@@ -115,7 +115,7 @@ unregistered draft (not in `settings.gradle.kts`).
 | `core:notifications` | 2 / 0 | Thin |
 | `core:testing` | 2 / 0 | Thin — needs fixtures for the test push |
 | `core:model` | 1 / 0 | Deliberately tiny (`MetricSource` seam) |
-| **`core:permissions`** | **0** | **Empty** — permission logic is ad-hoc per feature |
+| **`core:permissions`** | 7 / 0 | **Built (W5)** — per-feature `@IntoMap` registry + app baseline, `SpecialPermissions` orchestration, `PermissionsDashboardCard` in Settings |
 
 ### 1.4 Legacy inventory — `com.gadget.**` (96 files)
 
@@ -307,18 +307,26 @@ torch/vibration reference pattern:
   `Vibrator.hasVibrator()` presence check — the haptic actions are
   fire-and-forget one-shots with no "currently vibrating at X" state
   worth modelling).
-- **Still open (out of this sweep's scope):** `storage` standard-tier
-  ActionHandler (assert-free-space); widget coverage for `gps`/`camera`/
-  `apps`-beyond-its-existing-folder-widget; embedding `MonitorContainer`/
-  `LiveMonitorContainer` in the `apps` screen (the MetricSource exists,
-  the screen wiring doesn't yet).
+- **Still open (out of this sweep's scope):** ~~`storage` standard-tier
+  ActionHandler (assert-free-space)~~ **done** (`StorageActionHandler`,
+  featureId `storage`, `storage_assert_free_space`); widget coverage for
+  `gps`/`camera`/`apps`-beyond-its-existing-folder-widget; embedding
+  `MonitorContainer`/`LiveMonitorContainer` in the `apps` screen (the
+  MetricSource exists, the screen wiring doesn't yet).
 - Every screen embeds `MonitorContainer` + `LiveMonitorContainer` where
   signals exist; tri-state capability rows cover all rooted functions;
   `ModuleInfo` blocks complete; all entry points converge on the same
   `@Singleton` controller.
 - One PR per feature family; CI green on both flavors each time.
 
-### W4 — Widgets & tiles everywhere, fully customizable · **L**
+### W4 — Widgets & tiles everywhere, fully customizable · **L** · 🚧 started
+
+> **In progress** (`claude/feature-roadmap-gaps-jjef2r`): added a
+> **`VibrateTileService`** QS tile (continuous vibration via the shared
+> `VibrationController`), the second feature after torch with QS coverage.
+> Deferred: the generic configurable metric widget (needs the full
+> CI-invisible pin-reliability contract) and lock / automation-engine tiles
+> (need new `DevicePolicyManager` / engine-master-switch plumbing).
 
 - **Generic metric widget (the multiplier):** generalize the
   torch/vibration `MonitorWidgetProvider` / `MonitorChartWidgetProvider`
@@ -337,9 +345,18 @@ torch/vibration reference pattern:
   everywhere. **Stay on RemoteViews** — no Glance (consistent with
   `:core:widgetkit`'s design).
 
-### W5 — Permission management · **M**
+### W5 — Permission management · **M** · ✅ core built
 
-Build `:core:permissions` for real (empty today):
+> **Done (foundation):** `:core:permissions` is built — a per-feature
+> `@IntoMap` `FeaturePermissions` registry (`@Multibinds`, opt-in) plus an
+> app-wide baseline catalog, `PermissionRegistry` grant queries + summary,
+> `SpecialPermissions` (overlay / exact-alarm / WRITE_SETTINGS /
+> notification-listener / all-files → live query + Settings deep-link), and a
+> reusable `PermissionsDashboardCard` wired into Settings via a
+> `permissionsSection` slot. Still open: first-run onboarding flow, rooted
+> one-tap `pm grant` wiring, and per-module `ModuleInfo` integration.
+
+Original scope — build `:core:permissions` for real (was empty):
 
 - Per-feature **permission registry** (`@IntoMap` contributions of
   required/optional runtime + special permissions per feature).
@@ -354,7 +371,17 @@ Build `:core:permissions` for real (empty today):
   integration; **first-run onboarding** flow (replaces the deleted
   legacy coordinator).
 
-### W6 — Root flavor completion · **M**
+### W6 — Root flavor completion · **M** · 🚧 started
+
+> **In progress:** the reusable `:core:ui` **`RootToolsSection`** +
+> **`RootActionRow`** substrate now standardizes surfacing a dormant rooted
+> controller in a feature screen (torch/vibration had hand-rolled cards);
+> **`:feature:storage`** is the first live consumer (read-only
+> diskstats/mounts through `StorageController`, gated by the `:core:root`
+> seam). The signed **`rooted-release.apk`** pipeline is verified in CI (an
+> `apksigner verify` gate). Remaining: roll `RootToolsSection` out to the
+> other dormant features, the Sub-GHz SDR data path, and the LSPosed
+> repackage.
 
 - **Re-surface rooted UX natively in every feature screen** (the #94
   Phase-3 epic): the migrated controllers are wired but dormant — add
@@ -367,7 +394,14 @@ Build `:core:permissions` for real (empty today):
 - Root-safety audit: every rooted capability has a `RootFeatureKey`,
   soft-limiter coverage, and mutation logging; leak gates stay green.
 
-### W7 — High-end automation · **M**
+### W7 — High-end automation · **M** · 🚧 mostly landed
+
+> **Landed:** nested condition groups (`Condition.Group`), rule templates +
+> JSON export/import (`RuleTemplates` / `AutomationTransfer`), a persisted
+> firing-history log (`automation.db` v2 `rule_fire_history` +
+> `RuleFireHistoryRepository`, surfaced in the builder), and dry-run /
+> test-fire (`RuleFireExecutor.dryRun`). Remaining: time-window / hysteresis
+> trigger presets, FGS consolidation, and the external broadcast/intent hook.
 
 - **Nested condition groups** — the deferred `Group` node (the sealed
   `Condition` shape already leaves room).
@@ -479,6 +513,7 @@ graph TD
 
 ---
 
-> _Last reviewed: 2026-07-11 · Source: measured tree audit (PR #199,
-> `find`/`grep` counts over `app/`, `core/`, `feature/`,
-> `settings.gradle.kts`) · Related modules: all._
+> _Last reviewed: 2026-07-11 · Source: measured tree audit (PR #199 + the
+> completion-workstreams batch, `find`/`grep` counts over `app/`, `core/`,
+> `feature/`, `settings.gradle.kts`, `app/src/main/AndroidManifest.xml`) ·
+> Related modules: all._

@@ -8,10 +8,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dev.ranzlappen.gadget.core.automation.RuleFireHistoryRepository
 import dev.ranzlappen.gadget.core.automation.RuleRepository
 import dev.ranzlappen.gadget.core.data.automation.AutomationDatabase
+import dev.ranzlappen.gadget.core.data.automation.RoomRuleFireHistoryRepository
 import dev.ranzlappen.gadget.core.data.automation.RoomRuleRepository
 import dev.ranzlappen.gadget.core.data.automation.RuleDao
+import dev.ranzlappen.gadget.core.data.automation.RuleFireDao
 import javax.inject.Singleton
 
 // Repo convention (see CLAUDE.md "Companion-object @Provides" pitfall):
@@ -30,10 +33,15 @@ object AutomationDataModule {
         context,
         AutomationDatabase::class.java,
         "automation.db",
-    ).build()
+    )
+        .addMigrations(AutomationDatabase.MIGRATION_1_2)
+        .build()
 
     @Provides
     fun provideRuleDao(database: AutomationDatabase): RuleDao = database.ruleDao()
+
+    @Provides
+    fun provideRuleFireDao(database: AutomationDatabase): RuleFireDao = database.ruleFireDao()
 }
 
 @Module
@@ -43,4 +51,10 @@ abstract class AutomationDataBindsModule {
     @Binds
     @Singleton
     abstract fun bindRuleRepository(impl: RoomRuleRepository): RuleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRuleFireHistoryRepository(
+        impl: RoomRuleFireHistoryRepository,
+    ): RuleFireHistoryRepository
 }

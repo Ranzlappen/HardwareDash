@@ -7,6 +7,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -20,6 +23,8 @@ import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
 import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.RootActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
@@ -29,10 +34,49 @@ fun DiagnosticsScreen(
     viewModel: DiagnosticsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val rootTools by viewModel.rootTools.collectAsState()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
     DiagnosticsScreenContent(
         state = state,
         moduleInfo = diagnosticsModuleInfo(state),
         modifier = modifier,
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.diagnostics_root_tools_title),
+                available = state.isRootedFlavor,
+                unavailableMessage = stringResource(R.string.diagnostics_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootActionRow(
+                    label = stringResource(R.string.diagnostics_root_meminfo_label),
+                    description = stringResource(R.string.diagnostics_root_meminfo_detail),
+                    runLabel = stringResource(R.string.diagnostics_root_run),
+                    onRun = viewModel::onDumpMemInfo,
+                    enabled = !rootTools.memInfo.running,
+                    statusMessage = rootTools.memInfo.message,
+                    statusKind = if (rootTools.memInfo.isError) GadgetStatusKind.Error else GadgetStatusKind.Success,
+                )
+                RootActionRow(
+                    label = stringResource(R.string.diagnostics_root_cpuinfo_label),
+                    description = stringResource(R.string.diagnostics_root_cpuinfo_detail),
+                    runLabel = stringResource(R.string.diagnostics_root_run),
+                    onRun = viewModel::onDumpCpuInfo,
+                    enabled = !rootTools.cpuInfo.running,
+                    statusMessage = rootTools.cpuInfo.message,
+                    statusKind = if (rootTools.cpuInfo.isError) GadgetStatusKind.Error else GadgetStatusKind.Success,
+                )
+                RootActionRow(
+                    label = stringResource(R.string.diagnostics_root_procstats_label),
+                    description = stringResource(R.string.diagnostics_root_procstats_detail),
+                    runLabel = stringResource(R.string.diagnostics_root_run),
+                    onRun = viewModel::onDumpProcstats,
+                    enabled = !rootTools.procstats.running,
+                    statusMessage = rootTools.procstats.message,
+                    statusKind = if (rootTools.procstats.isError) GadgetStatusKind.Error else GadgetStatusKind.Success,
+                )
+            }
+        },
         monitors = {
             LiveMonitorContainer(
                 metricKey = MemoryMetricSource.METRIC_KEY,
@@ -114,6 +158,7 @@ internal fun DiagnosticsScreenContent(
     state: DiagnosticsState,
     moduleInfo: ModuleInfo?,
     modifier: Modifier = Modifier,
+    rootTools: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
@@ -123,6 +168,7 @@ internal fun DiagnosticsScreenContent(
         functional = {
             DiagnosticsInfoCard()
             monitors()
+            rootTools()
         },
     )
 }

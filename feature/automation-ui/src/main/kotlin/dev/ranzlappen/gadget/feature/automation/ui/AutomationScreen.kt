@@ -1,9 +1,15 @@
+// The templates / import / history bottom sheets use GadgetBottomSheet, whose
+// signature carries M3's experimental SheetState default — callers need the
+// ExperimentalMaterial3Api opt-in (same as RuleEditorSheet).
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package dev.ranzlappen.gadget.feature.automation.ui
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,12 +21,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Power
 import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.Science
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.TouchApp
+import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -49,15 +60,20 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import dev.ranzlappen.gadget.core.automation.ModuleAction
+import dev.ranzlappen.gadget.core.automation.RuleFireOutcome
+import dev.ranzlappen.gadget.core.automation.RuleFireRecord
 import dev.ranzlappen.gadget.core.automation.model.ComparisonOp
 import dev.ranzlappen.gadget.core.automation.model.Edge
 import dev.ranzlappen.gadget.core.automation.model.Rule
 import dev.ranzlappen.gadget.core.automation.model.RuleAction
+import dev.ranzlappen.gadget.core.automation.model.RuleTemplate
 import dev.ranzlappen.gadget.core.automation.model.Trigger
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.model.MetricDescriptor
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
+import dev.ranzlappen.gadget.core.ui.component.CompactCard
 import dev.ranzlappen.gadget.core.ui.component.DashCard
+import dev.ranzlappen.gadget.core.ui.component.GadgetBottomSheet
 import dev.ranzlappen.gadget.core.ui.component.GadgetDialog
 import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GadgetFab
@@ -65,6 +81,7 @@ import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetPrimaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetStatusKind
 import dev.ranzlappen.gadget.core.ui.component.GadgetTertiaryButton
+import dev.ranzlappen.gadget.core.ui.component.GadgetTextField
 import dev.ranzlappen.gadget.core.ui.module.CapabilityAction
 import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
 import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
@@ -95,13 +112,14 @@ fun AutomationScreen(
     // isn't in the feature plugin's default set; see the CLAUDE.md pitfall).
     val rules by viewModel.rules.collectAsState()
     val exactAlarmAllowed by viewModel.exactAlarmAllowed.collectAsState()
+    val fireHistory by viewModel.fireHistoryRecords.collectAsState()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
-            when (event) {
-                is AutomationUiEvent.RanNow -> snackbarHostState.showSnackbar(
+            val message = when (event) {
+                is AutomationUiEvent.RanNow ->
                     if (event.dispatched > 0) {
                         context.getString(
                             R.string.automation_run_now_result,
@@ -110,9 +128,29 @@ fun AutomationScreen(
                         )
                     } else {
                         context.getString(R.string.automation_run_now_nothing, event.ruleName)
-                    },
-                )
+                    }
+                is AutomationUiEvent.TemplateAdded ->
+                    context.getString(R.string.automation_template_added, event.templateName)
+                is AutomationUiEvent.TestFired ->
+                    if (event.wouldDispatch > 0) {
+                        context.getString(R.string.automation_test_fire_result, event.wouldDispatch)
+                    } else {
+                        context.getString(R.string.automation_test_fire_nothing)
+                    }
+                is AutomationUiEvent.Exported ->
+                    if (event.count > 0) {
+                        context.getString(R.string.automation_export_result, event.count)
+                    } else {
+                        context.getString(R.string.automation_export_empty)
+                    }
+                is AutomationUiEvent.Imported ->
+                    if (event.imported != null) {
+                        context.getString(R.string.automation_import_result, event.imported)
+                    } else {
+                        context.getString(R.string.automation_import_failed, event.reason.orEmpty())
+                    }
             }
+            snackbarHostState.showSnackbar(message)
         }
     }
 
@@ -147,11 +185,18 @@ fun AutomationScreen(
         signals = viewModel.signals,
         actionChoices = viewModel.actionChoices,
         exactAlarmAllowed = exactAlarmAllowed,
+        templates = viewModel.templates,
+        fireHistory = fireHistory,
         moduleInfo = automationModuleInfo(exactAlarmAllowed, onRequestExactAlarm),
         onSave = viewModel::saveRule,
         onDelete = viewModel::deleteRule,
         onSetEnabled = viewModel::setEnabled,
         onRunNow = viewModel::runNow,
+        onTestFire = viewModel::testFire,
+        onApplyTemplate = viewModel::applyTemplate,
+        onExport = viewModel::exportRules,
+        onImport = viewModel::importRules,
+        onClearHistory = viewModel::clearHistory,
         onRequestExactAlarm = onRequestExactAlarm,
         modifier = modifier,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -220,18 +265,34 @@ internal fun AutomationScreenContent(
     onRunNow: (Rule) -> Unit,
     onRequestExactAlarm: () -> Unit,
     modifier: Modifier = Modifier,
+    templates: List<RuleTemplate> = emptyList(),
+    fireHistory: List<RuleFireRecord> = emptyList(),
+    onTestFire: (Rule) -> Unit = {},
+    onApplyTemplate: (RuleTemplate) -> Unit = {},
+    onExport: () -> Unit = {},
+    onImport: (String) -> Unit = {},
+    onClearHistory: () -> Unit = {},
     snackbarHost: @Composable () -> Unit = {},
 ) {
     val spacing = LocalGadgetTheme.current.spacing
     val signalsByKey = remember(signals) { signals.associateBy { it.metricKey } }
     var editorRule by remember { mutableStateOf<Rule?>(null) }
     var pendingDelete by remember { mutableStateOf<Rule?>(null) }
+    var showTemplates by remember { mutableStateOf(false) }
+    var showImport by remember { mutableStateOf(false) }
+    var showHistory by remember { mutableStateOf(false) }
 
     Box(modifier = modifier.fillMaxSize()) {
         ModuleScreenScaffold(
             title = stringResource(R.string.automation_title),
             moduleInfo = moduleInfo,
             functional = {
+                AutomationToolbar(
+                    onTemplates = { showTemplates = true },
+                    onExport = onExport,
+                    onImport = { showImport = true },
+                    onHistory = { showHistory = true },
+                )
                 if (rules.isEmpty()) {
                     GadgetEmptyState(
                         title = stringResource(R.string.automation_empty_title),
@@ -248,6 +309,7 @@ internal fun AutomationScreenContent(
                             onClick = { editorRule = rule },
                             onSetEnabled = { enabled -> onSetEnabled(rule.id, enabled) },
                             onRunNow = { onRunNow(rule) },
+                            onTestFire = { onTestFire(rule) },
                             onDeleteRequest = { pendingDelete = rule },
                         )
                     }
@@ -310,6 +372,185 @@ internal fun AutomationScreenContent(
             },
         )
     }
+
+    if (showTemplates) {
+        TemplatesSheet(
+            templates = templates,
+            onPick = { template ->
+                onApplyTemplate(template)
+                showTemplates = false
+            },
+            onDismiss = { showTemplates = false },
+        )
+    }
+
+    if (showImport) {
+        ImportSheet(
+            onImport = { json ->
+                onImport(json)
+                showImport = false
+            },
+            onDismiss = { showImport = false },
+        )
+    }
+
+    if (showHistory) {
+        HistorySheet(
+            records = fireHistory,
+            onClear = onClearHistory,
+            onDismiss = { showHistory = false },
+        )
+    }
+}
+
+/** The Templates / Export / Import / History action row above the rule list. */
+@Composable
+private fun AutomationToolbar(
+    onTemplates: () -> Unit,
+    onExport: () -> Unit,
+    onImport: () -> Unit,
+    onHistory: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(spacing.small),
+    ) {
+        GadgetTertiaryButton(
+            onClick = onTemplates,
+            text = stringResource(R.string.automation_templates),
+            leadingIcon = Icons.Outlined.Dashboard,
+        )
+        GadgetTertiaryButton(
+            onClick = onHistory,
+            text = stringResource(R.string.automation_history),
+            leadingIcon = Icons.Outlined.History,
+        )
+        GadgetIconButton(
+            onClick = onExport,
+            icon = Icons.Outlined.Upload,
+            contentDescription = stringResource(R.string.automation_export),
+        )
+        GadgetIconButton(
+            onClick = onImport,
+            icon = Icons.Outlined.Download,
+            contentDescription = stringResource(R.string.automation_import),
+        )
+    }
+}
+
+/** Bottom sheet listing the built-in [RuleTemplate]s to drop in. */
+@Composable
+private fun TemplatesSheet(
+    templates: List<RuleTemplate>,
+    onPick: (RuleTemplate) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    GadgetBottomSheet(
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.automation_templates_title),
+    ) {
+        templates.forEach { template ->
+            DashCard(
+                modifier = Modifier.fillMaxWidth(),
+                title = template.name,
+                icon = Icons.Outlined.Dashboard,
+                onClick = { onPick(template) },
+            ) {
+                Text(
+                    text = template.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Spacer(modifier = Modifier.height(spacing.small))
+        }
+    }
+}
+
+/** Paste-a-JSON-document import bottom sheet. */
+@Composable
+private fun ImportSheet(
+    onImport: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var text by remember { mutableStateOf("") }
+    GadgetBottomSheet(
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.automation_import_title),
+    ) {
+        GadgetTextField(
+            value = text,
+            onValueChange = { text = it },
+            label = stringResource(R.string.automation_import),
+            placeholder = stringResource(R.string.automation_import_hint),
+            singleLine = false,
+            minLines = 3,
+            maxLines = 8,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        GadgetPrimaryButton(
+            onClick = { onImport(text) },
+            text = stringResource(R.string.automation_import_confirm),
+            enabled = text.isNotBlank(),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+/** Bottom sheet showing the rule firing-history audit trail. */
+@Composable
+private fun HistorySheet(
+    records: List<RuleFireRecord>,
+    onClear: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    GadgetBottomSheet(
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.automation_history_title),
+    ) {
+        if (records.isEmpty()) {
+            Text(
+                text = stringResource(R.string.automation_history_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            records.forEach { record -> HistoryRow(record) }
+            Spacer(modifier = Modifier.height(spacing.small))
+            GadgetTertiaryButton(
+                onClick = onClear,
+                text = stringResource(R.string.automation_history_clear),
+                leadingIcon = Icons.Outlined.Delete,
+            )
+        }
+    }
+}
+
+@Composable
+private fun HistoryRow(record: RuleFireRecord, modifier: Modifier = Modifier) {
+    val outcomeLabel = when (record.outcome) {
+        RuleFireOutcome.Fired -> stringResource(R.string.automation_history_outcome_fired)
+        RuleFireOutcome.Skipped -> stringResource(R.string.automation_history_outcome_skipped)
+        RuleFireOutcome.Throttled -> stringResource(R.string.automation_history_outcome_throttled)
+    }
+    val prefix = if (record.dryRun) {
+        stringResource(R.string.automation_history_dry_run) + " · "
+    } else {
+        ""
+    }
+    val subtitle = prefix + outcomeLabel + " · " +
+        stringResource(R.string.automation_history_dispatched, record.dispatched)
+    CompactCard(
+        modifier = modifier.fillMaxWidth(),
+        title = record.ruleName,
+        subtitle = subtitle,
+    )
 }
 
 /** A fresh draft for the "New rule" FAB; Manual is the no-param default. */
@@ -332,6 +573,7 @@ private fun RuleCard(
     onClick: () -> Unit,
     onSetEnabled: (Boolean) -> Unit,
     onRunNow: () -> Unit,
+    onTestFire: () -> Unit,
     onDeleteRequest: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -370,6 +612,11 @@ private fun RuleCard(
                     modifier = Modifier.semantics { contentDescription = toggleDescription },
                 )
                 Spacer(modifier = Modifier.weight(1f))
+                GadgetIconButton(
+                    onClick = onTestFire,
+                    icon = Icons.Outlined.Science,
+                    contentDescription = stringResource(R.string.automation_test_fire),
+                )
                 GadgetIconButton(
                     onClick = onRunNow,
                     icon = Icons.Outlined.PlayArrow,

@@ -24,6 +24,7 @@ import dev.ranzlappen.gadget.core.root.launch.LaunchGate
 import dev.ranzlappen.gadget.core.root.launch.LaunchGateOutcome
 import dev.ranzlappen.gadget.root.ui.FatalLaunchScreen
 import dev.ranzlappen.gadget.backup.ui.BackupCard
+import dev.ranzlappen.gadget.core.permissions.PermissionsDashboardCard
 import dev.ranzlappen.gadget.root.ui.RootedFeatureTogglesCard
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import android.nfc.NfcAdapter
@@ -59,6 +60,7 @@ import dev.ranzlappen.gadget.feature.bugreport.bugReportScreen
 import dev.ranzlappen.gadget.feature.diagnostics.diagnosticsScreen
 import dev.ranzlappen.gadget.feature.display.displayScreen
 import dev.ranzlappen.gadget.feature.lock.lockScreen
+import dev.ranzlappen.gadget.feature.logbook.logbookScreen
 import dev.ranzlappen.gadget.feature.manual.manualScreen
 import dev.ranzlappen.gadget.feature.microphone.microphoneScreen
 import dev.ranzlappen.gadget.feature.notification.notificationScreen
@@ -186,8 +188,14 @@ class MainActivity : ComponentActivity() {
                         adbDebugScreen()
                         bugReportScreen()
                         manualScreen()
+                        logbookScreen()
                         automationScreen()
                         settingsScreen(
+                            // Centralized permissions dashboard (W5), from
+                            // :core:permissions — aggregates every feature's
+                            // @IntoMap permission contributions + the app
+                            // baseline.
+                            permissionsSection = { PermissionsDashboardCard() },
                             // Backup/restore lives in :app (BackupManager
                             // spans :core:data + :feature:apps, which no
                             // leaf module can see together).

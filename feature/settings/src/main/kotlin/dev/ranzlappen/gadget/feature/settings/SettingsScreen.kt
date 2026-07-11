@@ -41,6 +41,7 @@ import dev.ranzlappen.gadget.feature.settings.components.MonitoringCard
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
+    permissionsSection: @Composable () -> Unit = {},
     backupSection: @Composable () -> Unit = {},
     rootFeatureToggles: @Composable () -> Unit = {},
 ) {
@@ -73,6 +74,10 @@ fun SettingsScreen(
                 notificationActionsEnabled = monitorNotificationActionsEnabled,
                 onNotificationActionsEnabledChange = viewModel::setMonitorNotificationActionsEnabled,
             )
+            // Centralized permissions dashboard (W5). Empty default; supplied
+            // by :app from :core:permissions (PermissionsDashboardCard), which
+            // aggregates every feature's @IntoMap permission contributions.
+            permissionsSection()
             // Whole-app backup / restore. Empty default; supplied by :app
             // (BackupManager spans :core:data + :feature:apps, which a leaf
             // module can't see together).

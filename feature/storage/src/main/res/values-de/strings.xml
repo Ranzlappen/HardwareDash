@@ -37,4 +37,12 @@
     <string name="storage_widget_percent_format">%1$d %% belegt</string>
     <string name="storage_widget_free_format">%1$s frei</string>
     <string name="storage_widget_unknown">—</string>
+    <string name="storage_action_assert_free_space">Prüfen, ob freier Speicher über dem Schwellenwert liegt</string>
+    <string name="storage_root_tools_title">Root-Werkzeuge</string>
+    <string name="storage_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="storage_root_run">Ausführen</string>
+    <string name="storage_root_diskstats_label">Diskstats ausgeben</string>
+    <string name="storage_root_diskstats_detail">Schreibgeschütztes dumpsys diskstats – E/A pro Blockgerät.</string>
+    <string name="storage_root_mounts_label">Mounts auflisten</string>
+    <string name="storage_root_mounts_detail">Schreibgeschütztes /proc/mountinfo, einschließlich versteckter Partitionen.</string>
 </resources>

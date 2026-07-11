@@ -31,6 +31,18 @@
     <string name="storage_cap_fstrim_name">Storage trim (fstrim)</string>
     <string name="storage_cap_fstrim_detail">Force discard operation on mounted filesystems to improve SSD longevity</string>
 
+    <!-- ─── Automation actions ─────────────────────────────────────────── -->
+    <string name="storage_action_assert_free_space">Assert free space above threshold</string>
+
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="storage_root_tools_title">Rooted tools</string>
+    <string name="storage_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="storage_root_run">Run</string>
+    <string name="storage_root_diskstats_label">Dump diskstats</string>
+    <string name="storage_root_diskstats_detail">Read-only dumpsys diskstats — I/O per block device.</string>
+    <string name="storage_root_mounts_label">Enumerate mounts</string>
+    <string name="storage_root_mounts_detail">Read-only /proc/mountinfo, including hidden partitions.</string>
+
     <!-- Home-screen widget -->
     <string name="storage_widget_label">Storage</string>
     <string name="storage_widget_description">Internal storage used and free space</string>

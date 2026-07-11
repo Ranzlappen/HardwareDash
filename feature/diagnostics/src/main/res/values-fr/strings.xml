@@ -20,4 +20,13 @@
     <string name="diagnostics_cap_cpuinfo_detail">Instantané de dumpsys cpuinfo (limité à 8 Ko) de l\'utilisation du CPU par processus</string>
     <string name="diagnostics_cap_procstats_name">Vidage des statistiques de processus</string>
     <string name="diagnostics_cap_procstats_detail">Instantané de dumpsys procstats pour l\'historique à long terme de la mémoire et du CPU des processus</string>
+    <string name="diagnostics_root_tools_title">Outils root</string>
+    <string name="diagnostics_root_tools_unavailable">Nécessite la version root de l\'application.</string>
+    <string name="diagnostics_root_run">Exécuter</string>
+    <string name="diagnostics_root_meminfo_label">Extraire meminfo</string>
+    <string name="diagnostics_root_meminfo_detail">Instantané dumpsys meminfo en lecture seule.</string>
+    <string name="diagnostics_root_cpuinfo_label">Extraire cpuinfo</string>
+    <string name="diagnostics_root_cpuinfo_detail">Instantané dumpsys cpuinfo en lecture seule.</string>
+    <string name="diagnostics_root_procstats_label">Extraire procstats</string>
+    <string name="diagnostics_root_procstats_detail">Instantané dumpsys procstats (3 h) en lecture seule.</string>
 </resources>

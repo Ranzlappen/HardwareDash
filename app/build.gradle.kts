@@ -189,6 +189,9 @@ dependencies {
     // RootCapabilityRegistry living in this module. Legacy
     // app/src/{standard,rooted}/java/com/gadget/root/* impls bind it.
     implementation(project(":core:root"))
+    // :core:permissions (W5) — the centralized permission dashboard the
+    // Settings screen renders via its permissionsSection slot.
+    implementation(project(":core:permissions"))
     // Direct deps for the :app-level automation wiring
     // (AutomationBootRearmHandler binds :core:widgetkit's BootRearmHandler to
     // :core:automation's runtime — the two modules deliberately don't see
@@ -235,6 +238,7 @@ dependencies {
     implementation(project(":feature:notification"))
     implementation(project(":feature:bugreport"))
     implementation(project(":feature:manual"))
+    implementation(project(":feature:logbook"))
     implementation(project(":feature:youtubedownloader"))
     // Batch H: the automation rules list + builder (also pulls
     // :core:hardware — the read-side registry — into the :app Hilt graph).

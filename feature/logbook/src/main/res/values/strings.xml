@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="logbook_screen_title">Logbook</string>
+
+    <!-- ─── Entry composer ─────────────────────────────────────────────── -->
+    <string name="logbook_composer_title">New entry</string>
+    <string name="logbook_composer_placeholder">What happened in this session?</string>
+    <string name="logbook_composer_submit">Log entry</string>
+
+    <!-- ─── Tag palette ────────────────────────────────────────────────── -->
+    <string name="logbook_tag_none">No tag</string>
+    <string name="logbook_tag_teal">Teal tag</string>
+    <string name="logbook_tag_amber">Amber tag</string>
+    <string name="logbook_tag_rose">Rose tag</string>
+    <string name="logbook_tag_violet">Violet tag</string>
+    <string name="logbook_tag_slate">Slate tag</string>
+
+    <!-- ─── Entries section ────────────────────────────────────────────── -->
+    <string name="logbook_entries_title">Entries</string>
+    <string name="logbook_entries_empty_title">No entries yet</string>
+    <string name="logbook_entries_empty_subtitle">Log the first note about this session above.</string>
+    <string name="logbook_entry_delete">Delete entry</string>
+
+    <!-- ─── Processes section ──────────────────────────────────────────── -->
+    <string name="logbook_processes_title">Processes</string>
+    <string name="logbook_processes_empty_title">No processes yet</string>
+    <string name="logbook_processes_empty_subtitle">Track a multi-step task with checkpoints and reminders.</string>
+    <string name="logbook_process_add">New process</string>
+    <string name="logbook_process_delete">Delete process</string>
+    <string name="logbook_process_open_count">%1$d open</string>
+    <string name="logbook_process_done">All done</string>
+    <string name="logbook_checkpoint_due">Due %1$s</string>
+    <string name="logbook_checkpoint_overdue">Overdue — was due %1$s</string>
+    <string name="logbook_checkpoint_toggle">Mark checkpoint complete</string>
+
+    <!-- ─── Process builder sheet ──────────────────────────────────────── -->
+    <string name="logbook_builder_title">New process</string>
+    <string name="logbook_builder_name_label">Process name</string>
+    <string name="logbook_builder_checkpoints_header">Checkpoints</string>
+    <string name="logbook_builder_checkpoint_name">Checkpoint name</string>
+    <string name="logbook_builder_set_due">Set due date</string>
+    <string name="logbook_builder_set_reminder">Set reminder</string>
+    <string name="logbook_builder_due_set">Due %1$s</string>
+    <string name="logbook_builder_reminder_set">Remind %1$s</string>
+    <string name="logbook_builder_add_checkpoint">Add checkpoint</string>
+    <string name="logbook_builder_remove_checkpoint">Remove checkpoint</string>
+    <string name="logbook_builder_save">Create process</string>
+    <string name="logbook_builder_cancel">Cancel</string>
+
+    <!-- ─── Module info ────────────────────────────────────────────────── -->
+    <string name="logbook_perm_notifications_label">Notifications</string>
+    <string name="logbook_perm_notifications_rationale">Deliver checkpoint reminders as notifications.</string>
+    <string name="logbook_cap_reminders_name">Checkpoint reminders</string>
+    <string name="logbook_cap_reminders_detail">Per-checkpoint reminder notifications scheduled via WorkManager.</string>
+    <string name="logbook_cap_reminders_ready">Notifications permitted — reminders will be delivered.</string>
+    <string name="logbook_cap_reminders_blocked">Notification permission missing — reminders will be silent.</string>
+
+    <!-- ─── Monitoring ─────────────────────────────────────────────────── -->
+    <string name="logbook_monitor_metric_name">Open checkpoints</string>
+    <string name="logbook_monitor_open">Open checkpoints history</string>
+
+    <!-- ─── Automation actions ─────────────────────────────────────────── -->
+    <string name="logbook_action_add_entry">Add logbook entry</string>
+    <string name="logbook_action_assert_open_below">Assert open checkpoints at or below threshold</string>
+
+    <!-- ─── Reminder notification ──────────────────────────────────────── -->
+    <string name="logbook_notification_channel_name">Logbook reminders</string>
+    <string name="logbook_notification_channel_description">Checkpoint reminder notifications from the Logbook module</string>
+    <string name="logbook_notification_title">Checkpoint due: %1$s</string>
+    <string name="logbook_notification_body">From process “%1$s”</string>
+    <string name="logbook_notification_process_fallback">Logbook process</string>
+</resources>

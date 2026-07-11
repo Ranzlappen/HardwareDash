@@ -99,6 +99,25 @@ internal fun Condition.holds(readings: Map<String, Float>, now: LocalTime): Bool
             else -> minutes >= startMinutes || minutes < endMinutes
         }
     }
+    // Nested group: fold the children by the group's own logic, recursing.
+    // An empty group is vacuously true for both logics (matches the
+    // top-level Rule.conditions empty semantics).
+    is Condition.Group -> when (logic) {
+        ConditionLogic.All -> children.all { it.holds(readings, now) }
+        ConditionLogic.Any -> children.isEmpty() || children.any { it.holds(readings, now) }
+    }
+}
+
+/**
+ * Every `MetricCompare` metric key referenced anywhere in this condition
+ * tree (recursing into [Condition.Group]s). The runtime uses this to gather
+ * the readings a rule's conditions need before evaluating, so a metric
+ * buried inside a nested group is still sampled.
+ */
+fun Condition.referencedMetricKeys(): List<String> = when (this) {
+    is Condition.MetricCompare -> listOf(metricKey)
+    is Condition.TimeWindow -> emptyList()
+    is Condition.Group -> children.flatMap { it.referencedMetricKeys() }
 }
 
 /** `sample <op> bound`, e.g. `Lt.compare(3f, 5f) == true`. */

@@ -59,6 +59,7 @@
 
     <!-- Widget labels / descriptions -->
     <string name="widget_vibrate_label">Vibrate</string>
+    <string name="vibration_tile_label">Vibrate</string>
     <string name="widget_pattern_label">Vibration pattern</string>
     <string name="widget_vibration_monitor_label">Vibration monitor</string>
     <string name="widget_vibration_monitor_chart_label">Vibration chart</string>

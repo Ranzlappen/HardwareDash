@@ -182,10 +182,15 @@ directly via `EntryPointAccessors.fromApplication`, producing the same state
 visible from the screen and widgets. Declared in the feature module's
 manifest (`BIND_QUICK_SETTINGS_TILE` + `exported=true`).
 
-The torch module ships two:
+Torch ships two tiles; vibration adds a third (W4):
 
 - **`FlashlightTileService`** — toggles `TorchController` on each tap; tile
   state mirrors `TorchController.state` (UNAVAILABLE on flashless devices).
+- **`VibrateTileService`** (`:feature:vibration`) — a tap starts / stops a
+  **held continuous** vibration via the shared `VibrationController`
+  (`startContinuous` / `stop`). Active-state reads `VibrationState.isSustained`
+  (not `isActive`, which a decaying one-shot also sets); UNAVAILABLE on
+  vibrator-less devices. Same `EntryPointAccessors` recipe as the torch tiles.
 - **`StrobeTileService`** — a tap starts / stops a constant-rate strobe
   (`TorchWidgetConfig.DEFAULT_RATE_HZ`) by start/stopping `StrobeService`
   (the same start path as `TorchViewModel` — `startForegroundService` inside
@@ -228,7 +233,7 @@ Catalog](Asset-Catalog), [Troubleshooting](Troubleshooting).
 
 ---
 
-> _Last reviewed: 2026-06-30 · Source: `CLAUDE.md` (widgetkit),
+> _Last reviewed: 2026-07-11 · Source: `CLAUDE.md` (widgetkit),
 > `feature/torch/.../tile/*TileService.kt`,
 > `docs/widgets/content-widget-customization.md`
 > · Related modules: `:core:widgetkit`, `:feature:torch`,

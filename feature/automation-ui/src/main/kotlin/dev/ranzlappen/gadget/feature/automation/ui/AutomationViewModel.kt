@@ -10,9 +10,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.automation.ModuleAction
 import dev.ranzlappen.gadget.core.automation.ModuleActionRegistry
+import dev.ranzlappen.gadget.core.automation.RuleFireHistoryRepository
+import dev.ranzlappen.gadget.core.automation.RuleFireRecord
 import dev.ranzlappen.gadget.core.automation.RuleRepository
 import dev.ranzlappen.gadget.core.automation.engine.AutomationServiceResidency
+import dev.ranzlappen.gadget.core.automation.model.AutomationTransfer
 import dev.ranzlappen.gadget.core.automation.model.Rule
+import dev.ranzlappen.gadget.core.automation.model.RuleTemplate
+import dev.ranzlappen.gadget.core.automation.model.RuleTemplates
 import dev.ranzlappen.gadget.core.automation.model.Trigger
 import dev.ranzlappen.gadget.core.automation.service.AutomationController
 import dev.ranzlappen.gadget.core.automation.service.AutomationScheduler
@@ -47,6 +52,18 @@ data class ActionChoice(
 sealed interface AutomationUiEvent {
     /** A manual "run now" finished; [dispatched] actions were sent. */
     data class RanNow(val ruleName: String, val dispatched: Int) : AutomationUiEvent
+
+    /** A template was added as a new (disabled-until-saved) rule. */
+    data class TemplateAdded(val templateName: String) : AutomationUiEvent
+
+    /** A dry-run "test fire" finished; [wouldDispatch] actions would have run. */
+    data class TestFired(val ruleName: String, val wouldDispatch: Int) : AutomationUiEvent
+
+    /** Rules were exported to the clipboard. */
+    data class Exported(val count: Int) : AutomationUiEvent
+
+    /** An import finished. [imported] is null on a parse failure ([reason] set). */
+    data class Imported(val imported: Int?, val reason: String? = null) : AutomationUiEvent
 }
 
 /**
@@ -72,6 +89,7 @@ class AutomationViewModel @Inject constructor(
     private val scheduler: AutomationScheduler,
     private val controller: AutomationController,
     private val fireExecutor: RuleFireExecutor,
+    private val fireHistory: RuleFireHistoryRepository,
     hardwareRegistry: HardwareRegistry,
     actionRegistry: ModuleActionRegistry,
     rootRegistry: RootCapabilityRegistry,
@@ -79,6 +97,17 @@ class AutomationViewModel @Inject constructor(
 
     /** All persisted rules, hot while the screen is subscribed. */
     val rules: StateFlow<List<Rule>> = ruleRepository.observeRules()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATE_FLOW_TIMEOUT_MS),
+            initialValue = emptyList(),
+        )
+
+    /** The built-in rule templates surfaced in the "Templates" picker. */
+    val templates: List<RuleTemplate> = RuleTemplates.all
+
+    /** The rule firing-history audit trail, most-recent first. */
+    val fireHistoryRecords: StateFlow<List<RuleFireRecord>> = fireHistory.observeRecent()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STATE_FLOW_TIMEOUT_MS),
@@ -152,6 +181,74 @@ class AutomationViewModel @Inject constructor(
             val dispatched = fireExecutor.fire(rule)
             _events.send(AutomationUiEvent.RanNow(rule.name, dispatched))
         }
+    }
+
+    /**
+     * Dry-run "test fire" — evaluate the rule and report what it *would* do
+     * without dispatching anything or touching the cooldown clock. Records a
+     * dry-run entry in the firing history.
+     */
+    fun testFire(rule: Rule) {
+        viewModelScope.launch {
+            val result = fireExecutor.dryRun(rule)
+            _events.send(AutomationUiEvent.TestFired(rule.name, result.wouldDispatch))
+        }
+    }
+
+    /** Materialize a [RuleTemplate] as a fresh persisted rule, then re-arm. */
+    fun applyTemplate(template: RuleTemplate) {
+        viewModelScope.launch {
+            val rule = template.create(java.util.UUID.randomUUID().toString())
+            ruleRepository.save(rule)
+            afterRuleChange(ruleRepository.rule(rule.id) ?: rule)
+            _events.send(AutomationUiEvent.TemplateAdded(template.name))
+        }
+    }
+
+    /** Serialize all current rules to a JSON document on the clipboard. */
+    fun exportRules() {
+        viewModelScope.launch {
+            val current = rules.value
+            if (current.isEmpty()) {
+                _events.send(AutomationUiEvent.Exported(0))
+                return@launch
+            }
+            val json = AutomationTransfer.export(current)
+            copyToClipboard(json)
+            _events.send(AutomationUiEvent.Exported(current.size))
+        }
+    }
+
+    /**
+     * Parse a pasted JSON document and persist each rule with a **fresh id**
+     * (an import never clobbers an existing rule), then re-arm the engine.
+     */
+    fun importRules(json: String) {
+        viewModelScope.launch {
+            when (val result = AutomationTransfer.import(json)) {
+                is AutomationTransfer.ImportResult.Success -> {
+                    result.rules.forEach { imported ->
+                        val fresh = imported.copy(id = java.util.UUID.randomUUID().toString())
+                        ruleRepository.save(fresh)
+                        afterRuleChange(ruleRepository.rule(fresh.id) ?: fresh)
+                    }
+                    _events.send(AutomationUiEvent.Imported(result.rules.size))
+                }
+                is AutomationTransfer.ImportResult.Failure ->
+                    _events.send(AutomationUiEvent.Imported(imported = null, reason = result.reason))
+            }
+        }
+    }
+
+    fun clearHistory() {
+        viewModelScope.launch { fireHistory.clear() }
+    }
+
+    private fun copyToClipboard(text: String) {
+        val clipboard = context.getSystemService(android.content.ClipboardManager::class.java)
+        clipboard?.setPrimaryClip(
+            android.content.ClipData.newPlainText("Gadget automation rules", text),
+        )
     }
 
     private suspend fun afterRuleChange(rule: Rule) {

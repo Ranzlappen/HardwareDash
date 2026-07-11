@@ -157,4 +157,5 @@
     <string name="vibration_root_result_error">Échec : %1$s</string>
     <string name="vibration_root_opted_out_action">Paramètres</string>
 
+    <string name="vibration_tile_label">Vibrer</string>
 </resources>
