@@ -1,3 +1,7 @@
+// GadgetBottomSheet's signature carries M3's experimental SheetState default,
+// so callers need the ExperimentalMaterial3Api opt-in (same as RuleEditorSheet).
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package dev.ranzlappen.gadget.feature.logbook.components
 
 import androidx.compose.foundation.layout.Arrangement
@@ -6,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

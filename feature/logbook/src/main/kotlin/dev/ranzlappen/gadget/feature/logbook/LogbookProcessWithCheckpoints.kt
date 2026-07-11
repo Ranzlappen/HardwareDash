@@ -20,7 +20,9 @@ data class LogbookProcessWithCheckpoints(
 
     /** True when any incomplete checkpoint's due date has passed. */
     fun isOverdue(nowMillis: Long): Boolean =
-        checkpoints.any { !it.completed && it.dueAtMillis != null && it.dueAtMillis < nowMillis }
+        // dueAtMillis is a Long? from :core:data (another module) so it can't
+        // smart-cast after a null check — resolve it through ?.let.
+        checkpoints.any { cp -> !cp.completed && cp.dueAtMillis?.let { it < nowMillis } == true }
 }
 
 /** A user-authored checkpoint, not yet persisted — the process-builder's

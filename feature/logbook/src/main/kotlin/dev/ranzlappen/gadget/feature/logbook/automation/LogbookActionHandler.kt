@@ -60,10 +60,14 @@ class LogbookActionHandler @Inject constructor(
     override suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult =
         when (actionKey) {
             ACTION_ADD_ENTRY -> {
+                // No non-local return: dispatch has an expression body.
                 val text = params[PARAM_TEXT]?.takeIf { it.isNotBlank() }
-                    ?: return ActionResult.Failure("No entry text supplied")
-                repository.addEntry(text, LogbookTagColor.None)
-                ActionResult.Success
+                if (text == null) {
+                    ActionResult.Failure("No entry text supplied")
+                } else {
+                    repository.addEntry(text, LogbookTagColor.None)
+                    ActionResult.Success
+                }
             }
             ACTION_ASSERT_OPEN_BELOW -> {
                 val threshold = params[PARAM_THRESHOLD]?.toIntOrNull() ?: DEFAULT_OPEN_THRESHOLD

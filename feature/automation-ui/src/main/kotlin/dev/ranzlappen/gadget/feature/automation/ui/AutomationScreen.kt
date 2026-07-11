@@ -1,3 +1,8 @@
+// The templates / import / history bottom sheets use GadgetBottomSheet, whose
+// signature carries M3's experimental SheetState default — callers need the
+// ExperimentalMaterial3Api opt-in (same as RuleEditorSheet).
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package dev.ranzlappen.gadget.feature.automation.ui
 
 import android.content.Intent
