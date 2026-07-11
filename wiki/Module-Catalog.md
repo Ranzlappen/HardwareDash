@@ -116,7 +116,6 @@ widgets / tiles / tests / strings): see the
 | `feature:manual` | 2 | ✅ | In-app manual / help (thin static screen; per-module deep links pending). |
 | `feature:logbook` | 18 | ✅ | Session-note log entries (tagged) + a checkpoint/process tracker with per-checkpoint due dates and WorkManager reminders. `logbook_open_checkpoints` MetricSource (push over the open-checkpoint flow); `LogbookActionHandler` (add-entry / assert-open-below). Standard-only; data layer in `:core:data`. |
 | `feature:youtubedownloader` | 17 | ✅ | YouTube video/audio downloader (yt-dlp + ffmpeg via youtubedl-android); private playlists via in-app cookie login; dataSync FGS; MediaStore export; `download_progress` monitor + `youtube_downloader` ActionHandler. Standard-only. |
-| **`feature:logbook`** | 12 | ⬜ | **Not in `settings.gradle.kts` — inert, excluded from the build.** Partial draft: Room data layer (`core:data/logbook`, entries + process/checkpoint entities), tag palette, entry composer, reminder worker/scheduler scaffolding. Interrupted mid-build by an API spend limit. Still missing: the top-level screen/nav entry point, `LogbookActionHandler`, `LogbookMetricSource`, `strings.xml`, and the `settings.gradle.kts` registration itself. |
 
 ## `benchmark`
 

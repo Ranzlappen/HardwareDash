@@ -235,15 +235,13 @@ of [Roadmap & Status](Roadmap-and-Status):
   fire, settings override, dumpsys snapshot) surface as rule-builder
   actions in `automation-ui` instead.
 - **Manual** (`:feature:manual`) — thin static help screen.
-
-## Not yet buildable — inert draft
-
-`:feature:logbook` (session-note log + checkpoint/reminder tracker) has
-a partial Room data layer + some UI components, but is **not registered
-in `settings.gradle.kts`** — excluded from the build entirely. Missing:
-the screen/nav entry point, ActionHandler, MetricSource, and strings.
-Interrupted mid-build by an API spend limit; tracked in the
-[Completion Master Plan](Completion-Master-Plan) (W2).
+- **Logbook** (`:feature:logbook`) — session-note log entries (tagged) +
+  a checkpoint/process tracker with per-checkpoint due dates and
+  WorkManager reminders. `logbook_open_checkpoints` MetricSource (push over
+  the open-checkpoint flow) + `LogbookActionHandler` (add-entry /
+  assert-open-below); registered in the build and reachable from the nav
+  rail. Standard-only; data layer in `:core:data`. (Finished from the
+  earlier inert draft — W2.)
 
 ---
 
