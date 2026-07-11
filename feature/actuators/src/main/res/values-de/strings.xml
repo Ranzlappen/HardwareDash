@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="actuators_screen_title">Aktoren</string>
+
+    <!-- Status card -->
+    <string name="actuators_card_title">Vibrationshardware</string>
+    <string name="actuators_chip_available">Vibrationsmotor verfügbar</string>
+    <string name="actuators_chip_unavailable">Kein Vibrationsmotor</string>
+    <string name="actuators_chip_amplitude">Amplitudensteuerung</string>
+    <string name="actuators_chip_no_amplitude">Feste Amplitude</string>
+
+    <!-- Capability rows -->
+    <string name="actuators_cap_vibrator_name">Vibrationsaktor</string>
+    <string name="actuators_cap_vibrator_detail">Android VibrationEffect API für haptische Feedback-Muster</string>
+    <string name="actuators_cap_vibrator_available">Vibrationsmotor vorhanden</string>
+    <string name="actuators_cap_vibrator_unavailable">Vibrationsmotor nicht gefunden</string>
+
+    <!-- Rooted capability rows -->
+    <string name="actuators_cap_rooted_active">Aktiv — gerooteter Build</string>
+    <string name="actuators_cap_rooted_required">Erfordert gerooteten Build</string>
+    <string name="actuators_cap_extreme_name">Extreme Amplitude</string>
+    <string name="actuators_cap_extreme_detail">Steuert den Vibrationsmotor über die Amplitudenobergrenze des Betriebssystems hinaus per Sysfs, bei maximalem Tastverhältnis (harte Obergrenze von 80 % zum Schutz der Hardware)</string>
+    <string name="actuators_cap_pwm_name">Direkte PWM-Steuerung</string>
+    <string name="actuators_cap_pwm_detail">Schreibt PWM-Frequenz und Tastverhältnis direkt in die Sysfs-Knoten des Vibrationstreibers, unter Umgehung von VibrationEffect</string>
+    <string name="actuators_cap_dual_name">Doppel-Aktor-Steuerung</string>
+    <string name="actuators_cap_dual_detail">Steuert LRA- (linear resonant) und ERM-Aktoren (exzentrische Unwucht) gleichzeitig mit phasenversetzter Synchronisation</string>
+    <string name="actuators_cap_rumble_name">Anhaltende Vibration</string>
+    <string name="actuators_cap_rumble_detail">Wiederholt ein haptisches Muster über das 500-ms-Limit des Betriebssystems hinaus, während Akkuverbrauch und Motortemperatur per Watchdog überwacht werden</string>
+
+    <!-- Monitoring -->
+    <string name="actuators_monitor_metric_name">Vibrationsmotor verfügbar</string>
+</resources>

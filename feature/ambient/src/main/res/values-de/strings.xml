@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ambient_screen_title">Umgebung</string>
+
+    <!-- Status card -->
+    <string name="ambient_card_title">Umgebungslicht</string>
+    <string name="ambient_label_lux">Beleuchtungsstärke</string>
+    <string name="ambient_lux_format">%.1f Lux</string>
+    <string name="ambient_sensor_unavailable">Umgebungslichtsensor auf diesem Gerät nicht verfügbar</string>
+
+    <!-- Light level descriptors -->
+    <string name="ambient_level_dark">Dunkel</string>
+    <string name="ambient_level_dim">Schwach</string>
+    <string name="ambient_level_indoor">Innenraumlicht</string>
+    <string name="ambient_level_bright">Hell</string>
+    <string name="ambient_level_sunlight">Direktes Sonnenlicht</string>
+
+    <!-- Monitor titles -->
+    <string name="ambient_live_monitor_lux">Umgebungslicht (live)</string>
+    <string name="ambient_monitor_lux">Umgebungslicht-Verlauf</string>
+
+    <!-- Capability rows -->
+    <string name="ambient_cap_sensor_name">Umgebungslichtsensor</string>
+    <string name="ambient_cap_sensor_detail">TYPE_LIGHT-Sensor zur Messung der Beleuchtungsstärke in Lux</string>
+    <string name="ambient_cap_sensor_available">Sensor verfügbar</string>
+    <string name="ambient_cap_sensor_unavailable">Sensor nicht gefunden</string>
+
+    <!-- Rooted capability rows -->
+    <string name="ambient_cap_rooted_active">Aktiv — gerootete Build-Version</string>
+    <string name="ambient_cap_rooted_required">Erfordert gerootete Build-Version</string>
+    <string name="ambient_cap_brightness_name">Bildschirmhelligkeit-Override</string>
+    <string name="ambient_cap_brightness_detail">Bildschirmhelligkeit direkt über sysfs festlegen, unter Umgehung der automatischen Android-Helligkeit</string>
+    <string name="ambient_cap_refresh_name">Bildwiederholrate-Override</string>
+    <string name="ambient_cap_refresh_detail">Erzwingt eine bestimmte Bildwiederholrate über den SurfaceFlinger-Dienst</string>
+    <string name="ambient_cap_density_name">Bildschirmdichte-Override</string>
+    <string name="ambient_cap_density_detail">Ändert die Bildschirm-DPI über das Kernel-Äquivalent von adb/wm density</string>
+</resources>

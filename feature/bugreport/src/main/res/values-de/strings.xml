@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bugreport_screen_title">Zustand</string>
+
+    <!-- Status card -->
+    <string name="bugreport_card_title">App-Berechtigungen</string>
+    <string name="bugreport_all_granted">Alle Berechtigungen erteilt</string>
+    <string name="bugreport_some_missing">Einige Berechtigungen fehlen</string>
+    <string name="bugreport_open_settings">App-Einstellungen öffnen</string>
+    <string name="bugreport_summary">%1$d von %2$d erteilt</string>
+    <string name="bugreport_perm_grant">Erteilen</string>
+
+    <!-- Permission row labels -->
+    <string name="bugreport_perm_camera">Kamera</string>
+    <string name="bugreport_perm_microphone">Mikrofon</string>
+    <string name="bugreport_perm_location">Standort (genau)</string>
+    <string name="bugreport_perm_bluetooth">Bluetooth-Verbindung</string>
+    <string name="bugreport_perm_notifications">Benachrichtigungen senden</string>
+    <string name="bugreport_perm_phone">Telefonstatus</string>
+    <string name="bugreport_perm_granted">Erteilt</string>
+    <string name="bugreport_perm_denied">Verweigert</string>
+
+    <!-- Capability rows -->
+    <string name="bugreport_cap_health_name">App-Zustandsprüfung</string>
+    <string name="bugreport_cap_health_detail">Berechtigungsstatus prüfen und fehlende anfordern oder bei dauerhaft verweigerten direkt zu den App-Einstellungen springen</string>
+    <string name="bugreport_cap_health_ok">Alle Berechtigungen erteilt</string>
+    <string name="bugreport_cap_health_missing">%1$d Berechtigung(en) fehlen</string>
+
+    <!-- Rooted capability rows -->
+    <string name="bugreport_cap_rooted_active">Aktiv — gerootete Version</string>
+    <string name="bugreport_cap_rooted_required">Erfordert gerootete Version</string>
+    <string name="bugreport_cap_adb_name">ADB-Diagnose</string>
+    <string name="bugreport_cap_adb_detail">ADB über Netzwerk umschalten und Geräteeigenschaften über setprop-sichere Shell-Befehle auslesen</string>
+    <string name="bugreport_cap_force_grant_name">Berechtigungen erzwingen</string>
+    <string name="bugreport_cap_force_grant_detail">Eine deklarierte Laufzeitberechtigung über pm grant erteilen, unter Umgehung des System-Berechtigungsdialogs (abgesichert durch RootSafetyGate)</string>
+
+    <!-- Monitoring -->
+    <string name="bugreport_monitor_metric_name">Bereitschaft der Diagnoseberechtigungen</string>
+</resources>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="ytdl_screen_title">YouTube-Downloader</string>
+
+    <!-- Source card -->
+    <string name="ytdl_source_title">Quelle</string>
+    <string name="ytdl_url_label">Video- oder Playlist-URL</string>
+    <string name="ytdl_url_placeholder">https://www.youtube.com/watch?v=…</string>
+    <string name="ytdl_download_button">Herunterladen</string>
+
+    <!-- Format card -->
+    <string name="ytdl_format_title">Format</string>
+    <string name="ytdl_kind_video">Video</string>
+    <string name="ytdl_kind_audio">Audio</string>
+    <string name="ytdl_video_quality_label">Maximale Qualität</string>
+    <string name="ytdl_audio_format_label">Audioformat</string>
+    <string name="ytdl_audio_quality_label">Bitrate</string>
+    <string name="ytdl_video_best">Beste</string>
+    <string name="ytdl_video_1080">1080p</string>
+    <string name="ytdl_video_720">720p</string>
+    <string name="ytdl_video_480">480p</string>
+
+    <!-- Scope card -->
+    <string name="ytdl_scope_title">Umfang</string>
+    <string name="ytdl_scope_single">Einzelnes Video</string>
+    <string name="ytdl_scope_playlist">Gesamte Playlist</string>
+    <string name="ytdl_playlist_items_label">Playlist-Elemente</string>
+    <string name="ytdl_playlist_items_placeholder">z. B. 1-10,15</string>
+    <string name="ytdl_playlist_items_hint">Leer lassen, um alle Elemente herunterzuladen.</string>
+
+    <!-- Extras card -->
+    <string name="ytdl_extras_title">Extras</string>
+    <string name="ytdl_embed_thumbnail">Thumbnail einbetten</string>
+    <string name="ytdl_embed_metadata">Metadaten einbetten</string>
+    <string name="ytdl_embed_chapters">Kapitel einbetten</string>
+    <string name="ytdl_sponsorblock">SponsorBlock-Segmente entfernen</string>
+    <string name="ytdl_restrict_filenames">Dateinamen einschränken (ASCII-sicher)</string>
+
+    <!-- Privacy / sign-in card -->
+    <string name="ytdl_privacy_title">Privater Inhalt</string>
+    <string name="ytdl_privacy_blurb">Melde dich an, um deine privaten oder nur für Mitglieder zugänglichen Playlists herunterzuladen. Cookies bleiben auf diesem Gerät und werden nur an yt-dlp weitergegeben.</string>
+    <string name="ytdl_signed_in">Angemeldet — Sitzungscookies sind auf dem Gerät gespeichert.</string>
+    <string name="ytdl_use_cookies">Cookies für Downloads verwenden</string>
+    <string name="ytdl_sign_in">Bei YouTube anmelden</string>
+    <string name="ytdl_sign_out">Abmelden / Cookies vergessen</string>
+
+    <!-- In-app login -->
+    <string name="ytdl_login_title">Bei YouTube anmelden</string>
+    <string name="ytdl_login_cancel">Abbrechen</string>
+    <string name="ytdl_login_done">Fertig</string>
+
+    <!-- Queue card -->
+    <string name="ytdl_queue_title">Downloads</string>
+    <string name="ytdl_queue_empty">Noch keine Downloads.</string>
+    <string name="ytdl_clear_finished">Abgeschlossene entfernen</string>
+    <string name="ytdl_cancel">Abbrechen</string>
+    <string name="ytdl_status_queued">In Warteschlange</string>
+    <string name="ytdl_status_running">%1$d %%</string>
+    <string name="ytdl_status_completed">Fertig</string>
+    <string name="ytdl_status_failed">Fehlgeschlagen</string>
+    <string name="ytdl_status_cancelled">Abgebrochen</string>
+
+    <!-- Monitoring -->
+    <string name="ytdl_monitor_title">Download-Verlauf</string>
+    <string name="ytdl_live_monitor_title">Live-Fortschritt</string>
+    <string name="ytdl_metric_name">Download-Fortschritt</string>
+
+    <!-- Automation actions -->
+    <string name="ytdl_action_download_url">Video herunterladen</string>
+    <string name="ytdl_action_download_playlist">Playlist herunterladen</string>
+    <string name="ytdl_action_cancel_all">Alle Downloads abbrechen</string>
+    <string name="ytdl_action_error_no_url">Keine URL angegeben.</string>
+
+    <!-- Module info -->
+    <string name="ytdl_perm_notifications_label">Benachrichtigungen</string>
+    <string name="ytdl_perm_notifications_rationale">Zeigt den Download-Fortschritt an, während die App im Hintergrund läuft.</string>
+    <string name="ytdl_cap_engine_name">yt-dlp + ffmpeg-Engine</string>
+    <string name="ytdl_cap_engine_detail">Integrierter Offline-Downloader (kein Root erforderlich).</string>
+    <string name="ytdl_cap_engine_ok">Bereit</string>
+
+    <!-- Notification -->
+    <string name="ytdl_notification_channel_name">Downloads</string>
+    <string name="ytdl_notification_channel_desc">Fortschritt aktiver YouTube-Downloads.</string>
+    <string name="ytdl_notification_title">Wird heruntergeladen</string>
+    <string name="ytdl_notification_downloading">Wird heruntergeladen… %1$d %%</string>
+    <string name="ytdl_notification_done">Download abgeschlossen</string>
+    <string name="ytdl_notification_failed">Download fehlgeschlagen</string>
+    <string name="ytdl_notification_cancelled">Download abgebrochen</string>
+    <string name="ytdl_notification_cancel">Abbrechen</string>
+</resources>

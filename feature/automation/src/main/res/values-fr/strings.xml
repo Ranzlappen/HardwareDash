@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="automation_action_fire_intent">Déclencher un intent privilégié</string>
+    <string name="automation_action_override_setting">Remplacer un paramètre système</string>
+    <string name="automation_action_dumpsys_snapshot">Instantané dumpsys</string>
+    <string name="automation_action_reset_all">Réinitialiser toutes les modifications</string>
+</resources>

@@ -29,4 +29,26 @@
     <!-- Vibration widget -->
     <string name="widget_label_vibration">Vibration on/off</string>
     <string name="widget_desc_vibration">Activer ou désactiver la vibration depuis votre écran d\'accueil.</string>
+
+    <!-- App Folder widget -->
+    <string name="widget_folder_label">Dossier d\'apps</string>
+    <string name="widget_folder_desc">Un dossier personnalisable de l\'écran d\'accueil pour les apps installées, les PWA et les liens web.</string>
+    <string name="widget_folder_1x1_label">Dossier d\'apps (petit)</string>
+    <string name="widget_folder_1x1_desc">Une version 1x1 cellule du widget Dossier d\'apps — pratique quand vous voulez une seule cible de tap pour un dossier.</string>
+
+    <!-- Backup & restore -->
+    <string name="backup_title">Sauvegarde et restauration</string>
+    <string name="backup_description">Exportez toutes les données de l\'app dans un fichier, ou restaurez-les depuis un fichier. Les sauvegardes de versions antérieures de l\'app sont prises en charge.</string>
+    <string name="backup_export">Exporter</string>
+    <string name="backup_restore">Restaurer</string>
+    <string name="backup_working">En cours…</string>
+    <string name="backup_exported">Sauvegarde enregistrée.</string>
+    <string name="backup_error">Échec : %1$s</string>
+    <string name="backup_restore_confirm_title">Restaurer la sauvegarde ?</string>
+    <string name="backup_restore_confirm_body">Cela remplace toutes les données actuelles de l\'app par le contenu de la sauvegarde. L\'app redémarrera pour terminer.</string>
+    <string name="backup_cancel">Annuler</string>
+    <string name="backup_restart_title">Redémarrage requis</string>
+    <string name="backup_restart_body">La sauvegarde a été restaurée. Redémarrez l\'app pour l\'appliquer.</string>
+    <string name="backup_restart_now">Redémarrer maintenant</string>
+    <string name="backup_later">Plus tard</string>
 </resources>

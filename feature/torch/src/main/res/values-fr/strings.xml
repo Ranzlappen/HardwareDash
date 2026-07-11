@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ─── System UI surfaces (tile + widget chrome) ──────────── -->
+    <string name="torch_tile_label">Lampe torche</string>
+    <string name="strobe_tile_label">Stroboscope</string>
+    <string name="widget_flashlight_label">Lampe torche</string>
+    <string name="widget_strobe_label">Stroboscope</string>
+    <string name="widget_flashlight_description">Active ou désactive la lampe torche de l\'appareil.</string>
+    <string name="widget_strobe_description">Active ou désactive un stroboscope de lampe torche configurable.</string>
+    <string name="widget_monitor_label">Activité de la torche</string>
+    <string name="widget_monitor_description">Lecture en direct de l\'activité de la torche avec une barre de progression.</string>
+    <string name="widget_monitor_value">Intensité de la torche : %1$d%%</string>
+    <string name="widget_monitor_toggle_on">Surveillance activée</string>
+    <string name="widget_monitor_toggle_off">Surveillance désactivée</string>
+    <string name="widget_monitor_reload">Actualiser</string>
+    <string name="widget_monitor_chart_label">Graphique d\'activité de la torche</string>
+    <string name="widget_monitor_chart_description">Mini-graphique en direct de l\'activité de la torche sur la période configurée.</string>
+    <string name="widget_monitor_chart_empty">Collecte des données…</string>
+
+    <!-- ─── Foreground-service notification ─────────────────────── -->
+    <string name="strobe_notification_channel_name">Service de stroboscope</string>
+    <string name="strobe_notification_title">Stroboscope actif</string>
+    <string name="strobe_notification_text">Touchez le widget pour l\'arrêter.</string>
+    <string name="strobe_notification_stop">Arrêter</string>
+    <string name="strobe_widget_start_failed">Impossible de démarrer le stroboscope — ouvrez l\'application</string>
+
+    <!-- ─── Widget toggle-feedback channel ──────────────────────── -->
+    <string name="widget_feedback_channel_name">Retour du widget</string>
+    <string name="widget_feedback_channel_description">Messages de confirmation et notifications facultatifs lors de l\'activation d\'un widget.</string>
+
+    <!-- ─── TorchScreen ─────────────────────────────────────────── -->
+    <string name="torch_screen_title">Torche</string>
+    <string name="torch_state_on">Activée</string>
+    <string name="torch_state_off">Désactivée</string>
+    <string name="torch_action_turn_on">Allumer la torche</string>
+    <string name="torch_action_turn_off">Éteindre la torche</string>
+    <string name="torch_action_toggle_caption">Torche</string>
+    <string name="torch_action_hold">Maintenir pour la lumière</string>
+    <string name="torch_action_strobe">Stroboscope</string>
+    <string name="torch_action_strobe_toggle">Activer/désactiver le stroboscope</string>
+    <string name="torch_action_strobe_hold">Maintenir le stroboscope</string>
+    <string name="torch_action_morse">Morse</string>
+    <string name="torch_action_morse_toggle">Activer/désactiver le morse</string>
+    <string name="torch_action_morse_hold">Maintenir le morse</string>
+    <string name="torch_morse_message_label">Message en morse</string>
+    <string name="torch_status_no_flash">Cet appareil ne possède pas de module flash.</string>
+    <string name="torch_status_hardware_error">Erreur matérielle — réessayez.</string>
+    <string name="torch_status_permission_denied">Accès à l\'appareil photo refusé — autorisez-le dans les paramètres système.</string>
+    <string name="torch_status_on">La torche est allumée.</string>
+    <string name="torch_status_off">Touchez le bouton pour allumer la torche.</string>
+
+    <!-- In-app strobe toggle button (under the flashlight FAB). -->
+    <string name="torch_action_strobe_start">Démarrer le stroboscope</string>
+    <string name="torch_action_strobe_stop">Arrêter le stroboscope</string>
+    <string name="torch_action_strobe_start_a11y">Démarrer le stroboscope à la vitesse par défaut actuelle</string>
+    <string name="torch_action_strobe_stop_a11y">Arrêter le stroboscope en cours</string>
+
+    <!-- ─── Monitoring (torch instantiation of MonitorContainer) ──── -->
+    <string name="torch_monitor_title">Activité de la torche</string>
+    <string name="torch_live_monitor_title">Activité de la torche (en direct)</string>
+    <string name="torch_monitor_metric_name">Intensité de la torche</string>
+
+    <!-- ─── Strobe defaults section ─────────────────────────────── -->
+    <string name="torch_section_defaults_title">Valeurs par défaut du stroboscope</string>
+    <string name="torch_section_defaults_subtitle">Utilisé par défaut pour les nouveaux widgets de stroboscope que vous créez.</string>
+    <string name="torch_strobe_rate_label">Fréquence</string>
+    <string name="torch_brightness_label">Luminosité</string>
+    <string name="torch_strobe_rate_value">%1$d Hz</string>
+
+    <!-- ─── Widgets management section ──────────────────────────── -->
+    <string name="torch_section_widgets_title">Vos widgets</string>
+    <!-- Single "Add widget" entry point — the function (flashlight / strobe /
+         morse) is picked inside the customization sheet. -->
+    <string name="torch_widget_add">Ajouter un widget</string>
+    <string name="torch_widget_pin_unsupported">Votre launcher ne permet pas d\'ajouter des widgets directement. Appuyez de manière prolongée sur l\'écran d\'accueil pour en ajouter un manuellement.</string>
+    <string name="torch_widget_removed_hint">Supprimé de votre liste. Pour le retirer de l\'écran d\'accueil, appuyez de manière prolongée sur le widget puis supprimez-le.</string>
+    <string name="torch_widget_cap_reached">Vous pouvez épingler au maximum %1$d widgets de chaque type. Supprimez-en un d\'abord.</string>
+    <string name="torch_widget_default_name_flashlight">Lampe torche</string>
+    <string name="torch_widget_default_name_strobe">Stroboscope</string>
+    <string name="torch_widget_list_empty_title">Aucun widget pour l\'instant</string>
+    <string name="torch_widget_list_empty_subtitle">Utilisez le bouton ci-dessus pour ajouter un widget à votre écran d\'accueil.</string>
+    <string name="torch_widget_list_action_edit">Modifier le widget</string>
+    <string name="torch_widget_list_action_delete">Supprimer le widget</string>
+
+    <!-- ─── Widget customization sheet (function picker) ─────────── -->
+    <!-- The customization sheet chrome (name / size / appearance / footer
+         labels) now lives in :core:widgetkit. Torch only contributes the
+         function labels the picker offers. -->
+    <string name="torch_widget_function_flashlight">Lampe torche</string>
+    <string name="torch_widget_function_strobe">Stroboscope</string>
+    <string name="torch_widget_function_morse">Morse / SOS</string>
+
+    <!-- Appearance / tap / feedback / preview sub-sections moved to
+         :core:widgetkit (refactor-2026 Phase 2 / C6b). 38 strings
+         relocated under widget_kit_appearance_* prefix; the kit's
+         WidgetAppearanceSection composable is the single consumer. -->
+
+    <!-- Module-blueprint OS-compatibility notes (rendered by ModuleCompatibilitySection) -->
+    <string name="torch_module_perm_notifications_label">Notifications</string>
+    <string name="torch_module_perm_notifications_rationale">Permet au service de stroboscope d\'afficher son état et aux confirmations de widget d\'apparaître.</string>
+    <string name="torch_module_compat_note_fgs_active">Le stroboscope s\'exécute en tant que service au premier plan pendant qu\'il est actif, il continue donc de clignoter même après avoir quitté l\'écran.</string>
+    <string name="torch_module_compat_note_fgs_short">Sous Android 14 et versions ultérieures, le stroboscope s\'exécute en tant que service au premier plan court et limité dans le temps (environ 3 minutes).</string>
+
+    <!-- Per-function capability badges (Functions & compatibility section) -->
+    <string name="torch_cap_no_flash">Cet appareil ne possède pas de module flash.</string>
+    <string name="torch_cap_needs_root">Nécessite la version rootée de l\'application avec un accès root accordé.</string>
+    <string name="torch_cap_basic_name">Torche marche/arrêt + maintien</string>
+    <string name="torch_cap_basic_detail">Basculer et maintenir brièvement pour la lumière.</string>
+    <string name="torch_cap_basic_ok">Module flash détecté — fonctionne.</string>
+    <string name="torch_cap_strobe_name">Stroboscope et morse</string>
+    <string name="torch_cap_strobe_detail">Stroboscope configurable et lecture en morse.</string>
+    <string name="torch_cap_strobe_ok">Fonctionne.</string>
+    <string name="torch_cap_strobe_caveat">Fonctionne ; sous Android 14 et versions ultérieures, un stroboscope en arrière-plan s\'exécute en tant que service au premier plan limité dans le temps (~3 min) et affiche une notification.</string>
+    <string name="torch_cap_root_ready">Accès root et matériel de lampe torche disponibles.</string>
+    <string name="torch_cap_root_no_led">Accès root disponible, mais aucun nœud sysfs LED pris en charge n\'a été trouvé sur cet appareil.</string>
+    <string name="torch_cap_root_brightness_name">Luminosité extrême (root)</string>
+    <string name="torch_cap_root_brightness_detail">Pilote la LED au-delà de la limite d\'origine (jusqu\'à 150 %).</string>
+    <string name="torch_cap_root_strobe_name">Stroboscope à cycle de service haute fréquence (root)</string>
+    <string name="torch_cap_root_strobe_detail">Impulsions à faible cycle et haute fréquence pour préserver la marge thermique.</string>
+    <string name="torch_cap_root_multiled_name">Activation multi-LED (root)</string>
+    <string name="torch_cap_root_multiled_detail">Allume tous les émetteurs détectés en même temps.</string>
+    <string name="torch_cap_root_multiled_caveat">Disponible ; l\'ensemble exact des émetteurs dépend de l\'appareil.</string>
+    <string name="torch_cap_root_thermal_name">Contournement thermique (root)</string>
+    <string name="torch_cap_root_thermal_detail">Suspend brièvement la limitation thermique de la LED pour un stroboscope.</string>
+    <string name="torch_cap_root_thermal_caveat">Disponible — suspend les limites thermiques (plafond fixe de 45 s). Peut chauffer l\'appareil ; à utiliser brièvement.</string>
+
+    <!-- Root tools card (rooted app version only) -->
+    <string name="torch_root_tools_title">Outils root</string>
+    <string name="torch_root_tools_subtitle">Commandes de lampe torche privilégiées, limitées en fréquence par la barrière de sécurité root. Chaque outil est désactivé par défaut — activez-le (et désactivez le mode sécurité) dans Paramètres → Fonctionnalités rootées avant utilisation.</string>
+    <string name="torch_root_action_brightness">Lancer le boost</string>
+    <string name="torch_root_action_strobe">Lancer le stroboscope</string>
+    <string name="torch_root_action_multiled">Lancer la rafale</string>
+    <string name="torch_root_action_thermal">Lancer le stroboscope thermique</string>
+    <!-- Rooted-tool section headers -->
+    <string name="torch_root_section_brightness">Augmenter la luminosité</string>
+    <string name="torch_root_section_strobe">Stroboscope à cycle de service</string>
+    <string name="torch_root_section_multiled">Rafale multi-LED</string>
+    <string name="torch_root_section_thermal">Stroboscope à contournement thermique</string>
+    <!-- Rooted-tool slider / control labels -->
+    <string name="torch_root_brightness_label">Luminosité</string>
+    <string name="torch_root_freq_label">Fréquence</string>
+    <string name="torch_root_duty_label">Cycle de service</string>
+    <string name="torch_root_duration_label">Durée</string>
+    <string name="torch_root_include_screen_label">Inclure l\'écran</string>
+    <string name="torch_root_thermal_ceiling_note">Le contournement thermique est limité à 45 secondes.</string>
+    <string name="torch_root_no_boost_headroom">Aucune marge de luminosité sur cet appareil — aucun nœud LED amplifiable n\'a été trouvé.</string>
+    <string name="torch_root_result_ok">Terminé.</string>
+    <string name="torch_root_result_unsupported">Non disponible sur cet appareil.</string>
+    <string name="torch_root_result_opted_out">Désactivé dans Paramètres → Fonctionnalités rootées (vérifiez aussi le mode sécurité).</string>
+    <string name="torch_root_opted_out_action">Paramètres</string>
+    <string name="torch_root_result_rate_limited">Limité en fréquence — réessayez sous peu.</string>
+    <string name="torch_root_result_error">Échec : %1$s</string>
+
+    <!-- ─── Floating overlay button ─────────────────────────────────── -->
+    <string name="overlay_button_description">Activer/désactiver la torche</string>
+    <string name="overlay_notification_channel_name">Bouton flottant de torche</string>
+    <string name="overlay_notification_title">Bouton flottant de torche actif</string>
+    <string name="overlay_notification_text">Faites glisser le bouton pour le repositionner.</string>
+    <string name="overlay_notification_dismiss">Ignorer</string>
+</resources>

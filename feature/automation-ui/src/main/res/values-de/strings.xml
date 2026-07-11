@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen -->
+    <string name="automation_title">Automatisierung</string>
+    <string name="automation_new_rule">Neue Regel</string>
+    <string name="automation_empty_title">Noch keine Regeln</string>
+    <string name="automation_empty_subtitle">Erstelle deine erste Regel — wenn ihr Auslöser ausgelöst wird, führt Gadget die von dir gewählten Aktionen aus.</string>
+    <string name="automation_run_now">Jetzt ausführen</string>
+    <string name="automation_delete_rule">Regel löschen</string>
+    <string name="automation_rule_enabled_toggle">Regel aktiviert</string>
+    <string name="automation_rule_actions_summary">Aktionen: %1$s</string>
+    <string name="automation_rule_actions_none">Noch keine Aktionen</string>
+    <string name="automation_delete_confirm_title">Regel löschen?</string>
+    <string name="automation_delete_confirm_text">“%1$s” wird gelöscht. Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="automation_delete_confirm_yes">Löschen</string>
+    <string name="automation_cancel">Abbrechen</string>
+    <string name="automation_run_now_result">“%1$s” wurde ausgeführt — %2$d Aktion(en) ausgelöst</string>
+    <string name="automation_run_now_nothing">“%1$s” wurde nicht ausgeführt — Bedingungen nicht erfüllt oder die Regel befindet sich in der Abklingzeit</string>
+
+    <!-- Exact-alarm capability -->
+    <string name="automation_capability_exact">Zeitpläne mit genauer Uhrzeit</string>
+    <string name="automation_capability_exact_detail">Als “genau” markierte Zeitplan-Auslöser lösen minutengenau aus, auch im Doze-Modus</string>
+    <string name="automation_capability_exact_ok">Erlaubt — genaue Zeitpläne lösen zur eingestellten Minute aus</string>
+    <string name="automation_capability_exact_missing">Nicht erlaubt — genaue Zeitpläne weichen auf ein ±10-Minuten-Fenster aus</string>
+    <string name="automation_capability_exact_action">Erlauben</string>
+    <string name="automation_os_note_31">Android 12+: Zeitpläne mit genauer Uhrzeit benötigen die Sonderberechtigung “Alarme &amp; Erinnerungen”.</string>
+    <string name="automation_os_note_34">Android 14+: Diese Berechtigung ist bei Neuinstallationen standardmäßig verweigert — Zeitpläne weichen auf ein ±10-Minuten-Fenster aus, bis du sie erlaubst.</string>
+
+    <!-- Rule summaries -->
+    <string name="automation_summary_metric">Wenn %1$s %2$s %3$s</string>
+    <string name="automation_summary_schedule_daily">Täglich um %1$s</string>
+    <string name="automation_summary_schedule_days">%1$s um %2$s</string>
+    <string name="automation_summary_schedule_exact_suffix">· genau</string>
+    <string name="automation_summary_boot">Beim Gerätestart</string>
+    <string name="automation_summary_power_connected">Beim Anschließen des Ladegeräts</string>
+    <string name="automation_summary_power_disconnected">Beim Trennen des Ladegeräts</string>
+    <string name="automation_summary_connectivity">Bei Verbindungsänderung</string>
+    <string name="automation_summary_manual">Manuell — “Jetzt ausführen” tippen</string>
+
+    <!-- Editor: shared -->
+    <string name="automation_editor_title_new">Neue Regel</string>
+    <string name="automation_editor_title_edit">Regel bearbeiten</string>
+    <string name="automation_editor_name_label">Name</string>
+    <string name="automation_editor_section_trigger">Wenn (Auslöser)</string>
+    <string name="automation_editor_section_conditions">Nur wenn (Bedingungen)</string>
+    <string name="automation_editor_section_actions">Dann (Aktionen)</string>
+    <string name="automation_editor_section_options">Optionen</string>
+    <string name="automation_editor_save">Regel speichern</string>
+
+    <!-- Editor: trigger -->
+    <string name="automation_editor_trigger_kind">Auslöser</string>
+    <string name="automation_trigger_kind_metric">Signal-Schwellenwert</string>
+    <string name="automation_trigger_kind_schedule">Zeitplan</string>
+    <string name="automation_trigger_kind_event">Systemereignis</string>
+    <string name="automation_trigger_kind_manual">Manuell</string>
+    <string name="automation_editor_signal">Signal</string>
+    <string name="automation_editor_operator">Löst aus, wenn der Wert ist</string>
+    <string name="automation_editor_threshold">Schwellenwert</string>
+    <string name="automation_editor_edge">Auslösen bei</string>
+    <string name="automation_edge_rising">Eintreten</string>
+    <string name="automation_edge_falling">Verlassen</string>
+    <string name="automation_editor_hysteresis">Reaktivierungswert (Hysterese)</string>
+    <string name="automation_editor_hysteresis_hint">Nach dem Auslösen wird erst reaktiviert, wenn der Wert diesen Punkt wieder überschreitet — verhindert, dass ein unruhiges Signal die Regel zu schnell erneut auslöst.</string>
+    <string name="automation_editor_rearm">Reaktivieren bei</string>
+    <string name="automation_editor_time">Uhrzeit</string>
+    <string name="automation_editor_days">Tage</string>
+    <string name="automation_editor_exact">Genaue Uhrzeit</string>
+    <string name="automation_editor_exact_hint_inexact">Löst innerhalb eines ±10-Minuten-Fensters um die eingestellte Zeit aus.</string>
+    <string name="automation_editor_exact_hint_exact">Löst minutengenau aus, auch im Doze-Modus.</string>
+    <string name="automation_editor_exact_denied">Genaue Alarme sind für Gadget nicht erlaubt — diese Regel weicht auf ein ±10-Minuten-Fenster aus.</string>
+    <string name="automation_editor_exact_allow">Genaue Alarme erlauben</string>
+    <string name="automation_editor_event">Ereignis</string>
+    <string name="automation_event_boot">Gerät gestartet</string>
+    <string name="automation_event_power_connected">Ladegerät angeschlossen</string>
+    <string name="automation_event_power_disconnected">Ladegerät getrennt</string>
+    <string name="automation_event_connectivity">Verbindung geändert</string>
+    <string name="automation_editor_manual_hint">Wird nur ausgeführt, wenn du auf diesem Bildschirm “Jetzt ausführen” tippst.</string>
+
+    <!-- Editor: conditions -->
+    <string name="automation_editor_conditions_empty">Keine Bedingungen — nur der Auslöser entscheidet.</string>
+    <string name="automation_editor_condition_logic">Muss zutreffen</string>
+    <string name="automation_logic_all">Alle</string>
+    <string name="automation_logic_any">Beliebig</string>
+    <string name="automation_editor_condition_add_metric">Signalprüfung hinzufügen</string>
+    <string name="automation_editor_condition_add_time">Zeitfenster hinzufügen</string>
+    <string name="automation_condition_metric_title">Signalprüfung</string>
+    <string name="automation_condition_time_title">Zeitfenster</string>
+    <string name="automation_editor_condition_remove">Bedingung entfernen</string>
+    <string name="automation_editor_condition_value_is">Wert ist</string>
+    <string name="automation_editor_window_start">Von</string>
+    <string name="automation_editor_window_end">Bis</string>
+    <string name="automation_editor_window_wrap_hint">Ein Ende vor dem Start umschließt Mitternacht (22:00–06:00).</string>
+
+    <!-- Editor: actions -->
+    <string name="automation_editor_action_pick">Aktion</string>
+    <string name="automation_editor_action_add">Aktion hinzufügen</string>
+    <string name="automation_editor_actions_empty">Füge mindestens eine Aktion hinzu.</string>
+    <string name="automation_editor_action_remove">Aktion entfernen</string>
+    <string name="automation_editor_action_unavailable">%1$s — in diesem Build nicht verfügbar</string>
+    <string name="automation_action_label">%1$s · %2$s</string>
+
+    <!-- Editor: options -->
+    <string name="automation_editor_cooldown">Abklingzeit</string>
+    <string name="automation_editor_cooldown_suffix">s</string>
+    <string name="automation_editor_cooldown_hint">Mindestzeit zwischen automatischen Auslösungen — 0 = keine. Ein manuelles “Jetzt ausführen” umgeht dies, verzögert aber weiterhin die nächste automatische Auslösung.</string>
+
+    <!-- Day-of-week short labels -->
+    <string name="automation_day_mon">Mo</string>
+    <string name="automation_day_tue">Di</string>
+    <string name="automation_day_wed">Mi</string>
+    <string name="automation_day_thu">Do</string>
+    <string name="automation_day_fri">Fr</string>
+    <string name="automation_day_sat">Sa</string>
+    <string name="automation_day_sun">So</string>
+</resources>

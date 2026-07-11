@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ranzlappen.gadget.core.datastore.CustomThemeOption
 import dev.ranzlappen.gadget.core.datastore.DarkThemeMode
@@ -199,11 +200,15 @@ private fun ThemeSwatch(
     ) {
         Box(
             modifier = Modifier
-                .size(width = 76.dp, height = 52.dp)
+                .size(width = ThemeSwatchDefaults.Width, height = ThemeSwatchDefaults.Height)
                 .clip(shapes.medium)
                 .background(scheme.surface)
                 .border(
-                    width = if (selected) 2.dp else 1.dp,
+                    width = if (selected) {
+                        ThemeSwatchDefaults.SelectedBorderWidth
+                    } else {
+                        ThemeSwatchDefaults.BorderWidth
+                    },
                     color = accent,
                     shape = shapes.medium,
                 )
@@ -235,10 +240,18 @@ private fun ThemeSwatch(
 private fun SwatchDot(color: Color) {
     Box(
         modifier = Modifier
-            .size(16.dp)
+            .size(ThemeSwatchDefaults.DotSize)
             .clip(CircleShape)
             .background(color),
     )
+}
+
+private object ThemeSwatchDefaults {
+    val Width: Dp = 76.dp
+    val Height: Dp = 52.dp
+    val SelectedBorderWidth: Dp = 2.dp
+    val BorderWidth: Dp = 1.dp
+    val DotSize: Dp = 16.dp
 }
 
 private fun CustomThemeOption.toGadgetCustomTheme(): GadgetCustomTheme = when (this) {

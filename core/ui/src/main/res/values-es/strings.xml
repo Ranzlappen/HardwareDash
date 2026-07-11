@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Generic chrome for the module blueprint sections (ModuleInfoSections.kt).
+         Module-specific copy (permission rationales, OS-behaviour notes) is
+         resolved in each feature module and passed in via ModuleInfo. -->
+
+    <!-- Permissions section -->
+    <string name="module_permissions_title">Permisos</string>
+    <string name="module_permissions_none">Este módulo no necesita permisos especiales.</string>
+    <string name="module_permission_all_granted">Se han concedido todos los permisos necesarios.</string>
+    <string name="module_permission_grant">Conceder permisos</string>
+    <string name="module_permission_open_settings">Abrir configuración de la app</string>
+    <string name="module_permission_granted">Concedido</string>
+    <string name="module_permission_denied">No concedido</string>
+    <string name="module_permission_optional_label">%1$s (opcional)</string>
+
+    <!-- OS-compatibility section -->
+    <string name="module_compat_title">Compatibilidad del sistema operativo</string>
+    <string name="module_compat_requires">Requiere el nivel de API de Android %1$d o superior.</string>
+    <string name="module_compat_current">Este dispositivo ejecuta el nivel de API %1$d.</string>
+    <string name="module_compat_supported">Compatible con este dispositivo</string>
+    <string name="module_compat_unsupported">No compatible con este dispositivo</string>
+    <string name="module_compat_note">API %1$d+: %2$s</string>
+
+    <!-- Firmware section -->
+    <string name="module_firmware_title">Firmware</string>
+    <string name="module_firmware_version">%1$s · firmware %2$s o posterior</string>
+
+    <!-- Per-function capability section -->
+    <string name="module_capabilities_title">Funciones y compatibilidad</string>
+
+    <!-- GadgetExpandableCard (collapsible card) state announcements -->
+    <string name="expandable_card_state_expanded">Expandido</string>
+    <string name="expandable_card_state_collapsed">Contraído</string>
+</resources>

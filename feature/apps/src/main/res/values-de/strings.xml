@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App-Organizer feature strings. English-only, matching the modular
+         convention established by :feature:torch (the legacy 4-language
+         S.apps/m() system is retired by this migration; re-adding values-de/
+         es/fr is a follow-up if per-feature translation returns). -->
+
+    <string name="apps_title">Apps</string>
+    <string name="apps_description">Organisiere installierte Apps, PWAs und Weblinks in Ordnern, die zugleich gestaltbare Startbildschirm-Widgets sind.</string>
+    <string name="apps_create_folder">Ordner erstellen</string>
+    <string name="apps_new_folder">Neuer Ordner</string>
+    <string name="apps_folder_name">Ordnername</string>
+    <string name="apps_delete_folder_confirm">Diesen Ordner löschen?</string>
+    <string name="apps_no_folders">Noch keine Ordner — tippe auf +</string>
+    <string name="apps_color">Farbe</string>
+    <string name="apps_color_custom">Benutzerdefiniert</string>
+    <string name="apps_apps_in_folder">Apps in diesem Ordner</string>
+    <string name="apps_add_web_link">Weblink hinzufügen</string>
+    <string name="apps_web_link_url">URL</string>
+    <string name="apps_web_link_label">Beschriftung (optional)</string>
+    <string name="apps_no_apps">Noch keine Apps erkannt</string>
+    <string name="apps_pwa_badge">PWA</string>
+    <string name="apps_web_link_badge">Web</string>
+    <string name="apps_preview_folder">Vorschau</string>
+    <string name="apps_lock_folder">Ordner sperren</string>
+    <string name="apps_unlock_folder">Ordner entsperren</string>
+    <string name="apps_biometric_unavailable">Biometrische Entsperrung ist auf diesem Gerät nicht eingerichtet</string>
+    <string name="apps_pin_to_home">Auf Startbildschirm anheften</string>
+    <string name="apps_pin_unsupported">Dein Launcher unterstützt kein Anheften mit einem Tipp. Halte stattdessen deinen Startbildschirm gedrückt und wähle das App-Ordner-Widget aus.</string>
+    <string name="apps_rule">Regeln</string>
+    <string name="apps_rule_package_prefix">Paket beginnt mit</string>
+    <string name="apps_rule_recently_installed">Kürzlich installiert</string>
+    <string name="apps_rule_web_apks">Nur Web-PWAs</string>
+    <string name="apps_rule_unused">Ungenutzt seit</string>
+    <string name="apps_rule_on_internal_storage">Auf internem Speicher</string>
+    <string name="apps_rule_on_external_storage">Auf SD-Karte</string>
+    <string name="apps_rule_system_apps">Systemapps</string>
+    <string name="apps_rule_user_apps">Vom Nutzer installierte Apps</string>
+    <string name="apps_rule_union_hint">Manuelle Auswahl und Regeltreffer werden kombiniert.</string>
+    <string name="apps_rule_days">Tage</string>
+    <string name="apps_rule_package_prefix_hint">z. B. com.google.</string>
+    <string name="apps_rule_usage_hint">Erfordert die Berechtigung \"Nutzungszugriff\". Erteile sie unter Einstellungen → Apps → Spezialzugriff.</string>
+    <string name="apps_search_apps_hint">Apps suchen</string>
+    <string name="apps_no_search_matches">Keine Apps gefunden</string>
+    <string name="apps_already_in_folder">in:</string>
+    <string name="apps_cover_icon">Cover</string>
+    <string name="apps_cover_pick_image">Bild auswählen</string>
+    <string name="apps_cover_pick_symbol">Symbol auswählen</string>
+    <string name="apps_cover_clear">Entfernen</string>
+    <string name="apps_cover_none">Auto</string>
+    <string name="apps_cancel">Abbrechen</string>
+    <string name="apps_save">Speichern</string>
+    <string name="apps_delete">Löschen</string>
+    <string name="apps_back">Zurück</string>
+
+    <!-- Legacy import -->
+    <string name="apps_import_legacy">Aus alter App importieren</string>
+    <string name="apps_import_success">%1$d Ordner, %2$d Apps importiert</string>
+    <string name="apps_import_nothing">Keine alten Daten gefunden</string>
+    <string name="apps_import_error">Import fehlgeschlagen — versuche es erneut</string>
+
+    <!-- In-editor widget management section -->
+    <string name="apps_widgets_section_title">Startbildschirm-Widgets</string>
+    <string name="apps_widget_add">Widget hinzufügen</string>
+    <string name="apps_widget_list_empty">Noch keine Widgets platziert</string>
+    <string name="apps_widget_delete">Widget löschen</string>
+
+    <!-- Folder widget design customization. -->
+    <string name="apps_folder_design">Design</string>
+    <string name="apps_folder_shape_circle">Kreis</string>
+    <string name="apps_folder_shape_rounded">Abgerundet</string>
+    <string name="apps_folder_shape_square">Quadrat</string>
+    <string name="apps_folder_corner_radius">Eckenradius: %1$d%%</string>
+    <string name="apps_folder_grid_preview">App-Symbolraster anzeigen</string>
+    <string name="apps_folder_gradient">Verlauf</string>
+    <string name="apps_folder_gradient_add">Hinzufügen</string>
+    <string name="apps_folder_gradient_clear">Entfernen</string>
+    <string name="apps_folder_stroke_width">Rahmen: %1$d dp</string>
+
+    <!-- Folder home-screen widget. -->
+    <string name="apps_widget_folder_label">App-Ordner</string>
+    <string name="apps_widget_folder_description">Ein anpassbarer Startbildschirm-Ordner für installierte Apps, PWAs und Weblinks.</string>
+    <string name="apps_widget_pick_folder">Ordner auswählen</string>
+    <string name="apps_widget_folder_selected">Ausgewählt</string>
+
+    <!-- Monitoring: readable signal for the monitoring framework / automation. -->
+    <string name="apps_monitor_metric_folder_count_name">Konfigurierte Ordner</string>
+    <string name="apps_monitor_metric_folder_count_unit">Ordner</string>
+
+    <!-- Automation: invocable action labels. -->
+    <string name="apps_action_refresh_apps">App-Katalog aktualisieren</string>
+    <string name="apps_action_open_folder">Ordner öffnen</string>
+    <string name="apps_action_launch_app">App starten</string>
+
+    <!-- Rooted per-app management row (folder editor's app list; self-hides
+         on the standard flavor and for web-link entries — see AppRow /
+         AppRootActionsMenu). Backed by :feature:apps-rooted's
+         RootedAppsRootController via the AppsRootController seam. -->
+    <string name="apps_root_menu_manage">App verwalten</string>
+    <string name="apps_root_menu_freeze">Einfrieren</string>
+    <string name="apps_root_menu_unfreeze">Auftauen</string>
+    <string name="apps_root_menu_force_stop">Beenden erzwingen</string>
+    <string name="apps_root_result_ok">Fertig</string>
+    <string name="apps_root_result_unsupported">Erfordert die gerootete App-Version</string>
+    <string name="apps_root_result_opted_out">In den Einstellungen deaktiviert</string>
+    <string name="apps_root_result_rate_limited">Ratenbegrenzt — versuche es in Kürze erneut</string>
+</resources>

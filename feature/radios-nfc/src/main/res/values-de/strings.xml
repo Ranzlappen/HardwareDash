@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nfc_hce_service_description">Gadget-NFC-Emulation</string>
+    <string name="nfc_hce_aid_group_description">NDEF-Tag-Emulation</string>
+
+    <string name="nfc_screen_title">NFC</string>
+    <string name="nfc_capability_adapter">NFC-Adapter</string>
+    <string name="nfc_capability_adapter_detail">Liest und emuliert NFC-Tags</string>
+    <string name="nfc_tag_card_title">Zuletzt gescannter Tag</string>
+    <string name="nfc_tag_empty">Telefon zum Scannen in die Nähe eines NFC-Tags halten</string>
+    <string name="nfc_tag_format">Format</string>
+    <string name="nfc_tag_id">Tag-ID</string>
+    <string name="nfc_tag_payload">Nutzdaten</string>
+    <string name="nfc_tag_copy">Nutzdaten kopieren</string>
+    <string name="nfc_hce_card_title">HCE-Emulation</string>
+    <string name="nfc_hce_text_label">Text-Nutzdaten</string>
+    <string name="nfc_hce_url_label">URL-Nutzdaten</string>
+    <string name="nfc_hce_activate">HCE aktivieren</string>
+    <string name="nfc_hce_clear">Löschen</string>
+    <string name="nfc_hce_active">HCE aktiv</string>
+    <string name="nfc_hce_inactive">HCE inaktiv</string>
+    <string name="nfc_capability_card_title">NFC-Status</string>
+    <string name="nfc_adapter_present">NFC-Adapter vorhanden</string>
+    <string name="nfc_adapter_enabled">NFC aktiviert</string>
+    <string name="nfc_adapter_disabled">NFC deaktiviert — zum Aktivieren tippen</string>
+    <string name="nfc_monitor_title">NFC-Statusverlauf</string>
+
+    <!-- Template library -->
+    <string name="nfc_template_card_title">NDEF-Vorlagen</string>
+    <string name="nfc_template_browse">Vorlagen durchsuchen</string>
+    <string name="nfc_template_pick">Vorlage auswählen</string>
+    <string name="nfc_template_activate">Aktivieren</string>
+
+    <!-- ─── Monitor titles ───────────────────────────────────────────────── -->
+    <string name="nfc_live_monitor_title">NFC-Status (live)</string>
+
+    <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
+    <string name="nfc_cap_rooted_active">Aktiv — gerooteter Build</string>
+    <string name="nfc_cap_rooted_required">Erfordert gerooteten Build</string>
+    <string name="nfc_cap_raw_nci_name">Raw-NCI-Befehlsinjektion</string>
+    <string name="nfc_cap_raw_nci_detail">Sendet beliebige NCI-Frames über /dev/nfc an den NFC-Controller, unter Umgehung des NFC-Stacks</string>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lock_screen_title">Bloqueo</string>
+
+    <!-- Status card -->
+    <string name="lock_card_title">Estado de bloqueo</string>
+    <string name="lock_chip_locked">Bloqueado</string>
+    <string name="lock_chip_unlocked">Desbloqueado</string>
+    <string name="lock_chip_secure">Seguro</string>
+    <string name="lock_chip_insecure">Sin bloqueo de pantalla</string>
+    <string name="lock_chip_biometric">Datos biométricos registrados</string>
+    <string name="lock_chip_no_biometric">Sin datos biométricos</string>
+
+    <!-- Monitor titles -->
+    <string name="lock_live_monitor_state">Estado de bloqueo (en vivo)</string>
+    <string name="lock_monitor_state">Historial del estado de bloqueo</string>
+
+    <!-- Capability rows -->
+    <string name="lock_cap_keyguard_name">Bloqueo del dispositivo</string>
+    <string name="lock_cap_keyguard_detail">Supervisa el estado de bloqueo de Keyguard mediante KeyguardManager</string>
+    <string name="lock_cap_keyguard_active">Pantalla de bloqueo activa</string>
+    <string name="lock_cap_keyguard_inactive">No hay pantalla de bloqueo configurada</string>
+    <string name="lock_cap_biometric_name">Autenticación biométrica</string>
+    <string name="lock_cap_biometric_detail">Comprueba el estado de registro biométrico (huella dactilar, rostro, iris)</string>
+    <string name="lock_cap_biometric_available">Datos biométricos registrados</string>
+    <string name="lock_cap_biometric_unavailable">No hay datos biométricos registrados</string>
+
+    <!-- Rooted capability rows -->
+    <string name="lock_cap_rooted_active">Activo — compilación rooteada</string>
+    <string name="lock_cap_rooted_required">Requiere compilación rooteada</string>
+    <string name="lock_cap_overlay_name">Superposición de notificación en pantalla de bloqueo</string>
+    <string name="lock_cap_overlay_detail">Muestra una ventana de notificación de alerta del sistema sobre la pantalla de bloqueo para alertas seguras temporizadas (límite fijo: 60 s)</string>
+</resources>

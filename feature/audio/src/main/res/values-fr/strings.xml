@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="audio_capability_mic">Microphone</string>
+    <string name="audio_capability_mic_detail">Mesure en dB et enregistrement WAV</string>
+    <string name="audio_permission_card_title">Autorisation requise</string>
+    <string name="audio_permission_body">L\'accès au microphone est nécessaire pour mesurer le niveau sonore et enregistrer de l\'audio.</string>
+    <string name="audio_permission_grant">Accorder l\'autorisation</string>
+    <string name="audio_db_meter_card_title">Sonomètre</string>
+    <string name="audio_db_level">Niveau sonore</string>
+    <string name="audio_db_unit">dB</string>
+    <string name="audio_monitor_title">Historique du sonomètre</string>
+    <string name="audio_record_card_title">Enregistrement vocal</string>
+    <string name="audio_record_start">Démarrer l\'enregistrement</string>
+    <string name="audio_record_stop">Arrêter</string>
+    <string name="audio_record_saved">Enregistré dans le dossier Musique</string>
+    <string name="audio_record_share">Partager</string>
+    <string name="audio_record_idle">Appuyez pour démarrer l\'enregistrement</string>
+    <string name="audio_notification_channel">Enregistrement audio</string>
+    <string name="audio_notification_title">Enregistrement audio en cours</string>
+    <string name="audio_notification_text">Appuyez pour ouvrir Gadget</string>
+    <string name="audio_notification_stop">Arrêter l\'enregistrement</string>
+    <string name="audio_capability_available">Enregistrement disponible</string>
+    <string name="audio_capability_permission_required">Autorisation requise</string>
+    <string name="audio_live_monitor_title">Sonomètre — en direct</string>
+    <string name="audio_capability_rooted_active">Actif — build rooté</string>
+    <string name="audio_capability_rooted_required">Nécessite un build rooté</string>
+    <string name="audio_capability_gain_boost">Amplification du gain micro</string>
+    <string name="audio_capability_gain_boost_detail">Remplace le registre de gain matériel au-delà des limites du système</string>
+    <string name="audio_capability_direct_pcm">Capture PCM directe</string>
+    <string name="audio_capability_direct_pcm_detail">Contourne la pile AudioRecord pour une capture brute au niveau du noyau</string>
+    <string name="audio_capability_custom_sample_rate">Fréquence d\'échantillonnage personnalisée</string>
+    <string name="audio_capability_custom_sample_rate_detail">Demande des fréquences de capture non standard (par ex. 96 kHz)</string>
+</resources>

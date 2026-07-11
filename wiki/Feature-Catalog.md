@@ -74,8 +74,10 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
   `MonitorWidgetNotifier` yet (the folder widget is a content widget, not
   a metric gauge) and the screen doesn't embed `MonitorContainer` /
   `LiveMonitorContainer` yet.
-- **Standard:** ✅ · **Rooted:** ⬜ (`:feature:apps-rooted` skeleton).
-- **Source:** `:feature:apps`.
+- **Rooted:** per-app freeze / unfreeze / force-stop overflow menu (via
+  `:feature:apps-rooted`'s `AppsRootController`, deny-list-protected).
+- **Standard:** ✅ · **Rooted:** ✅.
+- **Source:** `:feature:apps`, `:feature:apps-rooted`.
 
 ## Sensors ✅
 
@@ -206,29 +208,45 @@ of [Roadmap & Status](Roadmap-and-Status):
   permission manager + `pm grant` one-up.
 - **Radios** (`:feature:radios-wifi/-bt/-nfc/-ir` + `-rooted`) — all
   live with monitors and ActionHandlers.
+- **Cellular** (`:feature:radios-cell` + `-rooted`) — standard
+  `TelephonyManager` screen (SIM state, carrier, network type, live
+  signal bars) + rooted raw-modem-dump panel; `cell_signal` MetricSource.
 - **Actuators** (`:feature:actuators`) — vibrator availability +
   haptic actions.
+- **Display** (`:feature:display` + `-rooted`) — brightness slider
+  (standard) + density/refresh-rate override + SurfaceFlinger snapshot
+  (rooted); `screen_brightness` MetricSource.
+- **Microphone tools** (`:feature:microphone` + `-rooted`) — rooted-only
+  extreme mic tools (gain/PCM/rate/multi-mic/effects/system-audio);
+  baseline dB meter/recording stays in `:feature:audio`.
+- **Notifications** (`:feature:notification` + `-rooted`) — channel
+  inspector + test-notification builder (standard); sticky-importance
+  override / listener opt-in / lock-screen-overlay test (rooted); a real
+  `GadgetNotificationListenerService` backs `active_notifications`.
+- **ADB / USB debugging** (`:feature:adbdebug`, `:feature:usbdebug` +
+  `-rooted`) — debug-state readouts + Developer-options deep-links
+  (standard); toggle/network/getprop/setprop and function-role/diagnostics
+  dumps (rooted).
+- **Apps root tools** (`:feature:apps-rooted`) — pm-based freeze /
+  unfreeze / force-stop, surfaced as a per-app menu inside
+  `:feature:apps`'s own screen rather than a dedicated one.
+- **Automation power tools** (`:feature:automation` + `-rooted`) —
+  screenless by design; its 3 rooted capabilities (privileged intent
+  fire, settings override, dumpsys snapshot) surface as rule-builder
+  actions in `automation-ui` instead.
 - **Manual** (`:feature:manual`) — thin static help screen.
 
-## Controller-only (no screen yet) 🟡
+## Not yet buildable — inert draft
 
-Migrated rooted/standard controllers with **no UI, nav route,
-monitoring, or automation wiring** — the build-out is tracked in the
-[Completion Master Plan](Completion-Master-Plan) (W2):
-
-| Feature | Module | Note |
-|---|---|---|
-| Display | `:feature:display` (+ `-rooted`) | Brightness / refresh / rotation controllers only |
-| Microphone | `:feature:microphone` (+ `-rooted`) | dB/recording UI currently lives in `:feature:audio` |
-| Notification tools | `:feature:notification` (+ `-rooted`) | Legacy builder presets still in `:app` |
-| ADB / USB debugging | `:feature:adbdebug`, `:feature:usbdebug` (+ `-rooted`) | State + toggle controllers only |
-| Cellular | `:feature:radios-cell` (+ `-rooted`) | Rooted modem-dump controller; standard screen pending |
-| Automation controllers | `:feature:automation` (+ `-rooted`) | Role vs `automation-ui` to be resolved |
-
-Also still pending: `:feature:apps-rooted` (empty skeleton).
+`:feature:logbook` (session-note log + checkpoint/reminder tracker) has
+a partial Room data layer + some UI components, but is **not registered
+in `settings.gradle.kts`** — excluded from the build entirely. Missing:
+the screen/nav entry point, ActionHandler, MetricSource, and strings.
+Interrupted mid-build by an API spend limit; tracked in the
+[Completion Master Plan](Completion-Master-Plan) (W2).
 
 ---
 
-> _Last reviewed: 2026-07-09 · Source: `settings.gradle.kts`,
+> _Last reviewed: 2026-07-11 · Source: `settings.gradle.kts`,
 > feature source counts, [Completion Master Plan](Completion-Master-Plan) ·
 > Related: every `feature/*`._

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="battery_screen_title">Akku</string>
+
+    <!-- ─── Status card ─────────────────────────────────────────────── -->
+    <string name="battery_card_status_title">Status</string>
+    <string name="battery_level_value">%1$d%%</string>
+    <string name="battery_level_unknown">Ladestand unbekannt</string>
+    <string name="battery_unavailable">Akkuinformationen nicht verfügbar.</string>
+    <!-- health · temp · voltage on a single summary line -->
+    <string name="battery_detail_line">%s · %.1f°C · %.2f V</string>
+
+    <!-- ─── Charging card ────────────────────────────────────────────── -->
+    <string name="battery_card_charging_title">Aufladen</string>
+    <string name="battery_plugged_via">über %1$s</string>
+
+    <!-- Charging status labels -->
+    <string name="battery_status_charging">Wird geladen</string>
+    <string name="battery_status_discharging">Entlädt sich</string>
+    <string name="battery_status_not_charging">Lädt nicht</string>
+    <string name="battery_status_full">Voll</string>
+    <string name="battery_status_unknown">Unbekannt</string>
+
+    <!-- Plug type labels -->
+    <string name="battery_plug_ac">Netzteil</string>
+    <string name="battery_plug_usb">USB</string>
+    <string name="battery_plug_wireless">Kabellos</string>
+    <string name="battery_plug_none">Nicht angeschlossen</string>
+
+    <!-- Health labels -->
+    <string name="battery_health_good">Gut</string>
+    <string name="battery_health_overheat">Überhitzt</string>
+    <string name="battery_health_dead">Defekt</string>
+    <string name="battery_health_overvoltage">Überspannung</string>
+    <string name="battery_health_failure">Unbekannter Fehler</string>
+    <string name="battery_health_cold">Kalt</string>
+    <string name="battery_health_unknown">Unbekannt</string>
+
+    <!-- ─── Module capabilities ──────────────────────────────────────── -->
+    <string name="battery_cap_level_name">Akkustand</string>
+    <string name="battery_cap_level_detail">Ladestand in Echtzeit über BatteryManager.</string>
+    <string name="battery_cap_temp_name">Temperatur</string>
+    <string name="battery_cap_temp_detail">Akkutemperatur, gemeldet vom System.</string>
+    <string name="battery_cap_available">Funktioniert — keine Berechtigungen erforderlich.</string>
+    <string name="battery_cap_unavailable">Akkudaten noch nicht empfangen.</string>
+    <string name="battery_cap_temp_ok">%.1f°C — im normalen Bereich.</string>
+
+    <!-- ─── Monitoring containers ────────────────────────────────────── -->
+    <string name="battery_live_monitor_level">Akkustand (live)</string>
+    <string name="battery_live_monitor_temp">Temperatur (live)</string>
+    <string name="battery_monitor_level">Akkustandverlauf</string>
+    <string name="battery_monitor_temp">Temperaturverlauf</string>
+
+    <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
+    <string name="battery_cap_rooted_active">Aktiv — gerooteter Build</string>
+    <string name="battery_cap_rooted_required">Erfordert gerooteten Build</string>
+    <string name="battery_cap_fuel_gauge_name">Fuel-Gauge-Rohdaten</string>
+    <string name="battery_cap_fuel_gauge_detail">Direkter Sysfs-Zugriff auf den Fuel-Gauge-Chip (Ladezustand, Spannung, Stromstärke)</string>
+    <string name="battery_cap_cell_monitor_name">Zellspannungsüberwachung</string>
+    <string name="battery_cap_cell_monitor_detail">Zellspannungs-Telemetrie pro Zelle vom Fuel-Gauge-Chip</string>
+    <string name="battery_cap_charging_profile_name">Ladeprofilsteuerung</string>
+    <string name="battery_cap_charging_profile_detail">Überschreibt Ladestrom- und Spannungsgrenzwerte</string>
+
+    <!-- ─── Automation actions (rooted) ──────────────────────────────── -->
+    <string name="battery_action_charging_profile_override">Ladeprofil überschreiben (gerootet)</string>
+    <string name="battery_action_thermal_bypass">Thermische Drosselung umgehen (gerootet)</string>
+    <string name="battery_action_charging_type_override">Ladetyp überschreiben (gerootet)</string>
+    <string name="battery_action_full_dump">Vollständiger Sysfs-Dump (gerootet)</string>
+    <string name="battery_action_reset_mutations">Akku-Overrides zurücksetzen (gerootet)</string>
+    <string name="battery_action_hold_soc">Ladezustand halten (gerootet)</string>
+    <string name="battery_action_wireless_coil_current">Kabellose Spulenstromstärke begrenzen (gerootet)</string>
+    <string name="battery_action_health_snapshot">Akku-Gesundheitsmomentaufnahme (gerootet)</string>
+
+    <!-- Home-screen widget -->
+    <string name="battery_widget_label">Akku</string>
+    <string name="battery_widget_description">Akkustand und Ladezustand live</string>
+    <string name="battery_widget_percent_format">%1$d%%</string>
+    <string name="battery_widget_unknown">—</string>
+    <string name="battery_widget_charging">Wird geladen</string>
+    <string name="battery_widget_discharging">Entlädt sich</string>
+</resources>

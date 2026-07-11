@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Screen -->
+    <string name="vibration_screen_title">Vibration</string>
+
+    <!-- Controls card -->
+    <string name="vibration_controls_title">Haptique</string>
+    <string name="vibration_controls_no_motor">Cet appareil n\'a pas de moteur de vibration.</string>
+    <string name="vibration_controls_predefined">Effets prédéfinis</string>
+    <string name="vibration_effect_click">Clic</string>
+    <string name="vibration_effect_tick">Tic</string>
+    <string name="vibration_effect_double_click">Double clic</string>
+    <string name="vibration_effect_heavy_click">Clic fort</string>
+    <string name="vibration_controls_amplitude">Amplitude</string>
+    <string name="vibration_controls_no_amplitude">Cet appareil ne peut pas faire varier l\'amplitude — les effets sont joués à pleine intensité.</string>
+    <string name="vibration_controls_duration">Durée</string>
+    <string name="vibration_controls_play">Lire</string>
+    <string name="vibration_controls_stop">Arrêter</string>
+
+    <!-- Pattern builder card -->
+    <string name="vibration_builder_title">Créateur de motifs</string>
+    <string name="vibration_builder_instructions">Dessinez avec le doigt : gauche→droite est le temps (0–2 s), vers le haut est l\'intensité (0–100 %).</string>
+    <string name="vibration_builder_loop">Répéter le motif</string>
+    <string name="vibration_builder_play">Lire</string>
+    <string name="vibration_builder_stop">Arrêter</string>
+    <string name="vibration_builder_clear">Effacer</string>
+    <string name="vibration_builder_name">Nom du motif</string>
+    <string name="vibration_builder_save">Enregistrer le motif</string>
+
+    <!-- Saved patterns card -->
+    <string name="vibration_patterns_title">Motifs enregistrés</string>
+    <string name="vibration_patterns_empty_title">Aucun motif enregistré pour l\'instant</string>
+    <string name="vibration_patterns_empty_subtitle">Dessinez un motif ci-dessus et enregistrez-le pour le rejouer plus tard.</string>
+    <string name="vibration_patterns_duration">%1$d ms</string>
+    <string name="vibration_patterns_play">Lire le motif</string>
+    <string name="vibration_patterns_delete">Supprimer le motif</string>
+
+    <!-- Widgets card -->
+    <string name="vibration_section_widgets_title">Vos widgets</string>
+    <string name="vibration_widget_add">Ajouter un widget</string>
+    <string name="vibration_widget_list_empty_title">Aucun widget pour l\'instant</string>
+    <string name="vibration_widget_list_empty_subtitle">Ajoutez un widget d\'écran d\'accueil pour vibrer d\'un simple appui.</string>
+    <string name="vibration_widget_list_action_edit">Modifier le widget</string>
+    <string name="vibration_widget_list_action_delete">Supprimer le widget</string>
+
+    <!-- Widget config sheet (feature-specific bits; the rest are kit strings) -->
+    <string name="vibration_widget_config_pattern_label">Motif enregistré</string>
+    <string name="vibration_widget_config_pattern_note">Aucun motif enregistré pour l\'instant. Enregistrez un motif dans le créateur ci-dessus pour en choisir un.</string>
+
+    <!-- Widget function labels (the customization sheet's function picker) -->
+    <string name="vibration_widget_function_oneshot">Vibration unique</string>
+    <string name="vibration_widget_function_continuous">Continu</string>
+    <string name="vibration_widget_function_pattern">Motif enregistré (unique)</string>
+    <string name="vibration_widget_function_pattern_toggle">Répéter le motif (bascule)</string>
+    <string name="vibration_widget_function_extreme_amplitude">Amplitude extrême (rooté)</string>
+    <string name="vibration_widget_function_direct_pwm">PWM direct (rooté)</string>
+    <string name="vibration_widget_function_sustained_rumble">Vibration soutenue (rooté)</string>
+
+    <!-- Widget labels / descriptions -->
+    <string name="widget_vibrate_label">Vibrer</string>
+    <string name="widget_pattern_label">Motif de vibration</string>
+    <string name="widget_vibration_monitor_label">Moniteur de vibration</string>
+    <string name="widget_vibration_monitor_chart_label">Graphique de vibration</string>
+    <string name="vibration_widget_default_name_vibrate">Vibrer</string>
+    <string name="vibration_widget_default_name_pattern">Motif</string>
+    <string name="vibration_widget_description">Vibration en un seul appui.</string>
+    <string name="vibration_widget_pin_unsupported">Ce launcher ne peut pas épingler de widgets depuis l\'application.</string>
+    <string name="vibration_widget_removed_hint">Supprimé de l\'application. Faites glisser le widget hors de votre écran d\'accueil pour le supprimer entièrement.</string>
+    <string name="vibration_widget_cap_reached">Vous avez atteint la limite de %1$d widgets de ce type.</string>
+    <string name="widget_vibrate_description">Touchez pour vibrer.</string>
+    <string name="widget_pattern_description">Touchez pour lire un motif de vibration enregistré.</string>
+    <string name="widget_vibration_monitor_description">Amplitude de vibration en direct sous forme de barre.</string>
+    <string name="widget_vibration_monitor_chart_description">Amplitude de vibration en direct sous forme de graphique.</string>
+
+    <!-- Shared monitor-widget strings (mirror torch's widget_monitor_* keys) -->
+    <string name="widget_monitor_label">Vibration</string>
+    <string name="widget_monitor_value">%1$d%%</string>
+    <string name="widget_monitor_toggle_on">Surveillance activée</string>
+    <string name="widget_monitor_toggle_off">Surveillance désactivée</string>
+    <string name="widget_monitor_reload">Actualiser</string>
+    <string name="widget_monitor_chart_label">Vibration</string>
+    <string name="widget_monitor_chart_empty">Collecte…</string>
+
+    <!-- Widget feedback channel -->
+    <string name="vibration_widget_feedback_channel_name">Retour du widget de vibration</string>
+    <string name="vibration_widget_feedback_channel_description">Confirmations par toast/notification lorsqu\'un widget de vibration est touché.</string>
+
+    <!-- Playback service -->
+    <string name="vibration_notification_channel_name">Lecture de vibration</string>
+    <string name="vibration_notification_title">Vibration active</string>
+    <string name="vibration_notification_text">Lecture d\'un motif de vibration.</string>
+    <string name="vibration_notification_stop">Arrêter</string>
+
+    <!-- Monitoring -->
+    <string name="vibration_monitor_title">Historique d\'amplitude</string>
+    <string name="vibration_live_monitor_title">Amplitude en direct</string>
+    <string name="vibration_monitor_metric_name">Amplitude de vibration</string>
+
+    <!-- Module info: permissions -->
+    <string name="vibration_module_perm_vibrate_label">Vibrer</string>
+    <string name="vibration_module_perm_vibrate_rationale">Permet à l\'application de piloter le moteur de vibration. Accordée automatiquement à l\'installation.</string>
+    <string name="vibration_module_compat_note_effects">Les effets haptiques prédéfinis nécessitent Android 10 (API 29) ou version ultérieure.</string>
+    <string name="vibration_module_compat_note_manager">Le contrôle par actionneur + effets plus riches utilisent VibratorManager sur Android 12 (API 31) ou version ultérieure.</string>
+
+    <!-- Module info: capabilities -->
+    <string name="vibration_cap_no_motor">Aucun moteur de vibration sur cet appareil.</string>
+    <string name="vibration_cap_needs_root">Nécessite la version rootée de l\'application.</string>
+    <string name="vibration_cap_basic_name">Vibration de base</string>
+    <string name="vibration_cap_basic_detail">Vibration unique + effets prédéfinis.</string>
+    <string name="vibration_cap_basic_ok">Disponible.</string>
+    <string name="vibration_cap_amplitude_name">Contrôle de l\'amplitude</string>
+    <string name="vibration_cap_amplitude_detail">Faire varier l\'intensité de la vibration.</string>
+    <string name="vibration_cap_amplitude_ok">Pris en charge.</string>
+    <string name="vibration_cap_amplitude_none">Cet appareil vibre à intensité fixe.</string>
+    <string name="vibration_cap_patterns_name">Lecture de motifs</string>
+    <string name="vibration_cap_patterns_detail">Dessiner + lire des formes d\'onde personnalisées.</string>
+    <string name="vibration_cap_patterns_ok">Disponible.</string>
+    <string name="vibration_cap_root_amplitude_name">Amplitude extrême (rooté)</string>
+    <string name="vibration_cap_root_amplitude_detail">Survolte PWM directe du moteur.</string>
+    <string name="vibration_cap_root_pwm_name">PWM direct (rooté)</string>
+    <string name="vibration_cap_root_pwm_detail">Motifs de micro-impulsions arbitraires.</string>
+    <string name="vibration_cap_root_dual_name">Double actionneur (rooté)</string>
+    <string name="vibration_cap_root_dual_detail">Pilotage LRA + ERM en phase.</string>
+    <string name="vibration_cap_root_rumble_name">Vibration soutenue (rooté)</string>
+    <string name="vibration_cap_root_rumble_detail">Vibration soutenue longue avec protections batterie et thermique.</string>
+    <string name="vibration_cap_root_ready">Disponible sur cet appareil rooté.</string>
+    <string name="vibration_cap_root_no_dual">Actionneur unique — le pilotage double moteur n\'est pas disponible sur cet appareil.</string>
+    <string name="vibration_cap_root_rumble_caveat">S\'arrête prématurément en cas de décharge de batterie ou de surchauffe du moteur.</string>
+
+    <!-- Root tools card -->
+    <string name="vibration_root_tools_title">Outils root</string>
+    <string name="vibration_root_tools_subtitle">Contrôle privilégié du moteur, limité en fréquence par la barrière de sécurité root. Chaque outil est désactivé par défaut — activez-le (et désactivez le mode sécurité) dans Paramètres → Fonctionnalités rootées avant utilisation.</string>
+    <string name="vibration_root_section_amplitude">Amplitude extrême</string>
+    <string name="vibration_root_section_pwm">PWM direct</string>
+    <string name="vibration_root_section_dual">Double actionneur</string>
+    <string name="vibration_root_section_rumble">Vibration soutenue</string>
+    <string name="vibration_root_amplitude_label">Amplitude</string>
+    <string name="vibration_root_duration_label">Durée</string>
+    <string name="vibration_root_pwm_on_label">Impulsion activée</string>
+    <string name="vibration_root_pwm_off_label">Impulsion désactivée</string>
+    <string name="vibration_root_pwm_pulses_label">Impulsions</string>
+    <string name="vibration_root_dual_phase_label">Décalage de phase</string>
+    <string name="vibration_root_burst_ceiling_note">Les rafales d\'amplitude extrême sont plafonnées à 3 secondes.</string>
+    <string name="vibration_root_rumble_ceiling_note">La vibration soutenue est plafonnée à 5 minutes.</string>
+    <string name="vibration_root_no_dual">Cet appareil possède un seul actionneur — le pilotage double moteur n\'est pas disponible.</string>
+    <string name="vibration_root_action_amplitude">Lancer la vibration</string>
+    <string name="vibration_root_action_pwm">Lancer le PWM</string>
+    <string name="vibration_root_action_dual">Lancer le double</string>
+    <string name="vibration_root_action_rumble">Lancer la vibration soutenue</string>
+
+    <!-- Rooted-tool result snackbars -->
+    <string name="vibration_root_result_ok">Terminé.</string>
+    <string name="vibration_root_result_unsupported">Non disponible sur cet appareil.</string>
+    <string name="vibration_root_result_opted_out">Désactivé dans Paramètres → Fonctionnalités rootées (vérifiez aussi le mode sécurité).</string>
+    <string name="vibration_root_result_rate_limited">Limité en fréquence — réessayez sous peu.</string>
+    <string name="vibration_root_result_error">Échec : %1$s</string>
+    <string name="vibration_root_opted_out_action">Paramètres</string>
+
+</resources>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Kit-owned strings for the WidgetAppearanceSection (the chip-row +
+  icon-picker + tap-animation + feedback-template UI a widget-bearing
+  feature drops into its configuration sheet via WidgetAppearanceSection).
+
+  Lifted from torch's strings.xml in refactor-2026 Phase 2 / C6b so every
+  widget-bearing feature shares one localised copy. Torch-specific strings
+  (sheet title / save / cancel / morse / preview hint) stay in
+  feature/torch/.../strings.xml.
+
+  Naming: widget_kit_appearance_* prefix so a feature consuming the kit
+  can grep its own res for "widget_kit_*" and instantly see what it's
+  reusing.
+-->
+<resources>
+    <!-- Section headers inside the appearance section. -->
+    <string name="widget_kit_appearance_section_appearance">Erscheinungsbild</string>
+    <string name="widget_kit_appearance_section_tap">Tippverhalten</string>
+    <string name="widget_kit_appearance_section_feedback">Rückmeldung beim Umschalten</string>
+    <string name="widget_kit_appearance_section_preview">Vorschau</string>
+    <string name="widget_kit_appearance_preview_hint">Tippe auf die Vorschau, um die Tippanimation zu testen.</string>
+
+    <!-- Background-mode chip row + the solid-fill colour picker. -->
+    <string name="widget_kit_appearance_background_label">Hintergrund</string>
+    <string name="widget_kit_appearance_background_glass">Glas</string>
+    <string name="widget_kit_appearance_background_solid">Einfarbig</string>
+    <string name="widget_kit_appearance_background_transparent">Transparent</string>
+    <string name="widget_kit_appearance_solid_color_label">Volltonfarbe</string>
+
+    <!-- Icon picker. -->
+    <string name="widget_kit_appearance_icon_label">Symbol</string>
+    <string name="widget_kit_appearance_icon_active_label">Symbol (aktiv)</string>
+    <string name="widget_kit_appearance_icon_inactive_label">Symbol (inaktiv)</string>
+    <string name="widget_kit_appearance_icon_add_custom">Eigenes Symbol aus Dateien hinzufügen</string>
+    <string name="widget_kit_appearance_icon_custom">Eigenes Symbol</string>
+    <string name="widget_kit_appearance_icon_import_error">Dieses Bild konnte nicht verwendet werden — versuche ein anderes.</string>
+
+    <!-- Tint chip row + custom colour picker. -->
+    <string name="widget_kit_appearance_tint_label">Farbton</string>
+    <string name="widget_kit_appearance_tint_accent">Akzent</string>
+    <string name="widget_kit_appearance_tint_on_surface">Vordergrund</string>
+    <string name="widget_kit_appearance_tint_white">Weiß</string>
+    <string name="widget_kit_appearance_tint_black">Schwarz</string>
+    <string name="widget_kit_appearance_tint_custom">Benutzerdefiniert</string>
+    <string name="widget_kit_appearance_tint_custom_color">Benutzerdefinierte Farbe</string>
+
+    <!-- Tap behaviour. -->
+    <string name="widget_kit_appearance_tap_enabled_label">Zum Umschalten tippen</string>
+    <string name="widget_kit_appearance_tap_disabled_supporting">Wenn deaktiviert, zeigt das Widget nur Informationen an.</string>
+    <string name="widget_kit_appearance_tap_animation_label">Animation</string>
+    <string name="widget_kit_appearance_tap_animation_none">Keine</string>
+    <string name="widget_kit_appearance_tap_animation_ripple">Ripple</string>
+    <string name="widget_kit_appearance_tap_animation_pulse">Puls</string>
+    <string name="widget_kit_appearance_tap_animation_scale">Skalierung</string>
+    <string name="widget_kit_appearance_tap_animation_flash">Blitz</string>
+
+    <!-- Toggle feedback. -->
+    <string name="widget_kit_appearance_feedback_kind_label">Rückmeldung</string>
+    <string name="widget_kit_appearance_feedback_none">Keine</string>
+    <string name="widget_kit_appearance_feedback_toast">Toast</string>
+    <string name="widget_kit_appearance_feedback_notification">Benachrichtigung</string>
+    <string name="widget_kit_appearance_feedback_toast_template_label">Toast-Vorlage</string>
+    <string name="widget_kit_appearance_feedback_notification_title_label">Benachrichtigungstitel</string>
+    <string name="widget_kit_appearance_feedback_notification_body_label">Benachrichtigungstext</string>
+    <string name="widget_kit_appearance_feedback_template_help">Verwende {name} für den Widget-Namen und {state} für Ein/Aus.</string>
+    <string name="widget_kit_appearance_feedback_default_toast_template">{name} ist jetzt {state}</string>
+    <string name="widget_kit_appearance_feedback_default_notification_title">{name}</string>
+    <string name="widget_kit_appearance_feedback_default_notification_body">Jetzt {state}</string>
+
+    <!-- Generic customization dialog (WidgetCustomizationSheet): name,
+         function picker, params, size. -->
+    <string name="widget_kit_section_name">Name</string>
+    <string name="widget_kit_name_label">Widget-Name</string>
+    <string name="widget_kit_section_function">Funktion</string>
+    <string name="widget_kit_function_label">Was dieses Widget tut</string>
+    <string name="widget_kit_section_params">Einstellungen</string>
+    <string name="widget_kit_param_enabled">Ein</string>
+    <string name="widget_kit_create">Widget hinzufügen</string>
+    <string name="widget_kit_save">Änderungen speichern</string>
+    <string name="widget_kit_cancel">Abbrechen</string>
+    <string name="widget_kit_dialog_title_new">Neues Widget</string>
+    <string name="widget_kit_dialog_title_edit">Widget bearbeiten</string>
+
+    <!-- Content/launcher-archetype customization (ContentWidgetCustomizationSheet). -->
+    <string name="widget_kit_content_section_content">Zeigt</string>
+    <string name="widget_kit_content_tint_label">Akzentfarbe</string>
+    <string name="widget_kit_content_tint_custom">Eine benutzerdefinierte Farbe verwenden</string>
+    <string name="widget_kit_content_label_show">Namensbeschriftung anzeigen</string>
+    <string name="widget_kit_content_size_label">Startgröße</string>
+    <string name="widget_kit_content_size_small">Klein</string>
+    <string name="widget_kit_content_size_medium">Mittel</string>
+    <string name="widget_kit_content_size_large">Groß</string>
+</resources>

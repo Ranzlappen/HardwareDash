@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -314,7 +315,7 @@ internal fun AutomationScreenContent(
                     }
                 }
                 // Keep the last card's controls clear of the overlaid FAB.
-                Spacer(modifier = Modifier.height(FabClearance))
+                Spacer(modifier = Modifier.height(AutomationScreenDefaults.FabClearance))
             },
         )
 
@@ -639,12 +640,14 @@ private fun Trigger.icon(): ImageVector = when (this) {
     is Trigger.Manual -> Icons.Outlined.TouchApp
 }
 
-/**
- * Fixed clearance so the scrolled column's last row isn't hidden under the
- * overlaid 56 dp FAB (+ its padding) — a layout constant, not a theme
- * spacing step, hence the sanctioned per-file dp literal.
- */
-private val FabClearance = 88.dp
+private object AutomationScreenDefaults {
+    /**
+     * Fixed clearance so the scrolled column's last row isn't hidden under
+     * the overlaid 56 dp FAB (+ its padding) — a layout constant, not a
+     * theme spacing step, hence the sanctioned per-file dp literal.
+     */
+    val FabClearance: Dp = 88.dp
+}
 
 // ─── Previews ───────────────────────────────────────────────────────────
 

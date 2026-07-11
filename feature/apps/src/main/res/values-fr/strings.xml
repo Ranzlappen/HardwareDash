@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App-Organizer feature strings. English-only, matching the modular
+         convention established by :feature:torch (the legacy 4-language
+         S.apps/m() system is retired by this migration; re-adding values-de/
+         es/fr is a follow-up if per-feature translation returns). -->
+
+    <string name="apps_title">Applications</string>
+    <string name="apps_description">Organisez les applications installées, les PWA et les liens web dans des dossiers qui servent aussi de widgets personnalisables pour l\'écran d\'accueil.</string>
+    <string name="apps_create_folder">Créer un dossier</string>
+    <string name="apps_new_folder">Nouveau dossier</string>
+    <string name="apps_folder_name">Nom du dossier</string>
+    <string name="apps_delete_folder_confirm">Supprimer ce dossier ?</string>
+    <string name="apps_no_folders">Aucun dossier pour l\'instant — appuyez sur +</string>
+    <string name="apps_color">Couleur</string>
+    <string name="apps_color_custom">Personnalisé</string>
+    <string name="apps_apps_in_folder">Applications de ce dossier</string>
+    <string name="apps_add_web_link">Ajouter un lien web</string>
+    <string name="apps_web_link_url">URL</string>
+    <string name="apps_web_link_label">Libellé (facultatif)</string>
+    <string name="apps_no_apps">Aucune application détectée pour l\'instant</string>
+    <string name="apps_pwa_badge">PWA</string>
+    <string name="apps_web_link_badge">Web</string>
+    <string name="apps_preview_folder">Aperçu</string>
+    <string name="apps_lock_folder">Verrouiller le dossier</string>
+    <string name="apps_unlock_folder">Déverrouiller le dossier</string>
+    <string name="apps_biometric_unavailable">Le déverrouillage biométrique n\'est pas configuré sur cet appareil</string>
+    <string name="apps_pin_to_home">Épingler à l\'accueil</string>
+    <string name="apps_pin_unsupported">Votre launcher ne prend pas en charge l\'épinglage en un geste. Appuyez de manière prolongée sur votre écran d\'accueil et choisissez plutôt le widget Dossier d\'applications.</string>
+    <string name="apps_rule">Règles</string>
+    <string name="apps_rule_package_prefix">Le package commence par</string>
+    <string name="apps_rule_recently_installed">Installées récemment</string>
+    <string name="apps_rule_web_apks">PWA web uniquement</string>
+    <string name="apps_rule_unused">Inutilisée depuis</string>
+    <string name="apps_rule_on_internal_storage">Sur le stockage interne</string>
+    <string name="apps_rule_on_external_storage">Sur carte SD</string>
+    <string name="apps_rule_system_apps">Applications système</string>
+    <string name="apps_rule_user_apps">Applications installées par l\'utilisateur</string>
+    <string name="apps_rule_union_hint">Les sélections manuelles et les correspondances de règles sont combinées.</string>
+    <string name="apps_rule_days">jours</string>
+    <string name="apps_rule_package_prefix_hint">p. ex. com.google.</string>
+    <string name="apps_rule_usage_hint">Nécessite l\'autorisation \"Accès à l\'utilisation\". Accordez-la dans Paramètres → Applications → Accès spécial.</string>
+    <string name="apps_search_apps_hint">Rechercher des applications</string>
+    <string name="apps_no_search_matches">Aucune application ne correspond</string>
+    <string name="apps_already_in_folder">dans :</string>
+    <string name="apps_cover_icon">Couverture</string>
+    <string name="apps_cover_pick_image">Choisir une image</string>
+    <string name="apps_cover_pick_symbol">Choisir un symbole</string>
+    <string name="apps_cover_clear">Effacer</string>
+    <string name="apps_cover_none">Auto</string>
+    <string name="apps_cancel">Annuler</string>
+    <string name="apps_save">Enregistrer</string>
+    <string name="apps_delete">Supprimer</string>
+    <string name="apps_back">Retour</string>
+
+    <!-- Legacy import -->
+    <string name="apps_import_legacy">Importer depuis l\'ancienne application</string>
+    <string name="apps_import_success">%1$d dossiers et %2$d applications importés</string>
+    <string name="apps_import_nothing">Aucune donnée héritée trouvée</string>
+    <string name="apps_import_error">Échec de l\'importation — réessayez</string>
+
+    <!-- In-editor widget management section -->
+    <string name="apps_widgets_section_title">Widgets de l\'écran d\'accueil</string>
+    <string name="apps_widget_add">Ajouter un widget</string>
+    <string name="apps_widget_list_empty">Aucun widget placé pour l\'instant</string>
+    <string name="apps_widget_delete">Supprimer le widget</string>
+
+    <!-- Folder widget design customization. -->
+    <string name="apps_folder_design">Design</string>
+    <string name="apps_folder_shape_circle">Cercle</string>
+    <string name="apps_folder_shape_rounded">Arrondi</string>
+    <string name="apps_folder_shape_square">Carré</string>
+    <string name="apps_folder_corner_radius">Rayon des angles : %1$d%%</string>
+    <string name="apps_folder_grid_preview">Afficher la grille d\'icônes d\'applications</string>
+    <string name="apps_folder_gradient">Dégradé</string>
+    <string name="apps_folder_gradient_add">Ajouter</string>
+    <string name="apps_folder_gradient_clear">Effacer</string>
+    <string name="apps_folder_stroke_width">Bordure : %1$d dp</string>
+
+    <!-- Folder home-screen widget. -->
+    <string name="apps_widget_folder_label">Dossier d\'applications</string>
+    <string name="apps_widget_folder_description">Un dossier personnalisable pour l\'écran d\'accueil regroupant applications installées, PWA et liens web.</string>
+    <string name="apps_widget_pick_folder">Choisir un dossier</string>
+    <string name="apps_widget_folder_selected">Sélectionné</string>
+
+    <!-- Monitoring: readable signal for the monitoring framework / automation. -->
+    <string name="apps_monitor_metric_folder_count_name">Dossiers configurés</string>
+    <string name="apps_monitor_metric_folder_count_unit">dossiers</string>
+
+    <!-- Automation: invocable action labels. -->
+    <string name="apps_action_refresh_apps">Actualiser le catalogue d\'applications</string>
+    <string name="apps_action_open_folder">Ouvrir le dossier</string>
+    <string name="apps_action_launch_app">Lancer l\'application</string>
+
+    <!-- Rooted per-app management row (folder editor's app list; self-hides
+         on the standard flavor and for web-link entries — see AppRow /
+         AppRootActionsMenu). Backed by :feature:apps-rooted's
+         RootedAppsRootController via the AppsRootController seam. -->
+    <string name="apps_root_menu_manage">Gérer l\'application</string>
+    <string name="apps_root_menu_freeze">Geler</string>
+    <string name="apps_root_menu_unfreeze">Dégeler</string>
+    <string name="apps_root_menu_force_stop">Forcer l\'arrêt</string>
+    <string name="apps_root_result_ok">Terminé</string>
+    <string name="apps_root_result_unsupported">Nécessite la version rootée de l\'application</string>
+    <string name="apps_root_result_opted_out">Désactivé dans les Paramètres</string>
+    <string name="apps_root_result_rate_limited">Limité en fréquence — réessayez sous peu</string>
+</resources>

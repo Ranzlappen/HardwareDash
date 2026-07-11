@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subghz_screen_title">Sub-GHz</string>
+
+    <!-- Bridge card -->
+    <string name="subghz_card_bridge_title">Bridge Sub-GHz</string>
+    <string name="subghz_chip_connected">Bridge connecté</string>
+    <string name="subghz_chip_none">Aucun bridge</string>
+    <string name="subghz_chip_capable">Compatible Sub-GHz</string>
+    <string name="subghz_label_device">Appareil</string>
+    <string name="subghz_label_coverage">Couverture</string>
+    <string name="subghz_coverage_subghz">300–928 MHz ISM (Sub-GHz)</string>
+    <string name="subghz_coverage_wideband">Large bande (non réglé sur Sub-GHz)</string>
+    <string name="subghz_no_bridge">Connectez un SDR ou émetteur-récepteur Sub-GHz compatible (RTL-SDR, HackRF, YARD Stick One, …) via USB pour utiliser ce module</string>
+    <string name="subghz_no_usb_host">Cet appareil ne dispose d\'aucun bus hôte USB ; une radio Sub-GHz externe ne peut donc pas être connectée</string>
+
+    <!-- Monitor titles -->
+    <string name="subghz_live_monitor_bridge">État du bridge (en direct)</string>
+    <string name="subghz_monitor_bridge">Historique de l\'état du bridge</string>
+
+    <!-- Standard capability -->
+    <string name="subghz_cap_bridge_name">Détection SDR USB</string>
+    <string name="subghz_cap_bridge_detail">Détecte un SDR ou émetteur-récepteur Sub-GHz compatible sur le bus hôte USB ; Android ne propose aucune API radio Sub-GHz native</string>
+    <string name="subghz_cap_bridge_connected">Bridge connecté</string>
+    <string name="subghz_cap_bridge_none">Aucun bridge connecté</string>
+    <string name="subghz_cap_bridge_no_host">Aucune prise en charge USB hôte</string>
+
+    <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
+    <string name="subghz_cap_rooted_active">Actif — version rootée</string>
+    <string name="subghz_cap_rooted_required">Nécessite une version rootée</string>
+    <string name="subghz_cap_registers_name">Accès direct aux registres</string>
+    <string name="subghz_cap_registers_detail">Lit et écrit directement les registres radio de l\'émetteur-récepteur via le nœud de périphérique USB, en contournant le pilote en espace utilisateur</string>
+    <string name="subghz_cap_tuning_name">Réglage personnalisé de la porteuse</string>
+    <string name="subghz_cap_tuning_detail">Se règle sur une porteuse Sub-GHz explicite (p. ex. 315 / 433,92 / 868 / 915 MHz) et définit une déviation en dehors des préréglages du pilote standard</string>
+    <string name="subghz_cap_capture_name">Capture OOK / 2-FSK</string>
+    <string name="subghz_cap_capture_detail">Diffuse en continu les symboles bruts on-off-keying et 2-FSK depuis la radio pour relecture et analyse</string>
+</resources>

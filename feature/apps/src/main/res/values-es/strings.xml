@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App-Organizer feature strings. English-only, matching the modular
+         convention established by :feature:torch (the legacy 4-language
+         S.apps/m() system is retired by this migration; re-adding values-de/
+         es/fr is a follow-up if per-feature translation returns). -->
+
+    <string name="apps_title">Apps</string>
+    <string name="apps_description">Organiza las apps instaladas, las PWA y los enlaces web en carpetas que también funcionan como widgets personalizables para la pantalla de inicio.</string>
+    <string name="apps_create_folder">Crear carpeta</string>
+    <string name="apps_new_folder">Nueva carpeta</string>
+    <string name="apps_folder_name">Nombre de la carpeta</string>
+    <string name="apps_delete_folder_confirm">¿Eliminar esta carpeta?</string>
+    <string name="apps_no_folders">Aún no hay carpetas; toca +</string>
+    <string name="apps_color">Color</string>
+    <string name="apps_color_custom">Personalizado</string>
+    <string name="apps_apps_in_folder">Apps en esta carpeta</string>
+    <string name="apps_add_web_link">Añadir enlace web</string>
+    <string name="apps_web_link_url">URL</string>
+    <string name="apps_web_link_label">Etiqueta (opcional)</string>
+    <string name="apps_no_apps">Aún no se detectaron apps</string>
+    <string name="apps_pwa_badge">PWA</string>
+    <string name="apps_web_link_badge">Web</string>
+    <string name="apps_preview_folder">Vista previa</string>
+    <string name="apps_lock_folder">Bloquear carpeta</string>
+    <string name="apps_unlock_folder">Desbloquear carpeta</string>
+    <string name="apps_biometric_unavailable">El desbloqueo biométrico no está configurado en este dispositivo</string>
+    <string name="apps_pin_to_home">Fijar en inicio</string>
+    <string name="apps_pin_unsupported">Tu launcher no admite la fijación con un toque. Mantén pulsada la pantalla de inicio y elige el widget Carpeta de apps en su lugar.</string>
+    <string name="apps_rule">Reglas</string>
+    <string name="apps_rule_package_prefix">El paquete empieza por</string>
+    <string name="apps_rule_recently_installed">Instaladas recientemente</string>
+    <string name="apps_rule_web_apks">Solo PWA web</string>
+    <string name="apps_rule_unused">Sin usar durante</string>
+    <string name="apps_rule_on_internal_storage">En almacenamiento interno</string>
+    <string name="apps_rule_on_external_storage">En tarjeta SD</string>
+    <string name="apps_rule_system_apps">Apps del sistema</string>
+    <string name="apps_rule_user_apps">Apps instaladas por el usuario</string>
+    <string name="apps_rule_union_hint">Las selecciones manuales y las coincidencias de reglas se combinan.</string>
+    <string name="apps_rule_days">días</string>
+    <string name="apps_rule_package_prefix_hint">p. ej. com.google.</string>
+    <string name="apps_rule_usage_hint">Requiere el permiso \"Acceso de uso\". Concédelo en Ajustes → Apps → Acceso especial.</string>
+    <string name="apps_search_apps_hint">Buscar apps</string>
+    <string name="apps_no_search_matches">Ninguna app coincide</string>
+    <string name="apps_already_in_folder">en:</string>
+    <string name="apps_cover_icon">Portada</string>
+    <string name="apps_cover_pick_image">Elegir imagen</string>
+    <string name="apps_cover_pick_symbol">Elegir símbolo</string>
+    <string name="apps_cover_clear">Quitar</string>
+    <string name="apps_cover_none">Auto</string>
+    <string name="apps_cancel">Cancelar</string>
+    <string name="apps_save">Guardar</string>
+    <string name="apps_delete">Eliminar</string>
+    <string name="apps_back">Atrás</string>
+
+    <!-- Legacy import -->
+    <string name="apps_import_legacy">Importar desde la app anterior</string>
+    <string name="apps_import_success">Se importaron %1$d carpetas y %2$d apps</string>
+    <string name="apps_import_nothing">No se encontraron datos anteriores</string>
+    <string name="apps_import_error">Error al importar; inténtalo de nuevo</string>
+
+    <!-- In-editor widget management section -->
+    <string name="apps_widgets_section_title">Widgets de la pantalla de inicio</string>
+    <string name="apps_widget_add">Añadir widget</string>
+    <string name="apps_widget_list_empty">Aún no se colocaron widgets</string>
+    <string name="apps_widget_delete">Eliminar widget</string>
+
+    <!-- Folder widget design customization. -->
+    <string name="apps_folder_design">Diseño</string>
+    <string name="apps_folder_shape_circle">Círculo</string>
+    <string name="apps_folder_shape_rounded">Redondeado</string>
+    <string name="apps_folder_shape_square">Cuadrado</string>
+    <string name="apps_folder_corner_radius">Radio de esquina: %1$d%%</string>
+    <string name="apps_folder_grid_preview">Mostrar cuadrícula de iconos de apps</string>
+    <string name="apps_folder_gradient">Degradado</string>
+    <string name="apps_folder_gradient_add">Añadir</string>
+    <string name="apps_folder_gradient_clear">Quitar</string>
+    <string name="apps_folder_stroke_width">Borde: %1$d dp</string>
+
+    <!-- Folder home-screen widget. -->
+    <string name="apps_widget_folder_label">Carpeta de apps</string>
+    <string name="apps_widget_folder_description">Una carpeta personalizable para la pantalla de inicio con apps instaladas, PWA y enlaces web.</string>
+    <string name="apps_widget_pick_folder">Elegir una carpeta</string>
+    <string name="apps_widget_folder_selected">Seleccionada</string>
+
+    <!-- Monitoring: readable signal for the monitoring framework / automation. -->
+    <string name="apps_monitor_metric_folder_count_name">Carpetas configuradas</string>
+    <string name="apps_monitor_metric_folder_count_unit">carpetas</string>
+
+    <!-- Automation: invocable action labels. -->
+    <string name="apps_action_refresh_apps">Actualizar catálogo de apps</string>
+    <string name="apps_action_open_folder">Abrir carpeta</string>
+    <string name="apps_action_launch_app">Iniciar app</string>
+
+    <!-- Rooted per-app management row (folder editor's app list; self-hides
+         on the standard flavor and for web-link entries — see AppRow /
+         AppRootActionsMenu). Backed by :feature:apps-rooted's
+         RootedAppsRootController via the AppsRootController seam. -->
+    <string name="apps_root_menu_manage">Gestionar app</string>
+    <string name="apps_root_menu_freeze">Congelar</string>
+    <string name="apps_root_menu_unfreeze">Descongelar</string>
+    <string name="apps_root_menu_force_stop">Forzar detención</string>
+    <string name="apps_root_result_ok">Listo</string>
+    <string name="apps_root_result_unsupported">Requiere la versión rooteada de la app</string>
+    <string name="apps_root_result_opted_out">Desactivado en Ajustes</string>
+    <string name="apps_root_result_rate_limited">Limitado por frecuencia; inténtalo de nuevo en breve</string>
+</resources>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ─── System UI surfaces (tile + widget chrome) ──────────── -->
+    <string name="torch_tile_label">Taschenlampe</string>
+    <string name="strobe_tile_label">Stroboskop</string>
+    <string name="widget_flashlight_label">Taschenlampe</string>
+    <string name="widget_strobe_label">Stroboskop</string>
+    <string name="widget_flashlight_description">Schaltet die Taschenlampe des Geräts ein oder aus.</string>
+    <string name="widget_strobe_description">Schaltet ein konfigurierbares Blitzlicht-Stroboskop ein oder aus.</string>
+    <string name="widget_monitor_label">Taschenlampen-Aktivität</string>
+    <string name="widget_monitor_description">Live-Anzeige der Taschenlampen-Aktivität mit einem Fortschrittsbalken.</string>
+    <string name="widget_monitor_value">Taschenlampen-Intensität: %1$d%%</string>
+    <string name="widget_monitor_toggle_on">Überwachung ein</string>
+    <string name="widget_monitor_toggle_off">Überwachung aus</string>
+    <string name="widget_monitor_reload">Aktualisieren</string>
+    <string name="widget_monitor_chart_label">Diagramm der Taschenlampen-Aktivität</string>
+    <string name="widget_monitor_chart_description">Live-Sparkline der Taschenlampen-Aktivität über das konfigurierte Zeitfenster.</string>
+    <string name="widget_monitor_chart_empty">Daten werden gesammelt …</string>
+
+    <!-- ─── Foreground-service notification ─────────────────────── -->
+    <string name="strobe_notification_channel_name">Stroboskop-Dienst</string>
+    <string name="strobe_notification_title">Stroboskop aktiv</string>
+    <string name="strobe_notification_text">Tippe auf das Widget, um es zu stoppen.</string>
+    <string name="strobe_notification_stop">Stopp</string>
+    <string name="strobe_widget_start_failed">Stroboskop konnte nicht gestartet werden — App öffnen</string>
+
+    <!-- ─── Widget toggle-feedback channel ──────────────────────── -->
+    <string name="widget_feedback_channel_name">Widget-Rückmeldung</string>
+    <string name="widget_feedback_channel_description">Optionale Bestätigungs-Toasts und Benachrichtigungen beim Umschalten eines Widgets.</string>
+
+    <!-- ─── TorchScreen ─────────────────────────────────────────── -->
+    <string name="torch_screen_title">Taschenlampe</string>
+    <string name="torch_state_on">Ein</string>
+    <string name="torch_state_off">Aus</string>
+    <string name="torch_action_turn_on">Taschenlampe einschalten</string>
+    <string name="torch_action_turn_off">Taschenlampe ausschalten</string>
+    <string name="torch_action_toggle_caption">Taschenlampe</string>
+    <string name="torch_action_hold">Halten für Licht</string>
+    <string name="torch_action_strobe">Stroboskop</string>
+    <string name="torch_action_strobe_toggle">Stroboskop umschalten</string>
+    <string name="torch_action_strobe_hold">Stroboskop halten</string>
+    <string name="torch_action_morse">Morse</string>
+    <string name="torch_action_morse_toggle">Morse umschalten</string>
+    <string name="torch_action_morse_hold">Morse halten</string>
+    <string name="torch_morse_message_label">Morse-Nachricht</string>
+    <string name="torch_status_no_flash">Dieses Gerät verfügt über keine Blitzeinheit.</string>
+    <string name="torch_status_hardware_error">Hardwarefehler — versuche es erneut.</string>
+    <string name="torch_status_permission_denied">Kamerazugriff verweigert — in den Systemeinstellungen erlauben.</string>
+    <string name="torch_status_on">Die Taschenlampe ist eingeschaltet.</string>
+    <string name="torch_status_off">Tippe auf die Schaltfläche, um die Taschenlampe einzuschalten.</string>
+
+    <!-- In-app strobe toggle button (under the flashlight FAB). -->
+    <string name="torch_action_strobe_start">Stroboskop starten</string>
+    <string name="torch_action_strobe_stop">Stroboskop stoppen</string>
+    <string name="torch_action_strobe_start_a11y">Stroboskop mit der aktuellen Standardrate starten</string>
+    <string name="torch_action_strobe_stop_a11y">Das laufende Stroboskop stoppen</string>
+
+    <!-- ─── Monitoring (torch instantiation of MonitorContainer) ──── -->
+    <string name="torch_monitor_title">Taschenlampen-Aktivität</string>
+    <string name="torch_live_monitor_title">Taschenlampen-Aktivität (live)</string>
+    <string name="torch_monitor_metric_name">Taschenlampen-Intensität</string>
+
+    <!-- ─── Strobe defaults section ─────────────────────────────── -->
+    <string name="torch_section_defaults_title">Stroboskop-Standardwerte</string>
+    <string name="torch_section_defaults_subtitle">Wird als Standard für neu erstellte Stroboskop-Widgets verwendet.</string>
+    <string name="torch_strobe_rate_label">Rate</string>
+    <string name="torch_brightness_label">Helligkeit</string>
+    <string name="torch_strobe_rate_value">%1$d Hz</string>
+
+    <!-- ─── Widgets management section ──────────────────────────── -->
+    <string name="torch_section_widgets_title">Deine Widgets</string>
+    <!-- Single "Add widget" entry point — the function (flashlight / strobe /
+         morse) is picked inside the customization sheet. -->
+    <string name="torch_widget_add">Widget hinzufügen</string>
+    <string name="torch_widget_pin_unsupported">Dein Launcher unterstützt das direkte Hinzufügen von Widgets nicht. Halte den Startbildschirm gedrückt, um eines manuell hinzuzufügen.</string>
+    <string name="torch_widget_removed_hint">Aus deiner Liste entfernt. Um es vom Startbildschirm zu entfernen, halte das Widget dort gedrückt und entferne es.</string>
+    <string name="torch_widget_cap_reached">Du kannst höchstens %1$d Widgets jeder Art anheften. Entferne zuerst eines.</string>
+    <string name="torch_widget_default_name_flashlight">Taschenlampe</string>
+    <string name="torch_widget_default_name_strobe">Stroboskop</string>
+    <string name="torch_widget_list_empty_title">Noch keine Widgets</string>
+    <string name="torch_widget_list_empty_subtitle">Verwende die Schaltfläche oben, um ein Widget zu deinem Startbildschirm hinzuzufügen.</string>
+    <string name="torch_widget_list_action_edit">Widget bearbeiten</string>
+    <string name="torch_widget_list_action_delete">Widget entfernen</string>
+
+    <!-- ─── Widget customization sheet (function picker) ─────────── -->
+    <!-- The customization sheet chrome (name / size / appearance / footer
+         labels) now lives in :core:widgetkit. Torch only contributes the
+         function labels the picker offers. -->
+    <string name="torch_widget_function_flashlight">Taschenlampe</string>
+    <string name="torch_widget_function_strobe">Stroboskop</string>
+    <string name="torch_widget_function_morse">Morse / SOS</string>
+
+    <!-- Appearance / tap / feedback / preview sub-sections moved to
+         :core:widgetkit (refactor-2026 Phase 2 / C6b). 38 strings
+         relocated under widget_kit_appearance_* prefix; the kit's
+         WidgetAppearanceSection composable is the single consumer. -->
+
+    <!-- Module-blueprint OS-compatibility notes (rendered by ModuleCompatibilitySection) -->
+    <string name="torch_module_perm_notifications_label">Benachrichtigungen</string>
+    <string name="torch_module_perm_notifications_rationale">Ermöglicht es dem Stroboskop-Dienst, seinen Status anzuzeigen, und lässt Widget-Bestätigungen erscheinen.</string>
+    <string name="torch_module_compat_note_fgs_active">Das Stroboskop läuft während der Aktivierung als Vordergrunddienst und blitzt daher weiter, auch wenn du den Bildschirm verlässt.</string>
+    <string name="torch_module_compat_note_fgs_short">Unter Android 14+ läuft das Stroboskop als zeitlich begrenzter kurzer Vordergrunddienst (etwa 3 Minuten).</string>
+
+    <!-- Per-function capability badges (Functions & compatibility section) -->
+    <string name="torch_cap_no_flash">Dieses Gerät hat keine Blitzeinheit.</string>
+    <string name="torch_cap_needs_root">Erfordert die gerootete App-Version mit erteiltem Root-Zugriff.</string>
+    <string name="torch_cap_basic_name">Taschenlampe ein/aus + halten</string>
+    <string name="torch_cap_basic_detail">Umschalten und kurzzeitiges Halten für Licht.</string>
+    <string name="torch_cap_basic_ok">Blitzeinheit erkannt — funktioniert.</string>
+    <string name="torch_cap_strobe_name">Stroboskop &amp; Morse</string>
+    <string name="torch_cap_strobe_detail">Konfigurierbares Stroboskop und Morse-Wiedergabe.</string>
+    <string name="torch_cap_strobe_ok">Funktioniert.</string>
+    <string name="torch_cap_strobe_caveat">Funktioniert; unter Android 14+ läuft ein Hintergrund-Stroboskop als zeitlich begrenzter (~3 Min.) Vordergrunddienst und zeigt eine Benachrichtigung an.</string>
+    <string name="torch_cap_root_ready">Root-Zugriff und Taschenlampen-Hardware verfügbar.</string>
+    <string name="torch_cap_root_no_led">Root-Zugriff verfügbar, aber es wurde kein unterstützter LED-sysfs-Knoten auf diesem Gerät gefunden.</string>
+    <string name="torch_cap_root_brightness_name">Extreme Helligkeit (Root)</string>
+    <string name="torch_cap_root_brightness_detail">Steuert die LED über das werkseitige Limit hinaus (bis zu 150 %).</string>
+    <string name="torch_cap_root_strobe_name">Hochfrequentes Tastverhältnis-Stroboskop (Root)</string>
+    <string name="torch_cap_root_strobe_detail">Impulse mit niedrigem Tastverhältnis bei hoher Frequenz für thermischen Spielraum.</string>
+    <string name="torch_cap_root_multiled_name">Multi-LED-Aktivierung (Root)</string>
+    <string name="torch_cap_root_multiled_detail">Schaltet alle erkannten Emitter gleichzeitig ein.</string>
+    <string name="torch_cap_root_multiled_caveat">Verfügbar; die genaue Anzahl der Emitter ist geräteabhängig.</string>
+    <string name="torch_cap_root_thermal_name">Thermische Außerkraftsetzung (Root)</string>
+    <string name="torch_cap_root_thermal_detail">Setzt die thermische Drosselung der LED für ein Stroboskop kurzzeitig außer Kraft.</string>
+    <string name="torch_cap_root_thermal_caveat">Verfügbar — setzt thermische Grenzwerte außer Kraft (fest auf 45 s begrenzt). Kann das Gerät erhitzen; nur kurz verwenden.</string>
+
+    <!-- Root tools card (rooted app version only) -->
+    <string name="torch_root_tools_title">Root-Tools</string>
+    <string name="torch_root_tools_subtitle">Privilegierte Taschenlampen-Steuerungen, ratenbegrenzt durch die Root-Sicherheitssperre. Jedes Tool ist standardmäßig AUS — aktiviere es (und schalte den Sicherheitsmodus aus) unter Einstellungen → Gerootete Funktionsschalter, bevor du es verwendest.</string>
+    <string name="torch_root_action_brightness">Boost ausführen</string>
+    <string name="torch_root_action_strobe">Stroboskop ausführen</string>
+    <string name="torch_root_action_multiled">Burst ausführen</string>
+    <string name="torch_root_action_thermal">Thermisches Stroboskop ausführen</string>
+    <!-- Rooted-tool section headers -->
+    <string name="torch_root_section_brightness">Helligkeit steigern</string>
+    <string name="torch_root_section_strobe">Tastverhältnis-Stroboskop</string>
+    <string name="torch_root_section_multiled">Multi-LED-Burst</string>
+    <string name="torch_root_section_thermal">Stroboskop mit thermischer Außerkraftsetzung</string>
+    <!-- Rooted-tool slider / control labels -->
+    <string name="torch_root_brightness_label">Helligkeit</string>
+    <string name="torch_root_freq_label">Frequenz</string>
+    <string name="torch_root_duty_label">Tastverhältnis</string>
+    <string name="torch_root_duration_label">Dauer</string>
+    <string name="torch_root_include_screen_label">Bildschirm einbeziehen</string>
+    <string name="torch_root_thermal_ceiling_note">Die thermische Außerkraftsetzung ist auf 45 Sekunden begrenzt.</string>
+    <string name="torch_root_no_boost_headroom">Kein Helligkeitsspielraum auf diesem Gerät — es wurde kein boostbarer LED-Knoten gefunden.</string>
+    <string name="torch_root_result_ok">Fertig.</string>
+    <string name="torch_root_result_unsupported">Auf diesem Gerät nicht verfügbar.</string>
+    <string name="torch_root_result_opted_out">In Einstellungen → Gerootete Funktionsschalter deaktiviert (prüfe auch den Sicherheitsmodus).</string>
+    <string name="torch_root_opted_out_action">Einstellungen</string>
+    <string name="torch_root_result_rate_limited">Ratenbegrenzt — versuche es in Kürze erneut.</string>
+    <string name="torch_root_result_error">Fehlgeschlagen: %1$s</string>
+
+    <!-- ─── Floating overlay button ─────────────────────────────────── -->
+    <string name="overlay_button_description">Taschenlampe umschalten</string>
+    <string name="overlay_notification_channel_name">Schwebende Taschenlampen-Schaltfläche</string>
+    <string name="overlay_notification_title">Schwebende Taschenlampen-Schaltfläche aktiv</string>
+    <string name="overlay_notification_text">Ziehe die Schaltfläche, um sie neu zu positionieren.</string>
+    <string name="overlay_notification_dismiss">Verwerfen</string>
+</resources>

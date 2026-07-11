@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensors_title">Sensores</string>
+    <string name="sensors_live_section">Lecturas en vivo</string>
+    <string name="sensors_value_pending">Esperando lectura…</string>
+    <string name="sensors_not_present">No disponible en este dispositivo</string>
+    <string name="sensors_monitor_title">Historial de %1$s</string>
+    <string name="sensors_live_monitor_title">%1$s en vivo</string>
+    <string name="sensors_capability_available">Sensor presente — transmitiendo lecturas</string>
+    <string name="sensors_capability_missing">Este dispositivo no tiene este sensor</string>
+    <string name="sensors_capability_detail_signal">Representable en gráfico + utilizable como desencadenador de automatización (clave de métrica: %1$s)</string>
+    <string name="sensors_capability_rooted_active">Activo — compilación rooteada</string>
+    <string name="sensors_capability_rooted_required">Requiere compilación rooteada</string>
+    <string name="sensors_capability_high_polling">Muestreo de alta frecuencia</string>
+    <string name="sensors_capability_high_polling_detail">Anular la frecuencia de reporte del sensor por debajo del mínimo de la API pública</string>
+    <string name="sensors_capability_raw_unfiltered">Salida sin procesar sin filtrar</string>
+    <string name="sensors_capability_raw_unfiltered_detail">Evita la fusión de sensores de Android y el pipeline de filtro de paso bajo</string>
+    <string name="sensors_capability_sysfs_read">Lectura directa de Sysfs</string>
+    <string name="sensors_capability_sysfs_read_detail">Acceso sysfs a nivel de kernel a los nodos de hardware del sensor</string>
+    <string name="sensors_action_proximity_near">Proximidad por debajo del umbral</string>
+    <string name="sensors_action_proximity_far">Proximidad por encima del umbral</string>
+    <string name="sensors_action_light_bright">Luz ambiental por encima del umbral</string>
+    <string name="sensors_action_light_dark">Luz ambiental por debajo del umbral</string>
+    <string name="sensors_action_acceleration_above">Aceleración por encima del umbral</string>
+    <string name="sensors_action_acceleration_below">Aceleración por debajo del umbral</string>
+</resources>

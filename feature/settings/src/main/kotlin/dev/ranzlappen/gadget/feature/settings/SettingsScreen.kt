@@ -9,16 +9,19 @@ import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.feature.settings.components.AboutCard
 import dev.ranzlappen.gadget.feature.settings.components.AccessibilityCard
 import dev.ranzlappen.gadget.feature.settings.components.AppearanceCard
+import dev.ranzlappen.gadget.feature.settings.components.LanguageCard
 import dev.ranzlappen.gadget.feature.settings.components.MonitoringCard
 
 /**
- * Settings v1 — three cards under one [ModuleScreenScaffold]:
+ * Settings v1 — cards under one [ModuleScreenScaffold]:
  *
  *   1. **About** — version / build info from `BuildConfig`.
- *   2. **Appearance** — dark-theme mode + dynamic colour.
- *   3. **Accessibility** — reduced motion override, reduce
+ *   2. **Language** — per-app UI language (W8), backed by
+ *      `AppCompatDelegate.setApplicationLocales()`.
+ *   3. **Appearance** — dark-theme mode + dynamic colour.
+ *   4. **Accessibility** — reduced motion override, reduce
  *      transparency, large text override.
- *   4. **Rooted feature toggles** ([rootFeatureToggles] slot) — the
+ *   5. **Rooted feature toggles** ([rootFeatureToggles] slot) — the
  *      per-feature opt-in switches + safety-mode master switch. Supplied
  *      by `:app` (it depends on the legacy `RootFeaturesEntryPoint` +
  *      22 controllers, which a leaf feature module can't see) and renders
@@ -44,11 +47,16 @@ fun SettingsScreen(
 ) {
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
     val monitorNotificationActionsEnabled by viewModel.monitorNotificationActionsEnabled.collectAsStateWithLifecycle()
+    val language by viewModel.language.collectAsStateWithLifecycle()
     ModuleScreenScaffold(
         title = "Settings",
         modifier = modifier,
         functional = {
             AboutCard()
+            LanguageCard(
+                current = language,
+                onLanguageChange = viewModel::setLanguage,
+            )
             AppearanceCard(
                 preferences = preferences,
                 onDarkThemeModeChange = viewModel::setDarkThemeMode,

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gps_screen_title">GPS/Position</string>
+
+    <!-- ─── Permission card ────────────────────────────────────────────── -->
+    <string name="gps_permission_card_title">Autorisation de localisation requise</string>
+    <string name="gps_permission_card_body">Cet écran a besoin d\'accéder à la position de votre appareil pour afficher votre emplacement sur la carte et indiquer la vitesse et l\'altitude.</string>
+    <string name="gps_permission_grant_button">Autoriser la localisation</string>
+
+    <!-- ─── Permission ModuleInfo ──────────────────────────────────────── -->
+    <string name="gps_permission_label">Position</string>
+    <string name="gps_permission_rationale">Nécessaire pour lire la position GPS, la vitesse et l\'altitude de l\'appareil.</string>
+
+    <!-- ─── Module capabilities ─────────────────────────────────────────── -->
+    <string name="gps_cap_location_name">Position GPS</string>
+    <string name="gps_cap_location_detail">Position en temps réel via FusedLocationProvider.</string>
+    <string name="gps_cap_no_permission">Autorisation de localisation non accordée.</string>
+    <string name="gps_cap_searching">Autorisation accordée — acquisition de la position…</string>
+    <string name="gps_cap_available">Position acquise.</string>
+
+    <!-- ─── Map card ─────────────────────────────────────────────────────── -->
+    <string name="gps_card_map_title">Carte</string>
+
+    <!-- ─── Coordinates card ─────────────────────────────────────────────── -->
+    <string name="gps_card_coordinates_title">Position</string>
+    <string name="gps_searching">Acquisition du signal GPS…</string>
+    <string name="gps_label_lat">Latitude</string>
+    <string name="gps_label_lon">Longitude</string>
+    <string name="gps_label_altitude">Altitude</string>
+    <string name="gps_label_speed">Vitesse</string>
+    <string name="gps_label_bearing">Cap</string>
+    <string name="gps_label_accuracy">Précision</string>
+
+    <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
+    <string name="gps_cap_rooted_active">Actif — version rootée</string>
+    <string name="gps_cap_rooted_required">Nécessite la version rootée</string>
+    <string name="gps_cap_nmea_name">Capture brute NMEA</string>
+    <string name="gps_cap_nmea_detail">Flux direct de trames NMEA contournant l\'API LocationManager</string>
+    <string name="gps_cap_constellation_name">Extraction de la constellation</string>
+    <string name="gps_cap_constellation_detail">Rapport complet de la constellation de satellites via /dev/gnss0 ou sysfs</string>
+    <string name="gps_cap_location_override_name">Substitution de position</string>
+    <string name="gps_cap_location_override_detail">Injection de position simulée via un fournisseur de test (nécessite l\'option développeur de position fictive)</string>
+
+    <!-- ─── Monitoring containers ─────────────────────────────────────────── -->
+    <string name="gps_live_monitor_speed">Vitesse (en direct)</string>
+    <string name="gps_live_monitor_altitude">Altitude (en direct)</string>
+    <string name="gps_monitor_speed">Historique de vitesse</string>
+    <string name="gps_monitor_altitude">Historique d\'altitude</string>
+
+    <!-- ─── Automation actions ─────────────────────────────────────────────── -->
+    <string name="gps_action_track_start">Démarrer le suivi de position</string>
+    <string name="gps_action_track_stop">Arrêter le suivi de position</string>
+    <string name="gps_action_spoof_start">Démarrer la simulation de position</string>
+    <string name="gps_action_spoof_stop">Arrêter la simulation de position</string>
+    <string name="gps_action_nmea_raw_tap">Capture brute NMEA (rooté)</string>
+    <string name="gps_action_constellation_dump">Extraction de la constellation (rooté)</string>
+    <string name="gps_action_reset_gps_mutations">Réinitialiser les modifications GPS (rooté)</string>
+</resources>

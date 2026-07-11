@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="audio_capability_mic">Micrófono</string>
+    <string name="audio_capability_mic_detail">Medición de dB y grabación WAV</string>
+    <string name="audio_permission_card_title">Permiso requerido</string>
+    <string name="audio_permission_body">Se necesita acceso al micrófono para medir el nivel de sonido y grabar audio.</string>
+    <string name="audio_permission_grant">Conceder permiso</string>
+    <string name="audio_db_meter_card_title">Medidor de dB</string>
+    <string name="audio_db_level">Nivel de sonido</string>
+    <string name="audio_db_unit">dB</string>
+    <string name="audio_monitor_title">Historial del medidor de dB</string>
+    <string name="audio_record_card_title">Grabación de voz</string>
+    <string name="audio_record_start">Iniciar grabación</string>
+    <string name="audio_record_stop">Detener</string>
+    <string name="audio_record_saved">Guardado en la carpeta Música</string>
+    <string name="audio_record_share">Compartir</string>
+    <string name="audio_record_idle">Toca para iniciar la grabación</string>
+    <string name="audio_notification_channel">Grabación de audio</string>
+    <string name="audio_notification_title">Grabando audio</string>
+    <string name="audio_notification_text">Toca para abrir Gadget</string>
+    <string name="audio_notification_stop">Detener grabación</string>
+    <string name="audio_capability_available">Grabación disponible</string>
+    <string name="audio_capability_permission_required">Permiso requerido</string>
+    <string name="audio_live_monitor_title">Medidor de dB — en vivo</string>
+    <string name="audio_capability_rooted_active">Activo — compilación rooteada</string>
+    <string name="audio_capability_rooted_required">Requiere compilación rooteada</string>
+    <string name="audio_capability_gain_boost">Aumento de ganancia del micrófono</string>
+    <string name="audio_capability_gain_boost_detail">Anula el registro de ganancia del hardware más allá de los límites del sistema</string>
+    <string name="audio_capability_direct_pcm">Captura PCM directa</string>
+    <string name="audio_capability_direct_pcm_detail">Evita la pila de AudioRecord para captura sin procesar a nivel del núcleo</string>
+    <string name="audio_capability_custom_sample_rate">Frecuencia de muestreo personalizada</string>
+    <string name="audio_capability_custom_sample_rate_detail">Solicita frecuencias de captura no estándar (p. ej., 96 kHz)</string>
+</resources>

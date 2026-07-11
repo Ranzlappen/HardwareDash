@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bt_screen_title">Bluetooth</string>
+    <string name="bt_capability_adapter">Adaptateur Bluetooth</string>
+    <string name="bt_capability_adapter_detail">Radio Classic et BLE</string>
+    <string name="bt_capability_card_title">État du Bluetooth</string>
+    <string name="bt_adapter_present">Adaptateur présent</string>
+    <string name="bt_adapter_enabled">Bluetooth activé</string>
+    <string name="bt_adapter_disabled">Bluetooth désactivé</string>
+    <string name="bt_adapter_name">Nom de l\'adaptateur</string>
+    <string name="bt_permission_required">Autorisation Bluetooth requise</string>
+    <string name="bt_permission_grant">Accorder l\'autorisation</string>
+    <string name="bt_bonded_devices_title">Appareils associés</string>
+    <string name="bt_no_bonded_devices">Aucun appareil associé</string>
+    <string name="bt_device_type_classic">Classic</string>
+    <string name="bt_device_type_le">BLE</string>
+    <string name="bt_device_type_dual">Dual</string>
+    <string name="bt_device_type_unknown">Inconnu</string>
+    <string name="bt_monitor_title">Historique de l\'état du Bluetooth</string>
+    <string name="bt_refresh">Actualiser</string>
+
+    <!-- Per-device connection and battery info. -->
+    <string name="bt_device_connected">Connecté</string>
+    <string name="bt_device_disconnected">Déconnecté</string>
+    <string name="bt_device_battery">%1$d%%</string>
+    <string name="bt_device_rssi">%1$d dBm</string>
+
+    <!-- Monitor titles -->
+    <string name="bt_live_monitor_title">État du Bluetooth (en direct)</string>
+
+    <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
+    <string name="bt_cap_rooted_active">Actif — build rooté</string>
+    <string name="bt_cap_rooted_required">Nécessite un build rooté</string>
+    <string name="bt_cap_hidden_battery_name">API cachée de niveau de batterie</string>
+    <string name="bt_cap_hidden_battery_detail">Lit le pourcentage de batterie de l\'appareil via des API de réflexion Bluetooth cachées, pour les appareils Classic, BLE et Dual</string>
+    <string name="bt_cap_a2dp_codec_name">Identification du codec A2DP</string>
+    <string name="bt_cap_a2dp_codec_detail">Identifie le codec de diffusion A2DP actif (AAC, aptX, LDAC) via le proxy caché BluetoothA2dp</string>
+</resources>

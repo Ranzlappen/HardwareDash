@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensors_title">Sensoren</string>
+    <string name="sensors_live_section">Live-Messwerte</string>
+    <string name="sensors_value_pending">Warte auf Messwert…</string>
+    <string name="sensors_not_present">Auf diesem Gerät nicht vorhanden</string>
+    <string name="sensors_monitor_title">%1$s-Verlauf</string>
+    <string name="sensors_live_monitor_title">%1$s live</string>
+    <string name="sensors_capability_available">Sensor vorhanden — Messwerte werden gestreamt</string>
+    <string name="sensors_capability_missing">Dieses Gerät hat keinen solchen Sensor</string>
+    <string name="sensors_capability_detail_signal">Als Diagramm darstellbar + nutzbar als Automatisierungsauslöser (Metrikschlüssel: %1$s)</string>
+    <string name="sensors_capability_rooted_active">Aktiv — gerooteter Build</string>
+    <string name="sensors_capability_rooted_required">Erfordert gerooteten Build</string>
+    <string name="sensors_capability_high_polling">Hochfrequente Abtastung</string>
+    <string name="sensors_capability_high_polling_detail">Sensor-Meldefrequenz unterhalb des öffentlichen API-Minimums erzwingen</string>
+    <string name="sensors_capability_raw_unfiltered">Unverarbeitete Rohausgabe</string>
+    <string name="sensors_capability_raw_unfiltered_detail">Umgeht Androids Sensorfusion und Tiefpassfilter-Pipeline</string>
+    <string name="sensors_capability_sysfs_read">Direkter Sysfs-Zugriff</string>
+    <string name="sensors_capability_sysfs_read_detail">Sysfs-Zugriff auf Kernel-Ebene auf Sensor-Hardwareknoten</string>
+    <string name="sensors_action_proximity_near">Näherungswert unter Schwellenwert</string>
+    <string name="sensors_action_proximity_far">Näherungswert über Schwellenwert</string>
+    <string name="sensors_action_light_bright">Umgebungslicht über Schwellenwert</string>
+    <string name="sensors_action_light_dark">Umgebungslicht unter Schwellenwert</string>
+    <string name="sensors_action_acceleration_above">Beschleunigung über Schwellenwert</string>
+    <string name="sensors_action_acceleration_below">Beschleunigung unter Schwellenwert</string>
+</resources>

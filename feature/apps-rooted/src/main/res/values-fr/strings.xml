@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- apps_root ActionHandler labels, surfaced in the automation
+         rule-builder's action picker. English-only, matching the modular
+         convention (see :feature:apps's strings.xml header). -->
+    <string name="apps_root_action_freeze">Geler l\'application</string>
+    <string name="apps_root_action_unfreeze">Dégeler l\'application</string>
+    <string name="apps_root_action_force_stop">Forcer l\'arrêt de l\'application</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Generic chrome for the module blueprint sections (ModuleInfoSections.kt).
+         Module-specific copy (permission rationales, OS-behaviour notes) is
+         resolved in each feature module and passed in via ModuleInfo. -->
+
+    <!-- Permissions section -->
+    <string name="module_permissions_title">Autorisations</string>
+    <string name="module_permissions_none">Ce module ne nécessite aucune autorisation spéciale.</string>
+    <string name="module_permission_all_granted">Toutes les autorisations requises sont accordées.</string>
+    <string name="module_permission_grant">Accorder les autorisations</string>
+    <string name="module_permission_open_settings">Ouvrir les paramètres de l\'application</string>
+    <string name="module_permission_granted">Accordée</string>
+    <string name="module_permission_denied">Non accordée</string>
+    <string name="module_permission_optional_label">%1$s (facultatif)</string>
+
+    <!-- OS-compatibility section -->
+    <string name="module_compat_title">Compatibilité du système</string>
+    <string name="module_compat_requires">Nécessite le niveau d\'API Android %1$d ou supérieur.</string>
+    <string name="module_compat_current">Cet appareil utilise le niveau d\'API %1$d.</string>
+    <string name="module_compat_supported">Pris en charge sur cet appareil</string>
+    <string name="module_compat_unsupported">Non pris en charge sur cet appareil</string>
+    <string name="module_compat_note">API %1$d+ : %2$s</string>
+
+    <!-- Firmware section -->
+    <string name="module_firmware_title">Micrologiciel</string>
+    <string name="module_firmware_version">%1$s · micrologiciel %2$s ou supérieur</string>
+
+    <!-- Per-function capability section -->
+    <string name="module_capabilities_title">Fonctions et compatibilité</string>
+
+    <!-- GadgetExpandableCard (collapsible card) state announcements -->
+    <string name="expandable_card_state_expanded">Développé</string>
+    <string name="expandable_card_state_collapsed">Réduit</string>
+</resources>

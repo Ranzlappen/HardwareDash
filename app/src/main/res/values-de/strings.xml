@@ -29,4 +29,26 @@
     <!-- Vibration widget -->
     <string name="widget_label_vibration">Vibration ein/aus</string>
     <string name="widget_desc_vibration">Vibration vom Startbildschirm aus ein- oder ausschalten.</string>
+
+    <!-- App Folder widget -->
+    <string name="widget_folder_label">App-Ordner</string>
+    <string name="widget_folder_desc">Ein anpassbarer Startbildschirm-Ordner für installierte Apps, PWAs und Web-Links.</string>
+    <string name="widget_folder_1x1_label">App-Ordner (klein)</string>
+    <string name="widget_folder_1x1_desc">Eine 1x1-Zellen-Version des App-Ordner-Widgets — praktisch, wenn du ein einzelnes Tippziel für einen Ordner möchtest.</string>
+
+    <!-- Backup & restore -->
+    <string name="backup_title">Sichern &amp; wiederherstellen</string>
+    <string name="backup_description">Exportiere alle App-Daten in eine Datei oder stelle sie aus einer wieder her. Backups aus älteren App-Versionen werden unterstützt.</string>
+    <string name="backup_export">Exportieren</string>
+    <string name="backup_restore">Wiederherstellen</string>
+    <string name="backup_working">Wird ausgeführt …</string>
+    <string name="backup_exported">Backup gespeichert.</string>
+    <string name="backup_error">Fehlgeschlagen: %1$s</string>
+    <string name="backup_restore_confirm_title">Backup wiederherstellen?</string>
+    <string name="backup_restore_confirm_body">Dadurch werden alle aktuellen App-Daten durch den Inhalt des Backups ersetzt. Die App wird neu gestartet, um dies abzuschließen.</string>
+    <string name="backup_cancel">Abbrechen</string>
+    <string name="backup_restart_title">Neustart erforderlich</string>
+    <string name="backup_restart_body">Das Backup wurde wiederhergestellt. Starte die App neu, um es anzuwenden.</string>
+    <string name="backup_restart_now">Jetzt neu starten</string>
+    <string name="backup_later">Später</string>
 </resources>

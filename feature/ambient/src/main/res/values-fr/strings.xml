@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ambient_screen_title">Ambiance</string>
+
+    <!-- Status card -->
+    <string name="ambient_card_title">Luminosité ambiante</string>
+    <string name="ambient_label_lux">Éclairement</string>
+    <string name="ambient_lux_format">%.1f lux</string>
+    <string name="ambient_sensor_unavailable">Capteur de luminosité ambiante non disponible sur cet appareil</string>
+
+    <!-- Light level descriptors -->
+    <string name="ambient_level_dark">Sombre</string>
+    <string name="ambient_level_dim">Faible</string>
+    <string name="ambient_level_indoor">Lumière intérieure</string>
+    <string name="ambient_level_bright">Lumineux</string>
+    <string name="ambient_level_sunlight">Lumière directe du soleil</string>
+
+    <!-- Monitor titles -->
+    <string name="ambient_live_monitor_lux">Luminosité ambiante (en direct)</string>
+    <string name="ambient_monitor_lux">Historique de luminosité ambiante</string>
+
+    <!-- Capability rows -->
+    <string name="ambient_cap_sensor_name">Capteur de luminosité ambiante</string>
+    <string name="ambient_cap_sensor_detail">Capteur TYPE_LIGHT mesurant l\'éclairement en lux</string>
+    <string name="ambient_cap_sensor_available">Capteur disponible</string>
+    <string name="ambient_cap_sensor_unavailable">Capteur introuvable</string>
+
+    <!-- Rooted capability rows -->
+    <string name="ambient_cap_rooted_active">Actif — version rootée</string>
+    <string name="ambient_cap_rooted_required">Nécessite la version rootée</string>
+    <string name="ambient_cap_brightness_name">Substitution de la luminosité de l\'écran</string>
+    <string name="ambient_cap_brightness_detail">Définit la luminosité de l\'écran directement via sysfs, en contournant la luminosité automatique d\'Android</string>
+    <string name="ambient_cap_refresh_name">Substitution du taux de rafraîchissement</string>
+    <string name="ambient_cap_refresh_detail">Force un taux de rafraîchissement d\'écran spécifique via le service SurfaceFlinger</string>
+    <string name="ambient_cap_density_name">Substitution de la densité d\'écran</string>
+    <string name="ambient_cap_density_detail">Modifie le DPI de l\'écran via l\'équivalent noyau de adb/wm density</string>
+</resources>
