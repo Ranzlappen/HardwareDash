@@ -127,7 +127,7 @@ class RuleFireExecutor @Inject constructor(
      */
     suspend fun dryRun(rule: Rule): DryRunResult =
         withContext(dispatcher) {
-            val readings = gatherReadings(rule, preSampledTriggerValue = null)
+            val readings = gatherReadings(rule, triggerValue = null)
             val actions = evaluator.evaluate(
                 rule = rule,
                 firedTrigger = rule.trigger,
