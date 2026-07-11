@@ -32,10 +32,15 @@ import dev.ranzlappen.gadget.core.navigation.GadgetDestination
  * automatically and the route is reachable via `navigateTopLevel`.
  */
 fun NavGraphBuilder.settingsScreen(
+    permissionsSection: @Composable () -> Unit = {},
     backupSection: @Composable () -> Unit = {},
     rootFeatureToggles: @Composable () -> Unit = {},
 ) {
     composable(route = GadgetDestination.Settings.route) {
-        SettingsScreen(backupSection = backupSection, rootFeatureToggles = rootFeatureToggles)
+        SettingsScreen(
+            permissionsSection = permissionsSection,
+            backupSection = backupSection,
+            rootFeatureToggles = rootFeatureToggles,
+        )
     }
 }
