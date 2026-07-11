@@ -412,6 +412,20 @@ class RootFeatureRegistry @Inject constructor() {
             requiresExplicitConfirm = false,
             isWriteCapable = false,
         ),
+        RootFeatureKey.BluetoothHiddenBatteryApi to RootFeatureDescriptor(
+            key = RootFeatureKey.BluetoothHiddenBatteryApi,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
+        RootFeatureKey.BluetoothA2dpCodecReflection to RootFeatureDescriptor(
+            key = RootFeatureKey.BluetoothA2dpCodecReflection,
+            defaultOn = false,
+            limit = RootLimitPolicy(window = 60.seconds, maxInvocations = EXTREME_OPS_HIGH_CAP),
+            requiresExplicitConfirm = false,
+            isWriteCapable = false,
+        ),
 
         // ──── Batch-6 NFC features ────
         RootFeatureKey.NfcRawNciCommand to RootFeatureDescriptor(
