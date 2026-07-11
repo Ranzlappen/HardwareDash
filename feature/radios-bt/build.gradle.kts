@@ -15,6 +15,10 @@ dependencies {
     implementation(project(":core:monitoring"))
     implementation(project(":core:automation"))
 
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+
     androidTestImplementation(project(":core:testing"))
     androidTestImplementation(libs.androidx.junit)
 }
