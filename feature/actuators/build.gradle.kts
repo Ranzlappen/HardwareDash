@@ -17,4 +17,8 @@ dependencies {
     // seam (api-exposes :core:ui and :core:model). Actuators contributes an
     // ActuatorsMetricSource for the vibrator-presence signal.
     implementation(project(":core:monitoring"))
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

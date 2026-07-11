@@ -14,4 +14,8 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:monitoring"))
     implementation(project(":core:automation"))
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
