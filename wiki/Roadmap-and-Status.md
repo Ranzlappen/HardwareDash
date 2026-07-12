@@ -271,6 +271,9 @@ allow-list), independent of the migrated controller.
   Still deferred: the write-tier features (`camera`, `microphone`,
   `notification`, `radios-ir`, `radios-nfc`, `apps`, `lock`) — those need
   per-action confirm dialogs / config inputs, not the read-only row pattern.
+  Also lands the **first live W5 `@IntoMap` contributor**: `:feature:notification`
+  contributes a `FeaturePermissions` group surfacing the notification-listener
+  special permission (outside the app baseline) in the Permissions dashboard.
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.

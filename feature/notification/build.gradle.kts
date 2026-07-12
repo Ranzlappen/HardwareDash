@@ -38,6 +38,11 @@ dependencies {
     // channel creation) backs the builder's three importance-tier test
     // channels; never a hand-rolled createNotificationChannel() dance.
     implementation(project(":core:notifications"))
+    // :core:permissions — this feature owns the NotificationListenerService,
+    // so it contributes a FeaturePermissions group (@IntoMap) surfacing the
+    // notification-listener special permission (not in the app baseline) in
+    // the centralized Permissions dashboard (W5).
+    implementation(project(":core:permissions"))
     // androidx.core for NotificationCompat (the in-app test-notification
     // builder) + POST_NOTIFICATIONS-safe posting helpers.
     implementation(libs.androidx.core.ktx)

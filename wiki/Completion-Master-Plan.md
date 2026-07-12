@@ -353,8 +353,12 @@ torch/vibration reference pattern:
 > `SpecialPermissions` (overlay / exact-alarm / WRITE_SETTINGS /
 > notification-listener / all-files → live query + Settings deep-link), and a
 > reusable `PermissionsDashboardCard` wired into Settings via a
-> `permissionsSection` slot. Still open: first-run onboarding flow, rooted
-> one-tap `pm grant` wiring, and per-module `ModuleInfo` integration.
+> `permissionsSection` slot. **`:feature:notification` is the first live
+> per-feature `@IntoMap` contributor** — it owns the
+> `NotificationListenerService`, so it surfaces the notification-listener
+> special permission (deliberately outside the baseline) in the dashboard.
+> Still open: first-run onboarding flow, rooted one-tap `pm grant` wiring,
+> and per-module `ModuleInfo` integration.
 
 Original scope — build `:core:permissions` for real (was empty):
 
