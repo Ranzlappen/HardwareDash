@@ -39,7 +39,7 @@ class RootedAppsRootControllerTest {
     }
 
     private fun shellSucceeds() {
-        coEvery { shell.exec(any(), any()) } returns
+        coEvery { shell.exec(any<String>(), any()) } returns
             RootShellResult(exitCode = 0, stdout = emptyList(), stderr = emptyList(), durationMillis = 1)
     }
 
@@ -50,14 +50,14 @@ class RootedAppsRootControllerTest {
         val result = controller.freezeApp("not-a-package")
 
         assertTrue(result is AppsRootControllerResult.Denied)
-        coVerify(exactly = 0) { shell.exec(any(), any()) }
+        coVerify(exactly = 0) { shell.exec(any<String>(), any()) }
         coVerify(exactly = 0) { gate.check(any()) }
     }
 
     @Test
     fun `a single-segment name is rejected as malformed`() = runTest {
         assertTrue(controller.freezeApp("android") is AppsRootControllerResult.Denied)
-        coVerify(exactly = 0) { shell.exec(any(), any()) }
+        coVerify(exactly = 0) { shell.exec(any<String>(), any()) }
     }
 
     // ── Hard deny-list ───────────────────────────────────────────────────
@@ -68,7 +68,7 @@ class RootedAppsRootControllerTest {
 
         assertTrue(result is AppsRootControllerResult.Denied)
         coVerify(exactly = 0) { gate.check(any()) }
-        coVerify(exactly = 0) { shell.exec(any(), any()) }
+        coVerify(exactly = 0) { shell.exec(any<String>(), any()) }
     }
 
     @Test
@@ -79,7 +79,7 @@ class RootedAppsRootControllerTest {
         val result = controller.forceStopApp("com.android.settings")
 
         assertTrue(result is AppsRootControllerResult.Denied)
-        coVerify(exactly = 0) { shell.exec(any(), any()) }
+        coVerify(exactly = 0) { shell.exec(any<String>(), any()) }
     }
 
     @Test
@@ -87,7 +87,7 @@ class RootedAppsRootControllerTest {
         val result = controller.freezeApp(OWN_PACKAGE)
 
         assertTrue(result is AppsRootControllerResult.Denied)
-        coVerify(exactly = 0) { shell.exec(any(), any()) }
+        coVerify(exactly = 0) { shell.exec(any<String>(), any()) }
     }
 
     // ── Happy path + command shape ───────────────────────────────────────
@@ -145,7 +145,7 @@ class RootedAppsRootControllerTest {
         val result = controller.freezeApp("com.example.app")
 
         assertEquals(AppsRootControllerResult.OptedOut, result)
-        coVerify(exactly = 0) { shell.exec(any(), any()) }
+        coVerify(exactly = 0) { shell.exec(any<String>(), any()) }
     }
 
     @Test
@@ -155,7 +155,7 @@ class RootedAppsRootControllerTest {
         val result = controller.freezeApp("com.example.app")
 
         assertEquals(AppsRootControllerResult.RateLimited(retryAfterMillis = 5_000), result)
-        coVerify(exactly = 0) { shell.exec(any(), any()) }
+        coVerify(exactly = 0) { shell.exec(any<String>(), any()) }
     }
 
     @Test
@@ -170,7 +170,7 @@ class RootedAppsRootControllerTest {
     @Test
     fun `a non-zero shell exit surfaces as HardwareError and does not record success`() = runTest {
         allowGate()
-        coEvery { shell.exec(any(), any()) } returns
+        coEvery { shell.exec(any<String>(), any()) } returns
             RootShellResult(
                 exitCode = 1,
                 stdout = emptyList(),
