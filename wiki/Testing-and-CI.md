@@ -17,10 +17,17 @@ traps that don't show up in a local syntax check.
 ### Unit tests — `:core:testing`
 
 JVM tests carry pure-logic correctness. The CI list is curated (grow it as
-modules gain tests): `:core:automation`, `:core:data`, `:core:hardware`,
-`:core:widgetkit`, plus 22 `feature:*` modules that have picked up real
-`ActionHandler`/`MetricSource`/screen-content unit tests (2026-07-10) —
-see `ci-refactor.yml`'s `unit-tests` job for the exact list. The
+modules gain tests): the `:core:*` logic modules (`automation`, `data`,
+`datastore`, `designsystem`, `monitoring`, `root`, `hardware`,
+`widgetkit`), plus the `feature:*` modules that have picked up real
+`ActionHandler`/`MetricSource`/screen-content unit tests — see
+`ci-refactor.yml`'s `unit-tests` job for the exact list. **Wiring
+discipline:** a module's `testDebugUnitTest` only runs if it is listed in
+that job — a test file added to a module that isn't listed silently never
+runs. The 2026-07-13 sweep added the previously-unwired `:core:datastore`,
+`:core:designsystem`, `:core:monitoring`, `:core:root`, and
+`:feature:apps-rooted` (the last covering `RootedAppsRootController`'s
+deny-list / package-validation safety gate). The
 `RuleEvaluator` is the flagship — exhaustive JVM tests for threshold
 edges, ALL/ANY folding, midnight-wrapping windows, root filtering,
 cooldown boundary, and hysteresis arm/re-arm, all with **zero emulator**
@@ -106,6 +113,6 @@ real compile** and pre-check against that list.
 
 ---
 
-> _Last reviewed: 2026-07-07 · Source: `.github/workflows/*`, `CLAUDE.md`
+> _Last reviewed: 2026-07-13 · Source: `.github/workflows/*`, `CLAUDE.md`
 > (preview matrix + pitfalls), `docs/migration-guide.md` · Related modules:
 > `:core:testing`, `:core:ui`, all tested features._

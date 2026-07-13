@@ -57,10 +57,15 @@ jobs:
           ./gradlew \
             :core:automation:testDebugUnitTest \
             :core:data:testDebugUnitTest \
+            :core:datastore:testDebugUnitTest \
+            :core:designsystem:testDebugUnitTest \
             :core:hardware:testDebugUnitTest \
+            :core:monitoring:testDebugUnitTest \
+            :core:root:testDebugUnitTest \
             :core:widgetkit:testDebugUnitTest \
             :feature:adbdebug:testDebugUnitTest \
             :feature:apps:testDebugUnitTest \
+            :feature:apps-rooted:testDebugUnitTest \
             :feature:automation:testDebugUnitTest \
             :feature:battery:testDebugUnitTest \
             :feature:bugreport-rooted:testDebugUnitTest \
@@ -92,10 +97,7 @@ jobs:
         with:
           name: unit-test-reports
           path: |
-            core/automation/build/reports/tests/
-            core/data/build/reports/tests/
-            core/hardware/build/reports/tests/
-            core/widgetkit/build/reports/tests/
+            core/*/build/reports/tests/
             feature/*/build/reports/tests/
           retention-days: 7
 
