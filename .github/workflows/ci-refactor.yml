@@ -57,11 +57,9 @@ jobs:
           ./gradlew \
             :core:automation:testDebugUnitTest \
             :core:data:testDebugUnitTest \
-            :core:datastore:testDebugUnitTest \
             :core:designsystem:testDebugUnitTest \
             :core:hardware:testDebugUnitTest \
             :core:monitoring:testDebugUnitTest \
-            :core:root:testDebugUnitTest \
             :core:widgetkit:testDebugUnitTest \
             :feature:adbdebug:testDebugUnitTest \
             :feature:apps:testDebugUnitTest \

@@ -24,10 +24,15 @@ modules gain tests): the `:core:*` logic modules (`automation`, `data`,
 `ci-refactor.yml`'s `unit-tests` job for the exact list. **Wiring
 discipline:** a module's `testDebugUnitTest` only runs if it is listed in
 that job — a test file added to a module that isn't listed silently never
-runs. The 2026-07-13 sweep added the previously-unwired `:core:datastore`,
-`:core:designsystem`, `:core:monitoring`, `:core:root`, and
-`:feature:apps-rooted` (the last covering `RootedAppsRootController`'s
-deny-list / package-validation safety gate). The
+runs. The 2026-07-13 sweep wired in the previously-unwired
+`:core:designsystem`, `:core:monitoring`, and `:feature:apps-rooted` (the
+last covering `RootedAppsRootController`'s deny-list / package-validation
+safety gate). Two more — `:core:datastore` and `:core:root` — are
+**deferred**: their tests (`FeaturePreferencesTest`,
+`RootSafetyPreferencesTest`) drive a real `PreferenceDataStoreFactory` on
+`Dispatchers.IO` from inside `runTest`, a dispatcher mismatch that hangs
+under the virtual-time test scheduler; wiring them in needs an injected
+test dispatcher first (tracked follow-up). The
 `RuleEvaluator` is the flagship — exhaustive JVM tests for threshold
 edges, ALL/ANY folding, midnight-wrapping windows, root filtering,
 cooldown boundary, and hysteresis arm/re-arm, all with **zero emulator**
