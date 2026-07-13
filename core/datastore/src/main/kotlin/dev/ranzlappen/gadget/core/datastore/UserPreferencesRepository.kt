@@ -110,6 +110,12 @@ class UserPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun setCustomPalette(palette: CustomPalette) {
+        dataStore.edit {
+            it[UserPreferencesKeys.CUSTOM_PALETTE] = json.encodeToString(CustomPalette.serializer(), palette)
+        }
+    }
+
     private fun Preferences.readFrom(): UserPreferences = UserPreferences(
         darkThemeMode = this[UserPreferencesKeys.DARK_THEME_MODE]
             ?.let { runCatching { DarkThemeMode.valueOf(it) }.getOrNull() }
@@ -132,6 +138,9 @@ class UserPreferencesRepository @Inject constructor(
         dashboardLayout = this[UserPreferencesKeys.DASHBOARD_LAYOUT]
             ?.let { runCatching { json.decodeFromString(DashboardLayout.serializer(), it) }.getOrNull() }
             ?: DashboardLayout(),
+        customPalette = this[UserPreferencesKeys.CUSTOM_PALETTE]
+            ?.let { runCatching { json.decodeFromString(CustomPalette.serializer(), it) }.getOrNull() }
+            ?: CustomPalette(),
     )
 }
 
@@ -148,4 +157,5 @@ private object UserPreferencesKeys {
     val DEFAULT_TORCH_BRIGHTNESS = floatPreferencesKey("default_torch_brightness")
     val FLOATING_TORCH_BUTTON_ENABLED = booleanPreferencesKey("floating_torch_button_enabled")
     val DASHBOARD_LAYOUT = stringPreferencesKey("dashboard_layout")
+    val CUSTOM_PALETTE = stringPreferencesKey("custom_palette")
 }

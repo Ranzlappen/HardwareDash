@@ -26,6 +26,10 @@ import dev.ranzlappen.gadget.root.ui.FatalLaunchScreen
 import dev.ranzlappen.gadget.backup.ui.BackupCard
 import dev.ranzlappen.gadget.core.permissions.PermissionsDashboardCard
 import dev.ranzlappen.gadget.root.ui.RootedFeatureTogglesCard
+import androidx.compose.ui.graphics.Color
+import dev.ranzlappen.gadget.core.designsystem.theme.GadgetDarkColorScheme
+import dev.ranzlappen.gadget.core.designsystem.theme.GadgetLightColorScheme
+import dev.ranzlappen.gadget.core.designsystem.theme.customColorScheme
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import android.nfc.NfcAdapter
 import androidx.activity.viewModels
@@ -148,12 +152,27 @@ class MainActivity : ComponentActivity() {
                         CustomThemeOption.HighContrast -> GadgetCustomTheme.HighContrast
                         CustomThemeOption.AmoledTrue -> GadgetCustomTheme.AmoledTrue
                         CustomThemeOption.Pastel -> GadgetCustomTheme.Pastel
+                        // A user-defined accent palette can't be a static enum
+                        // variant — it's materialized into customColorSchemeOverride
+                        // below, so the named theme stays Default.
+                        CustomThemeOption.Custom -> GadgetCustomTheme.Default
+                    }
+                    val customColorSchemeOverride = if (preferences.customTheme == CustomThemeOption.Custom) {
+                        customColorScheme(
+                            base = if (useDarkTheme) GadgetDarkColorScheme else GadgetLightColorScheme,
+                            primary = Color(preferences.customPalette.primaryArgb),
+                            secondary = Color(preferences.customPalette.secondaryArgb),
+                            tertiary = Color(preferences.customPalette.tertiaryArgb),
+                        )
+                    } else {
+                        null
                     }
                     GadgetApp(
                         navController = navController,
                         useDarkTheme = useDarkTheme,
                         useDynamicColor = preferences.dynamicColor,
                         customTheme = customTheme,
+                        customColorSchemeOverride = customColorSchemeOverride,
                         reducedMotionOverride = reducedMotionOverride,
                         reducedTransparency = preferences.reducedTransparency,
                     ) {

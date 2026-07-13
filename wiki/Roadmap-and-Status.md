@@ -277,6 +277,12 @@ allow-list), independent of the migrated controller.
   Plus the **W4 generic metric widget** — a new `:feature:metricwidget`
   (`BaseContentWidgetProvider`) that binds to any registered `MetricSource` via
   a configure-activity picker, the first cross-cutting home-screen widget.
+  Plus **W9 user-customization**: a **dashboard editor** (the dashboard now
+  enumerates the module catalog and honours a persisted order/hidden/pinned
+  `DashboardLayout`, edited in a bottom sheet) and a **custom palette builder**
+  (`CustomThemeOption.Custom` + a `CustomPalette` accent override materialized
+  through a new `GadgetTheme(customColorSchemeOverride=…)` seam, edited with
+  live `GadgetColorPicker`s in Settings).
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.

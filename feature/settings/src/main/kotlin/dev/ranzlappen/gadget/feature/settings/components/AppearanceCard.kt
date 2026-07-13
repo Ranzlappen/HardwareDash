@@ -20,6 +20,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ranzlappen.gadget.core.datastore.CustomPalette
 import dev.ranzlappen.gadget.core.datastore.CustomThemeOption
 import dev.ranzlappen.gadget.core.datastore.DarkThemeMode
 import dev.ranzlappen.gadget.core.datastore.UserPreferences
@@ -36,7 +41,9 @@ import dev.ranzlappen.gadget.core.designsystem.theme.GadgetLightColorScheme
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.designsystem.theme.colorScheme
 import dev.ranzlappen.gadget.core.ui.component.DashCard
+import dev.ranzlappen.gadget.core.ui.component.GadgetBottomSheet
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
+import dev.ranzlappen.gadget.core.ui.component.GadgetColorPicker
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
@@ -57,9 +64,11 @@ internal fun AppearanceCard(
     onDarkThemeModeChange: (DarkThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
     onCustomThemeChange: (CustomThemeOption) -> Unit,
+    onCustomPaletteChange: (CustomPalette) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
+    var showPaletteEditor by remember { mutableStateOf(false) }
     DashCard(
         modifier = modifier.fillMaxWidth(),
         title = "Appearance",
@@ -107,9 +116,27 @@ internal fun AppearanceCard(
                         option = option,
                         selected = preferences.customTheme == option,
                         dark = previewDark,
+                        // The Custom swatch previews the user's own accents;
+                        // the fixed palettes derive theirs from the scheme.
+                        customDots = if (option == CustomThemeOption.Custom) {
+                            listOf(
+                                Color(preferences.customPalette.primaryArgb),
+                                Color(preferences.customPalette.secondaryArgb),
+                                Color(preferences.customPalette.tertiaryArgb),
+                            )
+                        } else {
+                            null
+                        },
                         onClick = { onCustomThemeChange(option) },
                     )
                 }
+            }
+            if (preferences.customTheme == CustomThemeOption.Custom) {
+                GadgetChip(
+                    selected = false,
+                    onClick = { showPaletteEditor = true },
+                    label = "Edit custom palette",
+                )
             }
             SettingsToggleRow(
                 title = "Dynamic colour",
@@ -124,6 +151,64 @@ internal fun AppearanceCard(
                 enabled = preferences.customTheme == CustomThemeOption.Default,
             )
         }
+    }
+
+    if (showPaletteEditor) {
+        CustomPaletteEditorSheet(
+            palette = preferences.customPalette,
+            onPaletteChange = onCustomPaletteChange,
+            onDismiss = { showPaletteEditor = false },
+        )
+    }
+}
+
+/**
+ * Bottom sheet for the [CustomThemeOption.Custom] accent palette: three
+ * [GadgetColorPicker]s (primary / secondary / tertiary). Changes apply live
+ * through [onPaletteChange] so the whole app re-themes as the user drags.
+ */
+@Composable
+private fun CustomPaletteEditorSheet(
+    palette: CustomPalette,
+    onPaletteChange: (CustomPalette) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    GadgetBottomSheet(onDismissRequest = onDismiss, title = "Custom palette") {
+        Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
+            PaletteAccentField(
+                label = "Primary",
+                argb = palette.primaryArgb,
+                onArgbChange = { onPaletteChange(palette.copy(primaryArgb = it)) },
+            )
+            PaletteAccentField(
+                label = "Secondary",
+                argb = palette.secondaryArgb,
+                onArgbChange = { onPaletteChange(palette.copy(secondaryArgb = it)) },
+            )
+            PaletteAccentField(
+                label = "Tertiary",
+                argb = palette.tertiaryArgb,
+                onArgbChange = { onPaletteChange(palette.copy(tertiaryArgb = it)) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun PaletteAccentField(
+    label: String,
+    argb: Long,
+    onArgbChange: (Long) -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        GadgetColorPicker(argb = argb, onArgbChange = onArgbChange)
     }
 }
 
@@ -183,6 +268,7 @@ private fun ThemeSwatch(
     option: CustomThemeOption,
     selected: Boolean,
     dark: Boolean,
+    customDots: List<Color>?,
     onClick: () -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
@@ -217,9 +303,8 @@ private fun ThemeSwatch(
             contentAlignment = Alignment.CenterStart,
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.micro)) {
-                SwatchDot(scheme.primary)
-                SwatchDot(scheme.secondary)
-                SwatchDot(scheme.tertiary)
+                val dots = customDots ?: listOf(scheme.primary, scheme.secondary, scheme.tertiary)
+                dots.forEach { SwatchDot(it) }
             }
         }
         Text(
@@ -259,6 +344,9 @@ private fun CustomThemeOption.toGadgetCustomTheme(): GadgetCustomTheme = when (t
     CustomThemeOption.HighContrast -> GadgetCustomTheme.HighContrast
     CustomThemeOption.AmoledTrue -> GadgetCustomTheme.AmoledTrue
     CustomThemeOption.Pastel -> GadgetCustomTheme.Pastel
+    // Custom's dots come from the user palette (customDots), so the swatch base
+    // just uses the canonical scheme — no fixed GadgetCustomTheme maps to it.
+    CustomThemeOption.Custom -> GadgetCustomTheme.Default
 }
 
 private fun DarkThemeMode.toDisplayLabel(): String = when (this) {
@@ -272,6 +360,7 @@ private fun CustomThemeOption.toDisplayLabel(): String = when (this) {
     CustomThemeOption.HighContrast -> "High contrast"
     CustomThemeOption.AmoledTrue -> "AMOLED"
     CustomThemeOption.Pastel -> "Pastel"
+    CustomThemeOption.Custom -> "Custom"
 }
 
 // ─── Previews ───────────────────────────────────────────────────────
@@ -284,5 +373,6 @@ private fun AppearanceCardPreview() = GadgetThemedPreview {
         onDarkThemeModeChange = {},
         onDynamicColorChange = {},
         onCustomThemeChange = {},
+        onCustomPaletteChange = {},
     )
 }

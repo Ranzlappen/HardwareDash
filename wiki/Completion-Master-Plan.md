@@ -444,7 +444,22 @@ Original scope — build `:core:permissions` for real (was empty):
   lint stops being `continue-on-error` (W10); pseudo-locale (`en-XA`)
   render in the preview gallery; RTL smoke check.
 
-### W9 — Design, customization & assets · **L**
+### W9 — Design, customization & assets · **L** · 🚧 customization started
+
+> **In progress** (`claude/feature-roadmap-gaps-jjef2r`): the two
+> **user-customization** items landed. **Dashboard editor** — the dashboard
+> (previously a hardcoded placeholder) now enumerates the
+> `GadgetDestination.modules` catalog and honours a persisted `DashboardLayout`
+> (order / hidden / pinned route sets in `UserPreferences`), edited through a
+> `DashboardEditorSheet` (move-up/down + pin + show toggles; no drag-reorder
+> dependency exists in the repo). **Custom palette builder** — a new
+> `CustomThemeOption.Custom` + `CustomPalette` (three accent ARGBs) that the
+> app materializes into a `ColorScheme` via a new `customColorScheme(...)` seam
+> and the new `GadgetTheme(customColorSchemeOverride=…)` param (wins above the
+> fixed custom themes and dynamic color); edited in the Settings Appearance
+> card via three `GadgetColorPicker`s that apply live. Dynamic-color (Monet)
+> opt-in was already wired. Still open: the design-consistency pass, quality
+> assets, and motion polish.
 
 - **Design-consistency pass** over every screen against
   [Design System](Design-System) (tokens only, no raw `dp`, a11y

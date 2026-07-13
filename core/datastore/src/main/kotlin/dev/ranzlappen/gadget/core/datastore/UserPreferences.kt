@@ -66,6 +66,11 @@ data class UserPreferences(
      * three list/set facets write atomically.
      */
     val dashboardLayout: DashboardLayout = DashboardLayout(),
+    /**
+     * The user-defined accent palette, active when [customTheme] is
+     * [CustomThemeOption.Custom]. Ignored for every other [customTheme] value.
+     */
+    val customPalette: CustomPalette = CustomPalette(),
 ) {
     companion object {
         /** Initial strobe rate before the user touches the slider. 5 Hz
@@ -103,6 +108,9 @@ enum class CustomThemeOption {
     HighContrast,
     AmoledTrue,
     Pastel,
+
+    /** A user-defined accent palette — see [UserPreferences.customPalette]. */
+    Custom,
 }
 
 /**

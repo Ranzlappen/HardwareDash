@@ -63,14 +63,17 @@ fun GadgetTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     useDynamicColor: Boolean = true,
     customTheme: GadgetCustomTheme = GadgetCustomTheme.Default,
+    customColorSchemeOverride: androidx.compose.material3.ColorScheme? = null,
     reducedMotionOverride: Boolean? = null,
     reducedTransparency: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    // A non-Default custom theme overrides everything else — including dynamic
-    // color — because the user explicitly chose a fixed palette.
+    // A user-defined accent palette (materialized by the app from the persisted
+    // CustomPalette) wins above everything, then a fixed custom theme — both
+    // override dynamic color because the user explicitly chose a palette.
     val customScheme = customTheme.colorScheme(dark = useDarkTheme)
     val colorScheme = when {
+        customColorSchemeOverride != null -> customColorSchemeOverride
         customScheme != null -> customScheme
         useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
