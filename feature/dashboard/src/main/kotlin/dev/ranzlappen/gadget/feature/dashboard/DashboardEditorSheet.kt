@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
@@ -49,7 +50,7 @@ internal fun DashboardEditorSheet(
     val spacing = LocalGadgetTheme.current.spacing
     GadgetBottomSheet(
         onDismissRequest = onDismiss,
-        title = "Edit dashboard",
+        title = stringResource(R.string.dashboard_edit),
     ) {
         entries.forEachIndexed { index, entry ->
             DashboardEditorRow(
@@ -67,7 +68,7 @@ internal fun DashboardEditorSheet(
         }
         GadgetTertiaryButton(
             onClick = onReset,
-            text = "Reset to default",
+            text = stringResource(R.string.dashboard_reset),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = spacing.small),
@@ -108,19 +109,21 @@ private fun DashboardEditorRow(
         GadgetIconButton(
             onClick = onMoveUp,
             icon = Icons.Filled.KeyboardArrowUp,
-            contentDescription = "Move up",
+            contentDescription = stringResource(R.string.dashboard_move_up),
             enabled = !isFirst,
         )
         GadgetIconButton(
             onClick = onMoveDown,
             icon = Icons.Filled.KeyboardArrowDown,
-            contentDescription = "Move down",
+            contentDescription = stringResource(R.string.dashboard_move_down),
             enabled = !isLast,
         )
         GadgetIconButton(
             onClick = { onSetPinned(!entry.pinned) },
             icon = if (entry.pinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
-            contentDescription = if (entry.pinned) "Unpin" else "Pin",
+            contentDescription = stringResource(
+                if (entry.pinned) R.string.dashboard_unpin else R.string.dashboard_pin,
+            ),
             tint = if (entry.pinned) {
                 MaterialTheme.colorScheme.primary
             } else {
