@@ -273,7 +273,8 @@ allow-list), independent of the migrated controller.
   `GadgetDialog`) now surfaces the no-arg device-mutating actions of
   `microphone`, `camera`, `notification`, `radios-ir`, and `radios-nfc`. Still
   deferred: the config-bearing extreme actions (need parameter entry), plus
-  `apps` and `lock` (the latter needs `DevicePolicyManager`).
+  `lock` (needs `DevicePolicyManager`). (`apps` freeze / force-stop is
+  confirm-gated in the next batch — see below.)
   Also lands the **first live W5 `@IntoMap` contributor**: `:feature:notification`
   contributes a `FeaturePermissions` group surfacing the notification-listener
   special permission (outside the app baseline) in the Permissions dashboard.
@@ -286,6 +287,20 @@ allow-list), independent of the migrated controller.
   (`CustomThemeOption.Custom` + a `CustomPalette` accent override materialized
   through a new `GadgetTheme(customColorSchemeOverride=…)` seam, edited with
   live `GadgetColorPicker`s in Settings).
+- **Follow-up (post-#203) — batch 3 fast-follows.** Adds the **W4
+  metric-widget sparkline** display mode (`MetricWidgetDisplay.Sparkline`
+  renders a bucketed `MonitorSampleRepository` history through
+  `MonitorChartBitmapRenderer` into the widget's `ImageView`, with a
+  configurable time window); **dashboard-editor localization** (the new
+  `:feature:dashboard` strings gain `de`/`es`/`fr` parity); opt-in
+  **predictive back** (`android:enableOnBackInvokedCallback`, safe on the
+  fully-Compose/Navigation back stack); and the **W6 `apps` write-tier
+  confirm gate** — the rooted per-app freeze / force-stop actions (the
+  `AppRootActionsMenu` in the folder editor's app picker, backed by
+  `AppsRootController`) now route through a `GadgetDialog` confirmation
+  matching the `RootConfirmActionRow` convention, so a privileged `pm
+  disable-user` / `am force-stop` never fires on a single tap. Unfreeze
+  (the non-destructive restore) stays immediate.
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.
@@ -336,7 +351,7 @@ verified with an `apksigner verify` gate. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-07-11 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-07-13 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md`,
 > [Completion Master Plan](Completion-Master-Plan) ·
 > Related modules: all._

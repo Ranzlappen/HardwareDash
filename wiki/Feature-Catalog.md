@@ -75,7 +75,10 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
   a metric gauge) and the screen doesn't embed `MonitorContainer` /
   `LiveMonitorContainer` yet.
 - **Rooted:** per-app freeze / unfreeze / force-stop overflow menu (via
-  `:feature:apps-rooted`'s `AppsRootController`, deny-list-protected).
+  `:feature:apps-rooted`'s `AppsRootController`, deny-list-protected). The
+  two state-mutating actions (freeze / force-stop) are confirm-gated behind
+  a `GadgetDialog`, matching the `RootConfirmActionRow` write-tier
+  convention; unfreeze (the restore) runs immediately.
 - **Standard:** ✅ · **Rooted:** ✅.
 - **Source:** `:feature:apps`, `:feature:apps-rooted`.
 
@@ -245,6 +248,6 @@ of [Roadmap & Status](Roadmap-and-Status):
 
 ---
 
-> _Last reviewed: 2026-07-11 · Source: `settings.gradle.kts`,
+> _Last reviewed: 2026-07-13 · Source: `settings.gradle.kts`,
 > feature source counts, [Completion Master Plan](Completion-Master-Plan) ·
 > Related: every `feature/*`._

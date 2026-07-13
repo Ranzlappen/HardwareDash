@@ -104,4 +104,12 @@
     <string name="apps_root_result_unsupported">Requires the rooted app version</string>
     <string name="apps_root_result_opted_out">Turned off in Settings</string>
     <string name="apps_root_result_rate_limited">Rate limited — try again shortly</string>
+
+    <!-- Confirmation dialog for the state-mutating rooted app actions
+         (freeze / force-stop), matching the write-tier RootConfirmActionRow
+         convention — a privileged pm/am op never fires on a single tap. -->
+    <string name="apps_root_confirm_title">Confirm root action</string>
+    <string name="apps_root_confirm_cancel">Cancel</string>
+    <string name="apps_root_freeze_confirm_message">Freeze %1$s? It will disappear from the launcher and can\'t run until you unfreeze it.</string>
+    <string name="apps_root_force_stop_confirm_message">Force-stop %1$s? Every running process is killed immediately.</string>
 </resources>

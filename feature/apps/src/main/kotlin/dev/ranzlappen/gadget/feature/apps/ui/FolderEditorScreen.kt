@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -81,10 +82,13 @@ import dev.ranzlappen.gadget.core.designsystem.GlassIntensity
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
 import dev.ranzlappen.gadget.core.ui.component.GadgetColorPicker
+import dev.ranzlappen.gadget.core.ui.component.GadgetDialog
 import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
+import dev.ranzlappen.gadget.core.ui.component.GadgetPrimaryButton
 import dev.ranzlappen.gadget.core.ui.component.GlassSurface
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
+import dev.ranzlappen.gadget.core.ui.component.GadgetTertiaryButton
 import androidx.compose.material.icons.outlined.Delete
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
@@ -754,7 +758,12 @@ private fun AppRow(
                 }
             }
             if (showRootActions) {
-                AppRootActionsMenu(onFreeze = onFreeze, onUnfreeze = onUnfreeze, onForceStop = onForceStop)
+                AppRootActionsMenu(
+                    appLabel = record.label,
+                    onFreeze = onFreeze,
+                    onUnfreeze = onUnfreeze,
+                    onForceStop = onForceStop,
+                )
             }
             Checkbox(checked = selected, onCheckedChange = { onToggle() })
         }
@@ -767,14 +776,23 @@ private fun AppRow(
  * (never web links). Backed by [dev.ranzlappen.gadget.feature.apps.root.AppsRootController]
  * via the folder editor's ViewModel — this composable is purely the
  * trigger + menu chrome, matching [AppsScreenContent]'s existing overflow-menu pattern.
+ *
+ * The two **state-mutating** actions — freeze (`pm disable-user`, hides the
+ * app until unfrozen) and force-stop (`am force-stop`, kills every process) —
+ * are confirm-gated behind a [GadgetDialog], matching the write-tier root
+ * convention (`RootConfirmActionRow`) so a privileged `pm`/`am` op never
+ * fires on a single tap. Unfreeze is the non-destructive restore, so it runs
+ * immediately.
  */
 @Composable
 private fun AppRootActionsMenu(
+    appLabel: String,
     onFreeze: () -> Unit,
     onUnfreeze: () -> Unit,
     onForceStop: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var pending by remember { mutableStateOf<AppRootPendingAction?>(null) }
     Box {
         IconButton(onClick = { expanded = true }) {
             Icon(
@@ -785,7 +803,7 @@ private fun AppRootActionsMenu(
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.apps_root_menu_freeze)) },
-                onClick = { expanded = false; onFreeze() },
+                onClick = { expanded = false; pending = AppRootPendingAction.Freeze },
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.apps_root_menu_unfreeze)) },
@@ -793,11 +811,51 @@ private fun AppRootActionsMenu(
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.apps_root_menu_force_stop)) },
-                onClick = { expanded = false; onForceStop() },
+                onClick = { expanded = false; pending = AppRootPendingAction.ForceStop },
             )
         }
     }
+
+    pending?.let { action ->
+        val message = when (action) {
+            AppRootPendingAction.Freeze ->
+                stringResource(R.string.apps_root_freeze_confirm_message, appLabel)
+            AppRootPendingAction.ForceStop ->
+                stringResource(R.string.apps_root_force_stop_confirm_message, appLabel)
+        }
+        val confirmLabel = when (action) {
+            AppRootPendingAction.Freeze -> stringResource(R.string.apps_root_menu_freeze)
+            AppRootPendingAction.ForceStop -> stringResource(R.string.apps_root_menu_force_stop)
+        }
+        GadgetDialog(
+            onDismissRequest = { pending = null },
+            title = stringResource(R.string.apps_root_confirm_title),
+            text = message,
+            icon = Icons.Outlined.WarningAmber,
+            confirmButton = {
+                GadgetPrimaryButton(
+                    onClick = {
+                        pending = null
+                        when (action) {
+                            AppRootPendingAction.Freeze -> onFreeze()
+                            AppRootPendingAction.ForceStop -> onForceStop()
+                        }
+                    },
+                    text = confirmLabel,
+                )
+            },
+            dismissButton = {
+                GadgetTertiaryButton(
+                    onClick = { pending = null },
+                    text = stringResource(R.string.apps_root_confirm_cancel),
+                )
+            },
+        )
+    }
 }
+
+/** The two confirm-gated privileged app actions in [AppRootActionsMenu]. */
+private enum class AppRootPendingAction { Freeze, ForceStop }
 
 @Composable
 private fun FolderWidgetsSection(

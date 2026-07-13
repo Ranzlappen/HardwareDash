@@ -104,4 +104,8 @@
     <string name="apps_root_result_unsupported">Requiere la versión rooteada de la app</string>
     <string name="apps_root_result_opted_out">Desactivado en Ajustes</string>
     <string name="apps_root_result_rate_limited">Limitado por frecuencia; inténtalo de nuevo en breve</string>
+    <string name="apps_root_confirm_title">Confirmar acción de root</string>
+    <string name="apps_root_confirm_cancel">Cancelar</string>
+    <string name="apps_root_freeze_confirm_message">¿Congelar %1$s? Desaparecerá del launcher y no podrá ejecutarse hasta que la descongeles.</string>
+    <string name="apps_root_force_stop_confirm_message">¿Forzar la detención de %1$s? Todos los procesos en ejecución se cerrarán de inmediato.</string>
 </resources>

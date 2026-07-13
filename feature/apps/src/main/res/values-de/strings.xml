@@ -104,4 +104,8 @@
     <string name="apps_root_result_unsupported">Erfordert die gerootete App-Version</string>
     <string name="apps_root_result_opted_out">In den Einstellungen deaktiviert</string>
     <string name="apps_root_result_rate_limited">Ratenbegrenzt — versuche es in Kürze erneut</string>
+    <string name="apps_root_confirm_title">Root-Aktion bestätigen</string>
+    <string name="apps_root_confirm_cancel">Abbrechen</string>
+    <string name="apps_root_freeze_confirm_message">%1$s einfrieren? Die App verschwindet aus dem Launcher und kann nicht laufen, bis du sie wieder auftaust.</string>
+    <string name="apps_root_force_stop_confirm_message">Beenden von %1$s erzwingen? Jeder laufende Prozess wird sofort beendet.</string>
 </resources>
