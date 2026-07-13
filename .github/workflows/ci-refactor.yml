@@ -64,6 +64,7 @@ jobs:
             :feature:automation:testDebugUnitTest \
             :feature:battery:testDebugUnitTest \
             :feature:bugreport-rooted:testDebugUnitTest \
+            :feature:dashboard:testDebugUnitTest \
             :feature:diagnostics:testDebugUnitTest \
             :feature:display:testDebugUnitTest \
             :feature:flipper:testDebugUnitTest \

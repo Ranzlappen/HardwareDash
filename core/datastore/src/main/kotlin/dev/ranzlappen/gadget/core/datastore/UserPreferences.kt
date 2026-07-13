@@ -59,6 +59,13 @@ data class UserPreferences(
      * when the value flips to `false`.
      */
     val floatingTorchButtonEnabled: Boolean = false,
+    /**
+     * The user's dashboard arrangement (order / hidden / pinned module
+     * entries). Default empty = the full module catalog in natural order.
+     * Persisted as a JSON blob (the one non-scalar preference field) so the
+     * three list/set facets write atomically.
+     */
+    val dashboardLayout: DashboardLayout = DashboardLayout(),
 ) {
     companion object {
         /** Initial strobe rate before the user touches the slider. 5 Hz

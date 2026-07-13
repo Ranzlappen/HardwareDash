@@ -20,4 +20,9 @@ dependencies {
     // :core:navigation surfaces GadgetDestination so the dashboard
     // can request top-level navigation through its onNavigate callback.
     implementation(project(":core:navigation"))
+    // :core:datastore backs the persisted DashboardLayout (order / hidden /
+    // pinned) the DashboardViewModel reads and writes (W9 dashboard editor).
+    implementation(project(":core:datastore"))
+
+    testImplementation(libs.junit)
 }

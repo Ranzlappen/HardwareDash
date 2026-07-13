@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -49,6 +50,11 @@ private const val MAX_MORSE_TEXT_LENGTH = 2048
 class UserPreferencesRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>,
 ) {
+
+    /** JSON for the non-scalar preference fields (e.g. [DashboardLayout]).
+     *  `ignoreUnknownKeys` so a schema bump that adds a facet doesn't reject
+     *  an older on-disk value — matches `FeaturePreferencesFactory.sharedJson`. */
+    private val json = Json { ignoreUnknownKeys = true }
 
     /** Reactive stream of the current user preferences. */
     val flow: Flow<UserPreferences> = dataStore.data.map { it.readFrom() }
@@ -98,6 +104,12 @@ class UserPreferencesRepository @Inject constructor(
         dataStore.edit { it[UserPreferencesKeys.FLOATING_TORCH_BUTTON_ENABLED] = enabled }
     }
 
+    suspend fun setDashboardLayout(layout: DashboardLayout) {
+        dataStore.edit {
+            it[UserPreferencesKeys.DASHBOARD_LAYOUT] = json.encodeToString(DashboardLayout.serializer(), layout)
+        }
+    }
+
     private fun Preferences.readFrom(): UserPreferences = UserPreferences(
         darkThemeMode = this[UserPreferencesKeys.DARK_THEME_MODE]
             ?.let { runCatching { DarkThemeMode.valueOf(it) }.getOrNull() }
@@ -117,6 +129,9 @@ class UserPreferencesRepository @Inject constructor(
         defaultTorchBrightness = this[UserPreferencesKeys.DEFAULT_TORCH_BRIGHTNESS]
             ?.coerceIn(0f, 1f) ?: UserPreferences.DEFAULT_TORCH_BRIGHTNESS,
         floatingTorchButtonEnabled = this[UserPreferencesKeys.FLOATING_TORCH_BUTTON_ENABLED] ?: false,
+        dashboardLayout = this[UserPreferencesKeys.DASHBOARD_LAYOUT]
+            ?.let { runCatching { json.decodeFromString(DashboardLayout.serializer(), it) }.getOrNull() }
+            ?: DashboardLayout(),
     )
 }
 
@@ -132,4 +147,5 @@ private object UserPreferencesKeys {
     val MORSE_TEXT = stringPreferencesKey("morse_text")
     val DEFAULT_TORCH_BRIGHTNESS = floatPreferencesKey("default_torch_brightness")
     val FLOATING_TORCH_BUTTON_ENABLED = booleanPreferencesKey("floating_torch_button_enabled")
+    val DASHBOARD_LAYOUT = stringPreferencesKey("dashboard_layout")
 }
