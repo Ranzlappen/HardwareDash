@@ -47,5 +47,12 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
+    // kotlin-test — RootSafetyPreferences / AlsaMixerControl /
+    // RootFeatureRegistry tests use kotlin.test assertions. Declared
+    // explicitly because this is a `gadget.android.library` module (the
+    // feature convention plugin would otherwise add it); without it the test
+    // source does not compile, which is why the module was historically
+    // absent from the CI test list.
+    testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
 }
