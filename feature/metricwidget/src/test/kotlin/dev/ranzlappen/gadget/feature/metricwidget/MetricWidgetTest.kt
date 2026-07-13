@@ -17,9 +17,10 @@ class MetricWidgetTest {
     fun `config round-trips through json`() {
         val config = MetricWidgetConfig(
             metricKey = "battery_level",
-            display = MetricWidgetDisplay.Value,
+            display = MetricWidgetDisplay.Sparkline,
             showLabel = false,
             tintArgb = 0xFF00FF00L,
+            windowSeconds = 900,
             sizePreset = WidgetSizePreset.Large,
             displayName = "Battery level",
         )
@@ -37,6 +38,7 @@ class MetricWidgetTest {
         assertFalse(decoded.isBound)
         assertEquals(MetricWidgetDisplay.ValueAndBar, decoded.display)
         assertTrue(decoded.showLabel)
+        assertEquals(MetricWidgetConfig.DEFAULT_WINDOW_SECONDS, decoded.windowSeconds)
     }
 
     @Test

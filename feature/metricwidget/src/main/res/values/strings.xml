@@ -12,4 +12,6 @@
     <string name="metric_widget_display_mode">Display</string>
     <string name="metric_widget_display_value">Value</string>
     <string name="metric_widget_display_value_bar">Value + bar</string>
+    <string name="metric_widget_display_sparkline">Sparkline</string>
+    <string name="metric_widget_window">History window</string>
 </resources>

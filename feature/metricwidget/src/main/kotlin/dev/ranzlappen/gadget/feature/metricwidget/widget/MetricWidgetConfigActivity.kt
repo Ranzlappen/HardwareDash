@@ -136,6 +136,9 @@ private fun MetricWidgetConfigScreen(
 ) {
     var metricKey by remember { mutableStateOf(existing?.metricKey ?: MetricWidgetConfig.NO_METRIC) }
     var display by remember { mutableStateOf(existing?.display ?: MetricWidgetDisplay.ValueAndBar) }
+    var windowSeconds by remember {
+        mutableStateOf(existing?.windowSeconds ?: MetricWidgetConfig.DEFAULT_WINDOW_SECONDS)
+    }
     var name by remember { mutableStateOf(existing?.displayName.orEmpty()) }
     var appearance by remember { mutableStateOf(existing?.appearance ?: WidgetAppearance()) }
     var tintArgb by remember { mutableStateOf(existing?.tintArgb) }
@@ -165,6 +168,7 @@ private fun MetricWidgetConfigScreen(
                     display = display,
                     showLabel = showLabel,
                     tintArgb = tintArgb,
+                    windowSeconds = windowSeconds,
                     sizePreset = sizePreset,
                     displayName = name.ifBlank { selected?.displayName.orEmpty() },
                     appearance = appearance,
@@ -181,6 +185,9 @@ private fun MetricWidgetConfigScreen(
                 },
             )
             DisplayModePicker(display = display, onSelect = { display = it })
+            if (display == MetricWidgetDisplay.Sparkline) {
+                WindowPicker(windowSeconds = windowSeconds, onSelect = { windowSeconds = it })
+            }
         },
         preview = { MetricWidgetPreview(option = selected) },
     )
@@ -264,8 +271,50 @@ private fun DisplayModePicker(
                 onClick = { onSelect(MetricWidgetDisplay.ValueAndBar) },
                 label = stringResource(R.string.metric_widget_display_value_bar),
             )
+            GadgetChip(
+                selected = display == MetricWidgetDisplay.Sparkline,
+                onClick = { onSelect(MetricWidgetDisplay.Sparkline) },
+                label = stringResource(R.string.metric_widget_display_sparkline),
+            )
         }
     }
+}
+
+/** One selectable sparkline window, in seconds. */
+private val WINDOW_PRESETS = listOf(60, 300, 900, 3600)
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun WindowPicker(
+    windowSeconds: Int,
+    onSelect: (Int) -> Unit,
+) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(spacing.tiny),
+    ) {
+        Text(
+            text = stringResource(R.string.metric_widget_window),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(spacing.tiny)) {
+            WINDOW_PRESETS.forEach { seconds ->
+                GadgetChip(
+                    selected = windowSeconds == seconds,
+                    onClick = { onSelect(seconds) },
+                    label = windowLabel(seconds),
+                )
+            }
+        }
+    }
+}
+
+/** "1 min" / "5 min" / "15 min" / "1 h" for the window presets. */
+private fun windowLabel(seconds: Int): String = when {
+    seconds < 3600 -> "${seconds / 60} min"
+    else -> "${seconds / 3600} h"
 }
 
 @Composable

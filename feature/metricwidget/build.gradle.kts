@@ -19,8 +19,12 @@ android {
 dependencies {
     implementation(project(":core:ui"))
     // MetricSource seam + the Map<String, MetricSource> @Multibinds (also
-    // transitively exposes :core:model which defines MetricDescriptor).
+    // transitively exposes :core:model which defines MetricDescriptor);
+    // MonitorChartBitmapRenderer + MonitorDownsampling back the sparkline.
     implementation(project(":core:monitoring"))
+    // :core:data — MonitorSampleRepository supplies the windowed history the
+    // sparkline display mode renders.
+    implementation(project(":core:data"))
     // :core:widgetkit — the content/display archetype (BaseContentWidgetProvider,
     // ContentWidgetCustomizationSheet); :core:datastore backs the per-appWidgetId
     // config store via FeaturePreferencesFactory.
