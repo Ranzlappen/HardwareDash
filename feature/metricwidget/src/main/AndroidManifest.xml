@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Generic metric home-screen widget (content/display archetype).
+             Configurable: the launcher opens MetricWidgetConfigActivity after a
+             tray-drop to pick which registered MetricSource it binds to. -->
+        <receiver
+            android:name=".widget.MetricWidgetProvider"
+            android:exported="true"
+            android:label="@string/metric_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_metric_info" />
+        </receiver>
+
+        <activity
+            android:name=".widget.MetricWidgetConfigActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:label="@string/metric_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

@@ -21,6 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -40,6 +43,8 @@ import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
 import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.RootActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -57,6 +62,8 @@ fun BtScreen(
     viewModel: BtViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val rootTools by viewModel.rootTools.collectAsState()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -71,6 +78,25 @@ fun BtScreen(
         state = state,
         moduleInfo = btModuleInfo(state),
         modifier = modifier,
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.bt_root_tools_title),
+                available = state.isRootedFlavor,
+                unavailableMessage = stringResource(R.string.bt_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootActionRow(
+                    label = stringResource(R.string.bt_root_hcisnoop_label),
+                    description = stringResource(R.string.bt_root_hcisnoop_detail),
+                    runLabel = stringResource(R.string.bt_root_run),
+                    onRun = viewModel::onDumpHciSnoop,
+                    enabled = !rootTools.hciSnoop.running,
+                    statusMessage = rootTools.hciSnoop.message,
+                    statusKind = rootTools.hciSnoop.statusKind,
+                )
+            }
+        },
         monitors = {
             LiveMonitorContainer(
                 metricKey = BtEnabledMetricSource.METRIC_KEY,
@@ -175,6 +201,7 @@ internal fun BtScreenContent(
     state: BtState,
     moduleInfo: ModuleInfo?,
     modifier: Modifier = Modifier,
+    rootTools: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
@@ -184,6 +211,7 @@ internal fun BtScreenContent(
         functional = {
             BtStatusCard(state = state)
             monitors()
+            rootTools()
         },
     )
 }

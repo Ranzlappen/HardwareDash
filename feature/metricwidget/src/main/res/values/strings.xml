@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="metric_widget_label">Metric</string>
+    <string name="metric_widget_description">Show any monitored metric on your home screen</string>
+
+    <!-- Placeholder shown before a metric is chosen / if it's no longer registered. -->
+    <string name="metric_widget_placeholder">—</string>
+
+    <!-- Configure activity (metric picker). -->
+    <string name="metric_widget_pick_metric">Metric to show</string>
+    <string name="metric_widget_no_metrics">No metrics are available yet.</string>
+    <string name="metric_widget_display_mode">Display</string>
+    <string name="metric_widget_display_value">Value</string>
+    <string name="metric_widget_display_value_bar">Value + bar</string>
+</resources>

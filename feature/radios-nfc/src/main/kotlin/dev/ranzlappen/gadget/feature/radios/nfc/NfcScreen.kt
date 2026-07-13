@@ -19,6 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -39,6 +42,8 @@ import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
 import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.RootConfirmActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.core.ui.component.GadgetStatusKind
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
@@ -52,6 +57,8 @@ fun NfcScreen(
     viewModel: NfcViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val rootTools by viewModel.rootTools.collectAsState()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -75,6 +82,29 @@ fun NfcScreen(
             }
         },
         modifier = modifier,
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.nfc_root_tools_title),
+                available = state.isRootedFlavor,
+                unavailableMessage = stringResource(R.string.nfc_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootConfirmActionRow(
+                    label = stringResource(R.string.nfc_root_reset_label),
+                    description = stringResource(R.string.nfc_root_reset_detail),
+                    runLabel = stringResource(R.string.nfc_root_run),
+                    confirmTitle = stringResource(R.string.nfc_root_reset_confirm_title),
+                    confirmMessage = stringResource(R.string.nfc_root_reset_confirm_message),
+                    confirmLabel = stringResource(R.string.nfc_root_reset_confirm_label),
+                    cancelLabel = stringResource(R.string.nfc_root_cancel),
+                    onConfirm = viewModel::onResetMutations,
+                    enabled = !rootTools.reset.running,
+                    statusMessage = rootTools.reset.message,
+                    statusKind = rootTools.reset.statusKind,
+                )
+            }
+        },
         liveMonitors = {
             LiveMonitorContainer(
                 metricKey = NfcEnabledMetricSource.METRIC_KEY,
@@ -154,6 +184,7 @@ fun NfcScreenContent(
     state: NfcState,
     onEvent: (NfcUiEvent) -> Unit,
     modifier: Modifier = Modifier,
+    rootTools: @Composable () -> Unit = {},
     liveMonitors: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
@@ -167,6 +198,7 @@ fun NfcScreenContent(
             NfcHceCard(state = state, onEvent = onEvent)
             liveMonitors()
             monitors()
+            rootTools()
         },
     )
 }

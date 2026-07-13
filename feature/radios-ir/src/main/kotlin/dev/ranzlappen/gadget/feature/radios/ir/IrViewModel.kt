@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.ui.module.RootActionState
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrControllerResult
 import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibraryBrand
 import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibraryRepository
 import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibrarySignal
@@ -17,15 +20,49 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** The rooted-tools panel state for the IR screen (W6 in-screen write-tier surface). */
+data class IrRootToolsState(
+    val reset: RootActionState = RootActionState(),
+)
+
 @HiltViewModel
 class IrViewModel @Inject constructor(
     private val hardware: IrHardware,
     private val repository: IrSignalRepository,
     private val libraryRepository: IrLibraryRepository,
+    private val irController: IrController,
     rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
 
     val isRootedFlavor: Boolean = rootCapabilityRegistry.isRootedFlavor
+
+    private val _rootTools = MutableStateFlow(IrRootToolsState())
+
+    /** Live status of the confirm-gated rooted IR-mutation reset. */
+    val rootTools: StateFlow<IrRootToolsState> = _rootTools.asStateFlow()
+
+    fun onResetMutations() {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(reset = it.reset.copy(running = true)) }
+            val result = irController.resetAllIrMutations()
+            _rootTools.update { it.copy(reset = result.toActionState()) }
+        }
+    }
+
+    private fun IrControllerResult.toActionState(): RootActionState = when (this) {
+        is IrControllerResult.Ok ->
+            RootActionState(message = statusNote ?: "Done")
+        IrControllerResult.Unsupported ->
+            RootActionState(message = "Requires the rooted app version", isError = true)
+        is IrControllerResult.RateLimited ->
+            RootActionState(message = "Rate limited — retry in ${retryAfterMillis}ms", isError = true)
+        IrControllerResult.OptedOut ->
+            RootActionState(message = "Blocked by your root-safety opt-out", isError = true)
+        is IrControllerResult.HardwareError ->
+            RootActionState(message = message, isError = true)
+        is IrControllerResult.ResetCompleted ->
+            RootActionState(message = "Reset $restored restored, $failed failed")
+    }
 
 
     private val _state = MutableStateFlow(

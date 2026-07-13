@@ -259,8 +259,33 @@ allow-list), independent of the migrated controller.
   with `:feature:storage` as the first live consumer). Deferred: the generic
   configurable metric widget and lock/automation-engine tiles (need the full
   pin-reliability contract / new `DevicePolicyManager` + engine-master-switch
-  plumbing); rolling `RootToolsSection` out to the other dormant rooted
-  features.
+  plumbing).
+- **Follow-up (post-#201) — W6 read-only rollout completed.** The
+  `RootToolsSection` in-screen surface now reaches every read-only dormant
+  rooted feature: `audio`, `radios-wifi`, `radios-bt`, `gps`, `battery`,
+  `display`, `radios-cell`, `usbdebug`, and `adbdebug` (joining `storage`
+  and `diagnostics` from #201, and the pre-existing torch/vibration cards).
+  The per-action state holder is hoisted into a single canonical
+  `:core:ui` `RootActionState` (`message`/`isError`/`running` + a derived
+  `statusKind`), and the two earlier consumers were migrated onto it.
+  A follow-up commit adds the **write-tier** surface: a new `:core:ui`
+  `RootConfirmActionRow` (a `RootActionRow` gated behind a confirmation
+  `GadgetDialog`) now surfaces the no-arg device-mutating actions of
+  `microphone`, `camera`, `notification`, `radios-ir`, and `radios-nfc`. Still
+  deferred: the config-bearing extreme actions (need parameter entry), plus
+  `apps` and `lock` (the latter needs `DevicePolicyManager`).
+  Also lands the **first live W5 `@IntoMap` contributor**: `:feature:notification`
+  contributes a `FeaturePermissions` group surfacing the notification-listener
+  special permission (outside the app baseline) in the Permissions dashboard.
+  Plus the **W4 generic metric widget** — a new `:feature:metricwidget`
+  (`BaseContentWidgetProvider`) that binds to any registered `MetricSource` via
+  a configure-activity picker, the first cross-cutting home-screen widget.
+  Plus **W9 user-customization**: a **dashboard editor** (the dashboard now
+  enumerates the module catalog and honours a persisted order/hidden/pinned
+  `DashboardLayout`, edited in a bottom sheet) and a **custom palette builder**
+  (`CustomThemeOption.Custom` + a `CustomPalette` accent override materialized
+  through a new `GadgetTheme(customColorSchemeOverride=…)` seam, edited with
+  live `GadgetColorPicker`s in Settings).
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.

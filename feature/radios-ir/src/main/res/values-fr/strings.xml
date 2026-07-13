@@ -53,4 +53,14 @@
     <string name="ir_cap_custom_carrier_detail">Émission à des fréquences porteuses arbitraires en dehors de la plage de ConsumerIrManager</string>
     <string name="ir_cap_gpio_burst_name">Rafale GPIO brute</string>
     <string name="ir_cap_gpio_burst_detail">Sortie directe d\'un train d\'impulsions GPIO via sysfs, en contournant le HAL IR</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="ir_root_tools_title">Outils root</string>
+    <string name="ir_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
+    <string name="ir_root_run">Exécuter</string>
+    <string name="ir_root_cancel">Annuler</string>
+    <string name="ir_root_reset_label">Réinitialiser les modifications IR</string>
+    <string name="ir_root_reset_detail">Annule toutes les modifications IR en root faites par cette application.</string>
+    <string name="ir_root_reset_confirm_title">Réinitialiser les modifications IR ?</string>
+    <string name="ir_root_reset_confirm_message">Cela annule toutes les modifications IR en root faites par cette application. Continuer ?</string>
+    <string name="ir_root_reset_confirm_label">Réinitialiser</string>
 </resources>

@@ -30,4 +30,10 @@
     <string name="audio_capability_direct_pcm_detail">Umgeht den AudioRecord-Stack für Rohaufnahme auf Kernel-Ebene</string>
     <string name="audio_capability_custom_sample_rate">Benutzerdefinierte Abtastrate</string>
     <string name="audio_capability_custom_sample_rate_detail">Fordert nicht standardmäßige Aufnahmeraten an (z. B. 96 kHz)</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="audio_root_tools_title">Root-Tools</string>
+    <string name="audio_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="audio_root_run">Ausführen</string>
+    <string name="audio_root_policy_label">Audio-Richtlinie ausgeben</string>
+    <string name="audio_root_policy_detail">Schreibgeschützter cmd-audio-dump-Snapshot.</string>
 </resources>

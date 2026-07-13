@@ -52,4 +52,10 @@
     <string name="wifi_cap_tx_power_detail">Establece la potencia de transmisión mediante iw phy set txpower (límite máximo: 20 dBm) para reducir interferencias o ampliar el alcance</string>
     <string name="wifi_cap_channel_name">Selección explícita de canal</string>
     <string name="wifi_cap_channel_detail">Fija un canal específico de 2,4 o 5 GHz mediante iw dev set channel, evitando la selección automática</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="wifi_root_tools_title">Herramientas root</string>
+    <string name="wifi_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="wifi_root_run">Ejecutar</string>
+    <string name="wifi_root_injection_label">Sondear capacidad de inyección</string>
+    <string name="wifi_root_injection_detail">Sondeo de solo lectura de iw phy info (compatibilidad monitor / IBSS).</string>
 </resources>

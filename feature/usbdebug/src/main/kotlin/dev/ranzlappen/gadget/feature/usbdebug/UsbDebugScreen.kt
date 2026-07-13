@@ -16,6 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
@@ -38,6 +41,8 @@ import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
 import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.RootActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -52,6 +57,8 @@ fun UsbDebugScreen(
     viewModel: UsbDebugViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val rootTools by viewModel.rootTools.collectAsState()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
 
     // Refresh the ADB_ENABLED readout on resume — the user's most likely
     // path to changing it is the "Open Developer options" deep link, which
@@ -70,6 +77,43 @@ fun UsbDebugScreen(
         onEvent = viewModel::onEvent,
         moduleInfo = usbDebugModuleInfo(state),
         modifier = modifier,
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.usbdebug_root_tools_title),
+                available = state.isRootedFlavor,
+                unavailableMessage = stringResource(R.string.usbdebug_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootActionRow(
+                    label = stringResource(R.string.usbdebug_root_dumpusb_label),
+                    description = stringResource(R.string.usbdebug_root_dumpusb_detail),
+                    runLabel = stringResource(R.string.usbdebug_root_run),
+                    onRun = viewModel::onDumpUsb,
+                    enabled = !rootTools.usb.running,
+                    statusMessage = rootTools.usb.message,
+                    statusKind = rootTools.usb.statusKind,
+                )
+                RootActionRow(
+                    label = stringResource(R.string.usbdebug_root_serial_label),
+                    description = stringResource(R.string.usbdebug_root_serial_detail),
+                    runLabel = stringResource(R.string.usbdebug_root_run),
+                    onRun = viewModel::onDumpSerial,
+                    enabled = !rootTools.serial.running,
+                    statusMessage = rootTools.serial.message,
+                    statusKind = rootTools.serial.statusKind,
+                )
+                RootActionRow(
+                    label = stringResource(R.string.usbdebug_root_devices_label),
+                    description = stringResource(R.string.usbdebug_root_devices_detail),
+                    runLabel = stringResource(R.string.usbdebug_root_run),
+                    onRun = viewModel::onDumpDevices,
+                    enabled = !rootTools.devices.running,
+                    statusMessage = rootTools.devices.message,
+                    statusKind = rootTools.devices.statusKind,
+                )
+            }
+        },
         liveMonitors = {
             LiveMonitorContainer(
                 metricKey = UsbDebuggingMetricSource.METRIC_KEY,
@@ -141,6 +185,7 @@ internal fun UsbDebugScreenContent(
     onEvent: (UsbDebugUiEvent) -> Unit,
     moduleInfo: ModuleInfo?,
     modifier: Modifier = Modifier,
+    rootTools: @Composable () -> Unit = {},
     liveMonitors: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
@@ -156,6 +201,7 @@ internal fun UsbDebugScreenContent(
             }
             liveMonitors()
             monitors()
+            rootTools()
         },
     )
 }

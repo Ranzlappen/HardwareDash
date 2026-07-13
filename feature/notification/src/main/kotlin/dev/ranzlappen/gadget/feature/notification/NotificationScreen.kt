@@ -8,8 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -17,6 +19,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
 import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
+import dev.ranzlappen.gadget.core.ui.module.RootConfirmActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.feature.notification.components.ChannelInspectorCard
 import dev.ranzlappen.gadget.feature.notification.components.ListenerAccessCard
 import dev.ranzlappen.gadget.feature.notification.components.LockScreenOverlayCard
@@ -52,6 +56,8 @@ fun NotificationScreen(
     onNavigateToSettings: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val rootTools by viewModel.rootTools.collectAsStateWithLifecycle()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
     val snackbarHostState = remember { SnackbarHostState() }
     val resultOk = stringResource(R.string.notification_root_result_ok)
     val resultUnsupported = stringResource(R.string.notification_root_result_unsupported)
@@ -114,6 +120,42 @@ fun NotificationScreen(
                 title = stringResource(R.string.notification_active_notifications_live_monitor),
             )
         },
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.notification_root_tools_title),
+                available = state.isRootedFlavor,
+                unavailableMessage = stringResource(R.string.notification_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootConfirmActionRow(
+                    label = stringResource(R.string.notification_root_listener_label),
+                    description = stringResource(R.string.notification_root_listener_detail),
+                    runLabel = stringResource(R.string.notification_root_run),
+                    confirmTitle = stringResource(R.string.notification_root_listener_confirm_title),
+                    confirmMessage = stringResource(R.string.notification_root_listener_confirm_message),
+                    confirmLabel = stringResource(R.string.notification_root_listener_confirm_label),
+                    cancelLabel = stringResource(R.string.notification_root_cancel),
+                    onConfirm = viewModel::onGrantListenerAccess,
+                    enabled = !rootTools.listener.running,
+                    statusMessage = rootTools.listener.message,
+                    statusKind = rootTools.listener.statusKind,
+                )
+                RootConfirmActionRow(
+                    label = stringResource(R.string.notification_root_reset_label),
+                    description = stringResource(R.string.notification_root_reset_detail),
+                    runLabel = stringResource(R.string.notification_root_run),
+                    confirmTitle = stringResource(R.string.notification_root_reset_confirm_title),
+                    confirmMessage = stringResource(R.string.notification_root_reset_confirm_message),
+                    confirmLabel = stringResource(R.string.notification_root_reset_confirm_label),
+                    cancelLabel = stringResource(R.string.notification_root_cancel),
+                    onConfirm = viewModel::onResetMutations,
+                    enabled = !rootTools.reset.running,
+                    statusMessage = rootTools.reset.message,
+                    statusKind = rootTools.reset.statusKind,
+                )
+            }
+        },
     )
 
     SnackbarHost(hostState = snackbarHostState)
@@ -142,6 +184,7 @@ fun NotificationScreenContent(
     modifier: Modifier = Modifier,
     monitor: @Composable () -> Unit = {},
     liveMonitor: @Composable () -> Unit = {},
+    rootTools: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
         title = stringResource(R.string.notification_screen_title),
@@ -185,6 +228,7 @@ fun NotificationScreenContent(
                     onResetAllRequest = { onEvent(NotificationUiEvent.ResetAllRequest) },
                 )
             }
+            rootTools()
         },
         moduleInfo = notificationModuleInfo(
             state = state,

@@ -53,4 +53,15 @@
     <string name="ir_cap_custom_carrier_detail">Transmit at arbitrary carrier frequencies outside the ConsumerIrManager range</string>
     <string name="ir_cap_gpio_burst_name">GPIO raw burst</string>
     <string name="ir_cap_gpio_burst_detail">Direct GPIO pulse-train output via sysfs, bypassing the IR HAL</string>
+
+    <!-- ─── Rooted tools (in-screen, W6 write-tier) ─────────────────────── -->
+    <string name="ir_root_tools_title">Rooted tools</string>
+    <string name="ir_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="ir_root_run">Run</string>
+    <string name="ir_root_cancel">Cancel</string>
+    <string name="ir_root_reset_label">Reset IR mutations</string>
+    <string name="ir_root_reset_detail">Revert every rooted IR mutation this app made.</string>
+    <string name="ir_root_reset_confirm_title">Reset IR mutations?</string>
+    <string name="ir_root_reset_confirm_message">This reverts every rooted IR change this app has made. Continue?</string>
+    <string name="ir_root_reset_confirm_label">Reset</string>
 </resources>

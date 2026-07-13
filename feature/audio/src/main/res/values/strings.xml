@@ -30,4 +30,11 @@
     <string name="audio_capability_direct_pcm_detail">Bypass AudioRecord stack for raw kernel capture</string>
     <string name="audio_capability_custom_sample_rate">Custom sample rate</string>
     <string name="audio_capability_custom_sample_rate_detail">Request non-standard capture rates (e.g. 96 kHz)</string>
+
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="audio_root_tools_title">Rooted tools</string>
+    <string name="audio_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="audio_root_run">Run</string>
+    <string name="audio_root_policy_label">Dump audio policy</string>
+    <string name="audio_root_policy_detail">Read-only cmd audio dump snapshot.</string>
 </resources>

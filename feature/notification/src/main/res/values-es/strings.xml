@@ -108,4 +108,19 @@
     <string name="notification_action_grant_listener">Conceder acceso de escucha</string>
     <string name="notification_action_show_overlay">Mostrar superposición de pantalla de bloqueo</string>
     <string name="notification_action_reset_all">Restablecer todas las modificaciones de notificaciones</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="notification_root_tools_title">Herramientas root</string>
+    <string name="notification_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="notification_root_run">Ejecutar</string>
+    <string name="notification_root_cancel">Cancelar</string>
+    <string name="notification_root_listener_label">Conceder acceso de listener</string>
+    <string name="notification_root_listener_detail">Abre la pantalla de acceso a notificaciones del sistema para esta app.</string>
+    <string name="notification_root_listener_confirm_title">¿Conceder acceso de listener?</string>
+    <string name="notification_root_listener_confirm_message">Esto abre los ajustes de acceso a notificaciones del sistema para que puedas habilitar el servicio de listener de esta app. ¿Continuar?</string>
+    <string name="notification_root_listener_confirm_label">Abrir ajustes</string>
+    <string name="notification_root_reset_label">Restablecer anulaciones de notificaciones</string>
+    <string name="notification_root_reset_detail">Revierte todas las modificaciones de notificaciones con root que hizo esta app.</string>
+    <string name="notification_root_reset_confirm_title">¿Restablecer anulaciones de notificaciones?</string>
+    <string name="notification_root_reset_confirm_message">Esto revierte todos los cambios de notificaciones con root de esta app. ¿Continuar?</string>
+    <string name="notification_root_reset_confirm_label">Restablecer</string>
 </resources>

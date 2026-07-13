@@ -39,4 +39,14 @@
     <string name="nfc_cap_rooted_required">Requiere compilación rooteada</string>
     <string name="nfc_cap_raw_nci_name">Inyección de comandos NCI sin procesar</string>
     <string name="nfc_cap_raw_nci_detail">Envía tramas NCI arbitrarias al controlador NFC mediante /dev/nfc, evitando la pila NFC</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="nfc_root_tools_title">Herramientas root</string>
+    <string name="nfc_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="nfc_root_run">Ejecutar</string>
+    <string name="nfc_root_cancel">Cancelar</string>
+    <string name="nfc_root_reset_label">Restablecer modificaciones de NFC</string>
+    <string name="nfc_root_reset_detail">Revierte todas las modificaciones de NFC con root que hizo esta app.</string>
+    <string name="nfc_root_reset_confirm_title">¿Restablecer modificaciones de NFC?</string>
+    <string name="nfc_root_reset_confirm_message">Esto revierte todos los cambios de NFC con root de esta app. ¿Continuar?</string>
+    <string name="nfc_root_reset_confirm_label">Restablecer</string>
 </resources>

@@ -95,6 +95,22 @@ A content widget's layout must include an `@id/widget_background`
 ImageView as the backmost child; the provider calls
 `WidgetAppearanceRenderer.applyBackground` in `buildRemoteViews`.
 
+**Generic metric widget** (`:feature:metricwidget`, W4) — the first
+*cross-cutting* content widget: instead of one feature's hardwired signal
+it binds to **any** registered `MetricSource` the user picks in its
+`APPWIDGET_CONFIGURE` activity (`MetricWidgetConfigActivity` — a grouped
+metric picker + Value / Value+bar display mode layered into the
+`ContentWidgetCustomizationSheet` `content` slot). `MetricWidgetConfig`
+persists the chosen `metricKey` per `appWidgetId`; `MetricWidgetProvider`
+resolves the source through a `SingletonComponent` `@EntryPoint` exposing
+the app-wide `Map<String, MetricSource>` multibinding and paints
+`source.sample()` scaled to `descriptor.currentMax()`.
+`MetricWidgetController` repaints on each bound source's push `stream()`
+plus a 30 s ticker for poll-only sources. Placement is launcher-tray +
+config-activity only (config written synchronously under the real
+`appWidgetId`), so it needs no pin receiver. Sparkline display is a planned
+fast-follow (mirrors the torch `MonitorChartWidgetProvider` bitmap path).
+
 **Folder widget icon catalog** — `FolderWidgetIconCatalog`
 (`feature/apps/.../widget/customization/`) implements `WidgetIconResolver`
 for the folder widget. Built-in entries map each `MaterialSymbol` id to its

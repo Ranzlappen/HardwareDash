@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.ui.module.RootActionState
 import dev.ranzlappen.gadget.feature.diagnostics.control.DiagnosticsController
 import dev.ranzlappen.gadget.feature.diagnostics.control.DiagnosticsControllerResult
 import javax.inject.Inject
@@ -13,18 +14,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Last-run status of one rooted diagnostics dump (W6 in-screen surface). */
-data class DiagActionState(
-    val message: String? = null,
-    val isError: Boolean = false,
-    val running: Boolean = false,
-)
-
 /** The rooted-tools panel state for the diagnostics screen. */
 data class DiagnosticsRootToolsState(
-    val memInfo: DiagActionState = DiagActionState(),
-    val cpuInfo: DiagActionState = DiagActionState(),
-    val procstats: DiagActionState = DiagActionState(),
+    val memInfo: RootActionState = RootActionState(),
+    val cpuInfo: RootActionState = RootActionState(),
+    val procstats: RootActionState = RootActionState(),
 )
 
 @HiltViewModel
@@ -67,26 +61,26 @@ class DiagnosticsViewModel @Inject constructor(
         }
     }
 
-    private fun DiagnosticsControllerResult.toActionState(): DiagActionState = when (this) {
+    private fun DiagnosticsControllerResult.toActionState(): RootActionState = when (this) {
         is DiagnosticsControllerResult.MemInfoExcerpt ->
-            DiagActionState(message = "Captured ${excerpt.length} chars of meminfo")
+            RootActionState(message = "Captured ${excerpt.length} chars of meminfo")
         is DiagnosticsControllerResult.CpuInfoExcerpt ->
-            DiagActionState(message = "Captured ${excerpt.length} chars of cpuinfo")
+            RootActionState(message = "Captured ${excerpt.length} chars of cpuinfo")
         is DiagnosticsControllerResult.ProcstatsExcerpt ->
-            DiagActionState(message = "Captured ${excerpt.length} chars of procstats")
+            RootActionState(message = "Captured ${excerpt.length} chars of procstats")
         is DiagnosticsControllerResult.LogcatExcerpt ->
-            DiagActionState(message = "Captured ${excerpt.length} chars")
+            RootActionState(message = "Captured ${excerpt.length} chars")
         is DiagnosticsControllerResult.Ok ->
-            DiagActionState(message = statusNote ?: "Done")
+            RootActionState(message = statusNote ?: "Done")
         DiagnosticsControllerResult.Unsupported ->
-            DiagActionState(message = "Requires the rooted app version", isError = true)
+            RootActionState(message = "Requires the rooted app version", isError = true)
         DiagnosticsControllerResult.OptedOut ->
-            DiagActionState(message = "Blocked by your root-safety opt-out", isError = true)
+            RootActionState(message = "Blocked by your root-safety opt-out", isError = true)
         is DiagnosticsControllerResult.RateLimited ->
-            DiagActionState(message = "Rate limited — retry in ${retryAfterMillis}ms", isError = true)
+            RootActionState(message = "Rate limited — retry in ${retryAfterMillis}ms", isError = true)
         is DiagnosticsControllerResult.HardwareError ->
-            DiagActionState(message = message, isError = true)
+            RootActionState(message = message, isError = true)
         is DiagnosticsControllerResult.ResetCompleted ->
-            DiagActionState(message = "Reset $restored restored, $failed failed")
+            RootActionState(message = "Reset $restored restored, $failed failed")
     }
 }

@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.ui.module.RootActionState
 import dev.ranzlappen.gadget.feature.usbdebug.control.UsbDebuggingController
 import dev.ranzlappen.gadget.feature.usbdebug.control.UsbDebuggingControllerResult
 import dev.ranzlappen.gadget.feature.usbdebug.control.UsbFunctionType
@@ -33,6 +34,13 @@ import kotlinx.coroutines.launch
  * are hidden entirely on that flavor by [UsbDebugScreenContent], so in
  * practice these branches only run rooted).
  */
+/** The rooted-tools panel state for the USB-debug screen (W6 in-screen surface). */
+data class UsbDebugRootToolsState(
+    val usb: RootActionState = RootActionState(),
+    val serial: RootActionState = RootActionState(),
+    val devices: RootActionState = RootActionState(),
+)
+
 @HiltViewModel
 class UsbDebugViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -47,6 +55,54 @@ class UsbDebugViewModel @Inject constructor(
         ),
     )
     val state: StateFlow<UsbDebugState> = _state.asStateFlow()
+
+    private val _rootTools = MutableStateFlow(UsbDebugRootToolsState())
+
+    /** Live status of the three rooted read-only USB dumps (W6 surface). */
+    val rootTools: StateFlow<UsbDebugRootToolsState> = _rootTools.asStateFlow()
+
+    fun onDumpUsb() {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(usb = it.usb.copy(running = true)) }
+            val result = controller.dumpUsb()
+            _rootTools.update { it.copy(usb = result.toActionState()) }
+        }
+    }
+
+    fun onDumpSerial() {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(serial = it.serial.copy(running = true)) }
+            val result = controller.dumpSerialService()
+            _rootTools.update { it.copy(serial = result.toActionState()) }
+        }
+    }
+
+    fun onDumpDevices() {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(devices = it.devices.copy(running = true)) }
+            val result = controller.dumpUsbDevicesDebug()
+            _rootTools.update { it.copy(devices = result.toActionState()) }
+        }
+    }
+
+    private fun UsbDebuggingControllerResult.toActionState(): RootActionState = when (this) {
+        is UsbDebuggingControllerResult.Ok ->
+            RootActionState(message = statusNote ?: "Done")
+        UsbDebuggingControllerResult.Unsupported ->
+            RootActionState(message = "Requires the rooted app version", isError = true)
+        is UsbDebuggingControllerResult.RateLimited ->
+            RootActionState(message = "Rate limited — retry in ${retryAfterMillis}ms", isError = true)
+        UsbDebuggingControllerResult.OptedOut ->
+            RootActionState(message = "Blocked by your root-safety opt-out", isError = true)
+        is UsbDebuggingControllerResult.HardwareError ->
+            RootActionState(message = message, isError = true)
+        is UsbDebuggingControllerResult.ResetCompleted ->
+            RootActionState(message = "Reset $restored restored, $failed failed")
+        is UsbDebuggingControllerResult.UsbFunctionSnapshot ->
+            RootActionState(message = "Function $appliedFunction")
+        is UsbDebuggingControllerResult.UsbDumpExcerpt ->
+            RootActionState(message = "Captured ${excerpt.length} chars from $source")
+    }
 
     fun onEvent(event: UsbDebugUiEvent) {
         when (event) {

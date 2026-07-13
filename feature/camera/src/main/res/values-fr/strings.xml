@@ -54,4 +54,14 @@
     <string name="camera_action_multi_camera_capture">Capture multi-caméra (rooté)</string>
     <string name="camera_action_hal_bypass_frame">Trame avec contournement HAL (rooté)</string>
     <string name="camera_action_set_shutter_sound">Définir le son de l\'obturateur (rooté)</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="camera_root_tools_title">Outils root</string>
+    <string name="camera_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
+    <string name="camera_root_run">Exécuter</string>
+    <string name="camera_root_cancel">Annuler</string>
+    <string name="camera_root_hal_bypass_label">Capturer une image en contournant le HAL</string>
+    <string name="camera_root_hal_bypass_detail">Capture une seule image en contournant le HAL de la caméra.</string>
+    <string name="camera_root_hal_bypass_confirm_title">Capturer une image en contournant le HAL ?</string>
+    <string name="camera_root_hal_bypass_confirm_message">Cela capture une image directement en contournant le HAL de la caméra. Continuer ?</string>
+    <string name="camera_root_hal_bypass_confirm_label">Capturer</string>
 </resources>

@@ -66,4 +66,12 @@
     <string name="cell_dump_retry_button">Réessayer</string>
     <string name="cell_dump_empty">Aucun nœud renvoyé.</string>
     <string name="cell_dump_unsupported">Non pris en charge sur ce SoC — aucun nœud de diagnostic Qualcomm trouvé.</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="cell_root_tools_title">Outils root</string>
+    <string name="cell_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
+    <string name="cell_root_run">Exécuter</string>
+    <string name="cell_root_modem_label">Vider le modem</string>
+    <string name="cell_root_modem_detail">Parcours en lecture seule des nœuds modem du fournisseur.</string>
+    <string name="cell_root_signal_label">Vidage approfondi du signal</string>
+    <string name="cell_root_signal_detail">Décomposition en lecture seule RSRP / RSRQ / SINR par bande.</string>
 </resources>

@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.notifications.NotificationChannelRegistry
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.ui.module.RootActionState
 import dev.ranzlappen.gadget.feature.notification.control.LockScreenOverlayConfig
 import dev.ranzlappen.gadget.feature.notification.control.NotificationController
 import dev.ranzlappen.gadget.feature.notification.control.NotificationControllerResult
@@ -27,10 +28,18 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+/** The rooted-tools panel state for the notification screen (W6 in-screen
+ *  write-tier surface). Each field is one confirm-gated action row. */
+data class NotificationRootToolsState(
+    val listener: RootActionState = RootActionState(),
+    val reset: RootActionState = RootActionState(),
+)
 
 /**
  * Aggregating ViewModel for [NotificationScreen].
@@ -74,6 +83,11 @@ class NotificationViewModel @Inject constructor(
      *  a snackbar by the screen (mirrors `TorchViewModel.rootToolEvents`). */
     private val _resultEvents = MutableSharedFlow<NotificationControllerResult>(extraBufferCapacity = 1)
     val resultEvents: SharedFlow<NotificationControllerResult> = _resultEvents.asSharedFlow()
+
+    /** Live status of the in-screen rooted write-tier tools (W6). Each row's
+     *  last `NotificationControllerResult` mapped onto the shared holder. */
+    private val _rootTools = MutableStateFlow(NotificationRootToolsState())
+    val rootTools: StateFlow<NotificationRootToolsState> = _rootTools.asStateFlow()
 
     val state: StateFlow<NotificationScreenState> = combine(
         _draft,
@@ -198,6 +212,43 @@ class NotificationViewModel @Inject constructor(
 
     private fun onResetAllRequest() {
         viewModelScope.launch { _resultEvents.tryEmit(controller.resetAllNotificationMutations()) }
+    }
+
+    /** Confirm-gated in-screen rooted action: open the system Notification
+     *  Access screen via the controller's programmatic listener grant. */
+    fun onGrantListenerAccess() {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(listener = it.listener.copy(running = true)) }
+            val result = controller.grantListenerAccess()
+            _rootTools.update { it.copy(listener = result.toActionState()) }
+        }
+    }
+
+    /** Confirm-gated in-screen rooted action: revert every notification
+     *  mutation this app made. */
+    fun onResetMutations() {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(reset = it.reset.copy(running = true)) }
+            val result = controller.resetAllNotificationMutations()
+            _rootTools.update { it.copy(reset = result.toActionState()) }
+        }
+    }
+
+    private fun NotificationControllerResult.toActionState(): RootActionState = when (this) {
+        is NotificationControllerResult.Ok ->
+            RootActionState(message = statusNote ?: "Done")
+        NotificationControllerResult.Unsupported ->
+            RootActionState(message = "Requires the rooted app version", isError = true)
+        is NotificationControllerResult.RateLimited ->
+            RootActionState(message = "Rate limited — retry in ${retryAfterMillis}ms", isError = true)
+        NotificationControllerResult.OptedOut ->
+            RootActionState(message = "Blocked by your root-safety opt-out", isError = true)
+        is NotificationControllerResult.HardwareError ->
+            RootActionState(message = message, isError = true)
+        is NotificationControllerResult.ResetCompleted ->
+            RootActionState(message = "Reset $restored restored, $failed failed")
+        is NotificationControllerResult.ChannelImportanceSnapshot ->
+            RootActionState(message = "Channel importance updated")
     }
 
     /** Local, unsaved draft of the builder + rooted-panel input fields.

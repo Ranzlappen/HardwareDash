@@ -20,6 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,6 +44,8 @@ import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
 import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.RootActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -55,11 +60,32 @@ fun AdbDebugScreen(
     viewModel: AdbDebugViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val rootTools by viewModel.rootTools.collectAsState()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
     AdbDebugScreenContent(
         state = state,
         moduleInfo = adbDebugModuleInfo(state),
         onEvent = viewModel::onEvent,
         modifier = modifier,
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.adbdebug_root_tools_title),
+                available = state.isRootedFlavor,
+                unavailableMessage = stringResource(R.string.adbdebug_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootActionRow(
+                    label = stringResource(R.string.adbdebug_root_getprop_label),
+                    description = stringResource(R.string.adbdebug_root_getprop_detail),
+                    runLabel = stringResource(R.string.adbdebug_root_run),
+                    onRun = viewModel::onDumpProperties,
+                    enabled = !rootTools.properties.running,
+                    statusMessage = rootTools.properties.message,
+                    statusKind = rootTools.properties.statusKind,
+                )
+            }
+        },
         liveMonitors = {
             LiveMonitorContainer(
                 metricKey = AdbEnabledMetricSource.METRIC_KEY,
@@ -152,6 +178,7 @@ internal fun AdbDebugScreenContent(
     moduleInfo: ModuleInfo?,
     onEvent: (AdbDebugUiEvent) -> Unit,
     modifier: Modifier = Modifier,
+    rootTools: @Composable () -> Unit = {},
     liveMonitors: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
@@ -169,6 +196,7 @@ internal fun AdbDebugScreenContent(
             }
             liveMonitors()
             monitors()
+            rootTools()
         },
     )
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.ui.module.RootActionState
 import dev.ranzlappen.gadget.feature.storage.control.StorageController
 import dev.ranzlappen.gadget.feature.storage.control.StorageControllerResult
 import javax.inject.Inject
@@ -14,13 +15,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-/** The last-run status of one rooted storage action (W6 in-screen surface). */
-data class RootActionState(
-    val message: String? = null,
-    val isError: Boolean = false,
-    val running: Boolean = false,
-)
 
 /** The rooted-tools panel state for the storage screen. */
 data class StorageRootToolsState(

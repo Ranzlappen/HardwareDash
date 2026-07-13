@@ -26,6 +26,10 @@ import dev.ranzlappen.gadget.root.ui.FatalLaunchScreen
 import dev.ranzlappen.gadget.backup.ui.BackupCard
 import dev.ranzlappen.gadget.core.permissions.PermissionsDashboardCard
 import dev.ranzlappen.gadget.root.ui.RootedFeatureTogglesCard
+import androidx.compose.ui.graphics.Color
+import dev.ranzlappen.gadget.core.designsystem.theme.GadgetDarkColorScheme
+import dev.ranzlappen.gadget.core.designsystem.theme.GadgetLightColorScheme
+import dev.ranzlappen.gadget.core.designsystem.theme.customColorScheme
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import android.nfc.NfcAdapter
 import androidx.activity.viewModels
@@ -34,6 +38,7 @@ import dev.ranzlappen.gadget.feature.apps.AppRepository
 import dev.ranzlappen.gadget.feature.apps.appsScreen
 import dev.ranzlappen.gadget.feature.apps.widget.FolderWidgetController
 import dev.ranzlappen.gadget.feature.battery.widget.BatteryWidgetController
+import dev.ranzlappen.gadget.feature.metricwidget.widget.MetricWidgetController
 import dev.ranzlappen.gadget.feature.storage.widget.StorageWidgetController
 import dev.ranzlappen.gadget.core.datastore.CustomThemeOption
 import dev.ranzlappen.gadget.core.datastore.DarkThemeMode
@@ -98,6 +103,10 @@ class MainActivity : ComponentActivity() {
     // placed storage widgets for the lifetime of the process.
     @Inject lateinit var storageWidgetController: StorageWidgetController
 
+    // Eager-injected so its init { } observes each bound metric and repaints
+    // placed generic metric widgets for the lifetime of the process.
+    @Inject lateinit var metricWidgetController: MetricWidgetController
+
     // Eager-injected so its init { } runs the one-shot legacy gadget_db ->
     // apps.db import (in-place upgrade + legacy backup restore continuity).
     @Inject lateinit var legacyAppsImporter: dev.ranzlappen.gadget.feature.apps.LegacyAppsImporter
@@ -143,12 +152,27 @@ class MainActivity : ComponentActivity() {
                         CustomThemeOption.HighContrast -> GadgetCustomTheme.HighContrast
                         CustomThemeOption.AmoledTrue -> GadgetCustomTheme.AmoledTrue
                         CustomThemeOption.Pastel -> GadgetCustomTheme.Pastel
+                        // A user-defined accent palette can't be a static enum
+                        // variant — it's materialized into customColorSchemeOverride
+                        // below, so the named theme stays Default.
+                        CustomThemeOption.Custom -> GadgetCustomTheme.Default
+                    }
+                    val customColorSchemeOverride = if (preferences.customTheme == CustomThemeOption.Custom) {
+                        customColorScheme(
+                            base = if (useDarkTheme) GadgetDarkColorScheme else GadgetLightColorScheme,
+                            primary = Color(preferences.customPalette.primaryArgb),
+                            secondary = Color(preferences.customPalette.secondaryArgb),
+                            tertiary = Color(preferences.customPalette.tertiaryArgb),
+                        )
+                    } else {
+                        null
                     }
                     GadgetApp(
                         navController = navController,
                         useDarkTheme = useDarkTheme,
                         useDynamicColor = preferences.dynamicColor,
                         customTheme = customTheme,
+                        customColorSchemeOverride = customColorSchemeOverride,
                         reducedMotionOverride = reducedMotionOverride,
                         reducedTransparency = preferences.reducedTransparency,
                     ) {

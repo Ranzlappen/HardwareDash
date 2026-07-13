@@ -100,6 +100,22 @@
     <string name="notification_root_result_channel_snapshot">%1$s: importance %2$d → %3$d</string>
     <string name="notification_root_opted_out_action">Enable</string>
 
+    <!-- ─── Rooted tools (in-screen, W6 write-tier) ─────────────────────── -->
+    <string name="notification_root_tools_title">Rooted tools</string>
+    <string name="notification_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="notification_root_run">Run</string>
+    <string name="notification_root_cancel">Cancel</string>
+    <string name="notification_root_listener_label">Grant listener access</string>
+    <string name="notification_root_listener_detail">Open the system Notification Access screen for this app.</string>
+    <string name="notification_root_listener_confirm_title">Grant listener access?</string>
+    <string name="notification_root_listener_confirm_message">This opens the system Notification Access settings so you can enable this app\'s listener service. Continue?</string>
+    <string name="notification_root_listener_confirm_label">Open settings</string>
+    <string name="notification_root_reset_label">Reset notification overrides</string>
+    <string name="notification_root_reset_detail">Revert every rooted notification mutation this app made.</string>
+    <string name="notification_root_reset_confirm_title">Reset notification overrides?</string>
+    <string name="notification_root_reset_confirm_message">This reverts every rooted notification change this app has made. Continue?</string>
+    <string name="notification_root_reset_confirm_label">Reset</string>
+
     <!-- ActionHandler labels (automation rule builder) -->
     <string name="notification_action_post_test">Post test notification</string>
     <string name="notification_action_cancel_test">Cancel test notification</string>

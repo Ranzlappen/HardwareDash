@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.ranzlappen.gadget.core.datastore.CustomPalette
 import dev.ranzlappen.gadget.core.datastore.CustomThemeOption
 import dev.ranzlappen.gadget.core.datastore.DarkThemeMode
 import dev.ranzlappen.gadget.core.datastore.TriStatePreference
@@ -81,6 +82,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setCustomTheme(option: CustomThemeOption) {
         viewModelScope.launch { repository.setCustomTheme(option) }
+    }
+
+    fun setCustomPalette(palette: CustomPalette) {
+        viewModelScope.launch { repository.setCustomPalette(palette) }
     }
 
     fun setReducedMotionOverride(value: TriStatePreference) {

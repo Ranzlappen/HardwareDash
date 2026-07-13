@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.ui.module.RootActionState
 import dev.ranzlappen.gadget.feature.display.control.DensityOverrideConfig
 import dev.ranzlappen.gadget.feature.display.control.DisplayController
 import dev.ranzlappen.gadget.feature.display.control.DisplayControllerResult
@@ -27,6 +28,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+/** The rooted-tools panel state for the display screen (W6 in-screen surface). */
+data class DisplayRootToolsState(
+    val surfaceFlinger: RootActionState = RootActionState(),
+)
 
 @HiltViewModel
 class DisplayViewModel @Inject constructor(
@@ -48,6 +54,11 @@ class DisplayViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(DisplayState(isRootedFlavor = isRootedFlavor))
     val state: StateFlow<DisplayState> = _state.asStateFlow()
+
+    private val _rootTools = MutableStateFlow(DisplayRootToolsState())
+
+    /** Live status of the rooted read-only SurfaceFlinger dump. */
+    val rootTools: StateFlow<DisplayRootToolsState> = _rootTools.asStateFlow()
 
     private val brightnessObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
         override fun onChange(selfChange: Boolean) {
@@ -245,6 +256,37 @@ class DisplayViewModel @Inject constructor(
         is DisplayControllerResult.DensitySnapshot ->
             context.getString(R.string.display_status_density_applied, appliedDpi)
         is DisplayControllerResult.SurfaceFlingerExcerpt -> null
+    }
+
+    fun onDumpSurfaceFlinger() {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(surfaceFlinger = it.surfaceFlinger.copy(running = true)) }
+            val result = controller.surfaceFlingerSnapshot()
+            _rootTools.update { it.copy(surfaceFlinger = result.toActionState()) }
+        }
+    }
+
+    private fun DisplayControllerResult.toActionState(): RootActionState = when (this) {
+        is DisplayControllerResult.Ok ->
+            RootActionState(message = statusNote ?: "Done")
+        DisplayControllerResult.Unsupported ->
+            RootActionState(message = "Requires the rooted app version", isError = true)
+        is DisplayControllerResult.RateLimited ->
+            RootActionState(message = "Rate limited — retry in ${retryAfterMillis}ms", isError = true)
+        DisplayControllerResult.OptedOut ->
+            RootActionState(message = "Blocked by your root-safety opt-out", isError = true)
+        is DisplayControllerResult.HardwareError ->
+            RootActionState(message = message, isError = true)
+        is DisplayControllerResult.ResetCompleted ->
+            RootActionState(message = "Reset $restored restored, $failed failed")
+        is DisplayControllerResult.BrightnessSnapshot ->
+            RootActionState(message = "Brightness ${appliedRaw}/${maxBrightness}")
+        is DisplayControllerResult.RefreshRateSnapshot ->
+            RootActionState(message = "Mode $appliedModeId")
+        is DisplayControllerResult.DensitySnapshot ->
+            RootActionState(message = "Density ${appliedDpi} dpi")
+        is DisplayControllerResult.SurfaceFlingerExcerpt ->
+            RootActionState(message = "Captured ${excerpt.length} chars")
     }
 
     companion object {

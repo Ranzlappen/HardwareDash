@@ -324,9 +324,18 @@ torch/vibration reference pattern:
 > **In progress** (`claude/feature-roadmap-gaps-jjef2r`): added a
 > **`VibrateTileService`** QS tile (continuous vibration via the shared
 > `VibrationController`), the second feature after torch with QS coverage.
-> Deferred: the generic configurable metric widget (needs the full
-> CI-invisible pin-reliability contract) and lock / automation-engine tiles
-> (need new `DevicePolicyManager` / engine-master-switch plumbing).
+> **The generic configurable metric widget is now built** — a new
+> **`:feature:metricwidget`** rides the kit's `BaseContentWidgetProvider`
+> archetype and binds to **any** registered `MetricSource` the user picks in
+> its `APPWIDGET_CONFIGURE` activity (grouped metric picker + Value / Value+bar
+> display + the shared `ContentWidgetCustomizationSheet` appearance/tint/size).
+> `MetricWidgetController` repaints on each bound metric's push stream (+ a
+> ticker for poll-only sources) via `ContentWidgetUpdater`. Placement is
+> launcher-tray + config-activity (config written synchronously under the real
+> `appWidgetId`), sidestepping the flaky in-app pin path. Deferred: the sparkline
+> display mode (fast-follow, mirrors torch's `MonitorChartWidgetProvider` bitmap
+> path) and lock / automation-engine tiles (need new `DevicePolicyManager` /
+> engine-master-switch plumbing).
 
 - **Generic metric widget (the multiplier):** generalize the
   torch/vibration `MonitorWidgetProvider` / `MonitorChartWidgetProvider`
@@ -353,8 +362,12 @@ torch/vibration reference pattern:
 > `SpecialPermissions` (overlay / exact-alarm / WRITE_SETTINGS /
 > notification-listener / all-files → live query + Settings deep-link), and a
 > reusable `PermissionsDashboardCard` wired into Settings via a
-> `permissionsSection` slot. Still open: first-run onboarding flow, rooted
-> one-tap `pm grant` wiring, and per-module `ModuleInfo` integration.
+> `permissionsSection` slot. **`:feature:notification` is the first live
+> per-feature `@IntoMap` contributor** — it owns the
+> `NotificationListenerService`, so it surfaces the notification-listener
+> special permission (deliberately outside the baseline) in the dashboard.
+> Still open: first-run onboarding flow, rooted one-tap `pm grant` wiring,
+> and per-module `ModuleInfo` integration.
 
 Original scope — build `:core:permissions` for real (was empty):
 
@@ -371,17 +384,25 @@ Original scope — build `:core:permissions` for real (was empty):
   integration; **first-run onboarding** flow (replaces the deleted
   legacy coordinator).
 
-### W6 — Root flavor completion · **M** · 🚧 started
+### W6 — Root flavor completion · **M** · 🚧 read-only rollout complete
 
-> **In progress:** the reusable `:core:ui` **`RootToolsSection`** +
-> **`RootActionRow`** substrate now standardizes surfacing a dormant rooted
-> controller in a feature screen (torch/vibration had hand-rolled cards);
-> **`:feature:storage`** is the first live consumer (read-only
-> diskstats/mounts through `StorageController`, gated by the `:core:root`
-> seam). The signed **`rooted-release.apk`** pipeline is verified in CI (an
-> `apksigner verify` gate). Remaining: roll `RootToolsSection` out to the
-> other dormant features, the Sub-GHz SDR data path, and the LSPosed
-> repackage.
+> **Done (read-only tier):** the reusable `:core:ui` **`RootToolsSection`** +
+> **`RootActionRow`** substrate (with the shared **`RootActionState`** holder)
+> standardizes surfacing a dormant rooted controller in a feature screen
+> (torch/vibration had hand-rolled cards). Every read-only dormant feature is
+> now a live consumer — `storage`, `diagnostics`, `audio`, `radios-wifi`,
+> `radios-bt`, `gps`, `battery`, `display`, `radios-cell`, `usbdebug`,
+> `adbdebug` — each gated by the `:core:root` seam. The signed
+> **`rooted-release.apk`** pipeline is verified in CI (an `apksigner verify`
+> gate). **Write-tier started:** a new `:core:ui` `RootConfirmActionRow`
+> (a `RootActionRow` gated behind a confirmation `GadgetDialog`) surfaces the
+> no-arg device-mutating actions of `microphone` (disable effects), `camera`
+> (HAL-bypass frame), `notification` (grant listener / reset overrides),
+> `radios-ir` and `radios-nfc` (reset mutations). **Remaining:** the
+> config-bearing extreme actions (exposure / sample-rate / NCI-command entry)
+> still need a parameter-entry UI; `apps` and `lock` (the latter needs
+> `DevicePolicyManager` plumbing); plus the Sub-GHz SDR data path and the
+> LSPosed repackage.
 
 - **Re-surface rooted UX natively in every feature screen** (the #94
   Phase-3 epic): the migrated controllers are wired but dormant — add
@@ -428,7 +449,22 @@ Original scope — build `:core:permissions` for real (was empty):
   lint stops being `continue-on-error` (W10); pseudo-locale (`en-XA`)
   render in the preview gallery; RTL smoke check.
 
-### W9 — Design, customization & assets · **L**
+### W9 — Design, customization & assets · **L** · 🚧 customization started
+
+> **In progress** (`claude/feature-roadmap-gaps-jjef2r`): the two
+> **user-customization** items landed. **Dashboard editor** — the dashboard
+> (previously a hardcoded placeholder) now enumerates the
+> `GadgetDestination.modules` catalog and honours a persisted `DashboardLayout`
+> (order / hidden / pinned route sets in `UserPreferences`), edited through a
+> `DashboardEditorSheet` (move-up/down + pin + show toggles; no drag-reorder
+> dependency exists in the repo). **Custom palette builder** — a new
+> `CustomThemeOption.Custom` + `CustomPalette` (three accent ARGBs) that the
+> app materializes into a `ColorScheme` via a new `customColorScheme(...)` seam
+> and the new `GadgetTheme(customColorSchemeOverride=…)` param (wins above the
+> fixed custom themes and dynamic color); edited in the Settings Appearance
+> card via three `GadgetColorPicker`s that apply live. Dynamic-color (Monet)
+> opt-in was already wired. Still open: the design-consistency pass, quality
+> assets, and motion polish.
 
 - **Design-consistency pass** over every screen against
   [Design System](Design-System) (tokens only, no raw `dp`, a11y

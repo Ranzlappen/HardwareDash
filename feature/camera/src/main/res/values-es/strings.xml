@@ -54,4 +54,14 @@
     <string name="camera_action_multi_camera_capture">Captura multi-cámara (rooteado)</string>
     <string name="camera_action_hal_bypass_frame">Fotograma con omisión de HAL (rooteado)</string>
     <string name="camera_action_set_shutter_sound">Establecer sonido del obturador (rooteado)</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="camera_root_tools_title">Herramientas root</string>
+    <string name="camera_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="camera_root_run">Ejecutar</string>
+    <string name="camera_root_cancel">Cancelar</string>
+    <string name="camera_root_hal_bypass_label">Capturar fotograma con bypass de HAL</string>
+    <string name="camera_root_hal_bypass_detail">Captura un solo fotograma evitando el HAL de la cámara.</string>
+    <string name="camera_root_hal_bypass_confirm_title">¿Capturar fotograma con bypass de HAL?</string>
+    <string name="camera_root_hal_bypass_confirm_message">Esto captura un fotograma directamente, evitando el HAL de la cámara. ¿Continuar?</string>
+    <string name="camera_root_hal_bypass_confirm_label">Capturar</string>
 </resources>

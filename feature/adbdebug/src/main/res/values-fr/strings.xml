@@ -53,4 +53,10 @@
     <string name="adbdebug_setprop_logtag_suffix_label">Suffixe log.tag.</string>
     <string name="adbdebug_setprop_value_label">Valeur</string>
     <string name="adbdebug_setprop_apply">Appliquer la substitution</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="adbdebug_root_tools_title">Outils root</string>
+    <string name="adbdebug_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
+    <string name="adbdebug_root_run">Exécuter</string>
+    <string name="adbdebug_root_getprop_label">Vider les propriétés</string>
+    <string name="adbdebug_root_getprop_detail">Instantané en lecture seule de getprop.</string>
 </resources>

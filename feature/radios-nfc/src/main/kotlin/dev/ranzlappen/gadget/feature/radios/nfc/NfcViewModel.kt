@@ -9,6 +9,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.ui.module.RootActionState
+import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
+import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcControllerResult
 import dev.ranzlappen.gadget.feature.radios.nfc.hce.NfcHceState
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplate
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplateRepository
@@ -16,19 +19,56 @@ import java.nio.charset.Charset
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+/** The rooted-tools panel state for the NFC screen (W6 in-screen write-tier surface). */
+data class NfcRootToolsState(
+    val reset: RootActionState = RootActionState(),
+)
 
 @HiltViewModel
 class NfcViewModel @Inject constructor(
     private val adapter: NfcAdapterWrapper,
     private val hceState: NfcHceState,
     private val templateRepository: NfcTemplateRepository,
+    private val nfcController: NfcController,
     rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NfcState(isRootedFlavor = rootCapabilityRegistry.isRootedFlavor))
     val state: StateFlow<NfcState> = _state
+
+    private val _rootTools = MutableStateFlow(NfcRootToolsState())
+
+    /** Live status of the confirm-gated rooted NFC-mutation reset. */
+    val rootTools: StateFlow<NfcRootToolsState> = _rootTools.asStateFlow()
+
+    fun onResetMutations() {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(reset = it.reset.copy(running = true)) }
+            val result = nfcController.resetAllNfcMutations()
+            _rootTools.update { it.copy(reset = result.toActionState()) }
+        }
+    }
+
+    private fun NfcControllerResult.toActionState(): RootActionState = when (this) {
+        is NfcControllerResult.Ok ->
+            RootActionState(message = statusNote ?: "Done")
+        NfcControllerResult.Unsupported ->
+            RootActionState(message = "Requires the rooted app version", isError = true)
+        is NfcControllerResult.RateLimited ->
+            RootActionState(message = "Rate limited — retry in ${retryAfterMillis}ms", isError = true)
+        NfcControllerResult.OptedOut ->
+            RootActionState(message = "Blocked by your root-safety opt-out", isError = true)
+        is NfcControllerResult.HardwareError ->
+            RootActionState(message = message, isError = true)
+        is NfcControllerResult.ResetCompleted ->
+            RootActionState(message = "Reset $restored restored, $failed failed")
+        is NfcControllerResult.NciResponse ->
+            RootActionState(message = "Response: ${responseHex.take(24)}")
+    }
 
     init {
         _state.update {

@@ -108,4 +108,19 @@
     <string name="notification_action_grant_listener">Listener-Zugriff gewähren</string>
     <string name="notification_action_show_overlay">Sperrbildschirm-Overlay anzeigen</string>
     <string name="notification_action_reset_all">Alle Benachrichtigungsänderungen zurücksetzen</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="notification_root_tools_title">Root-Tools</string>
+    <string name="notification_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="notification_root_run">Ausführen</string>
+    <string name="notification_root_cancel">Abbrechen</string>
+    <string name="notification_root_listener_label">Listener-Zugriff gewähren</string>
+    <string name="notification_root_listener_detail">Den System-Bildschirm für Benachrichtigungszugriff für diese App öffnen.</string>
+    <string name="notification_root_listener_confirm_title">Listener-Zugriff gewähren?</string>
+    <string name="notification_root_listener_confirm_message">Dies öffnet die System-Einstellungen für Benachrichtigungszugriff, damit Sie den Listener-Dienst dieser App aktivieren können. Fortfahren?</string>
+    <string name="notification_root_listener_confirm_label">Einstellungen öffnen</string>
+    <string name="notification_root_reset_label">Benachrichtigungsüberschreibungen zurücksetzen</string>
+    <string name="notification_root_reset_detail">Alle gerooteten Benachrichtigungsänderungen dieser App rückgängig machen.</string>
+    <string name="notification_root_reset_confirm_title">Benachrichtigungsüberschreibungen zurücksetzen?</string>
+    <string name="notification_root_reset_confirm_message">Dies macht alle gerooteten Benachrichtigungsänderungen dieser App rückgängig. Fortfahren?</string>
+    <string name="notification_root_reset_confirm_label">Zurücksetzen</string>
 </resources>

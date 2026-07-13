@@ -55,4 +55,11 @@
     <string name="gps_action_nmea_raw_tap">NMEA raw tap (rooted)</string>
     <string name="gps_action_constellation_dump">Constellation dump (rooted)</string>
     <string name="gps_action_reset_gps_mutations">Reset GPS mutations (rooted)</string>
+
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="gps_root_tools_title">Rooted tools</string>
+    <string name="gps_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="gps_root_run">Run</string>
+    <string name="gps_root_constellation_label">Dump constellation</string>
+    <string name="gps_root_constellation_detail">Read-only enumeration of all visible satellites.</string>
 </resources>

@@ -69,6 +69,8 @@ import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.ModulePermission
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.RootConfirmActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -82,6 +84,8 @@ fun CameraScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val history by viewModel.history.collectAsStateWithLifecycle()
+    val rootTools by viewModel.rootTools.collectAsStateWithLifecycle()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
     val context = LocalContext.current
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
     val isRootedFlavor = viewModel.isRootedFlavor
@@ -101,6 +105,29 @@ fun CameraScreen(
         onShare = { result -> shareText(context, result.rawValue) },
         onClearHistory = viewModel::clearHistory,
         modifier = modifier,
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.camera_root_tools_title),
+                available = isRootedFlavor,
+                unavailableMessage = stringResource(R.string.camera_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootConfirmActionRow(
+                    label = stringResource(R.string.camera_root_hal_bypass_label),
+                    description = stringResource(R.string.camera_root_hal_bypass_detail),
+                    runLabel = stringResource(R.string.camera_root_run),
+                    confirmTitle = stringResource(R.string.camera_root_hal_bypass_confirm_title),
+                    confirmMessage = stringResource(R.string.camera_root_hal_bypass_confirm_message),
+                    confirmLabel = stringResource(R.string.camera_root_hal_bypass_confirm_label),
+                    cancelLabel = stringResource(R.string.camera_root_cancel),
+                    onConfirm = viewModel::onHalBypassFrame,
+                    enabled = !rootTools.halBypass.running,
+                    statusMessage = rootTools.halBypass.message,
+                    statusKind = rootTools.halBypass.statusKind,
+                )
+            }
+        },
     )
 }
 
@@ -198,6 +225,7 @@ internal fun CameraScreenContent(
     onShare: (BarcodeResult) -> Unit,
     onClearHistory: () -> Unit,
     modifier: Modifier = Modifier,
+    rootTools: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
         title = stringResource(R.string.camera_screen_title),
@@ -225,6 +253,7 @@ internal fun CameraScreenContent(
                 onCopy = onCopy,
                 onClearHistory = onClearHistory,
             )
+            rootTools()
         },
     )
 }

@@ -66,4 +66,12 @@
     <string name="cell_dump_retry_button">Reintentar</string>
     <string name="cell_dump_empty">No se devolvió ningún nodo.</string>
     <string name="cell_dump_unsupported">No compatible con este SoC — no se encontraron nodos de diagnóstico de Qualcomm.</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="cell_root_tools_title">Herramientas root</string>
+    <string name="cell_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="cell_root_run">Ejecutar</string>
+    <string name="cell_root_modem_label">Volcar módem</string>
+    <string name="cell_root_modem_detail">Recorrido de solo lectura de los nodos de módem del proveedor.</string>
+    <string name="cell_root_signal_label">Volcado profundo de señal</string>
+    <string name="cell_root_signal_detail">Desglose de solo lectura de RSRP / RSRQ / SINR por banda.</string>
 </resources>

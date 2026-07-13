@@ -84,4 +84,10 @@
     <string name="display_action_override_refresh_rate">Anular tasa de refresco (rooteado)</string>
     <string name="display_action_override_density">Anular densidad (rooteado)</string>
     <string name="display_action_reset_all">Restablecer todas las anulaciones (rooteado)</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="display_root_tools_title">Herramientas root</string>
+    <string name="display_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="display_root_run">Ejecutar</string>
+    <string name="display_root_surfaceflinger_label">Volcar SurfaceFlinger</string>
+    <string name="display_root_surfaceflinger_detail">Instantánea de solo lectura de dumpsys SurfaceFlinger.</string>
 </resources>

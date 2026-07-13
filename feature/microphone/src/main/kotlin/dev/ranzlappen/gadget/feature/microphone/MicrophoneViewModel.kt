@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.ui.module.RootActionState
 import dev.ranzlappen.gadget.feature.microphone.control.CustomRateConfig
 import dev.ranzlappen.gadget.feature.microphone.control.DirectPcmConfig
 import dev.ranzlappen.gadget.feature.microphone.control.GainBoostConfig
@@ -19,6 +20,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+/** The rooted-tools panel state for the microphone screen (W6 in-screen write-tier surface). */
+data class MicrophoneRootToolsState(
+    val disableEffects: RootActionState = RootActionState(),
+)
 
 /**
  * ViewModel for [MicrophoneScreen]. Wires the single [MicrophoneController]
@@ -44,6 +50,33 @@ class MicrophoneViewModel @Inject constructor(
 
     private val _resultEvents = MutableSharedFlow<MicrophoneControllerResult>(extraBufferCapacity = 1)
     val resultEvents: SharedFlow<MicrophoneControllerResult> = _resultEvents.asSharedFlow()
+
+    private val _rootTools = MutableStateFlow(MicrophoneRootToolsState())
+
+    /** Live status of the rooted, confirm-gated write-tier microphone actions (W6 in-screen surface). */
+    val rootTools: StateFlow<MicrophoneRootToolsState> = _rootTools.asStateFlow()
+
+    /** Confirm-gated write action: disables the system mic effects (AGC / NS / AEC) via the root seam. */
+    fun onDisableEffects() {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(disableEffects = it.disableEffects.copy(running = true)) }
+            val result = controller.disableEffects()
+            _rootTools.update { it.copy(disableEffects = result.toActionState()) }
+        }
+    }
+
+    private fun MicrophoneControllerResult.toActionState(): RootActionState = when (this) {
+        MicrophoneControllerResult.Ok ->
+            RootActionState(message = "Effects disabled")
+        MicrophoneControllerResult.Unsupported ->
+            RootActionState(message = "Requires the rooted app version", isError = true)
+        is MicrophoneControllerResult.RateLimited ->
+            RootActionState(message = "Rate limited — retry in ${retryAfterMillis}ms", isError = true)
+        MicrophoneControllerResult.OptedOut ->
+            RootActionState(message = "Blocked by your root-safety opt-out", isError = true)
+        is MicrophoneControllerResult.HardwareError ->
+            RootActionState(message = message, isError = true)
+    }
 
     fun onEvent(event: MicrophoneUiEvent) {
         when (event) {

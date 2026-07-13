@@ -44,6 +44,8 @@ import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
 import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
 import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
 import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
+import dev.ranzlappen.gadget.core.ui.module.RootConfirmActionRow
+import dev.ranzlappen.gadget.core.ui.module.RootToolsSection
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -58,6 +60,8 @@ fun IrScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val signals by viewModel.signals.collectAsStateWithLifecycle()
+    val rootTools by viewModel.rootTools.collectAsStateWithLifecycle()
+    var rootToolsExpanded by remember { mutableStateOf(true) }
     val clipboard = LocalClipboardManager.current
 
     IrScreenContent(
@@ -78,6 +82,29 @@ fun IrScreen(
         onSelectBrand = viewModel::selectBrand,
         onClearBrand = viewModel::clearBrandSelection,
         onImportSignal = viewModel::importSignal,
+        rootTools = {
+            RootToolsSection(
+                title = stringResource(R.string.ir_root_tools_title),
+                available = viewModel.isRootedFlavor,
+                unavailableMessage = stringResource(R.string.ir_root_tools_unavailable),
+                expanded = rootToolsExpanded,
+                onExpandedChange = { rootToolsExpanded = it },
+            ) {
+                RootConfirmActionRow(
+                    label = stringResource(R.string.ir_root_reset_label),
+                    description = stringResource(R.string.ir_root_reset_detail),
+                    runLabel = stringResource(R.string.ir_root_run),
+                    confirmTitle = stringResource(R.string.ir_root_reset_confirm_title),
+                    confirmMessage = stringResource(R.string.ir_root_reset_confirm_message),
+                    confirmLabel = stringResource(R.string.ir_root_reset_confirm_label),
+                    cancelLabel = stringResource(R.string.ir_root_cancel),
+                    onConfirm = viewModel::onResetMutations,
+                    enabled = !rootTools.reset.running,
+                    statusMessage = rootTools.reset.message,
+                    statusKind = rootTools.reset.statusKind,
+                )
+            }
+        },
         modifier = modifier,
     )
 }
@@ -165,6 +192,7 @@ internal fun IrScreenContent(
     onSelectBrand: (IrLibraryBrand) -> Unit = {},
     onClearBrand: () -> Unit = {},
     onImportSignal: (IrLibrarySignal) -> Unit = {},
+    rootTools: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     ModuleScreenScaffold(
@@ -199,6 +227,7 @@ internal fun IrScreenContent(
                 onReplay = onReplay,
                 onDelete = onDelete,
             )
+            rootTools()
         },
     )
 }

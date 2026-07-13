@@ -54,4 +54,15 @@
     <string name="camera_action_multi_camera_capture">Multi-camera capture (rooted)</string>
     <string name="camera_action_hal_bypass_frame">HAL bypass frame (rooted)</string>
     <string name="camera_action_set_shutter_sound">Set shutter sound (rooted)</string>
+
+    <!-- ─── Rooted tools (in-screen, W6 write-tier) ─────────────────────── -->
+    <string name="camera_root_tools_title">Rooted tools</string>
+    <string name="camera_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="camera_root_run">Run</string>
+    <string name="camera_root_cancel">Cancel</string>
+    <string name="camera_root_hal_bypass_label">Capture HAL-bypass frame</string>
+    <string name="camera_root_hal_bypass_detail">Grab a single frame bypassing the camera HAL.</string>
+    <string name="camera_root_hal_bypass_confirm_title">Capture HAL-bypass frame?</string>
+    <string name="camera_root_hal_bypass_confirm_message">This captures one frame directly, bypassing the camera HAL. Continue?</string>
+    <string name="camera_root_hal_bypass_confirm_label">Capture</string>
 </resources>

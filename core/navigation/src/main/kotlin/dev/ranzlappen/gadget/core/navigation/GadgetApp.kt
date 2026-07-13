@@ -61,6 +61,7 @@ fun GadgetApp(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     useDynamicColor: Boolean = true,
     customTheme: GadgetCustomTheme = GadgetCustomTheme.Default,
+    customColorSchemeOverride: androidx.compose.material3.ColorScheme? = null,
     reducedMotionOverride: Boolean? = null,
     reducedTransparency: Boolean = false,
     builder: NavGraphBuilder.() -> Unit,
@@ -74,6 +75,7 @@ fun GadgetApp(
     // throw — explicit beats silently rendering the wrong layout.
     val activity = LocalContext.current as? Activity
     GadgetTheme(
+        customColorSchemeOverride = customColorSchemeOverride,
         useDarkTheme = useDarkTheme,
         useDynamicColor = useDynamicColor,
         customTheme = customTheme,

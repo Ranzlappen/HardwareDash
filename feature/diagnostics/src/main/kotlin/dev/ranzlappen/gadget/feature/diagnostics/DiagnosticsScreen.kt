@@ -55,7 +55,7 @@ fun DiagnosticsScreen(
                     onRun = viewModel::onDumpMemInfo,
                     enabled = !rootTools.memInfo.running,
                     statusMessage = rootTools.memInfo.message,
-                    statusKind = if (rootTools.memInfo.isError) GadgetStatusKind.Error else GadgetStatusKind.Success,
+                    statusKind = rootTools.memInfo.statusKind,
                 )
                 RootActionRow(
                     label = stringResource(R.string.diagnostics_root_cpuinfo_label),
@@ -64,7 +64,7 @@ fun DiagnosticsScreen(
                     onRun = viewModel::onDumpCpuInfo,
                     enabled = !rootTools.cpuInfo.running,
                     statusMessage = rootTools.cpuInfo.message,
-                    statusKind = if (rootTools.cpuInfo.isError) GadgetStatusKind.Error else GadgetStatusKind.Success,
+                    statusKind = rootTools.cpuInfo.statusKind,
                 )
                 RootActionRow(
                     label = stringResource(R.string.diagnostics_root_procstats_label),
@@ -73,7 +73,7 @@ fun DiagnosticsScreen(
                     onRun = viewModel::onDumpProcstats,
                     enabled = !rootTools.procstats.running,
                     statusMessage = rootTools.procstats.message,
-                    statusKind = if (rootTools.procstats.isError) GadgetStatusKind.Error else GadgetStatusKind.Success,
+                    statusKind = rootTools.procstats.statusKind,
                 )
             }
         },

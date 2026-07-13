@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="metric_widget_label">Mesure</string>
+    <string name="metric_widget_description">Affichez n\'importe quelle mesure surveillée sur votre écran d\'accueil</string>
+    <string name="metric_widget_placeholder">—</string>
+    <string name="metric_widget_pick_metric">Mesure à afficher</string>
+    <string name="metric_widget_no_metrics">Aucune mesure disponible pour l\'instant.</string>
+    <string name="metric_widget_display_mode">Affichage</string>
+    <string name="metric_widget_display_value">Valeur</string>
+    <string name="metric_widget_display_value_bar">Valeur + barre</string>
+</resources>

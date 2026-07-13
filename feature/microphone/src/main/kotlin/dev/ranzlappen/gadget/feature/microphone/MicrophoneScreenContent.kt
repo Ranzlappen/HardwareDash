@@ -89,6 +89,7 @@ internal fun MicrophoneScreenContent(
     state: MicrophoneScreenState,
     onEvent: (MicrophoneUiEvent) -> Unit,
     modifier: Modifier = Modifier,
+    rootTools: @Composable () -> Unit = {},
 ) {
     ModuleScreenScaffold(
         title = stringResource(R.string.microphone_screen_title),
@@ -112,6 +113,7 @@ internal fun MicrophoneScreenContent(
                 onSystemAudioCaptureDurationChange = { onEvent(MicrophoneUiEvent.SystemAudioCaptureDurationChange(it)) },
                 onSystemAudioCaptureRequest = { onEvent(MicrophoneUiEvent.SystemAudioCaptureRequest) },
             )
+            rootTools()
         },
     )
 

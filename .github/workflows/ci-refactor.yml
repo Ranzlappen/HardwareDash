@@ -64,6 +64,7 @@ jobs:
             :feature:automation:testDebugUnitTest \
             :feature:battery:testDebugUnitTest \
             :feature:bugreport-rooted:testDebugUnitTest \
+            :feature:dashboard:testDebugUnitTest \
             :feature:diagnostics:testDebugUnitTest \
             :feature:display:testDebugUnitTest \
             :feature:flipper:testDebugUnitTest \
@@ -71,6 +72,7 @@ jobs:
             :feature:gps:testDebugUnitTest \
             :feature:lock-rooted:testDebugUnitTest \
             :feature:logbook:testDebugUnitTest \
+            :feature:metricwidget:testDebugUnitTest \
             :feature:microphone:testDebugUnitTest \
             :feature:notification:testDebugUnitTest \
             :feature:radios-cell:testDebugUnitTest \

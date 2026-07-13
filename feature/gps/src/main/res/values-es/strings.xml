@@ -55,4 +55,10 @@
     <string name="gps_action_nmea_raw_tap">Captura de datos NMEA sin procesar (rooteado)</string>
     <string name="gps_action_constellation_dump">Volcado de constelación (rooteado)</string>
     <string name="gps_action_reset_gps_mutations">Restablecer cambios de GPS (rooteado)</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="gps_root_tools_title">Herramientas root</string>
+    <string name="gps_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="gps_root_run">Ejecutar</string>
+    <string name="gps_root_constellation_label">Volcar constelación</string>
+    <string name="gps_root_constellation_detail">Enumeración de solo lectura de todos los satélites visibles.</string>
 </resources>

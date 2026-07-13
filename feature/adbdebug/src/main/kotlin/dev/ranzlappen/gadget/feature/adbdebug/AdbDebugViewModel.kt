@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.core.ui.module.RootActionState
 import dev.ranzlappen.gadget.feature.adbdebug.control.AdbDebuggingController
 import dev.ranzlappen.gadget.feature.adbdebug.control.AdbDebuggingControllerResult
 import dev.ranzlappen.gadget.feature.adbdebug.control.AdbNetworkConfig
@@ -17,11 +18,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+/** The rooted-tools panel state for the ADB-debug screen (W6 in-screen surface). */
+data class AdbDebugRootToolsState(
+    val properties: RootActionState = RootActionState(),
+)
 
 /**
  * Wires [AdbDebuggingController] (rooted write path, no-op on standard) +
@@ -75,6 +82,42 @@ class AdbDebugViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
         initialValue = AdbDebugState(isRootedFlavor = isRootedFlavor),
     )
+
+    private val _rootTools = MutableStateFlow(AdbDebugRootToolsState())
+
+    /** Live status of the rooted read-only getprop dump (W6 surface). */
+    val rootTools: StateFlow<AdbDebugRootToolsState> = _rootTools.asStateFlow()
+
+    fun onDumpProperties() {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(properties = it.properties.copy(running = true)) }
+            val result = controller.dumpProperties(persist = false)
+            _rootTools.update { it.copy(properties = result.toActionState()) }
+        }
+    }
+
+    private fun AdbDebuggingControllerResult.toActionState(): RootActionState = when (this) {
+        is AdbDebuggingControllerResult.Ok ->
+            RootActionState(message = statusNote ?: "Done")
+        AdbDebuggingControllerResult.Unsupported ->
+            RootActionState(message = "Requires the rooted app version", isError = true)
+        is AdbDebuggingControllerResult.RateLimited ->
+            RootActionState(message = "Rate limited — retry in ${retryAfterMillis}ms", isError = true)
+        AdbDebuggingControllerResult.OptedOut ->
+            RootActionState(message = "Blocked by your root-safety opt-out", isError = true)
+        is AdbDebuggingControllerResult.HardwareError ->
+            RootActionState(message = message, isError = true)
+        is AdbDebuggingControllerResult.ResetCompleted ->
+            RootActionState(message = "Reset $restored restored, $failed failed")
+        is AdbDebuggingControllerResult.AdbToggleSnapshot ->
+            RootActionState(message = if (appliedEnabled) "ADB enabled" else "ADB disabled")
+        is AdbDebuggingControllerResult.AdbNetworkSnapshot ->
+            RootActionState(message = "Network port ${appliedPort ?: "off"}")
+        is AdbDebuggingControllerResult.PropertyDump ->
+            RootActionState(message = "Captured ${excerpt.length} chars")
+        is AdbDebuggingControllerResult.SetpropSnapshot ->
+            RootActionState(message = "$key = $appliedValue")
+    }
 
     fun onEvent(event: AdbDebugUiEvent) {
         when (event) {

@@ -35,4 +35,10 @@
     <string name="bt_cap_hidden_battery_detail">Lit le pourcentage de batterie de l\'appareil via des API de réflexion Bluetooth cachées, pour les appareils Classic, BLE et Dual</string>
     <string name="bt_cap_a2dp_codec_name">Identification du codec A2DP</string>
     <string name="bt_cap_a2dp_codec_detail">Identifie le codec de diffusion A2DP actif (AAC, aptX, LDAC) via le proxy caché BluetoothA2dp</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="bt_root_tools_title">Outils root</string>
+    <string name="bt_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
+    <string name="bt_root_run">Exécuter</string>
+    <string name="bt_root_hcisnoop_label">Vider le journal HCI snoop</string>
+    <string name="bt_root_hcisnoop_detail">Fin en lecture seule de btsnoop_hci.log (si la journalisation HCI est activée).</string>
 </resources>

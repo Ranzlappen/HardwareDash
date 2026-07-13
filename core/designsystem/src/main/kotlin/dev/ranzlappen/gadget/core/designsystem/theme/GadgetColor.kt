@@ -4,6 +4,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 
 /**
  * Gadget brand palette.
@@ -275,3 +276,29 @@ fun GadgetCustomTheme.colorScheme(dark: Boolean): ColorScheme? = when (this) {
     GadgetCustomTheme.Pastel ->
         if (dark) GadgetPastelDarkColorScheme else GadgetPastelLightColorScheme
 }
+
+/**
+ * Materialize a **user-defined accent palette** (W9) onto the canonical
+ * [base] scheme: overrides only `primary` / `secondary` / `tertiary` (and picks
+ * a legible on-color per accent by luminance), leaving surfaces and the rest of
+ * the scheme intact. An accent override — not a full tonal generation — because
+ * the app ships no seed→scheme (HCT) generator. The three accents come from the
+ * user's `CustomPalette` as `Color`s (designsystem stays free of `:core:datastore`).
+ */
+fun customColorScheme(
+    base: ColorScheme,
+    primary: Color,
+    secondary: Color,
+    tertiary: Color,
+): ColorScheme = base.copy(
+    primary = primary,
+    onPrimary = onColorFor(primary),
+    secondary = secondary,
+    onSecondary = onColorFor(secondary),
+    tertiary = tertiary,
+    onTertiary = onColorFor(tertiary),
+)
+
+/** Black or white, whichever reads on [color] (simple luminance threshold). */
+private fun onColorFor(color: Color): Color =
+    if (color.luminance() > 0.5f) Color.Black else Color.White

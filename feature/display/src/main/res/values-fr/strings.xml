@@ -84,4 +84,10 @@
     <string name="display_action_override_refresh_rate">Substituer le taux de rafraîchissement (rooté)</string>
     <string name="display_action_override_density">Substituer la densité (rooté)</string>
     <string name="display_action_reset_all">Réinitialiser toutes les substitutions (rooté)</string>
+    <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
+    <string name="display_root_tools_title">Outils root</string>
+    <string name="display_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
+    <string name="display_root_run">Exécuter</string>
+    <string name="display_root_surfaceflinger_label">Vider SurfaceFlinger</string>
+    <string name="display_root_surfaceflinger_detail">Instantané en lecture seule de dumpsys SurfaceFlinger.</string>
 </resources>

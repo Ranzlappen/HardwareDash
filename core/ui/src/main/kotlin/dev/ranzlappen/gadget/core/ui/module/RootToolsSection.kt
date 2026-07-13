@@ -7,17 +7,25 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
+import dev.ranzlappen.gadget.core.ui.component.GadgetDialog
 import dev.ranzlappen.gadget.core.ui.component.GadgetExpandableCard
+import dev.ranzlappen.gadget.core.ui.component.GadgetPrimaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetStatusKind
 import dev.ranzlappen.gadget.core.ui.component.GadgetStatusDot
+import dev.ranzlappen.gadget.core.ui.component.GadgetTertiaryButton
 import dev.ranzlappen.gadget.core.ui.component.color
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
@@ -143,6 +151,66 @@ fun RootActionRow(
                 overflow = TextOverflow.Ellipsis,
             )
         }
+    }
+}
+
+/**
+ * A [RootActionRow] whose run button is gated behind a confirmation
+ * [GadgetDialog] — the substrate for the **write-tier** rooted features
+ * (camera / microphone / notification / radios-*), whose actions mutate device
+ * state and so must not fire on a single tap. Tapping *run* opens the dialog;
+ * only the dialog's confirm button invokes [onConfirm]. The row's status line
+ * ([statusMessage] / [statusKind]) still reflects the last result, exactly like
+ * the read-only [RootActionRow].
+ */
+@Composable
+fun RootConfirmActionRow(
+    label: String,
+    runLabel: String,
+    confirmTitle: String,
+    confirmMessage: String,
+    confirmLabel: String,
+    cancelLabel: String,
+    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier,
+    description: String? = null,
+    enabled: Boolean = true,
+    statusMessage: String? = null,
+    statusKind: GadgetStatusKind = GadgetStatusKind.Success,
+) {
+    var showConfirm by remember { mutableStateOf(false) }
+    RootActionRow(
+        label = label,
+        runLabel = runLabel,
+        onRun = { showConfirm = true },
+        modifier = modifier,
+        description = description,
+        enabled = enabled,
+        statusMessage = statusMessage,
+        statusKind = statusKind,
+    )
+    if (showConfirm) {
+        GadgetDialog(
+            onDismissRequest = { showConfirm = false },
+            title = confirmTitle,
+            text = confirmMessage,
+            icon = Icons.Outlined.WarningAmber,
+            confirmButton = {
+                GadgetPrimaryButton(
+                    onClick = {
+                        showConfirm = false
+                        onConfirm()
+                    },
+                    text = confirmLabel,
+                )
+            },
+            dismissButton = {
+                GadgetTertiaryButton(
+                    onClick = { showConfirm = false },
+                    text = cancelLabel,
+                )
+            },
+        )
     }
 }
 
