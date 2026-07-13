@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -167,6 +168,7 @@ internal fun AppearanceCard(
  * [GadgetColorPicker]s (primary / secondary / tertiary). Changes apply live
  * through [onPaletteChange] so the whole app re-themes as the user drags.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CustomPaletteEditorSheet(
     palette: CustomPalette,

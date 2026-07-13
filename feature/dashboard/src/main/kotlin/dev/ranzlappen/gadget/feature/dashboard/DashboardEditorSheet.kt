@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -34,6 +35,7 @@ import dev.ranzlappen.gadget.core.ui.component.GadgetBottomSheet
  * move-up/move-down from the shared `GadgetIconButton` keeps the interaction on
  * design-system primitives.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DashboardEditorSheet(
     entries: List<DashboardEntry>,
