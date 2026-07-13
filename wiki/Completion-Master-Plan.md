@@ -324,9 +324,18 @@ torch/vibration reference pattern:
 > **In progress** (`claude/feature-roadmap-gaps-jjef2r`): added a
 > **`VibrateTileService`** QS tile (continuous vibration via the shared
 > `VibrationController`), the second feature after torch with QS coverage.
-> Deferred: the generic configurable metric widget (needs the full
-> CI-invisible pin-reliability contract) and lock / automation-engine tiles
-> (need new `DevicePolicyManager` / engine-master-switch plumbing).
+> **The generic configurable metric widget is now built** — a new
+> **`:feature:metricwidget`** rides the kit's `BaseContentWidgetProvider`
+> archetype and binds to **any** registered `MetricSource` the user picks in
+> its `APPWIDGET_CONFIGURE` activity (grouped metric picker + Value / Value+bar
+> display + the shared `ContentWidgetCustomizationSheet` appearance/tint/size).
+> `MetricWidgetController` repaints on each bound metric's push stream (+ a
+> ticker for poll-only sources) via `ContentWidgetUpdater`. Placement is
+> launcher-tray + config-activity (config written synchronously under the real
+> `appWidgetId`), sidestepping the flaky in-app pin path. Deferred: the sparkline
+> display mode (fast-follow, mirrors torch's `MonitorChartWidgetProvider` bitmap
+> path) and lock / automation-engine tiles (need new `DevicePolicyManager` /
+> engine-master-switch plumbing).
 
 - **Generic metric widget (the multiplier):** generalize the
   torch/vibration `MonitorWidgetProvider` / `MonitorChartWidgetProvider`

@@ -274,6 +274,9 @@ allow-list), independent of the migrated controller.
   Also lands the **first live W5 `@IntoMap` contributor**: `:feature:notification`
   contributes a `FeaturePermissions` group surfacing the notification-listener
   special permission (outside the app baseline) in the Permissions dashboard.
+  Plus the **W4 generic metric widget** — a new `:feature:metricwidget`
+  (`BaseContentWidgetProvider`) that binds to any registered `MetricSource` via
+  a configure-activity picker, the first cross-cutting home-screen widget.
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.

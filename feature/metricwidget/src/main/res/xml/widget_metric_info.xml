@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AppWidget provider metadata for the generic metric widget.
+
+  Configurable: android:configure points at MetricWidgetConfigActivity (the
+  launcher shows it after a tray-drop; widgetFeatures="reconfigurable" lets the
+  user re-open it later). updatePeriodMillis=0 — the widget refreshes only via
+  the content observer (MetricWidgetController -> ContentWidgetUpdater) and
+  onAppWidgetOptionsChanged, never on a periodic tick.
+
+  previewLayout (API 31+) renders the real layout in the picker.
+  targetCellWidth/Height declare the 2x1 footprint — some OEM launchers refuse
+  widgets without these.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="110dp"
+    android:minHeight="40dp"
+    android:minResizeWidth="40dp"
+    android:minResizeHeight="40dp"
+    android:maxResizeWidth="250dp"
+    android:maxResizeHeight="180dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_metric"
+    android:previewLayout="@layout/widget_metric"
+    android:configure="dev.ranzlappen.gadget.feature.metricwidget.widget.MetricWidgetConfigActivity"
+    android:description="@string/metric_widget_description"
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable"
+    android:resizeMode="horizontal|vertical" />

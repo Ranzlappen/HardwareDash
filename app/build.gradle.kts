@@ -239,6 +239,7 @@ dependencies {
     implementation(project(":feature:bugreport"))
     implementation(project(":feature:manual"))
     implementation(project(":feature:logbook"))
+    implementation(project(":feature:metricwidget"))
     implementation(project(":feature:youtubedownloader"))
     // Batch H: the automation rules list + builder (also pulls
     // :core:hardware — the read-side registry — into the :app Hilt graph).

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="metric_widget_label">Messwert</string>
+    <string name="metric_widget_description">Zeige einen beliebigen überwachten Messwert auf dem Startbildschirm</string>
+    <string name="metric_widget_placeholder">—</string>
+    <string name="metric_widget_pick_metric">Anzuzeigender Messwert</string>
+    <string name="metric_widget_no_metrics">Noch keine Messwerte verfügbar.</string>
+    <string name="metric_widget_display_mode">Anzeige</string>
+    <string name="metric_widget_display_value">Wert</string>
+    <string name="metric_widget_display_value_bar">Wert + Balken</string>
+</resources>
