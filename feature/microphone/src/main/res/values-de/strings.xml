@@ -74,4 +74,14 @@
     <!-- ─── Automation actions (MicrophoneActionHandler) ────────────────── -->
     <string name="microphone_action_disable_effects">Hardware-Rauschunterdrückung deaktivieren</string>
     <string name="microphone_action_system_audio">Systemaudio-Aufnahme</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="microphone_root_tools_title">Root-Tools</string>
+    <string name="microphone_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="microphone_root_run">Ausführen</string>
+    <string name="microphone_root_cancel">Abbrechen</string>
+    <string name="microphone_root_disable_effects_label">Audioeffekte deaktivieren</string>
+    <string name="microphone_root_disable_effects_detail">System-AGC / Rauschunterdrückung / Echounterdrückung ausschalten.</string>
+    <string name="microphone_root_disable_effects_confirm_title">Audioeffekte deaktivieren?</string>
+    <string name="microphone_root_disable_effects_confirm_message">Dies schaltet die System-Mikrofoneffekte aus, bis sie wieder aktiviert werden. Fortfahren?</string>
+    <string name="microphone_root_disable_effects_confirm_label">Deaktivieren</string>
 </resources>

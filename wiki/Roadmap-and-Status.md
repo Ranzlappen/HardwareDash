@@ -268,9 +268,12 @@ allow-list), independent of the migrated controller.
   The per-action state holder is hoisted into a single canonical
   `:core:ui` `RootActionState` (`message`/`isError`/`running` + a derived
   `statusKind`), and the two earlier consumers were migrated onto it.
-  Still deferred: the write-tier features (`camera`, `microphone`,
-  `notification`, `radios-ir`, `radios-nfc`, `apps`, `lock`) — those need
-  per-action confirm dialogs / config inputs, not the read-only row pattern.
+  A follow-up commit adds the **write-tier** surface: a new `:core:ui`
+  `RootConfirmActionRow` (a `RootActionRow` gated behind a confirmation
+  `GadgetDialog`) now surfaces the no-arg device-mutating actions of
+  `microphone`, `camera`, `notification`, `radios-ir`, and `radios-nfc`. Still
+  deferred: the config-bearing extreme actions (need parameter entry), plus
+  `apps` and `lock` (the latter needs `DevicePolicyManager`).
   Also lands the **first live W5 `@IntoMap` contributor**: `:feature:notification`
   contributes a `FeaturePermissions` group surfacing the notification-listener
   special permission (outside the app baseline) in the Permissions dashboard.

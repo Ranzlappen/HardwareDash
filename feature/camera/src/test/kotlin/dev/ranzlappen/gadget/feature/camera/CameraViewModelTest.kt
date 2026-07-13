@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import androidx.camera.core.CameraControl
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.feature.camera.control.CameraController
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -53,6 +54,7 @@ class CameraViewModelTest {
     private val dispatcher = StandardTestDispatcher()
 
     private val repository = mockk<ScanHistoryRepository>(relaxed = true)
+    private val cameraController = mockk<CameraController>(relaxed = true)
     private val rootCapabilityRegistry = mockk<RootCapabilityRegistry>(relaxed = true)
 
     @Before
@@ -67,7 +69,8 @@ class CameraViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun createViewModel(): CameraViewModel = CameraViewModel(repository, rootCapabilityRegistry)
+    private fun createViewModel(): CameraViewModel =
+        CameraViewModel(repository, cameraController, rootCapabilityRegistry)
 
     private fun barcode(id: String = "1") = BarcodeResult(
         id = id,

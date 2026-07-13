@@ -53,4 +53,14 @@
     <string name="ir_cap_custom_carrier_detail">Senden mit beliebigen Trägerfrequenzen außerhalb des ConsumerIrManager-Bereichs</string>
     <string name="ir_cap_gpio_burst_name">Rohe GPIO-Impulsfolge</string>
     <string name="ir_cap_gpio_burst_detail">Direkte GPIO-Impulsfolgenausgabe über sysfs, unter Umgehung der IR-HAL</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="ir_root_tools_title">Root-Tools</string>
+    <string name="ir_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="ir_root_run">Ausführen</string>
+    <string name="ir_root_cancel">Abbrechen</string>
+    <string name="ir_root_reset_label">IR-Änderungen zurücksetzen</string>
+    <string name="ir_root_reset_detail">Alle gerooteten IR-Änderungen dieser App rückgängig machen.</string>
+    <string name="ir_root_reset_confirm_title">IR-Änderungen zurücksetzen?</string>
+    <string name="ir_root_reset_confirm_message">Dies macht alle gerooteten IR-Änderungen dieser App rückgängig. Fortfahren?</string>
+    <string name="ir_root_reset_confirm_label">Zurücksetzen</string>
 </resources>

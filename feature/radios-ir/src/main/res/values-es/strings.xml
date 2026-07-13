@@ -53,4 +53,14 @@
     <string name="ir_cap_custom_carrier_detail">Transmite en frecuencias portadoras arbitrarias fuera del rango de ConsumerIrManager</string>
     <string name="ir_cap_gpio_burst_name">Ráfaga GPIO sin procesar</string>
     <string name="ir_cap_gpio_burst_detail">Salida directa de tren de pulsos GPIO mediante sysfs, sin pasar por el HAL de IR</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="ir_root_tools_title">Herramientas root</string>
+    <string name="ir_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="ir_root_run">Ejecutar</string>
+    <string name="ir_root_cancel">Cancelar</string>
+    <string name="ir_root_reset_label">Restablecer modificaciones de IR</string>
+    <string name="ir_root_reset_detail">Revierte todas las modificaciones de IR con root que hizo esta app.</string>
+    <string name="ir_root_reset_confirm_title">¿Restablecer modificaciones de IR?</string>
+    <string name="ir_root_reset_confirm_message">Esto revierte todos los cambios de IR con root de esta app. ¿Continuar?</string>
+    <string name="ir_root_reset_confirm_label">Restablecer</string>
 </resources>

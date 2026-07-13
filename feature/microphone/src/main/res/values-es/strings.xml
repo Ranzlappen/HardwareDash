@@ -74,4 +74,14 @@
     <!-- ─── Automation actions (MicrophoneActionHandler) ────────────────── -->
     <string name="microphone_action_disable_effects">Desactivar supresión de ruido por hardware</string>
     <string name="microphone_action_system_audio">Captura de audio del sistema</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="microphone_root_tools_title">Herramientas root</string>
+    <string name="microphone_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
+    <string name="microphone_root_run">Ejecutar</string>
+    <string name="microphone_root_cancel">Cancelar</string>
+    <string name="microphone_root_disable_effects_label">Desactivar efectos de audio</string>
+    <string name="microphone_root_disable_effects_detail">Desactiva AGC / supresión de ruido / cancelación de eco del sistema.</string>
+    <string name="microphone_root_disable_effects_confirm_title">¿Desactivar efectos de audio?</string>
+    <string name="microphone_root_disable_effects_confirm_message">Esto desactiva los efectos del micrófono del sistema hasta que se reactiven. ¿Continuar?</string>
+    <string name="microphone_root_disable_effects_confirm_label">Desactivar</string>
 </resources>

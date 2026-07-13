@@ -8,6 +8,7 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Parcelable
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
+import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
 import dev.ranzlappen.gadget.feature.radios.nfc.hce.NfcHceState
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplate
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplateRepository
@@ -58,6 +59,7 @@ class NfcViewModelTest {
 
     private val adapter = mockk<NfcAdapterWrapper>()
     private val templateRepository = mockk<NfcTemplateRepository>()
+    private val nfcController = mockk<NfcController>(relaxed = true)
     private val hceState = NfcHceState()
 
     private val outgoingRecord = mockk<NdefRecord>()
@@ -93,7 +95,7 @@ class NfcViewModelTest {
     }
 
     private fun createViewModel(isRootedFlavor: Boolean = false): NfcViewModel =
-        NfcViewModel(adapter, hceState, templateRepository, rootRegistry(isRootedFlavor))
+        NfcViewModel(adapter, hceState, templateRepository, nfcController, rootRegistry(isRootedFlavor))
 
     private fun mockTag(idBytes: ByteArray, techs: List<String>): Tag {
         val tag = mockk<Tag>()

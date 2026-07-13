@@ -299,6 +299,14 @@ consumers: `storage`, `diagnostics`, `audio`, `radios-wifi`, `radios-bt`,
 `gps`, `battery`, `display`, `radios-cell`, `usbdebug`, `adbdebug` (all
 read-only rooted actions), on top of torch/vibration's own rooted cards.
 
+**`RootConfirmActionRow`** (same file) is the **write-tier** variant: a
+`RootActionRow` whose run button is gated behind a confirmation `GadgetDialog`
+(title / message / confirm+cancel labels), so a device-mutating action can't
+fire on a single tap. Live consumers: `microphone` (disable effects), `camera`
+(HAL-bypass frame), `notification` (grant listener access / reset overrides),
+`radios-ir` and `radios-nfc` (reset mutations). Config-bearing extreme actions
+(exposure/sample-rate/NCI-command entry) still await a parameter-entry UI.
+
 ### `PermissionsDashboardCard` (`:core:permissions`)
 
 The centralized permissions dashboard (W5) — a self-contained Hilt-injected

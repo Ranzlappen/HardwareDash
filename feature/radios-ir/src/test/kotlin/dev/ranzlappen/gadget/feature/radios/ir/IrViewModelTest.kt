@@ -72,7 +72,13 @@ class IrViewModelTest {
     }
 
     private fun createViewModel(isRootedFlavor: Boolean = false): IrViewModel =
-        IrViewModel(hardware, repository, libraryRepository, rootRegistry(isRootedFlavor))
+        IrViewModel(
+            hardware,
+            repository,
+            libraryRepository,
+            mockk<dev.ranzlappen.gadget.feature.radios.ir.control.IrController>(relaxed = true),
+            rootRegistry(isRootedFlavor),
+        )
 
     private fun brand(name: String) = IrLibraryBrand(
         brand = name,

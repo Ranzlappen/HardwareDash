@@ -54,4 +54,14 @@
     <string name="camera_action_multi_camera_capture">Multi-Kamera-Aufnahme (gerootet)</string>
     <string name="camera_action_hal_bypass_frame">HAL-Umgehungs-Frame (gerootet)</string>
     <string name="camera_action_set_shutter_sound">Auslöserton festlegen (gerootet)</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="camera_root_tools_title">Root-Tools</string>
+    <string name="camera_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
+    <string name="camera_root_run">Ausführen</string>
+    <string name="camera_root_cancel">Abbrechen</string>
+    <string name="camera_root_hal_bypass_label">HAL-Bypass-Bild aufnehmen</string>
+    <string name="camera_root_hal_bypass_detail">Ein einzelnes Bild unter Umgehung des Kamera-HAL aufnehmen.</string>
+    <string name="camera_root_hal_bypass_confirm_title">HAL-Bypass-Bild aufnehmen?</string>
+    <string name="camera_root_hal_bypass_confirm_message">Dies nimmt ein Bild direkt unter Umgehung des Kamera-HAL auf. Fortfahren?</string>
+    <string name="camera_root_hal_bypass_confirm_label">Aufnehmen</string>
 </resources>

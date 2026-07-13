@@ -39,4 +39,15 @@
     <string name="nfc_cap_rooted_required">Requires rooted build</string>
     <string name="nfc_cap_raw_nci_name">Raw NCI command injection</string>
     <string name="nfc_cap_raw_nci_detail">Send arbitrary NCI frames to the NFC controller via /dev/nfc, bypassing the NFC stack</string>
+
+    <!-- ─── Rooted tools (in-screen, W6 write-tier) ─────────────────────── -->
+    <string name="nfc_root_tools_title">Rooted tools</string>
+    <string name="nfc_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="nfc_root_run">Run</string>
+    <string name="nfc_root_cancel">Cancel</string>
+    <string name="nfc_root_reset_label">Reset NFC mutations</string>
+    <string name="nfc_root_reset_detail">Revert every rooted NFC mutation this app made.</string>
+    <string name="nfc_root_reset_confirm_title">Reset NFC mutations?</string>
+    <string name="nfc_root_reset_confirm_message">This reverts every rooted NFC change this app has made. Continue?</string>
+    <string name="nfc_root_reset_confirm_label">Reset</string>
 </resources>

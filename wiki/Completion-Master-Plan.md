@@ -394,10 +394,15 @@ Original scope — build `:core:permissions` for real (was empty):
 > `radios-bt`, `gps`, `battery`, `display`, `radios-cell`, `usbdebug`,
 > `adbdebug` — each gated by the `:core:root` seam. The signed
 > **`rooted-release.apk`** pipeline is verified in CI (an `apksigner verify`
-> gate). **Remaining:** the write-tier features (`camera`, `microphone`,
-> `notification`, `radios-ir`, `radios-nfc`, `apps`, `lock`) need per-action
-> confirm dialogs / config inputs before they get the section; plus the
-> Sub-GHz SDR data path and the LSPosed repackage.
+> gate). **Write-tier started:** a new `:core:ui` `RootConfirmActionRow`
+> (a `RootActionRow` gated behind a confirmation `GadgetDialog`) surfaces the
+> no-arg device-mutating actions of `microphone` (disable effects), `camera`
+> (HAL-bypass frame), `notification` (grant listener / reset overrides),
+> `radios-ir` and `radios-nfc` (reset mutations). **Remaining:** the
+> config-bearing extreme actions (exposure / sample-rate / NCI-command entry)
+> still need a parameter-entry UI; `apps` and `lock` (the latter needs
+> `DevicePolicyManager` plumbing); plus the Sub-GHz SDR data path and the
+> LSPosed repackage.
 
 - **Re-surface rooted UX natively in every feature screen** (the #94
   Phase-3 epic): the migrated controllers are wired but dormant — add

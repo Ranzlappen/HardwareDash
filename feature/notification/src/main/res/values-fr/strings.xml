@@ -108,4 +108,19 @@
     <string name="notification_action_grant_listener">Accorder l\'accès à l\'écoute</string>
     <string name="notification_action_show_overlay">Afficher la superposition sur écran de verrouillage</string>
     <string name="notification_action_reset_all">Réinitialiser toutes les modifications de notification</string>
+    <!-- Rooted tools (in-screen, W6 write-tier) -->
+    <string name="notification_root_tools_title">Outils root</string>
+    <string name="notification_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
+    <string name="notification_root_run">Exécuter</string>
+    <string name="notification_root_cancel">Annuler</string>
+    <string name="notification_root_listener_label">Accorder l\'accès listener</string>
+    <string name="notification_root_listener_detail">Ouvre l\'écran système d\'accès aux notifications pour cette application.</string>
+    <string name="notification_root_listener_confirm_title">Accorder l\'accès listener ?</string>
+    <string name="notification_root_listener_confirm_message">Cela ouvre les paramètres système d\'accès aux notifications pour activer le service listener de cette application. Continuer ?</string>
+    <string name="notification_root_listener_confirm_label">Ouvrir les paramètres</string>
+    <string name="notification_root_reset_label">Réinitialiser les remplacements de notifications</string>
+    <string name="notification_root_reset_detail">Annule toutes les modifications de notifications en root faites par cette application.</string>
+    <string name="notification_root_reset_confirm_title">Réinitialiser les remplacements de notifications ?</string>
+    <string name="notification_root_reset_confirm_message">Cela annule toutes les modifications de notifications en root faites par cette application. Continuer ?</string>
+    <string name="notification_root_reset_confirm_label">Réinitialiser</string>
 </resources>

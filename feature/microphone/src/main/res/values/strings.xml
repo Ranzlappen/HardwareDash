@@ -74,4 +74,15 @@
     <!-- ─── Automation actions (MicrophoneActionHandler) ────────────────── -->
     <string name="microphone_action_disable_effects">Disable hardware noise suppression</string>
     <string name="microphone_action_system_audio">System audio capture</string>
+
+    <!-- ─── Rooted tools (in-screen, W6 write-tier) ─────────────────────── -->
+    <string name="microphone_root_tools_title">Rooted tools</string>
+    <string name="microphone_root_tools_unavailable">Requires the rooted app version.</string>
+    <string name="microphone_root_run">Run</string>
+    <string name="microphone_root_cancel">Cancel</string>
+    <string name="microphone_root_disable_effects_label">Disable audio effects</string>
+    <string name="microphone_root_disable_effects_detail">Turn off system AGC / noise suppression / echo cancel.</string>
+    <string name="microphone_root_disable_effects_confirm_title">Disable audio effects?</string>
+    <string name="microphone_root_disable_effects_confirm_message">This turns off the system microphone effects until they are re-enabled. Continue?</string>
+    <string name="microphone_root_disable_effects_confirm_label">Disable</string>
 </resources>
