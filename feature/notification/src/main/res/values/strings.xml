@@ -108,7 +108,7 @@
     <string name="notification_root_listener_label">Grant listener access</string>
     <string name="notification_root_listener_detail">Open the system Notification Access screen for this app.</string>
     <string name="notification_root_listener_confirm_title">Grant listener access?</string>
-    <string name="notification_root_listener_confirm_message">This opens the system Notification Access settings so you can enable this app's listener service. Continue?</string>
+    <string name="notification_root_listener_confirm_message">This opens the system Notification Access settings so you can enable this app\'s listener service. Continue?</string>
     <string name="notification_root_listener_confirm_label">Open settings</string>
     <string name="notification_root_reset_label">Reset notification overrides</string>
     <string name="notification_root_reset_detail">Revert every rooted notification mutation this app made.</string>
