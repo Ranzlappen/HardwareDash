@@ -77,6 +77,11 @@ serialization](Troubleshooting)):
   permission state (table below).
 - **`SystemEvent`** — `BootCompleted` / `PowerConnected` /
   `PowerDisconnected` / `Connectivity`.
+- **`Geofence`** — device crosses a circular fence (`lat`/`lon`/`radiusMeters`
+  + `GeofenceTransition` Enter/Exit). OS-hosted via `GeofencingClient`
+  (`GeofenceRegistrar` + `GeofenceReceiver`), so it's one-shot/edge-driven
+  like a Schedule alarm — **not** service-resident — and re-armed on boot and
+  rule change. Needs `ACCESS_BACKGROUND_LOCATION` ("Allow all the time").
 - **`Manual`** — a widget/QS-tile/in-app "run now".
 
 `enum ComparisonOp { Lt, Lte, Gt, Gte, Eq, Neq }`, `enum Edge { Rising,
@@ -228,7 +233,7 @@ See also: [Monitoring Framework](Monitoring-Framework) (the same
 
 ---
 
-> _Last reviewed: 2026-07-11 · Source: `docs/automation-engine.md`,
+> _Last reviewed: 2026-07-14 · Source: `docs/automation-engine.md`,
 > `docs/adr/0002-automation-engine.md`, `CLAUDE.md` (automation) · Related
 > modules: `:core:automation`, `:core:hardware`, `:core:data`,
 > `:feature:automation-ui`, `:feature:automation`._

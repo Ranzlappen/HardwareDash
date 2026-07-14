@@ -315,6 +315,22 @@ allow-list), independent of the migrated controller.
   shutter-sound toggle. Every card renders only on the rooted flavor and the
   controllers re-clamp to their hard hardware ceilings. Still deferred from
   this workstream: `lock` (needs `DevicePolicyManager`).
+- **Follow-up (post-#203) — W7 geofence trigger.** The previously-deferred
+  location-fence trigger now works end to end. `Trigger.Geofence`
+  (lat/lon/radius + a pinned `GeofenceTransition` enter/exit enum) joins the
+  sealed `Trigger` graph with its package-stable `@SerialName` and
+  append-only `RuleSerializationTest` pins. The rule builder gains a Geofence
+  chip + editor (lat/lon/radius fields + transition chips). Arming is
+  OS-hosted, **not** service-resident: a new `GeofenceRegistrar` wraps
+  `GeofencingClient` (one fence per rule, requestId = rule id, a single
+  MUTABLE `PendingIntent`), and `GeofenceReceiver` maps the transition back
+  and fires matching rules through the shared `RuleFireExecutor`. Fences are
+  re-armed on boot (`AutomationBootRearmHandler`) and on every rule
+  save/delete (`AutomationViewModel`) — like alarms, they don't survive
+  reboot. Uses the `play-services-location` artifact `:feature:gps` already
+  ships, and self-declares `ACCESS_FINE`/`ACCESS_BACKGROUND_LOCATION` in the
+  `:core:automation` manifest; registration silently no-ops until the user
+  grants "Allow all the time".
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.
