@@ -30,4 +30,15 @@
     <string name="lock_cap_rooted_required">Requires rooted build</string>
     <string name="lock_cap_overlay_name">Lock-screen notification overlay</string>
     <string name="lock_cap_overlay_detail">Display a system-alert notification window over the lock screen for timed secure alerts (hard cap: 60 s)</string>
+
+    <!-- Device-admin "lock now" (standard tier, DevicePolicyManager) -->
+    <string name="lock_admin_card_title">Lock the device</string>
+    <string name="lock_admin_active_subtitle">Device admin is active — you can lock the screen on demand.</string>
+    <string name="lock_admin_inactive_subtitle">Grant device-admin (force-lock only) to lock the screen from here. No root needed.</string>
+    <string name="lock_admin_enable">Enable device admin</string>
+    <string name="lock_admin_explanation">HardwareDash uses device admin only to lock the screen on demand — nothing else.</string>
+    <string name="lock_now_action">Lock now</string>
+    <string name="lock_now_confirm_title">Lock the screen now?</string>
+    <string name="lock_now_confirm_message">This immediately locks the device. You\'ll need your PIN, pattern, or biometric to get back in.</string>
+    <string name="lock_cancel">Cancel</string>
 </resources>

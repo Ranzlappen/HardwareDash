@@ -30,4 +30,15 @@
     <string name="lock_cap_rooted_required">Erfordert gerootete Version</string>
     <string name="lock_cap_overlay_name">Benachrichtigungs-Overlay für den Sperrbildschirm</string>
     <string name="lock_cap_overlay_detail">Zeigt ein Systemwarnungsfenster über dem Sperrbildschirm für zeitlich begrenzte sichere Warnungen an (feste Obergrenze: 60 s)</string>
+
+    <!-- Device-admin "lock now" (standard tier, DevicePolicyManager) -->
+    <string name="lock_admin_card_title">Gerät sperren</string>
+    <string name="lock_admin_active_subtitle">Geräteadmin ist aktiv — du kannst den Bildschirm bei Bedarf sperren.</string>
+    <string name="lock_admin_inactive_subtitle">Erteile Geräteadmin (nur Sperren erzwingen), um den Bildschirm von hier aus zu sperren. Kein Root nötig.</string>
+    <string name="lock_admin_enable">Geräteadmin aktivieren</string>
+    <string name="lock_admin_explanation">HardwareDash nutzt Geräteadmin nur, um den Bildschirm bei Bedarf zu sperren — nichts anderes.</string>
+    <string name="lock_now_action">Jetzt sperren</string>
+    <string name="lock_now_confirm_title">Bildschirm jetzt sperren?</string>
+    <string name="lock_now_confirm_message">Dies sperrt das Gerät sofort. Du brauchst deine PIN, dein Muster oder Biometrie, um wieder hineinzukommen.</string>
+    <string name="lock_cancel">Abbrechen</string>
 </resources>

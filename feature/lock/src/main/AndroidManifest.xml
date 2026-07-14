@@ -4,4 +4,24 @@
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" android:maxSdkVersion="27" />
 
+    <application>
+        <!--
+          Device-admin receiver backing the standard-tier "lock now" action.
+          Requests only the force-lock policy (res/xml/lock_device_admin.xml);
+          the system binds it, so it must be exported and guarded by
+          BIND_DEVICE_ADMIN. lockNow is device-admin, not root.
+        -->
+        <receiver
+            android:name=".GadgetDeviceAdminReceiver"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/lock_device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
 </manifest>
