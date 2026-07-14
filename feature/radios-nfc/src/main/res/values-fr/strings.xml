@@ -49,4 +49,13 @@
     <string name="nfc_root_reset_confirm_title">Réinitialiser les modifications NFC ?</string>
     <string name="nfc_root_reset_confirm_message">Cela annule toutes les modifications NFC en root faites par cette application. Continuer ?</string>
     <string name="nfc_root_reset_confirm_label">Réinitialiser</string>
+
+    <!-- ─── Rooted config-entry tools (parameter input, W6 write-tier) ──── -->
+    <string name="nfc_tools_title">Commande NCI brute</string>
+    <string name="nfc_tools_subtitle">Envoie une trame NCI brute directement au contrôleur NFC. Hex uniquement ; la charge est limitée à 256 octets.</string>
+    <string name="nfc_tools_payload_label">Charge NCI (hex)</string>
+    <string name="nfc_tools_payload_error">Saisissez un nombre pair de chiffres hex (512 max).</string>
+    <string name="nfc_tools_send">Envoyer NCI</string>
+    <string name="nfc_tools_confirm_title">Envoyer la commande NCI brute ?</string>
+    <string name="nfc_tools_confirm_message">Cela écrit une trame arbitraire directement dans le contrôleur NFC et peut le laisser dans un état inattendu. Continuer ?</string>
 </resources>
