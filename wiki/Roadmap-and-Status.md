@@ -271,10 +271,9 @@ allow-list), independent of the migrated controller.
   A follow-up commit adds the **write-tier** surface: a new `:core:ui`
   `RootConfirmActionRow` (a `RootActionRow` gated behind a confirmation
   `GadgetDialog`) now surfaces the no-arg device-mutating actions of
-  `microphone`, `camera`, `notification`, `radios-ir`, and `radios-nfc`. Still
-  deferred: the config-bearing extreme actions (need parameter entry), plus
-  `lock` (needs `DevicePolicyManager`). (`apps` freeze / force-stop is
-  confirm-gated in the next batch — see below.)
+  `microphone`, `camera`, `notification`, `radios-ir`, and `radios-nfc`.
+  (The config-bearing **parameter-entry** actions and `apps` / `lock` were
+  deferred here and land in later batches — see below.)
   Also lands the **first live W5 `@IntoMap` contributor**: `:feature:notification`
   contributes a `FeaturePermissions` group surfacing the notification-listener
   special permission (outside the app baseline) in the Permissions dashboard.
@@ -300,7 +299,22 @@ allow-list), independent of the migrated controller.
   `AppsRootController`) now route through a `GadgetDialog` confirmation
   matching the `RootConfirmActionRow` convention, so a privileged `pm
   disable-user` / `am force-stop` never fires on a single tap. Unfreeze
-  (the non-destructive restore) stays immediate.
+  (the non-destructive restore) stays immediate. Batch 3 also adds a new
+  `RootedAppsRootController` **safety-gate unit test** (deny-list /
+  package-validation) and wires several previously-unrun test modules into
+  the JVM CI job.
+- **Follow-up (post-#203) — W6 config-entry parameter UIs.** The
+  config-bearing rooted actions now have in-screen **parameter input**,
+  mirroring the microphone's `MicrophoneToolsCard`: a `*ToolsCard` per
+  feature with `GadgetSlider` / `GadgetTextField` inputs feeding the
+  controller's config methods and surfacing each result through the shared
+  `RootActionState`. **IR** — custom-carrier burst (frequency + duration)
+  and raw on/off GPIO pattern. **NFC** — raw NCI command (hex field,
+  confirm-gated). **Camera** — high-FPS capture, manual ISO/exposure/focus
+  override, raw multi-frame capture, multi-camera capture, and the
+  shutter-sound toggle. Every card renders only on the rooted flavor and the
+  controllers re-clamp to their hard hardware ceilings. Still deferred from
+  this workstream: `lock` (needs `DevicePolicyManager`).
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.
@@ -351,7 +365,7 @@ verified with an `apksigner verify` gate. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-07-13 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-07-14 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md`,
 > [Completion Master Plan](Completion-Master-Plan) ·
 > Related modules: all._
