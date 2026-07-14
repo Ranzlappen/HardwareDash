@@ -43,6 +43,11 @@ dependencies {
     implementation(project(":core:notifications"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
+    // GeofencingClient (Trigger.Geofence): the OS hosts the fence and delivers
+    // transitions via a PendingIntent, so a geofence rule is one-shot like a
+    // Schedule alarm and needs no resident service. Same artefact :feature:gps
+    // already uses for FusedLocationProvider.
+    implementation(libs.play.services.location)
 
     testImplementation(libs.junit)
 }

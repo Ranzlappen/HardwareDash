@@ -18,6 +18,16 @@
       aren't deliverable to manifest receivers since Android N).
     -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!--
+      Geofence triggers (Trigger.Geofence). GeofencingClient needs fine
+      location, and delivering transitions while the app is backgrounded/closed
+      needs background location ("Allow all the time"). Both self-declared here
+      so the engine is independent of :feature:gps (which also declares
+      background location for GPS spoofing); duplicate uses-permission merges
+      cleanly.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application>
         <!--
@@ -44,6 +54,16 @@
         <!-- One-shot landing point for AutomationScheduler's alarms. -->
         <receiver
             android:name=".service.AutomationAlarmReceiver"
+            android:exported="false" />
+
+        <!--
+          Landing point for GeofencingClient transition callbacks. The OS
+          hosts the fences and fires our PendingIntent on enter/exit; the
+          triggering rule ids ride in the GeofencingEvent, so no intent-filter
+          is needed (like the alarm receiver).
+        -->
+        <receiver
+            android:name=".service.GeofenceReceiver"
             android:exported="false" />
 
         <!--
