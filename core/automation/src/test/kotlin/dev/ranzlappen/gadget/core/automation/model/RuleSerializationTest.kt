@@ -150,9 +150,17 @@ class RuleSerializationTest {
 
     @Test
     fun geofencePinsDiscriminator() {
+        // Use the NON-default transition (Exit): AutomationJson encodes with
+        // encodeDefaults=false, so the default Enter would be omitted and the
+        // by-name enum assertion couldn't see it.
         val encoded = json.encodeToString(
             Trigger.serializer(),
-            Trigger.Geofence(latitude = 0.0, longitude = 0.0, radiusMeters = 100f),
+            Trigger.Geofence(
+                latitude = 0.0,
+                longitude = 0.0,
+                radiusMeters = 100f,
+                transition = GeofenceTransition.Exit,
+            ),
         )
         assertTrue(
             "encoded=$encoded must carry the pinned FQN discriminator",
@@ -160,7 +168,7 @@ class RuleSerializationTest {
         )
         assertTrue(
             "transition encodes by name: $encoded",
-            encoded.contains("\"Enter\""),
+            encoded.contains("\"Exit\""),
         )
     }
 
