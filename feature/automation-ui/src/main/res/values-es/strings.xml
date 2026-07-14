@@ -88,6 +88,12 @@
     <string name="automation_summary_geofence_enter">Al entrar en una valla de %1$d m</string>
     <string name="automation_summary_geofence_exit">Al salir de una valla de %1$d m</string>
 
+    <!-- Editor: external-broadcast trigger (W7) -->
+    <string name="automation_trigger_kind_broadcast">App externa</string>
+    <string name="automation_editor_broadcast_tag">Etiqueta del disparador</string>
+    <string name="automation_editor_broadcast_hint">Se activa cuando otra app emite dev.ranzlappen.gadget.feature.automation.EXTERNAL_TRIGGER con un extra de cadena \"tag\" coincidente, p. ej. desde Tasker o MacroDroid.</string>
+    <string name="automation_summary_broadcast">Con disparador externo “%1$s”</string>
+
     <!-- Editor: conditions -->
     <string name="automation_editor_conditions_empty">Sin condiciones — solo decide el activador.</string>
     <string name="automation_editor_condition_logic">Debe cumplirse</string>

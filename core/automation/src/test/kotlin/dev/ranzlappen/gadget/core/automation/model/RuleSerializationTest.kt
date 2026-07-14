@@ -101,6 +101,12 @@ class RuleSerializationTest {
         assertEquals(rule, roundTrip(rule))
     }
 
+    @Test
+    fun externalBroadcastRule_roundTrips() {
+        val rule = ruleWith(Trigger.ExternalBroadcast(tag = "leaving_work"))
+        assertEquals(rule, roundTrip(rule))
+    }
+
     // ─── discriminator pins (the sacred wire strings) ───────────────
 
     @Test
@@ -169,6 +175,18 @@ class RuleSerializationTest {
         assertTrue(
             "transition encodes by name: $encoded",
             encoded.contains("\"Exit\""),
+        )
+    }
+
+    @Test
+    fun externalBroadcastPinsDiscriminator() {
+        val encoded = json.encodeToString(
+            Trigger.serializer(),
+            Trigger.ExternalBroadcast(tag = "t"),
+        )
+        assertTrue(
+            "encoded=$encoded must carry the pinned FQN discriminator",
+            encoded.contains("\"dev.ranzlappen.gadget.core.automation.Trigger.ExternalBroadcast\""),
         )
     }
 

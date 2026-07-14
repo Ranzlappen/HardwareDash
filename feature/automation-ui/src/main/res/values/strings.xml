@@ -88,6 +88,12 @@
     <string name="automation_summary_geofence_enter">On entering a %1$dm fence</string>
     <string name="automation_summary_geofence_exit">On leaving a %1$dm fence</string>
 
+    <!-- Editor: external-broadcast trigger (W7) -->
+    <string name="automation_trigger_kind_broadcast">External app</string>
+    <string name="automation_editor_broadcast_tag">Trigger tag</string>
+    <string name="automation_editor_broadcast_hint">Fires when another app broadcasts dev.ranzlappen.gadget.feature.automation.EXTERNAL_TRIGGER with a matching \"tag\" string extra — e.g. from Tasker or MacroDroid.</string>
+    <string name="automation_summary_broadcast">On external trigger “%1$s”</string>
+
     <!-- Editor: conditions -->
     <string name="automation_editor_conditions_empty">No conditions — the trigger alone decides.</string>
     <string name="automation_editor_condition_logic">Must hold</string>

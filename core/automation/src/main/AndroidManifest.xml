@@ -81,5 +81,19 @@
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
             </intent-filter>
         </receiver>
+
+        <!--
+          External-automation hook (Trigger.ExternalBroadcast). Exported so
+          other automation apps (Tasker/MacroDroid/etc.) can fire it, but it
+          listens for ONE fixed app-namespaced action and only ever runs the
+          user's own tag-matched rules — see the receiver KDoc's security note.
+        -->
+        <receiver
+            android:name=".service.AutomationExternalBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="dev.ranzlappen.gadget.feature.automation.EXTERNAL_TRIGGER" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

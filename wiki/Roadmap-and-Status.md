@@ -313,8 +313,7 @@ allow-list), independent of the migrated controller.
   confirm-gated). **Camera** — high-FPS capture, manual ISO/exposure/focus
   override, raw multi-frame capture, multi-camera capture, and the
   shutter-sound toggle. Every card renders only on the rooted flavor and the
-  controllers re-clamp to their hard hardware ceilings. Still deferred from
-  this workstream: `lock` (needs `DevicePolicyManager`).
+  controllers re-clamp to their hard hardware ceilings.
 - **Follow-up (post-#203) — W7 geofence trigger.** The previously-deferred
   location-fence trigger now works end to end. `Trigger.Geofence`
   (lat/lon/radius + a pinned `GeofenceTransition` enter/exit enum) joins the
@@ -331,6 +330,17 @@ allow-list), independent of the migrated controller.
   ships, and self-declares `ACCESS_FINE`/`ACCESS_BACKGROUND_LOCATION` in the
   `:core:automation` manifest; registration silently no-ops until the user
   grants "Allow all the time".
+- **Follow-up (post-#203) — W6 lock (device-admin, no root).** The last
+  deferred W6 write-tier surface. `:feature:lock` (previously read-only) gains
+  a standard-tier "lock the device now" via `DevicePolicyManager`: a
+  behaviourless `GadgetDeviceAdminReceiver` holding **only** the force-lock
+  policy (`res/xml/lock_device_admin.xml`), a `DeviceLockController`
+  (`isAdminActive` / `adminActivationIntent` / `lockNow` → a small
+  `DeviceLockResult`), and a `DeviceAdminCard` that launches the system
+  admin-activation prompt (re-checking on `ON_RESUME`) and, once active,
+  offers a confirm-gated **Lock now**. No root — `lockNow()` works in the
+  standard flavor once the admin is activated; pairs naturally with the
+  geofence trigger (exit fence → lock).
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.

@@ -85,6 +85,25 @@ sealed interface Trigger {
         val radiusMeters: Float,
         val transition: GeofenceTransition = GeofenceTransition.Enter,
     ) : Trigger
+
+    /**
+     * Fires when another app sends the app-wide external-automation broadcast
+     * (`dev.ranzlappen.gadget.feature.automation.EXTERNAL_TRIGGER`) carrying a
+     * `tag` extra equal to this [tag]. This is the Tasker/MacroDroid-style
+     * hook: an external automation app runs
+     * `am broadcast -a …EXTERNAL_TRIGGER --es tag "<tag>"` and every enabled
+     * rule with a matching tag fires.
+     *
+     * **Exposure is bounded by design:** the single fixed receiver only ever
+     * runs the user's own authored rules (whose actions are themselves gated),
+     * so a stray broadcast can at worst trigger a rule the user already built —
+     * it cannot inject arbitrary behaviour. There is deliberately *no* dynamic
+     * action string (which would let a sender name any action); the tag is
+     * matched inside the app.
+     */
+    @Serializable
+    @SerialName("dev.ranzlappen.gadget.core.automation.Trigger.ExternalBroadcast")
+    data class ExternalBroadcast(val tag: String) : Trigger
 }
 
 /** Which crossing of a [Trigger.Geofence] fence fires: entering or leaving. */

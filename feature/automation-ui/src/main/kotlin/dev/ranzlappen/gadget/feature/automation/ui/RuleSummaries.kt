@@ -121,6 +121,10 @@ internal fun triggerSummary(
         },
         trigger.radiusMeters.toInt(),
     )
+    is Trigger.ExternalBroadcast -> stringResource(
+        R.string.automation_summary_broadcast,
+        trigger.tag,
+    )
     is Trigger.Manual -> stringResource(R.string.automation_summary_manual)
 }
 

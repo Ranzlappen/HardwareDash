@@ -88,6 +88,12 @@
     <string name="automation_summary_geofence_enter">Beim Betreten eines %1$d-m-Zauns</string>
     <string name="automation_summary_geofence_exit">Beim Verlassen eines %1$d-m-Zauns</string>
 
+    <!-- Editor: external-broadcast trigger (W7) -->
+    <string name="automation_trigger_kind_broadcast">Externe App</string>
+    <string name="automation_editor_broadcast_tag">Auslöser-Tag</string>
+    <string name="automation_editor_broadcast_hint">Löst aus, wenn eine andere App dev.ranzlappen.gadget.feature.automation.EXTERNAL_TRIGGER mit einem passenden \"tag\"-String-Extra sendet — z. B. aus Tasker oder MacroDroid.</string>
+    <string name="automation_summary_broadcast">Bei externem Auslöser „%1$s“</string>
+
     <!-- Editor: conditions -->
     <string name="automation_editor_conditions_empty">Keine Bedingungen — nur der Auslöser entscheidet.</string>
     <string name="automation_editor_condition_logic">Muss zutreffen</string>

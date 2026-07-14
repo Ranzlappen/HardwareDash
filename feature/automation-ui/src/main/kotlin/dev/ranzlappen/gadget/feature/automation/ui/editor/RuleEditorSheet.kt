@@ -173,13 +173,14 @@ internal fun RuleEditorSheet(
 // ─── Trigger section ────────────────────────────────────────────────────
 
 /** The four authorable trigger kinds; chips switch the draft between them. */
-private enum class TriggerKind { Metric, Schedule, Event, Geofence, Manual }
+private enum class TriggerKind { Metric, Schedule, Event, Geofence, Broadcast, Manual }
 
 private fun Trigger.kind(): TriggerKind = when (this) {
     is Trigger.MetricThreshold -> TriggerKind.Metric
     is Trigger.Schedule -> TriggerKind.Schedule
     is Trigger.SystemEvent -> TriggerKind.Event
     is Trigger.Geofence -> TriggerKind.Geofence
+    is Trigger.ExternalBroadcast -> TriggerKind.Broadcast
     is Trigger.Manual -> TriggerKind.Manual
 }
 
@@ -190,6 +191,7 @@ private fun TriggerKind.label(): String = stringResource(
         TriggerKind.Schedule -> R.string.automation_trigger_kind_schedule
         TriggerKind.Event -> R.string.automation_trigger_kind_event
         TriggerKind.Geofence -> R.string.automation_trigger_kind_geofence
+        TriggerKind.Broadcast -> R.string.automation_trigger_kind_broadcast
         TriggerKind.Manual -> R.string.automation_trigger_kind_manual
     },
 )
@@ -214,6 +216,7 @@ private fun defaultTriggerFor(kind: TriggerKind, signals: List<MetricDescriptor>
             longitude = 0.0,
             radiusMeters = DEFAULT_GEOFENCE_RADIUS_M,
         )
+        TriggerKind.Broadcast -> Trigger.ExternalBroadcast(tag = "")
         TriggerKind.Manual -> Trigger.Manual
     }
 }
@@ -250,8 +253,23 @@ private fun TriggerSection(
         )
         is Trigger.SystemEvent -> SystemEventTriggerEditor(trigger, onTriggerChange)
         is Trigger.Geofence -> GeofenceTriggerEditor(trigger, onTriggerChange)
+        is Trigger.ExternalBroadcast -> ExternalBroadcastTriggerEditor(trigger, onTriggerChange)
         is Trigger.Manual -> HintText(stringResource(R.string.automation_editor_manual_hint))
     }
+}
+
+@Composable
+private fun ExternalBroadcastTriggerEditor(
+    trigger: Trigger.ExternalBroadcast,
+    onTriggerChange: (Trigger) -> Unit,
+) {
+    GadgetTextField(
+        value = trigger.tag,
+        onValueChange = { onTriggerChange(trigger.copy(tag = it)) },
+        label = stringResource(R.string.automation_editor_broadcast_tag),
+        modifier = Modifier.fillMaxWidth(),
+    )
+    HintText(stringResource(R.string.automation_editor_broadcast_hint))
 }
 
 @Composable

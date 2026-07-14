@@ -82,6 +82,13 @@ serialization](Troubleshooting)):
   (`GeofenceRegistrar` + `GeofenceReceiver`), so it's one-shot/edge-driven
   like a Schedule alarm — **not** service-resident — and re-armed on boot and
   rule change. Needs `ACCESS_BACKGROUND_LOCATION` ("Allow all the time").
+- **`ExternalBroadcast`** — an external automation app (Tasker/MacroDroid/…)
+  fires the rule by broadcasting the single fixed app-namespaced action
+  `dev.ranzlappen.gadget.feature.automation.EXTERNAL_TRIGGER` with a `tag`
+  string extra; `AutomationExternalBroadcastReceiver` matches the tag against
+  enabled rules. Exported so external apps can reach it, but there's **no
+  dynamic action string** — a stray broadcast can only fire a rule the user
+  already authored (whose actions are gated), so exposure is bounded.
 - **`Manual`** — a widget/QS-tile/in-app "run now".
 
 `enum ComparisonOp { Lt, Lte, Gt, Gte, Eq, Neq }`, `enum Edge { Rising,

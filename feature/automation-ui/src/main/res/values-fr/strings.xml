@@ -88,6 +88,12 @@
     <string name="automation_summary_geofence_enter">À l’entrée dans une zone de %1$d m</string>
     <string name="automation_summary_geofence_exit">À la sortie d’une zone de %1$d m</string>
 
+    <!-- Editor: external-broadcast trigger (W7) -->
+    <string name="automation_trigger_kind_broadcast">App externe</string>
+    <string name="automation_editor_broadcast_tag">Étiquette du déclencheur</string>
+    <string name="automation_editor_broadcast_hint">Se déclenche quand une autre app diffuse dev.ranzlappen.gadget.feature.automation.EXTERNAL_TRIGGER avec un extra chaîne \"tag\" correspondant — p. ex. depuis Tasker ou MacroDroid.</string>
+    <string name="automation_summary_broadcast">Sur déclencheur externe « %1$s »</string>
+
     <!-- Editor: conditions -->
     <string name="automation_editor_conditions_empty">Aucune condition — seul le déclencheur décide.</string>
     <string name="automation_editor_condition_logic">Doit être vrai</string>
