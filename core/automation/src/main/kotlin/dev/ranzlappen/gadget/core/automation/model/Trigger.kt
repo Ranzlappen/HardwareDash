@@ -66,9 +66,30 @@ sealed interface Trigger {
     @SerialName("dev.ranzlappen.gadget.core.automation.Trigger.Manual")
     data object Manual : Trigger
 
-    // Geofence is deferred (location-permission UX + fused-location dep);
-    // it plugs in here as a later sealed subtype with its own pinned name.
+    /**
+     * Fires when the device crosses a circular location fence. Backed by the
+     * platform `GeofencingClient` (Play Services), which hosts the fence at the
+     * OS level and delivers transitions through a `PendingIntent` — so a
+     * Geofence rule is one-shot / edge-driven like [Schedule] and never needs
+     * the resident automation service.
+     *
+     * [latitude] / [longitude] are WGS-84 degrees; [radiusMeters] is the fence
+     * radius (the platform recommends ≥ ~100 m for reliable triggering).
+     * [transition] selects which crossing fires.
+     */
+    @Serializable
+    @SerialName("dev.ranzlappen.gadget.core.automation.Trigger.Geofence")
+    data class Geofence(
+        val latitude: Double,
+        val longitude: Double,
+        val radiusMeters: Float,
+        val transition: GeofenceTransition = GeofenceTransition.Enter,
+    ) : Trigger
 }
+
+/** Which crossing of a [Trigger.Geofence] fence fires: entering or leaving. */
+@Serializable
+enum class GeofenceTransition { Enter, Exit }
 
 /** Broadcast kinds a [Trigger.SystemEvent] can subscribe to. */
 @Serializable

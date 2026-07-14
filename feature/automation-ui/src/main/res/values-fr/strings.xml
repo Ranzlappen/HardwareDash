@@ -76,6 +76,18 @@
     <string name="automation_event_connectivity">Connectivité modifiée</string>
     <string name="automation_editor_manual_hint">Ne s’exécute que lorsque vous appuyez sur “Exécuter maintenant” sur cet écran.</string>
 
+    <!-- Editor: geofence trigger (W7) -->
+    <string name="automation_trigger_kind_geofence">Zone géographique</string>
+    <string name="automation_editor_geofence_latitude">Latitude</string>
+    <string name="automation_editor_geofence_longitude">Longitude</string>
+    <string name="automation_editor_geofence_radius">Rayon (m)</string>
+    <string name="automation_editor_geofence_transition">Déclencher lors de</string>
+    <string name="automation_geofence_enter">Entrée</string>
+    <string name="automation_geofence_exit">Sortie</string>
+    <string name="automation_editor_geofence_hint">Se déclenche quand l’appareil franchit cette zone. Nécessite l’autorisation de localisation « Toujours autoriser ». Copiez les coordonnées depuis n’importe quelle app de cartes.</string>
+    <string name="automation_summary_geofence_enter">À l’entrée dans une zone de %1$d m</string>
+    <string name="automation_summary_geofence_exit">À la sortie d’une zone de %1$d m</string>
+
     <!-- Editor: conditions -->
     <string name="automation_editor_conditions_empty">Aucune condition — seul le déclencheur décide.</string>
     <string name="automation_editor_condition_logic">Doit être vrai</string>

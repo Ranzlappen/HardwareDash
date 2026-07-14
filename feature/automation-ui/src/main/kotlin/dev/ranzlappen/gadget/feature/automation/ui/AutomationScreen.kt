@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Power
 import androidx.compose.material.icons.outlined.Schedule
@@ -637,6 +638,7 @@ private fun Trigger.icon(): ImageVector = when (this) {
     is Trigger.MetricThreshold -> Icons.Outlined.Sensors
     is Trigger.Schedule -> Icons.Outlined.Schedule
     is Trigger.SystemEvent -> Icons.Outlined.Power
+    is Trigger.Geofence -> Icons.Outlined.LocationOn
     is Trigger.Manual -> Icons.Outlined.TouchApp
 }
 

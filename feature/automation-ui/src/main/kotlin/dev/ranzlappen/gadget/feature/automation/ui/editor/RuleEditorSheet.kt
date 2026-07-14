@@ -33,6 +33,7 @@ import androidx.compose.ui.semantics.semantics
 import dev.ranzlappen.gadget.core.automation.model.ComparisonOp
 import dev.ranzlappen.gadget.core.automation.model.DayOfWeek
 import dev.ranzlappen.gadget.core.automation.model.Edge
+import dev.ranzlappen.gadget.core.automation.model.GeofenceTransition
 import dev.ranzlappen.gadget.core.automation.model.Rule
 import dev.ranzlappen.gadget.core.automation.model.SystemEventKind
 import dev.ranzlappen.gadget.core.automation.model.Trigger
@@ -172,12 +173,13 @@ internal fun RuleEditorSheet(
 // ─── Trigger section ────────────────────────────────────────────────────
 
 /** The four authorable trigger kinds; chips switch the draft between them. */
-private enum class TriggerKind { Metric, Schedule, Event, Manual }
+private enum class TriggerKind { Metric, Schedule, Event, Geofence, Manual }
 
 private fun Trigger.kind(): TriggerKind = when (this) {
     is Trigger.MetricThreshold -> TriggerKind.Metric
     is Trigger.Schedule -> TriggerKind.Schedule
     is Trigger.SystemEvent -> TriggerKind.Event
+    is Trigger.Geofence -> TriggerKind.Geofence
     is Trigger.Manual -> TriggerKind.Manual
 }
 
@@ -187,6 +189,7 @@ private fun TriggerKind.label(): String = stringResource(
         TriggerKind.Metric -> R.string.automation_trigger_kind_metric
         TriggerKind.Schedule -> R.string.automation_trigger_kind_schedule
         TriggerKind.Event -> R.string.automation_trigger_kind_event
+        TriggerKind.Geofence -> R.string.automation_trigger_kind_geofence
         TriggerKind.Manual -> R.string.automation_trigger_kind_manual
     },
 )
@@ -206,6 +209,11 @@ private fun defaultTriggerFor(kind: TriggerKind, signals: List<MetricDescriptor>
         }
         TriggerKind.Schedule -> Trigger.Schedule(timeOfDayMinutes = DEFAULT_SCHEDULE_MINUTES)
         TriggerKind.Event -> Trigger.SystemEvent(SystemEventKind.PowerConnected)
+        TriggerKind.Geofence -> Trigger.Geofence(
+            latitude = 0.0,
+            longitude = 0.0,
+            radiusMeters = DEFAULT_GEOFENCE_RADIUS_M,
+        )
         TriggerKind.Manual -> Trigger.Manual
     }
 }
@@ -241,8 +249,64 @@ private fun TriggerSection(
             onTriggerChange = onTriggerChange,
         )
         is Trigger.SystemEvent -> SystemEventTriggerEditor(trigger, onTriggerChange)
+        is Trigger.Geofence -> GeofenceTriggerEditor(trigger, onTriggerChange)
         is Trigger.Manual -> HintText(stringResource(R.string.automation_editor_manual_hint))
     }
+}
+
+@Composable
+private fun GeofenceTriggerEditor(
+    trigger: Trigger.Geofence,
+    onTriggerChange: (Trigger) -> Unit,
+) {
+    // Local editable text so partial input ("-", "48.") doesn't get reverted
+    // by an eager parse; the model updates only when a field parses cleanly.
+    var latText by remember { mutableStateOf(trigger.latitude.toString()) }
+    var lonText by remember { mutableStateOf(trigger.longitude.toString()) }
+    var radiusText by remember { mutableStateOf(trigger.radiusMeters.toInt().toString()) }
+
+    GadgetTextField(
+        value = latText,
+        onValueChange = {
+            latText = it
+            it.trim().toDoubleOrNull()?.let { v -> onTriggerChange(trigger.copy(latitude = v)) }
+        },
+        label = stringResource(R.string.automation_editor_geofence_latitude),
+        modifier = Modifier.fillMaxWidth(),
+    )
+    GadgetTextField(
+        value = lonText,
+        onValueChange = {
+            lonText = it
+            it.trim().toDoubleOrNull()?.let { v -> onTriggerChange(trigger.copy(longitude = v)) }
+        },
+        label = stringResource(R.string.automation_editor_geofence_longitude),
+        modifier = Modifier.fillMaxWidth(),
+    )
+    GadgetTextField(
+        value = radiusText,
+        onValueChange = {
+            radiusText = it
+            it.trim().toFloatOrNull()?.let { v -> onTriggerChange(trigger.copy(radiusMeters = v)) }
+        },
+        label = stringResource(R.string.automation_editor_geofence_radius),
+        modifier = Modifier.fillMaxWidth(),
+    )
+    LabeledChipRow(label = stringResource(R.string.automation_editor_geofence_transition)) {
+        GeofenceTransition.values().forEach { transition ->
+            GadgetChip(
+                selected = trigger.transition == transition,
+                onClick = { onTriggerChange(trigger.copy(transition = transition)) },
+                label = stringResource(
+                    when (transition) {
+                        GeofenceTransition.Enter -> R.string.automation_geofence_enter
+                        GeofenceTransition.Exit -> R.string.automation_geofence_exit
+                    },
+                ),
+            )
+        }
+    }
+    HintText(stringResource(R.string.automation_editor_geofence_hint))
 }
 
 @Composable
@@ -515,6 +579,7 @@ private val AUTHORABLE_EVENTS = listOf(
 
 /** 09:00 — the design doc's worked schedule example. */
 private const val DEFAULT_SCHEDULE_MINUTES = 9 * 60
+private const val DEFAULT_GEOFENCE_RADIUS_M = 150f
 
 /** Time slider snap step: 5-minute granularity, editable to the minute. */
 private const val TIME_STEP_MINUTES = 5

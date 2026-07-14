@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import dev.ranzlappen.gadget.core.automation.model.ComparisonOp
 import dev.ranzlappen.gadget.core.automation.model.DayOfWeek
+import dev.ranzlappen.gadget.core.automation.model.GeofenceTransition
 import dev.ranzlappen.gadget.core.automation.model.Rule
 import dev.ranzlappen.gadget.core.automation.model.SystemEventKind
 import dev.ranzlappen.gadget.core.automation.model.Trigger
@@ -112,6 +113,13 @@ internal fun triggerSummary(
             SystemEventKind.PowerDisconnected -> R.string.automation_summary_power_disconnected
             SystemEventKind.Connectivity -> R.string.automation_summary_connectivity
         },
+    )
+    is Trigger.Geofence -> stringResource(
+        when (trigger.transition) {
+            GeofenceTransition.Enter -> R.string.automation_summary_geofence_enter
+            GeofenceTransition.Exit -> R.string.automation_summary_geofence_exit
+        },
+        trigger.radiusMeters.toInt(),
     )
     is Trigger.Manual -> stringResource(R.string.automation_summary_manual)
 }
