@@ -64,4 +64,27 @@
     <string name="camera_root_hal_bypass_confirm_title">HAL-Bypass-Bild aufnehmen?</string>
     <string name="camera_root_hal_bypass_confirm_message">Dies nimmt ein Bild direkt unter Umgehung des Kamera-HAL auf. Fortfahren?</string>
     <string name="camera_root_hal_bypass_confirm_label">Aufnehmen</string>
+
+    <!-- ─── Rooted config-entry tools (parameter input, W6 write-tier) ──── -->
+    <string name="camera_tools_title">Extreme Kamera-Werkzeuge</string>
+    <string name="camera_tools_subtitle">Direkte Camera2-Steuerung, die die App-Pipeline umgeht. Werte werden auf die hardwaresicheren Grenzen begrenzt.</string>
+    <string name="camera_tools_camera_id_label">Kamera-ID</string>
+    <string name="camera_tools_duration_label">Dauer</string>
+    <string name="camera_tools_high_fps_section">High-FPS-Aufnahme</string>
+    <string name="camera_tools_fps_label">Bildrate</string>
+    <string name="camera_tools_high_fps_run">High-FPS aufnehmen</string>
+    <string name="camera_tools_manual_section">Manuelle Belichtung</string>
+    <string name="camera_tools_iso_label">ISO</string>
+    <string name="camera_tools_exposure_label">Belichtung</string>
+    <string name="camera_tools_focus_label">Fokusdistanz</string>
+    <string name="camera_tools_manual_run">Manuell anwenden</string>
+    <string name="camera_tools_raw_section">Raw-Mehrbildaufnahme</string>
+    <string name="camera_tools_frame_count_label">Bilder</string>
+    <string name="camera_tools_raw_run">Raw aufnehmen</string>
+    <string name="camera_tools_multi_section">Mehrkamera-Aufnahme</string>
+    <string name="camera_tools_multi_ids_label">Kamera-IDs (kommagetrennt)</string>
+    <string name="camera_tools_multi_run">Alle aufnehmen</string>
+    <string name="camera_tools_shutter_section">Auslöserton</string>
+    <string name="camera_tools_shutter_detail">Den obligatorischen Auslöserton umschalten. Nicht in jeder Region erlaubt.</string>
+    <string name="camera_tools_shutter_toggle_label">Auslöserton aktiviert</string>
 </resources>

@@ -65,4 +65,27 @@
     <string name="camera_root_hal_bypass_confirm_title">Capture HAL-bypass frame?</string>
     <string name="camera_root_hal_bypass_confirm_message">This captures one frame directly, bypassing the camera HAL. Continue?</string>
     <string name="camera_root_hal_bypass_confirm_label">Capture</string>
+
+    <!-- ─── Rooted config-entry tools (parameter input, W6 write-tier) ──── -->
+    <string name="camera_tools_title">Extreme camera tools</string>
+    <string name="camera_tools_subtitle">Direct Camera2 control that bypasses the app pipeline. Values are clamped to the hardware-safe ceilings.</string>
+    <string name="camera_tools_camera_id_label">Camera ID</string>
+    <string name="camera_tools_duration_label">Duration</string>
+    <string name="camera_tools_high_fps_section">High-FPS capture</string>
+    <string name="camera_tools_fps_label">Frame rate</string>
+    <string name="camera_tools_high_fps_run">Capture high-FPS</string>
+    <string name="camera_tools_manual_section">Manual exposure</string>
+    <string name="camera_tools_iso_label">ISO</string>
+    <string name="camera_tools_exposure_label">Exposure</string>
+    <string name="camera_tools_focus_label">Focus distance</string>
+    <string name="camera_tools_manual_run">Apply manual</string>
+    <string name="camera_tools_raw_section">Raw multi-frame capture</string>
+    <string name="camera_tools_frame_count_label">Frames</string>
+    <string name="camera_tools_raw_run">Capture raw</string>
+    <string name="camera_tools_multi_section">Multi-camera capture</string>
+    <string name="camera_tools_multi_ids_label">Camera IDs (comma-separated)</string>
+    <string name="camera_tools_multi_run">Capture all</string>
+    <string name="camera_tools_shutter_section">Shutter sound</string>
+    <string name="camera_tools_shutter_detail">Toggle the mandatory shutter sound. Not permitted in every region.</string>
+    <string name="camera_tools_shutter_toggle_label">Shutter sound enabled</string>
 </resources>

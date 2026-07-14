@@ -64,4 +64,27 @@
     <string name="camera_root_hal_bypass_confirm_title">Capturer une image en contournant le HAL ?</string>
     <string name="camera_root_hal_bypass_confirm_message">Cela capture une image directement en contournant le HAL de la caméra. Continuer ?</string>
     <string name="camera_root_hal_bypass_confirm_label">Capturer</string>
+
+    <!-- ─── Rooted config-entry tools (parameter input, W6 write-tier) ──── -->
+    <string name="camera_tools_title">Outils caméra extrêmes</string>
+    <string name="camera_tools_subtitle">Contrôle Camera2 direct qui contourne le pipeline de l\'application. Les valeurs sont limitées aux plafonds sûrs du matériel.</string>
+    <string name="camera_tools_camera_id_label">ID caméra</string>
+    <string name="camera_tools_duration_label">Durée</string>
+    <string name="camera_tools_high_fps_section">Capture haute fréquence</string>
+    <string name="camera_tools_fps_label">Fréquence d\'images</string>
+    <string name="camera_tools_high_fps_run">Capturer en haute fréquence</string>
+    <string name="camera_tools_manual_section">Exposition manuelle</string>
+    <string name="camera_tools_iso_label">ISO</string>
+    <string name="camera_tools_exposure_label">Exposition</string>
+    <string name="camera_tools_focus_label">Distance de mise au point</string>
+    <string name="camera_tools_manual_run">Appliquer le manuel</string>
+    <string name="camera_tools_raw_section">Capture raw multi-images</string>
+    <string name="camera_tools_frame_count_label">Images</string>
+    <string name="camera_tools_raw_run">Capturer en raw</string>
+    <string name="camera_tools_multi_section">Capture multi-caméra</string>
+    <string name="camera_tools_multi_ids_label">ID caméras (séparés par des virgules)</string>
+    <string name="camera_tools_multi_run">Tout capturer</string>
+    <string name="camera_tools_shutter_section">Son de l\'obturateur</string>
+    <string name="camera_tools_shutter_detail">Activer/désactiver le son obligatoire de l\'obturateur. Non autorisé dans toutes les régions.</string>
+    <string name="camera_tools_shutter_toggle_label">Son de l\'obturateur activé</string>
 </resources>
