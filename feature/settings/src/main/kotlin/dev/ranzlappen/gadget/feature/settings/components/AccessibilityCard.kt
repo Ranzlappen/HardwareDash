@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -28,6 +29,7 @@ import dev.ranzlappen.gadget.core.datastore.UserPreferences
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
+import dev.ranzlappen.gadget.feature.settings.R
 
 /**
  * Accessibility card — controls:
@@ -78,12 +80,12 @@ internal fun AccessibilityCard(
 
     DashCard(
         modifier = modifier.fillMaxWidth(),
-        title = "Accessibility",
+        title = stringResource(R.string.settings_accessibility_title),
         icon = Icons.Outlined.Accessibility,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
             Text(
-                text = "Reduce motion",
+                text = stringResource(R.string.settings_reduce_motion),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -99,23 +101,23 @@ internal fun AccessibilityCard(
                 }
             }
             SettingsToggleRow(
-                title = "Reduce transparency",
-                subtitle = "Swap glassy surfaces to a higher-opacity preset",
+                title = stringResource(R.string.settings_reduce_transparency),
+                subtitle = stringResource(R.string.settings_reduce_transparency_subtitle),
                 checked = preferences.reducedTransparency,
                 onCheckedChange = onReducedTransparencyChange,
             )
             SettingsToggleRow(
-                title = "Increase text size",
-                subtitle = "Reserved — wires to a font-scale override in a later batch",
+                title = stringResource(R.string.settings_increase_text_size),
+                subtitle = stringResource(R.string.settings_increase_text_size_subtitle),
                 checked = preferences.largeTextOverride,
                 onCheckedChange = onLargeTextOverrideChange,
             )
             SettingsToggleRow(
-                title = "Floating torch button",
+                title = stringResource(R.string.settings_floating_torch_button),
                 subtitle = if (canDrawOverlays) {
-                    "Show a draggable button over other apps to toggle the torch"
+                    stringResource(R.string.settings_floating_torch_button_subtitle)
                 } else {
-                    "Requires overlay permission — tap to grant in system settings"
+                    stringResource(R.string.settings_floating_torch_button_permission)
                 },
                 checked = preferences.floatingTorchButtonEnabled && canDrawOverlays,
                 onCheckedChange = { enabled ->
@@ -137,8 +139,9 @@ internal fun AccessibilityCard(
     }
 }
 
+@Composable
 private fun TriStatePreference.toDisplayLabel(): String = when (this) {
-    TriStatePreference.On -> "On"
-    TriStatePreference.Off -> "Off"
-    TriStatePreference.FollowSystem -> "Follow system"
+    TriStatePreference.On -> stringResource(R.string.settings_tristate_on)
+    TriStatePreference.Off -> stringResource(R.string.settings_tristate_off)
+    TriStatePreference.FollowSystem -> stringResource(R.string.settings_tristate_follow_system)
 }

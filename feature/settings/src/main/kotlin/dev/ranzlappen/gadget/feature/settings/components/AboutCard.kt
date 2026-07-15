@@ -10,10 +10,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.feature.settings.BuildConfig
+import dev.ranzlappen.gadget.feature.settings.R
 
 /**
  * Static About card — version / flavor / build type read from
@@ -28,13 +30,13 @@ internal fun AboutCard(modifier: Modifier = Modifier) {
     val spacing = LocalGadgetTheme.current.spacing
     DashCard(
         modifier = modifier.fillMaxWidth(),
-        title = "About",
+        title = stringResource(R.string.settings_about_title),
         icon = Icons.Outlined.Info,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
-            AboutRow(label = "Version", value = BuildConfig.VERSION_NAME)
-            AboutRow(label = "Build", value = BuildConfig.VERSION_CODE.toString())
-            AboutRow(label = "Build type", value = BuildConfig.BUILD_TYPE)
+            AboutRow(label = stringResource(R.string.settings_about_version), value = BuildConfig.VERSION_NAME)
+            AboutRow(label = stringResource(R.string.settings_about_build), value = BuildConfig.VERSION_CODE.toString())
+            AboutRow(label = stringResource(R.string.settings_about_build_type), value = BuildConfig.BUILD_TYPE)
         }
     }
 }

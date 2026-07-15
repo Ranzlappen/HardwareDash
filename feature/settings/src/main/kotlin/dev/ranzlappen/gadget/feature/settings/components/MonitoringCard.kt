@@ -5,7 +5,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import dev.ranzlappen.gadget.core.ui.component.DashCard
+import dev.ranzlappen.gadget.feature.settings.R
 
 /**
  * Settings card for global monitoring behaviour.
@@ -22,12 +24,12 @@ internal fun MonitoringCard(
 ) {
     DashCard(
         modifier = modifier.fillMaxWidth(),
-        title = "Monitoring",
+        title = stringResource(R.string.settings_monitoring_title),
         icon = Icons.Outlined.Notifications,
     ) {
         SettingsToggleRow(
-            title = "Notification controls",
-            subtitle = "Show a 'Stop' action on each monitoring notification",
+            title = stringResource(R.string.settings_notification_controls),
+            subtitle = stringResource(R.string.settings_notification_controls_subtitle),
             checked = notificationActionsEnabled,
             onCheckedChange = onNotificationActionsEnabledChange,
         )
