@@ -26,6 +26,9 @@ name: Instrumented Tests
 #   * :feature:bugreport       — bug-report capture screen
 #   * :feature:flipper         — flipper tools screen
 #   * :feature:radios-subghz   — sub-GHz radio screen
+#   * :feature:battery         — BatteryScreenContent (stateless screen)
+#   * :feature:storage         — StorageScreenContent (stateless screen)
+#   * :feature:dashboard       — DashboardScreenContent (stateless screen)
 # Only :app declares product flavors, so these modules use the unqualified
 # `connectedDebugAndroidTest` task. A flavor/API-level matrix (and :app's own
 # connected tests) can be layered on later if the need arises — kept to one
@@ -142,7 +145,7 @@ jobs:
           # Single line: android-emulator-runner's `script` input does not
           # reliably honor backslash-newline continuations (the `\` leaks
           # through as a literal Gradle task → "Task '\' not found").
-          script: ./gradlew :core:ui:connectedDebugAndroidTest :core:data:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest :feature:apps:connectedDebugAndroidTest :feature:sensors:connectedDebugAndroidTest :feature:automation-ui:connectedDebugAndroidTest :feature:notification:connectedDebugAndroidTest :feature:usbdebug:connectedDebugAndroidTest :feature:microphone:connectedDebugAndroidTest :feature:display:connectedDebugAndroidTest :feature:adbdebug:connectedDebugAndroidTest :feature:radios-cell:connectedDebugAndroidTest :feature:bugreport:connectedDebugAndroidTest :feature:flipper:connectedDebugAndroidTest :feature:radios-subghz:connectedDebugAndroidTest --stacktrace
+          script: ./gradlew :core:ui:connectedDebugAndroidTest :core:data:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest :feature:apps:connectedDebugAndroidTest :feature:sensors:connectedDebugAndroidTest :feature:automation-ui:connectedDebugAndroidTest :feature:notification:connectedDebugAndroidTest :feature:usbdebug:connectedDebugAndroidTest :feature:microphone:connectedDebugAndroidTest :feature:display:connectedDebugAndroidTest :feature:adbdebug:connectedDebugAndroidTest :feature:radios-cell:connectedDebugAndroidTest :feature:bugreport:connectedDebugAndroidTest :feature:flipper:connectedDebugAndroidTest :feature:radios-subghz:connectedDebugAndroidTest :feature:battery:connectedDebugAndroidTest :feature:storage:connectedDebugAndroidTest :feature:dashboard:connectedDebugAndroidTest --stacktrace
 
       - name: Upload test reports
         if: always()
@@ -162,7 +165,7 @@ jobs:
             echo "## Instrumented tests (API 30 emulator)"
             echo ""
             if [ "${{ job.status }}" = "success" ]; then
-              echo "✅ **connectedDebugAndroidTest passed** for :core:ui, :core:data and the gated feature suites (torch, vibration, apps, sensors, automation-ui, notification, usbdebug, microphone, display, adbdebug, radios-cell, bugreport, flipper, radios-subghz)."
+              echo "✅ **connectedDebugAndroidTest passed** for :core:ui, :core:data and the gated feature suites (torch, vibration, apps, sensors, automation-ui, notification, usbdebug, microphone, display, adbdebug, radios-cell, bugreport, flipper, radios-subghz, battery, storage, dashboard)."
             else
               echo "❌ **Instrumented tests failed.** See the uploaded \`instrumented-test-reports\` artifact."
             fi
