@@ -346,11 +346,15 @@ allow-list), independent of the migrated controller.
   stock launcher-icon placeholders (the adaptive icon already uses the custom
   `ic_gadget_*` layers) and routed the last hand-rolled text-only empty
   states (camera scan history, notification channel inspector, YouTube queue)
-  through the shared `GadgetEmptyState`. **W10:** widened the emulator gate
-  from a 7-module subset to every module that ships an androidTest suite
-  (which surfaced — and fixed — a stale `assertDoesNotExist` import that had
-  compiled nowhere), and added the first Compose UI tests for the stateless
-  `:feature:battery`, `:feature:storage` and `:feature:dashboard` screens.
+  through the shared `GadgetEmptyState`. **W10:** added the first Compose UI
+  tests for the stateless `:feature:battery`, `:feature:storage` and
+  `:feature:dashboard` screens and gated them on the emulator. An attempt to
+  also gate every dormant androidTest suite was rolled back to a verified-green
+  set: enabling them surfaced pre-existing breakage those suites had always
+  carried (a stale `assertDoesNotExist` import — a member function, not an
+  importable symbol — and, in the notification suite, single-node assertions
+  that ignore the always-present rooted capability rows). Greening those
+  dormant suites one at a time is a tracked follow-up.
   **Localization:** migrated the ~39 inline-English literals in
   `:feature:settings` (appearance/palette picker, accessibility, monitoring,
   about) to string resources with full de/es/fr parity — the last debt the
