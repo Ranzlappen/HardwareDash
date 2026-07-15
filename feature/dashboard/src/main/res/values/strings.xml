@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_edit">Edit dashboard</string>
+    <string name="dashboard_empty">Every module is hidden. Tap “Edit dashboard” to show some.</string>
+    <string name="dashboard_reset">Reset to default</string>
+    <string name="dashboard_move_up">Move up</string>
+    <string name="dashboard_move_down">Move down</string>
+    <string name="dashboard_pin">Pin</string>
+    <string name="dashboard_unpin">Unpin</string>
+</resources>

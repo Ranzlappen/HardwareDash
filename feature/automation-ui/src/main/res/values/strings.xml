@@ -76,6 +76,24 @@
     <string name="automation_event_connectivity">Connectivity changed</string>
     <string name="automation_editor_manual_hint">Runs only when you tap “Run now” on this screen.</string>
 
+    <!-- Editor: geofence trigger (W7) -->
+    <string name="automation_trigger_kind_geofence">Geofence</string>
+    <string name="automation_editor_geofence_latitude">Latitude</string>
+    <string name="automation_editor_geofence_longitude">Longitude</string>
+    <string name="automation_editor_geofence_radius">Radius (m)</string>
+    <string name="automation_editor_geofence_transition">Fire on</string>
+    <string name="automation_geofence_enter">Entering</string>
+    <string name="automation_geofence_exit">Leaving</string>
+    <string name="automation_editor_geofence_hint">Fires when the device crosses this fence. Needs the “Allow all the time” location permission. Copy coordinates from any map app.</string>
+    <string name="automation_summary_geofence_enter">On entering a %1$dm fence</string>
+    <string name="automation_summary_geofence_exit">On leaving a %1$dm fence</string>
+
+    <!-- Editor: external-broadcast trigger (W7) -->
+    <string name="automation_trigger_kind_broadcast">External app</string>
+    <string name="automation_editor_broadcast_tag">Trigger tag</string>
+    <string name="automation_editor_broadcast_hint">Fires when another app broadcasts dev.ranzlappen.gadget.feature.automation.EXTERNAL_TRIGGER with a matching \"tag\" string extra — e.g. from Tasker or MacroDroid.</string>
+    <string name="automation_summary_broadcast">On external trigger “%1$s”</string>
+
     <!-- Editor: conditions -->
     <string name="automation_editor_conditions_empty">No conditions — the trigger alone decides.</string>
     <string name="automation_editor_condition_logic">Must hold</string>

@@ -12,6 +12,7 @@ import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.core.ui.module.RootActionState
 import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
 import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcControllerResult
+import dev.ranzlappen.gadget.feature.radios.nfc.control.RawNciCommandConfig
 import dev.ranzlappen.gadget.feature.radios.nfc.hce.NfcHceState
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplate
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplateRepository
@@ -26,6 +27,7 @@ import kotlinx.coroutines.launch
 /** The rooted-tools panel state for the NFC screen (W6 in-screen write-tier surface). */
 data class NfcRootToolsState(
     val reset: RootActionState = RootActionState(),
+    val sendNci: RootActionState = RootActionState(),
 )
 
 @HiltViewModel
@@ -50,6 +52,19 @@ class NfcViewModel @Inject constructor(
             _rootTools.update { it.copy(reset = it.reset.copy(running = true)) }
             val result = nfcController.resetAllNfcMutations()
             _rootTools.update { it.copy(reset = result.toActionState()) }
+        }
+    }
+
+    /**
+     * Config-entry: send a raw NCI command (rooted NFC controller path). The
+     * caller confirm-gates this (`requiresExplicitConfirm`); the controller
+     * enforces the 256-byte payload ceiling and read timeout.
+     */
+    fun onSendRawNci(payloadHex: String) {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(sendNci = it.sendNci.copy(running = true)) }
+            val result = nfcController.sendRawNciCommand(RawNciCommandConfig(payloadHex = payloadHex))
+            _rootTools.update { it.copy(sendNci = result.toActionState()) }
         }
     }
 

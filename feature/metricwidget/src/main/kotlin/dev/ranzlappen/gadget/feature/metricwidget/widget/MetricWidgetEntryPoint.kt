@@ -3,6 +3,7 @@ package dev.ranzlappen.gadget.feature.metricwidget.widget
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dev.ranzlappen.gadget.core.data.MonitorSampleRepository
 import dev.ranzlappen.gadget.core.model.MetricSource
 import dev.ranzlappen.gadget.core.widgetkit.render.WidgetAppearanceRenderer
 import dev.ranzlappen.gadget.core.widgetkit.store.WidgetConfigStore
@@ -24,4 +25,5 @@ interface MetricWidgetEntryPoint {
     fun metricWidgetConfigStore(): WidgetConfigStore<MetricWidgetConfig>
     fun widgetAppearanceRenderer(): WidgetAppearanceRenderer
     fun metricSources(): Map<String, @JvmSuppressWildcards MetricSource>
+    fun sampleRepository(): MonitorSampleRepository
 }

@@ -76,6 +76,24 @@
     <string name="automation_event_connectivity">Conectividad cambiada</string>
     <string name="automation_editor_manual_hint">Solo se ejecuta cuando tocas “Ejecutar ahora” en esta pantalla.</string>
 
+    <!-- Editor: geofence trigger (W7) -->
+    <string name="automation_trigger_kind_geofence">Geovalla</string>
+    <string name="automation_editor_geofence_latitude">Latitud</string>
+    <string name="automation_editor_geofence_longitude">Longitud</string>
+    <string name="automation_editor_geofence_radius">Radio (m)</string>
+    <string name="automation_editor_geofence_transition">Activar al</string>
+    <string name="automation_geofence_enter">Entrar</string>
+    <string name="automation_geofence_exit">Salir</string>
+    <string name="automation_editor_geofence_hint">Se activa cuando el dispositivo cruza esta valla. Necesita el permiso de ubicación “Permitir siempre”. Copia las coordenadas desde cualquier app de mapas.</string>
+    <string name="automation_summary_geofence_enter">Al entrar en una valla de %1$d m</string>
+    <string name="automation_summary_geofence_exit">Al salir de una valla de %1$d m</string>
+
+    <!-- Editor: external-broadcast trigger (W7) -->
+    <string name="automation_trigger_kind_broadcast">App externa</string>
+    <string name="automation_editor_broadcast_tag">Etiqueta del disparador</string>
+    <string name="automation_editor_broadcast_hint">Se activa cuando otra app emite dev.ranzlappen.gadget.feature.automation.EXTERNAL_TRIGGER con un extra de cadena \"tag\" coincidente, p. ej. desde Tasker o MacroDroid.</string>
+    <string name="automation_summary_broadcast">Con disparador externo “%1$s”</string>
+
     <!-- Editor: conditions -->
     <string name="automation_editor_conditions_empty">Sin condiciones — solo decide el activador.</string>
     <string name="automation_editor_condition_logic">Debe cumplirse</string>

@@ -127,6 +127,17 @@ fun CameraScreen(
                     statusKind = rootTools.halBypass.statusKind,
                 )
             }
+            if (isRootedFlavor) {
+                CameraToolsCard(
+                    enabled = true,
+                    rootTools = rootTools,
+                    onHighFps = viewModel::onHighFps,
+                    onManualExposure = viewModel::onManualExposure,
+                    onRawCapture = viewModel::onRawCapture,
+                    onMultiCamera = viewModel::onMultiCamera,
+                    onShutterSound = viewModel::onShutterSound,
+                )
+            }
         },
     )
 }

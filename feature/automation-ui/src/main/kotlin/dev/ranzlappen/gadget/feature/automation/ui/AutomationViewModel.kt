@@ -21,6 +21,7 @@ import dev.ranzlappen.gadget.core.automation.model.RuleTemplates
 import dev.ranzlappen.gadget.core.automation.model.Trigger
 import dev.ranzlappen.gadget.core.automation.service.AutomationController
 import dev.ranzlappen.gadget.core.automation.service.AutomationScheduler
+import dev.ranzlappen.gadget.core.automation.service.GeofenceRegistrar
 import dev.ranzlappen.gadget.core.automation.service.RuleFireExecutor
 import dev.ranzlappen.gadget.core.hardware.HardwareRegistry
 import dev.ranzlappen.gadget.core.model.MetricDescriptor
@@ -87,6 +88,7 @@ class AutomationViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val ruleRepository: RuleRepository,
     private val scheduler: AutomationScheduler,
+    private val geofenceRegistrar: GeofenceRegistrar,
     private val controller: AutomationController,
     private val fireExecutor: RuleFireExecutor,
     private val fireHistory: RuleFireHistoryRepository,
@@ -165,6 +167,7 @@ class AutomationViewModel @Inject constructor(
         viewModelScope.launch {
             ruleRepository.delete(id)
             scheduler.cancel(id)
+            geofenceRegistrar.unregister(id)
         }
     }
 
@@ -261,6 +264,9 @@ class AutomationViewModel @Inject constructor(
             // stale alarm armed for the old shape.
             scheduler.cancel(rule.id)
         }
+        // register() no-ops / unregisters for non-geofence or disabled rules,
+        // so an unconditional call keeps the OS fence in sync with the edit.
+        geofenceRegistrar.register(rule)
         // Same predicate the service + boot re-arm use: metric-stream and
         // connectivity rules both need the resident service.
         if (AutomationServiceResidency.requiresResidency(rule)) {

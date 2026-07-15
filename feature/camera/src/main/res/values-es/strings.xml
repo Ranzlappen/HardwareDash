@@ -64,4 +64,27 @@
     <string name="camera_root_hal_bypass_confirm_title">¿Capturar fotograma con bypass de HAL?</string>
     <string name="camera_root_hal_bypass_confirm_message">Esto captura un fotograma directamente, evitando el HAL de la cámara. ¿Continuar?</string>
     <string name="camera_root_hal_bypass_confirm_label">Capturar</string>
+
+    <!-- ─── Rooted config-entry tools (parameter input, W6 write-tier) ──── -->
+    <string name="camera_tools_title">Herramientas de cámara extremas</string>
+    <string name="camera_tools_subtitle">Control directo de Camera2 que omite la canalización de la app. Los valores se limitan a los máximos seguros del hardware.</string>
+    <string name="camera_tools_camera_id_label">ID de cámara</string>
+    <string name="camera_tools_duration_label">Duración</string>
+    <string name="camera_tools_high_fps_section">Captura a altos FPS</string>
+    <string name="camera_tools_fps_label">Fotogramas por segundo</string>
+    <string name="camera_tools_high_fps_run">Capturar a altos FPS</string>
+    <string name="camera_tools_manual_section">Exposición manual</string>
+    <string name="camera_tools_iso_label">ISO</string>
+    <string name="camera_tools_exposure_label">Exposición</string>
+    <string name="camera_tools_focus_label">Distancia de enfoque</string>
+    <string name="camera_tools_manual_run">Aplicar manual</string>
+    <string name="camera_tools_raw_section">Captura raw multifotograma</string>
+    <string name="camera_tools_frame_count_label">Fotogramas</string>
+    <string name="camera_tools_raw_run">Capturar raw</string>
+    <string name="camera_tools_multi_section">Captura multicámara</string>
+    <string name="camera_tools_multi_ids_label">ID de cámaras (separados por comas)</string>
+    <string name="camera_tools_multi_run">Capturar todas</string>
+    <string name="camera_tools_shutter_section">Sonido del obturador</string>
+    <string name="camera_tools_shutter_detail">Alterna el sonido obligatorio del obturador. No se permite en todas las regiones.</string>
+    <string name="camera_tools_shutter_toggle_label">Sonido del obturador activado</string>
 </resources>

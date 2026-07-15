@@ -49,4 +49,13 @@
     <string name="nfc_root_reset_confirm_title">NFC-Änderungen zurücksetzen?</string>
     <string name="nfc_root_reset_confirm_message">Dies macht alle gerooteten NFC-Änderungen dieser App rückgängig. Fortfahren?</string>
     <string name="nfc_root_reset_confirm_label">Zurücksetzen</string>
+
+    <!-- ─── Rooted config-entry tools (parameter input, W6 write-tier) ──── -->
+    <string name="nfc_tools_title">Roher NCI-Befehl</string>
+    <string name="nfc_tools_subtitle">Sende einen rohen NCI-Frame direkt an den NFC-Controller. Nur Hex; die Nutzlast ist auf 256 Byte begrenzt.</string>
+    <string name="nfc_tools_payload_label">NCI-Nutzlast (Hex)</string>
+    <string name="nfc_tools_payload_error">Gib eine gerade Anzahl Hex-Ziffern ein (max. 512).</string>
+    <string name="nfc_tools_send">NCI senden</string>
+    <string name="nfc_tools_confirm_title">Rohen NCI-Befehl senden?</string>
+    <string name="nfc_tools_confirm_message">Dies schreibt einen beliebigen Frame direkt an den NFC-Controller und kann ihn in einen unerwarteten Zustand versetzen. Fortfahren?</string>
 </resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dashboard_title">Tableau de bord</string>
+    <string name="dashboard_edit">Modifier le tableau de bord</string>
+    <string name="dashboard_empty">Tous les modules sont masqués. Appuyez sur « Modifier le tableau de bord » pour en afficher.</string>
+    <string name="dashboard_reset">Réinitialiser</string>
+    <string name="dashboard_move_up">Monter</string>
+    <string name="dashboard_move_down">Descendre</string>
+    <string name="dashboard_pin">Épingler</string>
+    <string name="dashboard_unpin">Détacher</string>
+</resources>

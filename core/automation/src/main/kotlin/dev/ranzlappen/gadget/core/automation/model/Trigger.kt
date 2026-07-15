@@ -66,9 +66,49 @@ sealed interface Trigger {
     @SerialName("dev.ranzlappen.gadget.core.automation.Trigger.Manual")
     data object Manual : Trigger
 
-    // Geofence is deferred (location-permission UX + fused-location dep);
-    // it plugs in here as a later sealed subtype with its own pinned name.
+    /**
+     * Fires when the device crosses a circular location fence. Backed by the
+     * platform `GeofencingClient` (Play Services), which hosts the fence at the
+     * OS level and delivers transitions through a `PendingIntent` — so a
+     * Geofence rule is one-shot / edge-driven like [Schedule] and never needs
+     * the resident automation service.
+     *
+     * [latitude] / [longitude] are WGS-84 degrees; [radiusMeters] is the fence
+     * radius (the platform recommends ≥ ~100 m for reliable triggering).
+     * [transition] selects which crossing fires.
+     */
+    @Serializable
+    @SerialName("dev.ranzlappen.gadget.core.automation.Trigger.Geofence")
+    data class Geofence(
+        val latitude: Double,
+        val longitude: Double,
+        val radiusMeters: Float,
+        val transition: GeofenceTransition = GeofenceTransition.Enter,
+    ) : Trigger
+
+    /**
+     * Fires when another app sends the app-wide external-automation broadcast
+     * (`dev.ranzlappen.gadget.feature.automation.EXTERNAL_TRIGGER`) carrying a
+     * `tag` extra equal to this [tag]. This is the Tasker/MacroDroid-style
+     * hook: an external automation app runs
+     * `am broadcast -a …EXTERNAL_TRIGGER --es tag "<tag>"` and every enabled
+     * rule with a matching tag fires.
+     *
+     * **Exposure is bounded by design:** the single fixed receiver only ever
+     * runs the user's own authored rules (whose actions are themselves gated),
+     * so a stray broadcast can at worst trigger a rule the user already built —
+     * it cannot inject arbitrary behaviour. There is deliberately *no* dynamic
+     * action string (which would let a sender name any action); the tag is
+     * matched inside the app.
+     */
+    @Serializable
+    @SerialName("dev.ranzlappen.gadget.core.automation.Trigger.ExternalBroadcast")
+    data class ExternalBroadcast(val tag: String) : Trigger
 }
+
+/** Which crossing of a [Trigger.Geofence] fence fires: entering or leaving. */
+@Serializable
+enum class GeofenceTransition { Enter, Exit }
 
 /** Broadcast kinds a [Trigger.SystemEvent] can subscribe to. */
 @Serializable

@@ -104,6 +104,15 @@ fun IrScreen(
                     statusKind = rootTools.reset.statusKind,
                 )
             }
+            if (viewModel.isRootedFlavor) {
+                IrToolsCard(
+                    enabled = true,
+                    customCarrier = rootTools.customCarrier,
+                    rawPattern = rootTools.rawPattern,
+                    onCustomCarrier = viewModel::onCustomCarrier,
+                    onRawPattern = viewModel::onRawPattern,
+                )
+            }
         },
         modifier = modifier,
     )

@@ -8,4 +8,6 @@
     <string name="metric_widget_display_mode">Affichage</string>
     <string name="metric_widget_display_value">Valeur</string>
     <string name="metric_widget_display_value_bar">Valeur + barre</string>
+    <string name="metric_widget_display_sparkline">Sparkline</string>
+    <string name="metric_widget_window">Fenêtre d\'historique</string>
 </resources>

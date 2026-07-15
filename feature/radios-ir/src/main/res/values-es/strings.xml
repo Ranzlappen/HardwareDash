@@ -63,4 +63,16 @@
     <string name="ir_root_reset_confirm_title">¿Restablecer modificaciones de IR?</string>
     <string name="ir_root_reset_confirm_message">Esto revierte todos los cambios de IR con root de esta app. ¿Continuar?</string>
     <string name="ir_root_reset_confirm_label">Restablecer</string>
+
+    <!-- ─── Rooted config-entry tools (parameter input, W6 write-tier) ──── -->
+    <string name="ir_tools_title">Herramientas IR extremas</string>
+    <string name="ir_tools_subtitle">Emisión GPIO directa que omite el HAL de IR. Los valores se limitan a los máximos seguros del hardware.</string>
+    <string name="ir_tools_duration_label">Duración</string>
+    <string name="ir_tools_carrier_section">Ráfaga de portadora personalizada</string>
+    <string name="ir_tools_carrier_hz_label">Portadora</string>
+    <string name="ir_tools_carrier_run">Emitir portadora</string>
+    <string name="ir_tools_raw_section">Patrón bruto de encendido/apagado</string>
+    <string name="ir_tools_raw_on_label">Pulso activo</string>
+    <string name="ir_tools_raw_off_label">Pulso inactivo</string>
+    <string name="ir_tools_raw_run">Emitir patrón</string>
 </resources>

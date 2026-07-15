@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.core.ui.module.RootActionState
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrCarrierConfig
 import dev.ranzlappen.gadget.feature.radios.ir.control.IrController
 import dev.ranzlappen.gadget.feature.radios.ir.control.IrControllerResult
+import dev.ranzlappen.gadget.feature.radios.ir.control.IrRawPatternConfig
 import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibraryBrand
 import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibraryRepository
 import dev.ranzlappen.gadget.feature.radios.ir.library.IrLibrarySignal
@@ -23,6 +25,8 @@ import kotlinx.coroutines.launch
 /** The rooted-tools panel state for the IR screen (W6 in-screen write-tier surface). */
 data class IrRootToolsState(
     val reset: RootActionState = RootActionState(),
+    val customCarrier: RootActionState = RootActionState(),
+    val rawPattern: RootActionState = RootActionState(),
 )
 
 @HiltViewModel
@@ -46,6 +50,32 @@ class IrViewModel @Inject constructor(
             _rootTools.update { it.copy(reset = it.reset.copy(running = true)) }
             val result = irController.resetAllIrMutations()
             _rootTools.update { it.copy(reset = result.toActionState()) }
+        }
+    }
+
+    /** Config-entry: emit a custom-carrier IR burst (rooted GPIO path). */
+    fun onCustomCarrier(carrierHz: Int, durationMillis: Long) {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(customCarrier = it.customCarrier.copy(running = true)) }
+            val result = irController.customCarrier(
+                IrCarrierConfig(carrierHz = carrierHz, durationMillis = durationMillis),
+            )
+            _rootTools.update { it.copy(customCarrier = result.toActionState()) }
+        }
+    }
+
+    /** Config-entry: emit a raw on/off GPIO pattern (rooted GPIO path). */
+    fun onRawPattern(onMillis: Long, offMillis: Long, totalDurationMillis: Long) {
+        viewModelScope.launch {
+            _rootTools.update { it.copy(rawPattern = it.rawPattern.copy(running = true)) }
+            val result = irController.rawGpioPattern(
+                IrRawPatternConfig(
+                    onMillis = onMillis,
+                    offMillis = offMillis,
+                    totalDurationMillis = totalDurationMillis,
+                ),
+            )
+            _rootTools.update { it.copy(rawPattern = result.toActionState()) }
         }
     }
 

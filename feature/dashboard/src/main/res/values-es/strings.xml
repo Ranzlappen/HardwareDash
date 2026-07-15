@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dashboard_title">Panel</string>
+    <string name="dashboard_edit">Editar panel</string>
+    <string name="dashboard_empty">Todos los módulos están ocultos. Toca «Editar panel» para mostrar algunos.</string>
+    <string name="dashboard_reset">Restablecer valores</string>
+    <string name="dashboard_move_up">Subir</string>
+    <string name="dashboard_move_down">Bajar</string>
+    <string name="dashboard_pin">Fijar</string>
+    <string name="dashboard_unpin">Desfijar</string>
+</resources>

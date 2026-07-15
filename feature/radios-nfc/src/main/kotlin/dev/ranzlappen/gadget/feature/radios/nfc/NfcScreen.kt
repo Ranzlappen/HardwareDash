@@ -104,6 +104,13 @@ fun NfcScreen(
                     statusKind = rootTools.reset.statusKind,
                 )
             }
+            if (state.isRootedFlavor) {
+                NfcToolsCard(
+                    enabled = true,
+                    sendNci = rootTools.sendNci,
+                    onSendRawNci = viewModel::onSendRawNci,
+                )
+            }
         },
         liveMonitors = {
             LiveMonitorContainer(

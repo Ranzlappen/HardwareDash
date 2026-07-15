@@ -30,4 +30,15 @@
     <string name="lock_cap_rooted_required">Nécessite une version rootée</string>
     <string name="lock_cap_overlay_name">Superposition de notification sur l\'écran de verrouillage</string>
     <string name="lock_cap_overlay_detail">Affiche une fenêtre de notification d\'alerte système par-dessus l\'écran de verrouillage pour des alertes sécurisées limitées dans le temps (plafond fixe : 60 s)</string>
+
+    <!-- Device-admin "lock now" (standard tier, DevicePolicyManager) -->
+    <string name="lock_admin_card_title">Verrouiller l\'appareil</string>
+    <string name="lock_admin_active_subtitle">L\'administrateur d\'appareil est actif — vous pouvez verrouiller l\'écran à la demande.</string>
+    <string name="lock_admin_inactive_subtitle">Accordez l\'administrateur d\'appareil (verrouillage forcé uniquement) pour verrouiller l\'écran d\'ici. Aucun root requis.</string>
+    <string name="lock_admin_enable">Activer l\'administrateur d\'appareil</string>
+    <string name="lock_admin_explanation">HardwareDash utilise l\'administrateur d\'appareil uniquement pour verrouiller l\'écran à la demande, rien d\'autre.</string>
+    <string name="lock_now_action">Verrouiller maintenant</string>
+    <string name="lock_now_confirm_title">Verrouiller l\'écran maintenant ?</string>
+    <string name="lock_now_confirm_message">Cela verrouille immédiatement l\'appareil. Il vous faudra votre code, votre schéma ou votre biométrie pour revenir.</string>
+    <string name="lock_cancel">Annuler</string>
 </resources>

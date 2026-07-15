@@ -50,4 +50,13 @@
     <string name="nfc_root_reset_confirm_title">Reset NFC mutations?</string>
     <string name="nfc_root_reset_confirm_message">This reverts every rooted NFC change this app has made. Continue?</string>
     <string name="nfc_root_reset_confirm_label">Reset</string>
+
+    <!-- ─── Rooted config-entry tools (parameter input, W6 write-tier) ──── -->
+    <string name="nfc_tools_title">Raw NCI command</string>
+    <string name="nfc_tools_subtitle">Send a raw NCI frame straight to the NFC controller. Hex only; payload is capped at 256 bytes.</string>
+    <string name="nfc_tools_payload_label">NCI payload (hex)</string>
+    <string name="nfc_tools_payload_error">Enter an even number of hex digits (max 512).</string>
+    <string name="nfc_tools_send">Send NCI</string>
+    <string name="nfc_tools_confirm_title">Send raw NCI command?</string>
+    <string name="nfc_tools_confirm_message">This writes an arbitrary frame directly to the NFC controller and can leave it in an unexpected state. Continue?</string>
 </resources>

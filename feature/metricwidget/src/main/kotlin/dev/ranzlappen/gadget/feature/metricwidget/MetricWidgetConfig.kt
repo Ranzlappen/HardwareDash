@@ -24,6 +24,8 @@ data class MetricWidgetConfig(
     val display: MetricWidgetDisplay = MetricWidgetDisplay.ValueAndBar,
     val showLabel: Boolean = true,
     val tintArgb: Long? = null,
+    /** History window (seconds) for the [MetricWidgetDisplay.Sparkline] chart. */
+    val windowSeconds: Int = DEFAULT_WINDOW_SECONDS,
     val sizePreset: WidgetSizePreset = WidgetSizePreset.Medium,
     override val displayName: String = "",
     override val removed: Boolean = false,
@@ -37,6 +39,9 @@ data class MetricWidgetConfig(
     companion object {
         /** The unbound sentinel: a fresh tray-drop before the picker runs. */
         const val NO_METRIC: String = ""
+
+        /** Default sparkline window (5 minutes). */
+        const val DEFAULT_WINDOW_SECONDS: Int = 300
     }
 }
 
@@ -48,4 +53,12 @@ enum class MetricWidgetDisplay {
 
     /** The value + unit plus a progress bar scaled to the descriptor ceiling. */
     ValueAndBar,
+
+    /**
+     * The value + a windowed history sparkline (rendered to a bitmap). Data
+     * comes from the monitoring history, which only exists while the metric is
+     * being sampled by `MonitorService`; an unmonitored metric shows a
+     * "collecting" placeholder until history accrues.
+     */
+    Sparkline,
 }

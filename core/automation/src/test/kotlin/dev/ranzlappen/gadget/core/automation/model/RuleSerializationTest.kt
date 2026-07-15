@@ -88,6 +88,25 @@ class RuleSerializationTest {
         assertEquals(rule, roundTrip(rule))
     }
 
+    @Test
+    fun geofenceRule_roundTrips() {
+        val rule = ruleWith(
+            Trigger.Geofence(
+                latitude = 48.137154,
+                longitude = 11.576124,
+                radiusMeters = 150f,
+                transition = GeofenceTransition.Exit,
+            ),
+        )
+        assertEquals(rule, roundTrip(rule))
+    }
+
+    @Test
+    fun externalBroadcastRule_roundTrips() {
+        val rule = ruleWith(Trigger.ExternalBroadcast(tag = "leaving_work"))
+        assertEquals(rule, roundTrip(rule))
+    }
+
     // ─── discriminator pins (the sacred wire strings) ───────────────
 
     @Test
@@ -132,6 +151,42 @@ class RuleSerializationTest {
         assertTrue(
             "encoded=$encoded must carry the pinned FQN discriminator",
             encoded.contains("\"dev.ranzlappen.gadget.core.automation.Trigger.Manual\""),
+        )
+    }
+
+    @Test
+    fun geofencePinsDiscriminator() {
+        // Use the NON-default transition (Exit): AutomationJson encodes with
+        // encodeDefaults=false, so the default Enter would be omitted and the
+        // by-name enum assertion couldn't see it.
+        val encoded = json.encodeToString(
+            Trigger.serializer(),
+            Trigger.Geofence(
+                latitude = 0.0,
+                longitude = 0.0,
+                radiusMeters = 100f,
+                transition = GeofenceTransition.Exit,
+            ),
+        )
+        assertTrue(
+            "encoded=$encoded must carry the pinned FQN discriminator",
+            encoded.contains("\"dev.ranzlappen.gadget.core.automation.Trigger.Geofence\""),
+        )
+        assertTrue(
+            "transition encodes by name: $encoded",
+            encoded.contains("\"Exit\""),
+        )
+    }
+
+    @Test
+    fun externalBroadcastPinsDiscriminator() {
+        val encoded = json.encodeToString(
+            Trigger.serializer(),
+            Trigger.ExternalBroadcast(tag = "t"),
+        )
+        assertTrue(
+            "encoded=$encoded must carry the pinned FQN discriminator",
+            encoded.contains("\"dev.ranzlappen.gadget.core.automation.Trigger.ExternalBroadcast\""),
         )
     }
 

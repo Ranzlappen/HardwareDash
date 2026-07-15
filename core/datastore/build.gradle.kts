@@ -40,6 +40,12 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
+    // kotlin-test — FeaturePreferencesTest uses kotlin.test.assertEquals /
+    // assertNull. The feature convention plugin adds this automatically, but
+    // this module uses the plain `gadget.android.library` plugin, so it must
+    // be declared explicitly (without it the test source does not compile,
+    // which is why the module was historically absent from the CI test list).
+    testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
 }

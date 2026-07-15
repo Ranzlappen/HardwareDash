@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_edit">Dashboard bearbeiten</string>
+    <string name="dashboard_empty">Alle Module sind ausgeblendet. Tippe auf „Dashboard bearbeiten“, um welche anzuzeigen.</string>
+    <string name="dashboard_reset">Auf Standard zurücksetzen</string>
+    <string name="dashboard_move_up">Nach oben</string>
+    <string name="dashboard_move_down">Nach unten</string>
+    <string name="dashboard_pin">Anheften</string>
+    <string name="dashboard_unpin">Lösen</string>
+</resources>

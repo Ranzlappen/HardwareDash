@@ -108,8 +108,16 @@ the app-wide `Map<String, MetricSource>` multibinding and paints
 `MetricWidgetController` repaints on each bound source's push `stream()`
 plus a 30 s ticker for poll-only sources. Placement is launcher-tray +
 config-activity only (config written synchronously under the real
-`appWidgetId`), so it needs no pin receiver. Sparkline display is a planned
-fast-follow (mirrors the torch `MonitorChartWidgetProvider` bitmap path).
+`appWidgetId`), so it needs no pin receiver. Three display modes: **Value**,
+**Value + bar** (scaled to `descriptor.currentMax()`), and **Sparkline** — a
+windowed history chart rendered to a bitmap via the shared
+`MonitorChartBitmapRenderer` (the torch `MonitorChartWidgetProvider` path),
+fed by `MonitorSampleRepository.observeBucketedSince`. The sparkline shows a
+"collecting" state until the metric has ≥2 history points (history exists only
+while `MonitorService` is sampling that metric). Because
+`BaseContentWidgetProvider` owns the `updateAppWidget` call, the bitmap is
+rendered **without** returning it to the renderer's pool — never releasing
+means the pool always allocates fresh, so no in-flight bitmap is aliased.
 
 **Folder widget icon catalog** — `FolderWidgetIconCatalog`
 (`feature/apps/.../widget/customization/`) implements `WidgetIconResolver`

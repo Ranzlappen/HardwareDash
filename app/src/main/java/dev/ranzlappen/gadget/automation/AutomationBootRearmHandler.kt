@@ -5,6 +5,7 @@ import dev.ranzlappen.gadget.core.automation.RuleRepository
 import dev.ranzlappen.gadget.core.automation.engine.AutomationServiceResidency
 import dev.ranzlappen.gadget.core.automation.service.AutomationController
 import dev.ranzlappen.gadget.core.automation.service.AutomationScheduler
+import dev.ranzlappen.gadget.core.automation.service.GeofenceRegistrar
 import dev.ranzlappen.gadget.core.automation.service.RuleFireExecutor
 import dev.ranzlappen.gadget.core.automation.model.SystemEventKind
 import dev.ranzlappen.gadget.core.automation.model.Trigger
@@ -36,6 +37,7 @@ import javax.inject.Singleton
 class AutomationBootRearmHandler @Inject constructor(
     private val ruleRepository: RuleRepository,
     private val scheduler: AutomationScheduler,
+    private val geofenceRegistrar: GeofenceRegistrar,
     private val controller: AutomationController,
     private val fireExecutor: RuleFireExecutor,
 ) : BootRearmHandler {
@@ -49,6 +51,8 @@ class AutomationBootRearmHandler @Inject constructor(
             .forEach { fireExecutor.fire(it) }
 
         rules.forEach(scheduler::scheduleNext)
+        // Geofences, like alarms, don't survive reboot — re-register each.
+        rules.forEach(geofenceRegistrar::register)
 
         if (AutomationServiceResidency.isServiceRequired(rules)) {
             controller.ensureStarted()

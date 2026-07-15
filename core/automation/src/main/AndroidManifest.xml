@@ -18,6 +18,16 @@
       aren't deliverable to manifest receivers since Android N).
     -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!--
+      Geofence triggers (Trigger.Geofence). GeofencingClient needs fine
+      location, and delivering transitions while the app is backgrounded/closed
+      needs background location ("Allow all the time"). Both self-declared here
+      so the engine is independent of :feature:gps (which also declares
+      background location for GPS spoofing); duplicate uses-permission merges
+      cleanly.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application>
         <!--
@@ -47,6 +57,16 @@
             android:exported="false" />
 
         <!--
+          Landing point for GeofencingClient transition callbacks. The OS
+          hosts the fences and fires our PendingIntent on enter/exit; the
+          triggering rule ids ride in the GeofencingEvent, so no intent-filter
+          is needed (like the alarm receiver).
+        -->
+        <receiver
+            android:name=".service.GeofenceReceiver"
+            android:exported="false" />
+
+        <!--
           Power events are on the implicit-broadcast exemption list, so a
           manifest receiver still gets them. Connectivity is NOT armed here
           (not deliverable to manifest receivers since Android N) — it is
@@ -59,6 +79,20 @@
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+          External-automation hook (Trigger.ExternalBroadcast). Exported so
+          other automation apps (Tasker/MacroDroid/etc.) can fire it, but it
+          listens for ONE fixed app-namespaced action and only ever runs the
+          user's own tag-matched rules — see the receiver KDoc's security note.
+        -->
+        <receiver
+            android:name=".service.AutomationExternalBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="dev.ranzlappen.gadget.feature.automation.EXTERNAL_TRIGGER" />
             </intent-filter>
         </receiver>
     </application>

@@ -64,4 +64,16 @@
     <string name="ir_root_reset_confirm_title">Reset IR mutations?</string>
     <string name="ir_root_reset_confirm_message">This reverts every rooted IR change this app has made. Continue?</string>
     <string name="ir_root_reset_confirm_label">Reset</string>
+
+    <!-- ─── Rooted config-entry tools (parameter input, W6 write-tier) ──── -->
+    <string name="ir_tools_title">Extreme IR tools</string>
+    <string name="ir_tools_subtitle">Direct GPIO emission that bypasses the IR HAL. Values are clamped to the hardware-safe ceilings.</string>
+    <string name="ir_tools_duration_label">Duration</string>
+    <string name="ir_tools_carrier_section">Custom carrier burst</string>
+    <string name="ir_tools_carrier_hz_label">Carrier</string>
+    <string name="ir_tools_carrier_run">Emit carrier</string>
+    <string name="ir_tools_raw_section">Raw on/off pattern</string>
+    <string name="ir_tools_raw_on_label">Pulse on</string>
+    <string name="ir_tools_raw_off_label">Pulse off</string>
+    <string name="ir_tools_raw_run">Emit pattern</string>
 </resources>

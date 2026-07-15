@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ranzlappen.gadget.core.navigation.GadgetDestination
@@ -68,22 +69,22 @@ internal fun DashboardScreenContent(
     modifier: Modifier = Modifier,
 ) {
     ModuleScreenScaffold(
-        title = "Dashboard",
+        title = stringResource(R.string.dashboard_title),
         modifier = modifier,
         functional = {
             GadgetSecondaryButton(
                 onClick = onEdit,
-                text = "Edit dashboard",
+                text = stringResource(R.string.dashboard_edit),
                 leadingIcon = Icons.Outlined.Edit,
                 modifier = Modifier.fillMaxWidth(),
             )
             if (entries.isEmpty()) {
                 DashCard(
                     modifier = Modifier.fillMaxWidth(),
-                    title = "Dashboard",
+                    title = stringResource(R.string.dashboard_title),
                 ) {
                     Text(
-                        text = "Every module is hidden. Tap “Edit dashboard” to show some.",
+                        text = stringResource(R.string.dashboard_empty),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

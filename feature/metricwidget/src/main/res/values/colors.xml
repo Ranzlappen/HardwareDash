@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sparkline colors for the metric widget (RemoteViews bitmap render path).
+  Resolved via ContextCompat.getColor in MetricWidgetProvider and handed to
+  MonitorChartBitmapRenderer. Brand teal line over a translucent fill on a
+  transparent ground so the widget's own background chrome shows through.
+-->
+<resources>
+    <color name="metric_widget_spark_line">#FF00E5C8</color>
+    <color name="metric_widget_spark_fill">#3300E5C8</color>
+    <color name="metric_widget_spark_bg">#00000000</color>
+</resources>

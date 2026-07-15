@@ -271,9 +271,9 @@ allow-list), independent of the migrated controller.
   A follow-up commit adds the **write-tier** surface: a new `:core:ui`
   `RootConfirmActionRow` (a `RootActionRow` gated behind a confirmation
   `GadgetDialog`) now surfaces the no-arg device-mutating actions of
-  `microphone`, `camera`, `notification`, `radios-ir`, and `radios-nfc`. Still
-  deferred: the config-bearing extreme actions (need parameter entry), plus
-  `apps` and `lock` (the latter needs `DevicePolicyManager`).
+  `microphone`, `camera`, `notification`, `radios-ir`, and `radios-nfc`.
+  (The config-bearing **parameter-entry** actions and `apps` / `lock` were
+  deferred here and land in later batches — see below.)
   Also lands the **first live W5 `@IntoMap` contributor**: `:feature:notification`
   contributes a `FeaturePermissions` group surfacing the notification-listener
   special permission (outside the app baseline) in the Permissions dashboard.
@@ -286,6 +286,61 @@ allow-list), independent of the migrated controller.
   (`CustomThemeOption.Custom` + a `CustomPalette` accent override materialized
   through a new `GadgetTheme(customColorSchemeOverride=…)` seam, edited with
   live `GadgetColorPicker`s in Settings).
+- **Follow-up (post-#203) — batch 3 fast-follows.** Adds the **W4
+  metric-widget sparkline** display mode (`MetricWidgetDisplay.Sparkline`
+  renders a bucketed `MonitorSampleRepository` history through
+  `MonitorChartBitmapRenderer` into the widget's `ImageView`, with a
+  configurable time window); **dashboard-editor localization** (the new
+  `:feature:dashboard` strings gain `de`/`es`/`fr` parity); opt-in
+  **predictive back** (`android:enableOnBackInvokedCallback`, safe on the
+  fully-Compose/Navigation back stack); and the **W6 `apps` write-tier
+  confirm gate** — the rooted per-app freeze / force-stop actions (the
+  `AppRootActionsMenu` in the folder editor's app picker, backed by
+  `AppsRootController`) now route through a `GadgetDialog` confirmation
+  matching the `RootConfirmActionRow` convention, so a privileged `pm
+  disable-user` / `am force-stop` never fires on a single tap. Unfreeze
+  (the non-destructive restore) stays immediate. Batch 3 also adds a new
+  `RootedAppsRootController` **safety-gate unit test** (deny-list /
+  package-validation) and wires several previously-unrun test modules into
+  the JVM CI job.
+- **Follow-up (post-#203) — W6 config-entry parameter UIs.** The
+  config-bearing rooted actions now have in-screen **parameter input**,
+  mirroring the microphone's `MicrophoneToolsCard`: a `*ToolsCard` per
+  feature with `GadgetSlider` / `GadgetTextField` inputs feeding the
+  controller's config methods and surfacing each result through the shared
+  `RootActionState`. **IR** — custom-carrier burst (frequency + duration)
+  and raw on/off GPIO pattern. **NFC** — raw NCI command (hex field,
+  confirm-gated). **Camera** — high-FPS capture, manual ISO/exposure/focus
+  override, raw multi-frame capture, multi-camera capture, and the
+  shutter-sound toggle. Every card renders only on the rooted flavor and the
+  controllers re-clamp to their hard hardware ceilings.
+- **Follow-up (post-#203) — W7 geofence trigger.** The previously-deferred
+  location-fence trigger now works end to end. `Trigger.Geofence`
+  (lat/lon/radius + a pinned `GeofenceTransition` enter/exit enum) joins the
+  sealed `Trigger` graph with its package-stable `@SerialName` and
+  append-only `RuleSerializationTest` pins. The rule builder gains a Geofence
+  chip + editor (lat/lon/radius fields + transition chips). Arming is
+  OS-hosted, **not** service-resident: a new `GeofenceRegistrar` wraps
+  `GeofencingClient` (one fence per rule, requestId = rule id, a single
+  MUTABLE `PendingIntent`), and `GeofenceReceiver` maps the transition back
+  and fires matching rules through the shared `RuleFireExecutor`. Fences are
+  re-armed on boot (`AutomationBootRearmHandler`) and on every rule
+  save/delete (`AutomationViewModel`) — like alarms, they don't survive
+  reboot. Uses the `play-services-location` artifact `:feature:gps` already
+  ships, and self-declares `ACCESS_FINE`/`ACCESS_BACKGROUND_LOCATION` in the
+  `:core:automation` manifest; registration silently no-ops until the user
+  grants "Allow all the time".
+- **Follow-up (post-#203) — W6 lock (device-admin, no root).** The last
+  deferred W6 write-tier surface. `:feature:lock` (previously read-only) gains
+  a standard-tier "lock the device now" via `DevicePolicyManager`: a
+  behaviourless `GadgetDeviceAdminReceiver` holding **only** the force-lock
+  policy (`res/xml/lock_device_admin.xml`), a `DeviceLockController`
+  (`isAdminActive` / `adminActivationIntent` / `lockNow` → a small
+  `DeviceLockResult`), and a `DeviceAdminCard` that launches the system
+  admin-activation prompt (re-checking on `ON_RESUME`) and, once active,
+  offers a confirm-gated **Lock now**. No root — `lockNow()` works in the
+  standard flavor once the admin is activated; pairs naturally with the
+  geofence trigger (exit fence → lock).
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.
@@ -336,7 +391,7 @@ verified with an `apksigner verify` gate. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-07-11 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-07-14 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md`,
 > [Completion Master Plan](Completion-Master-Plan) ·
 > Related modules: all._

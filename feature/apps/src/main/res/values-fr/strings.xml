@@ -104,4 +104,8 @@
     <string name="apps_root_result_unsupported">Nécessite la version rootée de l\'application</string>
     <string name="apps_root_result_opted_out">Désactivé dans les Paramètres</string>
     <string name="apps_root_result_rate_limited">Limité en fréquence — réessayez sous peu</string>
+    <string name="apps_root_confirm_title">Confirmer l\'action root</string>
+    <string name="apps_root_confirm_cancel">Annuler</string>
+    <string name="apps_root_freeze_confirm_message">Geler %1$s ? L\'application disparaîtra du launcher et ne pourra pas s\'exécuter tant que vous ne l\'aurez pas dégelée.</string>
+    <string name="apps_root_force_stop_confirm_message">Forcer l\'arrêt de %1$s ? Tous les processus en cours sont immédiatement arrêtés.</string>
 </resources>

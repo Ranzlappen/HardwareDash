@@ -30,4 +30,15 @@
     <string name="lock_cap_rooted_required">Requiere compilación rooteada</string>
     <string name="lock_cap_overlay_name">Superposición de notificación en pantalla de bloqueo</string>
     <string name="lock_cap_overlay_detail">Muestra una ventana de notificación de alerta del sistema sobre la pantalla de bloqueo para alertas seguras temporizadas (límite fijo: 60 s)</string>
+
+    <!-- Device-admin "lock now" (standard tier, DevicePolicyManager) -->
+    <string name="lock_admin_card_title">Bloquear el dispositivo</string>
+    <string name="lock_admin_active_subtitle">El administrador de dispositivos está activo: puedes bloquear la pantalla cuando quieras.</string>
+    <string name="lock_admin_inactive_subtitle">Concede administrador de dispositivos (solo forzar bloqueo) para bloquear la pantalla desde aquí. No requiere root.</string>
+    <string name="lock_admin_enable">Activar administrador de dispositivos</string>
+    <string name="lock_admin_explanation">HardwareDash usa el administrador de dispositivos solo para bloquear la pantalla cuando lo pidas, nada más.</string>
+    <string name="lock_now_action">Bloquear ahora</string>
+    <string name="lock_now_confirm_title">¿Bloquear la pantalla ahora?</string>
+    <string name="lock_now_confirm_message">Esto bloquea el dispositivo de inmediato. Necesitarás tu PIN, patrón o biometría para volver a entrar.</string>
+    <string name="lock_cancel">Cancelar</string>
 </resources>
