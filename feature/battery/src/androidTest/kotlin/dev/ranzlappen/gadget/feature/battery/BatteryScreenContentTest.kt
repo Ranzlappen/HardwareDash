@@ -2,6 +2,8 @@ package dev.ranzlappen.gadget.feature.battery
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -57,7 +59,11 @@ class BatteryScreenContentTest {
             .assertIsDisplayed()
         composeTestRule.onNodeWithText(res.getString(R.string.battery_card_status_title))
             .assertIsDisplayed()
-        composeTestRule.onNodeWithText(res.getString(R.string.battery_card_charging_title))
+        // "Charging" is both the card title and — for a Charging state — the
+        // status label rendered inside that card, so the text legitimately
+        // appears twice. Assert at least one is shown.
+        composeTestRule.onAllNodesWithText(res.getString(R.string.battery_card_charging_title))
+            .onFirst()
             .assertIsDisplayed()
     }
 
