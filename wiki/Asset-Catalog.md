@@ -11,7 +11,8 @@ Per the maintenance rules, **every new asset category updates this page.**
 | Asset | Path | Notes |
 |---|---|---|
 | Launcher icon | `app/src/main/res/mipmap-*/ic_launcher.webp` + `_round.webp` | 5 densities (mdpi → xxxhdpi), WEBP. |
-| Adaptive layers | `app/src/main/res/drawable/ic_launcher_background.xml`, `ic_launcher_foreground.xml` | Vector adaptive-icon layers. |
+| Adaptive icon | `app/src/main/res/mipmap-anydpi/ic_launcher.xml` + `_round.xml` | Declares the three layers below (background / foreground / monochrome). |
+| Adaptive layers | `app/src/main/res/drawable/ic_gadget_background.xml` (background), `…/drawable-nodpi/ic_gadget_artwork.png` (foreground), `ic_gadget_monochrome.xml` (monochrome) | The real adaptive-icon layers. The old Android-Studio stock `ic_launcher_background/foreground.xml` placeholders were orphaned and removed. |
 | Monochrome icon | `app/src/main/res/drawable/ic_gadget_monochrome.xml` | Themed-icon (Android 13+). |
 | Brand artwork | `…/drawable-nodpi/ic_gadget_artwork.png` | Per-flavor variants under `standardDebug/`, `standardRelease/`, `rootedDebug/`, `rootedRelease/` — lets each flavor/build show distinct artwork. |
 | Brand background | `app/src/main/res/drawable/ic_gadget_background.xml` | Vector. |
@@ -124,6 +125,6 @@ find . -name "strings.xml" -o -name "themes.xml" -o -name "colors.xml" | sort
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: live `find` over `*/res/*`,
+> _Last reviewed: 2026-07-15 · Source: live `find` over `*/res/*`,
 > `docs/backup.md` · Related modules: `:core:widgetkit`, `:feature:torch`,
 > `:feature:vibration`, `:feature:apps`, `:app`._
