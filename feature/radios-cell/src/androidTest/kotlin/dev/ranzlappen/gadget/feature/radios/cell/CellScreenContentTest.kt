@@ -112,6 +112,7 @@ class CellScreenContentTest {
             }
         }
 
+        composeTestRule.onNodeWithText("Raw modem diagnostics").performScrollTo().performClick()
         composeTestRule
             .onNodeWithText("/sys/class/qcom_smd8/status")
             .performScrollTo()

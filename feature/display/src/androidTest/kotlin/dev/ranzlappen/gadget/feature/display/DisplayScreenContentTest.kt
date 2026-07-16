@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
@@ -93,13 +94,13 @@ class DisplayScreenContentTest {
     @Test
     fun resetAction_firesResetAllRequestedEvent() {
         val events = setContent(DisplayState())
-        composeTestRule.onNodeWithText(res.getString(R.string.display_reset_action)).performClick()
+        composeTestRule.onNodeWithText(res.getString(R.string.display_reset_action)).performScrollTo().performClick()
         assertEquals(listOf(DisplayUiEvent.ResetAllRequested), events)
     }
 
     @Test
     fun statusMessage_rendersWhenPresent() {
         setContent(DisplayState(statusMessage = "Density set to 440 dpi"))
-        composeTestRule.onNodeWithText("Density set to 440 dpi").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Density set to 440 dpi").performScrollTo().assertIsDisplayed()
     }
 }
