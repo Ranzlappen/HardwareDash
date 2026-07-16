@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.FlashlightOff
 import androidx.compose.material.icons.outlined.FlashlightOn
+import androidx.compose.material.icons.outlined.HistoryToggleOff
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -61,6 +62,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.component.DashCard
+import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GadgetPrimaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetStatusKind
@@ -470,10 +472,10 @@ private fun ScanHistoryCard(
         title = stringResource(R.string.camera_card_history_title),
     ) {
         if (history.isEmpty()) {
-            Text(
-                text = stringResource(R.string.camera_history_empty),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            GadgetEmptyState(
+                title = stringResource(R.string.camera_history_empty),
+                icon = Icons.Outlined.HistoryToggleOff,
+                modifier = Modifier.fillMaxWidth(),
             )
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {

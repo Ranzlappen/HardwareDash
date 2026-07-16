@@ -3,6 +3,7 @@ package dev.ranzlappen.gadget.feature.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
@@ -49,7 +50,7 @@ fun SettingsScreen(
     val monitorNotificationActionsEnabled by viewModel.monitorNotificationActionsEnabled.collectAsStateWithLifecycle()
     val language by viewModel.language.collectAsStateWithLifecycle()
     ModuleScreenScaffold(
-        title = "Settings",
+        title = stringResource(R.string.settings_screen_title),
         modifier = modifier,
         functional = {
             AboutCard()

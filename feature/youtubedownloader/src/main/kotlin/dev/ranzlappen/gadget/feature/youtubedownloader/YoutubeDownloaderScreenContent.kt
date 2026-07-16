@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Downloading
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +25,7 @@ import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
+import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GadgetPrimaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetTertiaryButton
@@ -262,10 +264,10 @@ private fun QueueCard(tasks: List<DownloadTask>, onEvent: (YtdlEvent) -> Unit) {
     val spacing = LocalGadgetTheme.current.spacing
     DashCard(title = stringResource(R.string.ytdl_queue_title)) {
         if (tasks.isEmpty()) {
-            Text(
-                text = stringResource(R.string.ytdl_queue_empty),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            GadgetEmptyState(
+                title = stringResource(R.string.ytdl_queue_empty),
+                icon = Icons.Outlined.Downloading,
+                modifier = Modifier.fillMaxWidth(),
             )
             return@DashCard
         }

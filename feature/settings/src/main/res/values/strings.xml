@@ -1,13 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Language card (W8 — per-app language picker). The rest of
-         :feature:settings still carries hardcoded English literals in
-         Kotlin rather than string resources — a pre-existing gap, tracked
-         separately, not part of this addition's scope. -->
+    <!-- Language card (W8 — per-app language picker). -->
     <string name="settings_language_title">Language</string>
     <string name="settings_language_system_default">System default</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_de">Deutsch</string>
     <string name="settings_language_es">Español</string>
     <string name="settings_language_fr">Français</string>
+
+    <!-- Screen -->
+    <string name="settings_screen_title">Settings</string>
+
+    <!-- Appearance / palette -->
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_palette">Palette</string>
+    <string name="settings_edit_custom_palette">Edit custom palette</string>
+    <string name="settings_dynamic_color">Dynamic colour</string>
+    <string name="settings_dynamic_color_on">Use your wallpaper\'s palette (Android 12+)</string>
+    <string name="settings_dynamic_color_overridden">Overridden by the selected palette</string>
+    <string name="settings_custom_palette_title">Custom palette</string>
+    <string name="settings_palette_primary">Primary</string>
+    <string name="settings_palette_secondary">Secondary</string>
+    <string name="settings_palette_tertiary">Tertiary</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_follow_system">Follow system</string>
+    <string name="settings_palette_default">Default</string>
+    <string name="settings_palette_high_contrast">High contrast</string>
+    <string name="settings_palette_amoled">AMOLED</string>
+    <string name="settings_palette_pastel">Pastel</string>
+    <string name="settings_palette_custom">Custom</string>
+
+    <!-- Accessibility -->
+    <string name="settings_accessibility_title">Accessibility</string>
+    <string name="settings_reduce_motion">Reduce motion</string>
+    <string name="settings_reduce_transparency">Reduce transparency</string>
+    <string name="settings_reduce_transparency_subtitle">Swap glassy surfaces to a higher-opacity preset</string>
+    <string name="settings_increase_text_size">Increase text size</string>
+    <string name="settings_increase_text_size_subtitle">Reserved — wires to a font-scale override in a later batch</string>
+    <string name="settings_floating_torch_button">Floating torch button</string>
+    <string name="settings_floating_torch_button_subtitle">Show a draggable button over other apps to toggle the torch</string>
+    <string name="settings_floating_torch_button_permission">Requires overlay permission — tap to grant in system settings</string>
+    <string name="settings_tristate_on">On</string>
+    <string name="settings_tristate_off">Off</string>
+    <string name="settings_tristate_follow_system">Follow system</string>
+
+    <!-- Monitoring -->
+    <string name="settings_monitoring_title">Monitoring</string>
+    <string name="settings_notification_controls">Notification controls</string>
+    <string name="settings_notification_controls_subtitle">Show a \'Stop\' action on each monitoring notification</string>
+
+    <!-- About -->
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_version">Version</string>
+    <string name="settings_about_build">Build</string>
+    <string name="settings_about_build_type">Build type</string>
 </resources>

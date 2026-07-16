@@ -341,6 +341,25 @@ allow-list), independent of the migrated controller.
   offers a confirm-gated **Lock now**. No root — `lockNow()` works in the
   standard flavor once the admin is activated; pairs naturally with the
   geofence trigger (exit fence → lock).
+- **Follow-up (post-#204) — batch 4: polish, test coverage, localization.**
+  Clears the three items parked out of #204. **W9:** removed the orphaned
+  stock launcher-icon placeholders (the adaptive icon already uses the custom
+  `ic_gadget_*` layers) and routed the last hand-rolled text-only empty
+  states (camera scan history, notification channel inspector, YouTube queue)
+  through the shared `GadgetEmptyState`. **W10:** added the first Compose UI
+  tests for the stateless `:feature:battery`, `:feature:storage` and
+  `:feature:dashboard` screens and gated them on the emulator. An attempt to
+  also gate every dormant androidTest suite was rolled back to a verified-green
+  set: enabling them surfaced pre-existing breakage those suites had always
+  carried (a stale `assertDoesNotExist` import — a member function, not an
+  importable symbol — and, in the notification suite, single-node assertions
+  that ignore the always-present rooted capability rows). Greening those
+  dormant suites one at a time is a tracked follow-up.
+  **Localization:** migrated the ~39 inline-English literals in
+  `:feature:settings` (appearance/palette picker, accessibility, monitoring,
+  about) to string resources with full de/es/fr parity — the last debt the
+  roadmap flagged. Macrobenchmark infra remains deferred (the `:benchmark`
+  module is still a skeleton).
 - **Phase 4 — Polish, Testing, CI/CD & Release.** Per-feature
   instrumented tests on `:core:testing` fixtures, emulator CI (#92),
   performance benchmarks, release-candidate flow + Play metadata.
@@ -391,7 +410,7 @@ verified with an `apksigner verify` gate. See [Testing & CI](Testing-and-CI).
 
 ---
 
-> _Last reviewed: 2026-07-14 · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-07-15 · Source: `MASTER-PLAN.md`,
 > `docs/refactor-2026/*`, `README.md`,
 > [Completion Master Plan](Completion-Master-Plan) ·
 > Related modules: all._

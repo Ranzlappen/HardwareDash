@@ -25,4 +25,7 @@ dependencies {
     implementation(project(":core:datastore"))
 
     testImplementation(libs.junit)
+
+    androidTestImplementation(project(":core:testing"))
+    androidTestImplementation(libs.androidx.junit)
 }

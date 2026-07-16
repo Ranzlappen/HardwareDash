@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ import dev.ranzlappen.gadget.core.ui.component.GadgetChip
 import dev.ranzlappen.gadget.core.ui.component.GadgetColorPicker
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
+import dev.ranzlappen.gadget.feature.settings.R
 
 /**
  * Appearance card — dark-theme mode selector + dynamic-color
@@ -72,12 +74,12 @@ internal fun AppearanceCard(
     var showPaletteEditor by remember { mutableStateOf(false) }
     DashCard(
         modifier = modifier.fillMaxWidth(),
-        title = "Appearance",
+        title = stringResource(R.string.settings_appearance_title),
         icon = Icons.Outlined.Palette,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
             Text(
-                text = "Theme",
+                text = stringResource(R.string.settings_theme),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -93,7 +95,7 @@ internal fun AppearanceCard(
                 }
             }
             Text(
-                text = "Palette",
+                text = stringResource(R.string.settings_palette),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -136,15 +138,15 @@ internal fun AppearanceCard(
                 GadgetChip(
                     selected = false,
                     onClick = { showPaletteEditor = true },
-                    label = "Edit custom palette",
+                    label = stringResource(R.string.settings_edit_custom_palette),
                 )
             }
             SettingsToggleRow(
-                title = "Dynamic colour",
+                title = stringResource(R.string.settings_dynamic_color),
                 subtitle = if (preferences.customTheme == CustomThemeOption.Default) {
-                    "Use your wallpaper's palette (Android 12+)"
+                    stringResource(R.string.settings_dynamic_color_on)
                 } else {
-                    "Overridden by the selected palette"
+                    stringResource(R.string.settings_dynamic_color_overridden)
                 },
                 checked = preferences.dynamicColor &&
                     preferences.customTheme == CustomThemeOption.Default,
@@ -176,20 +178,20 @@ private fun CustomPaletteEditorSheet(
     onDismiss: () -> Unit,
 ) {
     val spacing = LocalGadgetTheme.current.spacing
-    GadgetBottomSheet(onDismissRequest = onDismiss, title = "Custom palette") {
+    GadgetBottomSheet(onDismissRequest = onDismiss, title = stringResource(R.string.settings_custom_palette_title)) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.medium)) {
             PaletteAccentField(
-                label = "Primary",
+                label = stringResource(R.string.settings_palette_primary),
                 argb = palette.primaryArgb,
                 onArgbChange = { onPaletteChange(palette.copy(primaryArgb = it)) },
             )
             PaletteAccentField(
-                label = "Secondary",
+                label = stringResource(R.string.settings_palette_secondary),
                 argb = palette.secondaryArgb,
                 onArgbChange = { onPaletteChange(palette.copy(secondaryArgb = it)) },
             )
             PaletteAccentField(
-                label = "Tertiary",
+                label = stringResource(R.string.settings_palette_tertiary),
                 argb = palette.tertiaryArgb,
                 onArgbChange = { onPaletteChange(palette.copy(tertiaryArgb = it)) },
             )
@@ -351,18 +353,20 @@ private fun CustomThemeOption.toGadgetCustomTheme(): GadgetCustomTheme = when (t
     CustomThemeOption.Custom -> GadgetCustomTheme.Default
 }
 
+@Composable
 private fun DarkThemeMode.toDisplayLabel(): String = when (this) {
-    DarkThemeMode.Light -> "Light"
-    DarkThemeMode.Dark -> "Dark"
-    DarkThemeMode.FollowSystem -> "Follow system"
+    DarkThemeMode.Light -> stringResource(R.string.settings_theme_light)
+    DarkThemeMode.Dark -> stringResource(R.string.settings_theme_dark)
+    DarkThemeMode.FollowSystem -> stringResource(R.string.settings_theme_follow_system)
 }
 
+@Composable
 private fun CustomThemeOption.toDisplayLabel(): String = when (this) {
-    CustomThemeOption.Default -> "Default"
-    CustomThemeOption.HighContrast -> "High contrast"
-    CustomThemeOption.AmoledTrue -> "AMOLED"
-    CustomThemeOption.Pastel -> "Pastel"
-    CustomThemeOption.Custom -> "Custom"
+    CustomThemeOption.Default -> stringResource(R.string.settings_palette_default)
+    CustomThemeOption.HighContrast -> stringResource(R.string.settings_palette_high_contrast)
+    CustomThemeOption.AmoledTrue -> stringResource(R.string.settings_palette_amoled)
+    CustomThemeOption.Pastel -> stringResource(R.string.settings_palette_pastel)
+    CustomThemeOption.Custom -> stringResource(R.string.settings_palette_custom)
 }
 
 // ─── Previews ───────────────────────────────────────────────────────

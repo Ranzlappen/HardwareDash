@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.RestartAlt
 import androidx.compose.material.icons.outlined.SettingsBackupRestore
 import androidx.compose.material.icons.outlined.Tune
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetChip
+import dev.ranzlappen.gadget.core.ui.component.GadgetEmptyState
 import dev.ranzlappen.gadget.core.ui.component.GadgetPrimaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.component.GadgetSlider
@@ -127,9 +129,10 @@ internal fun ChannelInspectorCard(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(spacing.small)) {
             if (channels.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.notification_channel_inspector_empty),
-                    style = MaterialTheme.typography.bodyMedium,
+                GadgetEmptyState(
+                    title = stringResource(R.string.notification_channel_inspector_empty),
+                    icon = Icons.Outlined.NotificationsNone,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             } else {
                 channels.forEach { channel ->

@@ -6,4 +6,53 @@
     <string name="settings_language_de">Deutsch</string>
     <string name="settings_language_es">Español</string>
     <string name="settings_language_fr">Français</string>
+
+    <!-- Screen -->
+    <string name="settings_screen_title">Paramètres</string>
+
+    <!-- Appearance / palette -->
+    <string name="settings_appearance_title">Apparence</string>
+    <string name="settings_theme">Thème</string>
+    <string name="settings_palette">Palette</string>
+    <string name="settings_edit_custom_palette">Modifier la palette personnalisée</string>
+    <string name="settings_dynamic_color">Couleurs dynamiques</string>
+    <string name="settings_dynamic_color_on">Utiliser la palette de votre fond d\'écran (Android 12+)</string>
+    <string name="settings_dynamic_color_overridden">Remplacé par la palette sélectionnée</string>
+    <string name="settings_custom_palette_title">Palette personnalisée</string>
+    <string name="settings_palette_primary">Primaire</string>
+    <string name="settings_palette_secondary">Secondaire</string>
+    <string name="settings_palette_tertiary">Tertiaire</string>
+    <string name="settings_theme_light">Clair</string>
+    <string name="settings_theme_dark">Sombre</string>
+    <string name="settings_theme_follow_system">Selon le système</string>
+    <string name="settings_palette_default">Par défaut</string>
+    <string name="settings_palette_high_contrast">Contraste élevé</string>
+    <string name="settings_palette_amoled">AMOLED</string>
+    <string name="settings_palette_pastel">Pastel</string>
+    <string name="settings_palette_custom">Personnalisée</string>
+
+    <!-- Accessibility -->
+    <string name="settings_accessibility_title">Accessibilité</string>
+    <string name="settings_reduce_motion">Réduire les animations</string>
+    <string name="settings_reduce_transparency">Réduire la transparence</string>
+    <string name="settings_reduce_transparency_subtitle">Remplacer les surfaces vitrées par un préréglage plus opaque</string>
+    <string name="settings_increase_text_size">Augmenter la taille du texte</string>
+    <string name="settings_increase_text_size_subtitle">Réservé — sera relié à un réglage d\'échelle de police ultérieurement</string>
+    <string name="settings_floating_torch_button">Bouton lampe torche flottant</string>
+    <string name="settings_floating_torch_button_subtitle">Afficher un bouton déplaçable au-dessus des autres applications pour activer la lampe torche</string>
+    <string name="settings_floating_torch_button_permission">Nécessite l\'autorisation de superposition — appuyez pour l\'accorder dans les paramètres système</string>
+    <string name="settings_tristate_on">Activé</string>
+    <string name="settings_tristate_off">Désactivé</string>
+    <string name="settings_tristate_follow_system">Selon le système</string>
+
+    <!-- Monitoring -->
+    <string name="settings_monitoring_title">Surveillance</string>
+    <string name="settings_notification_controls">Commandes de notification</string>
+    <string name="settings_notification_controls_subtitle">Afficher une action \'Stop\' sur chaque notification de surveillance</string>
+
+    <!-- About -->
+    <string name="settings_about_title">À propos</string>
+    <string name="settings_about_version">Version</string>
+    <string name="settings_about_build">Build</string>
+    <string name="settings_about_build_type">Type de build</string>
 </resources>
