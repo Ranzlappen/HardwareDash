@@ -43,14 +43,14 @@ cooldown boundary, and hysteresis arm/re-arm, all with **zero emulator**
 ### Instrumented tests
 
 `instrumented-tests.yml` runs `connectedDebugAndroidTest` on a headless
-**API 30 emulator** for **every module that ships an androidTest source set**:
+**API 30 emulator** for:
 `:core:ui`, `:core:data`, `:feature:torch`, `:feature:vibration`,
 `:feature:apps`, `:feature:sensors`, `:feature:automation-ui`,
 `:feature:battery`, `:feature:storage`, `:feature:dashboard`,
 `:feature:notification`, `:feature:usbdebug`, `:feature:microphone`,
-`:feature:display`, `:feature:adbdebug`, `:feature:radios-cell`,
-`:feature:bugreport`, `:feature:flipper`, `:feature:radios-subghz`. The last
-nine were dormant — written but never executed in CI — until a screen-by-screen
+`:feature:adbdebug`, `:feature:radios-cell`,
+`:feature:bugreport`, `:feature:flipper`, `:feature:radios-subghz`. Eight of
+these were dormant — written but never executed in CI — until a screen-by-screen
 audit fixed their never-run assertions and gated them. **Traps that surfaced
 (check new suites for these):** (1) a card title that also appears as a
 `ModuleCapability` **name** renders twice when `moduleInfo != null`, so
@@ -61,6 +61,11 @@ card-unique string; (2) nodes below the compact-window fold need
 `GadgetExpandableCard` composes its body only when expanded — click the header
 first; (4) `assertDoesNotExist()`/`assertExists()` are **member** functions,
 never imported (a top-level `import ...assertDoesNotExist` fails to resolve).
+**`:feature:display` is the one dormant suite still deferred:** its
+`GadgetSlider` enabled/disabled assertions match two nodes (the a11y label is a
+`contentDescription` on both the slider Row and the clickable value label), and
+pinning the matcher to the slider's `SetProgress` action needs on-device
+semantics inspection the no-SDK container can't do — a tracked follow-up.
 Compose UI tests assert against a settled tree —
 animations are disabled. Decompose every screen into a stateful
 `<Feature>Screen` (Hilt-wrapped) + a stateless `<Feature>ScreenContent` so
