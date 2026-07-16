@@ -2,6 +2,8 @@ package dev.ranzlappen.gadget.feature.adbdebug
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -122,9 +124,12 @@ class AdbDebugScreenContentTest {
     @Test
     fun lastActionMessageIsDisplayedWhenPresent() {
         setContent(
-            AdbDebugState(isRootedFlavor = true, adbEnabled = true, lastActionMessage = "ADB enabled"),
+            AdbDebugState(isRootedFlavor = true, adbEnabled = true, lastActionMessage = "ADB toggled successfully"),
         )
 
-        composeTestRule.onNodeWithText("ADB enabled").assertIsDisplayed()
+        composeTestRule.onAllNodesWithText("ADB toggled successfully")
+            .onFirst()
+            .performScrollTo()
+            .assertIsDisplayed()
     }
 }
