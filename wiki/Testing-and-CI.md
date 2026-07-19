@@ -43,18 +43,30 @@ cooldown boundary, and hysteresis arm/re-arm, all with **zero emulator**
 ### Instrumented tests
 
 `instrumented-tests.yml` runs `connectedDebugAndroidTest` on a headless
-**API 30 emulator** for the suites verified green: `:core:ui`, `:core:data`,
-`:feature:torch`, `:feature:vibration`, `:feature:apps`, `:feature:sensors`,
-`:feature:automation-ui`, `:feature:battery`, `:feature:storage`,
-`:feature:dashboard`. **Dormant suites are deliberately *not* gated yet:**
-several other feature modules (notification, usbdebug, microphone, display,
-adbdebug, radios-cell, bugreport, flipper, radios-subghz) ship an androidTest
-source set that had never executed in CI and still carries latent failures —
-a stale `assertDoesNotExist` import (a member function, not an importable
-symbol) and, in the notification suite, `assertDoesNotExist`/single-node
-assertions that don't account for the always-present rooted **capability
-rows** duplicating card titles. Auditing and greening those suites one at a
-time is a tracked follow-up; gate each only once it passes. Compose UI tests assert against a settled tree —
+**API 30 emulator** for:
+`:core:ui`, `:core:data`, `:feature:torch`, `:feature:vibration`,
+`:feature:apps`, `:feature:sensors`, `:feature:automation-ui`,
+`:feature:battery`, `:feature:storage`, `:feature:dashboard`,
+`:feature:notification`, `:feature:usbdebug`, `:feature:microphone`,
+`:feature:adbdebug`, `:feature:radios-cell`,
+`:feature:bugreport`, `:feature:flipper`, `:feature:radios-subghz`. Eight of
+these were dormant — written but never executed in CI — until a screen-by-screen
+audit fixed their never-run assertions and gated them. **Traps that surfaced
+(check new suites for these):** (1) a card title that also appears as a
+`ModuleCapability` **name** renders twice when `moduleInfo != null`, so
+`onNodeWithText` finds 2 nodes — use `onAllNodesWithText(...).onFirst()`, or
+keep `moduleInfo = null` in the test (the green convention) and assert a
+card-unique string; (2) nodes below the compact-window fold need
+`performScrollTo()` before `assertIsDisplayed()`/`performClick()`; (3) a
+`GadgetExpandableCard` composes its body only when expanded — click the header
+first; (4) `assertDoesNotExist()`/`assertExists()` are **member** functions,
+never imported (a top-level `import ...assertDoesNotExist` fails to resolve).
+**`:feature:display` is the one dormant suite still deferred:** its
+`GadgetSlider` enabled/disabled assertions match two nodes (the a11y label is a
+`contentDescription` on both the slider Row and the clickable value label), and
+pinning the matcher to the slider's `SetProgress` action needs on-device
+semantics inspection the no-SDK container can't do — a tracked follow-up.
+Compose UI tests assert against a settled tree —
 animations are disabled. Decompose every screen into a stateful
 `<Feature>Screen` (Hilt-wrapped) + a stateless `<Feature>ScreenContent` so
 the inner content is testable without Hilt or the real controller. Closes
@@ -127,6 +139,6 @@ real compile** and pre-check against that list.
 
 ---
 
-> _Last reviewed: 2026-07-15 · Source: `.github/workflows/*`, `CLAUDE.md`
+> _Last reviewed: 2026-07-16 · Source: `.github/workflows/*`, `CLAUDE.md`
 > (preview matrix + pitfalls), `docs/migration-guide.md` · Related modules:
 > `:core:testing`, `:core:ui`, all tested features._

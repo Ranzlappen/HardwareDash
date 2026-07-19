@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -51,10 +53,12 @@ class NotificationScreenContentTest {
     fun rendersBuilderCardOnStandardFlavor() {
         setContent(NotificationScreenState.Initial.copy(isRootedFlavor = false))
         composeTestRule
-            .onNodeWithText(res.getString(R.string.notification_builder_card_title))
+            .onAllNodesWithText(res.getString(R.string.notification_builder_card_title))
+            .onFirst()
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(res.getString(R.string.notification_channel_inspector_card_title))
+            .onAllNodesWithText(res.getString(R.string.notification_channel_inspector_card_title))
+            .onFirst()
             .performScrollTo()
             .assertIsDisplayed()
     }
@@ -63,7 +67,7 @@ class NotificationScreenContentTest {
     fun rootedOnlyCardsAreHiddenOnStandardFlavor() {
         setContent(NotificationScreenState.Initial.copy(isRootedFlavor = false))
         composeTestRule
-            .onNodeWithText(res.getString(R.string.notification_sticky_override_card_title))
+            .onNodeWithText(res.getString(R.string.notification_sticky_override_button))
             .assertDoesNotExist()
         composeTestRule
             .onNodeWithText(res.getString(R.string.notification_overlay_card_title))
@@ -74,7 +78,8 @@ class NotificationScreenContentTest {
     fun rootedOnlyCardsRenderOnRootedFlavor() {
         setContent(NotificationScreenState.Initial.copy(isRootedFlavor = true))
         composeTestRule
-            .onNodeWithText(res.getString(R.string.notification_sticky_override_card_title))
+            .onAllNodesWithText(res.getString(R.string.notification_sticky_override_card_title))
+            .onFirst()
             .performScrollTo()
             .assertIsDisplayed()
         composeTestRule

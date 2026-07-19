@@ -1,12 +1,15 @@
 package dev.ranzlappen.gadget.feature.display
 
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.ranzlappen.gadget.core.testing.GadgetTestTheme
@@ -27,6 +30,18 @@ class DisplayScreenContentTest {
     val composeTestRule = createComposeRule()
 
     private val res = InstrumentationRegistry.getInstrumentation().targetContext.resources
+
+    /**
+     * A [dev.ranzlappen.gadget.core.ui.component.GadgetSlider] exposes its a11y
+     * label as a `contentDescription` on two merge-boundary nodes — the slider
+     * Row and the clickable value label — so matching on the label alone is
+     * ambiguous. Only the slider Row carries the [SemanticsActions.SetProgress]
+     * action, so combine both to land on exactly the control (and its
+     * enabled/disabled state).
+     */
+    private fun sliderByLabel(label: String): SemanticsMatcher =
+        hasContentDescription(label, substring = true) and
+            SemanticsMatcher.keyIsDefined(SemanticsActions.SetProgress)
 
     private fun setContent(
         state: DisplayState,
@@ -62,7 +77,7 @@ class DisplayScreenContentTest {
     fun brightnessSlider_disabledWhenWriteSettingsNotGranted() {
         setContent(DisplayState(brightnessPercent = 40, brightnessWritable = false))
         composeTestRule
-            .onNodeWithContentDescription(res.getString(R.string.display_brightness_label), substring = true)
+            .onNode(sliderByLabel(res.getString(R.string.display_brightness_label)))
             .assertIsNotEnabled()
     }
 
@@ -70,7 +85,7 @@ class DisplayScreenContentTest {
     fun brightnessSlider_enabledWhenWriteSettingsGranted() {
         setContent(DisplayState(brightnessPercent = 40, brightnessWritable = true))
         composeTestRule
-            .onNodeWithContentDescription(res.getString(R.string.display_brightness_label), substring = true)
+            .onNode(sliderByLabel(res.getString(R.string.display_brightness_label)))
             .assertIsEnabled()
     }
 
@@ -78,7 +93,7 @@ class DisplayScreenContentTest {
     fun densitySlider_disabledOnStandardFlavor() {
         setContent(DisplayState(isRootedFlavor = false))
         composeTestRule
-            .onNodeWithContentDescription(res.getString(R.string.display_density_label), substring = true)
+            .onNode(sliderByLabel(res.getString(R.string.display_density_label)))
             .assertIsNotEnabled()
     }
 
@@ -86,20 +101,20 @@ class DisplayScreenContentTest {
     fun densitySlider_enabledOnRootedFlavor() {
         setContent(DisplayState(isRootedFlavor = true))
         composeTestRule
-            .onNodeWithContentDescription(res.getString(R.string.display_density_label), substring = true)
+            .onNode(sliderByLabel(res.getString(R.string.display_density_label)))
             .assertIsEnabled()
     }
 
     @Test
     fun resetAction_firesResetAllRequestedEvent() {
         val events = setContent(DisplayState())
-        composeTestRule.onNodeWithText(res.getString(R.string.display_reset_action)).performClick()
+        composeTestRule.onNodeWithText(res.getString(R.string.display_reset_action)).performScrollTo().performClick()
         assertEquals(listOf(DisplayUiEvent.ResetAllRequested), events)
     }
 
     @Test
     fun statusMessage_rendersWhenPresent() {
         setContent(DisplayState(statusMessage = "Density set to 440 dpi"))
-        composeTestRule.onNodeWithText("Density set to 440 dpi").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Density set to 440 dpi").performScrollTo().assertIsDisplayed()
     }
 }
