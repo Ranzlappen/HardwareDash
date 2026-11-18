@@ -4,11 +4,14 @@ The product-facing index of app capabilities. For the Gradle-module view,
 see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
 · ⬜ planned (skeleton).
 
-## Dashboard ✅
+## Home (Dashboard) ⚪
 
-- **What:** adaptive home screen — a grid of feature tiles that reflows
-  by window size class (single-pane on phones, split on tablets).
-- **Standard:** ✅ · **Rooted:** ✅ (same).
+- **What (v3 B3):** live status cards — battery (level + temperature),
+  storage (used % + free GB), Wi-Fi (on/off + RSSI), latest logbook entry —
+  each opening its tool; quick actions (torch on/off, short test buzz); the
+  user's pinned tools with the pin/hide/reorder editor. Reads features only
+  through core seams (MetricSource map, `ModuleActionRegistry`, `LogbookDao`).
+- **Standard:** ⚪ · **Rooted:** ⚪ (same).
 - **Source:** `:feature:dashboard`.
 
 ## Settings ✅
@@ -248,6 +251,6 @@ of [Roadmap & Status](Roadmap-and-Status):
 
 ---
 
-> _Last reviewed: 2026-07-13 · Source: `settings.gradle.kts`,
+> _Last reviewed: 2026-11-18 · Source: `settings.gradle.kts`,
 > feature source counts, [Completion Master Plan](Completion-Master-Plan) ·
 > Related: every `feature/*`._

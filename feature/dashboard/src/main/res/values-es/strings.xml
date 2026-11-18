@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="dashboard_title">Panel</string>
-    <string name="dashboard_edit">Editar panel</string>
-    <string name="dashboard_empty">Todos los módulos están ocultos. Toca «Editar panel» para mostrar algunos.</string>
+    <string name="dashboard_title">Inicio</string>
+    <string name="dashboard_edit">Editar herramientas fijadas</string>
     <string name="dashboard_reset">Restablecer valores</string>
     <string name="dashboard_move_up">Subir</string>
     <string name="dashboard_move_down">Bajar</string>
     <string name="dashboard_pin">Fijar</string>
     <string name="dashboard_unpin">Desfijar</string>
+    <string name="home_status">Estado</string>
+    <string name="home_quick_actions">Acciones rápidas</string>
+    <string name="home_pinned">Herramientas fijadas</string>
+    <string name="home_pinned_empty">Fija las herramientas que más usas y aparecerán aquí.</string>
+    <string name="home_battery">Batería</string>
+    <string name="home_battery_value">%1$d %% · %2$.1f °C</string>
+    <string name="home_battery_level_only">%1$d %%</string>
+    <string name="home_storage">Almacenamiento</string>
+    <string name="home_storage_value">%1$d %% usado · %2$.1f GB libres</string>
+    <string name="home_wifi">Wi-Fi</string>
+    <string name="home_wifi_connected">Activado · %1$d dBm</string>
+    <string name="home_wifi_on">Activado · sin conexión</string>
+    <string name="home_wifi_off">Desactivado</string>
+    <string name="home_logbook">Bitácora</string>
+    <string name="home_logbook_value">%1$s · %2$s</string>
+    <string name="home_logbook_empty">Aún no hay entradas</string>
+    <string name="home_torch">Linterna</string>
+    <string name="home_torch_on_cd">Encender linterna</string>
+    <string name="home_torch_off_cd">Apagar linterna</string>
+    <string name="home_buzz">Vibrar</string>
+    <string name="home_buzz_cd">Vibración de prueba corta</string>
 </resources>

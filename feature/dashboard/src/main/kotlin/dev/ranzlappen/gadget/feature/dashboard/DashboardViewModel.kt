@@ -4,12 +4,21 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.ranzlappen.gadget.core.automation.ModuleActionRegistry
+import dev.ranzlappen.gadget.core.data.logbook.LogbookDao
 import dev.ranzlappen.gadget.core.datastore.DashboardLayout
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
+import dev.ranzlappen.gadget.core.model.MetricSource
 import dev.ranzlappen.gadget.core.navigation.GadgetDestination
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,19 +43,85 @@ data class DashboardUiState(
     val visible: List<DashboardEntry>
         get() = (entries.filter { it.pinned } + entries.filter { !it.pinned })
             .filter { !it.hidden }
+
+    /** What Home paints under "Pinned tools" (v3): pinned and not hidden. */
+    val pinned: List<DashboardEntry>
+        get() = entries.filter { it.pinned && !it.hidden }
 }
 
 /**
- * Backs the dashboard (W9). Resolves the persisted [DashboardLayout] against
- * the [GadgetDestination.modules] catalog into an ordered list with per-entry
- * hidden/pinned flags, and exposes reorder / hide / pin / reset mutations that
- * persist through [UserPreferencesRepository]. A passthrough over the
- * repository, mirroring `SettingsViewModel`.
+ * Backs Home (v3 B3).
+ *
+ * - [status]: live status cards + quick-action state, read through core seams
+ *   only — the Hilt `MetricSource` map, the [ModuleActionRegistry] and the
+ *   [LogbookDao] — so this module never depends on a feature module. Flows are
+ *   collected only while Home is on screen (`WhileSubscribed`).
+ * - [uiState]: the persisted [DashboardLayout] resolved against the
+ *   [GadgetDestination.modules] catalog, with reorder / hide / pin / reset
+ *   mutations (the W9 editor), now used for the "Pinned tools" list.
  */
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val repository: UserPreferencesRepository,
+    private val metricSources: Map<String, @JvmSuppressWildcards MetricSource>,
+    private val actions: ModuleActionRegistry,
+    logbookDao: LogbookDao,
 ) : ViewModel() {
+
+    private val torchAvailable: Boolean
+        get() = actions.handlers().any { it.featureId == HomeKeys.TORCH_FEATURE }
+
+    private val buzzAvailable: Boolean
+        get() = actions.handlers().any { it.featureId == HomeKeys.VIBRATION_FEATURE }
+
+    private val lastLog: Flow<LastLogEntry?> = logbookDao.observeEntries()
+        .map { entries -> entries.firstOrNull()?.let { LastLogEntry(it.text, it.timestampMillis) } }
+        .catch { emit(null) }
+
+    /** Latest value per observed metric; `null` until the first reading or if unregistered. */
+    private val metricValues: Flow<Map<String, Float?>> = combine(
+        HomeKeys.OBSERVED.map { (key, pollMs) -> observe(key, pollMs) },
+    ) { latest -> HomeKeys.OBSERVED.keys.zip(latest.toList()).toMap() }
+
+    val status: StateFlow<HomeStatus> = combine(metricValues, lastLog) { values, log ->
+        homeStatusOf(values, torchAvailable, buzzAvailable, log)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(STATE_FLOW_TIMEOUT_MS),
+        initialValue = HomeStatus(),
+    )
+
+    /** Flip the torch through its registered action handler (same path as widgets and rules). */
+    fun toggleTorch() {
+        val on = status.value.torchOn ?: return
+        viewModelScope.launch {
+            actions.dispatch(
+                featureId = HomeKeys.TORCH_FEATURE,
+                actionKey = if (on) HomeKeys.TORCH_OFF else HomeKeys.TORCH_ON,
+            )
+        }
+    }
+
+    /** A short test vibration through the vibration action handler. */
+    fun buzz() {
+        if (!status.value.canBuzz) return
+        viewModelScope.launch {
+            actions.dispatch(
+                featureId = HomeKeys.VIBRATION_FEATURE,
+                actionKey = HomeKeys.VIBRATION_ONESHOT,
+                params = HomeKeys.BUZZ_PARAMS,
+            )
+        }
+    }
+
+    private fun observe(key: String, pollMs: Long): Flow<Float?> {
+        val source = metricSources[key] ?: return flowOf(null)
+        return source.values(pollMs)
+            .map<Float, Float?> { it }
+            .distinctUntilChanged()
+            .onStart { emit(null) }
+            .catch { emit(null) }
+    }
 
     private val catalog: List<GadgetDestination> = GadgetDestination.modules
 

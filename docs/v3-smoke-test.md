@@ -12,7 +12,7 @@ Format: `- [ ] Tool — job · notes`
 
 ## Shell
 - [ ] Navigation — bottom bar shows Home / Tools / Sensors / Connect / More; every tool is reachable in ≤ 2 taps; back returns to the section hub; re-tapping the active section returns to its hub; landscape shows a labelled rail instead ·
-- [ ] Home — shows something useful without tapping anything ·
+- [ ] Home — battery, storage, Wi-Fi and last log entry show real values and update; each card opens its tool; Torch button toggles the flashlight; Buzz vibrates; pinned tools appear after pinning in "Edit pinned tools" ·
 - [ ] Settings — theme / palette change applies immediately ·
 
 ## Tools

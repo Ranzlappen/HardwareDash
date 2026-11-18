@@ -226,9 +226,11 @@ is green and its smoke-test lines pass.
       with one-line tool summaries; re-tapping a section returns to its hub;
       dashboard tiles and "open settings" links push instead of resetting the
       stack. Mapping pinned by `GadgetSectionTest`.
-- [ ] **B3** Live Home: status cards (battery, storage, Wi-Fi, last log entry)
-      and quick toggles (torch, vibrate) reusing existing controllers; keep the
-      pin/hide editor.
+- [x] **B3** Live Home: status cards (battery, storage, Wi-Fi, last log entry)
+      and quick actions (torch, buzz) through the MetricSource map +
+      `ModuleActionRegistry` + `LogbookDao` (no feature deps); "Pinned tools"
+      replaces the full catalog list; editor kept. `HomeStatusTest` pins the
+      mapping.
 - [ ] **B4** Up-navigation on tool screens (back arrow in `ScreenHeader` when not
       a section root); deep links land inside the right section. Known bug:
       `MainActivity` never reads `GadgetDestination.EXTRA_ROUTE`, so tapping a

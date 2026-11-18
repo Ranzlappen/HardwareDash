@@ -32,7 +32,7 @@ is ticked.
 
 | Section | Feature | Module(s) | Status | v3 plan |
 |---|---|---|---|---|
-| Home | Dashboard | `dashboard` | 🟡 launcher list only | Live status cards + quick toggles (B3) |
+| Home | Dashboard | `dashboard` | ⚪ | live status cards, quick actions, pinned tools (B3 ✓) |
 | Tools | Torch (+ strobe, QS tiles, widgets) | `torch` (+`-rooted`/`-standard`) | ⚪ | keep |
 | Tools | Vibration (+ pattern editor, widgets, tile) | `vibration` (+`-rooted`/`-standard`) | ⚪ | absorb `actuators` (B7) |
 | Tools | Haptics test | `actuators` | ⚪ | ✂️ → `vibration` (B7) |

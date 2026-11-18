@@ -105,7 +105,7 @@ enum class GadgetSection(
             GadgetDestination.BugReport,
             GadgetDestination.AdbDebug,
             GadgetDestination.UsbDebug,
-            // Frozen pending a maintainer decision (MASTER-PLAN §8).
+            // Kept, frozen (MASTER-PLAN §8.1).
             GadgetDestination.Youtubedownloader,
             GadgetDestination.Manual,
             GadgetDestination.Settings,

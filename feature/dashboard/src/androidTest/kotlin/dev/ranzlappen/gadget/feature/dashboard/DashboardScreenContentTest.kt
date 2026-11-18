@@ -15,9 +15,9 @@ import org.junit.runner.RunWith
 /**
  * Instrumented tests for [DashboardScreenContent].
  *
- * Exercises the stateless home screen with a curated entry list (and the
- * empty case) and asserts the chrome (title + edit affordance) plus a module
- * tile. Mirrors the torch reference pattern (`createComposeRule` +
+ * Exercises the stateless Home screen (v3 B3) with a fixed [HomeStatus] and
+ * pinned list (and the no-pins case): status cards, the pinned tool and the
+ * edit affordance. Mirrors the torch reference pattern (`createComposeRule` +
  * [GadgetTestTheme]).
  *
  * Tests run via `:feature:dashboard:connectedDebugAndroidTest`. CI emulator
@@ -31,12 +31,18 @@ class DashboardScreenContentTest {
 
     private val res = InstrumentationRegistry.getInstrumentation().targetContext.resources
 
-    private fun setContent(entries: List<DashboardEntry>) {
+    private fun setContent(
+        pinned: List<DashboardEntry>,
+        status: HomeStatus = HomeStatus(batteryPercent = 87, wifiEnabled = false, torchOn = false),
+    ) {
         composeTestRule.setContent {
             GadgetTestTheme {
                 DashboardScreenContent(
-                    entries = entries,
+                    status = status,
+                    pinned = pinned,
                     onNavigate = {},
+                    onToggleTorch = {},
+                    onBuzz = {},
                     onEdit = {},
                 )
             }
@@ -44,26 +50,26 @@ class DashboardScreenContentTest {
     }
 
     @Test
-    fun rendersEditAffordanceAndModuleTiles() {
+    fun rendersStatusQuickActionsAndPinnedTools() {
         setContent(
-            listOf(
-                DashboardEntry(destination = GadgetDestination.Torch, hidden = false, pinned = true),
-                DashboardEntry(destination = GadgetDestination.Vibration, hidden = false, pinned = false),
-            ),
+            listOf(DashboardEntry(destination = GadgetDestination.Apps, hidden = false, pinned = true)),
         )
-        composeTestRule.onNodeWithText(res.getString(R.string.dashboard_edit))
+        composeTestRule.onNodeWithText(res.getString(R.string.home_battery))
             .assertIsDisplayed()
-        composeTestRule.onNodeWithText(GadgetDestination.Torch.label)
+        composeTestRule.onNodeWithText(res.getString(R.string.home_wifi_off))
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText(GadgetDestination.Apps.label)
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText(res.getString(R.string.dashboard_edit))
             .performScrollTo()
             .assertIsDisplayed()
     }
 
     @Test
-    fun emptyEntriesShowsEmptyState() {
+    fun noPinnedToolsShowsHint() {
         setContent(emptyList())
-        composeTestRule.onNodeWithText(res.getString(R.string.dashboard_edit))
-            .assertIsDisplayed()
-        composeTestRule.onNodeWithText(res.getString(R.string.dashboard_empty))
+        composeTestRule.onNodeWithText(res.getString(R.string.home_pinned_empty))
             .performScrollTo()
             .assertIsDisplayed()
     }

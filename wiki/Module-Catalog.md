@@ -72,7 +72,7 @@ widgets / tiles / tests / strings): see the
 
 | Module | Src | Status | Notes |
 |---|---:|:--:|---|
-| `feature:dashboard` | 2 | ✅ | Adaptive grid home screen (thin; no user reorder/hide yet). |
+| `feature:dashboard` | 5 | ⚪ | Home: live status cards + quick actions + pinned tools (v3 B3). Deps: `:core:model`, `:core:automation`, `:core:data`, `:core:datastore`. |
 | `feature:settings` | 7 | ✅ | About / Appearance / Accessibility / Monitoring + `backupSection` + `rootFeatureToggles` slots. No language picker yet. |
 | `feature:torch` | 46 | ✅ | Advanced blueprint: hardware control + 2 QS tiles + 4 widgets + strobe FGS + monitoring + automation. |
 | `feature:torch-rooted` | 7 | ✅ | DutyCycle / MultiLed / Thermal via `RootedTorchController`. |
@@ -133,5 +133,5 @@ widgets / tiles / tests / strings): see the
 
 ---
 
-> _Last reviewed: 2026-07-11 · Source: `settings.gradle.kts`, live
+> _Last reviewed: 2026-11-18 · Source: `settings.gradle.kts`, live
 > `find … -name '*.kt'` counts · Related: every module._
