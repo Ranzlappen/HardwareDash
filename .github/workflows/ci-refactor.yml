@@ -13,9 +13,22 @@ name: CI (claude/refactor-2026)
 #     for both flavors and exit. Quick to fail on a typo in a
 #     `build.gradle.kts` or a `*.kt`, where the matrix would spend several
 #     more minutes on signing + asset gates before reporting the same
-#     root cause. Runs on every PR regardless of target branch.
+#     root cause. Runs on every PR regardless of target branch, and on
+#     pushes to `claude/v3-**` so each v3 batch gets a compile verdict
+#     without opening a PR (the PR-comment steps below are guarded by
+#     `github.event_name == 'pull_request'`).
 
 on:
+  push:
+    branches:
+      - 'claude/v3-**'
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - 'wiki/**'
+      - '.gitignore'
+      - '.gitattributes'
+      - '.idea/**'
   pull_request:
     paths-ignore:
       - '*.md'
@@ -24,6 +37,11 @@ on:
       - '.gitignore'
       - '.gitattributes'
       - '.idea/**'
+
+# A newer push to the same branch/PR supersedes the running build.
+concurrency:
+  group: ci-refactor-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # JVM unit tests for the modules that carry pure-logic correctness
