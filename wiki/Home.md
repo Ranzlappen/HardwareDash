@@ -31,22 +31,17 @@ through `LocalGadgetTheme.current`.
 
 ## Current development status
 
-- **Phase 2 — Accelerated Feature Migration — ✅ feature-complete;
-  Phase 3 (Core God-App Capabilities) 🚧 started.** What remains of
-  Phase 2 is the per-feature clean-cut deletion of the legacy sources.
-- **Live in the shell:** Dashboard, Settings, Torch, Vibration,
-  App-Organizer, Sensors, Battery, GPS, Storage, IR, Camera/Barcode,
-  Motion, Ambient, Audio, NFC, Bluetooth, WiFi, Sub-GHz, Flipper Zero,
-  Lock, Actuators, Diagnostics, Health/Permissions, Manual, Automation
-  (rules list + builder), YouTube Downloader.
-- **Shared infrastructure landed:** `:core:root`, `:core:widgetkit`,
-  `:core:monitoring`, the full cross-automation engine
-  (`:core:automation` + `:core:hardware` + `automation.db` +
-  `:feature:automation-ui`), and whole-app backup format v5.
-- **Remaining legacy surface:** 96 `com.gadget.*` Kotlin files still in
-  `:app` source sets, migrating feature-by-feature.
-- **The road to done:** the gap analysis and phased completion roadmap
-  live in the **[Completion Master Plan](Completion-Master-Plan)**.
+- **v3 ("pragmatic") in progress** on `claude/v3-pragmatic-overhaul` — see
+  [`MASTER-PLAN.md`](https://github.com/Ranzlappen/HardwareDash/blob/main/MASTER-PLAN.md).
+  v2's foundations (design system, root safety seam, widget kit, automation
+  engine, CI) are kept; the app is being re-centred on usable tools:
+  five-section navigation, a live home screen, merged overlapping modules and
+  v1's lost practical features (camera capture, spectrum analyzer, full sensor
+  list).
+- **Archives:** `legacy-main` (v1, single module) and
+  `archive/v2-modular-2026` (v2, modular monorepo). Read-only.
+- **Status reporting changed:** a feature is ✅ only after it is smoke-tested
+  on a real device; everything else is ⚪ Unverified.
 
 Full detail: **[Roadmap & Status](Roadmap-and-Status)**.
 
@@ -62,14 +57,14 @@ Full detail: **[Roadmap & Status](Roadmap-and-Status)**.
 
 Start here, in order:
 
-1. **[Architecture](Architecture)** — the module graph and dependency
+1. **[`MASTER-PLAN.md`](https://github.com/Ranzlappen/HardwareDash/blob/main/MASTER-PLAN.md)**
+   — the v3 direction, principles and current batch.
+2. **[Architecture](Architecture)** — the module graph and dependency
    rules.
-2. **[Design System](Design-System)** — tokens, theming, accessibility,
+3. **[Design System](Design-System)** — tokens, theming, accessibility,
    responsiveness.
-3. **[Feature Migration Guide](Feature-Migration-Guide)** — the 8-step
-   playbook for bringing a legacy feature into a module.
-4. **[Module Authoring Contract](Module-Authoring-Contract)** — the
-   acceptance checklist a new module must satisfy.
+4. **[Module Authoring Contract](Module-Authoring-Contract)** — the v3
+   required core + opt-in extras.
 5. **[Torch Blueprint](Torch-Blueprint)** — the canonical advanced
    example exercising every seam.
 6. **[Testing & CI](Testing-and-CI)** and
@@ -78,10 +73,10 @@ Start here, in order:
 
 ## For maintainers
 
-- **[Roadmap & Status](Roadmap-and-Status)** — phases, migrated features,
-  open follow-up issues, release readiness.
-- **[Completion Master Plan](Completion-Master-Plan)** — the measured
-  gap analysis and the phased plan to a finished app.
+- **[Roadmap & Status](Roadmap-and-Status)** — what works today, per
+  feature, with the v3 plan for each.
+- **[Completion Master Plan](Completion-Master-Plan)** — superseded by
+  `MASTER-PLAN.md` (v3).
 - **[Decision Records](Decision-Records)** — the ADRs.
 - **[Module Catalog](Module-Catalog)** / **[Asset Catalog](Asset-Catalog)**
   — the parts inventory.
@@ -94,9 +89,9 @@ Start here, in order:
 - **[AI Prompt Library](AI-Prompt-Library)** — reusable prompts for
   migrations, reviews, and CI diagnosis.
 
-The repo keeps a tiny `CLAUDE.md` bootstrap that points an agent at the
-AI Collaboration, Module Authoring Contract, Design System, Migration
-Guide, and Roadmap pages before any planning or coding begins.
+The repo keeps a short `CLAUDE.md` bootstrap that points an agent at
+`MASTER-PLAN.md` and the AI Collaboration, Module Authoring Contract,
+Design System and Roadmap pages before any planning or coding begins.
 
 ---
 
@@ -111,6 +106,6 @@ Guide, and Roadmap pages before any planning or coding begins.
 
 ---
 
-> _Last reviewed: 2026-07-03 · Source: `README.md`, `CLAUDE.md`,
+> _Last reviewed: 2026-11-18 (v3 reset) · Source: `MASTER-PLAN.md`, `README.md`, `CLAUDE.md`,
 > [Roadmap & Status](Roadmap-and-Status),
 > [Completion Master Plan](Completion-Master-Plan) · Related modules: all._

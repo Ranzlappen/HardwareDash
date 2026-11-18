@@ -9,14 +9,16 @@ long-form ADR files. New ADRs are added here as numbered sections; record
 |---|---|---|---|
 | 0001 | Monorepo refactor onto module-per-feature layout | Accepted | 2026-05-12 |
 | 0002 | Cross-automation engine — model, runtime, persistence | Accepted | 2026-06-10 |
-| 0003 | YouTube downloader — youtubedl-android engine + cookie auth | Accepted | 2026-06-25 |
+| 0003 | YouTube downloader — youtubedl-android engine + cookie auth | Accepted (frozen by 0004) | 2026-06-25 |
+| 0004 | v3 reset — pragmatic direction, opt-in integrations, section navigation | Accepted | 2026-11-18 |
 
 ---
 
 ## ADR-0001 — Monorepo refactor onto module-per-feature layout
 
-**Status:** Accepted · **Deciders:** project owner, Claude (implementer),
-Grok (reviewer).
+**Status:** Accepted, amended by [ADR-0004](#adr-0004--v3-reset-pragmatic-direction)
+(module boundaries now follow usefulness, not one-module-per-capability) ·
+**Deciders:** project owner, Claude (implementer), Grok (reviewer).
 
 ### Context
 
@@ -186,6 +188,61 @@ YouTube's ToS — left to the user.
 
 ---
 
+## ADR-0004 — v3 reset: pragmatic direction
+
+**Status:** Accepted · **Date:** 2026-11-18 · **Deciders:** project owner,
+Claude (implementer).
+
+### Context
+
+v2 (ADR-0001 onwards) produced 79 Gradle modules and 33 top-level
+destinations. The Module Authoring Contract made `MetricSource` +
+`ActionHandler` and rooted-capability rows mandatory for every module, which
+yielded 24 `assert_*` actions that duplicate engine conditions, fragmented one
+sensors screen into three modules, and grew 95 `RootFeatureKey`s with no
+on-device verification — while v1's camera capture, spectrum analyzer, full
+sensor list and live dashboard were lost. Status pages reported ✅ for code
+nobody had run on a phone. Full retrospective: `MASTER-PLAN.md` §2.
+
+### Decisions
+
+1. **Archive v2** as `archive/v2-modular-2026` (alongside `legacy-main`); v3
+   continues from v2's code on `claude/v3-pragmatic-overhaul`.
+2. **Direction lives in `MASTER-PLAN.md`** at the repo root, versioned with the
+   branch, so a branch's plan always matches its code. The wiki keeps how-to
+   pages and a short status page.
+3. **Contract v3:** a small required core (works on a device, design system,
+   flavor safety, strings, logic tests); MetricSource / ActionHandler /
+   widgets / rooted sections are opt-in. No `assert_*` actions.
+4. **Five-section navigation** (Home / Tools / Sensors / Connect / More):
+   bottom bar on phones, labelled rail on wide screens, hub screens per
+   section.
+5. **Merge overlapping modules** (sensors ← ambient + motion, vibration ←
+   actuators, audio ← microphone, devtools ← adb/usb/diagnostics/bugreport);
+   keep persisted keys stable.
+6. **Honest root:** rooted actions are Verified (named device) or
+   Experimental (hidden by default, removed if never verified).
+7. **Status = verified on device** (✅ / 🟡 / ⚪ / 🧪 / ✂️), tracked in
+   `docs/v3-smoke-test.md`.
+
+### Consequences
+
+**Positive:** every batch has a user-visible result; less infrastructure per
+feature; docs shrink to what is maintained. **Negative:** some v2 work is
+retired (assert actions, unverified root tools, the full preview matrix per
+module); merged modules need careful key/route migration; the wiki is
+temporarily partly stale until V3-5 slims it.
+
+### Alternatives rejected
+
+- **Restart from v1:** discards the design system, root seam, leak gate and CI
+  that work; reintroduces god-screens.
+- **Keep finishing the v2 completion plan:** more breadth on an unverified
+  base; the plan's own definition of done never involved using the app.
+- **Fresh rewrite:** highest cost, no evidence it would avoid either failure.
+
+---
+
 ## Adding a new ADR
 
 Append a numbered `## ADR-000N — <title>` section here (Status / Deciders /
@@ -196,7 +253,7 @@ Records" rule if the process changes.
 
 ---
 
-> _Last reviewed: 2026-07-09 · Source: `docs/adr/0001-monorepo-refactor.md`,
+> _Last reviewed: 2026-11-18 (ADR-0004) · Source: `MASTER-PLAN.md`, `docs/adr/0001-monorepo-refactor.md`,
 > `docs/adr/0002-automation-engine.md` · Related: [Architecture](Architecture),
 > [Automation Engine](Automation-Engine), [Flavors & Root
 > Safety](Flavors-and-Root-Safety)._

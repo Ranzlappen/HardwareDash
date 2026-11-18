@@ -194,8 +194,7 @@ The component families (full signatures in
 
 ## Preview matrix policy
 
-Every component file that ships a public composable also ships ≥1
-`@Composable` preview. The annotation stack:
+**Shared `:core:ui` components** ship the full stack:
 
 - **Always:** `@GadgetPreviewLightDark` + `@GadgetPreviewLargeFont` +
   `@GadgetPreviewRtl` (dark+light, 200 % font, RTL).
@@ -203,6 +202,10 @@ Every component file that ships a public composable also ships ≥1
   shimmers): add `@GadgetPreviewSizeClasses` (Compact / Medium /
   Expanded). Skip for width-invariant components (buttons, chips, badges,
   text fields, dots).
+
+**Feature screens** (v3): one `@GadgetPreviewLightDark` preview of the
+stateless screen content is enough. Add more only when a layout genuinely
+differs by font size, direction or width.
 
 Multi-preview annotations live in
 `core/ui/preview/GadgetPreviewMatrix.kt`.
@@ -225,7 +228,7 @@ Multi-preview annotations live in
 
 ---
 
-> _Last reviewed: 2026-06-30 · Source: `CLAUDE.md` (design-system
+> _Last reviewed: 2026-11-18 (v3 preview policy) · Source: `CLAUDE.md` (design-system
 > sections), `core/designsystem/*`, `core/ui/*`,
 > `feature/settings/.../components/AppearanceCard.kt` · Related modules:
 > `:core:designsystem`, `:core:ui`, `:core:navigation`, `:feature:settings`._

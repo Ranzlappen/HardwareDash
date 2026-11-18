@@ -1,5 +1,14 @@
 # Feature Migration Guide
 
+> **v2 reference — the v1 → v2 migration is finished.** For v3 work (porting
+> v1 *behaviour* back, merging overlapping modules) follow
+> [`MASTER-PLAN.md` §7](https://github.com/Ranzlappen/HardwareDash/blob/main/MASTER-PLAN.md)
+> and the v3 [Module Authoring Contract](Module-Authoring-Contract). Where
+> this page makes monitoring, automation or rooted-capability rows mandatory,
+> the v3 contract supersedes it — they are opt-in now. The recipes below
+> (controller-first, stateless screen content, nav registration, Hilt and
+> persistence patterns) are still accurate.
+
 The repeatable playbook for bringing a feature from the archived
 `legacy-main` branch into a `:feature:<name>` module. Torch was the first
 worked example; Vibration validated it as a second consumer. Pair this

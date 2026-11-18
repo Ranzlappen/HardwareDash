@@ -1,113 +1,80 @@
-# Module Authoring Contract
+# Module Authoring Contract (v3)
 
-The **acceptance checklist** for a new feature module. Every legacy →
-modular actuator/sensor migration MUST satisfy this so the cross-feature
-automation engine can discover and drive the module with **zero central
-hardcoding**. Torch is the worked example of every item; Vibration is the
-validated second consumer — keep both green when adding seams.
+What every user-facing feature module must satisfy, and what it may add when
+it earns its place. This replaces the v2 contract, which made monitoring,
+automation and rooted-capability rows mandatory for every module — see
+[`MASTER-PLAN.md` §2](https://github.com/Ranzlappen/HardwareDash/blob/main/MASTER-PLAN.md)
+for why that was dropped.
 
-A module that isn't both **monitoring-** and **automation-ready** is not
-"done" (items 6 and 7 are the non-negotiable end-state).
+## Required core
 
-## The checklist
+1. **It does its job on a real phone.** The module's core job is a line in
+   [`docs/v3-smoke-test.md`](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/v3-smoke-test.md),
+   and it is only reported ✅ once that line is ticked on a named device.
+   No placeholder screens; no "architecture-ready" stubs.
+2. **Design system.** Tokens from `LocalGadgetTheme.current`; `:core:ui`
+   components (`ModuleScreenScaffold`, `DashCard`, `CompactCard`,
+   `GadgetSlider`, …); no raw `dp` at call sites (per-file `Defaults` for fixed
+   sizes); a11y basics — `contentDescription` on icon-only controls, 48 dp
+   touch targets, single-line + ellipsis by default. See
+   [Design System](Design-System).
+3. **Flavor safety.** Rooted code only behind the `:core:root` Hilt seam,
+   gated by `RootSafetyGate` + a `RootFeatureKey`. Never branch on
+   `BuildConfig.IS_ROOTED`; never import su under `src/main`; the standard-APK
+   leak gate stays green. See [Flavors & Root Safety](Flavors-and-Root-Safety).
+4. **Strings in resources.** English `strings.xml` required; `de`/`es`/`fr`
+   best-effort (don't block a batch on translations).
+5. **Tests for the logic it owns.** Unit tests for parsers, serializers,
+   maths and safety clamps. Screen tests are optional; keep the stateless
+   `<Feature>ScreenContent` split where it already exists so they stay easy.
 
-### 1. Design system
+## Add only when it earns its place
 
-Every token from `LocalGadgetTheme.current`; no raw `dp` at call sites
-(per-file `Defaults` for fixed sizes); modifier after required params,
-composable slots last; single-line + `Ellipsis` text by default; the full
-a11y contract (required `contentDescription`, `defaultMinSize(48.dp)`,
-reduced-motion / reduced-transparency). See [Design System](Design-System).
+| Extra | Add it when… | Don't add it when… |
+|---|---|---|
+| `MetricSource` (`@IntoMap`) | the signal is worth charting or triggering a rule on (battery %, signal strength, lux) | it is static presence ("vibrator available") or duplicates another source |
+| `ActionHandler` (`@IntoMap`) | the action has a real side effect someone would automate (torch on, vibrate pattern, send IR code) | it only checks a value — **never add `assert_*` actions**; rules use `Condition.MetricCompare` / `Trigger.MetricThreshold` |
+| `MonitorContainer` / `LiveMonitorContainer` | the screen's main value is a changing signal | the signal is incidental to the job |
+| Widget / QS tile | the job is commonly a one-tap thing (torch, strobe, vibrate) | it would just open the app |
+| Rooted section | a rooted function exists **and** is verified on a device — or it is flagged 🧪 Experimental and hidden by default | as a "required" row on every screen |
+| Previews | `@GadgetPreviewLightDark` for the screen content | the full LightDark + LargeFont + RTL + SizeClasses matrix — reserve that for shared `:core:ui` components |
 
-### 2. Screen shell
+When you do add an extra, follow its existing seam exactly (pin-reliability
+halves for widgets, stable metric keys for MetricSources, `requiresRoot` +
+param schema for actions). Those rules live on the subsystem pages:
+[Widgets, Tiles & Surfaces](Widgets-Tiles-and-Surfaces),
+[Monitoring Framework](Monitoring-Framework),
+[Automation Engine](Automation-Engine).
 
-Build on `ModuleScreenScaffold` with a `ModuleInfo` (permissions / OS
-compatibility / firmware) **and** a tri-state per-function
-`ModuleCapabilitiesSection` (green/amber/red, grant / open-settings
-actions) covering **standard and rooted** functions.
+## Hard rules (unchanged from v2)
 
-### 3. Rooted seam
+- New code under `dev.ranzlappen.gadget.**`; no `com.gadget.**` imports.
+- `app → feature → core`; no feature → feature dependency.
+- Every entry point (screen, tile, widget, action) converges on the same
+  `@Singleton` controller.
+- Persisted identifiers — MetricSource keys, DataStore keys, rule JSON
+  `@SerialName`s, widget config — never change without a migration.
 
-A feature-side capability interface; an app-flavor (or sibling-module)
-no-op (standard) + real (rooted) binding reusing the rooted controller,
-gated by `RootSafetyGate` + a `RootFeatureKey`. **Never** branch on
-`BuildConfig.IS_ROOTED`; **never** import su under `src/main`. See
-[Flavors & Root Safety](Flavors-and-Root-Safety).
-
-### 4. Reuse, don't reinvent
-
-`GadgetCircleControl`, `DashCard` / `CompactCard` / `GlassSurface`,
-`GadgetSlider`, the tri-state `GadgetStatusKind` badges, `MonitorContainer`
-/ `MonitorChart`. Promote a genuinely reusable new primitive into
-`:core:ui` rather than leaving it feature-private.
-
-### 5. Widgets + notifications (when the feature has them)
-
-AppWidget provider + pin/launcher flow + **RemoteViews-safe** (`@RemoteView`)
-layouts only; determinate-progress FGS notification; atomic `saveIfAbsent`
-self-heal; inert "removed" handling on in-app delete; custom-icon import.
-**Pin reliability is mandatory:** the in-app pin's success callback MUST be
-`FLAG_MUTABLE` + explicit `ComponentName`, the pre-pin config MUST ride the
-`PendingWidgetConfigs` bridge, and the provider MUST override
-`reconcilePendingConfig` with `claimSolePending`. See [Widgets, Tiles &
-Surfaces](Widgets-Tiles-and-Surfaces).
-
-### 6. Monitoring-ready (non-negotiable)
-
-Implement a `MetricSource` per readable signal and bind it `@IntoMap`;
-embed `MonitorContainer` (persisted history) and `LiveMonitorContainer`
-(live realtime) — both read the same source. Make each card collapsible
-(`GadgetExpandableCard` + persisted `CollapseStateRepository`). See
-[Monitoring Framework](Monitoring-Framework).
-
-### 7. Automation-ready (non-negotiable)
-
-Expose invocable actions via an `ActionHandler` (with `ModuleAction`
-metadata + param schema + `requiresRoot`) bound `@IntoMap`. The engine
-resolves both maps (`MetricSource` for triggers/conditions, `ActionHandler`
-for actions) from Hilt and drives the module without importing it. Define
-signals once — the same `MetricSource` feeds monitoring **and** automation
-triggers. See [Automation Engine](Automation-Engine).
-
-### 8. Tests + previews + CI traps
-
-Unit tests for serialization/repos; instrumented tests for the stateless
-screen (kept Hilt-free); the `@Preview` matrix policy (LightDark +
-LargeFont + RTL always, SizeClasses for layout-driven components); and the
-CI-only pitfalls. See [Testing & CI](Testing-and-CI) and
-[Troubleshooting](Troubleshooting).
-
-## The two seams the engine stands on
+## The two engine seams (reference)
 
 | Seam | Module | Role |
 |---|---|---|
-| `MetricSource` + `MetricDescriptor` | `:core:model` | Read side — a feature's readable signals (push or poll). Consumed by monitoring + automation triggers/conditions + `HardwareRegistry` enumeration. |
-| `ActionHandler` + `ModuleActionRegistry` | `:core:automation` | Write side — a feature's invocable actions by `featureId`/`actionKey`. Consumed by widgets + automation actions. |
-
-A feature contributes:
+| `MetricSource` + `MetricDescriptor` | `:core:model` | Read side — readable signals (push or poll) for monitoring, rule triggers/conditions, the metric widget. |
+| `ActionHandler` + `ModuleActionRegistry` | `:core:automation` | Write side — invocable actions by `featureId` / `actionKey` for rules and widgets. |
 
 ```kotlin
-// read side — one per readable signal
 @Binds @IntoMap @StringKey("<metricKey>") fun bindSource(impl: TorchMetricSource): MetricSource
-
-// write side — one handler per feature
 @Binds @IntoMap @StringKey("<featureId>") fun bindHandler(impl: TorchActionHandler): ActionHandler
 ```
 
-This is the deliberate fix for legacy `Link`, which hardcoded a 70-entry
-metric registry and an enum of action types inside one service.
+## Reference modules
 
-## Reference consumers
-
-- **Torch** (`:feature:torch` + `-rooted`/`-standard`) — the advanced
-  blueprint exercising every item. See [Torch Blueprint](Torch-Blueprint).
-- **Vibration** (`:feature:vibration` + `-rooted`/`-standard`) — the
-  validated second consumer; a non-pollable actuator signal (modelled via
-  `VibrationRuntime` → a decaying poll source) + a 4-capability rooted tier
-  + a freehand draw-canvas pattern builder.
+- **Torch** — the fullest example (widgets, tiles, strobe service, rooted
+  extras). Copy a seam from it when you need that seam, not the whole shape.
+- **Vibration** — pattern editor + rooted tier; a good mid-size example.
 
 ---
 
-> _Last reviewed: 2026-06-12 · Source: `CLAUDE.md` (Module Authoring
-> Contract) · Related modules: `:feature:torch`, `:feature:vibration`,
-> `:core:model`, `:core:automation`._
+> _Last reviewed: 2026-11-18 (v3 reset) · Source: `MASTER-PLAN.md` §5.3 ·
+> Related modules: `:core:model`, `:core:automation`, `:core:root`, all
+> feature modules._

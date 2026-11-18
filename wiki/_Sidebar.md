@@ -5,8 +5,8 @@
 - [Glossary](Glossary)
 
 **Project**
+- [MASTER-PLAN (v3)](https://github.com/Ranzlappen/HardwareDash/blob/main/MASTER-PLAN.md)
 - [Roadmap & Status](Roadmap-and-Status)
-- [Completion Master Plan](Completion-Master-Plan)
 - [Architecture](Architecture)
 - [Decision Records](Decision-Records)
 
@@ -22,13 +22,16 @@
 - [Widgets, Tiles & Surfaces](Widgets-Tiles-and-Surfaces)
 
 **Engineering**
-- [Feature Migration Guide](Feature-Migration-Guide)
 - [Module Authoring Contract](Module-Authoring-Contract)
-- [Torch Blueprint](Torch-Blueprint)
+- [Feature Migration Guide](Feature-Migration-Guide) _(v2 ref)_
+- [Torch Blueprint](Torch-Blueprint) _(v2 ref)_
 - [Flavors & Root Safety](Flavors-and-Root-Safety)
 - [Automation Engine](Automation-Engine)
 - [Testing & CI](Testing-and-CI)
 - [Troubleshooting](Troubleshooting)
+
+**Archived**
+- [Completion Master Plan](Completion-Master-Plan) _(superseded)_
 
 **AI collaborators**
 - [AI Collaboration](AI-Collaboration)

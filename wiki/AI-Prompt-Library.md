@@ -12,24 +12,26 @@ Read Architecture, Module-Authoring-Contract, and Design-System first.
 Check: dependency direction (app → feature → core, no feature↔feature, no
 *-rooted in standard); no com.gadget.** imports in new code; design tokens
 from LocalGadgetTheme.current (no raw dp, glass via GlassSurface); root
-gating via :core:root not BuildConfig.IS_ROOTED; MetricSource +
-ActionHandler bound @IntoMap. Report violations with file:line and a fix.
+gating via :core:root not BuildConfig.IS_ROOTED; any new MetricSource /
+ActionHandler / widget / rooted row has a stated user benefit (no assert_*
+actions); persisted keys unchanged or migrated. Report violations with
+file:line and a fix.
 ```
 
-## Feature migration (general)
+## v3 batch (general)
 
 ```
-Migrate <feature> from legacy-main into :feature:<name> following the
-Feature-Migration-Guide 8-step recipe. Do NOT check out legacy-main — use
-`git show legacy-main:<path>`. First produce a survey (≤400 words: file
-map, permissions, resources, services, persistence, cross-feature deps) and
-a lean v1 cut (now vs deferred). Pause for my review before coding. Respect
-the Module-Authoring-Contract (monitoring- and automation-ready) and the
-Troubleshooting CI traps. There is no local Android SDK — CI is the compile
-gate.
+Read MASTER-PLAN.md, then implement batch <Bn> on
+claude/v3-pragmatic-overhaul. State the user-visible result first, then a
+file map and what is deferred; pause for my review before coding if the
+batch touches persisted data. Port v1 behaviour with
+`git show legacy-main:<path>` (never import com.gadget). Follow the v3
+Module-Authoring-Contract (required core; integrations opt-in) and the
+Troubleshooting CI traps. No local Android SDK — CI on push is the compile
+gate. Update the MASTER-PLAN checkbox and smoke-test line in the same batch.
 ```
 
-## Torch-style advanced migration
+## Torch-style advanced feature (only when the feature truly needs every seam)
 
 ```
 Migrate <feature> as an advanced (Torch-style) feature: hardware control +
