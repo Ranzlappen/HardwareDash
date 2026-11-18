@@ -222,13 +222,17 @@ is green and its smoke-test lines pass.
 - [x] **B1** CI also runs on pushes to `claude/v3-**` (compile verdict without a PR).
 
 ### V3-1 · Navigation & Home
-- [x] **B2** Five-section shell: bottom bar (phone) / rail (wide), section hubs.
+- [x] **B2** Five-section shell: bottom bar (phone) / rail (wide), section hubs
+      with one-line tool summaries; re-tapping a section returns to its hub;
+      dashboard tiles and "open settings" links push instead of resetting the
+      stack. Mapping pinned by `GadgetSectionTest`.
 - [ ] **B3** Live Home: status cards (battery, storage, Wi-Fi, last log entry)
       and quick toggles (torch, vibrate) reusing existing controllers; keep the
       pin/hide editor.
 - [ ] **B4** Up-navigation on tool screens (back arrow in `ScreenHeader` when not
-      a section root); deep links (`EXTRA_ROUTE`, tiles) land inside the right
-      section.
+      a section root); deep links land inside the right section. Known bug:
+      `MainActivity` never reads `GadgetDestination.EXTRA_ROUTE`, so tapping a
+      logbook reminder notification opens Home instead of the Logbook.
 
 ### V3-2 · Consolidate overlaps
 - [ ] **B5** Sensor explorer (all sensors, live values, chart, copy); retire

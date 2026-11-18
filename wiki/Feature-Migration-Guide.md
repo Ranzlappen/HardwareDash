@@ -123,9 +123,9 @@ Add the route to `GadgetDestination` (`:core:navigation`), provide a
 it into `MainActivity`'s `GadgetApp { … }`. Add
 `implementation(project(":feature:<name>"))` to `:app`. **Grep every
 non-exhaustive `when (destination)`** after adding a `GadgetDestination`
-value (see [Troubleshooting](Troubleshooting)). Only add to the nav rail
-(`modules`) if the feature appears there; don't add an `onBack` callback
-speculatively.
+value (see [Troubleshooting](Troubleshooting)). Add the destination to
+`modules` and to exactly one `GadgetSection.members` list (v3 sections);
+don't add an `onBack` callback speculatively.
 
 ### Step 7 — Add the deep-link / surface entry points
 
@@ -260,6 +260,6 @@ Anti-patterns](Design-System).
 
 ---
 
-> _Last reviewed: 2026-06-22 · Source: `docs/migration-guide.md` · Related
+> _Last reviewed: 2026-11-18 · Source: `docs/migration-guide.md` · Related
 > modules: `:feature:torch`, `:feature:vibration`, `:core:datastore`,
 > `:core:widgetkit`, `:core:root`, all sensor/radio feature modules._

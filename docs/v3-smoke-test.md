@@ -10,7 +10,7 @@ GitHub app — no tooling needed. A tool's status in
 Format: `- [ ] Tool — job · notes`
 
 ## Shell
-- [ ] Navigation — bottom bar shows Home / Tools / Sensors / Connect / More; every tool is reachable in ≤ 2 taps; back returns to the section hub ·
+- [ ] Navigation — bottom bar shows Home / Tools / Sensors / Connect / More; every tool is reachable in ≤ 2 taps; back returns to the section hub; re-tapping the active section returns to its hub; landscape shows a labelled rail instead ·
 - [ ] Home — shows something useful without tapping anything ·
 - [ ] Settings — theme / palette change applies immediately ·
 

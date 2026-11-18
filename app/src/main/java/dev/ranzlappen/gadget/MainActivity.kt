@@ -48,7 +48,6 @@ import dev.ranzlappen.gadget.core.datastore.UserPreferences
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
 import dev.ranzlappen.gadget.core.navigation.GadgetApp
 import dev.ranzlappen.gadget.core.navigation.GadgetDestination
-import dev.ranzlappen.gadget.core.navigation.navigateTopLevel
 import dev.ranzlappen.gadget.feature.audio.audioScreen
 import dev.ranzlappen.gadget.feature.automation.ui.automationScreen
 import dev.ranzlappen.gadget.feature.dashboard.dashboardScreen
@@ -178,14 +177,10 @@ class MainActivity : ComponentActivity() {
                     ) {
                         dashboardScreen(
                             onNavigate = { destination ->
-                                // Rail destinations (Dashboard, Torch, Settings, …)
-                                // route via the back-stack-trimming helper; any
-                                // non-rail sub-route uses plain navigate.
-                                if (destination in GadgetDestination.railDestinations) {
-                                    navController.navigateTopLevel(destination)
-                                } else {
-                                    navController.navigate(destination.route)
-                                }
+                                // v3: tools open on top of Home, so back returns
+                                // to the dashboard. Section switching is owned by
+                                // the shell's bottom bar / rail.
+                                navController.navigate(destination.route)
                             },
                         )
                         sensorsScreen()
@@ -233,17 +228,17 @@ class MainActivity : ComponentActivity() {
                             // Deep-link the "turned off in settings" snackbar
                             // action to the Settings screen.
                             onNavigateToSettings = {
-                                navController.navigateTopLevel(GadgetDestination.Settings)
+                                navController.navigate(GadgetDestination.Settings.route)
                             },
                         )
                         vibrationScreen(
                             onNavigateToSettings = {
-                                navController.navigateTopLevel(GadgetDestination.Settings)
+                                navController.navigate(GadgetDestination.Settings.route)
                             },
                         )
                         notificationScreen(
                             onNavigateToSettings = {
-                                navController.navigateTopLevel(GadgetDestination.Settings)
+                                navController.navigate(GadgetDestination.Settings.route)
                             },
                         )
                         appsScreen(navController)

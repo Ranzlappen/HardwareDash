@@ -162,12 +162,15 @@ The component families (full signatures in
   between M3 versions); `GadgetLayoutMode` is the stable seam. Use
   `BoxWithConstraintsAdaptive { mode -> … }` when a layout needs both
   pixel constraints and the semantic mode.
-- **The shell adapts automatically:** `GadgetApp` passes `showLabels =
-  true` to `GadgetNavRail` only at Expanded width. The rail is a
-  pinned-anchors layout — `pinnedTop` (Dashboard), `pinnedBottom`
-  (Settings), and `modules` in a scrollable middle region. Add a module
-  by appending it to `GadgetDestination.modules` and registering its route
-  in `GadgetApp { … }`.
+- **The shell adapts automatically (v3):** `GadgetApp` shows the five
+  `GadgetSection`s (Home / Tools / Sensors / Connect / More) as a labelled
+  `GadgetSectionBar` at the bottom on Compact width and as a labelled
+  `GadgetSectionRail` on Medium / Expanded. Every section but Home has a
+  hub screen (`SectionHubScreen`) listing its tools; tools are pushed on
+  top of the hub. Add a tool by appending its destination to
+  `GadgetDestination.modules` **and** to one `GadgetSection.members` list
+  (`GadgetSectionTest` fails otherwise), adding a `hubSummary` line, and
+  registering its route in `GadgetApp { … }`.
 - **`ModuleScreenScaffold`** exposes an optional `secondaryPane` slot. Its
   placement adapts to both width and posture:
   - **Compact** (`SinglePane`): omitted entirely.

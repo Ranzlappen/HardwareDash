@@ -2,23 +2,31 @@ package dev.ranzlappen.gadget.core.navigation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 
 /**
  * Fixed-width design token for the rail.
@@ -32,97 +40,137 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 private val RailWidth: Dp = 80.dp
 
 /**
- * Vertical navigation rail with pinned anchors and a scrollable middle.
+ * Labelled bottom navigation bar with the five [GadgetSection]s. Used on
+ * Compact widths (phones in portrait).
  *
- * Layout (top → bottom):
- *  - [topAnchors] pinned at the top (typically Dashboard),
- *  - [modules] in a weighted, [verticalScroll]-backed middle region so
- *    the rail keeps Dashboard + Settings reachable no matter how many
- *    feature modules are registered (the module list grows over time),
- *  - [bottomAnchors] pinned at the bottom (typically Settings).
- *
- * Built as a plain [Column] of [NavigationRailItem]s rather than an M3
- * [androidx.compose.material3.NavigationRail] because the rail needs a
- * *pinned-top + scrollable-middle + pinned-bottom* shape — `NavigationRail`
- * exposes only a top header slot and doesn't reliably scroll when items
- * overflow the viewport.
- *
- * Selection is derived live from
- * [NavHostController.currentBackStackEntryAsState] so the highlight
- * stays in sync without a separate state holder. Clicks route via
- * [NavHostController.navigateTopLevel] so the back stack doesn't grow
- * indefinitely from tab switching.
+ * Insets are applied by the enclosing shell ([GadgetApp]), so the bar is
+ * given zero window insets to avoid double padding above the system
+ * navigation bar.
  */
 @Composable
-fun GadgetNavRail(
+fun GadgetSectionBar(
     navController: NavHostController,
-    topAnchors: List<GadgetDestination>,
-    modules: List<GadgetDestination>,
-    bottomAnchors: List<GadgetDestination>,
     modifier: Modifier = Modifier,
-    showLabels: Boolean = false,
 ) {
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route
-    val scroll = rememberScrollState()
-
-    val onSelect: (GadgetDestination) -> Unit = { destination ->
-        if (currentRoute != destination.route) navController.navigateTopLevel(destination)
+    val current = rememberCurrentSection(navController)
+    NavigationBar(
+        modifier = modifier,
+        windowInsets = WindowInsets(0, 0, 0, 0),
+    ) {
+        GadgetSection.entries.forEach { section ->
+            val selected = section == current.section
+            NavigationBarItem(
+                selected = selected,
+                onClick = { navController.navigateToSection(section, current.route) },
+                icon = { SectionIcon(section, selected) },
+                label = { SectionLabel(section) },
+                alwaysShowLabel = true,
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+            )
+        }
     }
+}
 
+/**
+ * Labelled vertical rail with the five [GadgetSection]s. Used on Medium /
+ * Expanded widths (landscape, foldables, tablets).
+ */
+@Composable
+fun GadgetSectionRail(
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+) {
+    val current = rememberCurrentSection(navController)
+    val spacing = LocalGadgetTheme.current.spacing
     Column(
         modifier = modifier
             .fillMaxHeight()
             .width(RailWidth),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(spacing.tiny, Alignment.CenterVertically),
     ) {
-        topAnchors.forEach { destination ->
-            RailItem(destination, currentRoute == destination.route, showLabels, onSelect)
-        }
-        // Scrollable module region — takes the space between the
-        // pinned anchors and scrolls internally when the module list
-        // overflows the available height.
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(scroll),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-        ) {
-            modules.forEach { destination ->
-                RailItem(destination, currentRoute == destination.route, showLabels, onSelect)
-            }
-        }
-        bottomAnchors.forEach { destination ->
-            RailItem(destination, currentRoute == destination.route, showLabels, onSelect)
+        GadgetSection.entries.forEach { section ->
+            val selected = section == current.section
+            NavigationRailItem(
+                selected = selected,
+                onClick = { navController.navigateToSection(section, current.route) },
+                icon = { SectionIcon(section, selected) },
+                label = { SectionLabel(section) },
+                alwaysShowLabel = true,
+                colors = NavigationRailItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+            )
         }
     }
 }
 
+/**
+ * Navigate to [section]'s root. Tapping the section that is already
+ * selected while a tool is open pops back to that section's hub;
+ * switching sections saves and restores each section's back stack.
+ */
+fun NavHostController.navigateToSection(section: GadgetSection, currentRoute: String?) {
+    val alreadyInSection = currentRoute != null && section.owns(currentRoute)
+    if (alreadyInSection) {
+        if (currentRoute != section.route) {
+            val popped = popBackStack(section.route, inclusive = false)
+            if (!popped) navigateSectionRoot(section)
+        }
+        return
+    }
+    navigateSectionRoot(section)
+}
+
+private fun NavHostController.navigateSectionRoot(section: GadgetSection) {
+    navigate(section.route) {
+        popUpTo(graph.startDestinationId) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
+private data class CurrentSection(val route: String?, val section: GadgetSection)
+
+/**
+ * The section owning the current back-stack entry. Routes outside every
+ * section (rare — e.g. a screen registered without a destination) keep
+ * the last known section highlighted instead of clearing the selection.
+ */
 @Composable
-private fun RailItem(
-    destination: GadgetDestination,
-    selected: Boolean,
-    showLabels: Boolean,
-    onSelect: (GadgetDestination) -> Unit,
-) {
-    NavigationRailItem(
-        selected = selected,
-        onClick = { onSelect(destination) },
-        icon = {
-            Icon(
-                imageVector = if (selected) destination.iconFilled else destination.iconOutlined,
-                contentDescription = destination.label,
-            )
-        },
-        label = if (showLabels) {
-            { Text(text = destination.label) }
-        } else null,
-        alwaysShowLabel = showLabels,
-        colors = NavigationRailItemDefaults.colors(
-            selectedIconColor = MaterialTheme.colorScheme.primary,
-            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        ),
+private fun rememberCurrentSection(navController: NavHostController): CurrentSection {
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val route = backStackEntry?.destination?.route
+    var last by remember { mutableStateOf(GadgetSection.Home) }
+    val resolved = GadgetSection.forRoute(route)
+    if (resolved != null && resolved != last) {
+        SideEffect { last = resolved }
+    }
+    return CurrentSection(route, resolved ?: last)
+}
+
+@Composable
+private fun SectionIcon(section: GadgetSection, selected: Boolean) {
+    Icon(
+        imageVector = if (selected) section.iconFilled else section.iconOutlined,
+        // The visible label (SectionLabel) names the item.
+        contentDescription = null,
+    )
+}
+
+@Composable
+private fun SectionLabel(section: GadgetSection) {
+    Text(
+        text = section.label,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
     )
 }

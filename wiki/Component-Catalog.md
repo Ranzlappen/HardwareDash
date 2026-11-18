@@ -237,8 +237,11 @@ fun GadgetStatusDot(contentDescription: String?, modifier: Modifier = Modifier,
   `LocalReducedMotion`.
 
 ### `GadgetApp` (`core/navigation/GadgetApp.kt`)
-- The top-level shell: nav rail + nav host. Computes `WindowSizeClass`
-  once and provides `LocalWindowSizeClass`. Wraps content in `GadgetTheme`.
+- The top-level shell: five-section navigation (`GadgetSectionBar` on
+  Compact, `GadgetSectionRail` on wider windows) + nav host + the
+  auto-registered section hubs (`SectionHubScreen`). Computes
+  `WindowSizeClass` once and provides `LocalWindowSizeClass`. Wraps content
+  in `GadgetTheme`.
 
 ### `ScreenHeader` / `SectionHeader` / `ModuleScreenScaffold`
 - Standard layout primitives. `ModuleScreenScaffold` takes a primary
@@ -319,7 +322,7 @@ and re-scans on `ON_RESUME`.
 
 ---
 
-> _Last reviewed: 2026-07-11 · Source: `CLAUDE.md` (component catalog),
+> _Last reviewed: 2026-11-18 · Source: `CLAUDE.md` (component catalog),
 > `core/ui/src/main/.../component/*`, `core/ui/.../module/*`,
 > `core/permissions/*` · Related
 > module: `:core:ui`._
