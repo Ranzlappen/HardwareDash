@@ -143,7 +143,7 @@ on top (system/predictive back returns to the hub).
 | Section | Contents (v3 target) | Interim (before merges) |
 |---|---|---|
 | **Home** | Live dashboard: status cards (battery, storage, network, last log), quick toggles (torch, vibrate), pinned tools | current Dashboard |
-| **Tools** | Torch · Vibration · Camera · Audio · Display · Apps · Logbook | + Actuators, Microphone |
+| **Tools** | Torch · Vibration · Camera · Audio · Display · Files (metadata/EXIF) · Apps · Logbook | + Actuators, Microphone |
 | **Sensors** | Sensor explorer · Battery · Storage · GPS | + Ambient, Motion |
 | **Connect** | Wi-Fi · Bluetooth · Cellular · NFC · IR · Sub-GHz · Flipper | same |
 | **More** | Automation · Notifications · Lock · Device & debug · Manual · Settings | + ADB, USB, Diagnostics, Health, Downloader |
@@ -160,7 +160,7 @@ on top (system/predictive back returns to the hub).
 | `torch-standard`, `vibration-standard` | folded into the app-flavor binding pattern used by every other module | when touched |
 | `automation` (screenless) | merged into `automation-ui` | when touched |
 | `benchmark` | removed (re-add when there is something to measure) | V3-5 |
-| `youtubedownloader` | **open decision** (§8) — frozen, listed under More | — |
+| `youtubedownloader` | kept, frozen, listed under More (§8.1) | — |
 | everything else | kept as is; fixed only where a smoke test fails | — |
 
 Expected result: ~79 → ~65 Gradle modules. The count is a side-effect, not a
@@ -248,7 +248,9 @@ is green and its smoke-test lines pass.
       capture to MediaStore; scanner becomes a mode.
 - [ ] **B10** Audio: live FFT spectrum; recordings list with playback/share/delete.
 - [ ] **B11** NFC parity check vs v1 (write, tag type, protection info); fill gaps.
-- [ ] **B12** (if approved, §8) File metadata/EXIF viewer.
+- [ ] **B12** File metadata / EXIF viewer (approved, §8.3): browse a file via
+      the system picker, show name/size/MIME/dates, read + edit image EXIF,
+      audio/video media metadata.
 
 ### V3-4 · Honest root
 - [ ] **B13** Tag every `RootFeatureKey` Verified/Experimental; Settings toggle
@@ -284,17 +286,17 @@ automation features, new feature modules.
 
 ---
 
-## 8. Open decisions (maintainer)
+## 8. Decisions (maintainer, 2026-11-18)
 
-1. **YouTube downloader** — keep (frozen, under More), move to its own repo, or
-   drop from the app? *Default until decided: keep, frozen.*
-2. **Root verification device** — is the Xiaomi 14T Pro rooted? Which rooted
-   tools matter most to verify first?
-3. **File metadata / EXIF viewer** (v1) — bring back (B12) or leave out?
-4. **Merge cadence** — PR each phase to `main` (recommended), or keep `main` on
-   v2 until v3 is complete?
-
----
+1. **YouTube downloader** — kept, **frozen**, listed under More. No further
+   investment; revisit only if it breaks.
+2. **Root verification device** — a rooted **Samsung Galaxy A17** is the test
+   device for rooted tools (the daily Xiaomi 14T Pro is not rooted and covers
+   the standard flavor). A rooted action becomes Verified only once it works
+   on the A17; vendor-specific paths that only exist on other SoCs stay 🧪.
+3. **File metadata / EXIF viewer** (v1) — **bring back** (B12 approved).
+4. **Merge cadence** — one PR per phase onto `main` once CI is green and the
+   phase's smoke-test lines pass. V3-0 + V3-1 go together in the first PR.
 
 ## 9. Working agreement
 

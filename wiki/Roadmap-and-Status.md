@@ -60,8 +60,9 @@ is ticked.
 | More | Lock (device admin) | `lock` (+`-rooted`) | ⚪ | keep |
 | More | ADB / USB debug, diagnostics, permission health | `adbdebug`, `usbdebug`, `diagnostics`, `bugreport` (+ rooted) | ⚪ | ✂️ → `devtools` (B8) |
 | More | Manual | `manual` | ⚪ | keep |
+| Tools | File metadata / EXIF (v1) | — | ✂️ lost in v2 | bring back (B12) |
 | More | Settings, backup, permissions dashboard | `settings`, `:core:permissions` | ⚪ | single permissions UI (B8) |
-| More | YouTube downloader | `youtubedownloader` | ⚪ | frozen — open decision (MASTER-PLAN §8) |
+| More | YouTube downloader | `youtubedownloader` | ⚪ | kept, frozen (MASTER-PLAN §8.1) |
 | Home screen | Generic metric widget | `metricwidget` | ⚪ | keep |
 | — | Keep-alive service | `keepalive` (+`-rooted`) | ⚪ | keep |
 | — | Macrobenchmarks | `benchmark` | empty skeleton | ✂️ remove (V3-5) |

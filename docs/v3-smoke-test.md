@@ -5,7 +5,8 @@ phone, note the device and anything odd. Edit this file straight from the
 GitHub app — no tooling needed. A tool's status in
 [MASTER-PLAN.md](../MASTER-PLAN.md) only becomes ✅ once its line is ticked.
 
-**Device:** Xiaomi 14T Pro · HyperOS · rooted: ? · build: _(APK / commit)_
+**Standard flavor:** Xiaomi 14T Pro · HyperOS · not rooted · build: _(APK / commit)_
+**Rooted flavor:** Samsung Galaxy A17 · rooted · build: _(APK / commit)_
 
 Format: `- [ ] Tool — job · notes`
 
@@ -46,7 +47,7 @@ Format: `- [ ] Tool — job · notes`
 - [ ] Manual — opens and reads correctly ·
 - [ ] Backup — export a backup ZIP, import it on a clean install ·
 
-## Rooted flavor only
+## Rooted flavor only (Samsung Galaxy A17)
 _List each rooted action here as it is verified; anything not listed stays
 🧪 Experimental (see MASTER-PLAN §4.6)._
 - [ ] Root grant — app requests su, safety acknowledgement shows once ·
