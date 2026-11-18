@@ -231,10 +231,12 @@ is green and its smoke-test lines pass.
       `ModuleActionRegistry` + `LogbookDao` (no feature deps); "Pinned tools"
       replaces the full catalog list; editor kept. `HomeStatusTest` pins the
       mapping.
-- [ ] **B4** Up-navigation on tool screens (back arrow in `ScreenHeader` when not
-      a section root); deep links land inside the right section. Known bug:
-      `MainActivity` never reads `GadgetDestination.EXTRA_ROUTE`, so tapping a
-      logbook reminder notification opens Home instead of the Logbook.
+- [x] **B4** Up arrow on every non-root screen via `LocalNavigateUp` (provided
+      by the shell, rendered by `ModuleScreenScaffold` — no per-feature
+      wiring). `MainActivity` now honours `GadgetDestination.EXTRA_ROUTE`
+      (was ignored) via `openFromDeepLink` (section hub → tool), and the
+      logbook reminder, battery / storage widgets and GPS spoof notification
+      open their own screen.
 
 ### V3-2 · Consolidate overlaps
 - [ ] **B5** Sensor explorer (all sensors, live values, chart, copy); retire

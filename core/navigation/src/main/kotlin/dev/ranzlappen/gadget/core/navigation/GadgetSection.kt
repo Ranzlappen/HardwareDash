@@ -129,6 +129,9 @@ enum class GadgetSection(
         fun forRoute(route: String?): GadgetSection? =
             route?.let { r -> entries.firstOrNull { it.owns(r) } }
 
+        /** `true` when [route] is a section root (Home's dashboard or a hub) — no up arrow. */
+        fun isRoot(route: String): Boolean = entries.any { it.route == route }
+
         private fun String.matchesDestination(destination: GadgetDestination): Boolean =
             this == destination.route ||
                 startsWith(destination.route + "/") ||

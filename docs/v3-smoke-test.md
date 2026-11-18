@@ -15,7 +15,8 @@ the standard and rooted debug APKs; kept 7 days).
 Format: `- [ ] Tool — job · notes`
 
 ## Shell
-- [ ] Navigation — bottom bar shows Home / Tools / Sensors / Connect / More; every tool is reachable in ≤ 2 taps; back returns to the section hub; re-tapping the active section returns to its hub; landscape shows a labelled rail instead ·
+- [ ] Navigation — bottom bar shows Home / Tools / Sensors / Connect / More; every tool is reachable in ≤ 2 taps; back returns to the section hub; re-tapping the active section returns to its hub; tool screens show a back arrow (hubs and Home don't); landscape shows a labelled rail instead ·
+- [ ] Deep links — tapping the battery widget opens Battery, the storage widget opens Storage, a logbook reminder opens Logbook (also when the app is already open) ·
 - [ ] Home — battery, storage, Wi-Fi and last log entry show real values and update; each card opens its tool; Torch button toggles the flashlight; Buzz vibrates; pinned tools appear after pinning in "Edit pinned tools" ·
 - [ ] Settings — theme / palette change applies immediately ·
 

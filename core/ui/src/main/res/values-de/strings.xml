@@ -32,4 +32,6 @@
     <!-- GadgetExpandableCard (collapsible card) state announcements -->
     <string name="expandable_card_state_expanded">Ausgeklappt</string>
     <string name="expandable_card_state_collapsed">Eingeklappt</string>
+    <!-- Up arrow in ModuleScreenScaffold (v3 B4). -->
+    <string name="gadget_navigate_up">Zurück</string>
 </resources>

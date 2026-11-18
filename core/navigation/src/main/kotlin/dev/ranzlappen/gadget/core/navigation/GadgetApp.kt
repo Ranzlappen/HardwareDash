@@ -15,14 +15,17 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetCustomTheme
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
+import dev.ranzlappen.gadget.core.ui.LocalNavigateUp
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.adaptive.LocalWindowSizeClass
 
@@ -112,15 +115,27 @@ fun GadgetApp(
                         GadgetSectionRail(navController = navController)
                     }
                     Column(modifier = Modifier.weight(1f)) {
-                        GadgetNavHost(
-                            modifier = Modifier.weight(1f),
-                            navController = navController,
-                            startDestination = startDestination,
-                        ) {
-                            sectionHubScreens(onOpen = { destination ->
-                                navController.navigate(destination.route)
-                            })
-                            builder()
+                        // Up arrow for every screen that isn't a section root
+                        // and has something to go back to (read by
+                        // ModuleScreenScaffold via LocalNavigateUp).
+                        val backStackEntry by navController.currentBackStackEntryAsState()
+                        val route = backStackEntry?.destination?.route
+                        val canNavigateUp = route != null &&
+                            !GadgetSection.isRoot(route) &&
+                            navController.previousBackStackEntry != null
+                        val navigateUp: (() -> Unit)? =
+                            if (canNavigateUp) ({ navController.navigateUp() }) else null
+                        CompositionLocalProvider(LocalNavigateUp provides navigateUp) {
+                            GadgetNavHost(
+                                modifier = Modifier.weight(1f),
+                                navController = navController,
+                                startDestination = startDestination,
+                            ) {
+                                sectionHubScreens(onOpen = { destination ->
+                                    navController.navigate(destination.route)
+                                })
+                                builder()
+                            }
                         }
                         if (compact) {
                             GadgetSectionBar(navController = navController)

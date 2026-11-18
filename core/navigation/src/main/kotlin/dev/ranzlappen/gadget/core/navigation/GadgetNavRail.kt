@@ -128,6 +128,27 @@ fun NavHostController.navigateToSection(section: GadgetSection, currentRoute: St
     navigateSectionRoot(section)
 }
 
+/**
+ * Open [destination] from outside the app (notification, widget, service):
+ * reset to the owning section's root, then push the tool, so back leads to
+ * the hub and the bottom bar highlights the right section. Section roots
+ * themselves are just opened.
+ */
+fun NavHostController.openFromDeepLink(destination: GadgetDestination) {
+    val section = GadgetSection.forRoute(destination.route)
+    if (section == null) {
+        navigate(destination.route) { launchSingleTop = true }
+        return
+    }
+    navigate(section.route) {
+        popUpTo(graph.startDestinationId)
+        launchSingleTop = true
+    }
+    if (destination.route != section.route) {
+        navigate(destination.route) { launchSingleTop = true }
+    }
+}
+
 private fun NavHostController.navigateSectionRoot(section: GadgetSection) {
     navigate(section.route) {
         popUpTo(graph.startDestinationId) {

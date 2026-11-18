@@ -6,6 +6,7 @@ import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
 import dagger.hilt.android.EntryPointAccessors
+import dev.ranzlappen.gadget.core.navigation.GadgetDestination
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetSizePreset
 import dev.ranzlappen.gadget.core.widgetkit.provider.BaseContentWidgetProvider
 import dev.ranzlappen.gadget.core.widgetkit.provider.WidgetRenderDensity
@@ -37,9 +38,13 @@ class StorageWidgetProvider : BaseContentWidgetProvider<StorageWidgetConfig>() {
 
     override fun defaultConfig(context: Context): StorageWidgetConfig = StorageWidgetConfig()
 
-    /** Tap opens the app (its launcher entry); null on the rare device without one. */
+    /** Tap opens the app on the Storage screen; null on the rare device without a launcher entry. */
     override fun launchIntent(context: Context, appWidgetId: Int, config: StorageWidgetConfig): Intent? =
         context.packageManager.getLaunchIntentForPackage(context.packageName)
+            ?.putExtra(GadgetDestination.EXTRA_ROUTE, GadgetDestination.Storage.route)
+            // Deliver to a running MainActivity (onNewIntent) instead of only
+            // bringing its task to front, so the route is honoured.
+            ?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
     override suspend fun buildRemoteViews(
         context: Context,

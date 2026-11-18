@@ -170,7 +170,12 @@ The component families (full signatures in
   top of the hub. Add a tool by appending its destination to
   `GadgetDestination.modules` **and** to one `GadgetSection.members` list
   (`GadgetSectionTest` fails otherwise), adding a `hubSummary` line, and
-  registering its route in `GadgetApp { … }`.
+  registering its route in `GadgetApp { … }`. Tool screens built on
+  `ModuleScreenScaffold` get an up arrow automatically: the shell provides
+  `LocalNavigateUp` for every non-root route. External entry points
+  (notifications, widgets) put `GadgetDestination.EXTRA_ROUTE` on the launch
+  intent with `FLAG_ACTIVITY_CLEAR_TOP | SINGLE_TOP`; `MainActivity` opens it
+  via `openFromDeepLink` (section hub underneath, so back lands on the hub).
 - **`ModuleScreenScaffold`** exposes an optional `secondaryPane` slot. Its
   placement adapts to both width and posture:
   - **Compact** (`SinglePane`): omitted entirely.

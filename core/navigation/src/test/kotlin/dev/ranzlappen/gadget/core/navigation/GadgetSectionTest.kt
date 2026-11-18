@@ -1,6 +1,7 @@
 package dev.ranzlappen.gadget.core.navigation
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -39,6 +40,14 @@ class GadgetSectionTest {
     fun `unknown and null routes resolve to no section`() {
         assertNull(GadgetSection.forRoute(null))
         assertNull(GadgetSection.forRoute("does-not-exist"))
+    }
+
+    @Test
+    fun `section roots get no up arrow, tools do`() {
+        assertTrue(GadgetSection.isRoot(GadgetDestination.Dashboard.route))
+        assertTrue(GadgetSection.isRoot(GadgetSection.Tools.route))
+        assertFalse(GadgetSection.isRoot(GadgetDestination.Torch.route))
+        assertFalse(GadgetSection.isRoot("apps/editor/42"))
     }
 
     @Test

@@ -85,7 +85,10 @@ class LogbookReminderWorker @AssistedInject constructor(
         val launchIntent = applicationContext.packageManager
             .getLaunchIntentForPackage(applicationContext.packageName)
             ?.apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP,
+                )
                 putExtra(GadgetDestination.EXTRA_ROUTE, GadgetDestination.Logbook.route)
             }
             ?: Intent(Intent.ACTION_MAIN).setPackage(applicationContext.packageName)

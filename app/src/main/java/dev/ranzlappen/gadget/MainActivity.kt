@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +51,7 @@ import dev.ranzlappen.gadget.core.datastore.UserPreferences
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
 import dev.ranzlappen.gadget.core.navigation.GadgetApp
 import dev.ranzlappen.gadget.core.navigation.GadgetDestination
+import dev.ranzlappen.gadget.core.navigation.openFromDeepLink
 import dev.ranzlappen.gadget.feature.audio.audioScreen
 import dev.ranzlappen.gadget.feature.automation.ui.automationScreen
 import dev.ranzlappen.gadget.feature.dashboard.dashboardScreen
@@ -120,10 +124,21 @@ class MainActivity : ComponentActivity() {
     // reduced-motion override, reduced-transparency override).
     @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
 
+    /**
+     * Route requested via [GadgetDestination.EXTRA_ROUTE] (logbook reminder,
+     * battery / storage widgets, GPS spoof notification), consumed once the
+     * nav graph exists. Only read on a fresh launch so a rotation doesn't
+     * re-navigate.
+     */
+    private var pendingRoute by mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         bootstrapLegacyManagers()
+        if (savedInstanceState == null) {
+            pendingRoute = intent?.getStringExtra(GadgetDestination.EXTRA_ROUTE)
+        }
 
         setContent {
             val outcome by produceState<LaunchGateOutcome?>(initialValue = null) {
@@ -244,6 +259,13 @@ class MainActivity : ComponentActivity() {
                         appsScreen(navController)
                         youtubeDownloaderScreen(navController)
                     }
+                    // Runs after GadgetApp's first composition, so the graph is set.
+                    LaunchedEffect(pendingRoute) {
+                        val route = pendingRoute ?: return@LaunchedEffect
+                        GadgetDestination.byRouteOrNull(route)?.let { navController.openFromDeepLink(it) }
+                        pendingRoute = null
+                        intent?.removeExtra(GadgetDestination.EXTRA_ROUTE)
+                    }
                 }
                 is LaunchGateOutcome.DeniedFatal -> GadgetTheme {
                     FatalLaunchScreen(
@@ -259,6 +281,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        intent.getStringExtra(GadgetDestination.EXTRA_ROUTE)?.let { pendingRoute = it }
         val action = intent.action
         if (action == NfcAdapter.ACTION_NDEF_DISCOVERED ||
             action == NfcAdapter.ACTION_TAG_DISCOVERED ||
