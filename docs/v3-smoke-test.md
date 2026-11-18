@@ -5,6 +5,10 @@ phone, note the device and anything odd. Edit this file straight from the
 GitHub app — no tooling needed. A tool's status in
 [MASTER-PLAN.md](../MASTER-PLAN.md) only becomes ✅ once its line is ticked.
 
+**Getting a build:** GitHub app → Actions → the latest *CI* run on
+`claude/v3-pragmatic-overhaul` → artifact `gadget-debug-apks-<sha>` (zip with
+the standard and rooted debug APKs; kept 7 days).
+
 **Standard flavor:** Xiaomi 14T Pro · HyperOS · not rooted · build: _(APK / commit)_
 **Rooted flavor:** Samsung Galaxy A17 · rooted · build: _(APK / commit)_
 

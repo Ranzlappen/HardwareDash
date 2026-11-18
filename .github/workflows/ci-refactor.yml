@@ -164,6 +164,21 @@ jobs:
             assembleRootedDebug \
             --stacktrace
 
+      # v3 smoke testing happens on real phones (no local tooling), so pushes
+      # to claude/v3-** publish both debug APKs as a downloadable artifact:
+      # standard → the daily (unrooted) phone, rooted → the rooted test phone.
+      # Short retention keeps CI storage small; PR runs skip it.
+      - name: Upload debug APKs (v3 branch pushes)
+        if: success() && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: gadget-debug-apks-${{ github.sha }}
+          path: |
+            app/build/outputs/apk/standard/debug/*.apk
+            app/build/outputs/apk/rooted/debug/*.apk
+          retention-days: 7
+          if-no-files-found: error
+
       # ─── APK-size delta vs main (standard-debug) ─────────────────────
       # Computes the size of the PR's standard-debug APK, downloads the
       # latest main-branch standard-debug APK from build-apk.yml as the

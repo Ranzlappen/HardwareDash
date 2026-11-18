@@ -90,7 +90,7 @@ System](Design-System).
 | Workflow | Trigger | Does |
 |---|---|---|
 | `build-apk.yml` | push to `main` | Builds `standard` + `rooted` debug **and** R8-minified release; runs the quality gates (leak gate, libsu assertion) + `lint` job (no-legacy-import assertion, `detekt`, `ktlintCheck`); creates a GitHub Release with the release builds. |
-| `ci-refactor.yml` | PR iteration + pushes to `claude/v3-**` | JVM unit tests (curated module list) + assembles standard+rooted debug APKs + posts an APK-size delta vs main (PRs only). |
+| `ci-refactor.yml` | PR iteration + pushes to `claude/v3-**` | JVM unit tests (curated module list) + assembles standard+rooted debug APKs + posts an APK-size delta vs main (PRs only); on `claude/v3-**` pushes uploads both debug APKs as the `gadget-debug-apks-<sha>` artifact (7-day retention) for on-device smoke tests. |
 | `instrumented-tests.yml` | PR | `connectedDebugAndroidTest` on an API 30 emulator for the migrated modules. |
 | `build-release.yml` | manual | Signed release APK + AAB (build-only; gates ran upstream). |
 | `cleanup-ci-storage.yml` | manual | Prunes workflow artifacts + un-flagged releases. |
