@@ -4,12 +4,14 @@ HardwareDash, internally named **Gadget**, is a modular Android app for
 monitoring and controlling device sensors, radios, cameras, audio,
 storage, widgets, automation, and rooted-only system surfaces.
 
+**Direction:** v3 ("pragmatic") — see [`MASTER-PLAN.md`](MASTER-PLAN.md).
+v1 is archived on `legacy-main`, v2 on `archive/v2-modular-2026`.
+
 **Full documentation lives in the [GitHub Wiki](https://github.com/Ranzlappen/HardwareDash/wiki):**
 
 - [Project overview](https://github.com/Ranzlappen/HardwareDash/wiki/Home)
 - [Roadmap & status](https://github.com/Ranzlappen/HardwareDash/wiki/Roadmap-and-Status)
 - [Architecture](https://github.com/Ranzlappen/HardwareDash/wiki/Architecture)
-- [Feature migration guide](https://github.com/Ranzlappen/HardwareDash/wiki/Feature-Migration-Guide)
 - [Design system](https://github.com/Ranzlappen/HardwareDash/wiki/Design-System)
 - [Standard / rooted flavor model](https://github.com/Ranzlappen/HardwareDash/wiki/Flavors-and-Root-Safety)
 - [AI collaboration workflow](https://github.com/Ranzlappen/HardwareDash/wiki/AI-Collaboration)
