@@ -60,10 +60,8 @@ import dev.ranzlappen.gadget.feature.gps.gpsScreen
 import dev.ranzlappen.gadget.feature.storage.storageScreen
 import dev.ranzlappen.gadget.feature.radios.ir.irScreen
 import dev.ranzlappen.gadget.feature.camera.cameraScreen
-import dev.ranzlappen.gadget.feature.motion.motionScreen
 import dev.ranzlappen.gadget.feature.actuators.actuatorsScreen
 import dev.ranzlappen.gadget.feature.adbdebug.adbDebugScreen
-import dev.ranzlappen.gadget.feature.ambient.ambientScreen
 import dev.ranzlappen.gadget.feature.bugreport.bugReportScreen
 import dev.ranzlappen.gadget.feature.diagnostics.diagnosticsScreen
 import dev.ranzlappen.gadget.feature.display.displayScreen
@@ -198,13 +196,12 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(destination.route)
                             },
                         )
-                        sensorsScreen()
+                        sensorsScreen(navController)
                         batteryScreen()
                         gpsScreen()
                         storageScreen()
                         irScreen()
                         cameraScreen()
-                        motionScreen()
                         audioScreen()
                         nfcScreen()
                         btScreen()
@@ -212,7 +209,6 @@ class MainActivity : ComponentActivity() {
                         cellScreen()
                         subghzScreen()
                         flipperScreen()
-                        ambientScreen()
                         lockScreen()
                         actuatorsScreen()
                         diagnosticsScreen()

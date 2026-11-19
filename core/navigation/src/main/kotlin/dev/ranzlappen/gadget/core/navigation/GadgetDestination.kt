@@ -10,13 +10,11 @@ import androidx.compose.material.icons.filled.Brightness6
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.DeveloperMode
-import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Help
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Memory
@@ -43,13 +41,11 @@ import androidx.compose.material.icons.outlined.Brightness6
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DeveloperMode
-import androidx.compose.material.icons.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.HealthAndSafety
 import androidx.compose.material.icons.outlined.Help
-import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Memory
@@ -115,19 +111,6 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.Sensors
     }
 
-    /**
-     * Motion feature module — gyroscope, step counter, and motion-detect
-     * sensors. A first-class entry in the scrollable [modules] region.
-     * Ships monitoring ([RotationRateMetricSource], [StepCounterMetricSource],
-     * [MotionDetectedMetricSource]) ready; read-only sensors, no ActionHandler
-     * needed.
-     */
-    data object Motion : GadgetDestination {
-        override val route = "motion"
-        override val label = "Motion"
-        override val iconFilled = Icons.Filled.DirectionsRun
-        override val iconOutlined = Icons.Outlined.DirectionsRun
-    }
 
     /**
      * Audio feature module — live microphone dB meter and WAV voice
@@ -355,16 +338,6 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.Memory
     }
 
-    /**
-     * Ambient light feature module — live lux reading from the device's
-     * light sensor, with level descriptors and monitoring support.
-     */
-    data object Ambient : GadgetDestination {
-        override val route = "ambient"
-        override val label = "Ambient"
-        override val iconFilled = Icons.Filled.LightMode
-        override val iconOutlined = Icons.Outlined.LightMode
-    }
 
     /**
      * Lock / Security feature module — keyguard lock state, screen-lock
@@ -550,8 +523,8 @@ sealed interface GadgetDestination {
         val modules: List<GadgetDestination> = listOf(
             Torch, Vibration, Apps, Sensors,
             Battery, Gps, Storage, RadiosIr, Camera,
-            Motion, Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosCell, RadiosSubghz, Flipper,
-            Ambient, Lock, Actuators, Youtubedownloader, Diagnostics, Display, Microphone, Notification, UsbDebug, AdbDebug, BugReport, Manual, Logbook, Automation,
+            Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosCell, RadiosSubghz, Flipper,
+            Lock, Actuators, Youtubedownloader, Diagnostics, Display, Microphone, Notification, UsbDebug, AdbDebug, BugReport, Manual, Logbook, Automation,
         )
 
         /**

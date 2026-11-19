@@ -30,7 +30,7 @@ Format: `- [ ] Tool — job · notes`
 - [ ] Logbook — add an entry; add a checkpoint with a due date; reminder fires ·
 
 ## Sensors
-- [ ] Sensors — proximity, light and acceleration values update live ·
+- [ ] Sensors — the list shows every sensor (magnetometer, barometer, … — compare with a sensor app); a sensor's detail shows live values per axis with moving sparklines and a rate in Hz; "Copy specs and readings" and "Copy sensor list" paste correctly; Step counter asks for activity permission, then counts; Significant motion shows the trigger note ·
 - [ ] Battery — level, charging state, temperature, voltage look right ·
 - [ ] Storage — free / used / total match system settings ·
 - [ ] GPS — position appears on the map; speed/altitude update while moving ·

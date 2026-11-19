@@ -71,9 +71,6 @@ enum class GadgetSection(
             GadgetDestination.Battery,
             GadgetDestination.Storage,
             GadgetDestination.Gps,
-            // Merged into the sensor explorer in V3-2 (B5).
-            GadgetDestination.Ambient,
-            GadgetDestination.Motion,
         ),
     ),
     Connect(

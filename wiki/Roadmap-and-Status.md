@@ -42,9 +42,7 @@ is ticked.
 | Tools | Display (brightness) | `display` (+`-rooted`) | ⚪ | keep |
 | Tools | App organizer + folder widgets | `apps` (+`-rooted`) | ⚪ | keep |
 | Tools | Logbook (entries, checkpoints, reminders) | `logbook` | ⚪ | keep |
-| Sensors | Sensors (proximity / light / accel) | `sensors` | 🟡 3 sensor types | full sensor explorer (B5) |
-| Sensors | Ambient light | `ambient` | ⚪ | ✂️ → `sensors` (B5) |
-| Sensors | Motion (gyro / steps) | `motion` | ⚪ | ✂️ → `sensors` (B5) |
+| Sensors | Sensor explorer (every sensor, live detail, copy) | `sensors` | ⚪ | B5 ✓ — absorbed `ambient` + `motion` (✂️) |
 | Sensors | Battery | `battery` (+`-rooted`) | ⚪ | keep |
 | Sensors | Storage | `storage` (+`-rooted`) | ⚪ | keep |
 | Sensors | GPS + spoofing | `gps` (+`-rooted`), `lsposed-module` | ⚪ | keep |

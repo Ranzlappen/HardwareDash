@@ -16,8 +16,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
- * Thin, injectable seam over [SensorManager] — shared by both
- * `:feature:sensors` and `:feature:motion` so neither imports the other.
+ * Thin, injectable seam over [SensorManager] for `:feature:sensors` (the
+ * sensor explorer + its MetricSources) and anything else that reads sensors
+ * without depending on that feature.
  *
  * [stream] is a **cold** flow: the listener registers on collect and
  * unregisters on cancel ([awaitClose]), so an uncollected signal costs zero
@@ -32,6 +33,44 @@ class DeviceSensors @Inject constructor(
         context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
 
     fun sensor(type: Int): Sensor? = sensorManager?.getDefaultSensor(type)
+
+    /**
+     * Every sensor the device reports — standard, vendor-specific and wake-up
+     * variants — in [SensorManager.getSensorList] order. The order is stable for
+     * the process lifetime, so an index into this list identifies a sensor.
+     */
+    fun all(): List<Sensor> = sensorManager?.getSensorList(Sensor.TYPE_ALL).orEmpty()
+
+    /**
+     * Cold stream of raw readings from one specific [sensor] (all axes, plus
+     * accuracy and the event timestamp) for the explorer's live view. Closes
+     * immediately when registration fails — one-shot trigger sensors
+     * ([Sensor.REPORTING_MODE_ONE_SHOT]) and sensors behind a missing
+     * permission. [conflate] keeps a slow collector from backing up the
+     * sensor thread; use [SensorReading.timestampNanos] for rates.
+     */
+    fun readings(
+        sensor: Sensor,
+        samplingPeriodUs: Int = SensorManager.SENSOR_DELAY_UI,
+    ): Flow<SensorReading> = callbackFlow {
+        val manager = sensorManager
+        if (manager == null) {
+            close()
+            return@callbackFlow
+        }
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                trySend(SensorReading(event.values.copyOf(), event.accuracy, event.timestamp))
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+        }
+        if (!manager.registerListener(listener, sensor, samplingPeriodUs)) {
+            close()
+            return@callbackFlow
+        }
+        awaitClose { manager.unregisterListener(listener) }
+    }.conflate()
 
     fun has(type: Int): Boolean = sensor(type) != null
 
@@ -79,3 +118,12 @@ class DeviceSensors @Inject constructor(
         const val ONE_SHOT_TIMEOUT_MS = 1_000L
     }
 }
+
+/** One raw event from [DeviceSensors.readings]: every axis value as reported. */
+class SensorReading(
+    val values: FloatArray,
+    /** One of `SensorManager.SENSOR_STATUS_*`. */
+    val accuracy: Int,
+    /** `SensorEvent.timestamp` — nanoseconds, monotonic. */
+    val timestampNanos: Long,
+)

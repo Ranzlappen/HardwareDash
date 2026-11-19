@@ -146,7 +146,7 @@ on top (system/predictive back returns to the hub).
 |---|---|---|
 | **Home** | Live dashboard: status cards (battery, storage, network, last log), quick toggles (torch, vibrate), pinned tools | current Dashboard |
 | **Tools** | Torch · Vibration · Camera · Audio · Display · Files (metadata/EXIF) · Apps · Logbook | + Actuators, Microphone |
-| **Sensors** | Sensor explorer · Battery · Storage · GPS | + Ambient, Motion |
+| **Sensors** | Sensor explorer · Battery · Storage · GPS | (done) |
 | **Connect** | Wi-Fi · Bluetooth · Cellular · NFC · IR · Sub-GHz · Flipper | same |
 | **More** | Automation · Notifications · Lock · Device & debug · Manual · Settings | + ADB, USB, Diagnostics, Health, Downloader |
 
@@ -154,7 +154,7 @@ on top (system/predictive back returns to the hub).
 
 | Today (v2) | v3 | Batch |
 |---|---|---|
-| `sensors`, `ambient`, `motion` | **`sensors`** — explorer over `SensorManager.getSensorList()` with per-sensor live values + chart + copy; keeps the useful MetricSources | V3-2 |
+| `sensors`, `ambient`, `motion` | **`sensors`** — explorer over `SensorManager.getSensorList()` with per-sensor live values + chart + copy; keeps the useful MetricSources | ✅ B5 |
 | `vibration`, `actuators` | **`vibration`** (absorbs amplitude/haptic test) | V3-2 |
 | `audio`, `microphone` (+rooted) | **`audio`** (+`audio-rooted`); mic extreme tools become a rooted section | V3-2 |
 | `adbdebug`, `usbdebug`, `diagnostics`, `bugreport` (+4 rooted) | **`devtools`** (+`devtools-rooted`): debug state, dumps, permission health | V3-2 |
@@ -241,8 +241,12 @@ is green and its smoke-test lines pass.
       open their own screen.
 
 ### V3-2 · Consolidate overlaps
-- [ ] **B5** Sensor explorer (all sensors, live values, chart, copy); retire
-      `ambient` + `motion` routes, keep their MetricSource keys stable.
+- [x] **B5** Sensor explorer: every sensor (`DeviceSensors.all()`), grouped;
+      per-sensor detail with live axes + sparklines, accuracy, rate, specs,
+      copy, and the history chart where a metric exists; step-sensor
+      permission flow. `ambient` + `motion` modules deleted, their
+      MetricSources moved into `sensors` with keys unchanged; v2's fake
+      rooted capability rows dropped. `SensorCatalogTest` / `SensorLiveTest`.
 - [x] **B6** *(done before B5, so the merge moves no dead code)* Removed all
       29 read-only `assert_*` / `*_check` actions — 10 handlers deleted
       (sensors, ambient, motion, lock, cell, bugreport, storage, wifi, bt,

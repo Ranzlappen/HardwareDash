@@ -145,8 +145,6 @@ include(
     ":feature:vibration-standard",
     ":feature:gps",
     ":feature:gps-rooted",
-    ":feature:motion",
-    ":feature:ambient",
     ":feature:radios-wifi",
     ":feature:radios-wifi-rooted",
     ":feature:radios-bt",

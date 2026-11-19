@@ -85,15 +85,27 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
 - **Standard:** ✅ · **Rooted:** ✅.
 - **Source:** `:feature:apps`, `:feature:apps-rooted`.
 
-## Sensors ✅
+## Sensors ⚪
 
-- **What:** proximity / light / acceleration readouts as push
-  `MetricSource`s over the `DeviceSensors` seam.
-- **Monitoring:** chartable + automatable (same `MetricSource`).
-- **Automation:** these signals feed automation triggers/conditions
-  (`MetricThreshold` / `MetricCompare`). No `ActionHandler` — there is
-  nothing to *do* to a sensor (v3 B6 removed the read-only assert actions).
-- **Source:** `:feature:sensors`.
+- **What (v3 B5):** a sensor explorer over `SensorManager.getSensorList()`
+  — every sensor the device reports (standard, vendor and wake-up
+  variants), grouped motion / position / environment / other, with name,
+  vendor and type. Each sensor opens a detail screen: live value per axis
+  with a sparkline, accuracy and event rate, full specs (range,
+  resolution, power, min delay, reporting mode, wake-up), "copy specs and
+  readings", and the persisted history chart when the sensor backs a
+  metric. "Copy sensor list" copies the whole inventory. Step sensors ask
+  for activity recognition on their detail screen; one-shot trigger
+  sensors are explained instead of streamed. Absorbs v2's `ambient` and
+  `motion` modules and brings back v1's full list.
+- **Monitoring:** `proximity`, `light`, `acceleration`, `rotation_rate`,
+  `step_count`, `motion_detected` and `ambient_light` MetricSources (keys
+  unchanged from v2; `ambient_light` duplicates `light` and is kept for
+  saved rules and widgets).
+- **Automation:** rules gate on those metrics (`MetricThreshold` /
+  `MetricCompare`); there is no `ActionHandler` — nothing to *do* to a
+  sensor.
+- **Source:** `:feature:sensors` (+ `DeviceSensors` in `:core:hardware`).
 
 ## Automation ✅
 
@@ -200,8 +212,6 @@ of [Roadmap & Status](Roadmap-and-Status):
   scanner, scan history, rooted high-FPS / RAW rows.
 - **Audio** (`:feature:audio` + `-rooted`) — dB meter + WAV recording,
   live dB monitor, rooted mic rows.
-- **Motion / Ambient** (`:feature:motion`, `:feature:ambient`) — sensor
-  readouts + monitors (being merged into Sensors, v3 B5).
 - **Storage** (`:feature:storage` + `-rooted`) — volume cards, used-%
   monitor, storage widget, rooted diskstats / fstrim actions.
 - **Lock / Diagnostics / Health** (`:feature:lock`,
