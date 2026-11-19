@@ -45,7 +45,6 @@
     <string name="logbook_monitor_metric_name">Puntos de control abiertos</string>
     <string name="logbook_monitor_open">Historial de puntos de control abiertos</string>
     <string name="logbook_action_add_entry">Añadir entrada al registro</string>
-    <string name="logbook_action_assert_open_below">Comprobar que los puntos de control abiertos estén en o por debajo del umbral</string>
     <string name="logbook_notification_channel_name">Recordatorios del registro</string>
     <string name="logbook_notification_channel_description">Notificaciones de recordatorio de puntos de control del módulo Registro</string>
     <string name="logbook_notification_title">Punto de control pendiente: %1$s</string>

@@ -61,7 +61,6 @@
 
     <!-- ─── Automation actions ─────────────────────────────────────────── -->
     <string name="logbook_action_add_entry">Add logbook entry</string>
-    <string name="logbook_action_assert_open_below">Assert open checkpoints at or below threshold</string>
 
     <!-- ─── Reminder notification ──────────────────────────────────────── -->
     <string name="logbook_notification_channel_name">Logbook reminders</string>

@@ -50,9 +50,11 @@ code and changes it in small reviewable batches.
    Authoring Contract made `MetricSource` + `ActionHandler` "non-negotiable"
    and rooted-capability rows "required for all feature modules". Result:
    **46** MetricSources, **37** ActionHandlers, **135** `ModuleAction`s — of
-   which **24 are `assert_*` "actions"** that only re-implement what
-   `Condition.MetricCompare` / `Trigger.MetricThreshold` already do
-   (and `ambient_assert_bright` duplicates `light_assert_bright`).
+   which **24 are `assert_*` "actions"** (plus 5 `*_check` ones) that only
+   re-implement what `Condition.MetricCompare` / `Trigger.MetricThreshold`
+   already do (and `ambient_assert_bright` duplicates `light_assert_bright`).
+   Worse, they were no-ops: the engine ignores action results, so an assert
+   never stopped a rule (found in B6).
 4. **Fragmentation instead of features.** One v1 Sensors screen became three
    partial modules (`sensors` = proximity/light/accel, `ambient` = light again,
    `motion` = gyro/steps). Magnetometer, barometer, gravity and rotation
@@ -241,8 +243,13 @@ is green and its smoke-test lines pass.
 ### V3-2 · Consolidate overlaps
 - [ ] **B5** Sensor explorer (all sensors, live values, chart, copy); retire
       `ambient` + `motion` routes, keep their MetricSource keys stable.
-- [ ] **B6** Remove the 24 `assert_*` actions; migrate any saved rules to
-      `MetricCompare` conditions (or drop them with a one-time notice).
+- [x] **B6** *(done before B5, so the merge moves no dead code)* Removed all
+      29 read-only `assert_*` / `*_check` actions — 10 handlers deleted
+      (sensors, ambient, motion, lock, cell, bugreport, storage, wifi, bt,
+      subghz), 4 trimmed (actuators, flipper, logbook, notification). They
+      never gated anything: `RuleFireExecutor` dispatches every action and
+      ignores the result. Saved rules lose them on read and save via
+      `RetiredActionKeys` / `withoutRetiredActions()` (tested).
 - [ ] **B7** `vibration` ← `actuators`; `audio` ← `microphone`.
 - [ ] **B8** `devtools` ← adb/usb/diagnostics/bugreport; one permissions UI
       (Settings) instead of two.

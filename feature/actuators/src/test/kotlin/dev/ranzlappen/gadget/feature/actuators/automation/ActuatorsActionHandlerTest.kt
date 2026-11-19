@@ -35,14 +35,13 @@ class ActuatorsActionHandlerTest {
     }
 
     @Test
-    fun `declares haptic-click, haptic-heavy and assert-available actions`() {
+    fun `declares haptic-click and haptic-heavy actions`() {
         val handler = handlerWith(null)
 
         assertEquals(
             setOf(
                 ActuatorsActionHandler.ACTION_HAPTIC_CLICK,
                 ActuatorsActionHandler.ACTION_HAPTIC_HEAVY,
-                ActuatorsActionHandler.ACTION_ASSERT_AVAILABLE,
             ),
             handler.actions.map { it.key }.toSet(),
         )
@@ -62,7 +61,6 @@ class ActuatorsActionHandlerTest {
         for (action in listOf(
             ActuatorsActionHandler.ACTION_HAPTIC_CLICK,
             ActuatorsActionHandler.ACTION_HAPTIC_HEAVY,
-            ActuatorsActionHandler.ACTION_ASSERT_AVAILABLE,
         )) {
             assertEquals(ActionResult.Failure("No vibrator on this device"), handler.dispatch(action, emptyMap()))
         }
@@ -92,38 +90,4 @@ class ActuatorsActionHandlerTest {
         verify { vibrator.vibrate(150L) }
     }
 
-    // ---- actuators_assert_available ----
-
-    @Test
-    fun `assert-available succeeds when the vibrator reports available`() = runTest {
-        val vibrator = mockk<Vibrator>()
-        every { vibrator.hasVibrator() } returns true
-
-        val result = handlerWith(vibrator).dispatch(ActuatorsActionHandler.ACTION_ASSERT_AVAILABLE, emptyMap())
-
-        assertEquals(ActionResult.Success, result)
-    }
-
-    @Test
-    fun `assert-available fails when the vibrator reports unavailable`() = runTest {
-        val vibrator = mockk<Vibrator>()
-        every { vibrator.hasVibrator() } returns false
-
-        val result = handlerWith(vibrator).dispatch(ActuatorsActionHandler.ACTION_ASSERT_AVAILABLE, emptyMap())
-
-        assertEquals(ActionResult.Failure("Vibrator not available"), result)
-    }
-
-    @Test
-    fun `assert-available ignores unrecognised params`() = runTest {
-        val vibrator = mockk<Vibrator>()
-        every { vibrator.hasVibrator() } returns true
-
-        val result = handlerWith(vibrator).dispatch(
-            ActuatorsActionHandler.ACTION_ASSERT_AVAILABLE,
-            mapOf("unused" to "value"),
-        )
-
-        assertEquals(ActionResult.Success, result)
-    }
 }

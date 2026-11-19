@@ -55,7 +55,7 @@ is ticked.
 | Connect | IR blaster | `radios-ir` (+`-rooted`) | ⚪ | keep |
 | Connect | Sub-GHz device detection | `radios-subghz` | ⚪ | keep |
 | Connect | Flipper Zero bridge | `flipper` (+`-rooted`) | ⚪ | keep |
-| More | Automation rules | `automation-ui`, `:core:automation`, `automation` (+`-rooted`) | ⚪ | drop `assert_*` actions (B6) |
+| More | Automation rules | `automation-ui`, `:core:automation`, `automation` (+`-rooted`) | ⚪ | 29 dead assert/check actions removed (B6 ✓) |
 | More | Notifications | `notification` (+`-rooted`) | ⚪ | keep |
 | More | Lock (device admin) | `lock` (+`-rooted`) | ⚪ | keep |
 | More | ADB / USB debug, diagnostics, permission health | `adbdebug`, `usbdebug`, `diagnostics`, `bugreport` (+ rooted) | ⚪ | ✂️ → `devtools` (B8) |
@@ -84,5 +84,5 @@ CI produces `standard-debug.apk`, `standard-release.apk` + `.aab`,
 
 ---
 
-> _Last reviewed: 2026-11-18 (v3 reset) · Source: `MASTER-PLAN.md`,
+> _Last reviewed: 2026-11-19 · Source: `MASTER-PLAN.md`,
 > `docs/v3-smoke-test.md`, `settings.gradle.kts` · Related modules: all._

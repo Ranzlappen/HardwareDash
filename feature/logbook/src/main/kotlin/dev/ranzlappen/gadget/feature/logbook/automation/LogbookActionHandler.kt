@@ -16,15 +16,14 @@ import dev.ranzlappen.gadget.core.automation.ModuleAction
 import dev.ranzlappen.gadget.core.data.logbook.LogbookTagColor
 import dev.ranzlappen.gadget.feature.logbook.LogbookRepository
 import dev.ranzlappen.gadget.feature.logbook.R
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * The logbook automation surface. `add_entry` lets a rule log a timestamped
- * note (e.g. "log an entry when the battery drops below 10 %"); the
- * assert-style `assert_open_below` gates a rule on the current open-checkpoint
- * backlog, mirroring the sensor/ambient assert pattern.
+ * note (e.g. "log an entry when the battery drops below 10 %"). To gate a
+ * rule on the open-checkpoint backlog, use a metric condition on the
+ * logbook MetricSource instead of an action.
  */
 @Singleton
 class LogbookActionHandler @Inject constructor(
@@ -42,19 +41,6 @@ class LogbookActionHandler @Inject constructor(
                 ActionParam(PARAM_TEXT, ActionParamType.Text),
             ),
         ),
-        ModuleAction(
-            key = ACTION_ASSERT_OPEN_BELOW,
-            label = context.getString(R.string.logbook_action_assert_open_below),
-            params = listOf(
-                ActionParam(
-                    PARAM_THRESHOLD,
-                    ActionParamType.Int,
-                    DEFAULT_OPEN_THRESHOLD.toString(),
-                    0f,
-                    MAX_OPEN_THRESHOLD,
-                ),
-            ),
-        ),
     )
 
     override suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult =
@@ -69,26 +55,13 @@ class LogbookActionHandler @Inject constructor(
                     ActionResult.Success
                 }
             }
-            ACTION_ASSERT_OPEN_BELOW -> {
-                val threshold = params[PARAM_THRESHOLD]?.toIntOrNull() ?: DEFAULT_OPEN_THRESHOLD
-                val open = repository.openCheckpointCount.first()
-                if (open <= threshold) {
-                    ActionResult.Success
-                } else {
-                    ActionResult.Failure("$open open checkpoints exceeds the threshold of $threshold")
-                }
-            }
             else -> ActionResult.Unsupported
         }
 
     companion object {
         const val FEATURE_ID = "logbook"
         const val ACTION_ADD_ENTRY = "logbook_add_entry"
-        const val ACTION_ASSERT_OPEN_BELOW = "logbook_assert_open_below"
         const val PARAM_TEXT = "text"
-        const val PARAM_THRESHOLD = "threshold"
-        const val DEFAULT_OPEN_THRESHOLD = 5
-        private const val MAX_OPEN_THRESHOLD = 100f
     }
 }
 

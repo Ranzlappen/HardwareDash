@@ -119,7 +119,6 @@
     <!-- ActionHandler labels (automation rule builder) -->
     <string name="notification_action_post_test">Post test notification</string>
     <string name="notification_action_cancel_test">Cancel test notification</string>
-    <string name="notification_action_assert_importance">Assert channel importance</string>
     <string name="notification_action_sticky_override">Raise channel importance to High</string>
     <string name="notification_action_grant_listener">Grant listener access</string>
     <string name="notification_action_show_overlay">Show lock-screen overlay</string>

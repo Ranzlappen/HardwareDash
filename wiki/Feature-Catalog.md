@@ -90,13 +90,9 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
 - **What:** proximity / light / acceleration readouts as push
   `MetricSource`s over the `DeviceSensors` seam.
 - **Monitoring:** chartable + automatable (same `MetricSource`).
-- **Automation:** these signals feed automation triggers/conditions; the
-  module also has no controller of its own to drive, so its `sensors`
-  `ActionHandler` exposes threshold **assert** actions instead (mirroring
-  `ambient`/`motion`) — proximity near/far, light bright/dark, acceleration
-  above/below — each sampling the same `MetricSource` directly, guarding on
-  `stream() == null` so an absent sensor fails the assertion rather than
-  silently passing on its zero absent-value.
+- **Automation:** these signals feed automation triggers/conditions
+  (`MetricThreshold` / `MetricCompare`). No `ActionHandler` — there is
+  nothing to *do* to a sensor (v3 B6 removed the read-only assert actions).
 - **Source:** `:feature:sensors`.
 
 ## Automation ✅
@@ -133,8 +129,8 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
   (graceful-unavailable when no dongle / no USB-host bus).
 - **Monitoring:** `subghz_bridge_connected` push `MetricSource` (emits on USB
   attach/detach only) → `MonitorContainer` + `LiveMonitorContainer`.
-- **Automation:** `SubghzActionHandler` — assert-bridge-attached and
-  assert-Sub-GHz-capable conditions.
+- **Automation:** gate rules on the `subghz_bridge_connected` metric (the
+  read-only check actions were removed in v3 B6).
 - **Permissions:** none (USB enumeration needs no runtime grant);
   `uses-feature android.hardware.usb.host` (not required).
 - **Rooted:** 3 capability rows — raw register access, custom carrier tuning,
@@ -165,8 +161,8 @@ see [Module Catalog](Module-Catalog). Status legend: ✅ live · 🟡 partial
   command-id demux) driving the System / Storage / Sub-GHz / Infrared command
   suites — no protoc/codegen dependency.
 - **Monitoring:** `flipper_connected` + `flipper_battery` `MetricSource`s.
-- **Automation:** `flipper` `ActionHandler` — assert-connected, ping,
-  transmit-`.sub`, transmit-`.ir`.
+- **Automation:** `flipper` `ActionHandler` — ping, transmit-`.sub`,
+  transmit-`.ir` (gate on the `flipper_connected` metric).
 - **Permissions:** USB host (no runtime grant); `BLUETOOTH_CONNECT/SCAN` for
   the BLE picker.
 - **Rooted:** `flipper_root` action root-grants USB access by relaxing the
@@ -205,7 +201,7 @@ of [Roadmap & Status](Roadmap-and-Status):
 - **Audio** (`:feature:audio` + `-rooted`) — dB meter + WAV recording,
   live dB monitor, rooted mic rows.
 - **Motion / Ambient** (`:feature:motion`, `:feature:ambient`) — sensor
-  readouts + monitors + assert actions (both modules).
+  readouts + monitors (being merged into Sensors, v3 B5).
 - **Storage** (`:feature:storage` + `-rooted`) — volume cards, used-%
   monitor, storage widget, rooted diskstats / fstrim actions.
 - **Lock / Diagnostics / Health** (`:feature:lock`,
@@ -244,13 +240,12 @@ of [Roadmap & Status](Roadmap-and-Status):
 - **Logbook** (`:feature:logbook`) — session-note log entries (tagged) +
   a checkpoint/process tracker with per-checkpoint due dates and
   WorkManager reminders. `logbook_open_checkpoints` MetricSource (push over
-  the open-checkpoint flow) + `LogbookActionHandler` (add-entry /
-  assert-open-below); registered in the build and reachable from the nav
+  the open-checkpoint flow) + `LogbookActionHandler` (add-entry); registered in the build and reachable from the nav
   rail. Standard-only; data layer in `:core:data`. (Finished from the
   earlier inert draft — W2.)
 
 ---
 
-> _Last reviewed: 2026-11-18 · Source: `settings.gradle.kts`,
+> _Last reviewed: 2026-11-19 · Source: `settings.gradle.kts`,
 > feature source counts, [Completion Master Plan](Completion-Master-Plan) ·
 > Related: every `feature/*`._

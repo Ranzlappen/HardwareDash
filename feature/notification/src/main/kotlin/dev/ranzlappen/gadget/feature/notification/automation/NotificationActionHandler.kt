@@ -31,10 +31,7 @@ import javax.inject.Singleton
  *
  * `post_test_notification` and `cancel_test_notification` are standard-flavor,
  * no-root actions that post through plain `NotificationManager` directly
- * (mirrors the screen's builder card). `assert_channel_importance` is a
- * read-only check against the live channel state (mirrors `LockActionHandler`'s
- * assert pattern) — it works on both flavors, it just only ever *passes* after
- * a successful override. The remaining four actions dispatch through the
+ * (mirrors the screen's builder card). The remaining four actions dispatch through the
  * injected [NotificationController] — the standard/rooted seam bound
  * per-flavor in `:app` (`RootBindings`); standard flavor's controller returns
  * [NotificationControllerResult.Unsupported] for all of them, so those four
@@ -65,14 +62,6 @@ class NotificationActionHandler @Inject constructor(
         ModuleAction(
             key = ACTION_CANCEL_TEST_NOTIFICATION,
             label = context.getString(R.string.notification_action_cancel_test),
-        ),
-        ModuleAction(
-            key = ACTION_ASSERT_CHANNEL_IMPORTANCE,
-            label = context.getString(R.string.notification_action_assert_importance),
-            params = listOf(
-                ActionParam(PARAM_CHANNEL_ID, ActionParamType.Text, ""),
-                ActionParam(PARAM_IMPORTANCE, ActionParamType.Text, NotificationImportance.High.name),
-            ),
         ),
         ModuleAction(
             key = ACTION_STICKY_OVERRIDE,
@@ -114,7 +103,6 @@ class NotificationActionHandler @Inject constructor(
                 notificationManager.cancel(TEST_NOTIFICATION_ID)
                 ActionResult.Success
             }
-            ACTION_ASSERT_CHANNEL_IMPORTANCE -> assertChannelImportance(params)
             ACTION_STICKY_OVERRIDE -> {
                 val channelId = params[PARAM_CHANNEL_ID]?.trim()
                 if (channelId.isNullOrEmpty()) {
@@ -153,28 +141,6 @@ class NotificationActionHandler @Inject constructor(
             )
     }
 
-    /** Read-only assert: does the given channel's *live* importance match the
-     *  expected tier? Mirrors `LockActionHandler`'s assert pattern — a plain
-     *  system-service read, not a controller call, so it works identically on
-     *  both flavors (it's only ever expected to *pass* after a rooted
-     *  sticky-override run, but nothing about the check itself needs root). */
-    private fun assertChannelImportance(params: Map<String, String>): ActionResult {
-        val channelId = params[PARAM_CHANNEL_ID]?.trim()
-        if (channelId.isNullOrEmpty()) return ActionResult.Failure("channel id required")
-        val expected = params[PARAM_IMPORTANCE]
-            ?.let { name -> NotificationImportance.entries.firstOrNull { it.name == name } }
-            ?: NotificationImportance.High
-        val channel = notificationManager.getNotificationChannel(channelId)
-            ?: return ActionResult.Failure("no such channel: $channelId")
-        return if (channel.importance == expected.osImportance) {
-            ActionResult.Success
-        } else {
-            ActionResult.Failure(
-                "channel importance is ${channel.importance}, expected ${expected.osImportance}",
-            )
-        }
-    }
-
     private fun NotificationControllerResult.toActionResult(): ActionResult = when (this) {
         is NotificationControllerResult.Ok -> ActionResult.Success
         NotificationControllerResult.Unsupported -> ActionResult.Failure("requires the rooted app version")
@@ -189,7 +155,6 @@ class NotificationActionHandler @Inject constructor(
         const val FEATURE_ID = "notification"
         const val ACTION_POST_TEST_NOTIFICATION = "notification_post_test"
         const val ACTION_CANCEL_TEST_NOTIFICATION = "notification_cancel_test"
-        const val ACTION_ASSERT_CHANNEL_IMPORTANCE = "notification_assert_channel_importance"
         const val ACTION_STICKY_OVERRIDE = "notification_sticky_override"
         const val ACTION_GRANT_LISTENER = "notification_grant_listener"
         const val ACTION_SHOW_OVERLAY = "notification_show_overlay"

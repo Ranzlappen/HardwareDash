@@ -45,7 +45,6 @@
     <string name="logbook_monitor_metric_name">Offene Kontrollpunkte</string>
     <string name="logbook_monitor_open">Verlauf offener Kontrollpunkte</string>
     <string name="logbook_action_add_entry">Logbucheintrag hinzufügen</string>
-    <string name="logbook_action_assert_open_below">Prüfen, ob offene Kontrollpunkte höchstens dem Schwellenwert entsprechen</string>
     <string name="logbook_notification_channel_name">Logbuch-Erinnerungen</string>
     <string name="logbook_notification_channel_description">Kontrollpunkt-Erinnerungsbenachrichtigungen aus dem Logbuch-Modul</string>
     <string name="logbook_notification_title">Kontrollpunkt fällig: %1$s</string>

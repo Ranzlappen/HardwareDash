@@ -103,7 +103,6 @@
     <!-- ActionHandler labels (automation rule builder) -->
     <string name="notification_action_post_test">Testbenachrichtigung senden</string>
     <string name="notification_action_cancel_test">Testbenachrichtigung abbrechen</string>
-    <string name="notification_action_assert_importance">Kanal-Wichtigkeit prüfen</string>
     <string name="notification_action_sticky_override">Kanal-Wichtigkeit auf Hoch anheben</string>
     <string name="notification_action_grant_listener">Listener-Zugriff gewähren</string>
     <string name="notification_action_show_overlay">Sperrbildschirm-Overlay anzeigen</string>

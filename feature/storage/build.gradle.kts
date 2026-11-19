@@ -13,8 +13,6 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
     implementation(project(":core:monitoring"))
-    // :core:automation — the standard-tier assert-free-space ActionHandler.
-    implementation(project(":core:automation"))
     implementation(project(":core:root"))
     // :core:widgetkit — the storage home-screen widget rides the kit's
     // content/display archetype; :core:datastore backs its per-appWidgetId

@@ -103,7 +103,6 @@
     <!-- ActionHandler labels (automation rule builder) -->
     <string name="notification_action_post_test">Publicar notificación de prueba</string>
     <string name="notification_action_cancel_test">Cancelar notificación de prueba</string>
-    <string name="notification_action_assert_importance">Verificar importancia del canal</string>
     <string name="notification_action_sticky_override">Elevar importancia del canal a Alta</string>
     <string name="notification_action_grant_listener">Conceder acceso de escucha</string>
     <string name="notification_action_show_overlay">Mostrar superposición de pantalla de bloqueo</string>

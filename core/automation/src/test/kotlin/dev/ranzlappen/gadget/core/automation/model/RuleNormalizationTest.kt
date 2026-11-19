@@ -3,6 +3,7 @@ package dev.ranzlappen.gadget.core.automation.model
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -114,5 +115,41 @@ class RuleNormalizationTest {
     fun ruleNormalized_isIdentityForNonThresholdTriggers() {
         val rule = Rule(id = "r", name = "n", trigger = Trigger.Manual)
         assertSame(rule, rule.normalized())
+    }
+
+    // ─── v3 B6: retired assert_* actions ─────────────────────────────
+
+    @Test
+    fun retiredAssertActions_areDroppedOnNormalize_andRealActionsKept() {
+        val rule = Rule(
+            id = "r",
+            name = "n",
+            trigger = Trigger.Manual,
+            actions = listOf(
+                RuleAction(featureId = "sensors", actionKey = "proximity_assert_near"),
+                RuleAction(featureId = "torch", actionKey = "torch_on"),
+                RuleAction(featureId = "lock", actionKey = "lock_assert_locked"),
+                RuleAction(featureId = "wifi", actionKey = "wifi_connected_check"),
+            ),
+        )
+        assertEquals(listOf("torch_on"), rule.normalized().actions.map { it.actionKey })
+        assertEquals(listOf("torch_on"), rule.withoutRetiredActions().actions.map { it.actionKey })
+    }
+
+    @Test
+    fun withoutRetiredActions_isIdentityWhenNothingIsRetired() {
+        val rule = Rule(
+            id = "r",
+            name = "n",
+            trigger = Trigger.Manual,
+            actions = listOf(RuleAction(featureId = "torch", actionKey = "torch_on")),
+        )
+        assertSame(rule, rule.withoutRetiredActions())
+    }
+
+    @Test
+    fun retiredKeys_areAllReadOnlyAssertsOrChecks() {
+        assertEquals(29, RetiredActionKeys.size)
+        RetiredActionKeys.forEach { key -> assertTrue(key, "assert" in key || key.endsWith("_check")) }
     }
 }

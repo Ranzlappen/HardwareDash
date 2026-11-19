@@ -12,7 +12,6 @@ dependencies {
     implementation(project(":core:root"))
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
-    implementation(project(":core:automation"))
     // :core:model — the MetricSource contract this module's
     // BugreportMetricSource implements.
     implementation(project(":core:model"))

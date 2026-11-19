@@ -20,6 +20,15 @@ Contract](Module-Authoring-Contract)):
 | `ActionHandler` + `ModuleActionRegistry` | `:core:automation` | Action (write) side — dispatch a feature's actions by `featureId`/`actionKey`. |
 | `MetricSource` + `MetricDescriptor` | `:core:model` | Trigger/condition (read) side — a feature's readable signals. |
 
+**Actions do, conditions check.** `RuleFireExecutor` dispatches every
+action of an admitted rule in order and **does not look at the
+`ActionResult`** — a failing action never stops the ones after it. So an
+"action" that only checks a value gates nothing; gate on a reading with
+`Condition.MetricCompare` or `Trigger.MetricThreshold` instead. v3 (B6)
+removed the 29 read-only `assert_*` / `*_check` actions on these grounds;
+`RetiredActionKeys` + `Rule.withoutRetiredActions()` strip them from saved
+and restored rules on read and on save.
+
 `:core:hardware`'s `HardwareRegistry` is the discovery layer over the read
 side: it lets the builder list "what signals exist on this device" without
 importing any feature — the symmetric partner to `ModuleActionRegistry`.
@@ -240,7 +249,7 @@ See also: [Monitoring Framework](Monitoring-Framework) (the same
 
 ---
 
-> _Last reviewed: 2026-07-14 · Source: `docs/automation-engine.md`,
+> _Last reviewed: 2026-11-19 · Source: `docs/automation-engine.md`,
 > `docs/adr/0002-automation-engine.md`, `CLAUDE.md` (automation) · Related
 > modules: `:core:automation`, `:core:hardware`, `:core:data`,
 > `:feature:automation-ui`, `:feature:automation`._

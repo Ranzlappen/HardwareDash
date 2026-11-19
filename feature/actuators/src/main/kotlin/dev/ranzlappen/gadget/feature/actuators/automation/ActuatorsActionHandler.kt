@@ -36,7 +36,6 @@ class ActuatorsActionHandler @Inject constructor(
     override val actions: List<ModuleAction> = listOf(
         ModuleAction(key = ACTION_HAPTIC_CLICK, label = "Trigger haptic click"),
         ModuleAction(key = ACTION_HAPTIC_HEAVY, label = "Trigger heavy haptic"),
-        ModuleAction(key = ACTION_ASSERT_AVAILABLE, label = "Assert vibrator available"),
     )
 
     override suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult {
@@ -66,10 +65,6 @@ class ActuatorsActionHandler @Inject constructor(
                 }
                 ActionResult.Success
             }
-            ACTION_ASSERT_AVAILABLE -> {
-                if (vib.hasVibrator()) ActionResult.Success
-                else ActionResult.Failure("Vibrator not available")
-            }
             else -> ActionResult.Unsupported
         }
     }
@@ -78,7 +73,6 @@ class ActuatorsActionHandler @Inject constructor(
         const val FEATURE_ID = "actuators"
         const val ACTION_HAPTIC_CLICK = "actuators_haptic_click"
         const val ACTION_HAPTIC_HEAVY = "actuators_haptic_heavy"
-        const val ACTION_ASSERT_AVAILABLE = "actuators_assert_available"
     }
 }
 

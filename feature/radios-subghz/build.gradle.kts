@@ -16,7 +16,6 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
     implementation(project(":core:monitoring"))
-    implementation(project(":core:automation"))
 
     testImplementation(libs.junit)
 

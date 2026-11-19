@@ -29,8 +29,4 @@
     <string name="motion_capability_sysfs_read_detail">Acceso directo del kernel por sysfs a los nodos de hardware del sensor</string>
     <string name="motion_capability_rooted_active">Activo — versión rooteada</string>
     <string name="motion_capability_rooted_required">Requiere versión rooteada</string>
-    <string name="motion_action_assert_motion_detected">Verificar movimiento detectado</string>
-    <string name="motion_action_assert_motion_idle">Verificar ausencia de movimiento</string>
-    <string name="motion_action_assert_steps_above">Verificar pasos por encima del umbral</string>
-    <string name="motion_action_assert_rotation_above">Verificar velocidad de rotación por encima del umbral</string>
 </resources>

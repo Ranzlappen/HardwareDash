@@ -37,7 +37,6 @@
     <string name="storage_widget_percent_format">%1$d %% utilisé</string>
     <string name="storage_widget_free_format">%1$s libres</string>
     <string name="storage_widget_unknown">—</string>
-    <string name="storage_action_assert_free_space">Vérifier que l\'espace libre dépasse le seuil</string>
     <string name="storage_root_tools_title">Outils root</string>
     <string name="storage_root_tools_unavailable">Nécessite la version root de l\'application.</string>
     <string name="storage_root_run">Exécuter</string>

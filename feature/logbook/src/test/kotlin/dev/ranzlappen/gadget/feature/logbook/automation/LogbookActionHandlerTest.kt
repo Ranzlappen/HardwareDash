@@ -44,26 +44,6 @@ class LogbookActionHandlerTest {
     }
 
     @Test
-    fun `assert_open_below succeeds when backlog is at or below the threshold`() = runBlocking {
-        every { repository.openCheckpointCount } returns flowOf(3)
-        val result = handler.dispatch(
-            LogbookActionHandler.ACTION_ASSERT_OPEN_BELOW,
-            mapOf(LogbookActionHandler.PARAM_THRESHOLD to "5"),
-        )
-        assertEquals(ActionResult.Success, result)
-    }
-
-    @Test
-    fun `assert_open_below fails when backlog exceeds the threshold`() = runBlocking {
-        every { repository.openCheckpointCount } returns flowOf(9)
-        val result = handler.dispatch(
-            LogbookActionHandler.ACTION_ASSERT_OPEN_BELOW,
-            mapOf(LogbookActionHandler.PARAM_THRESHOLD to "5"),
-        )
-        assertTrue(result is ActionResult.Failure)
-    }
-
-    @Test
     fun `featureId matches the contracted FEATURE_ID constant`() {
         assertEquals(LogbookActionHandler.FEATURE_ID, handler.featureId)
     }

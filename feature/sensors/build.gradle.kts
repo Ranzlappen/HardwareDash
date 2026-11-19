@@ -20,9 +20,6 @@ dependencies {
     // without a feature-to-feature dependency.
     implementation(project(":core:hardware"))
     implementation(project(":core:root"))
-    // :core:automation — the action contract (ModuleAction / ActionHandler),
-    // making the module automation-ready (SensorsActionHandler).
-    implementation(project(":core:automation"))
 
     // Stateless-screen instrumented test (Compose UI test stack via the
     // shared fixtures, the torch/vibration pattern).

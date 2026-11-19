@@ -29,8 +29,4 @@
     <string name="motion_capability_sysfs_read_detail">Direkter Kernel-Sysfs-Zugriff auf Sensor-Hardwareknoten</string>
     <string name="motion_capability_rooted_active">Aktiv — gerootete Build-Version</string>
     <string name="motion_capability_rooted_required">Erfordert gerootete Build-Version</string>
-    <string name="motion_action_assert_motion_detected">Bewegung erkannt prüfen</string>
-    <string name="motion_action_assert_motion_idle">Keine Bewegung prüfen</string>
-    <string name="motion_action_assert_steps_above">Schrittzahl über Schwellenwert prüfen</string>
-    <string name="motion_action_assert_rotation_above">Drehrate über Schwellenwert prüfen</string>
 </resources>

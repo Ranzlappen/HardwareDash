@@ -31,8 +31,6 @@
     <string name="storage_cap_fstrim_name">Storage trim (fstrim)</string>
     <string name="storage_cap_fstrim_detail">Force discard operation on mounted filesystems to improve SSD longevity</string>
 
-    <!-- ─── Automation actions ─────────────────────────────────────────── -->
-    <string name="storage_action_assert_free_space">Assert free space above threshold</string>
 
     <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
     <string name="storage_root_tools_title">Rooted tools</string>
