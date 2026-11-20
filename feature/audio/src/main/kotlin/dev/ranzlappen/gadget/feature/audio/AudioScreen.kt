@@ -45,6 +45,7 @@ import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 @Composable
 fun AudioScreen(
     modifier: Modifier = Modifier,
+    onOpenMicrophoneTools: () -> Unit = {},
     viewModel: AudioViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -79,6 +80,13 @@ fun AudioScreen(
                     enabled = !rootTools.audioPolicy.running,
                     statusMessage = rootTools.audioPolicy.message,
                     statusKind = rootTools.audioPolicy.statusKind,
+                )
+                // v3 B7b: the former top-level "Mic Tools" screen lives here.
+                RootActionRow(
+                    label = stringResource(R.string.audio_root_mic_tools_label),
+                    description = stringResource(R.string.audio_root_mic_tools_detail),
+                    runLabel = stringResource(R.string.audio_root_open),
+                    onRun = onOpenMicrophoneTools,
                 )
             }
         },

@@ -36,4 +36,7 @@
     <string name="audio_root_run">Ausführen</string>
     <string name="audio_root_policy_label">Audio-Richtlinie ausgeben</string>
     <string name="audio_root_policy_detail">Schreibgeschützter cmd-audio-dump-Snapshot.</string>
+    <string name="audio_root_mic_tools_label">Erweiterte Mikrofon-Tools</string>
+    <string name="audio_root_mic_tools_detail">Verstärkung, Roh-PCM, eigene Abtastraten, Multi-Mikrofon- und Systemaudio-Aufnahme. Experimentell – noch nicht auf einem Gerät geprüft.</string>
+    <string name="audio_root_open">Öffnen</string>
 </resources>

@@ -36,8 +36,8 @@ is ticked.
 | Tools | Torch (+ strobe, QS tiles, widgets) | `torch` (+`-rooted`/`-standard`) | ⚪ | keep |
 | Tools | Vibration (+ haptic effects, pattern editor, widgets, tile) | `vibration` (+`-rooted`/`-standard`) | ⚪ | absorbed `actuators` (✂️, B7a ✓) |
 | Tools | Camera | `camera` (+`-rooted`) | 🟡 barcode scanner only | preview / lens / zoom / capture (B9) |
-| Tools | Audio (dB meter, WAV recording) | `audio` (+`-rooted`) | 🟡 no spectrum, no playback | spectrum + recordings player (B10), absorb `microphone` (B7) |
-| Tools | Mic extreme tools | `microphone` (+`-rooted`) | 🧪 | ✂️ → `audio` rooted section (B7) |
+| Tools | Audio (dB meter, WAV recording) | `audio` (+`-rooted`) | 🟡 no spectrum, no playback | spectrum + recordings player (B10) |
+| Tools | Mic extreme tools (opened from Audio's rooted section) | `microphone` (+`-rooted`) | 🧪 | B7b ✓ no longer top-level; verify or drop in B13 |
 | Tools | Display (brightness) | `display` (+`-rooted`) | ⚪ | keep |
 | Tools | App organizer + folder widgets | `apps` (+`-rooted`) | ⚪ | keep |
 | Tools | Logbook (entries, checkpoints, reminders) | `logbook` | ⚪ | keep |

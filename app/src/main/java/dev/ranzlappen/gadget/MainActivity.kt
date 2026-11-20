@@ -201,7 +201,7 @@ class MainActivity : ComponentActivity() {
                         storageScreen()
                         irScreen()
                         cameraScreen()
-                        audioScreen()
+                        audioScreen(navController)
                         nfcScreen()
                         btScreen()
                         wifiScreen()

@@ -36,4 +36,7 @@
     <string name="audio_root_run">Exécuter</string>
     <string name="audio_root_policy_label">Vider la politique audio</string>
     <string name="audio_root_policy_detail">Instantané en lecture seule de cmd audio dump.</string>
+    <string name="audio_root_mic_tools_label">Outils avancés du micro</string>
+    <string name="audio_root_mic_tools_detail">Gain, PCM brut, fréquences d’échantillonnage personnalisées, multi-micro et capture audio système. Expérimental — pas encore vérifié sur un appareil.</string>
+    <string name="audio_root_open">Ouvrir</string>
 </resources>

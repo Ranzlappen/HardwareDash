@@ -145,7 +145,7 @@ on top (system/predictive back returns to the hub).
 | Section | Contents (v3 target) | Interim (before merges) |
 |---|---|---|
 | **Home** | Live dashboard: status cards (battery, storage, network, last log), quick toggles (torch, vibrate), pinned tools | current Dashboard |
-| **Tools** | Torch · Vibration · Camera · Audio · Display · Files (metadata/EXIF) · Apps · Logbook | + Microphone |
+| **Tools** | Torch · Vibration · Camera · Audio · Display · Files (metadata/EXIF) · Apps · Logbook | (Files: B12) |
 | **Sensors** | Sensor explorer · Battery · Storage · GPS | (done) |
 | **Connect** | Wi-Fi · Bluetooth · Cellular · NFC · IR · Sub-GHz · Flipper | same |
 | **More** | Automation · Notifications · Lock · Device & debug · Manual · Settings | + ADB, USB, Diagnostics, Health, Downloader |
@@ -156,7 +156,7 @@ on top (system/predictive back returns to the hub).
 |---|---|---|
 | `sensors`, `ambient`, `motion` | **`sensors`** — explorer over `SensorManager.getSensorList()` with per-sensor live values + chart + copy; keeps the useful MetricSources | ✅ B5 |
 | `vibration`, `actuators` | **`vibration`** (absorbs the haptic actions) | ✅ B7a |
-| `audio`, `microphone` (+rooted) | **`audio`** (+`audio-rooted`); mic extreme tools become a rooted section | V3-2 |
+| `audio`, `microphone` (+rooted) | mic tools reached from **`audio`**'s rooted section; modules kept (unverified code isn't worth a rename — B13 decides) | ✅ B7b |
 | `adbdebug`, `usbdebug`, `diagnostics`, `bugreport` (+4 rooted) | **`devtools`** (+`devtools-rooted`): debug state, dumps, permission health | V3-2 |
 | `camera` (+rooted) | **`camera`**: preview + lens/zoom/focus/exposure + capture, scanner as a mode | V3-3 |
 | `torch-standard`, `vibration-standard` | folded into the app-flavor binding pattern used by every other module | when touched |
@@ -260,7 +260,11 @@ is green and its smoke-test lines pass.
       actions became the new `vibration`/`effect` action (FGS-backed, works
       from widgets and rules), saved rules rewritten via `MovedActions`;
       static `vibrator_available` metric dropped (rules on it never fire).
-- [ ] **B7b** `audio` ← `microphone` (+ `microphone-rooted` → `audio-rooted`).
+- [x] **B7b** `audio` ← `microphone`, the light way: Microphone is entirely
+      unverified rooted extreme-tier code (ALSA mixer writes, tinycap, `pm
+      grant`), so instead of renaming ~2k lines into `audio-rooted` it left
+      the Tools hub and opens from Audio's rooted-tools section (route
+      `audio/microphone`, rooted build only). B13 verifies or removes it.
 - [ ] **B8** `devtools` ← adb/usb/diagnostics/bugreport; one permissions UI
       (Settings) instead of two.
 

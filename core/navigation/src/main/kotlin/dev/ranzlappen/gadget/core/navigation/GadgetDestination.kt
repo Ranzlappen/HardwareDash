@@ -394,9 +394,13 @@ sealed interface GadgetDestination {
      * hardware effect override, system-audio capture). Distinct from [Audio]:
      * baseline mic capture (the dB meter / voice recorder) stays on that
      * route; every row here is disabled on the standard flavor.
+     *
+     * v3 (B7b): no longer a top-level tool — opened from the Audio screen's
+     * rooted-tools section, and routed under `audio/` so the shell keeps the
+     * Tools section selected. Not in [modules] (not pinnable).
      */
     data object Microphone : GadgetDestination {
-        override val route = "microphone"
+        override val route = "audio/microphone"
         override val label = "Mic Tools"
         override val iconFilled = Icons.Filled.GraphicEq
         override val iconOutlined = Icons.Outlined.GraphicEq
@@ -513,7 +517,7 @@ sealed interface GadgetDestination {
             Torch, Vibration, Apps, Sensors,
             Battery, Gps, Storage, RadiosIr, Camera,
             Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosCell, RadiosSubghz, Flipper,
-            Lock, Youtubedownloader, Diagnostics, Display, Microphone, Notification, UsbDebug, AdbDebug, BugReport, Manual, Logbook, Automation,
+            Lock, Youtubedownloader, Diagnostics, Display, Notification, UsbDebug, AdbDebug, BugReport, Manual, Logbook, Automation,
         )
 
         /**

@@ -84,7 +84,6 @@ internal fun GadgetDestination.hubSummary(): String? = when (this) {
     GadgetDestination.Display -> "Screen brightness"
     GadgetDestination.Apps -> "App folders and folder widgets"
     GadgetDestination.Logbook -> "Timestamped notes and checkpoints"
-    GadgetDestination.Microphone -> "Advanced microphone tools (root)"
     GadgetDestination.Sensors -> "Every sensor: live values, charts, specs"
     GadgetDestination.Battery -> "Level, health, temperature, voltage"
     GadgetDestination.Storage -> "Volumes, used and free space"

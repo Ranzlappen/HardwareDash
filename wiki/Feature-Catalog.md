@@ -227,7 +227,8 @@ of [Roadmap & Status](Roadmap-and-Status):
   (standard) + density/refresh-rate override + SurfaceFlinger snapshot
   (rooted); `screen_brightness` MetricSource.
 - **Microphone tools** (`:feature:microphone` + `-rooted`) — rooted-only
-  extreme mic tools (gain/PCM/rate/multi-mic/effects/system-audio);
+  🧪 experimental mic tools, opened from Audio's rooted-tools section
+  (route `audio/microphone`, not a top-level tool since v3 B7b) (gain/PCM/rate/multi-mic/effects/system-audio);
   baseline dB meter/recording stays in `:feature:audio`.
 - **Notifications** (`:feature:notification` + `-rooted`) — channel
   inspector + test-notification builder (standard); sticky-importance

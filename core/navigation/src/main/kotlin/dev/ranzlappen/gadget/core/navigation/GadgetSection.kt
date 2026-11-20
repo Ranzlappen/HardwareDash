@@ -56,8 +56,6 @@ enum class GadgetSection(
             GadgetDestination.Display,
             GadgetDestination.Apps,
             GadgetDestination.Logbook,
-            // Merged into Audio in V3-2 (B7b).
-            GadgetDestination.Microphone,
         ),
     ),
     Sensors(

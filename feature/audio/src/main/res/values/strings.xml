@@ -37,4 +37,7 @@
     <string name="audio_root_run">Run</string>
     <string name="audio_root_policy_label">Dump audio policy</string>
     <string name="audio_root_policy_detail">Read-only cmd audio dump snapshot.</string>
+    <string name="audio_root_mic_tools_label">Advanced microphone tools</string>
+    <string name="audio_root_mic_tools_detail">Gain boost, raw PCM, custom sample rates, multi-mic and system-audio capture. Experimental — not yet verified on a device.</string>
+    <string name="audio_root_open">Open</string>
 </resources>
