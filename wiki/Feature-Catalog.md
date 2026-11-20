@@ -234,10 +234,15 @@ of [Roadmap & Status](Roadmap-and-Status):
   inspector + test-notification builder (standard); sticky-importance
   override / listener opt-in / lock-screen-overlay test (rooted); a real
   `GadgetNotificationListenerService` backs `active_notifications`.
-- **ADB / USB debugging** (`:feature:adbdebug`, `:feature:usbdebug` +
-  `-rooted`) — debug-state readouts + Developer-options deep-links
-  (standard); toggle/network/getprop/setprop and function-role/diagnostics
-  dumps (rooted).
+- **Device & debug** (`:feature:diagnostics` + `-rooted`, v3 B8) — one
+  entry under More: memory monitor and rooted meminfo / cpuinfo /
+  procstats dumps, plus links to **ADB & wireless debugging**
+  (`:feature:adbdebug` + `-rooted`: debug-state readout, Developer-options
+  deep-link; rooted toggle / network ADB / getprop / setprop), **USB
+  debugging & functions** (`:feature:usbdebug` + `-rooted`: readout; rooted
+  function switching and dumps) and **Permission health**
+  (`:feature:bugreport`: the shared `PermissionsDashboardCard`, same as in
+  Settings). Sub-screens are routed under `diagnostics/`.
 - **Apps root tools** (`:feature:apps-rooted`) — pm-based freeze /
   unfreeze / force-stop, surfaced as a per-app menu inside
   `:feature:apps`'s own screen rather than a dedicated one.

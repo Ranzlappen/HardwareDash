@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="diagnostics_screen_title">Diagnostic</string>
+    <string name="diagnostics_screen_title">Appareil &amp; débogage</string>
 
     <!-- Memory monitor (standard MetricSource hosted on the screen) -->
     <string name="diagnostics_live_monitor_memory">Mémoire utilisée (en direct)</string>
@@ -29,4 +29,10 @@
     <string name="diagnostics_root_cpuinfo_detail">Instantané dumpsys cpuinfo en lecture seule.</string>
     <string name="diagnostics_root_procstats_label">Extraire procstats</string>
     <string name="diagnostics_root_procstats_detail">Instantané dumpsys procstats (3 h) en lecture seule.</string>
+    <string name="diagnostics_link_adb">ADB &amp; débogage sans fil</string>
+    <string name="diagnostics_link_adb_detail">État du débogage, ADB réseau, propriétés système</string>
+    <string name="diagnostics_link_usb">Débogage USB &amp; fonctions</string>
+    <string name="diagnostics_link_usb_detail">Mode USB, appareils connectés, dumps</string>
+    <string name="diagnostics_link_permissions">Santé des autorisations</string>
+    <string name="diagnostics_link_permissions_detail">Les autorisations de l’app et ce que chacune permet</string>
 </resources>

@@ -345,9 +345,11 @@ sealed interface GadgetDestination {
      * Diagnostics feature module — capability overview for rooted diagnostic
      * shell dumps (logcat, meminfo, cpuinfo, procstats) via the automation engine.
      */
+    // v3 (B8): the "Device & debug" home — links to ADB, USB and permission
+    // health (routed under `diagnostics/`), plus memory and rooted dumps.
     data object Diagnostics : GadgetDestination {
         override val route = "diagnostics"
-        override val label = "Diagnostics"
+        override val label = "Device & debug"
         override val iconFilled = Icons.Filled.Analytics
         override val iconOutlined = Icons.Outlined.Analytics
     }
@@ -380,8 +382,9 @@ sealed interface GadgetDestination {
      * `:feature:adbdebug-rooted`) — this screen never branches on
      * `BuildConfig.IS_ROOTED`.
      */
+    // v3 (B8): opened from Device & debug; not a top-level tool.
     data object AdbDebug : GadgetDestination {
-        override val route = "adb_debug"
+        override val route = "diagnostics/adb"
         override val label = "ADB Debug"
         override val iconFilled = Icons.Filled.DeveloperMode
         override val iconOutlined = Icons.Outlined.DeveloperMode
@@ -434,8 +437,9 @@ sealed interface GadgetDestination {
      * `RootBindings` (standard no-op / rooted impl in `:feature:usbdebug-rooted`)
      * — this screen never branches on `BuildConfig.IS_ROOTED`.
      */
+    // v3 (B8): opened from Device & debug; not a top-level tool.
     data object UsbDebug : GadgetDestination {
-        override val route = "usb_debug"
+        override val route = "diagnostics/usb"
         override val label = "USB Debug"
         override val iconFilled = Icons.Filled.Usb
         override val iconOutlined = Icons.Outlined.Usb
@@ -445,9 +449,10 @@ sealed interface GadgetDestination {
      * Health / BugReport feature module — scans all runtime permission grant
      * states and surfaces missing permissions. No runtime requests are triggered.
      */
+    // v3 (B8): opened from Device & debug; not a top-level tool.
     data object BugReport : GadgetDestination {
-        override val route = "bugreport"
-        override val label = "Health"
+        override val route = "diagnostics/permissions"
+        override val label = "Permission health"
         override val iconFilled = Icons.Filled.HealthAndSafety
         override val iconOutlined = Icons.Outlined.HealthAndSafety
     }
@@ -517,7 +522,7 @@ sealed interface GadgetDestination {
             Torch, Vibration, Apps, Sensors,
             Battery, Gps, Storage, RadiosIr, Camera,
             Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosCell, RadiosSubghz, Flipper,
-            Lock, Youtubedownloader, Diagnostics, Display, Notification, UsbDebug, AdbDebug, BugReport, Manual, Logbook, Automation,
+            Lock, Youtubedownloader, Diagnostics, Display, Notification, Manual, Logbook, Automation,
         )
 
         /**

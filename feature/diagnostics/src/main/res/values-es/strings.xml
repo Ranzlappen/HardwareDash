@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="diagnostics_screen_title">Diagnóstico</string>
+    <string name="diagnostics_screen_title">Dispositivo y depuración</string>
 
     <!-- Memory monitor (standard MetricSource hosted on the screen) -->
     <string name="diagnostics_live_monitor_memory">Memoria en uso (en vivo)</string>
@@ -29,4 +29,10 @@
     <string name="diagnostics_root_cpuinfo_detail">Instantánea de solo lectura de dumpsys cpuinfo.</string>
     <string name="diagnostics_root_procstats_label">Volcar procstats</string>
     <string name="diagnostics_root_procstats_detail">Instantánea de solo lectura de dumpsys procstats (3 h).</string>
+    <string name="diagnostics_link_adb">ADB y depuración inalámbrica</string>
+    <string name="diagnostics_link_adb_detail">Estado de depuración, ADB en red, propiedades del sistema</string>
+    <string name="diagnostics_link_usb">Depuración USB y funciones</string>
+    <string name="diagnostics_link_usb_detail">Modo USB, dispositivos conectados, volcados</string>
+    <string name="diagnostics_link_permissions">Estado de permisos</string>
+    <string name="diagnostics_link_permissions_detail">Qué permisos tiene la app y para qué sirve cada uno</string>
 </resources>

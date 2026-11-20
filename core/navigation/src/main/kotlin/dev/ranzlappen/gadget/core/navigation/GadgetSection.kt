@@ -94,11 +94,8 @@ enum class GadgetSection(
             GadgetDestination.Automation,
             GadgetDestination.Notification,
             GadgetDestination.Lock,
-            // Merged into one "Device & debug" tool in V3-2 (B8).
+            // "Device & debug": ADB, USB and permission health open from it (B8).
             GadgetDestination.Diagnostics,
-            GadgetDestination.BugReport,
-            GadgetDestination.AdbDebug,
-            GadgetDestination.UsbDebug,
             // Kept, frozen (MASTER-PLAN §8.1).
             GadgetDestination.Youtubedownloader,
             GadgetDestination.Manual,

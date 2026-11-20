@@ -209,7 +209,7 @@ class MainActivity : ComponentActivity() {
                         subghzScreen()
                         flipperScreen()
                         lockScreen()
-                        diagnosticsScreen()
+                        diagnosticsScreen(navController)
                         displayScreen()
                         microphoneScreen()
                         usbDebugScreen()

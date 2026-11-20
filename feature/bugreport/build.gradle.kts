@@ -12,6 +12,8 @@ dependencies {
     implementation(project(":core:root"))
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
+    // :core:permissions — the shared PermissionsDashboardCard (also in Settings).
+    implementation(project(":core:permissions"))
     // :core:model — the MetricSource contract this module's
     // BugreportMetricSource implements.
     implementation(project(":core:model"))
@@ -19,6 +21,4 @@ dependencies {
     // sampler seam (api-exposes :core:ui and :core:model).
     implementation(project(":core:monitoring"))
 
-    androidTestImplementation(project(":core:testing"))
-    androidTestImplementation(libs.androidx.junit)
 }

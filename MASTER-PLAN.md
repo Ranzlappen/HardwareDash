@@ -148,7 +148,7 @@ on top (system/predictive back returns to the hub).
 | **Tools** | Torch · Vibration · Camera · Audio · Display · Files (metadata/EXIF) · Apps · Logbook | (Files: B12) |
 | **Sensors** | Sensor explorer · Battery · Storage · GPS | (done) |
 | **Connect** | Wi-Fi · Bluetooth · Cellular · NFC · IR · Sub-GHz · Flipper | same |
-| **More** | Automation · Notifications · Lock · Device & debug · Manual · Settings | + ADB, USB, Diagnostics, Health, Downloader |
+| **More** | Automation · Notifications · Lock · Device & debug · Manual · Settings | + Downloader (frozen) |
 
 ### 5.2 Module fate map
 
@@ -157,7 +157,7 @@ on top (system/predictive back returns to the hub).
 | `sensors`, `ambient`, `motion` | **`sensors`** — explorer over `SensorManager.getSensorList()` with per-sensor live values + chart + copy; keeps the useful MetricSources | ✅ B5 |
 | `vibration`, `actuators` | **`vibration`** (absorbs the haptic actions) | ✅ B7a |
 | `audio`, `microphone` (+rooted) | mic tools reached from **`audio`**'s rooted section; modules kept (unverified code isn't worth a rename — B13 decides) | ✅ B7b |
-| `adbdebug`, `usbdebug`, `diagnostics`, `bugreport` (+4 rooted) | **`devtools`** (+`devtools-rooted`): debug state, dumps, permission health | V3-2 |
+| `adbdebug`, `usbdebug`, `diagnostics`, `bugreport` (+4 rooted) | **Device & debug** = `diagnostics` screen linking the other three (routes under `diagnostics/`); modules kept — distinct rooted functions, and a combining module would need feature→feature deps | ✅ B8 |
 | `camera` (+rooted) | **`camera`**: preview + lens/zoom/focus/exposure + capture, scanner as a mode | V3-3 |
 | `torch-standard`, `vibration-standard` | folded into the app-flavor binding pattern used by every other module | when touched |
 | `automation` (screenless) | merged into `automation-ui` | when touched |
@@ -265,8 +265,14 @@ is green and its smoke-test lines pass.
       grant`), so instead of renaming ~2k lines into `audio-rooted` it left
       the Tools hub and opens from Audio's rooted-tools section (route
       `audio/microphone`, rooted build only). B13 verifies or removes it.
-- [ ] **B8** `devtools` ← adb/usb/diagnostics/bugreport; one permissions UI
-      (Settings) instead of two.
+- [x] **B8** "Device & debug": Diagnostics became the one More entry
+      (memory + rooted dumps) with links to ADB, USB and Permission health,
+      whose routes moved under `diagnostics/` (up arrow, Tools/More section
+      kept). Permission health now renders the shared
+      `PermissionsDashboardCard` (same as Settings) instead of its own
+      hardcoded six-permission list. More hub: 10 → 7 entries.
+      Deferred: ADB and USB screens both show `ADB_ENABLED` (two metrics,
+      `adb_enabled` + `usb_debugging_enabled`); fold when touched.
 
 ### V3-3 · Bring back v1's practical tools
 - [ ] **B9** Camera: preview, lens picker, zoom, tap-to-focus, exposure,

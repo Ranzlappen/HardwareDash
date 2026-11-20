@@ -55,10 +55,10 @@ is ticked.
 | More | Automation rules | `automation-ui`, `:core:automation`, `automation` (+`-rooted`) | ⚪ | 29 dead assert/check actions removed (B6 ✓) |
 | More | Notifications | `notification` (+`-rooted`) | ⚪ | keep |
 | More | Lock (device admin) | `lock` (+`-rooted`) | ⚪ | keep |
-| More | ADB / USB debug, diagnostics, permission health | `adbdebug`, `usbdebug`, `diagnostics`, `bugreport` (+ rooted) | ⚪ | ✂️ → `devtools` (B8) |
+| More | Device & debug (memory, dumps → ADB, USB, permission health) | `diagnostics`, `adbdebug`, `usbdebug`, `bugreport` (+ rooted) | ⚪ | B8 ✓ one entry; sub-screens under `diagnostics/` |
 | More | Manual | `manual` | ⚪ | keep |
 | Tools | File metadata / EXIF (v1) | — | ✂️ lost in v2 | bring back (B12) |
-| More | Settings, backup, permissions dashboard | `settings`, `:core:permissions` | ⚪ | single permissions UI (B8) |
+| More | Settings, backup, permissions dashboard | `settings`, `:core:permissions` | ⚪ | one permissions UI, also shown in Device & debug (B8 ✓) |
 | More | YouTube downloader | `youtubedownloader` | ⚪ | kept, frozen (MASTER-PLAN §8.1) |
 | Home screen | Generic metric widget | `metricwidget` | ⚪ | keep |
 | — | Keep-alive service | `keepalive` (+`-rooted`) | ⚪ | keep |

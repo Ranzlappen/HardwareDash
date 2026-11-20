@@ -48,7 +48,7 @@ Format: `- [ ] Tool — job · notes`
 - [ ] Automation — create "battery below 20 % → notification"; it fires ·
 - [ ] Notifications — test notification posts with chosen title/body ·
 - [ ] Lock — activate device admin; "Lock now" locks the screen ·
-- [ ] Device & debug — ADB/USB debug state matches Developer options ·
+- [ ] Device & debug — opens from More; its ADB, USB and Permission health links open with a back arrow; ADB/USB debug state matches Developer options; Permission health requests a missing permission ·
 - [ ] Manual — opens and reads correctly ·
 - [ ] Backup — export a backup ZIP, import it on a clean install ·
 

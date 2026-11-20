@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="diagnostics_screen_title">Diagnostics</string>
+    <string name="diagnostics_screen_title">Device &amp; debug</string>
 
     <!-- Memory monitor (standard MetricSource hosted on the screen) -->
     <string name="diagnostics_live_monitor_memory">Memory in use (live)</string>
@@ -31,4 +31,10 @@
     <string name="diagnostics_root_cpuinfo_detail">Read-only dumpsys cpuinfo snapshot.</string>
     <string name="diagnostics_root_procstats_label">Dump procstats</string>
     <string name="diagnostics_root_procstats_detail">Read-only dumpsys procstats (3 h) snapshot.</string>
+    <string name="diagnostics_link_adb">ADB &amp; wireless debugging</string>
+    <string name="diagnostics_link_adb_detail">Debugging state, network ADB, system properties</string>
+    <string name="diagnostics_link_usb">USB debugging &amp; functions</string>
+    <string name="diagnostics_link_usb_detail">USB mode, attached devices, dumps</string>
+    <string name="diagnostics_link_permissions">Permission health</string>
+    <string name="diagnostics_link_permissions_detail">Which permissions the app has, and what each unlocks</string>
 </resources>
