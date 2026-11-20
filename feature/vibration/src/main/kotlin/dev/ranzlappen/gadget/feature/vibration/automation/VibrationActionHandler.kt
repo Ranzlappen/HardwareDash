@@ -125,14 +125,17 @@ class VibrationActionHandler @Inject constructor(
                 // also play from a widget or rule in the background. Absorbs
                 // :feature:actuators' haptic actions (v3 B7a).
                 val effect = effectOf(params[PARAM_EFFECT])
-                    ?: return ActionResult.Failure("Unknown effect: ${params[PARAM_EFFECT]}")
-                startPlayback(
-                    Intent(context, VibrationPlaybackService::class.java).apply {
-                        putExtra(VibrationPlaybackService.EXTRA_ACTION_KEY, ACTION_EFFECT)
-                        putExtra(VibrationPlaybackService.EXTRA_EFFECT, effect.name)
-                    },
-                )
-                ActionResult.Success
+                if (effect == null) {
+                    ActionResult.Failure("Unknown effect: ${params[PARAM_EFFECT]}")
+                } else {
+                    startPlayback(
+                        Intent(context, VibrationPlaybackService::class.java).apply {
+                            putExtra(VibrationPlaybackService.EXTRA_ACTION_KEY, ACTION_EFFECT)
+                            putExtra(VibrationPlaybackService.EXTRA_EFFECT, effect.name)
+                        },
+                    )
+                    ActionResult.Success
+                }
             }
             ACTION_VIBRATE_CONTINUOUS -> {
                 // A continuous ("perma") buzz loops until stopped, so the FGS
