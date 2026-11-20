@@ -223,8 +223,6 @@ of [Roadmap & Status](Roadmap-and-Status):
 - **Cellular** (`:feature:radios-cell` + `-rooted`) — standard
   `TelephonyManager` screen (SIM state, carrier, network type, live
   signal bars) + rooted raw-modem-dump panel; `cell_signal` MetricSource.
-- **Actuators** (`:feature:actuators`) — vibrator availability +
-  haptic actions.
 - **Display** (`:feature:display` + `-rooted`) — brightness slider
   (standard) + density/refresh-rate override + SurfaceFlinger snapshot
   (rooted); `screen_brightness` MetricSource.

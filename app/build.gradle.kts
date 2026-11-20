@@ -221,7 +221,6 @@ dependencies {
     implementation(project(":feature:radios-subghz"))
     implementation(project(":feature:flipper"))
     implementation(project(":feature:lock"))
-    implementation(project(":feature:actuators"))
     implementation(project(":feature:diagnostics"))
     // Screenless rooted-extras controller contracts (+ standard no-ops); the
     // privileged impls ship in the matching -rooted siblings below.

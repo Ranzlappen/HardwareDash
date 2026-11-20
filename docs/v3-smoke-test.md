@@ -22,7 +22,7 @@ Format: `- [ ] Tool — job · notes`
 
 ## Tools
 - [ ] Torch — on/off from the screen, the QS tile and a widget; strobe runs and stops ·
-- [ ] Vibration — preset effect plays; custom pattern plays; saved pattern reloads ·
+- [ ] Vibration — Click / Tick / Double / Heavy effects play; custom pattern plays; saved pattern reloads; a rule with "Play haptic effect" (heavy click) vibrates ·
 - [ ] Camera — _(v2: barcode scan only)_ scan a QR code; result is copyable ·
 - [ ] Audio — dB meter moves with noise; record a clip; clip is saved ·
 - [ ] Display — brightness slider changes screen brightness ·

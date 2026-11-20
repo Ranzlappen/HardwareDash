@@ -128,7 +128,6 @@ include(
     ":feature:logbook",
     ":feature:metricwidget",
     ":feature:sensors",
-    ":feature:actuators",
     ":feature:battery",
     ":feature:battery-rooted",
     ":feature:audio",

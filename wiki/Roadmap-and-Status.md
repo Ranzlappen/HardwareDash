@@ -34,8 +34,7 @@ is ticked.
 |---|---|---|---|---|
 | Home | Dashboard | `dashboard` | ⚪ | live status cards, quick actions, pinned tools (B3 ✓) |
 | Tools | Torch (+ strobe, QS tiles, widgets) | `torch` (+`-rooted`/`-standard`) | ⚪ | keep |
-| Tools | Vibration (+ pattern editor, widgets, tile) | `vibration` (+`-rooted`/`-standard`) | ⚪ | absorb `actuators` (B7) |
-| Tools | Haptics test | `actuators` | ⚪ | ✂️ → `vibration` (B7) |
+| Tools | Vibration (+ haptic effects, pattern editor, widgets, tile) | `vibration` (+`-rooted`/`-standard`) | ⚪ | absorbed `actuators` (✂️, B7a ✓) |
 | Tools | Camera | `camera` (+`-rooted`) | 🟡 barcode scanner only | preview / lens / zoom / capture (B9) |
 | Tools | Audio (dB meter, WAV recording) | `audio` (+`-rooted`) | 🟡 no spectrum, no playback | spectrum + recordings player (B10), absorb `microphone` (B7) |
 | Tools | Mic extreme tools | `microphone` (+`-rooted`) | 🧪 | ✂️ → `audio` rooted section (B7) |

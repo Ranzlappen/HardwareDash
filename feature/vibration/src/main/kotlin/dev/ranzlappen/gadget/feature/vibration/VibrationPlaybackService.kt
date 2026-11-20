@@ -166,6 +166,13 @@ class VibrationPlaybackService : Service() {
                     intent.getStringExtra(EXTRA_PATTERN_ID),
                     intent.getBooleanExtra(EXTRA_LOOP, false),
                 )
+            VibrationActionHandler.ACTION_EFFECT -> {
+                val effect = intent.getStringExtra(EXTRA_EFFECT)
+                    ?.let { name -> VibrationPredefinedEffect.entries.firstOrNull { it.name == name } }
+                    ?: VibrationPredefinedEffect.Click
+                controller.playPredefined(effect)
+                EFFECT_KEEP_ALIVE_MS
+            }
             VibrationActionHandler.ACTION_VIBRATE_CONTINUOUS -> {
                 controller.startContinuous(
                     intent.getIntExtra(EXTRA_AMPLITUDE, VibrationWidgetConfig.DEFAULT_AMPLITUDE_PERCENT),
@@ -262,6 +269,12 @@ class VibrationPlaybackService : Service() {
          *  the process is never reclaimed in the instant before the effect
          *  finishes (which would cancel it). */
         const val PLAYBACK_TAIL_MS = 250L
+
+        /** Predefined effects are ≤ ~100 ms; keep the FGS up briefly so they finish. */
+        const val EFFECT_KEEP_ALIVE_MS = 150L
+
+        /** [VibrationPredefinedEffect] name (String) for an [EXTRA_ACTION_KEY] effect start. */
+        const val EXTRA_EFFECT = "dev.ranzlappen.gadget.feature.vibration.EXTRA_EFFECT"
 
         const val NOTIFICATION_CHANNEL_ID = "vibration_playback"
         const val NOTIFICATION_ID = 0x56_42_5F_53 // "VB_S"

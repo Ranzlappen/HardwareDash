@@ -145,7 +145,7 @@ on top (system/predictive back returns to the hub).
 | Section | Contents (v3 target) | Interim (before merges) |
 |---|---|---|
 | **Home** | Live dashboard: status cards (battery, storage, network, last log), quick toggles (torch, vibrate), pinned tools | current Dashboard |
-| **Tools** | Torch · Vibration · Camera · Audio · Display · Files (metadata/EXIF) · Apps · Logbook | + Actuators, Microphone |
+| **Tools** | Torch · Vibration · Camera · Audio · Display · Files (metadata/EXIF) · Apps · Logbook | + Microphone |
 | **Sensors** | Sensor explorer · Battery · Storage · GPS | (done) |
 | **Connect** | Wi-Fi · Bluetooth · Cellular · NFC · IR · Sub-GHz · Flipper | same |
 | **More** | Automation · Notifications · Lock · Device & debug · Manual · Settings | + ADB, USB, Diagnostics, Health, Downloader |
@@ -155,7 +155,7 @@ on top (system/predictive back returns to the hub).
 | Today (v2) | v3 | Batch |
 |---|---|---|
 | `sensors`, `ambient`, `motion` | **`sensors`** — explorer over `SensorManager.getSensorList()` with per-sensor live values + chart + copy; keeps the useful MetricSources | ✅ B5 |
-| `vibration`, `actuators` | **`vibration`** (absorbs amplitude/haptic test) | V3-2 |
+| `vibration`, `actuators` | **`vibration`** (absorbs the haptic actions) | ✅ B7a |
 | `audio`, `microphone` (+rooted) | **`audio`** (+`audio-rooted`); mic extreme tools become a rooted section | V3-2 |
 | `adbdebug`, `usbdebug`, `diagnostics`, `bugreport` (+4 rooted) | **`devtools`** (+`devtools-rooted`): debug state, dumps, permission health | V3-2 |
 | `camera` (+rooted) | **`camera`**: preview + lens/zoom/focus/exposure + capture, scanner as a mode | V3-3 |
@@ -253,8 +253,14 @@ is green and its smoke-test lines pass.
       subghz), 4 trimmed (actuators, flipper, logbook, notification). They
       never gated anything: `RuleFireExecutor` dispatches every action and
       ignores the result. Saved rules lose them on read and save via
-      `RetiredActionKeys` / `withoutRetiredActions()` (tested).
-- [ ] **B7** `vibration` ← `actuators`; `audio` ← `microphone`.
+      `RetiredActionKeys` / `withUpgradedActions()` (tested).
+- [x] **B7a** `vibration` ← `actuators`: the Actuators screen was a presence
+      chip plus four unimplemented rooted rows; the Vibration screen already
+      plays click / tick / double / heavy. Module deleted; its two haptic
+      actions became the new `vibration`/`effect` action (FGS-backed, works
+      from widgets and rules), saved rules rewritten via `MovedActions`;
+      static `vibrator_available` metric dropped (rules on it never fire).
+- [ ] **B7b** `audio` ← `microphone` (+ `microphone-rooted` → `audio-rooted`).
 - [ ] **B8** `devtools` ← adb/usb/diagnostics/bugreport; one permissions UI
       (Settings) instead of two.
 

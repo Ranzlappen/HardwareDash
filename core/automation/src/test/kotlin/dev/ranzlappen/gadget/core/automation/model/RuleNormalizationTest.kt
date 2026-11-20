@@ -133,23 +133,51 @@ class RuleNormalizationTest {
             ),
         )
         assertEquals(listOf("torch_on"), rule.normalized().actions.map { it.actionKey })
-        assertEquals(listOf("torch_on"), rule.withoutRetiredActions().actions.map { it.actionKey })
+        assertEquals(listOf("torch_on"), rule.withUpgradedActions().actions.map { it.actionKey })
     }
 
     @Test
-    fun withoutRetiredActions_isIdentityWhenNothingIsRetired() {
+    fun withUpgradedActions_isIdentityWhenNothingIsRetired() {
         val rule = Rule(
             id = "r",
             name = "n",
             trigger = Trigger.Manual,
             actions = listOf(RuleAction(featureId = "torch", actionKey = "torch_on")),
         )
-        assertSame(rule, rule.withoutRetiredActions())
+        assertSame(rule, rule.withUpgradedActions())
     }
 
     @Test
     fun retiredKeys_areAllReadOnlyAssertsOrChecks() {
         assertEquals(29, RetiredActionKeys.size)
         RetiredActionKeys.forEach { key -> assertTrue(key, "assert" in key || key.endsWith("_check")) }
+    }
+
+    // ─── v3 B7a: moved actions ───────────────────────────────────────
+
+    @Test
+    fun actuatorHaptics_becomeVibrationEffects() {
+        val rule = Rule(
+            id = "r",
+            name = "n",
+            trigger = Trigger.Manual,
+            actions = listOf(
+                RuleAction(featureId = "actuators", actionKey = "actuators_haptic_click"),
+                RuleAction(featureId = "actuators", actionKey = "actuators_haptic_heavy"),
+                RuleAction(featureId = "torch", actionKey = "torch_on"),
+            ),
+        )
+        val upgraded = rule.normalized().actions
+        assertEquals(
+            listOf("vibration" to "effect", "vibration" to "effect", "torch" to "torch_on"),
+            upgraded.map { it.featureId to it.actionKey },
+        )
+        assertEquals("click", upgraded[0].params["effect"])
+        assertEquals("heavy_click", upgraded[1].params["effect"])
+    }
+
+    @Test
+    fun movedTargets_areNeverRetired() {
+        MovedActions.values.forEach { target -> assertTrue(target.actionKey !in RetiredActionKeys) }
     }
 }

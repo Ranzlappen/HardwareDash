@@ -4,6 +4,7 @@ import android.content.Context
 import dev.ranzlappen.gadget.core.automation.ActionResult
 import dev.ranzlappen.gadget.feature.vibration.PatternRepository
 import dev.ranzlappen.gadget.feature.vibration.PwmPulse
+import dev.ranzlappen.gadget.feature.vibration.VibrationPredefinedEffect
 import dev.ranzlappen.gadget.feature.vibration.VibrationController
 import dev.ranzlappen.gadget.feature.vibration.VibrationRootCapabilities
 import dev.ranzlappen.gadget.feature.vibration.VibrationRootResult
@@ -99,5 +100,30 @@ class VibrationActionHandlerTest {
         coEvery { caps.sustainedRumble(any(), any()) } returns VibrationRootResult.OptedOut
         val result = handler.dispatch(VibrationActionHandler.ACTION_SUSTAINED_RUMBLE, emptyMap())
         assertTrue(result is ActionResult.Failure)
+    }
+
+    @Test
+    fun `effect with an unknown name fails before touching the service`() = runBlocking {
+        val result = handler.dispatch(
+            VibrationActionHandler.ACTION_EFFECT,
+            mapOf(VibrationActionHandler.PARAM_EFFECT to "boing"),
+        )
+        assertTrue(result is ActionResult.Failure)
+    }
+
+    @Test
+    fun `effect names map to predefined effects, blank means click`() {
+        assertEquals(VibrationPredefinedEffect.Click, VibrationActionHandler.effectOf(null))
+        assertEquals(VibrationPredefinedEffect.Click, VibrationActionHandler.effectOf(""))
+        assertEquals(VibrationPredefinedEffect.HeavyClick, VibrationActionHandler.effectOf("heavy_click"))
+        assertEquals(VibrationPredefinedEffect.DoubleClick, VibrationActionHandler.effectOf(" Double_Click "))
+        assertEquals(VibrationPredefinedEffect.Tick, VibrationActionHandler.effectOf("tick"))
+        assertEquals(null, VibrationActionHandler.effectOf("boing"))
+    }
+
+    @Test
+    fun `effect action is declared with an effect param defaulting to click`() {
+        val action = handler.actions.first { it.key == VibrationActionHandler.ACTION_EFFECT }
+        assertEquals(VibrationActionHandler.EFFECT_CLICK, action.params.single().default)
     }
 }

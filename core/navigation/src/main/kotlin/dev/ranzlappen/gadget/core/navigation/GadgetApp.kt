@@ -192,7 +192,6 @@ fun ComingSoonScreen(
     val message = when (destination) {
         GadgetDestination.Dashboard -> "Dashboard overview coming in Phase 2"
         GadgetDestination.Sensors -> "Sensor overview coming in Phase 2"
-        GadgetDestination.Actuators -> "Actuator controls coming in Phase 2"
         GadgetDestination.Automation -> "Automation rules coming in Phase 2"
         GadgetDestination.Settings -> "Settings coming in Phase 2"
         GadgetDestination.Torch -> "Torch is wired to its own screen"

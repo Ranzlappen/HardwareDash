@@ -29,7 +29,7 @@ package dev.ranzlappen.gadget.core.automation.model
  * backups, future APIs).
  */
 fun Rule.normalized(): Rule {
-    val rule = withoutRetiredActions()
+    val rule = withUpgradedActions()
     val t = rule.trigger
     if (t !is Trigger.MetricThreshold) return rule
     val normalizedTrigger = t.normalizedClearValue()
@@ -43,7 +43,7 @@ fun Rule.normalized(): Rule {
  * anything. Gating on a reading is what `Condition.MetricCompare` and
  * `Trigger.MetricThreshold` are for.
  *
- * Saved rules may still list them: [withoutRetiredActions] drops them on read
+ * Saved rules may still list them: [withUpgradedActions] drops them on read
  * and on save, so they never reach the builder UI or the dispatcher. Keep this
  * set — it is the migration for rules saved (or restored from backups) before
  * v3.
@@ -80,13 +80,40 @@ val RetiredActionKeys: Set<String> = setOf(
     "wifi_enabled_check",
 )
 
-/** [this] without any action whose key is in [RetiredActionKeys]. */
-fun Rule.withoutRetiredActions(): Rule =
-    if (actions.none { it.actionKey in RetiredActionKeys }) {
-        this
-    } else {
-        copy(actions = actions.filterNot { it.actionKey in RetiredActionKeys })
-    }
+/**
+ * Actions that moved to another feature when v3 merged modules, keyed by the
+ * old `(featureId, actionKey)`: each maps to its replacement step (whose
+ * `params` are merged under any params the old step carried).
+ *
+ * - B7a: `:feature:actuators` folded into vibration → its haptic actions are
+ *   the vibration `effect` action.
+ */
+val MovedActions: Map<Pair<String, String>, RuleAction> = mapOf(
+    ("actuators" to "actuators_haptic_click") to
+        RuleAction(featureId = "vibration", actionKey = "effect", params = mapOf("effect" to "click")),
+    ("actuators" to "actuators_haptic_heavy") to
+        RuleAction(featureId = "vibration", actionKey = "effect", params = mapOf("effect" to "heavy_click")),
+)
+
+/**
+ * [this] with v3 action migrations applied: moved actions ([MovedActions])
+ * rewritten to their new feature, retired ones ([RetiredActionKeys]) dropped.
+ * Returns the same instance when nothing changes. Applied on read
+ * (`RoomRuleRepository`) and on save ([normalized]), so saved and restored
+ * rules from v2 keep working.
+ */
+fun Rule.withUpgradedActions(): Rule {
+    val needsWork = actions.any { (it.featureId to it.actionKey) in MovedActions || it.actionKey in RetiredActionKeys }
+    if (!needsWork) return this
+    val upgraded = actions
+        .filterNot { it.actionKey in RetiredActionKeys }
+        .map { action ->
+            MovedActions[action.featureId to action.actionKey]
+                ?.let { target -> target.copy(params = target.params + action.params, requiresRoot = action.requiresRoot) }
+                ?: action
+        }
+    return copy(actions = upgraded)
+}
 
 /** [Trigger.MetricThreshold] with an invalid-side [Trigger.MetricThreshold.clearValue] nulled. */
 fun Trigger.MetricThreshold.normalizedClearValue(): Trigger.MetricThreshold {

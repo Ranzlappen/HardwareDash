@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.SettingsInputAntenna
 import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.Wifi
@@ -59,7 +58,6 @@ import androidx.compose.material.icons.outlined.SettingsInputAntenna
 import androidx.compose.material.icons.outlined.SettingsRemote
 import androidx.compose.material.icons.outlined.SignalCellularAlt
 import androidx.compose.material.icons.outlined.Storage
-import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Usb
 import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material.icons.outlined.Wifi
@@ -123,13 +121,6 @@ sealed interface GadgetDestination {
         override val label = "Audio"
         override val iconFilled = Icons.Filled.Mic
         override val iconOutlined = Icons.Outlined.Mic
-    }
-
-    data object Actuators : GadgetDestination {
-        override val route = "actuators"
-        override val label = "Actuators"
-        override val iconFilled = Icons.Filled.Tune
-        override val iconOutlined = Icons.Outlined.Tune
     }
 
     data object Automation : GadgetDestination {
@@ -515,16 +506,14 @@ sealed interface GadgetDestination {
          *
          * Real modules replace the abstract placeholder areas as they
          * land: [Torch], [Vibration], [Apps], [Sensors], and
-         * [Automation] (the rules list + builder) are live;
-         * [Actuators] remains a coming-soon placeholder until its
-         * feature module ships. Append new / legacy-migrated modules
-         * here.
+         * [Automation] (the rules list + builder) are live.
+         * Append new modules here and to one `GadgetSection`.
          */
         val modules: List<GadgetDestination> = listOf(
             Torch, Vibration, Apps, Sensors,
             Battery, Gps, Storage, RadiosIr, Camera,
             Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosCell, RadiosSubghz, Flipper,
-            Lock, Actuators, Youtubedownloader, Diagnostics, Display, Microphone, Notification, UsbDebug, AdbDebug, BugReport, Manual, Logbook, Automation,
+            Lock, Youtubedownloader, Diagnostics, Display, Microphone, Notification, UsbDebug, AdbDebug, BugReport, Manual, Logbook, Automation,
         )
 
         /**

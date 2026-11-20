@@ -78,13 +78,12 @@ fun SectionHubScreen(
  */
 internal fun GadgetDestination.hubSummary(): String? = when (this) {
     GadgetDestination.Torch -> "Flashlight, strobe, brightness"
-    GadgetDestination.Vibration -> "Effects, patterns, draw your own"
+    GadgetDestination.Vibration -> "Effects, haptics, patterns, draw your own"
     GadgetDestination.Camera -> "Barcode and QR scanner"
     GadgetDestination.Audio -> "Sound level meter and recorder"
     GadgetDestination.Display -> "Screen brightness"
     GadgetDestination.Apps -> "App folders and folder widgets"
     GadgetDestination.Logbook -> "Timestamped notes and checkpoints"
-    GadgetDestination.Actuators -> "Haptic feedback test"
     GadgetDestination.Microphone -> "Advanced microphone tools (root)"
     GadgetDestination.Sensors -> "Every sensor: live values, charts, specs"
     GadgetDestination.Battery -> "Level, health, temperature, voltage"

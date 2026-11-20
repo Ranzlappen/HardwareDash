@@ -25,9 +25,11 @@ action of an admitted rule in order and **does not look at the
 `ActionResult`** — a failing action never stops the ones after it. So an
 "action" that only checks a value gates nothing; gate on a reading with
 `Condition.MetricCompare` or `Trigger.MetricThreshold` instead. v3 (B6)
-removed the 29 read-only `assert_*` / `*_check` actions on these grounds;
-`RetiredActionKeys` + `Rule.withoutRetiredActions()` strip them from saved
-and restored rules on read and on save.
+removed the 29 read-only `assert_*` / `*_check` actions on these grounds.
+`Rule.withUpgradedActions()` migrates saved and restored rules on read and
+on save: it drops `RetiredActionKeys` and rewrites `MovedActions` — steps
+whose feature was merged (B7a: `actuators_haptic_click` / `_heavy` →
+`vibration` / `effect` with `effect=click` / `heavy_click`).
 
 `:core:hardware`'s `HardwareRegistry` is the discovery layer over the read
 side: it lets the builder list "what signals exist on this device" without

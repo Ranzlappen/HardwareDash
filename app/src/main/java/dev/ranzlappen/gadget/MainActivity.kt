@@ -60,7 +60,6 @@ import dev.ranzlappen.gadget.feature.gps.gpsScreen
 import dev.ranzlappen.gadget.feature.storage.storageScreen
 import dev.ranzlappen.gadget.feature.radios.ir.irScreen
 import dev.ranzlappen.gadget.feature.camera.cameraScreen
-import dev.ranzlappen.gadget.feature.actuators.actuatorsScreen
 import dev.ranzlappen.gadget.feature.adbdebug.adbDebugScreen
 import dev.ranzlappen.gadget.feature.bugreport.bugReportScreen
 import dev.ranzlappen.gadget.feature.diagnostics.diagnosticsScreen
@@ -210,7 +209,6 @@ class MainActivity : ComponentActivity() {
                         subghzScreen()
                         flipperScreen()
                         lockScreen()
-                        actuatorsScreen()
                         diagnosticsScreen()
                         displayScreen()
                         microphoneScreen()
