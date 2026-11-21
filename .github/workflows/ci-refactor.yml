@@ -79,6 +79,7 @@ jobs:
             :core:hardware:testDebugUnitTest \
             :core:monitoring:testDebugUnitTest \
             :core:navigation:testDebugUnitTest \
+            :core:root:testDebugUnitTest \
             :core:widgetkit:testDebugUnitTest \
             :feature:adbdebug:testDebugUnitTest \
             :feature:apps:testDebugUnitTest \

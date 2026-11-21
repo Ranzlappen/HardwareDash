@@ -28,6 +28,7 @@ import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import dev.ranzlappen.gadget.core.ui.LocalNavigateUp
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
 import dev.ranzlappen.gadget.core.ui.adaptive.LocalWindowSizeClass
+import dev.ranzlappen.gadget.core.ui.module.LocalShowExperimentalRootTools
 
 /**
  * Top-level Gadget app shell.
@@ -70,6 +71,8 @@ fun GadgetApp(
     customColorSchemeOverride: androidx.compose.material3.ColorScheme? = null,
     reducedMotionOverride: Boolean? = null,
     reducedTransparency: Boolean = false,
+    // v3 B13: Settings → "Show experimental root tools" (rooted flavor only).
+    showExperimentalRootTools: Boolean = false,
     builder: NavGraphBuilder.() -> Unit,
 ) {
     // Compute the WindowSizeClass once at the top of the shell and
@@ -125,7 +128,10 @@ fun GadgetApp(
                             navController.previousBackStackEntry != null
                         val navigateUp: (() -> Unit)? =
                             if (canNavigateUp) ({ navController.navigateUp() }) else null
-                        CompositionLocalProvider(LocalNavigateUp provides navigateUp) {
+                        CompositionLocalProvider(
+                            LocalNavigateUp provides navigateUp,
+                            LocalShowExperimentalRootTools provides showExperimentalRootTools,
+                        ) {
                             GadgetNavHost(
                                 modifier = Modifier.weight(1f),
                                 navController = navController,

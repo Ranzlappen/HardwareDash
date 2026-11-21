@@ -70,3 +70,15 @@ Format: `- [ ] Tool — job · notes`
 _List each rooted action here as it is verified; anything not listed stays
 🧪 Experimental (see MASTER-PLAN §4.6)._
 - [ ] Root grant — app requests su, safety acknowledgement shows once ·
+- [ ] Settings → rooted feature toggles → "Show experimental root tools":
+  off → no rooted sections in any tool; on → they appear with the
+  "Experimental — not yet verified" banner ·
+
+_B13c — with experimental tools on, open each section, run its actions and
+note what really works (then promote it in `RootVerification`):_
+- [ ] Torch root tools (boost, duty strobe, multi-LED, thermal) ·
+- [ ] Vibration root tools (extreme amplitude, PWM, dual actuator, rumble) ·
+- [ ] Camera · Audio (policy dump, mic tools link) · Microphone tools ·
+- [ ] Battery · Storage · Display · GPS ·
+- [ ] Wi-Fi · Bluetooth · Cellular · NFC (raw NCI) · IR ·
+- [ ] Notifications · Diagnostics · ADB · USB ·

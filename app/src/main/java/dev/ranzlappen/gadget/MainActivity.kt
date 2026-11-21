@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -29,6 +30,7 @@ import dev.ranzlappen.gadget.root.ui.FatalLaunchScreen
 import dev.ranzlappen.gadget.backup.ui.BackupCard
 import dev.ranzlappen.gadget.core.permissions.PermissionsDashboardCard
 import dev.ranzlappen.gadget.root.ui.RootedFeatureTogglesCard
+import dev.ranzlappen.gadget.root.ui.rememberRootFeatures
 import androidx.compose.ui.graphics.Color
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetDarkColorScheme
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetLightColorScheme
@@ -181,8 +183,16 @@ class MainActivity : ComponentActivity() {
                     } else {
                         null
                     }
+                    // v3 B13: rooted tools not yet verified stay hidden unless
+                    // the user opts in (Settings → rooted feature toggles).
+                    val rootFeatures = rememberRootFeatures()
+                    val experimentalRootFlow = remember(rootFeatures) {
+                        rootFeatures.featureToggles().isExperimentalVisible()
+                    }
+                    val showExperimentalRootTools by experimentalRootFlow.collectAsState(initial = false)
                     GadgetApp(
                         navController = navController,
+                        showExperimentalRootTools = showExperimentalRootTools,
                         useDarkTheme = useDarkTheme,
                         useDynamicColor = preferences.dynamicColor,
                         customTheme = customTheme,

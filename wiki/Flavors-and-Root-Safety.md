@@ -11,6 +11,8 @@ HardwareDash ships as two product flavors from one repo. Absorbs
 Both APKs install side-by-side because the `applicationId` differs — from
 Android's perspective they're separate apps (and they coexist with any
 legacy `com.gadget` / `com.gadget.root` build still on the device).
+v3 phone-test builds (CI `-Pv3TestBuild`) add a further `.v3` suffix and
+the label "Gadget v3" / "Gadget v3 Root".
 
 ## Namespaces vs. applicationId
 
@@ -94,6 +96,24 @@ workaround. The card self-hides on standard/no-root via its
 brightness cap), bound any override with an absolute time ceiling (torch's
 45 s thermal), and always restore device state in a `NonCancellable
 finally` so a cancelled coroutine can't leave the device latched.
+
+### Honest root: Verified vs Experimental (v3 B13)
+
+Every `RootFeatureKey` is 🧪 **Experimental** until its line in
+`docs/v3-smoke-test.md` passes on a rooted phone (Samsung Galaxy A17).
+The ledger is `RootVerification.verified` in `:core:root`.
+
+- Rooted UI (`RootToolsSection`, `RootActionRow`, `RootConfirmActionRow`,
+  torch / vibration root cards) renders **nothing** unless the call site
+  passes `verified = true` or the user turned on Settings → rooted feature
+  toggles → **Show experimental root tools** (default off, stored as
+  `RootPrefKeys.ExperimentalVisible`). Unverified sections then carry an
+  "Experimental — not yet verified" banner.
+- The flag reaches every screen as `LocalShowExperimentalRootTools`,
+  provided once by `GadgetApp(showExperimentalRootTools = …)`.
+- To promote: add the key to `RootVerification.verified` and pass
+  `verified = true` where it renders. B14 removes what is still
+  Experimental after one release.
 
 ### Adding a new rooted feature
 

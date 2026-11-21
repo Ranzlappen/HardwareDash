@@ -10,6 +10,7 @@ import dev.ranzlappen.gadget.feature.torch.components.TorchToggleCard
 import dev.ranzlappen.gadget.feature.torch.components.WidgetsCard
 import dev.ranzlappen.gadget.feature.torch.components.torchModuleInfo
 import dev.ranzlappen.gadget.core.widgetkit.config.WidgetIconSource
+import dev.ranzlappen.gadget.core.ui.module.LocalShowExperimentalRootTools
 
 /**
  * Stateless TorchScreen content — receives a single [TorchScreenState]
@@ -94,8 +95,9 @@ fun TorchScreenContent(
                 onExpandedChange = { onEvent(TorchUiEvent.SectionToggle(TorchSectionId.Widgets)) },
             )
             // Rooted-only privileged controls — shown only when the
-            // rooted app version reports a usable root shell.
-            if (state.rootAvailability.rootReady) {
+            // rooted app version reports a usable root shell, and (v3 B13)
+            // only with experimental root tools on until verified.
+            if (state.rootAvailability.rootReady && LocalShowExperimentalRootTools.current) {
                 RootToolsCard(
                     config = state.rootTools,
                     maxBrightnessPercent = state.maxBrightnessPercent,

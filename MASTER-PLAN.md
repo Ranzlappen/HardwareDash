@@ -285,7 +285,7 @@ is green and its smoke-test lines pass.
       ~~`audio`~~ (B10), `lock`, `radios-bt`, `radios-ir`, ~~`radios-nfc`~~ (B11), `radios-wifi`,
       `settings` (camera added in B9). Enable them one module per commit and
       fix what was silently red.
-      Known red: `settings` tests `import io.mockk.anyConstructed` /
+      Also `:core:datastore` (found in B13). Known red: `settings` tests `import io.mockk.anyConstructed` /
       `constructedWith` (scope members, not top-level — fixed in audio, B10).
 - [x] **B10** Audio: live level + 32-band log FFT spectrum with peak frequency
       (one lifecycle-aware `AudioRecord` on IO, `SpectrumMath` + test);
@@ -310,9 +310,20 @@ is green and its smoke-test lines pass.
       `FileMetadataFormatTest`, `FilesViewModelTest`.
 
 ### V3-4 · Honest root
-- [ ] **B13** Tag every `RootFeatureKey` Verified/Experimental; Settings toggle
-      "Show experimental root tools" (default off); rooted sections render only
-      verified + opted-in tools.
+- [x] **B13a** Honest-root gate: `RootVerification` ledger in `:core:root`
+      (every `RootFeatureKey` Experimental until its smoke-test line passes
+      on the rooted Galaxy A17); Settings → rooted toggles card → "Show
+      experimental root tools" (default off, persisted in root safety
+      prefs); `RootToolsSection` / `RootActionRow` / `RootConfirmActionRow`
+      render only when `verified = true` or opted in, with an
+      "Experimental — unverified" banner. `RootVerificationTest`;
+      `:core:root` tests now in CI.
+- [ ] **B13b** Strip the remaining fake "Active — rooted build" capability
+      rows (adbdebug, lock, IR, cell, display, flipper, gps, notification…)
+      as done for camera / audio / NFC.
+- [ ] **B13c** On the Galaxy A17 with experimental tools on: test each rooted
+      section, promote what works (`RootVerification.verified` +
+      `verified = true` at the call site).
 - [ ] **B14** Remove Experimental actions still unverified after one release.
 
 ### V3-5 · Polish & release

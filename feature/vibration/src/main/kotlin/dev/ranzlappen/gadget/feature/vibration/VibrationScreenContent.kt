@@ -11,6 +11,7 @@ import dev.ranzlappen.gadget.feature.vibration.components.VibrationControlsCard
 import dev.ranzlappen.gadget.feature.vibration.components.VibrationRootToolsCard
 import dev.ranzlappen.gadget.feature.vibration.components.WidgetsCard
 import dev.ranzlappen.gadget.feature.vibration.components.vibrationModuleInfo
+import dev.ranzlappen.gadget.core.ui.module.LocalShowExperimentalRootTools
 
 /**
  * Stateless VibrationScreen content — a single [VibrationScreenState] snapshot
@@ -78,7 +79,8 @@ fun VibrationScreenContent(
                 expanded = expanded(VibrationSectionId.Widgets),
                 onExpandedChange = { onEvent(VibrationUiEvent.SectionToggle(VibrationSectionId.Widgets)) },
             )
-            if (state.rootAvailability.rootReady) {
+            // v3 B13: unverified rooted tools only with experimental tools on.
+            if (state.rootAvailability.rootReady && LocalShowExperimentalRootTools.current) {
                 VibrationRootToolsCard(
                     config = state.rootTools,
                     availability = state.rootAvailability,

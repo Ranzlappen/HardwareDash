@@ -11,12 +11,16 @@ import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import dev.ranzlappen.gadget.core.ui.R
 import androidx.compose.ui.text.style.TextOverflow
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.component.GadgetDialog
@@ -50,6 +54,20 @@ import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
  * All copy is passed in already-resolved (the [ModuleInfo] convention), so
  * feature strings stay in each feature's resources.
  */
+/**
+ * v3 B13 honest-root gate: true when the user turned on Settings → "Show
+ * experimental root tools". Provided once by the app shell from
+ * `RootFeatureToggles.isExperimentalVisible()`; false by default (standard
+ * flavor, previews, tests).
+ */
+val LocalShowExperimentalRootTools = staticCompositionLocalOf { false }
+
+/**
+ * @param verified the section holds at least one tool listed in
+ *   `RootVerification.verified`. Unverified sections render nothing unless
+ *   [LocalShowExperimentalRootTools] is on, and then carry an
+ *   "experimental" banner.
+ */
 @Composable
 fun RootToolsSection(
     title: String,
@@ -58,8 +76,11 @@ fun RootToolsSection(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    verified: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val showExperimental = LocalShowExperimentalRootTools.current
+    if (!verified && !showExperimental) return
     val spacing = LocalGadgetTheme.current.spacing
     GadgetExpandableCard(
         title = title,
@@ -72,6 +93,19 @@ fun RootToolsSection(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
+            if (!verified) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(spacing.small),
+                ) {
+                    GadgetStatusDot(contentDescription = null, color = GadgetStatusKind.Warning.color())
+                    Text(
+                        text = stringResource(R.string.root_tools_experimental_banner),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = GadgetStatusKind.Warning.color(),
+                    )
+                }
+            }
             if (available) {
                 content()
             } else {
@@ -111,7 +145,10 @@ fun RootActionRow(
     enabled: Boolean = true,
     statusMessage: String? = null,
     statusKind: GadgetStatusKind = GadgetStatusKind.Success,
+    verified: Boolean = false,
 ) {
+    // v3 B13: an unverified row only shows with experimental tools on.
+    if (!verified && !LocalShowExperimentalRootTools.current) return
     val spacing = LocalGadgetTheme.current.spacing
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -177,6 +214,7 @@ fun RootConfirmActionRow(
     enabled: Boolean = true,
     statusMessage: String? = null,
     statusKind: GadgetStatusKind = GadgetStatusKind.Success,
+    verified: Boolean = false,
 ) {
     var showConfirm by remember { mutableStateOf(false) }
     RootActionRow(
@@ -188,6 +226,7 @@ fun RootConfirmActionRow(
         enabled = enabled,
         statusMessage = statusMessage,
         statusKind = statusKind,
+        verified = verified,
     )
     if (showConfirm) {
         GadgetDialog(
@@ -218,38 +257,44 @@ fun RootConfirmActionRow(
 @GadgetPreviewRtl
 @Composable
 private fun RootToolsSectionAvailablePreview() = GadgetThemedPreview {
-    RootToolsSection(
-        title = "Rooted tools",
-        available = true,
-        unavailableMessage = "Requires the rooted app version.",
-        expanded = true,
-        onExpandedChange = {},
-    ) {
-        RootActionRow(
-            label = "Dump diskstats",
-            description = "Kernel I/O statistics per block device.",
-            runLabel = "Run",
-            onRun = {},
-            statusMessage = "Captured 12 devices.",
-            statusKind = GadgetStatusKind.Success,
-        )
-        RootActionRow(
-            label = "Enumerate mounts",
-            description = "Full mount table via /proc/mountinfo.",
-            runLabel = "Run",
-            onRun = {},
-        )
+    // Experimental tools visible, as the user would see them after opting in.
+    CompositionLocalProvider(LocalShowExperimentalRootTools provides true) {
+        RootToolsSection(
+            title = "Rooted tools",
+            available = true,
+            unavailableMessage = "Requires the rooted app version.",
+            expanded = true,
+            onExpandedChange = {},
+        ) {
+            RootActionRow(
+                label = "Dump diskstats",
+                description = "Kernel I/O statistics per block device.",
+                runLabel = "Run",
+                onRun = {},
+                statusMessage = "Captured 12 devices.",
+                statusKind = GadgetStatusKind.Success,
+            )
+            RootActionRow(
+                label = "Enumerate mounts",
+                description = "Full mount table via /proc/mountinfo.",
+                runLabel = "Run",
+                onRun = {},
+            )
+        }
     }
 }
 
 @GadgetPreviewLightDark
 @Composable
 private fun RootToolsSectionUnavailablePreview() = GadgetThemedPreview {
-    RootToolsSection(
-        title = "Rooted tools",
-        available = false,
-        unavailableMessage = "Requires the rooted app version.",
-        expanded = true,
-        onExpandedChange = {},
-    ) {}
+    // Experimental tools visible, as the user would see them after opting in.
+    CompositionLocalProvider(LocalShowExperimentalRootTools provides true) {
+        RootToolsSection(
+            title = "Rooted tools",
+            available = false,
+            unavailableMessage = "Requires the rooted app version.",
+            expanded = true,
+            onExpandedChange = {},
+        ) {}
+    }
 }

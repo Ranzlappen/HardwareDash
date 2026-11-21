@@ -61,6 +61,7 @@ fun RootedFeatureTogglesCard(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val lang = LocalizationManager.loadLanguage(context)
     val safetyMode by toggles.isMonitorSafetyMode().collectAsState(initial = true)
+    val showExperimental by toggles.isExperimentalVisible().collectAsState(initial = false)
     var pendingConfirm by remember { mutableStateOf<RootFeatureDescriptor?>(null) }
 
     Card(
@@ -101,6 +102,32 @@ fun RootedFeatureTogglesCard(modifier: Modifier = Modifier) {
                     checked = safetyMode,
                     onCheckedChange = { newValue ->
                         scope.launch { toggles.setMonitorSafetyMode(newValue) }
+                    },
+                )
+            }
+            // v3 B13: rooted tools are hidden in feature screens until verified
+            // on a real rooted phone (RootVerification) or opted into here.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Show experimental root tools",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = "Rooted sections not yet verified on a real rooted phone appear in feature screens, marked experimental.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = showExperimental,
+                    onCheckedChange = { newValue ->
+                        scope.launch { toggles.setExperimentalVisible(newValue) }
                     },
                 )
             }

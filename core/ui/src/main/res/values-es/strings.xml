@@ -34,4 +34,6 @@
     <string name="expandable_card_state_collapsed">Contraído</string>
     <!-- Up arrow in ModuleScreenScaffold (v3 B4). -->
     <string name="gadget_navigate_up">Volver</string>
+    <!-- v3 B13: banner on unverified rooted-tool sections -->
+    <string name="root_tools_experimental_banner">Experimental: aún no verificado en un teléfono rooteado real. Úsalo con cuidado.</string>
 </resources>

@@ -60,6 +60,15 @@ class RootedRootFeatureToggles @Inject constructor(
         return cleared
     }
 
+    override fun isExperimentalVisible(): Flow<Boolean> =
+        dataStore.data.map { prefs -> prefs[RootPrefKeys.ExperimentalVisible] ?: false }
+
+    override suspend fun setExperimentalVisible(visible: Boolean) {
+        dataStore.edit { mutable ->
+            mutable[RootPrefKeys.ExperimentalVisible] = visible
+        }
+    }
+
     override fun isRootedAcknowledged(): Flow<Boolean> =
         dataStore.data.map { prefs -> prefs[RootPrefKeys.RootedAcknowledged] ?: false }
 
