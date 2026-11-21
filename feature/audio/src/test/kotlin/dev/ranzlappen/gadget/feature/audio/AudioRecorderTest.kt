@@ -2,7 +2,6 @@ package dev.ranzlappen.gadget.feature.audio
 
 import android.content.Context
 import android.media.AudioRecord
-import io.mockk.anyConstructed
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor

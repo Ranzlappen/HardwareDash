@@ -45,7 +45,6 @@
     <string name="logbook_monitor_metric_name">Points de contrôle ouverts</string>
     <string name="logbook_monitor_open">Historique des points de contrôle ouverts</string>
     <string name="logbook_action_add_entry">Ajouter une entrée au journal</string>
-    <string name="logbook_action_assert_open_below">Vérifier que les points de contrôle ouverts sont au niveau ou en dessous du seuil</string>
     <string name="logbook_notification_channel_name">Rappels du journal</string>
     <string name="logbook_notification_channel_description">Notifications de rappel de points de contrôle du module Journal</string>
     <string name="logbook_notification_title">Point de contrôle dû : %1$s</string>

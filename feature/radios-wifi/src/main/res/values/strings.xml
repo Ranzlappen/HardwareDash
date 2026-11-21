@@ -44,14 +44,6 @@
     <string name="wifi_monitor_enabled">WiFi state history</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="wifi_cap_rooted_active">Active — rooted build</string>
-    <string name="wifi_cap_rooted_required">Requires rooted build</string>
-    <string name="wifi_cap_rfkill_name">rfkill radio control</string>
-    <string name="wifi_cap_rfkill_detail">Block or unblock the WiFi radio at the kernel level via rfkill, bypassing the Android WiFi stack</string>
-    <string name="wifi_cap_tx_power_name">TX power override</string>
-    <string name="wifi_cap_tx_power_detail">Set transmit power via iw phy set txpower (hard ceiling: 20 dBm) to reduce interference or extend range</string>
-    <string name="wifi_cap_channel_name">Explicit channel selection</string>
-    <string name="wifi_cap_channel_detail">Lock onto a specific 2.4 or 5 GHz channel via iw dev set channel, bypassing automatic selection</string>
 
     <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
     <string name="wifi_root_tools_title">Rooted tools</string>

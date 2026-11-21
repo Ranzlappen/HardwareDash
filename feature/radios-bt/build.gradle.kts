@@ -6,6 +6,12 @@ plugins {
 
 android {
     namespace = "dev.ranzlappen.gadget.feature.radios.bt"
+
+    // Receivers built from IntentFilter would hit the android.jar "Stub!"
+    // in unit tests; same config as :feature:gps / :feature:lock / :app.
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -13,7 +19,6 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
     implementation(project(":core:monitoring"))
-    implementation(project(":core:automation"))
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

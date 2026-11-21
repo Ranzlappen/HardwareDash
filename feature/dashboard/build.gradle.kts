@@ -1,9 +1,9 @@
-// :feature:dashboard — home screen.
+// :feature:dashboard — the Home section (v3 B3).
 //
-// Adaptive grid of glassmorphic DashCard tiles showing live system
-// readouts. Phase 1 ships hardcoded mock data; Phase 2 wires the
-// hardware registry from :core:hardware via a Hilt-injected
-// ViewModel.
+// Live status cards (battery, storage, Wi-Fi, latest logbook entry), quick
+// actions (torch, buzz) and the user's pinned tools. Reads features only
+// through core seams — the MetricSource map, the ModuleActionRegistry and
+// the LogbookDao — never a feature module.
 
 plugins {
     id("gadget.android.feature")
@@ -23,6 +23,14 @@ dependencies {
     // :core:datastore backs the persisted DashboardLayout (order / hidden /
     // pinned) the DashboardViewModel reads and writes (W9 dashboard editor).
     implementation(project(":core:datastore"))
+    // :core:model — the Hilt Map<String, MetricSource> the status cards read
+    // (battery / storage / Wi-Fi / torch state) without depending on features.
+    implementation(project(":core:model"))
+    // :core:automation — ModuleActionRegistry for the quick actions (torch
+    // on/off, vibration one-shot) dispatched by featureId / actionKey.
+    implementation(project(":core:automation"))
+    // :core:data — LogbookDao for the "latest log entry" card.
+    implementation(project(":core:data"))
 
     testImplementation(libs.junit)
 

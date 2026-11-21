@@ -32,4 +32,8 @@
     <!-- GadgetExpandableCard (collapsible card) state announcements -->
     <string name="expandable_card_state_expanded">Ausgeklappt</string>
     <string name="expandable_card_state_collapsed">Eingeklappt</string>
+    <!-- Up arrow in ModuleScreenScaffold (v3 B4). -->
+    <string name="gadget_navigate_up">Zurück</string>
+    <!-- v3 B13: banner on unverified rooted-tool sections -->
+    <string name="root_tools_experimental_banner">Experimentell – noch nicht auf einem echten gerooteten Telefon geprüft. Mit Vorsicht verwenden.</string>
 </resources>

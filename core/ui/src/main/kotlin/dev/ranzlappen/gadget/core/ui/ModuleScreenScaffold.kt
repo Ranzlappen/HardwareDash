@@ -9,10 +9,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import dev.ranzlappen.gadget.core.ui.component.GadgetIconButton
 import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.adaptive.GadgetLayoutMode
 import dev.ranzlappen.gadget.core.ui.adaptive.GadgetPosture
@@ -28,7 +34,8 @@ import dev.ranzlappen.gadget.core.ui.module.ModulePermissionsSection
  * Per-module screen scaffold
  * Provides:
  *  - Full vertical scroll via `Column(Modifier.verticalScroll(...))`.
- *  - Optional [title] header slot.
+ *  - Optional [title] header slot, preceded by an up arrow when the shell
+ *    provides [LocalNavigateUp] (every non-root screen).
  *  - The module-blueprint sections, driven declaratively by an optional
  *    [moduleInfo]. When supplied, the scaffold renders the standard
  *    **Permissions**, **OS compatibility**, and (when present)
@@ -84,6 +91,12 @@ fun ModuleScreenScaffold(
     val layoutMode = rememberLayoutMode()
     val posture = rememberPosture()
     val showSecondary = secondaryPane != null && layoutMode != GadgetLayoutMode.SinglePane
+    // Captured once per screen instance: the shell's value is correct when
+    // this screen is first composed (it is the entering destination), and
+    // freezing it keeps an exiting screen from flashing the next screen's
+    // arrow during the nav transition.
+    val shellNavigateUp = LocalNavigateUp.current
+    val navigateUp = remember { shellNavigateUp }
 
     val primary: @Composable () -> Unit = {
         val scroll = rememberScrollState()
@@ -97,12 +110,27 @@ fun ModuleScreenScaffold(
                 ),
             verticalArrangement = Arrangement.spacedBy(spacing.large),
         ) {
-            if (title != null) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
+            if (title != null || navigateUp != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(spacing.tiny),
+                ) {
+                    if (navigateUp != null) {
+                        GadgetIconButton(
+                            onClick = navigateUp,
+                            icon = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.gadget_navigate_up),
+                        )
+                    }
+                    if (title != null) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
             }
             functional?.invoke(this)
             if (moduleInfo != null) {

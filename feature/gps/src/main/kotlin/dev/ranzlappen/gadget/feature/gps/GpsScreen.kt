@@ -173,57 +173,6 @@ private fun gpsModuleInfo(
                 )
             },
         ),
-        ModuleCapability(
-            name = stringResource(R.string.gps_cap_nmea_name),
-            detail = stringResource(R.string.gps_cap_nmea_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.gps_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.gps_cap_rooted_required),
-                    )
-                }
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.gps_cap_constellation_name),
-            detail = stringResource(R.string.gps_cap_constellation_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.gps_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.gps_cap_rooted_required),
-                    )
-                }
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.gps_cap_location_override_name),
-            detail = stringResource(R.string.gps_cap_location_override_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.gps_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.gps_cap_rooted_required),
-                    )
-                }
-            },
-        ),
     ),
 )
 

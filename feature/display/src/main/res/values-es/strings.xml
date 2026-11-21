@@ -53,14 +53,6 @@
     <string name="display_cap_brightness_detail">Lectura/escritura de Settings.System.SCREEN_BRIGHTNESS.</string>
     <string name="display_cap_brightness_granted">Permiso concedido</string>
     <string name="display_cap_brightness_denied">WRITE_SETTINGS no concedido</string>
-    <string name="display_cap_refresh_rate_name">Anulación de tasa de refresco</string>
-    <string name="display_cap_refresh_rate_detail">Fuerza la pantalla a un modo compatible específico.</string>
-    <string name="display_cap_density_name">Anulación de densidad (DPI)</string>
-    <string name="display_cap_density_detail">Anulación en tiempo de ejecución mediante `wm density`.</string>
-    <string name="display_cap_surfaceflinger_name">Instantánea de SurfaceFlinger</string>
-    <string name="display_cap_surfaceflinger_detail">Extracto de solo lectura de `dumpsys SurfaceFlinger`.</string>
-    <string name="display_cap_rooted_active">Activo — versión rooteada</string>
-    <string name="display_cap_rooted_required">Requiere la versión rooteada de la app</string>
 
     <!-- Monitoring -->
     <string name="display_live_monitor_brightness">Brillo en vivo</string>

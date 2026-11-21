@@ -26,10 +26,6 @@
     <string name="lock_cap_biometric_unavailable">No hay datos biométricos registrados</string>
 
     <!-- Rooted capability rows -->
-    <string name="lock_cap_rooted_active">Activo — compilación rooteada</string>
-    <string name="lock_cap_rooted_required">Requiere compilación rooteada</string>
-    <string name="lock_cap_overlay_name">Superposición de notificación en pantalla de bloqueo</string>
-    <string name="lock_cap_overlay_detail">Muestra una ventana de notificación de alerta del sistema sobre la pantalla de bloqueo para alertas seguras temporizadas (límite fijo: 60 s)</string>
 
     <!-- Device-admin "lock now" (standard tier, DevicePolicyManager) -->
     <string name="lock_admin_card_title">Bloquear el dispositivo</string>

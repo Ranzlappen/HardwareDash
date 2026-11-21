@@ -4,16 +4,18 @@ HardwareDash, internally named **Gadget**, is a modular Android app for
 monitoring and controlling device sensors, radios, cameras, audio,
 storage, widgets, automation, and rooted-only system surfaces.
 
+**Direction:** v3 ("pragmatic") — see [`MASTER-PLAN.md`](MASTER-PLAN.md).
+v1 is archived on `legacy-main`, v2 on `archive/v2-modular-2026`.
+
 **Full documentation lives in the [GitHub Wiki](https://github.com/Ranzlappen/HardwareDash/wiki):**
 
 - [Project overview](https://github.com/Ranzlappen/HardwareDash/wiki/Home)
 - [Roadmap & status](https://github.com/Ranzlappen/HardwareDash/wiki/Roadmap-and-Status)
-- [Architecture](https://github.com/Ranzlappen/HardwareDash/wiki/Architecture)
-- [Feature migration guide](https://github.com/Ranzlappen/HardwareDash/wiki/Feature-Migration-Guide)
+- [Architecture](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Architecture.md)
 - [Design system](https://github.com/Ranzlappen/HardwareDash/wiki/Design-System)
 - [Standard / rooted flavor model](https://github.com/Ranzlappen/HardwareDash/wiki/Flavors-and-Root-Safety)
 - [AI collaboration workflow](https://github.com/Ranzlappen/HardwareDash/wiki/AI-Collaboration)
-- [Testing & CI](https://github.com/Ranzlappen/HardwareDash/wiki/Testing-and-CI)
+- [Testing & CI](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Testing-and-CI.md)
 
 > The wiki source is also maintained in the [`wiki/`](wiki/) directory of
 > this repo; see [`wiki/README.md`](wiki/README.md) for how it's published.

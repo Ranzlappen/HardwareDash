@@ -19,6 +19,7 @@ import dev.ranzlappen.gadget.feature.vibration.PatternRepository
 import dev.ranzlappen.gadget.feature.vibration.PwmPulse
 import dev.ranzlappen.gadget.feature.vibration.VibrationController
 import dev.ranzlappen.gadget.feature.vibration.VibrationPlaybackService
+import dev.ranzlappen.gadget.feature.vibration.VibrationPredefinedEffect
 import dev.ranzlappen.gadget.feature.vibration.VibrationRootCapabilities
 import dev.ranzlappen.gadget.feature.vibration.VibrationRootResult
 import javax.inject.Inject
@@ -55,6 +56,11 @@ class VibrationActionHandler @Inject constructor(
                 ActionParam(PARAM_AMPLITUDE, ActionParamType.Int, "60", 1f, 100f),
                 ActionParam(PARAM_DURATION_MS, ActionParamType.Int, "300", 10f, 5_000f),
             ),
+        ),
+        ModuleAction(
+            key = ACTION_EFFECT,
+            label = "Play haptic effect",
+            params = listOf(ActionParam(PARAM_EFFECT, ActionParamType.Text, EFFECT_CLICK)),
         ),
         ModuleAction(ACTION_STOP, "Stop vibration"),
         ModuleAction(
@@ -112,6 +118,24 @@ class VibrationActionHandler @Inject constructor(
                     },
                 )
                 ActionResult.Success
+            }
+            ACTION_EFFECT -> {
+                // Predefined system haptics (click / double click / tick /
+                // heavy click) through the same FGS as the one-shot, so they
+                // also play from a widget or rule in the background. Absorbs
+                // :feature:actuators' haptic actions (v3 B7a).
+                val effect = effectOf(params[PARAM_EFFECT])
+                if (effect == null) {
+                    ActionResult.Failure("Unknown effect: ${params[PARAM_EFFECT]}")
+                } else {
+                    startPlayback(
+                        Intent(context, VibrationPlaybackService::class.java).apply {
+                            putExtra(VibrationPlaybackService.EXTRA_ACTION_KEY, ACTION_EFFECT)
+                            putExtra(VibrationPlaybackService.EXTRA_EFFECT, effect.name)
+                        },
+                    )
+                    ActionResult.Success
+                }
             }
             ACTION_VIBRATE_CONTINUOUS -> {
                 // A continuous ("perma") buzz loops until stopped, so the FGS
@@ -192,6 +216,21 @@ class VibrationActionHandler @Inject constructor(
         const val FEATURE_ID = "vibration"
         const val ACTION_ONESHOT = "oneshot"
         const val ACTION_STOP = "stop"
+        const val ACTION_EFFECT = "effect"
+        const val PARAM_EFFECT = "effect"
+        const val EFFECT_CLICK = "click"
+        const val EFFECT_DOUBLE_CLICK = "double_click"
+        const val EFFECT_TICK = "tick"
+        const val EFFECT_HEAVY_CLICK = "heavy_click"
+
+        /** Param value → effect; accepts the snake_case names above. */
+        fun effectOf(value: String?): VibrationPredefinedEffect? = when (value?.trim()?.lowercase()) {
+            null, "", EFFECT_CLICK -> VibrationPredefinedEffect.Click
+            EFFECT_DOUBLE_CLICK -> VibrationPredefinedEffect.DoubleClick
+            EFFECT_TICK -> VibrationPredefinedEffect.Tick
+            EFFECT_HEAVY_CLICK -> VibrationPredefinedEffect.HeavyClick
+            else -> null
+        }
         const val ACTION_VIBRATE_CONTINUOUS = "vibrate_continuous"
         const val ACTION_PATTERN_PLAY = "pattern_play"
         const val ACTION_EXTREME_AMPLITUDE = "extreme_amplitude"

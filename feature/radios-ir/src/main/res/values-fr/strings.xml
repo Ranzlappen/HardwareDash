@@ -47,12 +47,6 @@
     <string name="ir_btn_import">Importer un signal</string>
 
     <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
-    <string name="ir_cap_rooted_active">Actif — version rootée</string>
-    <string name="ir_cap_rooted_required">Nécessite une version rootée</string>
-    <string name="ir_cap_custom_carrier_name">Fréquence porteuse personnalisée</string>
-    <string name="ir_cap_custom_carrier_detail">Émission à des fréquences porteuses arbitraires en dehors de la plage de ConsumerIrManager</string>
-    <string name="ir_cap_gpio_burst_name">Rafale GPIO brute</string>
-    <string name="ir_cap_gpio_burst_detail">Sortie directe d\'un train d\'impulsions GPIO via sysfs, en contournant le HAL IR</string>
     <!-- Rooted tools (in-screen, W6 write-tier) -->
     <string name="ir_root_tools_title">Outils root</string>
     <string name="ir_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>

@@ -46,16 +46,6 @@
     <string name="usbdebug_cap_debug_state_detail">Lee Settings.Global.ADB_ENABLED, el único ajuste del sistema detrás de \"Depuración por USB\" y del acceso ADB</string>
     <string name="usbdebug_cap_debug_state_enabled">Habilitado</string>
     <string name="usbdebug_cap_debug_state_disabled">Deshabilitado</string>
-    <string name="usbdebug_cap_function_switch_name">Cambio de rol de función USB</string>
-    <string name="usbdebug_cap_function_switch_detail">Establece la función del gadget USB (MTP, PTP, RNDIS, …) mediante cmd usb set-functions</string>
-    <string name="usbdebug_cap_dump_usb_name">Volcado USB</string>
-    <string name="usbdebug_cap_dump_usb_detail">Instantánea de solo lectura de dumpsys usb, limitada a 8 KB</string>
-    <string name="usbdebug_cap_dump_serial_name">Volcado del servicio serie</string>
-    <string name="usbdebug_cap_dump_serial_detail">Instantánea de solo lectura de dumpsys SerialService (API 30+, recurre a dumpsys serial)</string>
-    <string name="usbdebug_cap_dump_debugfs_name">Volcado de dispositivos USB (debugfs)</string>
-    <string name="usbdebug_cap_dump_debugfs_detail">Instantánea de solo lectura de /sys/kernel/debug/usb/devices, recurre a dumpsys usb si debugfs no está montado</string>
-    <string name="usbdebug_cap_rooted_active">Activo: compilación rooteada</string>
-    <string name="usbdebug_cap_rooted_required">Requiere compilación rooteada</string>
 
     <!-- Automation action labels -->
     <string name="usbdebug_action_switch_function">Cambiar rol de función USB</string>

@@ -116,57 +116,6 @@ private fun storageModuleInfo(volumes: List<StorageVolumeInfo>, isRootedFlavor: 
                 )
             },
         ),
-        ModuleCapability(
-            name = stringResource(R.string.storage_cap_diskstats_name),
-            detail = stringResource(R.string.storage_cap_diskstats_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.storage_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.storage_cap_rooted_required),
-                    )
-                }
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.storage_cap_mounts_name),
-            detail = stringResource(R.string.storage_cap_mounts_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.storage_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.storage_cap_rooted_required),
-                    )
-                }
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.storage_cap_fstrim_name),
-            detail = stringResource(R.string.storage_cap_fstrim_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.storage_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.storage_cap_rooted_required),
-                    )
-                }
-            },
-        ),
     ),
 )
 

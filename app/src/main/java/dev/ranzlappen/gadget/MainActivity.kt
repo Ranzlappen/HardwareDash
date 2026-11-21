@@ -11,8 +11,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -26,13 +30,14 @@ import dev.ranzlappen.gadget.root.ui.FatalLaunchScreen
 import dev.ranzlappen.gadget.backup.ui.BackupCard
 import dev.ranzlappen.gadget.core.permissions.PermissionsDashboardCard
 import dev.ranzlappen.gadget.root.ui.RootedFeatureTogglesCard
+import dev.ranzlappen.gadget.root.ui.rememberRootFeatures
 import androidx.compose.ui.graphics.Color
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetDarkColorScheme
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetLightColorScheme
 import dev.ranzlappen.gadget.core.designsystem.theme.customColorScheme
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import android.nfc.NfcAdapter
-import androidx.activity.viewModels
+import android.nfc.Tag
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.feature.apps.AppRepository
 import dev.ranzlappen.gadget.feature.apps.appsScreen
@@ -48,7 +53,7 @@ import dev.ranzlappen.gadget.core.datastore.UserPreferences
 import dev.ranzlappen.gadget.core.datastore.UserPreferencesRepository
 import dev.ranzlappen.gadget.core.navigation.GadgetApp
 import dev.ranzlappen.gadget.core.navigation.GadgetDestination
-import dev.ranzlappen.gadget.core.navigation.navigateTopLevel
+import dev.ranzlappen.gadget.core.navigation.openFromDeepLink
 import dev.ranzlappen.gadget.feature.audio.audioScreen
 import dev.ranzlappen.gadget.feature.automation.ui.automationScreen
 import dev.ranzlappen.gadget.feature.dashboard.dashboardScreen
@@ -57,21 +62,19 @@ import dev.ranzlappen.gadget.feature.gps.gpsScreen
 import dev.ranzlappen.gadget.feature.storage.storageScreen
 import dev.ranzlappen.gadget.feature.radios.ir.irScreen
 import dev.ranzlappen.gadget.feature.camera.cameraScreen
-import dev.ranzlappen.gadget.feature.motion.motionScreen
-import dev.ranzlappen.gadget.feature.actuators.actuatorsScreen
 import dev.ranzlappen.gadget.feature.adbdebug.adbDebugScreen
-import dev.ranzlappen.gadget.feature.ambient.ambientScreen
 import dev.ranzlappen.gadget.feature.bugreport.bugReportScreen
 import dev.ranzlappen.gadget.feature.diagnostics.diagnosticsScreen
 import dev.ranzlappen.gadget.feature.display.displayScreen
 import dev.ranzlappen.gadget.feature.lock.lockScreen
+import dev.ranzlappen.gadget.feature.files.filesScreen
 import dev.ranzlappen.gadget.feature.logbook.logbookScreen
 import dev.ranzlappen.gadget.feature.manual.manualScreen
 import dev.ranzlappen.gadget.feature.microphone.microphoneScreen
 import dev.ranzlappen.gadget.feature.notification.notificationScreen
 import dev.ranzlappen.gadget.feature.radios.bt.btScreen
 import dev.ranzlappen.gadget.feature.radios.cell.cellScreen
-import dev.ranzlappen.gadget.feature.radios.nfc.NfcViewModel
+import dev.ranzlappen.gadget.feature.radios.nfc.tag.NfcTagInbox
 import dev.ranzlappen.gadget.feature.radios.wifi.wifiScreen
 import dev.ranzlappen.gadget.feature.radios.subghz.subghzScreen
 import dev.ranzlappen.gadget.feature.flipper.flipperScreen
@@ -114,17 +117,30 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var launchGate: LaunchGate
     @Inject lateinit var companionDetector: CompanionModuleDetector
 
-    private val nfcViewModel: NfcViewModel by viewModels()
+    /** Tags delivered by the NFC intent filters (Gadget opened by a tag), see [handleNfcIntent]. */
+    @Inject lateinit var nfcTagInbox: NfcTagInbox
 
     // Phase 2 / Batch 1 — new typed user-preferences repository. Drives
     // the GadgetApp theme params reactively (dark mode, dynamic colour,
     // reduced-motion override, reduced-transparency override).
     @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
 
+    /**
+     * Route requested via [GadgetDestination.EXTRA_ROUTE] (logbook reminder,
+     * battery / storage widgets, GPS spoof notification), consumed once the
+     * nav graph exists. Only read on a fresh launch so a rotation doesn't
+     * re-navigate.
+     */
+    private var pendingRoute by mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         bootstrapLegacyManagers()
+        if (savedInstanceState == null) {
+            pendingRoute = intent?.getStringExtra(GadgetDestination.EXTRA_ROUTE)
+            intent?.let(::handleNfcIntent)
+        }
 
         setContent {
             val outcome by produceState<LaunchGateOutcome?>(initialValue = null) {
@@ -167,8 +183,16 @@ class MainActivity : ComponentActivity() {
                     } else {
                         null
                     }
+                    // v3 B13: rooted tools not yet verified stay hidden unless
+                    // the user opts in (Settings → rooted feature toggles).
+                    val rootFeatures = rememberRootFeatures()
+                    val experimentalRootFlow = remember(rootFeatures) {
+                        rootFeatures.featureToggles().isExperimentalVisible()
+                    }
+                    val showExperimentalRootTools by experimentalRootFlow.collectAsState(initial = false)
                     GadgetApp(
                         navController = navController,
+                        showExperimentalRootTools = showExperimentalRootTools,
                         useDarkTheme = useDarkTheme,
                         useDynamicColor = preferences.dynamicColor,
                         customTheme = customTheme,
@@ -178,34 +202,27 @@ class MainActivity : ComponentActivity() {
                     ) {
                         dashboardScreen(
                             onNavigate = { destination ->
-                                // Rail destinations (Dashboard, Torch, Settings, …)
-                                // route via the back-stack-trimming helper; any
-                                // non-rail sub-route uses plain navigate.
-                                if (destination in GadgetDestination.railDestinations) {
-                                    navController.navigateTopLevel(destination)
-                                } else {
-                                    navController.navigate(destination.route)
-                                }
+                                // v3: tools open on top of Home, so back returns
+                                // to the dashboard. Section switching is owned by
+                                // the shell's bottom bar / rail.
+                                navController.navigate(destination.route)
                             },
                         )
-                        sensorsScreen()
+                        sensorsScreen(navController)
                         batteryScreen()
                         gpsScreen()
                         storageScreen()
                         irScreen()
                         cameraScreen()
-                        motionScreen()
-                        audioScreen()
+                        audioScreen(navController)
                         nfcScreen()
                         btScreen()
                         wifiScreen()
                         cellScreen()
                         subghzScreen()
                         flipperScreen()
-                        ambientScreen()
                         lockScreen()
-                        actuatorsScreen()
-                        diagnosticsScreen()
+                        diagnosticsScreen(navController)
                         displayScreen()
                         microphoneScreen()
                         usbDebugScreen()
@@ -213,6 +230,7 @@ class MainActivity : ComponentActivity() {
                         bugReportScreen()
                         manualScreen()
                         logbookScreen()
+                        filesScreen()
                         automationScreen()
                         settingsScreen(
                             // Centralized permissions dashboard (W5), from
@@ -233,21 +251,28 @@ class MainActivity : ComponentActivity() {
                             // Deep-link the "turned off in settings" snackbar
                             // action to the Settings screen.
                             onNavigateToSettings = {
-                                navController.navigateTopLevel(GadgetDestination.Settings)
+                                navController.navigate(GadgetDestination.Settings.route)
                             },
                         )
                         vibrationScreen(
                             onNavigateToSettings = {
-                                navController.navigateTopLevel(GadgetDestination.Settings)
+                                navController.navigate(GadgetDestination.Settings.route)
                             },
                         )
                         notificationScreen(
                             onNavigateToSettings = {
-                                navController.navigateTopLevel(GadgetDestination.Settings)
+                                navController.navigate(GadgetDestination.Settings.route)
                             },
                         )
                         appsScreen(navController)
                         youtubeDownloaderScreen(navController)
+                    }
+                    // Runs after GadgetApp's first composition, so the graph is set.
+                    LaunchedEffect(pendingRoute) {
+                        val route = pendingRoute ?: return@LaunchedEffect
+                        GadgetDestination.byRouteOrNull(route)?.let { navController.openFromDeepLink(it) }
+                        pendingRoute = null
+                        intent?.removeExtra(GadgetDestination.EXTRA_ROUTE)
                     }
                 }
                 is LaunchGateOutcome.DeniedFatal -> GadgetTheme {
@@ -264,12 +289,26 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        intent.getStringExtra(GadgetDestination.EXTRA_ROUTE)?.let { pendingRoute = it }
+        handleNfcIntent(intent)
+    }
+
+    /**
+     * A tag dispatched to the activity (the NFC screen itself uses reader
+     * mode): hand it to the NFC screen's view model and open that screen.
+     */
+    private fun handleNfcIntent(intent: Intent) {
         val action = intent.action
-        if (action == NfcAdapter.ACTION_NDEF_DISCOVERED ||
-            action == NfcAdapter.ACTION_TAG_DISCOVERED ||
-            action == NfcAdapter.ACTION_TECH_DISCOVERED) {
-            nfcViewModel.onNewIntent(intent)
+        if (action != NfcAdapter.ACTION_NDEF_DISCOVERED &&
+            action != NfcAdapter.ACTION_TAG_DISCOVERED &&
+            action != NfcAdapter.ACTION_TECH_DISCOVERED
+        ) {
+            return
         }
+        @Suppress("DEPRECATION")
+        val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
+        nfcTagInbox.offer(tag)
+        pendingRoute = GadgetDestination.RadiosNfc.route
     }
 
     private fun bootstrapLegacyManagers() {

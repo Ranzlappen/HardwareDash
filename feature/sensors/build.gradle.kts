@@ -1,4 +1,6 @@
-// :feature:sensors — skeleton; configuration via gadget.android.feature.
+// :feature:sensors — sensor explorer (v3 B5): every sensor on the device,
+// live detail per sensor, and the sensor MetricSources (incl. the ones that
+// used to live in :feature:motion / :feature:ambient — keys unchanged).
 
 plugins {
     id("gadget.android.feature")
@@ -14,15 +16,10 @@ dependencies {
     implementation(project(":core:navigation"))
     // :core:monitoring for the embedded MonitorContainer history charts; its
     // `api` surface also brings :core:model (MetricSource — the signal
-    // contract the three sensor sources implement).
+    // contract the sensor sources implement).
     implementation(project(":core:monitoring"))
-    // DeviceSensors — moved to :core:hardware so :feature:motion can reuse it
-    // without a feature-to-feature dependency.
+    // DeviceSensors — the SensorManager seam (list, streams, one-shots).
     implementation(project(":core:hardware"))
-    implementation(project(":core:root"))
-    // :core:automation — the action contract (ModuleAction / ActionHandler),
-    // making the module automation-ready (SensorsActionHandler).
-    implementation(project(":core:automation"))
 
     // Stateless-screen instrumented test (Compose UI test stack via the
     // shared fixtures, the torch/vibration pattern).

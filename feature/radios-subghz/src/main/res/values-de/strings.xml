@@ -26,12 +26,4 @@
     <string name="subghz_cap_bridge_no_host">Kein USB-Host unterstützt</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="subghz_cap_rooted_active">Aktiv — gerootete Version</string>
-    <string name="subghz_cap_rooted_required">Erfordert gerootete Version</string>
-    <string name="subghz_cap_registers_name">Direkter Registerzugriff</string>
-    <string name="subghz_cap_registers_detail">Liest und schreibt die Funkregister des Transceivers direkt über den USB-Gerätenode, unter Umgehung des Userspace-Treibers</string>
-    <string name="subghz_cap_tuning_name">Benutzerdefinierte Trägerabstimmung</string>
-    <string name="subghz_cap_tuning_detail">Auf eine explizite Sub-GHz-Trägerfrequenz abstimmen (z. B. 315 / 433,92 / 868 / 915 MHz) und die Abweichung außerhalb der Standard-Treibervoreinstellungen einstellen</string>
-    <string name="subghz_cap_capture_name">OOK-/2-FSK-Erfassung</string>
-    <string name="subghz_cap_capture_detail">Streamt rohe On-Off-Keying- und 2-FSK-Symbole vom Funkmodul für Wiedergabe und Analyse</string>
 </resources>

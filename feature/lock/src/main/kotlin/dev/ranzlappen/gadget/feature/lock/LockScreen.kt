@@ -192,19 +192,6 @@ private fun lockModuleInfo(state: LockState): ModuleInfo = ModuleInfo(
                 )
             },
         ),
-        ModuleCapability(
-            name = stringResource(R.string.lock_cap_overlay_name),
-            detail = stringResource(R.string.lock_cap_overlay_detail),
-            status = {
-                if (state.isRootedFlavor) CapabilityStatus(
-                    kind = GadgetStatusKind.Success,
-                    message = stringResource(R.string.lock_cap_rooted_active),
-                ) else CapabilityStatus(
-                    kind = GadgetStatusKind.Warning,
-                    message = stringResource(R.string.lock_cap_rooted_required),
-                )
-            },
-        ),
     ),
 )
 

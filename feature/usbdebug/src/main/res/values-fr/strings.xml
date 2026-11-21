@@ -46,16 +46,6 @@
     <string name="usbdebug_cap_debug_state_detail">Lit Settings.Global.ADB_ENABLED — le seul paramètre système à l\'origine à la fois du \"débogage USB\" et de l\'accès ADB</string>
     <string name="usbdebug_cap_debug_state_enabled">Activé</string>
     <string name="usbdebug_cap_debug_state_disabled">Désactivé</string>
-    <string name="usbdebug_cap_function_switch_name">Changement de rôle de fonction USB</string>
-    <string name="usbdebug_cap_function_switch_detail">Définit la fonction du gadget USB (MTP, PTP, RNDIS, …) via cmd usb set-functions</string>
-    <string name="usbdebug_cap_dump_usb_name">Vidage USB</string>
-    <string name="usbdebug_cap_dump_usb_detail">Instantané dumpsys usb en lecture seule, limité à 8 Ko</string>
-    <string name="usbdebug_cap_dump_serial_name">Vidage du service série</string>
-    <string name="usbdebug_cap_dump_serial_detail">Instantané dumpsys SerialService en lecture seule (API 30+, revient à dumpsys serial)</string>
-    <string name="usbdebug_cap_dump_debugfs_name">Vidage des périphériques USB (debugfs)</string>
-    <string name="usbdebug_cap_dump_debugfs_detail">Instantané /sys/kernel/debug/usb/devices en lecture seule, revient à dumpsys usb si debugfs n\'est pas monté</string>
-    <string name="usbdebug_cap_rooted_active">Actif — build rooté</string>
-    <string name="usbdebug_cap_rooted_required">Nécessite un build rooté</string>
 
     <!-- Automation action labels -->
     <string name="usbdebug_action_switch_function">Changer le rôle de fonction USB</string>

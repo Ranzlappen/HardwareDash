@@ -13,7 +13,7 @@ class CustomThemeOptionTest {
     @Test
     fun `persisted names are stable`() {
         assertEquals(
-            listOf("Default", "HighContrast", "AmoledTrue", "Pastel"),
+            listOf("Default", "HighContrast", "AmoledTrue", "Pastel", "Custom"),
             CustomThemeOption.entries.map { it.name },
         )
     }

@@ -48,4 +48,13 @@ interface RootFeatureToggles {
      */
     fun isRootedAcknowledged(): Flow<Boolean>
     suspend fun setRootedAcknowledged(acknowledged: Boolean)
+
+    /**
+     * v3 B13: show rooted tools that are not yet [RootVerification.verified]
+     * (default off). Defaults here keep the standard no-op and test fakes
+     * unchanged; the rooted implementation persists it.
+     */
+    fun isExperimentalVisible(): Flow<Boolean> = kotlinx.coroutines.flow.flowOf(false)
+
+    suspend fun setExperimentalVisible(visible: Boolean) = Unit
 }

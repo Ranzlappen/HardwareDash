@@ -103,7 +103,6 @@
     <!-- ActionHandler labels (automation rule builder) -->
     <string name="notification_action_post_test">Publier la notification de test</string>
     <string name="notification_action_cancel_test">Annuler la notification de test</string>
-    <string name="notification_action_assert_importance">Vérifier l\'importance du canal</string>
     <string name="notification_action_sticky_override">Passer l\'importance du canal à Élevée</string>
     <string name="notification_action_grant_listener">Accorder l\'accès à l\'écoute</string>
     <string name="notification_action_show_overlay">Afficher la superposition sur écran de verrouillage</string>

@@ -6,7 +6,7 @@ through `LocalGadgetTheme.current`, so a downstream "compact" or
 "high-contrast" theme can override any slot without forking components.
 
 For the full per-component reference (signatures, parameters, examples,
-a11y behaviour), see **[Component Catalog](Component-Catalog)**. This page
+a11y behaviour), see **[Component Catalog](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Component-Catalog.md)**. This page
 is the rule set and the rationale.
 
 ## Tokens — `LocalGadgetTheme`
@@ -84,7 +84,7 @@ degrades to a higher-opacity solid fallback.
 ## Cards, buttons, inputs, modals
 
 The component families (full signatures in
-[Component Catalog](Component-Catalog)):
+[Component Catalog](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Component-Catalog.md)):
 
 - **Buttons** — `GadgetPrimaryButton` (one high-emphasis CTA per screen),
   `GadgetSecondaryButton` (outlined glassy sibling), `GadgetTertiaryButton`
@@ -162,12 +162,20 @@ The component families (full signatures in
   between M3 versions); `GadgetLayoutMode` is the stable seam. Use
   `BoxWithConstraintsAdaptive { mode -> … }` when a layout needs both
   pixel constraints and the semantic mode.
-- **The shell adapts automatically:** `GadgetApp` passes `showLabels =
-  true` to `GadgetNavRail` only at Expanded width. The rail is a
-  pinned-anchors layout — `pinnedTop` (Dashboard), `pinnedBottom`
-  (Settings), and `modules` in a scrollable middle region. Add a module
-  by appending it to `GadgetDestination.modules` and registering its route
-  in `GadgetApp { … }`.
+- **The shell adapts automatically (v3):** `GadgetApp` shows the five
+  `GadgetSection`s (Home / Tools / Sensors / Connect / More) as a labelled
+  `GadgetSectionBar` at the bottom on Compact width and as a labelled
+  `GadgetSectionRail` on Medium / Expanded. Every section but Home has a
+  hub screen (`SectionHubScreen`) listing its tools; tools are pushed on
+  top of the hub. Add a tool by appending its destination to
+  `GadgetDestination.modules` **and** to one `GadgetSection.members` list
+  (`GadgetSectionTest` fails otherwise), adding a `hubSummary` line, and
+  registering its route in `GadgetApp { … }`. Tool screens built on
+  `ModuleScreenScaffold` get an up arrow automatically: the shell provides
+  `LocalNavigateUp` for every non-root route. External entry points
+  (notifications, widgets) put `GadgetDestination.EXTRA_ROUTE` on the launch
+  intent with `FLAG_ACTIVITY_CLEAR_TOP | SINGLE_TOP`; `MainActivity` opens it
+  via `openFromDeepLink` (section hub underneath, so back lands on the hub).
 - **`ModuleScreenScaffold`** exposes an optional `secondaryPane` slot. Its
   placement adapts to both width and posture:
   - **Compact** (`SinglePane`): omitted entirely.
@@ -194,8 +202,7 @@ The component families (full signatures in
 
 ## Preview matrix policy
 
-Every component file that ships a public composable also ships ≥1
-`@Composable` preview. The annotation stack:
+**Shared `:core:ui` components** ship the full stack:
 
 - **Always:** `@GadgetPreviewLightDark` + `@GadgetPreviewLargeFont` +
   `@GadgetPreviewRtl` (dark+light, 200 % font, RTL).
@@ -203,6 +210,10 @@ Every component file that ships a public composable also ships ≥1
   shimmers): add `@GadgetPreviewSizeClasses` (Compact / Medium /
   Expanded). Skip for width-invariant components (buttons, chips, badges,
   text fields, dots).
+
+**Feature screens** (v3): one `@GadgetPreviewLightDark` preview of the
+stateless screen content is enough. Add more only when a layout genuinely
+differs by font size, direction or width.
 
 Multi-preview annotations live in
 `core/ui/preview/GadgetPreviewMatrix.kt`.
@@ -225,7 +236,7 @@ Multi-preview annotations live in
 
 ---
 
-> _Last reviewed: 2026-06-30 · Source: `CLAUDE.md` (design-system
+> _Last reviewed: 2026-11-18 (v3 preview policy) · Source: `CLAUDE.md` (design-system
 > sections), `core/designsystem/*`, `core/ui/*`,
 > `feature/settings/.../components/AppearanceCard.kt` · Related modules:
 > `:core:designsystem`, `:core:ui`, `:core:navigation`, `:feature:settings`._

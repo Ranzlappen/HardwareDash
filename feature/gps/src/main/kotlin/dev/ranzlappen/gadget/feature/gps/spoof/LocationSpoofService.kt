@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import dev.ranzlappen.gadget.core.navigation.GadgetDestination
 import dev.ranzlappen.gadget.core.notifications.ChannelSpec
 import dev.ranzlappen.gadget.core.notifications.NotificationChannelRegistry
 import dagger.hilt.android.AndroidEntryPoint
@@ -99,6 +100,8 @@ class LocationSpoofService : Service() {
         // on it — the module can't see the app's MainActivity.
         val openIntent = (packageManager.getLaunchIntentForPackage(packageName) ?: Intent()).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            // Land on the GPS screen, where the spoof can be inspected / stopped.
+            putExtra(GadgetDestination.EXTRA_ROUTE, GadgetDestination.Gps.route)
         }
         val openPi = PendingIntent.getActivity(
             this, 0, openIntent,

@@ -29,10 +29,90 @@ package dev.ranzlappen.gadget.core.automation.model
  * backups, future APIs).
  */
 fun Rule.normalized(): Rule {
-    val t = trigger
-    if (t !is Trigger.MetricThreshold) return this
+    val rule = withUpgradedActions()
+    val t = rule.trigger
+    if (t !is Trigger.MetricThreshold) return rule
     val normalizedTrigger = t.normalizedClearValue()
-    return if (normalizedTrigger == t) this else copy(trigger = normalizedTrigger)
+    return if (normalizedTrigger == t) rule else rule.copy(trigger = normalizedTrigger)
+}
+
+/**
+ * Action keys removed in v3 (MASTER-PLAN B6). They were read-only `assert_*` /
+ * `*_check` "actions" that only returned Success/Failure — and `RuleFireExecutor`
+ * dispatches every action without looking at the result, so they never gated
+ * anything. Gating on a reading is what `Condition.MetricCompare` and
+ * `Trigger.MetricThreshold` are for.
+ *
+ * Saved rules may still list them: [withUpgradedActions] drops them on read
+ * and on save, so they never reach the builder UI or the dispatcher. Keep this
+ * set — it is the migration for rules saved (or restored from backups) before
+ * v3.
+ */
+val RetiredActionKeys: Set<String> = setOf(
+    "acceleration_assert_above",
+    "acceleration_assert_below",
+    "actuators_assert_available",
+    "ambient_assert_bright",
+    "ambient_assert_dark",
+    "assert_motion_detected",
+    "assert_motion_idle",
+    "assert_rotation_above",
+    "assert_steps_above",
+    "bt_connect_check",
+    "bugreport_assert_adb",
+    "bugreport_assert_permission",
+    "cell_assert_signal_above",
+    "cell_assert_signal_below",
+    "flipper_assert_connected",
+    "light_assert_bright",
+    "light_assert_dark",
+    "lock_assert_locked",
+    "lock_assert_secure",
+    "lock_assert_unlocked",
+    "logbook_assert_open_below",
+    "notification_assert_channel_importance",
+    "proximity_assert_far",
+    "proximity_assert_near",
+    "storage_assert_free_space",
+    "subghz_bridge_check",
+    "subghz_capable_check",
+    "wifi_connected_check",
+    "wifi_enabled_check",
+)
+
+/**
+ * Actions that moved to another feature when v3 merged modules, keyed by the
+ * old `(featureId, actionKey)`: each maps to its replacement step (whose
+ * `params` are merged under any params the old step carried).
+ *
+ * - B7a: `:feature:actuators` folded into vibration → its haptic actions are
+ *   the vibration `effect` action.
+ */
+val MovedActions: Map<Pair<String, String>, RuleAction> = mapOf(
+    ("actuators" to "actuators_haptic_click") to
+        RuleAction(featureId = "vibration", actionKey = "effect", params = mapOf("effect" to "click")),
+    ("actuators" to "actuators_haptic_heavy") to
+        RuleAction(featureId = "vibration", actionKey = "effect", params = mapOf("effect" to "heavy_click")),
+)
+
+/**
+ * [this] with v3 action migrations applied: moved actions ([MovedActions])
+ * rewritten to their new feature, retired ones ([RetiredActionKeys]) dropped.
+ * Returns the same instance when nothing changes. Applied on read
+ * (`RoomRuleRepository`) and on save ([normalized]), so saved and restored
+ * rules from v2 keep working.
+ */
+fun Rule.withUpgradedActions(): Rule {
+    val needsWork = actions.any { (it.featureId to it.actionKey) in MovedActions || it.actionKey in RetiredActionKeys }
+    if (!needsWork) return this
+    val upgraded = actions
+        .filterNot { it.actionKey in RetiredActionKeys }
+        .map { action ->
+            MovedActions[action.featureId to action.actionKey]
+                ?.let { target -> target.copy(params = target.params + action.params, requiresRoot = action.requiresRoot) }
+                ?: action
+        }
+    return copy(actions = upgraded)
 }
 
 /** [Trigger.MetricThreshold] with an invalid-side [Trigger.MetricThreshold.clearValue] nulled. */

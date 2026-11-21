@@ -20,30 +20,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Bugreport's readable signal for the monitoring framework (and, later, for
- * automation triggers): the percentage of the diagnostic permission set
- * ([BugReportState.permissions] in the screen's own `BugReportViewModel`)
- * that is currently granted — the same "N of M granted" readiness the
- * `bugreport_cap_health_*` capability row already surfaces, made chartable.
- *
- * The permission list mirrors `BugReportViewModel.buildState`'s exactly
- * (camera / microphone / fine location / phone state, plus the
- * SDK-gated Bluetooth-connect and post-notifications permissions) so the
- * metric and the screen never drift. It's duplicated rather than shared
- * because the ViewModel is `@HiltViewModel`-scoped to a screen while this
- * source is an app-`@Singleton` sampled independently of any UI being open;
- * both read the same un-privileged `PackageManager` grant state, so there is
- * no risk of disagreement, only of the two lists diverging if one is edited
- * without the other.
- *
- * `100` means every diagnostic permission is granted (the bug-report bundle
- * can capture everything it might need); a drop below `100` is exactly the
- * "action needed" moment the Health screen's warning chip already flags.
- *
- * Polled (not push): there is no OS broadcast for a permission grant/revoke
- * outside this process (the screen instead re-scans on `ON_RESUME`), so a
- * regular sample on the monitor's cadence is the only way to keep the chart
- * current.
+ * Permission readiness as a metric (`bugreport_permission_readiness`, key
+ * kept stable for saved rules and history): the percentage of a fixed
+ * diagnostic permission set — camera, microphone, fine location, phone
+ * state, plus SDK-gated Bluetooth-connect and post-notifications — that is
+ * currently granted. Since v3 B8 the screen itself shows the shared
+ * `PermissionsDashboardCard`; this source keeps its own small list so the
+ * chartable percentage stays comparable with v2 history.
  */
 @Singleton
 class BugreportMetricSource @Inject constructor(
@@ -71,11 +54,7 @@ class BugreportMetricSource @Inject constructor(
     companion object {
         const val METRIC_KEY = "bugreport_permission_readiness"
 
-        /**
-         * The same diagnostic permission set `BugReportViewModel.buildState`
-         * scans, kept in lockstep by hand (see class doc for why it isn't a
-         * shared reference).
-         */
+        /** The diagnostic permission set the percentage is computed over. */
         private fun diagnosticPermissions(): List<String> {
             val perms = mutableListOf(
                 Manifest.permission.CAMERA,

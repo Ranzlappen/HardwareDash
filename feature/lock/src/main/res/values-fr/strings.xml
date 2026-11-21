@@ -26,10 +26,6 @@
     <string name="lock_cap_biometric_unavailable">Aucune biométrie enregistrée</string>
 
     <!-- Rooted capability rows -->
-    <string name="lock_cap_rooted_active">Actif — version rootée</string>
-    <string name="lock_cap_rooted_required">Nécessite une version rootée</string>
-    <string name="lock_cap_overlay_name">Superposition de notification sur l\'écran de verrouillage</string>
-    <string name="lock_cap_overlay_detail">Affiche une fenêtre de notification d\'alerte système par-dessus l\'écran de verrouillage pour des alertes sécurisées limitées dans le temps (plafond fixe : 60 s)</string>
 
     <!-- Device-admin "lock now" (standard tier, DevicePolicyManager) -->
     <string name="lock_admin_card_title">Verrouiller l\'appareil</string>

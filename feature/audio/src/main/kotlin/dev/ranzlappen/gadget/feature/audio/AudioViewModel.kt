@@ -15,9 +15,17 @@ import dev.ranzlappen.gadget.core.ui.module.RootActionState
 import dev.ranzlappen.gadget.feature.audio.control.AudioRoutingController
 import dev.ranzlappen.gadget.feature.audio.control.AudioRoutingControllerResult
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -30,13 +38,27 @@ data class AudioRootToolsState(
 class AudioViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val recorder: AudioRecorder,
-    private val dbMeter: DbMeterMetricSource,
+    private val analyzer: MicAnalyzer,
+    private val recordings: Recordings,
+    private val player: RecordingPlayer,
     private val audioRoutingController: AudioRoutingController,
     rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AudioState(isRootedFlavor = rootCapabilityRegistry.isRootedFlavor))
     val state: StateFlow<AudioState> = _state
+
+    /**
+     * Live level + spectrum. The mic is only open while the screen collects
+     * this (lifecycle-aware) and RECORD_AUDIO is granted; it closes 2 s after
+     * the screen leaves the foreground.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val live: StateFlow<MicFrame?> = _state
+        .map { it.permissionGranted }
+        .distinctUntilChanged()
+        .flatMapLatest { granted -> if (granted) analyzer.frames() else flowOf(null) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(LIVE_STOP_TIMEOUT_MS), null)
 
     private val _rootTools = MutableStateFlow(AudioRootToolsState())
 
@@ -80,10 +102,38 @@ class AudioViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            dbMeter.stream()?.collect { db ->
-                _state.update { it.copy(currentDbLevel = db) }
+            recorder.lastSaved.filterNotNull().collect { refreshRecordings() }
+        }
+        viewModelScope.launch {
+            player.playing.collect { uri -> _state.update { it.copy(playingUri = uri) } }
+        }
+        refreshRecordings()
+    }
+
+    fun refreshRecordings() {
+        viewModelScope.launch {
+            val list = recordings.list()
+            _state.update { it.copy(recordings = list) }
+        }
+    }
+
+    fun togglePlayback(recording: Recording) = player.toggle(recording.uri)
+
+    fun deleteRecording(recording: Recording) {
+        viewModelScope.launch {
+            if (player.playing.value == recording.uri) player.stop()
+            if (recordings.delete(recording.uri)) {
+                _state.update { s -> s.copy(recordings = s.recordings - recording, error = null) }
+            } else {
+                _state.update { it.copy(error = DELETE_FAILED) }
             }
         }
+    }
+
+    fun clearError() = _state.update { it.copy(error = null) }
+
+    override fun onCleared() {
+        player.release()
     }
 
     fun checkPermission() {
@@ -108,5 +158,10 @@ class AudioViewModel @Inject constructor(
     fun stopRecording() {
         val intent = Intent(AudioRecordService.ACTION_STOP_RECORD).setPackage(context.packageName)
         context.startService(intent)
+    }
+
+    companion object {
+        private const val LIVE_STOP_TIMEOUT_MS = 2_000L
+        internal const val DELETE_FAILED = "delete_failed"
     }
 }

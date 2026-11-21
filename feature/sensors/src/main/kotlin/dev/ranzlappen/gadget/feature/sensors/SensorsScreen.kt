@@ -1,208 +1,168 @@
 package dev.ranzlappen.gadget.feature.sensors
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.DeviceThermostat
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Sensors
+import androidx.compose.material.icons.outlined.Vibration
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
-import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
-import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
-import dev.ranzlappen.gadget.core.ui.component.DashCard
-import dev.ranzlappen.gadget.core.ui.component.GadgetStatusKind
-import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
-import dev.ranzlappen.gadget.core.ui.module.ModuleCapability
-import dev.ranzlappen.gadget.core.ui.module.ModuleInfo
-import dev.ranzlappen.gadget.core.ui.module.OsCompatibility
-import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLargeFont
+import dev.ranzlappen.gadget.core.ui.component.CompactCard
+import dev.ranzlappen.gadget.core.ui.component.GadgetSecondaryButton
 import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewLightDark
-import dev.ranzlappen.gadget.core.ui.preview.GadgetPreviewRtl
 import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 
 /**
- * Hilt entry point for the Sensors feature screen: collects the live row
- * state, builds the [ModuleInfo] (per-sensor capability rows), and supplies
- * the monitor containers as a slot — keeping [SensorsScreenContent] (and its
- * previews/tests) Hilt-free, per the module blueprint (torch reference).
+ * Sensor explorer (v3 B5, MASTER-PLAN §5.2): every sensor the device
+ * reports, grouped motion / position / environment / other. Tapping one
+ * opens its live detail screen. Replaces v2's three-sensor screen and the
+ * separate Ambient and Motion modules, and brings back v1's full list and
+ * "copy readings".
  */
 @Composable
 fun SensorsScreen(
+    onOpenSensor: (index: Int) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SensorsViewModel = hiltViewModel(),
 ) {
-    // stateIn-backed flow -> collectAsState (lifecycle-runtime-compose isn't
-    // in the feature plugin's default set; see the CLAUDE.md pitfall).
-    val rows by viewModel.rows.collectAsState()
-    val isRootedFlavor = viewModel.isRootedFlavor
+    val clipboard = LocalClipboardManager.current
     SensorsScreenContent(
-        rows = rows,
-        moduleInfo = sensorsModuleInfo(rows, isRootedFlavor),
+        sensors = viewModel.sensors,
+        onOpenSensor = onOpenSensor,
+        onCopyList = { report -> clipboard.setText(AnnotatedString(report)) },
         modifier = modifier,
-        liveMonitors = {
-            rows.filter { it.available }.forEach { row ->
-                LiveMonitorContainer(
-                    metricKey = row.metricKey,
-                    title = stringResource(R.string.sensors_live_monitor_title, row.name),
-                    modifier = Modifier.fillMaxWidth(),
-                    collapseId = "sensors_live_monitor_${row.metricKey}",
-                )
-            }
-        },
-        monitors = {
-            rows.filter { it.available }.forEach { row ->
-                MonitorContainer(
-                    metricKey = row.metricKey,
-                    title = stringResource(R.string.sensors_monitor_title, row.name),
-                    modifier = Modifier.fillMaxWidth(),
-                    collapseId = "sensors_monitor_${row.metricKey}",
-                )
-            }
-        },
     )
 }
 
-/**
- * Per-sensor tri-state capability rows: green when the hardware is present
- * and streaming, red when this device simply lacks the sensor. No runtime
- * permissions — proximity / light / accelerometer are normal-protection.
- */
-@Composable
-private fun sensorsModuleInfo(rows: List<SensorRowUi>, isRootedFlavor: Boolean): ModuleInfo = ModuleInfo(
-    compatibility = OsCompatibility(minSdk = 29),
-    capabilities = rows.map { row ->
-        ModuleCapability(
-            name = row.name,
-            detail = stringResource(R.string.sensors_capability_detail_signal, row.metricKey),
-            status = {
-                if (row.available) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.sensors_capability_available),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Error,
-                        message = stringResource(R.string.sensors_capability_missing),
-                    )
-                }
-            },
-        )
-    } + listOf(
-        ModuleCapability(
-            name = stringResource(R.string.sensors_capability_high_polling),
-            detail = stringResource(R.string.sensors_capability_high_polling_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.sensors_capability_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.sensors_capability_rooted_required),
-                    )
-                }
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.sensors_capability_raw_unfiltered),
-            detail = stringResource(R.string.sensors_capability_raw_unfiltered_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.sensors_capability_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.sensors_capability_rooted_required),
-                    )
-                }
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.sensors_capability_sysfs_read),
-            detail = stringResource(R.string.sensors_capability_sysfs_read_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.sensors_capability_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.sensors_capability_rooted_required),
-                    )
-                }
-            },
-        ),
-    ),
-)
-
-/**
- * Stateless Sensors screen content: one live-readout [DashCard] per signal
- * plus the [monitors] slot (persisted history charts, supplied Hilt-free by
- * the route — the torch `monitor`-slot pattern).
- */
 @Composable
 internal fun SensorsScreenContent(
-    rows: List<SensorRowUi>,
-    moduleInfo: ModuleInfo?,
+    sensors: List<SensorInfo>,
+    onOpenSensor: (index: Int) -> Unit,
+    onCopyList: (String) -> Unit,
     modifier: Modifier = Modifier,
-    liveMonitors: @Composable () -> Unit = {},
-    monitors: @Composable () -> Unit = {},
 ) {
+    val spacing = LocalGadgetTheme.current.spacing
     ModuleScreenScaffold(
         title = stringResource(R.string.sensors_title),
         modifier = modifier,
-        moduleInfo = moduleInfo,
         functional = {
-            rows.forEach { row -> SensorReadingCard(row) }
-            liveMonitors()
-            monitors()
+            if (sensors.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.sensors_none),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                return@ModuleScreenScaffold
+            }
+            Text(
+                text = stringResource(R.string.sensors_count, sensors.size),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            SensorGroup.entries.forEach { group ->
+                val members = sensors.filter { it.kind.group == group }
+                if (members.isEmpty()) return@forEach
+                Text(
+                    text = stringResource(group.labelRes()),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
+                    members.forEach { sensor ->
+                        SensorRow(sensor = sensor, onClick = { onOpenSensor(sensor.index) })
+                    }
+                }
+            }
+            val report = sensors.joinToString(separator = "\n\n") { sensorReport(it) }
+            GadgetSecondaryButton(
+                onClick = { onCopyList(report) },
+                text = stringResource(R.string.sensors_copy_list),
+                leadingIcon = Icons.Outlined.ContentCopy,
+                modifier = Modifier.fillMaxWidth(),
+            )
         },
     )
 }
 
 @Composable
-private fun SensorReadingCard(row: SensorRowUi, modifier: Modifier = Modifier) {
-    DashCard(
-        modifier = modifier.fillMaxWidth(),
-        title = row.name,
-    ) {
-        val text = when {
-            !row.available -> stringResource(R.string.sensors_not_present)
-            row.value == null -> stringResource(R.string.sensors_value_pending)
-            else -> "${FORMAT.format(row.value)} ${row.unit}"
-        }
-        val style =
-            if (row.available && row.value != null) MaterialTheme.typography.headlineMedium
-            else MaterialTheme.typography.bodyMedium
-        Text(text = text, style = style)
-    }
+private fun SensorRow(sensor: SensorInfo, onClick: () -> Unit) {
+    val wakeUp = if (sensor.isWakeUp) " · " + stringResource(R.string.sensors_wake_up) else ""
+    CompactCard(
+        modifier = Modifier.fillMaxWidth(),
+        title = sensor.typeLabel,
+        subtitle = "${sensor.name} · ${sensor.vendor}$wakeUp",
+        leadingIcon = sensor.kind.group.icon(),
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                // Decorative: the row title names the target.
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+        onClick = onClick,
+    )
 }
 
-/** Fixed one-decimal readout; sensor magnitudes don't need more. */
-private val FORMAT = java.text.DecimalFormat("0.0")
+internal fun SensorGroup.labelRes(): Int = when (this) {
+    SensorGroup.Motion -> R.string.sensors_group_motion
+    SensorGroup.Position -> R.string.sensors_group_position
+    SensorGroup.Environment -> R.string.sensors_group_environment
+    SensorGroup.Other -> R.string.sensors_group_other
+}
+
+internal fun SensorGroup.icon(): ImageVector = when (this) {
+    SensorGroup.Motion -> Icons.Outlined.Vibration
+    SensorGroup.Position -> Icons.Outlined.Explore
+    SensorGroup.Environment -> Icons.Outlined.DeviceThermostat
+    SensorGroup.Other -> Icons.Outlined.Sensors
+}
+
+internal fun previewSensor(index: Int, type: Int, label: String, group: SensorGroup, unit: String, axes: List<String>) =
+    SensorInfo(
+        index = index,
+        type = type,
+        typeLabel = label,
+        name = "LSM6DSO $label",
+        vendor = "STMicro",
+        version = 1,
+        maxRange = 78.4f,
+        resolution = 0.0024f,
+        powerMa = 0.15f,
+        minDelayUs = 2_404,
+        isWakeUp = false,
+        reportingMode = 0,
+        kind = SensorKind(unit, axes, group),
+    )
 
 @GadgetPreviewLightDark
-@GadgetPreviewLargeFont
-@GadgetPreviewRtl
 @Composable
 private fun SensorsScreenPreview() = GadgetThemedPreview {
     SensorsScreenContent(
-        rows = listOf(
-            SensorRowUi("proximity", "Proximity", "cm", available = true, value = 4.2f),
-            SensorRowUi("light", "Ambient light", "lx", available = true, value = null),
-            SensorRowUi("acceleration", "Acceleration", "m/s²", available = false, value = null),
+        sensors = listOf(
+            previewSensor(0, 1, "Accelerometer", SensorGroup.Motion, "m/s²", listOf("X", "Y", "Z")),
+            previewSensor(1, 2, "Magnetic field", SensorGroup.Position, "µT", listOf("X", "Y", "Z")),
+            previewSensor(2, 6, "Pressure", SensorGroup.Environment, "hPa", listOf("Pressure")),
         ),
-        moduleInfo = null,
+        onOpenSensor = {},
+        onCopyList = {},
     )
 }

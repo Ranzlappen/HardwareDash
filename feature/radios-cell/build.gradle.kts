@@ -21,7 +21,6 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
     implementation(project(":core:monitoring"))
-    implementation(project(":core:automation"))
     // Runtime permission helper (READ_PHONE_STATE request flow) — same
     // dependency :feature:gps uses for ACCESS_FINE_LOCATION.
     implementation(libs.accompanist.permissions)

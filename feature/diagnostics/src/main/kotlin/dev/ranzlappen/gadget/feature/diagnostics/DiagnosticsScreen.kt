@@ -1,7 +1,11 @@
 package dev.ranzlappen.gadget.feature.diagnostics
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,9 +18,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.ranzlappen.gadget.core.designsystem.theme.LocalGadgetTheme
 import dev.ranzlappen.gadget.core.monitoring.LiveMonitorContainer
+import dev.ranzlappen.gadget.core.navigation.GadgetDestination
 import dev.ranzlappen.gadget.core.monitoring.MonitorContainer
 import dev.ranzlappen.gadget.core.ui.ModuleScreenScaffold
+import dev.ranzlappen.gadget.core.ui.component.CompactCard
 import dev.ranzlappen.gadget.core.ui.component.DashCard
 import dev.ranzlappen.gadget.core.ui.component.GadgetStatusKind
 import dev.ranzlappen.gadget.core.ui.module.CapabilityStatus
@@ -31,6 +38,7 @@ import dev.ranzlappen.gadget.core.ui.preview.GadgetThemedPreview
 @Composable
 fun DiagnosticsScreen(
     modifier: Modifier = Modifier,
+    onOpen: (GadgetDestination) -> Unit = {},
     viewModel: DiagnosticsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -40,6 +48,7 @@ fun DiagnosticsScreen(
         state = state,
         moduleInfo = diagnosticsModuleInfo(state),
         modifier = modifier,
+        links = { DeviceDebugLinks(onOpen = onOpen) },
         rootTools = {
             RootToolsSection(
                 title = stringResource(R.string.diagnostics_root_tools_title),
@@ -98,58 +107,6 @@ fun DiagnosticsScreen(
 private fun diagnosticsModuleInfo(state: DiagnosticsState): ModuleInfo = ModuleInfo(
     compatibility = OsCompatibility(minSdk = 1),
     capabilities = listOf(
-        ModuleCapability(
-            name = stringResource(R.string.diagnostics_cap_logcat_name),
-            detail = stringResource(R.string.diagnostics_cap_logcat_detail),
-            status = {
-                if (state.isRootedFlavor) CapabilityStatus(
-                    kind = GadgetStatusKind.Success,
-                    message = stringResource(R.string.diagnostics_cap_rooted_active),
-                ) else CapabilityStatus(
-                    kind = GadgetStatusKind.Warning,
-                    message = stringResource(R.string.diagnostics_cap_rooted_required),
-                )
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.diagnostics_cap_meminfo_name),
-            detail = stringResource(R.string.diagnostics_cap_meminfo_detail),
-            status = {
-                if (state.isRootedFlavor) CapabilityStatus(
-                    kind = GadgetStatusKind.Success,
-                    message = stringResource(R.string.diagnostics_cap_rooted_active),
-                ) else CapabilityStatus(
-                    kind = GadgetStatusKind.Warning,
-                    message = stringResource(R.string.diagnostics_cap_rooted_required),
-                )
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.diagnostics_cap_cpuinfo_name),
-            detail = stringResource(R.string.diagnostics_cap_cpuinfo_detail),
-            status = {
-                if (state.isRootedFlavor) CapabilityStatus(
-                    kind = GadgetStatusKind.Success,
-                    message = stringResource(R.string.diagnostics_cap_rooted_active),
-                ) else CapabilityStatus(
-                    kind = GadgetStatusKind.Warning,
-                    message = stringResource(R.string.diagnostics_cap_rooted_required),
-                )
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.diagnostics_cap_procstats_name),
-            detail = stringResource(R.string.diagnostics_cap_procstats_detail),
-            status = {
-                if (state.isRootedFlavor) CapabilityStatus(
-                    kind = GadgetStatusKind.Success,
-                    message = stringResource(R.string.diagnostics_cap_rooted_active),
-                ) else CapabilityStatus(
-                    kind = GadgetStatusKind.Warning,
-                    message = stringResource(R.string.diagnostics_cap_rooted_required),
-                )
-            },
-        ),
     ),
 )
 
@@ -158,6 +115,7 @@ internal fun DiagnosticsScreenContent(
     state: DiagnosticsState,
     moduleInfo: ModuleInfo?,
     modifier: Modifier = Modifier,
+    links: @Composable () -> Unit = {},
     rootTools: @Composable () -> Unit = {},
     monitors: @Composable () -> Unit = {},
 ) {
@@ -166,11 +124,41 @@ internal fun DiagnosticsScreenContent(
         modifier = modifier,
         moduleInfo = moduleInfo,
         functional = {
+            links()
             DiagnosticsInfoCard()
             monitors()
             rootTools()
         },
     )
+}
+
+/** The tools that used to be separate top-level entries (v3 B8). */
+@Composable
+private fun DeviceDebugLinks(onOpen: (GadgetDestination) -> Unit) {
+    val spacing = LocalGadgetTheme.current.spacing
+    Column(verticalArrangement = Arrangement.spacedBy(spacing.tiny)) {
+        listOf(
+            Triple(GadgetDestination.AdbDebug, R.string.diagnostics_link_adb, R.string.diagnostics_link_adb_detail),
+            Triple(GadgetDestination.UsbDebug, R.string.diagnostics_link_usb, R.string.diagnostics_link_usb_detail),
+            Triple(GadgetDestination.BugReport, R.string.diagnostics_link_permissions, R.string.diagnostics_link_permissions_detail),
+        ).forEach { (destination, title, detail) ->
+            CompactCard(
+                modifier = Modifier.fillMaxWidth(),
+                title = stringResource(title),
+                subtitle = stringResource(detail),
+                leadingIcon = destination.iconOutlined,
+                trailingContent = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        // Decorative: the row title names the target.
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                onClick = { onOpen(destination) },
+            )
+        }
+    }
 }
 
 @Composable

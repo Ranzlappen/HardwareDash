@@ -133,34 +133,4 @@ class NotificationActionHandlerTest {
         assertEquals(ActionResult.Success, result)
     }
 
-    @Test
-    fun `assert channel importance fails when the channel does not exist`() = runTest {
-        val notificationManager = mockk<NotificationManager>(relaxed = true) {
-            every { getNotificationChannel("missing") } returns null
-        }
-        val context = mockk<Context>(relaxed = true) {
-            every { getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
-        }
-        val handler = NotificationActionHandler(
-            context,
-            mockk<NotificationController>(relaxed = true),
-            mockk<NotificationChannelRegistry>(relaxed = true),
-        )
-
-        val result = handler.dispatch(
-            NotificationActionHandler.ACTION_ASSERT_CHANNEL_IMPORTANCE,
-            mapOf(NotificationActionHandler.PARAM_CHANNEL_ID to "missing"),
-        )
-
-        assertTrue(result is ActionResult.Failure)
-    }
-
-    @Test
-    fun `assert channel importance without a channel id fails`() = runTest {
-        val handler = newHandler(mockk<NotificationController>(relaxed = true))
-
-        val result = handler.dispatch(NotificationActionHandler.ACTION_ASSERT_CHANNEL_IMPORTANCE, emptyMap())
-
-        assertTrue(result is ActionResult.Failure)
-    }
 }

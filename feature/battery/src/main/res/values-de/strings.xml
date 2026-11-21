@@ -52,14 +52,6 @@
     <string name="battery_monitor_temp">Temperaturverlauf</string>
 
     <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
-    <string name="battery_cap_rooted_active">Aktiv — gerooteter Build</string>
-    <string name="battery_cap_rooted_required">Erfordert gerooteten Build</string>
-    <string name="battery_cap_fuel_gauge_name">Fuel-Gauge-Rohdaten</string>
-    <string name="battery_cap_fuel_gauge_detail">Direkter Sysfs-Zugriff auf den Fuel-Gauge-Chip (Ladezustand, Spannung, Stromstärke)</string>
-    <string name="battery_cap_cell_monitor_name">Zellspannungsüberwachung</string>
-    <string name="battery_cap_cell_monitor_detail">Zellspannungs-Telemetrie pro Zelle vom Fuel-Gauge-Chip</string>
-    <string name="battery_cap_charging_profile_name">Ladeprofilsteuerung</string>
-    <string name="battery_cap_charging_profile_detail">Überschreibt Ladestrom- und Spannungsgrenzwerte</string>
 
     <!-- ─── Automation actions (rooted) ──────────────────────────────── -->
     <string name="battery_action_charging_profile_override">Ladeprofil überschreiben (gerootet)</string>

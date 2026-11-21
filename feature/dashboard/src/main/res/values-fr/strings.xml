@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="dashboard_title">Tableau de bord</string>
-    <string name="dashboard_edit">Modifier le tableau de bord</string>
-    <string name="dashboard_empty">Tous les modules sont masqués. Appuyez sur « Modifier le tableau de bord » pour en afficher.</string>
+    <string name="dashboard_title">Accueil</string>
+    <string name="dashboard_edit">Modifier les outils épinglés</string>
     <string name="dashboard_reset">Réinitialiser</string>
     <string name="dashboard_move_up">Monter</string>
     <string name="dashboard_move_down">Descendre</string>
     <string name="dashboard_pin">Épingler</string>
     <string name="dashboard_unpin">Détacher</string>
+    <string name="home_status">État</string>
+    <string name="home_quick_actions">Actions rapides</string>
+    <string name="home_pinned">Outils épinglés</string>
+    <string name="home_pinned_empty">Épinglez les outils que vous utilisez le plus : ils apparaîtront ici.</string>
+    <string name="home_battery">Batterie</string>
+    <string name="home_battery_value">%1$d %% · %2$.1f °C</string>
+    <string name="home_battery_level_only">%1$d %%</string>
+    <string name="home_storage">Stockage</string>
+    <string name="home_storage_value">%1$d %% utilisé · %2$.1f Go libres</string>
+    <string name="home_wifi">Wi-Fi</string>
+    <string name="home_wifi_connected">Activé · %1$d dBm</string>
+    <string name="home_wifi_on">Activé · non connecté</string>
+    <string name="home_wifi_off">Désactivé</string>
+    <string name="home_logbook">Journal</string>
+    <string name="home_logbook_value">%1$s · %2$s</string>
+    <string name="home_logbook_empty">Aucune entrée pour l’instant</string>
+    <string name="home_torch">Lampe</string>
+    <string name="home_torch_on_cd">Allumer la lampe</string>
+    <string name="home_torch_off_cd">Éteindre la lampe</string>
+    <string name="home_buzz">Vibrer</string>
+    <string name="home_buzz_cd">Courte vibration de test</string>
 </resources>

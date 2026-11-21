@@ -1,2 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Step counter / step detector only deliver events once granted
+         (runtime permission, requested on the sensor's detail screen).
+         Moved here from :feature:motion in v3 B5. -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+</manifest>

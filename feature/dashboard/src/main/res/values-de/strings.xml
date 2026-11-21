@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="dashboard_title">Dashboard</string>
-    <string name="dashboard_edit">Dashboard bearbeiten</string>
-    <string name="dashboard_empty">Alle Module sind ausgeblendet. Tippe auf „Dashboard bearbeiten“, um welche anzuzeigen.</string>
+    <string name="dashboard_title">Start</string>
+    <string name="dashboard_edit">Angeheftete Tools bearbeiten</string>
     <string name="dashboard_reset">Auf Standard zurücksetzen</string>
     <string name="dashboard_move_up">Nach oben</string>
     <string name="dashboard_move_down">Nach unten</string>
     <string name="dashboard_pin">Anheften</string>
     <string name="dashboard_unpin">Lösen</string>
+    <string name="home_status">Status</string>
+    <string name="home_quick_actions">Schnellaktionen</string>
+    <string name="home_pinned">Angeheftete Tools</string>
+    <string name="home_pinned_empty">Hefte die Tools an, die du am meisten nutzt – sie erscheinen dann hier.</string>
+    <string name="home_battery">Akku</string>
+    <string name="home_battery_value">%1$d %% · %2$.1f °C</string>
+    <string name="home_battery_level_only">%1$d %%</string>
+    <string name="home_storage">Speicher</string>
+    <string name="home_storage_value">%1$d %% belegt · %2$.1f GB frei</string>
+    <string name="home_wifi">WLAN</string>
+    <string name="home_wifi_connected">An · %1$d dBm</string>
+    <string name="home_wifi_on">An · nicht verbunden</string>
+    <string name="home_wifi_off">Aus</string>
+    <string name="home_logbook">Logbuch</string>
+    <string name="home_logbook_value">%1$s · %2$s</string>
+    <string name="home_logbook_empty">Noch keine Einträge</string>
+    <string name="home_torch">Taschenlampe</string>
+    <string name="home_torch_on_cd">Taschenlampe einschalten</string>
+    <string name="home_torch_off_cd">Taschenlampe ausschalten</string>
+    <string name="home_buzz">Vibrieren</string>
+    <string name="home_buzz_cd">Kurze Testvibration</string>
 </resources>

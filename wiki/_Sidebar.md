@@ -2,34 +2,18 @@
 
 **Start here**
 - [Home](Home)
-- [Glossary](Glossary)
-
-**Project**
+- [MASTER-PLAN (v3)](https://github.com/Ranzlappen/HardwareDash/blob/main/MASTER-PLAN.md)
 - [Roadmap & Status](Roadmap-and-Status)
-- [Completion Master Plan](Completion-Master-Plan)
-- [Architecture](Architecture)
-- [Decision Records](Decision-Records)
 
-**Catalogs**
-- [Module Catalog](Module-Catalog)
-- [Feature Catalog](Feature-Catalog)
-- [Component Catalog](Component-Catalog)
-- [Asset Catalog](Asset-Catalog)
-
-**Design & UI**
-- [Design System](Design-System)
-- [Monitoring Framework](Monitoring-Framework)
-- [Widgets, Tiles & Surfaces](Widgets-Tiles-and-Surfaces)
-
-**Engineering**
-- [Feature Migration Guide](Feature-Migration-Guide)
+**Building**
+- [AI Collaboration](AI-Collaboration)
 - [Module Authoring Contract](Module-Authoring-Contract)
-- [Torch Blueprint](Torch-Blueprint)
+- [Design System](Design-System)
 - [Flavors & Root Safety](Flavors-and-Root-Safety)
-- [Automation Engine](Automation-Engine)
-- [Testing & CI](Testing-and-CI)
 - [Troubleshooting](Troubleshooting)
 
-**AI collaborators**
-- [AI Collaboration](AI-Collaboration)
-- [AI Prompt Library](AI-Prompt-Library)
+**Testing on a phone**
+- [v3 smoke test](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/v3-smoke-test.md)
+
+**Archive** _(v2-era reference, not maintained)_
+- [docs/wiki-archive](https://github.com/Ranzlappen/HardwareDash/tree/main/docs/wiki-archive)

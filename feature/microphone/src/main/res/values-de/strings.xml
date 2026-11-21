@@ -56,20 +56,6 @@
     <string name="microphone_result_error">Fehlgeschlagen: %s</string>
 
     <!-- ModuleInfo capabilities -->
-    <string name="microphone_cap_rooted_active">Aktiv — gerooteter Build</string>
-    <string name="microphone_cap_rooted_required">Erfordert gerooteten Build</string>
-    <string name="microphone_cap_gain_boost_name">Mikrofonverstärkung erhöhen</string>
-    <string name="microphone_cap_gain_boost_detail">Direkter ALSA-Mixer-Schreibzugriff, feste Obergrenze von +30 dB, 60-Sekunden-Limit</string>
-    <string name="microphone_cap_direct_pcm_name">Direkte PCM-Aufnahme</string>
-    <string name="microphone_cap_direct_pcm_detail">Rohaufnahme per Tinycap aus /dev/snd, unter Umgehung von AudioRecord</string>
-    <string name="microphone_cap_custom_rate_name">Benutzerdefinierte Abtastrate</string>
-    <string name="microphone_cap_custom_rate_detail">Ungewöhnliche Aufnahmeraten (z. B. Ultraschall); erfordert ausdrückliche Bestätigung</string>
-    <string name="microphone_cap_multi_mic_name">Multi-Mikrofon-Rohaufnahme</string>
-    <string name="microphone_cap_multi_mic_detail">Gleichzeitige Aufnahme von jedem verfügbaren Eingangsknoten, bis zu 3 Streams</string>
-    <string name="microphone_cap_disable_effects_name">Hardware-Effekte deaktivieren</string>
-    <string name="microphone_cap_disable_effects_detail">Setzt kurzzeitig die ALSA-Steuerungen für ANC/AGC/AEC/Beamforming auf null</string>
-    <string name="microphone_cap_system_audio_name">Systemaudio-Aufnahme</string>
-    <string name="microphone_cap_system_audio_detail">Gewährt CAPTURE_AUDIO_OUTPUT für ein begrenztes Zeitfenster; erfordert Bestätigung eines rechtlichen Hinweises</string>
 
     <!-- ─── Automation actions (MicrophoneActionHandler) ────────────────── -->
     <string name="microphone_action_disable_effects">Hardware-Rauschunterdrückung deaktivieren</string>

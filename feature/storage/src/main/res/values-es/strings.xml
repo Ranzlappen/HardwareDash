@@ -22,14 +22,6 @@
     <string name="storage_monitor_free">Historial de espacio libre</string>
 
     <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
-    <string name="storage_cap_rooted_active">Activo — compilación rooteada</string>
-    <string name="storage_cap_rooted_required">Requiere compilación rooteada</string>
-    <string name="storage_cap_diskstats_name">Volcado de diskstats</string>
-    <string name="storage_cap_diskstats_detail">Estadísticas de E/S del kernel desde /proc/diskstats (lecturas, escrituras, latencia por dispositivo de bloques)</string>
-    <string name="storage_cap_mounts_name">Enumeración de puntos de montaje</string>
-    <string name="storage_cap_mounts_detail">Tabla de montaje completa a través de /proc/mounts, incluidas particiones ocultas no visibles mediante StorageManager</string>
-    <string name="storage_cap_fstrim_name">Trim de almacenamiento (fstrim)</string>
-    <string name="storage_cap_fstrim_detail">Fuerza una operación discard en los sistemas de archivos montados para mejorar la longevidad de la SSD</string>
 
     <!-- Home-screen widget -->
     <string name="storage_widget_label">Almacenamiento</string>
@@ -37,7 +29,6 @@
     <string name="storage_widget_percent_format">%1$d %% usado</string>
     <string name="storage_widget_free_format">%1$s libres</string>
     <string name="storage_widget_unknown">—</string>
-    <string name="storage_action_assert_free_space">Comprobar que el espacio libre supera el umbral</string>
     <string name="storage_root_tools_title">Herramientas root</string>
     <string name="storage_root_tools_unavailable">Requiere la versión root de la app.</string>
     <string name="storage_root_run">Ejecutar</string>

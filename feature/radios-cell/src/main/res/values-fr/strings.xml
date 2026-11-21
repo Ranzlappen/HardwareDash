@@ -50,12 +50,6 @@
     <string name="cell_cap_signal_bars">%1$d sur 4 barres</string>
 
     <!-- Rooted capability rows -->
-    <string name="cell_cap_rooted_active">Actif — build rooté</string>
-    <string name="cell_cap_rooted_required">Nécessite un build rooté</string>
-    <string name="cell_cap_raw_modem_name">Diagnostics bruts du modem</string>
-    <string name="cell_cap_raw_modem_detail">Parcours en lecture seule des nœuds sysfs Qualcomm qcom_smd*/qmi_devices/rmnet&lt;N&gt; ; affiche proprement \"Non pris en charge\" sur les SoC non Qualcomm</string>
-    <string name="cell_cap_signal_deep_name">Vidage détaillé du signal par bande</string>
-    <string name="cell_cap_signal_deep_detail">Répartition en lecture seule RSRP/RSRQ/SINR par bande via les nœuds sysfs du fabricant, lorsqu\'ils sont présents</string>
 
     <!-- Rooted diagnostics panel -->
     <string name="cell_root_modem_dump_title">Diagnostics bruts du modem</string>

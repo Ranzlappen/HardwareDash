@@ -82,47 +82,9 @@ private fun subghzModuleInfo(state: SubghzState, isRootedFlavor: Boolean): Modul
                     }
                 },
             ),
-            rootedCapability(
-                R.string.subghz_cap_registers_name,
-                R.string.subghz_cap_registers_detail,
-                isRootedFlavor,
-            ),
-            rootedCapability(
-                R.string.subghz_cap_tuning_name,
-                R.string.subghz_cap_tuning_detail,
-                isRootedFlavor,
-            ),
-            rootedCapability(
-                R.string.subghz_cap_capture_name,
-                R.string.subghz_cap_capture_detail,
-                isRootedFlavor,
-            ),
         ),
     )
 }
-
-@Composable
-private fun rootedCapability(
-    nameRes: Int,
-    detailRes: Int,
-    isRootedFlavor: Boolean,
-): ModuleCapability = ModuleCapability(
-    name = stringResource(nameRes),
-    detail = stringResource(detailRes),
-    status = {
-        if (isRootedFlavor) {
-            CapabilityStatus(
-                kind = GadgetStatusKind.Success,
-                message = stringResource(R.string.subghz_cap_rooted_active),
-            )
-        } else {
-            CapabilityStatus(
-                kind = GadgetStatusKind.Warning,
-                message = stringResource(R.string.subghz_cap_rooted_required),
-            )
-        }
-    },
-)
 
 @Composable
 internal fun SubghzScreenContent(

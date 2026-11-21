@@ -52,14 +52,6 @@
     <string name="battery_monitor_temp">Historique de température</string>
 
     <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
-    <string name="battery_cap_rooted_active">Actif — build rooté</string>
-    <string name="battery_cap_rooted_required">Nécessite un build rooté</string>
-    <string name="battery_cap_fuel_gauge_name">Lecture brute de la jauge de batterie</string>
-    <string name="battery_cap_fuel_gauge_detail">Lecture sysfs directe de la puce de jauge de batterie (SoC, tension, courant)</string>
-    <string name="battery_cap_cell_monitor_name">Surveillance de tension par cellule</string>
-    <string name="battery_cap_cell_monitor_detail">Télémétrie de tension par cellule depuis la jauge de batterie</string>
-    <string name="battery_cap_charging_profile_name">Contrôle du profil de charge</string>
-    <string name="battery_cap_charging_profile_detail">Remplace les limites de courant de charge et de coupure de tension</string>
 
     <!-- ─── Automation actions (rooted) ──────────────────────────────── -->
     <string name="battery_action_charging_profile_override">Remplacement du profil de charge (rooté)</string>

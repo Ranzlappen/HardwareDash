@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="diagnostics_screen_title">Diagnose</string>
+    <string name="diagnostics_screen_title">Gerät &amp; Debugging</string>
 
     <!-- Memory monitor (standard MetricSource hosted on the screen) -->
     <string name="diagnostics_live_monitor_memory">Speicher in Verwendung (live)</string>
@@ -10,16 +10,6 @@
     <string name="diagnostics_info">Alle Diagnose-Snapshots laufen über die Automatisierungs-Engine. Löse sie über eine Automatisierungsregel aus oder tippe bei einer verbundenen Aktion auf „Ausführen“.</string>
 
     <!-- Capability rows -->
-    <string name="diagnostics_cap_rooted_active">Aktiv — gerootete Version</string>
-    <string name="diagnostics_cap_rooted_required">Erfordert gerootete Version</string>
-    <string name="diagnostics_cap_logcat_name">Logcat-Tail</string>
-    <string name="diagnostics_cap_logcat_detail">Erfasst die letzten 500 Zeilen von Logcat (alle Puffer, RADIO/SYSTEM automatisch geschwärzt) über adb logcat</string>
-    <string name="diagnostics_cap_meminfo_name">Speicher-Dump</string>
-    <string name="diagnostics_cap_meminfo_detail">Snapshot von dumpsys meminfo (auf 8 KB begrenzt) für die größten Speicherverbraucher</string>
-    <string name="diagnostics_cap_cpuinfo_name">CPU-Info-Dump</string>
-    <string name="diagnostics_cap_cpuinfo_detail">Snapshot von dumpsys cpuinfo (auf 8 KB begrenzt) für die CPU-Auslastung pro Prozess</string>
-    <string name="diagnostics_cap_procstats_name">Prozessstatistik-Dump</string>
-    <string name="diagnostics_cap_procstats_detail">Snapshot von dumpsys procstats für den langfristigen Verlauf von Prozessspeicher und CPU-Nutzung</string>
     <string name="diagnostics_root_tools_title">Root-Werkzeuge</string>
     <string name="diagnostics_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
     <string name="diagnostics_root_run">Ausführen</string>
@@ -29,4 +19,10 @@
     <string name="diagnostics_root_cpuinfo_detail">Schreibgeschützter dumpsys-cpuinfo-Snapshot.</string>
     <string name="diagnostics_root_procstats_label">Procstats ausgeben</string>
     <string name="diagnostics_root_procstats_detail">Schreibgeschützter dumpsys-procstats-Snapshot (3 Std.).</string>
+    <string name="diagnostics_link_adb">ADB &amp; kabelloses Debugging</string>
+    <string name="diagnostics_link_adb_detail">Debugging-Status, Netzwerk-ADB, Systemeigenschaften</string>
+    <string name="diagnostics_link_usb">USB-Debugging &amp; Funktionen</string>
+    <string name="diagnostics_link_usb_detail">USB-Modus, angeschlossene Geräte, Dumps</string>
+    <string name="diagnostics_link_permissions">Berechtigungen</string>
+    <string name="diagnostics_link_permissions_detail">Welche Berechtigungen die App hat und wofür sie nötig sind</string>
 </resources>

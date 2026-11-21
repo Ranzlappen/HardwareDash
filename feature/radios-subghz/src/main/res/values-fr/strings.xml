@@ -26,12 +26,4 @@
     <string name="subghz_cap_bridge_no_host">Aucune prise en charge USB hôte</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="subghz_cap_rooted_active">Actif — version rootée</string>
-    <string name="subghz_cap_rooted_required">Nécessite une version rootée</string>
-    <string name="subghz_cap_registers_name">Accès direct aux registres</string>
-    <string name="subghz_cap_registers_detail">Lit et écrit directement les registres radio de l\'émetteur-récepteur via le nœud de périphérique USB, en contournant le pilote en espace utilisateur</string>
-    <string name="subghz_cap_tuning_name">Réglage personnalisé de la porteuse</string>
-    <string name="subghz_cap_tuning_detail">Se règle sur une porteuse Sub-GHz explicite (p. ex. 315 / 433,92 / 868 / 915 MHz) et définit une déviation en dehors des préréglages du pilote standard</string>
-    <string name="subghz_cap_capture_name">Capture OOK / 2-FSK</string>
-    <string name="subghz_cap_capture_detail">Diffuse en continu les symboles bruts on-off-keying et 2-FSK depuis la radio pour relecture et analyse</string>
 </resources>

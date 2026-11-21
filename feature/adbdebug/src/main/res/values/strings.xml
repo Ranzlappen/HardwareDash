@@ -14,16 +14,6 @@
     <string name="adbdebug_cap_state_detail">Reads Settings.Global.ADB_ENABLED directly — no special permission required</string>
     <string name="adbdebug_cap_state_enabled">ADB debugging is enabled</string>
     <string name="adbdebug_cap_state_disabled">ADB debugging is disabled</string>
-    <string name="adbdebug_cap_toggle_name">ADB enabled toggle</string>
-    <string name="adbdebug_cap_toggle_detail">Writes settings put global adb_enabled 0|1</string>
-    <string name="adbdebug_cap_network_name">ADB over network</string>
-    <string name="adbdebug_cap_network_detail">Enables wireless ADB on an allow-listed port (5555-5599)</string>
-    <string name="adbdebug_cap_dump_name">getprop snapshot</string>
-    <string name="adbdebug_cap_dump_detail">Read-only getprop capture, tail-capped to 16 KB, with optional Logbook persistence</string>
-    <string name="adbdebug_cap_setprop_name">setprop override</string>
-    <string name="adbdebug_cap_setprop_detail">Allow-listed setprop override across 7 exact keys plus log.tag.* entries</string>
-    <string name="adbdebug_cap_rooted_active">Active — rooted build</string>
-    <string name="adbdebug_cap_rooted_required">Requires rooted build</string>
 
     <!-- Standard-tier state card -->
     <string name="adbdebug_card_state_title">ADB Debug State</string>

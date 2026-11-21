@@ -14,16 +14,6 @@
     <string name="adbdebug_cap_state_detail">Liest Settings.Global.ADB_ENABLED direkt aus — keine besondere Berechtigung erforderlich</string>
     <string name="adbdebug_cap_state_enabled">ADB-Debugging ist aktiviert</string>
     <string name="adbdebug_cap_state_disabled">ADB-Debugging ist deaktiviert</string>
-    <string name="adbdebug_cap_toggle_name">ADB-Aktivierungsschalter</string>
-    <string name="adbdebug_cap_toggle_detail">Schreibt settings put global adb_enabled 0|1</string>
-    <string name="adbdebug_cap_network_name">ADB über Netzwerk</string>
-    <string name="adbdebug_cap_network_detail">Aktiviert kabelloses ADB auf einem freigegebenen Port (5555–5599)</string>
-    <string name="adbdebug_cap_dump_name">getprop-Snapshot</string>
-    <string name="adbdebug_cap_dump_detail">Schreibgeschützte getprop-Erfassung, auf 16 KB begrenzt, mit optionaler Logbook-Speicherung</string>
-    <string name="adbdebug_cap_setprop_name">setprop-Override</string>
-    <string name="adbdebug_cap_setprop_detail">Freigegebener setprop-Override über 7 exakte Schlüssel sowie log.tag.*-Einträge</string>
-    <string name="adbdebug_cap_rooted_active">Aktiv — gerooteter Build</string>
-    <string name="adbdebug_cap_rooted_required">Erfordert gerooteten Build</string>
 
     <!-- Standard-tier state card -->
     <string name="adbdebug_card_state_title">ADB-Debugging-Status</string>

@@ -129,40 +129,7 @@ private fun adbDebugModuleInfo(state: AdbDebugState): ModuleInfo {
                     )
                 },
             ),
-            ModuleCapability(
-                name = stringResource(R.string.adbdebug_cap_toggle_name),
-                detail = stringResource(R.string.adbdebug_cap_toggle_detail),
-                status = { rootedCapabilityStatus(state.isRootedFlavor) },
-            ),
-            ModuleCapability(
-                name = stringResource(R.string.adbdebug_cap_network_name),
-                detail = stringResource(R.string.adbdebug_cap_network_detail),
-                status = { rootedCapabilityStatus(state.isRootedFlavor) },
-            ),
-            ModuleCapability(
-                name = stringResource(R.string.adbdebug_cap_dump_name),
-                detail = stringResource(R.string.adbdebug_cap_dump_detail),
-                status = { rootedCapabilityStatus(state.isRootedFlavor) },
-            ),
-            ModuleCapability(
-                name = stringResource(R.string.adbdebug_cap_setprop_name),
-                detail = stringResource(R.string.adbdebug_cap_setprop_detail),
-                status = { rootedCapabilityStatus(state.isRootedFlavor) },
-            ),
         ),
-    )
-}
-
-@Composable
-private fun rootedCapabilityStatus(isRootedFlavor: Boolean): CapabilityStatus = if (isRootedFlavor) {
-    CapabilityStatus(
-        kind = GadgetStatusKind.Success,
-        message = stringResource(R.string.adbdebug_cap_rooted_active),
-    )
-} else {
-    CapabilityStatus(
-        kind = GadgetStatusKind.Warning,
-        message = stringResource(R.string.adbdebug_cap_rooted_required),
     )
 }
 

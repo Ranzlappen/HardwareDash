@@ -46,16 +46,6 @@
     <string name="usbdebug_cap_debug_state_detail">Liest Settings.Global.ADB_ENABLED aus — die einzige Systemeinstellung, die sowohl \"USB-Debugging\" als auch dem ADB-Zugriff zugrunde liegt</string>
     <string name="usbdebug_cap_debug_state_enabled">Aktiviert</string>
     <string name="usbdebug_cap_debug_state_disabled">Deaktiviert</string>
-    <string name="usbdebug_cap_function_switch_name">USB-Funktionsrollenwechsel</string>
-    <string name="usbdebug_cap_function_switch_detail">Legt die USB-Gadget-Funktion (MTP, PTP, RNDIS, …) über cmd usb set-functions fest</string>
-    <string name="usbdebug_cap_dump_usb_name">USB-Dump</string>
-    <string name="usbdebug_cap_dump_usb_detail">Schreibgeschützter dumpsys-usb-Snapshot, auf 8 KB begrenzt</string>
-    <string name="usbdebug_cap_dump_serial_name">Serial-Dienst-Dump</string>
-    <string name="usbdebug_cap_dump_serial_detail">Schreibgeschützter dumpsys-SerialService-Snapshot (ab API 30, sonst Rückgriff auf dumpsys serial)</string>
-    <string name="usbdebug_cap_dump_debugfs_name">USB-Geräte-Dump (debugfs)</string>
-    <string name="usbdebug_cap_dump_debugfs_detail">Schreibgeschützter Snapshot von /sys/kernel/debug/usb/devices, Rückgriff auf dumpsys usb, falls debugfs nicht eingebunden ist</string>
-    <string name="usbdebug_cap_rooted_active">Aktiv — gerooteter Build</string>
-    <string name="usbdebug_cap_rooted_required">Erfordert gerooteten Build</string>
 
     <!-- Automation action labels -->
     <string name="usbdebug_action_switch_function">USB-Funktionsrolle wechseln</string>

@@ -1,35 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="audio_capability_mic">Microphone</string>
-    <string name="audio_capability_mic_detail">dB metering and WAV recording</string>
     <string name="audio_permission_card_title">Permission Required</string>
     <string name="audio_permission_body">Microphone access is needed to measure sound levels and record audio.</string>
     <string name="audio_permission_grant">Grant permission</string>
-    <string name="audio_db_meter_card_title">dB Meter</string>
-    <string name="audio_db_level">Sound level</string>
     <string name="audio_db_unit">dB</string>
     <string name="audio_monitor_title">dB meter history</string>
     <string name="audio_record_card_title">Voice Recording</string>
     <string name="audio_record_start">Start Recording</string>
     <string name="audio_record_stop">Stop</string>
-    <string name="audio_record_saved">Saved to Music folder</string>
     <string name="audio_record_share">Share</string>
-    <string name="audio_record_idle">Tap to start recording</string>
     <string name="audio_notification_channel">Audio recording</string>
     <string name="audio_notification_title">Recording audio</string>
     <string name="audio_notification_text">Tap to open Gadget</string>
     <string name="audio_notification_stop">Stop recording</string>
     <string name="audio_capability_available">Recording available</string>
     <string name="audio_capability_permission_required">Permission required</string>
-    <string name="audio_live_monitor_title">dB meter — live</string>
-    <string name="audio_capability_rooted_active">Active — rooted build</string>
-    <string name="audio_capability_rooted_required">Requires rooted build</string>
-    <string name="audio_capability_gain_boost">Mic gain boost</string>
-    <string name="audio_capability_gain_boost_detail">Override hardware gain register beyond OS limits</string>
-    <string name="audio_capability_direct_pcm">Direct PCM capture</string>
-    <string name="audio_capability_direct_pcm_detail">Bypass AudioRecord stack for raw kernel capture</string>
-    <string name="audio_capability_custom_sample_rate">Custom sample rate</string>
-    <string name="audio_capability_custom_sample_rate_detail">Request non-standard capture rates (e.g. 96 kHz)</string>
 
     <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
     <string name="audio_root_tools_title">Rooted tools</string>
@@ -37,4 +23,25 @@
     <string name="audio_root_run">Run</string>
     <string name="audio_root_policy_label">Dump audio policy</string>
     <string name="audio_root_policy_detail">Read-only cmd audio dump snapshot.</string>
+    <string name="audio_root_mic_tools_label">Advanced microphone tools</string>
+    <string name="audio_root_mic_tools_detail">Gain boost, raw PCM, custom sample rates, multi-mic and system-audio capture. Experimental — not yet verified on a device.</string>
+    <string name="audio_root_open">Open</string>
+
+    <!-- ─── v3 B10: spectrum + recordings ─────────────────────────────── -->
+    <string name="audio_capability_mic_detail">Level meter, live spectrum and WAV recording</string>
+    <string name="audio_spectrum_title">Level &amp; spectrum</string>
+    <string name="audio_spectrum_peak">Peak %1$s</string>
+    <string name="audio_spectrum_listening">Listening…</string>
+    <string name="audio_record_idle">Saved as WAV to Music/Gadget</string>
+    <string name="audio_record_elapsed">Recording · %1$s</string>
+    <string name="audio_recordings_title">Recordings</string>
+    <string name="audio_recordings_empty">No recordings yet</string>
+    <string name="audio_recording_meta">%1$s · %2$s</string>
+    <string name="audio_recording_play">Play</string>
+    <string name="audio_recording_stop_playback">Stop playback</string>
+    <string name="audio_recording_delete">Delete</string>
+    <string name="audio_recording_delete_title">Delete recording?</string>
+    <string name="audio_recording_delete_body">%1$s will be removed from Music/Gadget.</string>
+    <string name="audio_recording_delete_failed">Couldn\'t delete — the file belongs to another app.</string>
+    <string name="audio_cancel">Cancel</string>
 </resources>

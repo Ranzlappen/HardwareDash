@@ -50,12 +50,6 @@
     <string name="cell_cap_signal_bars">%1$d de 4 barras</string>
 
     <!-- Rooted capability rows -->
-    <string name="cell_cap_rooted_active">Activo: compilación rooteada</string>
-    <string name="cell_cap_rooted_required">Requiere compilación rooteada</string>
-    <string name="cell_cap_raw_modem_name">Diagnóstico sin procesar del módem</string>
-    <string name="cell_cap_raw_modem_detail">Recorrido de solo lectura de los nodos sysfs qcom_smd*/qmi_devices/rmnet&lt;N&gt; de Qualcomm; muestra \"No compatible\" claramente en SoC que no son Qualcomm</string>
-    <string name="cell_cap_signal_deep_name">Volcado detallado de señal por banda</string>
-    <string name="cell_cap_signal_deep_detail">Desglose de solo lectura de RSRP/RSRQ/SINR por banda mediante nodos sysfs del fabricante, cuando están presentes</string>
 
     <!-- Rooted diagnostics panel -->
     <string name="cell_root_modem_dump_title">Diagnóstico sin procesar del módem</string>

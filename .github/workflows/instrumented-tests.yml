@@ -31,7 +31,7 @@ name: Instrumented Tests
 #   * :feature:microphone      — extreme mic tools screen
 #   * :feature:adbdebug        — ADB-debug status screen
 #   * :feature:radios-cell     — cellular radio screen
-#   * :feature:bugreport       — bug-report capture screen
+#   (:feature:bugreport now renders the shared PermissionsDashboardCard — no own test)
 #   * :feature:flipper         — flipper tools screen
 #   * :feature:radios-subghz   — sub-GHz radio screen
 # Only :app declares product flavors, so these modules use the unqualified
@@ -150,7 +150,7 @@ jobs:
           # Single line: android-emulator-runner's `script` input does not
           # reliably honor backslash-newline continuations (the `\` leaks
           # through as a literal Gradle task → "Task '\' not found").
-          script: ./gradlew :core:ui:connectedDebugAndroidTest :core:data:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest :feature:apps:connectedDebugAndroidTest :feature:sensors:connectedDebugAndroidTest :feature:automation-ui:connectedDebugAndroidTest :feature:battery:connectedDebugAndroidTest :feature:storage:connectedDebugAndroidTest :feature:dashboard:connectedDebugAndroidTest :feature:notification:connectedDebugAndroidTest :feature:usbdebug:connectedDebugAndroidTest :feature:microphone:connectedDebugAndroidTest :feature:adbdebug:connectedDebugAndroidTest :feature:radios-cell:connectedDebugAndroidTest :feature:bugreport:connectedDebugAndroidTest :feature:flipper:connectedDebugAndroidTest :feature:radios-subghz:connectedDebugAndroidTest --stacktrace
+          script: ./gradlew :core:ui:connectedDebugAndroidTest :core:data:connectedDebugAndroidTest :feature:torch:connectedDebugAndroidTest :feature:vibration:connectedDebugAndroidTest :feature:apps:connectedDebugAndroidTest :feature:sensors:connectedDebugAndroidTest :feature:automation-ui:connectedDebugAndroidTest :feature:battery:connectedDebugAndroidTest :feature:storage:connectedDebugAndroidTest :feature:dashboard:connectedDebugAndroidTest :feature:notification:connectedDebugAndroidTest :feature:usbdebug:connectedDebugAndroidTest :feature:microphone:connectedDebugAndroidTest :feature:adbdebug:connectedDebugAndroidTest :feature:radios-cell:connectedDebugAndroidTest :feature:flipper:connectedDebugAndroidTest :feature:radios-subghz:connectedDebugAndroidTest --stacktrace
 
       - name: Upload test reports
         if: always()

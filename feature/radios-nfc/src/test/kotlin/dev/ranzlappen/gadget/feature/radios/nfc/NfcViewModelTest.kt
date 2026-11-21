@@ -1,26 +1,32 @@
 package dev.ranzlappen.gadget.feature.radios.nfc
 
-import android.content.Intent
 import android.net.Uri
 import android.nfc.NdefMessage
 import android.nfc.NdefRecord
-import android.nfc.NfcAdapter
 import android.nfc.Tag
-import android.os.Parcelable
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
 import dev.ranzlappen.gadget.feature.radios.nfc.hce.NfcHceState
+import dev.ranzlappen.gadget.feature.radios.nfc.tag.NfcTagInbox
+import dev.ranzlappen.gadget.feature.radios.nfc.tag.NfcTagInfo
+import dev.ranzlappen.gadget.feature.radios.nfc.tag.NfcTagIo
+import dev.ranzlappen.gadget.feature.radios.nfc.tag.NfcWriteMode
+import dev.ranzlappen.gadget.feature.radios.nfc.tag.NfcWriteOutcome
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplate
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplateRepository
-import io.mockk.anyConstructed
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
@@ -35,9 +41,9 @@ import kotlin.test.assertTrue
  *  - seeding [NfcState] from [NfcAdapterWrapper] / [NfcTemplateRepository] /
  *    [RootCapabilityRegistry] at construction, and [NfcViewModel.refresh]'s
  *    re-read,
- *  - [NfcViewModel.onNewIntent]'s tag/NDEF-record parsing (hex tag id,
- *    tech-list join, and the well-known-text / well-known-uri / mime-media /
- *    fallback-hex branches of the private `parseNdefRecord`),
+ *  - [NfcViewModel.onTag]: read via [NfcTagIo], tags handed over by
+ *    [NfcTagInbox], and the armed-write flow (v3 B11; record decoding itself
+ *    is pure and covered by `NfcParsingTest`),
  *  - [NfcViewModel.activateHce] / [NfcViewModel.applyTemplate]'s NDEF-mode
  *    branching and [NfcViewModel.clearHce], and
  *  - the template-picker open/select/set-value/close flow.
@@ -48,10 +54,8 @@ import kotlin.test.assertTrue
  * `NdefRecord.createTextRecord` / `createUri`, `Uri.parse` and the
  * `NdefMessage` constructor are intercepted via `mockkStatic` /
  * `mockkConstructor` — the same technique `NfcActionHandlerTest` uses — for
- * the outgoing (`activateHce` / `applyTemplate`) NDEF-encoding path. The
- * incoming (`onNewIntent`) parsing path instead stubs plain `mockk<Tag>()` /
- * `mockk<NdefMessage>()` / `mockk<NdefRecord>()` instances, since it only
- * reads their properties — it never constructs one itself.
+ * the outgoing NDEF-encoding paths (HCE and tag writes); tags are opaque
+ * `mockk<Tag>()` handed to a mocked [NfcTagIo].
  */
 class NfcViewModelTest {
 
@@ -61,6 +65,9 @@ class NfcViewModelTest {
     private val templateRepository = mockk<NfcTemplateRepository>()
     private val nfcController = mockk<NfcController>(relaxed = true)
     private val hceState = NfcHceState()
+    private val tagIo = mockk<NfcTagIo>()
+    private val tagInbox = NfcTagInbox()
+    private val tagInfo = NfcTagInfo(uid = "04:A1", techs = listOf("NfcA", "Ndef"), chip = "NTAG215")
 
     private val outgoingRecord = mockk<NdefRecord>()
     private val parsedUri = mockk<Uri>()
@@ -79,6 +86,8 @@ class NfcViewModelTest {
         every { NdefRecord.createTextRecord(any(), any()) } returns outgoingRecord
         every { Uri.parse(any()) } returns parsedUri
         every { NdefRecord.createUri(any<Uri>()) } returns outgoingRecord
+        every { NdefRecord.createUri(any<String>()) } returns outgoingRecord
+        coEvery { tagIo.read(any()) } returns tagInfo
         every { anyConstructed<NdefMessage>().toByteArray() } returns byteArrayOf(0x09, 0x09, 0x09)
     }
 
@@ -95,21 +104,7 @@ class NfcViewModelTest {
     }
 
     private fun createViewModel(isRootedFlavor: Boolean = false): NfcViewModel =
-        NfcViewModel(adapter, hceState, templateRepository, nfcController, rootRegistry(isRootedFlavor))
-
-    private fun mockTag(idBytes: ByteArray, techs: List<String>): Tag {
-        val tag = mockk<Tag>()
-        every { tag.id } returns idBytes
-        every { tag.techList } returns techs.toTypedArray()
-        return tag
-    }
-
-    private fun mockIntent(tag: Tag?, ndefMessages: Array<Parcelable>?): Intent {
-        val intent = mockk<Intent>()
-        every { intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) } returns tag
-        every { intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES) } returns ndefMessages
-        return intent
-    }
+        NfcViewModel(adapter, hceState, templateRepository, nfcController, tagIo, tagInbox, rootRegistry(isRootedFlavor))
 
     private fun template(mode: String, template: String) = NfcTemplate(
         id = "1",
@@ -154,100 +149,74 @@ class NfcViewModelTest {
         assertFalse(state.adapterEnabled)
     }
 
-    // ---- onNewIntent ----
+    // ---- tag read / write (v3 B11) ----
 
     @Test
-    fun `onNewIntent is a no-op when the intent carries no tag extra`() {
+    fun `onTag reads the tag and shows it`() = runTest(dispatcher) {
         val viewModel = createViewModel()
-        val before = viewModel.state.value
+        val tag = mockk<Tag>()
 
-        viewModel.onNewIntent(mockIntent(tag = null, ndefMessages = null))
+        viewModel.onTag(tag)
+        advanceUntilIdle()
 
-        assertEquals(before, viewModel.state.value)
+        assertEquals(tagInfo, viewModel.state.value.tag)
+        assertFalse(viewModel.state.value.readingTag)
+        coVerify(exactly = 0) { tagIo.write(any(), any()) }
     }
 
     @Test
-    fun `onNewIntent records the hex tag id and joined tech list with no NDEF payload`() {
+    fun `a tag offered to the inbox is read and consumed`() = runTest(dispatcher) {
         val viewModel = createViewModel()
-        val tag = mockTag(
-            idBytes = byteArrayOf(0x04, 0xAB.toByte(), 0x12),
-            techs = listOf("android.nfc.tech.NfcA", "android.nfc.tech.Ndef"),
-        )
+        tagInbox.offer(mockk())
 
-        viewModel.onNewIntent(mockIntent(tag = tag, ndefMessages = null))
+        advanceUntilIdle()
 
-        val state = viewModel.state.value
-        assertEquals("04AB12", state.lastTagId)
-        assertEquals("NfcA, Ndef", state.lastTagFormat)
-        assertNull(state.lastTagPayload)
+        assertEquals(tagInfo, viewModel.state.value.tag)
+        assertTrue(tagInbox.incoming.replayCache.isEmpty())
     }
 
     @Test
-    fun `onNewIntent parses a well-known text NDEF record`() {
+    fun `armWrite is ignored while the write text is blank`() {
         val viewModel = createViewModel()
-        val tag = mockTag(byteArrayOf(0x01), listOf("android.nfc.tech.Ndef"))
-        val payload = byteArrayOf(2) + "en".toByteArray() + "Hello".toByteArray()
-        val record = mockk<NdefRecord>()
-        every { record.tnf } returns NdefRecord.TNF_WELL_KNOWN
-        every { record.type } returns NdefRecord.RTD_TEXT
-        every { record.payload } returns payload
-        val message = mockk<NdefMessage>()
-        every { message.records } returns arrayOf(record)
 
-        viewModel.onNewIntent(mockIntent(tag = tag, ndefMessages = arrayOf<Parcelable>(message)))
+        viewModel.armWrite()
 
-        assertEquals("Hello", viewModel.state.value.lastTagPayload)
+        assertFalse(viewModel.state.value.writeArmed)
     }
 
     @Test
-    fun `onNewIntent parses a well-known uri NDEF record`() {
+    fun `an armed write writes the next tag, disarms and reads it back`() = runTest(dispatcher) {
+        val tag = mockk<Tag>()
+        coEvery { tagIo.write(tag, any()) } returns NfcWriteOutcome.Written(12, formatted = false)
         val viewModel = createViewModel()
-        val tag = mockTag(byteArrayOf(0x01), listOf("android.nfc.tech.Ndef"))
-        val record = mockk<NdefRecord>()
-        every { record.tnf } returns NdefRecord.TNF_WELL_KNOWN
-        every { record.type } returns NdefRecord.RTD_URI
-        val incomingUri = mockk<Uri>()
-        every { incomingUri.toString() } returns "https://example.com"
-        every { record.toUri() } returns incomingUri
-        val message = mockk<NdefMessage>()
-        every { message.records } returns arrayOf(record)
+        viewModel.setWriteMode(NfcWriteMode.Url)
+        viewModel.setWriteText("example.com")
+        viewModel.armWrite()
+        assertTrue(viewModel.state.value.writeArmed)
 
-        viewModel.onNewIntent(mockIntent(tag = tag, ndefMessages = arrayOf<Parcelable>(message)))
+        viewModel.onTag(tag)
+        advanceUntilIdle()
 
-        assertEquals("https://example.com", viewModel.state.value.lastTagPayload)
+        coVerify { tagIo.write(tag, any()) }
+        coVerify { tagIo.read(tag) }
+        verify { NdefRecord.createUri("https://example.com") }
+        assertFalse(viewModel.state.value.writeArmed)
+        assertEquals(NfcWriteOutcome.Written(12, formatted = false), viewModel.state.value.writeOutcome)
     }
 
     @Test
-    fun `onNewIntent parses a mime-media NDEF record as UTF-8 text`() {
+    fun `cancelWrite disarms without writing`() = runTest(dispatcher) {
         val viewModel = createViewModel()
-        val tag = mockTag(byteArrayOf(0x01), listOf("android.nfc.tech.Ndef"))
-        val record = mockk<NdefRecord>()
-        every { record.tnf } returns NdefRecord.TNF_MIME_MEDIA
-        every { record.payload } returns "image data".toByteArray()
-        val message = mockk<NdefMessage>()
-        every { message.records } returns arrayOf(record)
+        viewModel.setWriteText("hello")
+        viewModel.armWrite()
+        viewModel.cancelWrite()
 
-        viewModel.onNewIntent(mockIntent(tag = tag, ndefMessages = arrayOf<Parcelable>(message)))
+        viewModel.onTag(mockk())
+        advanceUntilIdle()
 
-        assertEquals("image data", viewModel.state.value.lastTagPayload)
+        coVerify(exactly = 0) { tagIo.write(any(), any()) }
+        assertNull(viewModel.state.value.writeOutcome)
     }
-
-    @Test
-    fun `onNewIntent falls back to a hex dump for any other record type`() {
-        val viewModel = createViewModel()
-        val tag = mockTag(byteArrayOf(0x01), listOf("android.nfc.tech.Ndef"))
-        val record = mockk<NdefRecord>()
-        every { record.tnf } returns NdefRecord.TNF_UNKNOWN
-        every { record.payload } returns byteArrayOf(0xDE.toByte(), 0xAD.toByte())
-        val message = mockk<NdefMessage>()
-        every { message.records } returns arrayOf(record)
-
-        viewModel.onNewIntent(mockIntent(tag = tag, ndefMessages = arrayOf<Parcelable>(message)))
-
-        assertEquals("DEAD", viewModel.state.value.lastTagPayload)
-    }
-
-    // ---- activateHce ----
 
     @Test
     fun `activateHce TEXT mode builds a text NDEF payload and updates hceMode`() {

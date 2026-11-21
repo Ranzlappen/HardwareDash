@@ -10,13 +10,11 @@ import androidx.compose.material.icons.filled.Brightness6
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.DeveloperMode
-import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Help
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Memory
@@ -30,10 +28,10 @@ import androidx.compose.material.icons.filled.SettingsInputAntenna
 import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.BatteryFull
@@ -43,13 +41,11 @@ import androidx.compose.material.icons.outlined.Brightness6
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DeveloperMode
-import androidx.compose.material.icons.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.HealthAndSafety
 import androidx.compose.material.icons.outlined.Help
-import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Memory
@@ -63,10 +59,10 @@ import androidx.compose.material.icons.outlined.SettingsInputAntenna
 import androidx.compose.material.icons.outlined.SettingsRemote
 import androidx.compose.material.icons.outlined.SignalCellularAlt
 import androidx.compose.material.icons.outlined.Storage
-import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Usb
 import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -115,19 +111,6 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.Sensors
     }
 
-    /**
-     * Motion feature module — gyroscope, step counter, and motion-detect
-     * sensors. A first-class entry in the scrollable [modules] region.
-     * Ships monitoring ([RotationRateMetricSource], [StepCounterMetricSource],
-     * [MotionDetectedMetricSource]) ready; read-only sensors, no ActionHandler
-     * needed.
-     */
-    data object Motion : GadgetDestination {
-        override val route = "motion"
-        override val label = "Motion"
-        override val iconFilled = Icons.Filled.DirectionsRun
-        override val iconOutlined = Icons.Outlined.DirectionsRun
-    }
 
     /**
      * Audio feature module — live microphone dB meter and WAV voice
@@ -140,13 +123,6 @@ sealed interface GadgetDestination {
         override val label = "Audio"
         override val iconFilled = Icons.Filled.Mic
         override val iconOutlined = Icons.Outlined.Mic
-    }
-
-    data object Actuators : GadgetDestination {
-        override val route = "actuators"
-        override val label = "Actuators"
-        override val iconFilled = Icons.Filled.Tune
-        override val iconOutlined = Icons.Outlined.Tune
     }
 
     data object Automation : GadgetDestination {
@@ -355,16 +331,6 @@ sealed interface GadgetDestination {
         override val iconOutlined = Icons.Outlined.Memory
     }
 
-    /**
-     * Ambient light feature module — live lux reading from the device's
-     * light sensor, with level descriptors and monitoring support.
-     */
-    data object Ambient : GadgetDestination {
-        override val route = "ambient"
-        override val label = "Ambient"
-        override val iconFilled = Icons.Filled.LightMode
-        override val iconOutlined = Icons.Outlined.LightMode
-    }
 
     /**
      * Lock / Security feature module — keyguard lock state, screen-lock
@@ -381,9 +347,11 @@ sealed interface GadgetDestination {
      * Diagnostics feature module — capability overview for rooted diagnostic
      * shell dumps (logcat, meminfo, cpuinfo, procstats) via the automation engine.
      */
+    // v3 (B8): the "Device & debug" home — links to ADB, USB and permission
+    // health (routed under `diagnostics/`), plus memory and rooted dumps.
     data object Diagnostics : GadgetDestination {
         override val route = "diagnostics"
-        override val label = "Diagnostics"
+        override val label = "Device & debug"
         override val iconFilled = Icons.Filled.Analytics
         override val iconOutlined = Icons.Outlined.Analytics
     }
@@ -416,8 +384,9 @@ sealed interface GadgetDestination {
      * `:feature:adbdebug-rooted`) — this screen never branches on
      * `BuildConfig.IS_ROOTED`.
      */
+    // v3 (B8): opened from Device & debug; not a top-level tool.
     data object AdbDebug : GadgetDestination {
-        override val route = "adb_debug"
+        override val route = "diagnostics/adb"
         override val label = "ADB Debug"
         override val iconFilled = Icons.Filled.DeveloperMode
         override val iconOutlined = Icons.Outlined.DeveloperMode
@@ -430,9 +399,13 @@ sealed interface GadgetDestination {
      * hardware effect override, system-audio capture). Distinct from [Audio]:
      * baseline mic capture (the dB meter / voice recorder) stays on that
      * route; every row here is disabled on the standard flavor.
+     *
+     * v3 (B7b): no longer a top-level tool — opened from the Audio screen's
+     * rooted-tools section, and routed under `audio/` so the shell keeps the
+     * Tools section selected. Not in [modules] (not pinnable).
      */
     data object Microphone : GadgetDestination {
-        override val route = "microphone"
+        override val route = "audio/microphone"
         override val label = "Mic Tools"
         override val iconFilled = Icons.Filled.GraphicEq
         override val iconOutlined = Icons.Outlined.GraphicEq
@@ -466,8 +439,9 @@ sealed interface GadgetDestination {
      * `RootBindings` (standard no-op / rooted impl in `:feature:usbdebug-rooted`)
      * — this screen never branches on `BuildConfig.IS_ROOTED`.
      */
+    // v3 (B8): opened from Device & debug; not a top-level tool.
     data object UsbDebug : GadgetDestination {
-        override val route = "usb_debug"
+        override val route = "diagnostics/usb"
         override val label = "USB Debug"
         override val iconFilled = Icons.Filled.Usb
         override val iconOutlined = Icons.Outlined.Usb
@@ -477,9 +451,10 @@ sealed interface GadgetDestination {
      * Health / BugReport feature module — scans all runtime permission grant
      * states and surfaces missing permissions. No runtime requests are triggered.
      */
+    // v3 (B8): opened from Device & debug; not a top-level tool.
     data object BugReport : GadgetDestination {
-        override val route = "bugreport"
-        override val label = "Health"
+        override val route = "diagnostics/permissions"
+        override val label = "Permission health"
         override val iconFilled = Icons.Filled.HealthAndSafety
         override val iconOutlined = Icons.Outlined.HealthAndSafety
     }
@@ -509,6 +484,18 @@ sealed interface GadgetDestination {
         override val label = "Logbook"
         override val iconFilled = Icons.Filled.Checklist
         override val iconOutlined = Icons.Outlined.Checklist
+    }
+
+    /**
+     * Files — metadata / EXIF viewer (v3 B12). A file picked through the
+     * system picker: name, size, type, dates, image EXIF (editable, incl.
+     * removing the location) and audio/video metadata. Standard-flavor only.
+     */
+    data object Files : GadgetDestination {
+        override val route = "files"
+        override val label = "Files"
+        override val iconFilled = Icons.Filled.FolderOpen
+        override val iconOutlined = Icons.Outlined.FolderOpen
     }
 
     /**
@@ -542,16 +529,15 @@ sealed interface GadgetDestination {
          *
          * Real modules replace the abstract placeholder areas as they
          * land: [Torch], [Vibration], [Apps], [Sensors], and
-         * [Automation] (the rules list + builder) are live;
-         * [Actuators] remains a coming-soon placeholder until its
-         * feature module ships. Append new / legacy-migrated modules
-         * here.
+         * [Automation] (the rules list + builder) are live.
+         * Append new modules here and to one `GadgetSection`.
          */
         val modules: List<GadgetDestination> = listOf(
             Torch, Vibration, Apps, Sensors,
             Battery, Gps, Storage, RadiosIr, Camera,
-            Motion, Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosCell, RadiosSubghz, Flipper,
-            Ambient, Lock, Actuators, Youtubedownloader, Diagnostics, Display, Microphone, Notification, UsbDebug, AdbDebug, BugReport, Manual, Logbook, Automation,
+            Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosCell, RadiosSubghz, Flipper,
+            Lock, Youtubedownloader, Diagnostics, Display, Notification, Manual, Logbook, Automation,
+            Files,
         )
 
         /**

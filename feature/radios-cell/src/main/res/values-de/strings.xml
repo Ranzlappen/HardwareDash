@@ -50,12 +50,6 @@
     <string name="cell_cap_signal_bars">%1$d von 4 Balken</string>
 
     <!-- Rooted capability rows -->
-    <string name="cell_cap_rooted_active">Aktiv — gerooteter Build</string>
-    <string name="cell_cap_rooted_required">Erfordert gerooteten Build</string>
-    <string name="cell_cap_raw_modem_name">Raw-Modem-Diagnose</string>
-    <string name="cell_cap_raw_modem_detail">Schreibgeschützter Durchlauf der Qualcomm-qcom_smd*/qmi_devices/rmnet&lt;N&gt;-sysfs-Knoten; zeigt auf Nicht-Qualcomm-SoCs sauber \"Nicht unterstützt\" an</string>
-    <string name="cell_cap_signal_deep_name">Signal-Detailauswertung pro Band</string>
-    <string name="cell_cap_signal_deep_detail">Schreibgeschützte RSRP/RSRQ/SINR-Aufschlüsselung pro Band über Hersteller-sysfs-Knoten, sofern vorhanden</string>
 
     <!-- Rooted diagnostics panel -->
     <string name="cell_root_modem_dump_title">Raw-Modem-Diagnose</string>

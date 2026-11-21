@@ -28,7 +28,6 @@ class FlipperActionHandler @Inject constructor(
     override val featureId: String = FEATURE_ID
 
     override val actions: List<ModuleAction> = listOf(
-        ModuleAction(key = ACTION_ASSERT_CONNECTED, label = "Assert Flipper connected"),
         ModuleAction(key = ACTION_PING, label = "Ping the Flipper"),
         ModuleAction(
             key = ACTION_TRANSMIT_SUBGHZ,
@@ -44,10 +43,6 @@ class FlipperActionHandler @Inject constructor(
 
     override suspend fun dispatch(actionKey: String, params: Map<String, String>): ActionResult {
         return when (actionKey) {
-            ACTION_ASSERT_CONNECTED -> {
-                if (manager.state.value is FlipperConnectionManager.State.Connected) ActionResult.Success
-                else ActionResult.Failure("No Flipper connected")
-            }
             ACTION_PING -> {
                 val system = manager.system ?: return ActionResult.Failure("No Flipper connected")
                 if (runCatching { system.ping() }.getOrDefault(false)) ActionResult.Success
@@ -77,7 +72,6 @@ class FlipperActionHandler @Inject constructor(
 
     companion object {
         const val FEATURE_ID = "flipper"
-        const val ACTION_ASSERT_CONNECTED = "flipper_assert_connected"
         const val ACTION_PING = "flipper_ping"
         const val ACTION_TRANSMIT_SUBGHZ = "flipper_transmit_subghz"
         const val ACTION_TRANSMIT_IR = "flipper_transmit_ir"

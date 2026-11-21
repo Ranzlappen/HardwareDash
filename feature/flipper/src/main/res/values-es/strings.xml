@@ -36,8 +36,4 @@
     <string name="flipper_cap_ble_detail">Se comunica con un Flipper Zero vinculado a través de su servicio serie Bluetooth Nordic-UART</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="flipper_cap_rooted_active">Activo — compilación rooteada</string>
-    <string name="flipper_cap_rooted_required">Requiere compilación rooteada</string>
-    <string name="flipper_cap_usb_grant_name">Concesión automática de USB root</string>
-    <string name="flipper_cap_usb_grant_detail">Concede acceso al dispositivo USB mediante appops root, de modo que el Flipper se conecte sin el cuadro de diálogo de permisos en cada conexión</string>
 </resources>

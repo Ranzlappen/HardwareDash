@@ -1,11 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="dashboard_title">Dashboard</string>
-    <string name="dashboard_edit">Edit dashboard</string>
-    <string name="dashboard_empty">Every module is hidden. Tap “Edit dashboard” to show some.</string>
+    <string name="dashboard_title">Home</string>
+    <string name="dashboard_edit">Edit pinned tools</string>
     <string name="dashboard_reset">Reset to default</string>
     <string name="dashboard_move_up">Move up</string>
     <string name="dashboard_move_down">Move down</string>
     <string name="dashboard_pin">Pin</string>
     <string name="dashboard_unpin">Unpin</string>
+    <string name="home_status">Status</string>
+    <string name="home_quick_actions">Quick actions</string>
+    <string name="home_pinned">Pinned tools</string>
+    <string name="home_pinned_empty">Pin the tools you use most and they’ll show up here.</string>
+    <string name="home_unknown" translatable="false">—</string>
+    <string name="home_battery">Battery</string>
+    <string name="home_battery_value">%1$d %% · %2$.1f °C</string>
+    <string name="home_battery_level_only">%1$d %%</string>
+    <string name="home_storage">Storage</string>
+    <string name="home_storage_value">%1$d %% used · %2$.1f GB free</string>
+    <string name="home_wifi">Wi-Fi</string>
+    <string name="home_wifi_connected">On · %1$d dBm</string>
+    <string name="home_wifi_on">On · not connected</string>
+    <string name="home_wifi_off">Off</string>
+    <string name="home_logbook">Logbook</string>
+    <string name="home_logbook_value">%1$s · %2$s</string>
+    <string name="home_logbook_empty">No entries yet</string>
+    <string name="home_torch">Torch</string>
+    <string name="home_torch_on_cd">Turn torch on</string>
+    <string name="home_torch_off_cd">Turn torch off</string>
+    <string name="home_buzz">Buzz</string>
+    <string name="home_buzz_cd">Short test vibration</string>
 </resources>

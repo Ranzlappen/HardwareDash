@@ -17,6 +17,7 @@ object RootPrefKeys {
     val MonitorSafetyMode = booleanPreferencesKey("root_monitor_safety_mode")
     val MasterSafetyInitialized = booleanPreferencesKey("root_master_safety_initialized")
     val RootedAcknowledged = booleanPreferencesKey("root_rooted_acknowledged")
+    val ExperimentalVisible = booleanPreferencesKey("root_experimental_visible")
 
     fun featureEnabledKey(feature: RootFeatureKey) =
         booleanPreferencesKey("root_feat_enabled_${feature.id}")

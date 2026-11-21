@@ -13,9 +13,22 @@ name: CI (claude/refactor-2026)
 #     for both flavors and exit. Quick to fail on a typo in a
 #     `build.gradle.kts` or a `*.kt`, where the matrix would spend several
 #     more minutes on signing + asset gates before reporting the same
-#     root cause. Runs on every PR regardless of target branch.
+#     root cause. Runs on every PR regardless of target branch, and on
+#     pushes to `claude/v3-**` so each v3 batch gets a compile verdict
+#     without opening a PR (the PR-comment steps below are guarded by
+#     `github.event_name == 'pull_request'`).
 
 on:
+  push:
+    branches:
+      - 'claude/v3-**'
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - 'wiki/**'
+      - '.gitignore'
+      - '.gitattributes'
+      - '.idea/**'
   pull_request:
     paths-ignore:
       - '*.md'
@@ -24,6 +37,11 @@ on:
       - '.gitignore'
       - '.gitattributes'
       - '.idea/**'
+
+# A newer push to the same branch/PR supersedes the running build.
+concurrency:
+  group: ci-refactor-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # JVM unit tests for the modules that carry pure-logic correctness
@@ -57,15 +75,21 @@ jobs:
           ./gradlew \
             :core:automation:testDebugUnitTest \
             :core:data:testDebugUnitTest \
+            :core:datastore:testDebugUnitTest \
             :core:designsystem:testDebugUnitTest \
             :core:hardware:testDebugUnitTest \
             :core:monitoring:testDebugUnitTest \
+            :core:navigation:testDebugUnitTest \
+            :core:root:testDebugUnitTest \
             :core:widgetkit:testDebugUnitTest \
             :feature:adbdebug:testDebugUnitTest \
             :feature:apps:testDebugUnitTest \
             :feature:apps-rooted:testDebugUnitTest \
+            :feature:audio:testDebugUnitTest \
             :feature:automation:testDebugUnitTest \
             :feature:battery:testDebugUnitTest \
+            :feature:camera:testDebugUnitTest \
+            :feature:files:testDebugUnitTest \
             :feature:bugreport-rooted:testDebugUnitTest \
             :feature:dashboard:testDebugUnitTest \
             :feature:diagnostics:testDebugUnitTest \
@@ -73,13 +97,19 @@ jobs:
             :feature:flipper:testDebugUnitTest \
             :feature:flipper-rooted:testDebugUnitTest \
             :feature:gps:testDebugUnitTest \
+            :feature:lock:testDebugUnitTest \
             :feature:lock-rooted:testDebugUnitTest \
             :feature:logbook:testDebugUnitTest \
             :feature:metricwidget:testDebugUnitTest \
             :feature:microphone:testDebugUnitTest \
             :feature:notification:testDebugUnitTest \
+            :feature:radios-bt:testDebugUnitTest \
             :feature:radios-cell:testDebugUnitTest \
+            :feature:radios-ir:testDebugUnitTest \
+            :feature:radios-nfc:testDebugUnitTest \
             :feature:radios-subghz:testDebugUnitTest \
+            :feature:radios-wifi:testDebugUnitTest \
+            :feature:settings:testDebugUnitTest \
             :feature:radios-wifi-rooted:testDebugUnitTest \
             :feature:sensors:testDebugUnitTest \
             :feature:storage:testDebugUnitTest \
@@ -104,7 +134,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      contents: read
+      # write: the rolling v3-dev prerelease (push runs only).
+      contents: write
       # APK-size delta step downloads the latest main-branch baseline
       # artifact from build-apk.yml runs and writes a sticky PR comment.
       actions: read
@@ -137,13 +168,102 @@ jobs:
       # app/src/rooted/assets/. Standard variant is unaffected by the
       # property (the asset-copy task only attaches to the rooted variant's
       # preBuild).
+      # Pushes to claude/v3-** produce phone-test APKs: a separate app
+      # (`-Pv3TestBuild` -> `dev.ranzlappen.gadget[.rooted].v3`, label
+      # "Gadget v3") that installs beside any existing Gadget. Signed with
+      # the release keystore so each test build updates the previous one in
+      # place (a fresh AGP debug key per run would block that); versionCode
+      # 1000 + run number. PR runs keep the throwaway debug key.
       - name: Assemble standard + rooted debug APKs
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          EXTRA=()
+          if [ "${{ github.event_name }}" = "push" ] && [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/Gadget-release.jks"
+            echo "v3 test build: release-key signed, versionCode $(( (1000 + ${{ github.run_number }}) * 10 ))"
+            EXTRA=(
+              -Pandroid.injected.signing.store.file="$RUNNER_TEMP/Gadget-release.jks"
+              -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD"
+              -Pandroid.injected.signing.key.alias="$KEY_ALIAS"
+              -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+              -PCI_VERSION_CODE=$((1000 + ${{ github.run_number }}))
+              -PCI_VERSION_NAME=3.0-dev.${{ github.run_number }}
+              -Pv3TestBuild
+            )
+          fi
           ./gradlew \
             -PenableLsposedModule=true \
+            "${EXTRA[@]}" \
             assembleStandardDebug \
             assembleRootedDebug \
             --stacktrace
+
+      # v3 smoke testing happens on real phones (no local tooling), so pushes
+      # to claude/v3-** publish both debug APKs as a downloadable artifact:
+      # standard → the daily (unrooted) phone, rooted → the rooted test phone.
+      # Short retention keeps CI storage small; PR runs skip it.
+      # Prints what the phone's installer will compare: package, versionCode,
+      # signer. Push builds must be the separate `.v3` test app and carry the
+      # release certificate (so test build N+1 updates test build N) - fail
+      # loudly instead of shipping an APK that won't install.
+      - name: Check debug APK identity
+        if: github.event_name == 'push'
+        env:
+          RELEASE_CERT_SHA256: 2341b7005d15352401b1f07c6bf389fce513390392d8c03fa8ab7988ef5d1eab
+        run: |
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          status=0
+          for apk in $(find app/build/outputs/apk -name '*.apk'); do
+            echo "== $apk"
+            badging=$("$BT/aapt2" dump badging "$apk")
+            echo "$badging" | grep -E "^package:|^application-label:"
+            if ! echo "$badging" | head -1 | grep -q "name='dev\.ranzlappen\.gadget\(\.rooted\)\?\.v3'"; then
+              echo "::error file=$apk::not the .v3 test package"
+              status=1
+            fi
+            certs=$("$BT/apksigner" verify --print-certs "$apk")
+            echo "$certs" | grep -E "SHA-256|DN"
+            if ! echo "$certs" | grep -qi "SHA-256 digest: $RELEASE_CERT_SHA256"; then
+              echo "::error file=$apk::not signed with the release certificate"
+              status=1
+            fi
+          done
+          exit $status
+
+      - name: Upload debug APKs (v3 branch pushes)
+        if: success() && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: gadget-debug-apks-${{ github.sha }}
+          path: |
+            app/build/outputs/apk/standard/debug/*.apk
+            app/build/outputs/apk/rooted/debug/*.apk
+          retention-days: 7
+          if-no-files-found: error
+
+      # Rolling prerelease `v3-dev`: the latest phone-test APKs at fixed
+      # URLs, downloadable on the phone without unzipping an artifact.
+      # No workflow triggers on tags/releases, and a prerelease never
+      # becomes "Latest", so main's release flow is untouched.
+      - name: Publish v3 test APKs (prerelease v3-dev)
+        if: success() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p v3dev
+          cp app/build/outputs/apk/standard/debug/*.apk v3dev/Gadget-v3-standard.apk
+          cp app/build/outputs/apk/rooted/debug/*.apk v3dev/Gadget-v3-rooted.apk
+          ls -l v3dev
+          gh release delete v3-dev --yes --cleanup-tag || true
+          gh release create v3-dev v3dev/*.apk \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "v3 test build ${{ github.run_number }}" \
+            --notes "Phone-test build of ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7} (CI run ${{ github.run_number }}). Installs as the separate app \"Gadget v3\" / \"Gadget v3 Root\". Not a release."
 
       # ─── APK-size delta vs main (standard-debug) ─────────────────────
       # Computes the size of the PR's standard-debug APK, downloads the

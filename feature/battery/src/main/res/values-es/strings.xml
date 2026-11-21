@@ -52,14 +52,6 @@
     <string name="battery_monitor_temp">Historial de temperatura</string>
 
     <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
-    <string name="battery_cap_rooted_active">Activo — compilación rooteada</string>
-    <string name="battery_cap_rooted_required">Requiere compilación rooteada</string>
-    <string name="battery_cap_fuel_gauge_name">Lectura directa del medidor de carga</string>
-    <string name="battery_cap_fuel_gauge_detail">Lectura sysfs directa del chip medidor de carga (SoC, voltaje, corriente)</string>
-    <string name="battery_cap_cell_monitor_name">Monitor de voltaje por celda</string>
-    <string name="battery_cap_cell_monitor_detail">Telemetría de voltaje por celda desde el medidor de carga</string>
-    <string name="battery_cap_charging_profile_name">Control del perfil de carga</string>
-    <string name="battery_cap_charging_profile_detail">Anula los límites de corriente de carga y corte de voltaje</string>
 
     <!-- ─── Automation actions (rooted) ──────────────────────────────── -->
     <string name="battery_action_charging_profile_override">Anulación del perfil de carga (rooteado)</string>

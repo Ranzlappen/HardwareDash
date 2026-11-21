@@ -37,14 +37,6 @@
     <string name="camera_btn_clear_history">Borrar historial</string>
 
     <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
-    <string name="camera_cap_rooted_active">Activo — compilación rooteada</string>
-    <string name="camera_cap_rooted_required">Requiere compilación rooteada</string>
-    <string name="camera_cap_high_fps_name">Captura a alta velocidad de fotogramas</string>
-    <string name="camera_cap_high_fps_detail">Fuerza tasas de fotogramas por encima del máximo publicado de la cámara mediante parámetros HAL</string>
-    <string name="camera_cap_manual_name">Control manual de la cámara</string>
-    <string name="camera_cap_manual_detail">Parámetros HAL directos: ISO, velocidad de obturación, balance de blancos y distancia de enfoque</string>
-    <string name="camera_cap_hal_bypass_name">Omisión de HAL</string>
-    <string name="camera_cap_hal_bypass_detail">Entrega de fotogramas sin procesar desde el controlador de la cámara, evitando la pila de la API Camera2</string>
 
     <!-- ─── Automation actions (CameraActionHandler) ───────────────────── -->
     <string name="camera_action_clear_scan_history">Borrar historial de escaneos</string>
@@ -87,4 +79,21 @@
     <string name="camera_tools_shutter_section">Sonido del obturador</string>
     <string name="camera_tools_shutter_detail">Alterna el sonido obligatorio del obturador. No se permite en todas las regiones.</string>
     <string name="camera_tools_shutter_toggle_label">Sonido del obturador activado</string>
+    <!-- v3 B9: photo mode -->
+    <string name="camera_mode_photo">Foto</string>
+    <string name="camera_mode_scan">Escanear</string>
+    <string name="camera_card_photo_title">Cámara</string>
+    <string name="camera_take_photo">Hacer foto</string>
+    <string name="camera_capturing">Guardando…</string>
+    <string name="camera_exposure">Exposición</string>
+    <string name="camera_zoom_current">ahora %1$s</string>
+    <string name="camera_lens_ultra_wide">Gran angular</string>
+    <string name="camera_lens_main">Principal</string>
+    <string name="camera_lens_tele">Teleobjetivo</string>
+    <string name="camera_lens_front">Frontal</string>
+    <string name="camera_lens_external">Externa</string>
+    <string name="camera_card_last_photo_title">Última foto</string>
+    <string name="camera_photo_saved">Guardada en %1$s.</string>
+    <string name="camera_photo_error">No se pudo guardar la foto: %1$s</string>
+    <string name="camera_photo_open">Abrir</string>
 </resources>

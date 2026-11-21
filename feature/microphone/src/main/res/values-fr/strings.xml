@@ -56,20 +56,6 @@
     <string name="microphone_result_error">Échec : %s</string>
 
     <!-- ModuleInfo capabilities -->
-    <string name="microphone_cap_rooted_active">Actif — build rooté</string>
-    <string name="microphone_cap_rooted_required">Nécessite un build rooté</string>
-    <string name="microphone_cap_gain_boost_name">Amplification du gain micro</string>
-    <string name="microphone_cap_gain_boost_detail">Écriture directe dans le mixeur ALSA, plafond strict de +30 dB, limite de 60 s</string>
-    <string name="microphone_cap_direct_pcm_name">Capture PCM directe</string>
-    <string name="microphone_cap_direct_pcm_detail">Lecture tinycap brute depuis /dev/snd, en contournant AudioRecord</string>
-    <string name="microphone_cap_custom_rate_name">Fréquence d\'échantillonnage personnalisée</string>
-    <string name="microphone_cap_custom_rate_detail">Fréquences de capture inhabituelles (par ex. ultrasoniques) ; nécessite une confirmation explicite</string>
-    <string name="microphone_cap_multi_mic_name">Capture brute multi-micro</string>
-    <string name="microphone_cap_multi_mic_detail">Capture simultanée depuis chaque nœud d\'entrée disponible, jusqu\'à 3 flux</string>
-    <string name="microphone_cap_disable_effects_name">Désactiver les effets matériels</string>
-    <string name="microphone_cap_disable_effects_detail">Met momentanément à zéro les commandes ALSA ANC / AGC / AEC / formation de faisceaux</string>
-    <string name="microphone_cap_system_audio_name">Capture audio système</string>
-    <string name="microphone_cap_system_audio_detail">Accorde CAPTURE_AUDIO_OUTPUT pour une fenêtre limitée ; nécessite la confirmation d\'un avertissement légal</string>
 
     <!-- ─── Automation actions (MicrophoneActionHandler) ────────────────── -->
     <string name="microphone_action_disable_effects">Désactiver la suppression du bruit matérielle</string>

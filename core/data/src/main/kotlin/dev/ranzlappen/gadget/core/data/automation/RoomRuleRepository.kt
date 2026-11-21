@@ -3,6 +3,7 @@ package dev.ranzlappen.gadget.core.data.automation
 import dev.ranzlappen.gadget.core.automation.RuleRepository
 import dev.ranzlappen.gadget.core.automation.model.Rule
 import dev.ranzlappen.gadget.core.automation.model.normalized
+import dev.ranzlappen.gadget.core.automation.model.withUpgradedActions
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -16,7 +17,8 @@ import javax.inject.Singleton
  * a `MetricThreshold.clearValue` on the wrong side of `value` for the
  * rule's (op, edge) is nulled rather than persisted, protecting every write
  * path (builder UI, restored backups, future APIs) from the degenerate-
- * hysteresis footgun. It also stamps `updated_at` and preserves
+ * hysteresis footgun, and applies v3 action migrations — moved actions
+ * rewritten, retired `assert_*` ones dropped (also on read, via [withUpgradedActions]). It also stamps `updated_at` and preserves
  * `created_at` / `last_fired_at` across upserts.
  */
 @Singleton
@@ -25,10 +27,10 @@ class RoomRuleRepository @Inject constructor(
 ) : RuleRepository {
 
     override fun observeRules(): Flow<List<Rule>> =
-        dao.observeAll().map { entities -> entities.map(RuleMapper::toModel) }
+        dao.observeAll().map { entities -> entities.map { RuleMapper.toModel(it).withUpgradedActions() } }
 
     override suspend fun rule(id: String): Rule? =
-        dao.getById(id)?.let(RuleMapper::toModel)
+        dao.getById(id)?.let { RuleMapper.toModel(it).withUpgradedActions() }
 
     override suspend fun save(rule: Rule) {
         val normalized = rule.normalized()

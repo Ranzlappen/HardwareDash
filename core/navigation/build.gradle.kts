@@ -26,4 +26,7 @@ dependencies {
     // leak into any public signature in :core:navigation — downstream
     // modules don't need it transitively.
     implementation(project(":core:ui"))
+
+    // GadgetSectionTest pins the section ↔ destination mapping.
+    testImplementation(libs.junit)
 }

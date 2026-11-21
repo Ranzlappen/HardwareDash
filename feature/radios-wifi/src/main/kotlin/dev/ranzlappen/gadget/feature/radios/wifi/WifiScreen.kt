@@ -112,57 +112,6 @@ private fun wifiModuleInfo(state: WifiState, isRootedFlavor: Boolean): ModuleInf
                     }
                 },
             ),
-            ModuleCapability(
-                name = stringResource(R.string.wifi_cap_rfkill_name),
-                detail = stringResource(R.string.wifi_cap_rfkill_detail),
-                status = {
-                    if (isRootedFlavor) {
-                        CapabilityStatus(
-                            kind = GadgetStatusKind.Success,
-                            message = stringResource(R.string.wifi_cap_rooted_active),
-                        )
-                    } else {
-                        CapabilityStatus(
-                            kind = GadgetStatusKind.Warning,
-                            message = stringResource(R.string.wifi_cap_rooted_required),
-                        )
-                    }
-                },
-            ),
-            ModuleCapability(
-                name = stringResource(R.string.wifi_cap_tx_power_name),
-                detail = stringResource(R.string.wifi_cap_tx_power_detail),
-                status = {
-                    if (isRootedFlavor) {
-                        CapabilityStatus(
-                            kind = GadgetStatusKind.Success,
-                            message = stringResource(R.string.wifi_cap_rooted_active),
-                        )
-                    } else {
-                        CapabilityStatus(
-                            kind = GadgetStatusKind.Warning,
-                            message = stringResource(R.string.wifi_cap_rooted_required),
-                        )
-                    }
-                },
-            ),
-            ModuleCapability(
-                name = stringResource(R.string.wifi_cap_channel_name),
-                detail = stringResource(R.string.wifi_cap_channel_detail),
-                status = {
-                    if (isRootedFlavor) {
-                        CapabilityStatus(
-                            kind = GadgetStatusKind.Success,
-                            message = stringResource(R.string.wifi_cap_rooted_active),
-                        )
-                    } else {
-                        CapabilityStatus(
-                            kind = GadgetStatusKind.Warning,
-                            message = stringResource(R.string.wifi_cap_rooted_required),
-                        )
-                    }
-                },
-            ),
         ),
     )
 }

@@ -15,11 +15,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.log10
 import kotlin.math.sqrt
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 
 @Singleton
 class DbMeterMetricSource @Inject constructor(
@@ -67,7 +69,7 @@ class DbMeterMetricSource @Inject constructor(
                 record.release()
             }
             awaitClose { }
-        }
+        }.flowOn(Dispatchers.IO) // AudioRecord.read blocks; never on the collector's thread
     }
 
     companion object {

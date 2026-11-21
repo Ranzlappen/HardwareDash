@@ -31,6 +31,8 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
+val isV3TestBuild = providers.gradleProperty("v3TestBuild").isPresent
+
 android {
     // App-shell namespace. Matches the applicationId now that the legacy
     // com.gadget.* surface has fully migrated into feature/core modules or
@@ -55,6 +57,9 @@ android {
         // two APKs can ship side-by-side without ever colliding on Play.
         versionCode = (providers.gradleProperty("CI_VERSION_CODE").orNull?.toInt() ?: 1) * 10
         versionName = providers.gradleProperty("CI_VERSION_NAME").getOrElse("1.0-dev")
+
+        // Launcher label. Phone-test builds (below) replace it with a literal.
+        manifestPlaceholders["appLabel"] = "@string/app_name"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -118,10 +123,15 @@ android {
 
     buildTypes {
         debug {
-            // Explicit empty debug block so assemble<Flavor>Debug tasks
-            // exist with predictable output names. Debug variants use the
-            // AGP-managed debug keystore by default — no extra
-            // configuration needed.
+            // Debug variants use the AGP-managed debug keystore unless CI
+            // injects a signing config.
+            //
+            // v3 phone-test builds (`-Pv3TestBuild`, set by ci-refactor.yml
+            // on claude/v3-** pushes) are a separate app: `….v3` package and
+            // a "Gadget v3" label, so they install beside any other Gadget
+            // (old com.gadget releases, a dev.ranzlappen.gadget install) and
+            // never touch its data.
+            if (isV3TestBuild) applicationIdSuffix = ".v3"
         }
         release {
             isMinifyEnabled = true
@@ -170,6 +180,17 @@ android {
     }
 }
 
+androidComponents {
+    onVariants(selector().withBuildType("debug")) { variant ->
+        if (isV3TestBuild) {
+            variant.manifestPlaceholders.put(
+                "appLabel",
+                if (variant.flavorName == "rooted") "Gadget v3 Root" else "Gadget v3",
+            )
+        }
+    }
+}
+
 dependencies {
     // ─── Modular skeleton (:core / :feature) ────────────────────
     // Wires :app into the GadgetAppShell + Dashboard introduced in
@@ -212,7 +233,6 @@ dependencies {
     implementation(project(":feature:storage"))
     implementation(project(":feature:radios-ir"))
     implementation(project(":feature:camera"))
-    implementation(project(":feature:motion"))
     implementation(project(":feature:audio"))
     implementation(project(":feature:microphone"))
     implementation(project(":feature:radios-nfc"))
@@ -221,9 +241,7 @@ dependencies {
     implementation(project(":feature:radios-wifi"))
     implementation(project(":feature:radios-subghz"))
     implementation(project(":feature:flipper"))
-    implementation(project(":feature:ambient"))
     implementation(project(":feature:lock"))
-    implementation(project(":feature:actuators"))
     implementation(project(":feature:diagnostics"))
     // Screenless rooted-extras controller contracts (+ standard no-ops); the
     // privileged impls ship in the matching -rooted siblings below.
@@ -239,6 +257,7 @@ dependencies {
     implementation(project(":feature:bugreport"))
     implementation(project(":feature:manual"))
     implementation(project(":feature:logbook"))
+    implementation(project(":feature:files"))
     implementation(project(":feature:metricwidget"))
     implementation(project(":feature:youtubedownloader"))
     // Batch H: the automation rules list + builder (also pulls

@@ -39,7 +39,7 @@ class LockViewModelTest {
         every { monitor.state } returns monitorState
         val registry = mockk<RootCapabilityRegistry>()
         every { registry.isRootedFlavor } returns isRootedFlavor
-        return LockViewModel(monitor, registry)
+        return LockViewModel(monitor, registry, mockk<DeviceLockController>(relaxed = true))
     }
 
     @Test

@@ -160,57 +160,6 @@ private fun displayModuleInfo(
                 }
             },
         ),
-        ModuleCapability(
-            name = stringResource(R.string.display_cap_refresh_rate_name),
-            detail = stringResource(R.string.display_cap_refresh_rate_detail),
-            status = {
-                if (state.isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.display_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.display_cap_rooted_required),
-                    )
-                }
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.display_cap_density_name),
-            detail = stringResource(R.string.display_cap_density_detail),
-            status = {
-                if (state.isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.display_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.display_cap_rooted_required),
-                    )
-                }
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.display_cap_surfaceflinger_name),
-            detail = stringResource(R.string.display_cap_surfaceflinger_detail),
-            status = {
-                if (state.isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.display_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.display_cap_rooted_required),
-                    )
-                }
-            },
-        ),
     ),
 )
 
