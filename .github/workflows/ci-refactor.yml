@@ -158,12 +158,12 @@ jobs:
       # app/src/rooted/assets/. Standard variant is unaffected by the
       # property (the asset-copy task only attaches to the rooted variant's
       # preBuild).
-      # Pushes to claude/v3-** produce phone-test APKs, so they must install
-      # OVER the production build already on the phone: sign with the
-      # production keystore (same secrets as build-apk.yml) and use a
-      # versionCode above every main release (1000 + run number; main's
-      # build-apk.yml starts at 3000 + run number, so a later release still
-      # updates over a test build). PR runs keep the throwaway debug key.
+      # Pushes to claude/v3-** produce phone-test APKs: a separate app
+      # (`-Pv3TestBuild` -> `dev.ranzlappen.gadget[.rooted].v3`, label
+      # "Gadget v3") that installs beside any existing Gadget. Signed with
+      # the release keystore so each test build updates the previous one in
+      # place (a fresh AGP debug key per run would block that); versionCode
+      # 1000 + run number. PR runs keep the throwaway debug key.
       - name: Assemble standard + rooted debug APKs
         env:
           KEYSTORE_B64: ${{ secrets.KEYSTORE }}
@@ -182,6 +182,7 @@ jobs:
               -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
               -PCI_VERSION_CODE=$((1000 + ${{ github.run_number }}))
               -PCI_VERSION_NAME=3.0-dev.${{ github.run_number }}
+              -Pv3TestBuild
             )
           fi
           ./gradlew \
@@ -196,9 +197,9 @@ jobs:
       # standard → the daily (unrooted) phone, rooted → the rooted test phone.
       # Short retention keeps CI storage small; PR runs skip it.
       # Prints what the phone's installer will compare: package, versionCode,
-      # signer. On pushes the test APKs must carry the release certificate
-      # (the one v1.0.231 was signed with) or they cannot update the
-      # installed app - fail loudly instead of shipping an uninstallable APK.
+      # signer. Push builds must be the separate `.v3` test app and carry the
+      # release certificate (so test build N+1 updates test build N) - fail
+      # loudly instead of shipping an APK that won't install.
       - name: Check debug APK identity
         if: github.event_name == 'push'
         env:
@@ -208,7 +209,12 @@ jobs:
           status=0
           for apk in $(find app/build/outputs/apk -name '*.apk'); do
             echo "== $apk"
-            "$BT/aapt2" dump badging "$apk" | head -1
+            badging=$("$BT/aapt2" dump badging "$apk")
+            echo "$badging" | grep -E "^package:|^application-label:"
+            if ! echo "$badging" | head -1 | grep -q "name='dev\.ranzlappen\.gadget\(\.rooted\)\?\.v3'"; then
+              echo "::error file=$apk::not the .v3 test package"
+              status=1
+            fi
             certs=$("$BT/apksigner" verify --print-certs "$apk")
             echo "$certs" | grep -E "SHA-256|DN"
             if ! echo "$certs" | grep -qi "SHA-256 digest: $RELEASE_CERT_SHA256"; then

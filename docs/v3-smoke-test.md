@@ -7,10 +7,11 @@ GitHub app — no tooling needed. A tool's status in
 
 **Getting a build:** GitHub app → Actions → the latest *CI* run on
 `claude/v3-pragmatic-overhaul` → artifact `gadget-debug-apks-<sha>` (zip with
-the standard and rooted debug APKs; kept 7 days). They are signed with the
-release key and versioned `3.0-dev.<run>`, so they install as an update over
-the Play/GitHub release and keep its data. Builds before run 342 used a
-throwaway key and fail with "App not installed" — skip them.
+the standard and rooted debug APKs; kept 7 days). They install as a **separate app,
+"Gadget v3"** (`dev.ranzlappen.gadget.v3`; rooted: "Gadget v3 Root",
+`dev.ranzlappen.gadget.rooted.v3`), beside any other Gadget, with their own
+data. Each new test build updates the previous one (same release key,
+versionCode 1000 + run). Builds before run 347 can't install — skip them.
 
 **Standard flavor:** Xiaomi 14T Pro · HyperOS · not rooted · build: _(APK / commit)_
 **Rooted flavor:** Samsung Galaxy A17 · rooted · build: _(APK / commit)_

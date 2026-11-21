@@ -31,6 +31,8 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
+val isV3TestBuild = providers.gradleProperty("v3TestBuild").isPresent
+
 android {
     // App-shell namespace. Matches the applicationId now that the legacy
     // com.gadget.* surface has fully migrated into feature/core modules or
@@ -55,6 +57,9 @@ android {
         // two APKs can ship side-by-side without ever colliding on Play.
         versionCode = (providers.gradleProperty("CI_VERSION_CODE").orNull?.toInt() ?: 1) * 10
         versionName = providers.gradleProperty("CI_VERSION_NAME").getOrElse("1.0-dev")
+
+        // Launcher label. Phone-test builds (below) replace it with a literal.
+        manifestPlaceholders["appLabel"] = "@string/app_name"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -118,10 +123,15 @@ android {
 
     buildTypes {
         debug {
-            // Explicit empty debug block so assemble<Flavor>Debug tasks
-            // exist with predictable output names. Debug variants use the
-            // AGP-managed debug keystore by default — no extra
-            // configuration needed.
+            // Debug variants use the AGP-managed debug keystore unless CI
+            // injects a signing config.
+            //
+            // v3 phone-test builds (`-Pv3TestBuild`, set by ci-refactor.yml
+            // on claude/v3-** pushes) are a separate app: `….v3` package and
+            // a "Gadget v3" label, so they install beside any other Gadget
+            // (old com.gadget releases, a dev.ranzlappen.gadget install) and
+            // never touch its data.
+            if (isV3TestBuild) applicationIdSuffix = ".v3"
         }
         release {
             isMinifyEnabled = true
@@ -166,6 +176,17 @@ android {
         outputs.all {
             (this as BaseVariantOutputImpl).outputFileName =
                 "Gadget-${variantFlavorName}-v${variantVersionName}-${variantBuildTypeName}.apk"
+        }
+    }
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("debug")) { variant ->
+        if (isV3TestBuild) {
+            variant.manifestPlaceholders.put(
+                "appLabel",
+                if (variant.flavorName == "rooted") "Gadget v3 Root" else "Gadget v3",
+            )
         }
     }
 }

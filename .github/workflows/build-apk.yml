@@ -69,10 +69,7 @@ jobs:
 
       - name: Prepare build metadata
         run: |
-          # +3000 keeps main releases above the v3 phone-test builds from
-          # ci-refactor.yml (1000 + its run number), so a release always
-          # installs as an update over a test build.
-          echo "VERSION_CODE=$((3000 + ${{ github.run_number }}))" >> $GITHUB_ENV
+          echo "VERSION_CODE=${{ github.run_number }}" >> $GITHUB_ENV
           echo "VERSION_NAME=1.0.${{ github.run_number }}" >> $GITHUB_ENV
           echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
           echo "BUILD_COMMIT=${{ github.sha }}" >> $GITHUB_ENV
