@@ -301,9 +301,13 @@ is green and its smoke-test lines pass.
       service now `BIND_NFC_SERVICE` (it could never be bound). v1's
       protection bypass (default passwords/keys) intentionally dropped.
       `NfcParsingTest`; nfc tests now in CI.
-- [ ] **B12** File metadata / EXIF viewer (approved, §8.3): browse a file via
-      the system picker, show name/size/MIME/dates, read + edit image EXIF,
-      audio/video media metadata.
+- [x] **B12** Files (`:feature:files`, Tools): pick any file via the system
+      picker → name/size/MIME/modified/dimensions; image EXIF: 8 editable
+      tags + "Remove location", written through a temp copy and replaced
+      with a truncating write (JPEG/PNG/WebP); camera details formatted;
+      audio/video metadata read-only — v1's media "edit" only touched
+      MediaStore columns, never the file, so it is not carried over.
+      `FileMetadataFormatTest`, `FilesViewModelTest`.
 
 ### V3-4 · Honest root
 - [ ] **B13** Tag every `RootFeatureKey` Verified/Experimental; Settings toggle

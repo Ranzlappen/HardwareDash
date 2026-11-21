@@ -54,6 +54,7 @@ enum class GadgetSection(
             GadgetDestination.Camera,
             GadgetDestination.Audio,
             GadgetDestination.Display,
+            GadgetDestination.Files,
             GadgetDestination.Apps,
             GadgetDestination.Logbook,
         ),

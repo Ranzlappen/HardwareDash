@@ -41,6 +41,7 @@ Format: `- [ ] Tool — job · notes`
 - [ ] Display — brightness slider changes screen brightness ·
 - [ ] Apps — create a folder, add apps, launch an app from it; folder widget pins and opens ·
 - [ ] Logbook — add an entry; add a checkpoint with a due date; reminder fires ·
+- [ ] Files — pick a camera photo: size, type, dimensions and camera details show; edit Artist, "Save to file", re-open it and the change is there; "Remove location" clears GPS; pick an MP3/MP4: duration, bitrate, tags show (read-only) ·
 
 ## Sensors
 - [ ] Sensors — the list shows every sensor (magnetometer, barometer, … — compare with a sensor app); a sensor's detail shows live values per axis with moving sparklines and a rate in Hz; "Copy specs and readings" and "Copy sensor list" paste correctly; Step counter asks for activity permission, then counts; Significant motion shows the trigger note ·

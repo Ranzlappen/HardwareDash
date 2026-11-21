@@ -87,6 +87,7 @@ jobs:
             :feature:automation:testDebugUnitTest \
             :feature:battery:testDebugUnitTest \
             :feature:camera:testDebugUnitTest \
+            :feature:files:testDebugUnitTest \
             :feature:bugreport-rooted:testDebugUnitTest \
             :feature:dashboard:testDebugUnitTest \
             :feature:diagnostics:testDebugUnitTest \

@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.BatteryFull
@@ -61,6 +62,7 @@ import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Usb
 import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -485,6 +487,18 @@ sealed interface GadgetDestination {
     }
 
     /**
+     * Files — metadata / EXIF viewer (v3 B12). A file picked through the
+     * system picker: name, size, type, dates, image EXIF (editable, incl.
+     * removing the location) and audio/video metadata. Standard-flavor only.
+     */
+    data object Files : GadgetDestination {
+        override val route = "files"
+        override val label = "Files"
+        override val iconFilled = Icons.Filled.FolderOpen
+        override val iconOutlined = Icons.Outlined.FolderOpen
+    }
+
+    /**
      * YouTube Downloader feature module — downloads videos and audio
      * (including private playlists) via the bundled yt-dlp + ffmpeg runtime.
      * Standard-flavor; runs unprivileged. Ships monitoring
@@ -523,6 +537,7 @@ sealed interface GadgetDestination {
             Battery, Gps, Storage, RadiosIr, Camera,
             Audio, RadiosNfc, RadiosBt, RadiosWifi, RadiosCell, RadiosSubghz, Flipper,
             Lock, Youtubedownloader, Diagnostics, Display, Notification, Manual, Logbook, Automation,
+            Files,
         )
 
         /**

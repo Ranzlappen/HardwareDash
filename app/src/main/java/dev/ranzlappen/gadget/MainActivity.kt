@@ -65,6 +65,7 @@ import dev.ranzlappen.gadget.feature.bugreport.bugReportScreen
 import dev.ranzlappen.gadget.feature.diagnostics.diagnosticsScreen
 import dev.ranzlappen.gadget.feature.display.displayScreen
 import dev.ranzlappen.gadget.feature.lock.lockScreen
+import dev.ranzlappen.gadget.feature.files.filesScreen
 import dev.ranzlappen.gadget.feature.logbook.logbookScreen
 import dev.ranzlappen.gadget.feature.manual.manualScreen
 import dev.ranzlappen.gadget.feature.microphone.microphoneScreen
@@ -219,6 +220,7 @@ class MainActivity : ComponentActivity() {
                         bugReportScreen()
                         manualScreen()
                         logbookScreen()
+                        filesScreen()
                         automationScreen()
                         settingsScreen(
                             // Centralized permissions dashboard (W5), from

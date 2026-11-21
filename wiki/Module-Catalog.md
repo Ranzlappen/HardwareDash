@@ -112,6 +112,7 @@ widgets / tiles / tests / strings): see the
 | `feature:bugreport-rooted` | 3 | ✅ | Force-grants a declared runtime permission via `pm grant` (gated by `RootFeatureKey.PermissionForceGrant`); `bugreport_root` ActionHandler. |
 | `feature:manual` | 2 | ✅ | In-app manual / help (thin static screen; per-module deep links pending). |
 | `feature:logbook` | 18 | ✅ | Session-note log entries (tagged) + a checkpoint/process tracker with per-checkpoint due dates and WorkManager reminders. `logbook_open_checkpoints` MetricSource (push over the open-checkpoint flow); `LogbookActionHandler` (add-entry). Standard-only; data layer in `:core:data`. |
+| `feature:files` | 6 | ⚪ | v3 B12: file metadata via the system picker (name/size/MIME/modified/dimensions); image EXIF read + edit (8 tags) + remove location through a temp copy (`FileMetadataStore`); camera details; audio/video metadata read-only; pure `FileMetadataFormat`. No MetricSource/ActionHandler (opt-in, nothing to give). |
 | `feature:youtubedownloader` | 17 | ✅ | YouTube video/audio downloader (yt-dlp + ffmpeg via youtubedl-android); private playlists via in-app cookie login; dataSync FGS; MediaStore export; `download_progress` monitor + `youtube_downloader` ActionHandler. Standard-only. |
 
 ## `benchmark`

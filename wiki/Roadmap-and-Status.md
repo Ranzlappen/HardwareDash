@@ -57,7 +57,7 @@ is ticked.
 | More | Lock (device admin) | `lock` (+`-rooted`) | ⚪ | keep |
 | More | Device & debug (memory, dumps → ADB, USB, permission health) | `diagnostics`, `adbdebug`, `usbdebug`, `bugreport` (+ rooted) | ⚪ | B8 ✓ one entry; sub-screens under `diagnostics/` |
 | More | Manual | `manual` | ⚪ | keep |
-| Tools | File metadata / EXIF (v1) | — | ✂️ lost in v2 | bring back (B12) |
+| Tools | Files (metadata / EXIF) | `files` | ⚪ | B12 ✓ back from v1: EXIF edit + remove location; media read-only |
 | More | Settings, backup, permissions dashboard | `settings`, `:core:permissions` | ⚪ | one permissions UI, also shown in Device & debug (B8 ✓) |
 | More | YouTube downloader | `youtubedownloader` | ⚪ | kept, frozen (MASTER-PLAN §8.1) |
 | Home screen | Generic metric widget | `metricwidget` | ⚪ | keep |

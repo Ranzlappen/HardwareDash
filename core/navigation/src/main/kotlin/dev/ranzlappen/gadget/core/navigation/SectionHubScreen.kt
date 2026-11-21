@@ -82,6 +82,7 @@ internal fun GadgetDestination.hubSummary(): String? = when (this) {
     GadgetDestination.Camera -> "Photos, lenses, zoom; QR scanner"
     GadgetDestination.Audio -> "Level, spectrum, recorder"
     GadgetDestination.Display -> "Screen brightness"
+    GadgetDestination.Files -> "Metadata and EXIF of any file"
     GadgetDestination.Apps -> "App folders and folder widgets"
     GadgetDestination.Logbook -> "Timestamped notes and checkpoints"
     GadgetDestination.Sensors -> "Every sensor: live values, charts, specs"

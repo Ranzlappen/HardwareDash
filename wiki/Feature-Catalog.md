@@ -269,6 +269,13 @@ of [Roadmap & Status](Roadmap-and-Status):
   fire, settings override, dumpsys snapshot) surface as rule-builder
   actions in `automation-ui` instead.
 - **Manual** (`:feature:manual`) — thin static help screen.
+- **Files** (`:feature:files`, v3 B12) — any file via the system picker:
+  name, size, MIME, extension, modified date, image dimensions. Images:
+  8 editable EXIF tags (description, artist, copyright, comment, date
+  taken, make, model, software) and "Remove location" (all GPS tags),
+  written to a temp copy first, then replacing the original (JPEG / PNG /
+  WebP); camera details (exposure, aperture, ISO, focal length, lens…).
+  Audio/video: title/artist/album/duration/bitrate/resolution…, read-only.
 - **Logbook** (`:feature:logbook`) — session-note log entries (tagged) +
   a checkpoint/process tracker with per-checkpoint due dates and
   WorkManager reminders. `logbook_open_checkpoints` MetricSource (push over
