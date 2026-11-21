@@ -195,6 +195,29 @@ jobs:
       # to claude/v3-** publish both debug APKs as a downloadable artifact:
       # standard → the daily (unrooted) phone, rooted → the rooted test phone.
       # Short retention keeps CI storage small; PR runs skip it.
+      # Prints what the phone's installer will compare: package, versionCode,
+      # signer. On pushes the test APKs must carry the release certificate
+      # (the one v1.0.231 was signed with) or they cannot update the
+      # installed app - fail loudly instead of shipping an uninstallable APK.
+      - name: Check debug APK identity
+        if: github.event_name == 'push'
+        env:
+          RELEASE_CERT_SHA256: 2341b7005d15352401b1f07c6bf389fce513390392d8c03fa8ab7988ef5d1eab
+        run: |
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          status=0
+          for apk in $(find app/build/outputs/apk -name '*.apk'); do
+            echo "== $apk"
+            "$BT/aapt2" dump badging "$apk" | head -1
+            certs=$("$BT/apksigner" verify --print-certs "$apk")
+            echo "$certs" | grep -E "SHA-256|DN"
+            if ! echo "$certs" | grep -qi "SHA-256 digest: $RELEASE_CERT_SHA256"; then
+              echo "::error file=$apk::not signed with the release certificate"
+              status=1
+            fi
+          done
+          exit $status
+
       - name: Upload debug APKs (v3 branch pushes)
         if: success() && github.event_name == 'push'
         uses: actions/upload-artifact@v4
