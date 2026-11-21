@@ -80,7 +80,9 @@ class BtViewModel @Inject constructor(
         } else emptyList()
 
         _state.update {
-            BtState(
+            // copy, not a fresh BtState: a fresh one dropped isRootedFlavor on
+            // every refresh (incl. init), so the rooted build looked standard.
+            it.copy(
                 adapterAvailable = adapter.isAvailable(),
                 adapterEnabled = adapter.isEnabled(),
                 adapterName = if (hasPermission) adapter.name() else null,
