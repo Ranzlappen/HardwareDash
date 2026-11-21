@@ -122,7 +122,7 @@ Declare a `RootFeatureKey` data object, add a `RootFeatureDescriptor`
 `feature/<name>-rooted/`, and wire the UI through the gate. No
 flavor-specific changes in shared modules. See [Module Authoring
 Contract](Module-Authoring-Contract) item 3 and [Torch
-Blueprint](Torch-Blueprint).
+Blueprint](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Torch-Blueprint.md).
 
 ## Build outputs & versionCode
 
@@ -157,8 +157,8 @@ localization strings. If you add a new rooted-only library/asset/permission,
 scope it to `rootedImplementation` / `app/src/rooted/assets/` /
 `app/src/rooted/AndroidManifest.xml` — the gate catches the mistake on PR.
 
-See also: [Testing & CI](Testing-and-CI), [Decision Records →
-ADR-0001](Decision-Records).
+See also: [Testing & CI](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Testing-and-CI.md), [Decision Records →
+ADR-0001](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Decision-Records.md).
 
 ---
 

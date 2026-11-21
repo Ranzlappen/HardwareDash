@@ -42,9 +42,9 @@ for why that was dropped.
 When you do add an extra, follow its existing seam exactly (pin-reliability
 halves for widgets, stable metric keys for MetricSources, `requiresRoot` +
 param schema for actions). Those rules live on the subsystem pages:
-[Widgets, Tiles & Surfaces](Widgets-Tiles-and-Surfaces),
-[Monitoring Framework](Monitoring-Framework),
-[Automation Engine](Automation-Engine).
+[Widgets, Tiles & Surfaces](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Widgets-Tiles-and-Surfaces.md),
+[Monitoring Framework](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Monitoring-Framework.md),
+[Automation Engine](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Automation-Engine.md).
 
 ## Hard rules (unchanged from v2)
 

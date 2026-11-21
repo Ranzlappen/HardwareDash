@@ -11,11 +11,11 @@ v1 is archived on `legacy-main`, v2 on `archive/v2-modular-2026`.
 
 - [Project overview](https://github.com/Ranzlappen/HardwareDash/wiki/Home)
 - [Roadmap & status](https://github.com/Ranzlappen/HardwareDash/wiki/Roadmap-and-Status)
-- [Architecture](https://github.com/Ranzlappen/HardwareDash/wiki/Architecture)
+- [Architecture](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Architecture.md)
 - [Design system](https://github.com/Ranzlappen/HardwareDash/wiki/Design-System)
 - [Standard / rooted flavor model](https://github.com/Ranzlappen/HardwareDash/wiki/Flavors-and-Root-Safety)
 - [AI collaboration workflow](https://github.com/Ranzlappen/HardwareDash/wiki/AI-Collaboration)
-- [Testing & CI](https://github.com/Ranzlappen/HardwareDash/wiki/Testing-and-CI)
+- [Testing & CI](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Testing-and-CI.md)
 
 > The wiki source is also maintained in the [`wiki/`](wiki/) directory of
 > this repo; see [`wiki/README.md`](wiki/README.md) for how it's published.

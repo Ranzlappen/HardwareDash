@@ -88,7 +88,7 @@ move the registration into the property's initializer. Tripped
   type already bound bare is a `[Dagger/DuplicateBindings]` clash in
   `SingletonC`. Use a `Map<String, X>` multibinding keyed by `featureId`
   (the widgetkit renderer/dispatcher pattern — see [Widgets, Tiles &
-  Surfaces](Widgets-Tiles-and-Surfaces)).
+  Surfaces](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Widgets-Tiles-and-Surfaces.md)).
 - **Companion-object `@Provides` on an abstract `@Module`** is fragile
   across Hilt/KSP versions — some configs skip the `@Provides`, leaving the
   binding unresolved. Convention: a top-level `object` module for
@@ -122,7 +122,7 @@ explicit `ComponentName`, **and** the provider **must** override
 through `PendingWidgetConfigs`. A `FLAG_IMMUTABLE` callback silently drops
 the assigned `appWidgetId` fill-in. CI-invisible — only fails inside the
 launcher round-trip. Full detail: [Widgets, Tiles &
-Surfaces](Widgets-Tiles-and-Surfaces).
+Surfaces](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Widgets-Tiles-and-Surfaces.md).
 
 ## RemoteViews limitations
 
@@ -158,7 +158,7 @@ should do the same.
   wal_checkpoint(FULL)")`, **not** `execSQL` (which rejects row-returning
   statements). Every new modular DB joins `DatabaseCheckpointer.checkpointAll()`
   (#153) and bumps `BACKUP_FORMAT_VERSION`. Full design: [Asset
-  Catalog](Asset-Catalog) + the backup notes below.
+  Catalog](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Asset-Catalog.md) + the backup notes below.
 - **WAL data loss on legacy restore.** After `PRAGMA wal_checkpoint(TRUNCATE)`
   the WAL may still exist if the checkpoint only partially succeeded (e.g.,
   another process held a read lock). `BackupManager` now copies the companion
@@ -195,7 +195,7 @@ should do the same.
 `instrumented-tests.yml` pre-installs the API 30 system image with a
 retry-on-corrupt-download step and enables KVM; Compose UI tests run with
 animations off. A flaky emulator run is usually a corrupt image download —
-re-run the job. See [Testing & CI](Testing-and-CI).
+re-run the job. See [Testing & CI](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Testing-and-CI.md).
 
 ## Backup/restore design (reference)
 

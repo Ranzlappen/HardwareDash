@@ -281,7 +281,7 @@ is green and its smoke-test lines pass.
       presets incl. < 1× on logical cameras; exposure slider; torch from the
       camera's own state; capture to `Pictures/Gadget` with open / share.
       v2's fake "rooted active" capability rows dropped. `CameraLensesTest`.
-- [ ] **CI gap** (found in B9): `ci-refactor.yml` never ran the unit tests of
+- [x] **CI gap** (found in B9, closed in V3-5): `ci-refactor.yml` never ran the unit tests of
       ~~`audio`~~ (B10), `lock`, `radios-bt`, `radios-ir`, ~~`radios-nfc`~~ (B11), `radios-wifi`,
       `settings` (camera added in B9). Enable them one module per commit and
       fix what was silently red.
@@ -330,8 +330,13 @@ is green and its smoke-test lines pass.
 - [ ] **B14** Remove Experimental actions still unverified after one release.
 
 ### V3-5 · Polish & release
-- [ ] Wiki slimmed to: Home, AI Collaboration, Module Contract, Design System,
-      Flavors & Root Safety, Troubleshooting, Status. Others archived.
+- [x] Wiki slimmed to: Home, AI Collaboration, Module Contract, Design System,
+      Flavors & Root Safety, Troubleshooting, Status. The other 15 pages
+      moved unmaintained to `docs/wiki-archive/` (with a README); links
+      rewritten; Home and the wiki README rewritten short.
+- [x] CI gap closed: every module with unit tests now runs in CI (lock,
+      bt, ir, wifi, settings, core:datastore were the last; their stale
+      tests fixed).
 - [ ] Full smoke-test pass on the maintainer's device; signed standard + rooted
       release from `main`.
 

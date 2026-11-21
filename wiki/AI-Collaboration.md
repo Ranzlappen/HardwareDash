@@ -43,8 +43,8 @@ Before planning or coding any task:
 5. [Roadmap & Status](Roadmap-and-Status).
 
 Read a subsystem page (widgets / monitoring / automation / flavors) only when
-the task touches it. [Torch Blueprint](Torch-Blueprint) and [Feature Migration
-Guide](Feature-Migration-Guide) are v2 references — useful for *how* a seam
+the task touches it. [Torch Blueprint](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Torch-Blueprint.md) and [Feature Migration
+Guide](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Feature-Migration-Guide.md) are v2 references — useful for *how* a seam
 works, not as a shape every module must copy.
 
 ## Modes
@@ -116,11 +116,11 @@ Per the maintenance rules, every change updates the relevant page **in the
 same PR**:
 
 - New/changed feature → [Roadmap & Status](Roadmap-and-Status),
-  [Feature Catalog](Feature-Catalog), [Module Catalog](Module-Catalog).
-- New public component → [Component Catalog](Component-Catalog).
-- New asset category → [Asset Catalog](Asset-Catalog).
+  [Feature Catalog](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Feature-Catalog.md), [Module Catalog](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Module-Catalog.md).
+- New public component → [Component Catalog](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Component-Catalog.md).
+- New asset category → [Asset Catalog](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Asset-Catalog.md).
 - New AI workflow rule → this page.
-- Major architectural choice → [Decision Records](Decision-Records).
+- Major architectural choice → [Decision Records](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Decision-Records.md).
 - New CI trap discovered → [Troubleshooting](Troubleshooting).
 
 Every wiki page carries a footer with **last reviewed**, **source paths**,
@@ -134,7 +134,7 @@ and **related modules** — update the date when you touch a page.
 - Branching on `BuildConfig.IS_ROOTED`.
 - Raw `dp` / raw `Surface(color=…)` glass / default text wrapping.
 - Overbuilding a simple feature into a torch (see [Torch
-  Blueprint](Torch-Blueprint) — copy the shape, not every seam).
+  Blueprint](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Torch-Blueprint.md) — copy the shape, not every seam).
 - Adding a seam, base class or module with fewer than two real consumers.
 - Adding `assert_*` ActionHandler actions (use the engine's metric
   conditions), or MetricSources / rooted rows nobody will look at.

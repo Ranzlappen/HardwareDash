@@ -17,11 +17,10 @@ How-to documentation lives in the
 
 Read a subsystem page only when the task touches it:
 [Flavors & Root Safety](wiki/Flavors-and-Root-Safety.md),
-[Widgets, Tiles & Surfaces](wiki/Widgets-Tiles-and-Surfaces.md),
-[Monitoring Framework](wiki/Monitoring-Framework.md),
-[Automation Engine](wiki/Automation-Engine.md),
 [Troubleshooting](wiki/Troubleshooting.md) (CI-only traps — there is no
-Android SDK locally; CI is the compile gate).
+Android SDK locally; CI is the compile gate). v2-era subsystem pages
+(Widgets/Tiles, Monitoring, Automation, catalogs) live unmaintained in
+[`docs/wiki-archive/`](docs/wiki-archive/) — the code wins when they disagree.
 
 ## Hard local rules
 

@@ -70,14 +70,14 @@ is ticked.
 seam), `:core:widgetkit`, `:core:monitoring`, `:core:automation` +
 `automation.db`, `:core:data` / `:core:datastore`, `:core:permissions`,
 backup format v6, the CI matrix (unit tests, both flavors, standard-APK leak
-gate, signed rooted release). See [Architecture](Architecture).
+gate, signed rooted release). See [Architecture](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Architecture.md).
 
 ## Release readiness
 
 CI produces `standard-debug.apk`, `standard-release.apk` + `.aab`,
 `rooted-debug.apk` and a signed `rooted-release.apk` on pushes to `main`;
 `ci-refactor.yml` builds both debug flavors on every PR and on pushes to
-`claude/v3-**`. See [Testing & CI](Testing-and-CI).
+`claude/v3-**`. See [Testing & CI](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Testing-and-CI.md).
 
 ---
 

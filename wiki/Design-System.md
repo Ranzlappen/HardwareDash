@@ -6,7 +6,7 @@ through `LocalGadgetTheme.current`, so a downstream "compact" or
 "high-contrast" theme can override any slot without forking components.
 
 For the full per-component reference (signatures, parameters, examples,
-a11y behaviour), see **[Component Catalog](Component-Catalog)**. This page
+a11y behaviour), see **[Component Catalog](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Component-Catalog.md)**. This page
 is the rule set and the rationale.
 
 ## Tokens — `LocalGadgetTheme`
@@ -84,7 +84,7 @@ degrades to a higher-opacity solid fallback.
 ## Cards, buttons, inputs, modals
 
 The component families (full signatures in
-[Component Catalog](Component-Catalog)):
+[Component Catalog](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/wiki-archive/Component-Catalog.md)):
 
 - **Buttons** — `GadgetPrimaryButton` (one high-emphasis CTA per screen),
   `GadgetSecondaryButton` (outlined glassy sibling), `GadgetTertiaryButton`

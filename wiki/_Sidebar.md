@@ -2,37 +2,18 @@
 
 **Start here**
 - [Home](Home)
-- [Glossary](Glossary)
-
-**Project**
 - [MASTER-PLAN (v3)](https://github.com/Ranzlappen/HardwareDash/blob/main/MASTER-PLAN.md)
 - [Roadmap & Status](Roadmap-and-Status)
-- [Architecture](Architecture)
-- [Decision Records](Decision-Records)
 
-**Catalogs**
-- [Module Catalog](Module-Catalog)
-- [Feature Catalog](Feature-Catalog)
-- [Component Catalog](Component-Catalog)
-- [Asset Catalog](Asset-Catalog)
-
-**Design & UI**
-- [Design System](Design-System)
-- [Monitoring Framework](Monitoring-Framework)
-- [Widgets, Tiles & Surfaces](Widgets-Tiles-and-Surfaces)
-
-**Engineering**
+**Building**
+- [AI Collaboration](AI-Collaboration)
 - [Module Authoring Contract](Module-Authoring-Contract)
-- [Feature Migration Guide](Feature-Migration-Guide) _(v2 ref)_
-- [Torch Blueprint](Torch-Blueprint) _(v2 ref)_
+- [Design System](Design-System)
 - [Flavors & Root Safety](Flavors-and-Root-Safety)
-- [Automation Engine](Automation-Engine)
-- [Testing & CI](Testing-and-CI)
 - [Troubleshooting](Troubleshooting)
 
-**Archived**
-- [Completion Master Plan](Completion-Master-Plan) _(superseded)_
+**Testing on a phone**
+- [v3 smoke test](https://github.com/Ranzlappen/HardwareDash/blob/main/docs/v3-smoke-test.md)
 
-**AI collaborators**
-- [AI Collaboration](AI-Collaboration)
-- [AI Prompt Library](AI-Prompt-Library)
+**Archive** _(v2-era reference, not maintained)_
+- [docs/wiki-archive](https://github.com/Ranzlappen/HardwareDash/tree/main/docs/wiki-archive)
