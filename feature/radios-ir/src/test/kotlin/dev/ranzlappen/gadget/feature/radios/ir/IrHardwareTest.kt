@@ -3,10 +3,8 @@ package dev.ranzlappen.gadget.feature.radios.ir
 import android.content.Context
 import android.hardware.ConsumerIrManager
 import io.mockk.Runs
-import io.mockk.eq
 import io.mockk.every
 import io.mockk.just
-import io.mockk.match
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
