@@ -125,7 +125,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      contents: read
+      # write: the rolling v3-dev prerelease (push runs only).
+      contents: write
       # APK-size delta step downloads the latest main-branch baseline
       # artifact from build-apk.yml runs and writes a sticky PR comment.
       actions: read
@@ -234,6 +235,26 @@ jobs:
             app/build/outputs/apk/rooted/debug/*.apk
           retention-days: 7
           if-no-files-found: error
+
+      # Rolling prerelease `v3-dev`: the latest phone-test APKs at fixed
+      # URLs, downloadable on the phone without unzipping an artifact.
+      # No workflow triggers on tags/releases, and a prerelease never
+      # becomes "Latest", so main's release flow is untouched.
+      - name: Publish v3 test APKs (prerelease v3-dev)
+        if: success() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p v3dev
+          cp app/build/outputs/apk/standard/debug/*.apk v3dev/Gadget-v3-standard.apk
+          cp app/build/outputs/apk/rooted/debug/*.apk v3dev/Gadget-v3-rooted.apk
+          ls -l v3dev
+          gh release delete v3-dev --yes --cleanup-tag || true
+          gh release create v3-dev v3dev/*.apk \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "v3 test build ${{ github.run_number }}" \
+            --notes "Phone-test build of ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7} (CI run ${{ github.run_number }}). Installs as the separate app \"Gadget v3\" / \"Gadget v3 Root\". Not a release."
 
       # ─── APK-size delta vs main (standard-debug) ─────────────────────
       # Computes the size of the PR's standard-debug APK, downloads the
