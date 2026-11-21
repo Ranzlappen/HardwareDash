@@ -79,7 +79,7 @@ fun SectionHubScreen(
 internal fun GadgetDestination.hubSummary(): String? = when (this) {
     GadgetDestination.Torch -> "Flashlight, strobe, brightness"
     GadgetDestination.Vibration -> "Effects, haptics, patterns, draw your own"
-    GadgetDestination.Camera -> "Barcode and QR scanner"
+    GadgetDestination.Camera -> "Photos, lenses, zoom; QR scanner"
     GadgetDestination.Audio -> "Sound level meter and recorder"
     GadgetDestination.Display -> "Screen brightness"
     GadgetDestination.Apps -> "App folders and folder widgets"

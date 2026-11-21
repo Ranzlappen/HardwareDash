@@ -275,8 +275,16 @@ is green and its smoke-test lines pass.
       `adb_enabled` + `usb_debugging_enabled`); fold when touched.
 
 ### V3-3 · Bring back v1's practical tools
-- [ ] **B9** Camera: preview, lens picker, zoom, tap-to-focus, exposure,
-      capture to MediaStore; scanner becomes a mode.
+- [x] **B9** Camera: Photo / Scan modes on one CameraX
+      `LifecycleCameraController` preview (tap-to-focus + pinch-zoom built
+      in); lens chips from every exposed camera, roles by focal length; zoom
+      presets incl. < 1× on logical cameras; exposure slider; torch from the
+      camera's own state; capture to `Pictures/Gadget` with open / share.
+      v2's fake "rooted active" capability rows dropped. `CameraLensesTest`.
+- [ ] **CI gap** (found in B9): `ci-refactor.yml` never ran the unit tests of
+      `audio`, `lock`, `radios-bt`, `radios-ir`, `radios-nfc`, `radios-wifi`,
+      `settings` (camera added in B9). Enable them one module per commit and
+      fix what was silently red.
 - [ ] **B10** Audio: live FFT spectrum; recordings list with playback/share/delete.
 - [ ] **B11** NFC parity check vs v1 (write, tag type, protection info); fill gaps.
 - [ ] **B12** File metadata / EXIF viewer (approved, §8.3): browse a file via

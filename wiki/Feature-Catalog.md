@@ -208,8 +208,15 @@ of [Roadmap & Status](Roadmap-and-Status):
 - **GPS / Location** (`:feature:gps` + `-rooted`) — OSMDroid map, live
   speed + altitude monitors, GPS-spoofing subsystem, rooted NMEA /
   constellation rows.
-- **Camera / Barcode** (`:feature:camera` + `-rooted`) — CameraX + MLKit
-  scanner, scan history, rooted high-FPS / RAW rows.
+- **Camera** (`:feature:camera` + `-rooted`, v3 B9) — one CameraX
+  `LifecycleCameraController` preview in two modes. **Photo** (default):
+  lens chips for every camera CameraX exposes (ultra-wide / main / tele by
+  focal length), zoom presets incl. a logical camera's < 1× ultra-wide,
+  tap-to-focus, pinch-zoom, exposure compensation, torch, capture to
+  `Pictures/Gadget` (MediaStore) with open / share. **Scan**: ML Kit
+  barcode scanner (all formats), scan history, Wi-Fi / URL deep-open.
+  Rooted extreme-tier rows (high FPS, manual exposure, RAW, multi-camera,
+  HAL bypass, shutter sound) unchanged — unverified, see B13.
 - **Audio** (`:feature:audio` + `-rooted`) — dB meter + WAV recording,
   live dB monitor, rooted mic rows.
 - **Storage** (`:feature:storage` + `-rooted`) — volume cards, used-%

@@ -1,9 +1,9 @@
 package dev.ranzlappen.gadget.feature.camera
 
 import android.content.ClipData
+import android.net.Uri
 import android.content.ClipboardManager
 import android.content.Context
-import androidx.camera.core.CameraControl
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.feature.camera.control.CameraController
 import io.mockk.coVerify
@@ -33,9 +33,8 @@ import kotlin.test.assertTrue
  *    identical seeding coverage),
  *  - [CameraViewModel.onScanDetected] updating `latestScan` *and* clearing any
  *    prior `error` together while persisting the scan via [ScanHistoryRepository],
- *  - [CameraViewModel.toggleTorch]'s actual toggle (not just a setter — it reads
- *    the current `isTorchOn` to compute the next value) and forwarding to
- *    [CameraControl.enableTorch], and
+ *  - photo mode state: [CameraViewModel.setMode] and a saved photo clearing
+ *    the previous capture error (torch state now comes from CameraX itself), and
  *  - [CameraViewModel.copyToClipboard] building the clipboard payload from the
  *    scan's raw value.
  *
@@ -111,29 +110,29 @@ class CameraViewModelTest {
         coVerify { repository.add(scan) }
     }
 
-    // ---- toggleTorch ----
+    // ---- photo mode (v3 B9) ----
 
     @Test
-    fun `toggleTorch flips isTorchOn from off to on and enables the torch`() {
+    fun `camera starts in photo mode and switches to scan`() {
         val viewModel = createViewModel()
-        val cameraControl = mockk<CameraControl>(relaxed = true)
+        assertEquals(CameraMode.Photo, viewModel.state.value.mode)
 
-        viewModel.toggleTorch(cameraControl)
+        viewModel.setMode(CameraMode.Scan)
 
-        assertTrue(viewModel.state.value.isTorchOn)
-        verify { cameraControl.enableTorch(true) }
+        assertEquals(CameraMode.Scan, viewModel.state.value.mode)
     }
 
     @Test
-    fun `toggleTorch flips isTorchOn back off on a second call`() {
+    fun `a saved photo clears the previous capture error`() {
         val viewModel = createViewModel()
-        val cameraControl = mockk<CameraControl>(relaxed = true)
+        val uri = mockk<Uri>()
 
-        viewModel.toggleTorch(cameraControl)
-        viewModel.toggleTorch(cameraControl)
+        viewModel.onPhotoError("busy")
+        assertEquals("busy", viewModel.state.value.photoError)
+        viewModel.onPhotoSaved(uri)
 
-        assertFalse(viewModel.state.value.isTorchOn)
-        verify { cameraControl.enableTorch(false) }
+        assertEquals(uri, viewModel.state.value.lastPhotoUri)
+        assertNull(viewModel.state.value.photoError)
     }
 
     // ---- clearHistory ----

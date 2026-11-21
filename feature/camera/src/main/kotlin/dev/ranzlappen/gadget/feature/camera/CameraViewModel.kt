@@ -3,7 +3,7 @@ package dev.ranzlappen.gadget.feature.camera
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import androidx.camera.core.CameraControl
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -148,11 +148,11 @@ class CameraViewModel @Inject constructor(
         viewModelScope.launch { repository.add(result) }
     }
 
-    fun toggleTorch(cameraControl: CameraControl) {
-        val next = !_state.value.isTorchOn
-        _state.update { it.copy(isTorchOn = next) }
-        cameraControl.enableTorch(next)
-    }
+    fun setMode(mode: CameraMode) = _state.update { it.copy(mode = mode) }
+
+    fun onPhotoSaved(uri: Uri) = _state.update { it.copy(lastPhotoUri = uri, photoError = null) }
+
+    fun onPhotoError(message: String) = _state.update { it.copy(photoError = message) }
 
     fun clearHistory() {
         viewModelScope.launch { repository.clear() }
