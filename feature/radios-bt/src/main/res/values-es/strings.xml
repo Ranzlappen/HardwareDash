@@ -29,12 +29,6 @@
     <string name="bt_live_monitor_title">Estado de Bluetooth (en vivo)</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="bt_cap_rooted_active">Activo: compilación rooteada</string>
-    <string name="bt_cap_rooted_required">Requiere compilación rooteada</string>
-    <string name="bt_cap_hidden_battery_name">API oculta de nivel de batería</string>
-    <string name="bt_cap_hidden_battery_detail">Lee el % de batería del dispositivo mediante API ocultas de reflexión de Bluetooth, para dispositivos Classic, BLE y Dual</string>
-    <string name="bt_cap_a2dp_codec_name">Identificación de códec A2DP</string>
-    <string name="bt_cap_a2dp_codec_detail">Identifica el códec de transmisión A2DP activo (AAC, aptX, LDAC) mediante el proxy oculto BluetoothA2dp</string>
     <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
     <string name="bt_root_tools_title">Herramientas root</string>
     <string name="bt_root_tools_unavailable">Requiere la versión rooteada de la app.</string>

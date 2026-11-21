@@ -135,57 +135,6 @@ private fun batteryModuleInfo(state: BatteryState, isRootedFlavor: Boolean): Mod
                 )
             },
         ),
-        ModuleCapability(
-            name = stringResource(R.string.battery_cap_fuel_gauge_name),
-            detail = stringResource(R.string.battery_cap_fuel_gauge_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.battery_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.battery_cap_rooted_required),
-                    )
-                }
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.battery_cap_cell_monitor_name),
-            detail = stringResource(R.string.battery_cap_cell_monitor_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.battery_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.battery_cap_rooted_required),
-                    )
-                }
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.battery_cap_charging_profile_name),
-            detail = stringResource(R.string.battery_cap_charging_profile_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.battery_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.battery_cap_rooted_required),
-                    )
-                }
-            },
-        ),
     ),
 )
 

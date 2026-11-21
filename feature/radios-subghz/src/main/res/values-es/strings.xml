@@ -26,12 +26,4 @@
     <string name="subghz_cap_bridge_no_host">Sin compatibilidad con USB host</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="subghz_cap_rooted_active">Activo — compilación rooteada</string>
-    <string name="subghz_cap_rooted_required">Requiere compilación rooteada</string>
-    <string name="subghz_cap_registers_name">Acceso directo a registros</string>
-    <string name="subghz_cap_registers_detail">Lee y escribe los registros de radio del transceptor directamente a través del nodo de dispositivo USB, sin pasar por el controlador en espacio de usuario</string>
-    <string name="subghz_cap_tuning_name">Sintonización de portadora personalizada</string>
-    <string name="subghz_cap_tuning_detail">Sintoniza una portadora Sub-GHz explícita (p. ej. 315 / 433,92 / 868 / 915 MHz) y ajusta la desviación fuera de los preajustes del controlador estándar</string>
-    <string name="subghz_cap_capture_name">Captura OOK / 2-FSK</string>
-    <string name="subghz_cap_capture_detail">Transmite símbolos sin procesar de on-off keying y 2-FSK desde la radio para su reproducción y análisis</string>
 </resources>

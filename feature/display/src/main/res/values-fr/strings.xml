@@ -53,14 +53,6 @@
     <string name="display_cap_brightness_detail">Lecture/écriture de Settings.System.SCREEN_BRIGHTNESS.</string>
     <string name="display_cap_brightness_granted">Autorisation accordée</string>
     <string name="display_cap_brightness_denied">WRITE_SETTINGS non accordé</string>
-    <string name="display_cap_refresh_rate_name">Substitution du taux de rafraîchissement</string>
-    <string name="display_cap_refresh_rate_detail">Force l\'écran à adopter un mode pris en charge spécifique.</string>
-    <string name="display_cap_density_name">Substitution de densité (DPI)</string>
-    <string name="display_cap_density_detail">Substitution à l\'exécution via `wm density`.</string>
-    <string name="display_cap_surfaceflinger_name">Instantané SurfaceFlinger</string>
-    <string name="display_cap_surfaceflinger_detail">Extrait en lecture seule de `dumpsys SurfaceFlinger`.</string>
-    <string name="display_cap_rooted_active">Actif — version rootée</string>
-    <string name="display_cap_rooted_required">Nécessite la version rootée de l\'application</string>
 
     <!-- Monitoring -->
     <string name="display_live_monitor_brightness">Luminosité en direct</string>

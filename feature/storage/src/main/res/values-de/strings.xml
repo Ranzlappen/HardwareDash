@@ -22,14 +22,6 @@
     <string name="storage_monitor_free">Verlauf des freien Speichers</string>
 
     <!-- ─── Rooted capabilities ─────────────────────────────────────────── -->
-    <string name="storage_cap_rooted_active">Aktiv — gerootete Version</string>
-    <string name="storage_cap_rooted_required">Erfordert gerootete Version</string>
-    <string name="storage_cap_diskstats_name">Diskstats-Dump</string>
-    <string name="storage_cap_diskstats_detail">Kernel-E/A-Statistiken aus /proc/diskstats (Lese-/Schreibvorgänge, Latenz pro Blockgerät)</string>
-    <string name="storage_cap_mounts_name">Mount-Auflistung</string>
-    <string name="storage_cap_mounts_detail">Vollständige Mount-Tabelle über /proc/mounts, einschließlich versteckter Partitionen, die über StorageManager nicht sichtbar sind</string>
-    <string name="storage_cap_fstrim_name">Speicher-Trim (fstrim)</string>
-    <string name="storage_cap_fstrim_detail">Erzwingt einen Discard-Vorgang auf eingehängten Dateisystemen, um die SSD-Lebensdauer zu verbessern</string>
 
     <!-- Home-screen widget -->
     <string name="storage_widget_label">Speicher</string>

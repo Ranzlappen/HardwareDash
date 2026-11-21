@@ -36,8 +36,4 @@
     <string name="flipper_cap_ble_detail">Talk to a bonded Flipper Zero over its Nordic-UART Bluetooth serial service</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="flipper_cap_rooted_active">Active — rooted build</string>
-    <string name="flipper_cap_rooted_required">Requires rooted build</string>
-    <string name="flipper_cap_usb_grant_name">Root USB auto-grant</string>
-    <string name="flipper_cap_usb_grant_detail">Grant USB device access via root appops so the Flipper connects without the per-attach permission dialog</string>
 </resources>

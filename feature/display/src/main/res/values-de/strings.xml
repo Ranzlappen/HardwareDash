@@ -53,14 +53,6 @@
     <string name="display_cap_brightness_detail">Lesen/Schreiben von Settings.System.SCREEN_BRIGHTNESS.</string>
     <string name="display_cap_brightness_granted">Berechtigung erteilt</string>
     <string name="display_cap_brightness_denied">WRITE_SETTINGS nicht erteilt</string>
-    <string name="display_cap_refresh_rate_name">Bildwiederholraten-Override</string>
-    <string name="display_cap_refresh_rate_detail">Erzwingt einen bestimmten unterstützten Modus für das Display.</string>
-    <string name="display_cap_density_name">Dichte (DPI)-Override</string>
-    <string name="display_cap_density_detail">Laufzeit-Override über `wm density`.</string>
-    <string name="display_cap_surfaceflinger_name">SurfaceFlinger-Snapshot</string>
-    <string name="display_cap_surfaceflinger_detail">Schreibgeschütztes `dumpsys SurfaceFlinger`-Ende.</string>
-    <string name="display_cap_rooted_active">Aktiv — gerootete Build-Version</string>
-    <string name="display_cap_rooted_required">Erfordert die gerootete App-Version</string>
 
     <!-- Monitoring -->
     <string name="display_live_monitor_brightness">Helligkeit (live)</string>

@@ -44,14 +44,6 @@
     <string name="wifi_monitor_enabled">Historial de estado de WiFi</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="wifi_cap_rooted_active">Activo: compilación rooteada</string>
-    <string name="wifi_cap_rooted_required">Requiere compilación rooteada</string>
-    <string name="wifi_cap_rfkill_name">Control de radio rfkill</string>
-    <string name="wifi_cap_rfkill_detail">Bloquea o desbloquea la radio WiFi a nivel de kernel mediante rfkill, evitando la pila WiFi de Android</string>
-    <string name="wifi_cap_tx_power_name">Anulación de potencia de transmisión (TX)</string>
-    <string name="wifi_cap_tx_power_detail">Establece la potencia de transmisión mediante iw phy set txpower (límite máximo: 20 dBm) para reducir interferencias o ampliar el alcance</string>
-    <string name="wifi_cap_channel_name">Selección explícita de canal</string>
-    <string name="wifi_cap_channel_detail">Fija un canal específico de 2,4 o 5 GHz mediante iw dev set channel, evitando la selección automática</string>
     <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
     <string name="wifi_root_tools_title">Herramientas root</string>
     <string name="wifi_root_tools_unavailable">Requiere la versión rooteada de la app.</string>

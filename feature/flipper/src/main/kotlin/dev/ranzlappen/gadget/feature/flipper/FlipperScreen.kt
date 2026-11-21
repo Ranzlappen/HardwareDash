@@ -106,23 +106,6 @@ private fun flipperModuleInfo(isRootedFlavor: Boolean): ModuleInfo = ModuleInfo(
                 )
             },
         ),
-        ModuleCapability(
-            name = stringResource(R.string.flipper_cap_usb_grant_name),
-            detail = stringResource(R.string.flipper_cap_usb_grant_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.flipper_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.flipper_cap_rooted_required),
-                    )
-                }
-            },
-        ),
     ),
 )
 

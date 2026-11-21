@@ -107,58 +107,6 @@ fun DiagnosticsScreen(
 private fun diagnosticsModuleInfo(state: DiagnosticsState): ModuleInfo = ModuleInfo(
     compatibility = OsCompatibility(minSdk = 1),
     capabilities = listOf(
-        ModuleCapability(
-            name = stringResource(R.string.diagnostics_cap_logcat_name),
-            detail = stringResource(R.string.diagnostics_cap_logcat_detail),
-            status = {
-                if (state.isRootedFlavor) CapabilityStatus(
-                    kind = GadgetStatusKind.Success,
-                    message = stringResource(R.string.diagnostics_cap_rooted_active),
-                ) else CapabilityStatus(
-                    kind = GadgetStatusKind.Warning,
-                    message = stringResource(R.string.diagnostics_cap_rooted_required),
-                )
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.diagnostics_cap_meminfo_name),
-            detail = stringResource(R.string.diagnostics_cap_meminfo_detail),
-            status = {
-                if (state.isRootedFlavor) CapabilityStatus(
-                    kind = GadgetStatusKind.Success,
-                    message = stringResource(R.string.diagnostics_cap_rooted_active),
-                ) else CapabilityStatus(
-                    kind = GadgetStatusKind.Warning,
-                    message = stringResource(R.string.diagnostics_cap_rooted_required),
-                )
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.diagnostics_cap_cpuinfo_name),
-            detail = stringResource(R.string.diagnostics_cap_cpuinfo_detail),
-            status = {
-                if (state.isRootedFlavor) CapabilityStatus(
-                    kind = GadgetStatusKind.Success,
-                    message = stringResource(R.string.diagnostics_cap_rooted_active),
-                ) else CapabilityStatus(
-                    kind = GadgetStatusKind.Warning,
-                    message = stringResource(R.string.diagnostics_cap_rooted_required),
-                )
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.diagnostics_cap_procstats_name),
-            detail = stringResource(R.string.diagnostics_cap_procstats_detail),
-            status = {
-                if (state.isRootedFlavor) CapabilityStatus(
-                    kind = GadgetStatusKind.Success,
-                    message = stringResource(R.string.diagnostics_cap_rooted_active),
-                ) else CapabilityStatus(
-                    kind = GadgetStatusKind.Warning,
-                    message = stringResource(R.string.diagnostics_cap_rooted_required),
-                )
-            },
-        ),
     ),
 )
 

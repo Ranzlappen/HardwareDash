@@ -26,12 +26,4 @@
     <string name="subghz_cap_bridge_no_host">No USB host support</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="subghz_cap_rooted_active">Active — rooted build</string>
-    <string name="subghz_cap_rooted_required">Requires rooted build</string>
-    <string name="subghz_cap_registers_name">Raw register access</string>
-    <string name="subghz_cap_registers_detail">Read and write the transceiver\'s radio registers directly over the USB device node, bypassing the userspace driver</string>
-    <string name="subghz_cap_tuning_name">Custom carrier tuning</string>
-    <string name="subghz_cap_tuning_detail">Tune to an explicit Sub-GHz carrier (e.g. 315 / 433.92 / 868 / 915 MHz) and set deviation outside the stock driver presets</string>
-    <string name="subghz_cap_capture_name">OOK / 2-FSK capture</string>
-    <string name="subghz_cap_capture_detail">Stream raw on-off-keying and 2-FSK symbols from the radio for replay and analysis</string>
 </resources>

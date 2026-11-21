@@ -14,16 +14,6 @@
     <string name="adbdebug_cap_state_detail">Lee Settings.Global.ADB_ENABLED directamente; no se requiere ningún permiso especial</string>
     <string name="adbdebug_cap_state_enabled">La depuración ADB está habilitada</string>
     <string name="adbdebug_cap_state_disabled">La depuración ADB está deshabilitada</string>
-    <string name="adbdebug_cap_toggle_name">Interruptor de ADB habilitado</string>
-    <string name="adbdebug_cap_toggle_detail">Escribe settings put global adb_enabled 0|1</string>
-    <string name="adbdebug_cap_network_name">ADB por red</string>
-    <string name="adbdebug_cap_network_detail">Habilita ADB inalámbrico en un puerto permitido (5555-5599)</string>
-    <string name="adbdebug_cap_dump_name">Instantánea de getprop</string>
-    <string name="adbdebug_cap_dump_detail">Captura de getprop de solo lectura, limitada a 16 KB, con persistencia opcional en Logbook</string>
-    <string name="adbdebug_cap_setprop_name">Anulación de setprop</string>
-    <string name="adbdebug_cap_setprop_detail">Anulación de setprop permitida en 7 claves exactas más entradas log.tag.*</string>
-    <string name="adbdebug_cap_rooted_active">Activo: compilación rooteada</string>
-    <string name="adbdebug_cap_rooted_required">Requiere compilación rooteada</string>
 
     <!-- Standard-tier state card -->
     <string name="adbdebug_card_state_title">Estado de depuración ADB</string>

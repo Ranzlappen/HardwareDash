@@ -46,16 +46,6 @@
     <string name="usbdebug_cap_debug_state_detail">Reads Settings.Global.ADB_ENABLED — the single OS setting behind both \"USB debugging\" and ADB access</string>
     <string name="usbdebug_cap_debug_state_enabled">Enabled</string>
     <string name="usbdebug_cap_debug_state_disabled">Disabled</string>
-    <string name="usbdebug_cap_function_switch_name">USB function role switch</string>
-    <string name="usbdebug_cap_function_switch_detail">Sets the USB gadget function (MTP, PTP, RNDIS, …) via cmd usb set-functions</string>
-    <string name="usbdebug_cap_dump_usb_name">USB dump</string>
-    <string name="usbdebug_cap_dump_usb_detail">Read-only dumpsys usb snapshot, tail-capped to 8 KB</string>
-    <string name="usbdebug_cap_dump_serial_name">Serial service dump</string>
-    <string name="usbdebug_cap_dump_serial_detail">Read-only dumpsys SerialService snapshot (API 30+, falls back to dumpsys serial)</string>
-    <string name="usbdebug_cap_dump_debugfs_name">USB devices (debugfs) dump</string>
-    <string name="usbdebug_cap_dump_debugfs_detail">Read-only /sys/kernel/debug/usb/devices snapshot, falls back to dumpsys usb if debugfs isn\'t mounted</string>
-    <string name="usbdebug_cap_rooted_active">Active — rooted build</string>
-    <string name="usbdebug_cap_rooted_required">Requires rooted build</string>
 
     <!-- Automation action labels -->
     <string name="usbdebug_action_switch_function">Switch USB function role</string>

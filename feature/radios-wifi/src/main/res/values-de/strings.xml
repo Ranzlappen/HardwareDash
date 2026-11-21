@@ -44,14 +44,6 @@
     <string name="wifi_monitor_enabled">WiFi-Statusverlauf</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="wifi_cap_rooted_active">Aktiv — gerooteter Build</string>
-    <string name="wifi_cap_rooted_required">Erfordert gerooteten Build</string>
-    <string name="wifi_cap_rfkill_name">rfkill-Funksteuerung</string>
-    <string name="wifi_cap_rfkill_detail">Blockiert oder entsperrt das WiFi-Funkmodul auf Kernel-Ebene über rfkill, unter Umgehung des Android-WiFi-Stacks</string>
-    <string name="wifi_cap_tx_power_name">TX-Leistungs-Override</string>
-    <string name="wifi_cap_tx_power_detail">Legt die Sendeleistung über iw phy set txpower fest (feste Obergrenze: 20 dBm), um Interferenzen zu reduzieren oder die Reichweite zu erhöhen</string>
-    <string name="wifi_cap_channel_name">Explizite Kanalauswahl</string>
-    <string name="wifi_cap_channel_detail">Bindet an einen bestimmten 2,4- oder 5-GHz-Kanal über iw dev set channel, unter Umgehung der automatischen Auswahl</string>
     <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
     <string name="wifi_root_tools_title">Root-Tools</string>
     <string name="wifi_root_tools_unavailable">Erfordert die gerootete App-Version.</string>

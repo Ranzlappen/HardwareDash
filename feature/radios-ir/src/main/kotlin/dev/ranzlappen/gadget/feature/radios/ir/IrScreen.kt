@@ -145,40 +145,6 @@ private fun irModuleInfo(
                 }
             },
         ),
-        ModuleCapability(
-            name = stringResource(R.string.ir_cap_custom_carrier_name),
-            detail = stringResource(R.string.ir_cap_custom_carrier_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.ir_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.ir_cap_rooted_required),
-                    )
-                }
-            },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.ir_cap_gpio_burst_name),
-            detail = stringResource(R.string.ir_cap_gpio_burst_detail),
-            status = {
-                if (isRootedFlavor) {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Success,
-                        message = stringResource(R.string.ir_cap_rooted_active),
-                    )
-                } else {
-                    CapabilityStatus(
-                        kind = GadgetStatusKind.Warning,
-                        message = stringResource(R.string.ir_cap_rooted_required),
-                    )
-                }
-            },
-        ),
     ),
 )
 

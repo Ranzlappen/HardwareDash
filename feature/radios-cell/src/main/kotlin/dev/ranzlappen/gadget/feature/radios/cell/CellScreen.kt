@@ -225,40 +225,7 @@ private fun cellModuleInfo(
                 }
             },
         ),
-        rootedCapability(
-            nameRes = R.string.cell_cap_raw_modem_name,
-            detailRes = R.string.cell_cap_raw_modem_detail,
-            isRootedFlavor = isRootedFlavor,
-        ),
-        rootedCapability(
-            nameRes = R.string.cell_cap_signal_deep_name,
-            detailRes = R.string.cell_cap_signal_deep_detail,
-            isRootedFlavor = isRootedFlavor,
-        ),
     ),
-)
-
-@Composable
-private fun rootedCapability(
-    nameRes: Int,
-    detailRes: Int,
-    isRootedFlavor: Boolean,
-): ModuleCapability = ModuleCapability(
-    name = stringResource(nameRes),
-    detail = stringResource(detailRes),
-    status = {
-        if (isRootedFlavor) {
-            CapabilityStatus(
-                kind = GadgetStatusKind.Success,
-                message = stringResource(R.string.cell_cap_rooted_active),
-            )
-        } else {
-            CapabilityStatus(
-                kind = GadgetStatusKind.Warning,
-                message = stringResource(R.string.cell_cap_rooted_required),
-            )
-        }
-    },
 )
 
 @Composable

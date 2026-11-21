@@ -32,14 +32,6 @@
     <string name="gps_label_accuracy">Precisión</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="gps_cap_rooted_active">Activo — versión rooteada</string>
-    <string name="gps_cap_rooted_required">Requiere versión rooteada</string>
-    <string name="gps_cap_nmea_name">Captura de datos NMEA sin procesar</string>
-    <string name="gps_cap_nmea_detail">Flujo directo de sentencias NMEA que evita la API de LocationManager</string>
-    <string name="gps_cap_constellation_name">Volcado de constelación</string>
-    <string name="gps_cap_constellation_detail">Informe completo de la constelación de satélites vía /dev/gnss0 o sysfs</string>
-    <string name="gps_cap_location_override_name">Anulación de ubicación</string>
-    <string name="gps_cap_location_override_detail">Inyección de ubicación simulada mediante proveedor de prueba (requiere la opción de desarrollador de ubicación simulada)</string>
 
     <!-- ─── Monitoring containers ─────────────────────────────────────────── -->
     <string name="gps_live_monitor_speed">Velocidad (en vivo)</string>

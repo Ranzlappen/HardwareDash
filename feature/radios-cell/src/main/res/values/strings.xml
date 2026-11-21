@@ -50,12 +50,6 @@
     <string name="cell_cap_signal_bars">%1$d of 4 bars</string>
 
     <!-- Rooted capability rows -->
-    <string name="cell_cap_rooted_active">Active — rooted build</string>
-    <string name="cell_cap_rooted_required">Requires rooted build</string>
-    <string name="cell_cap_raw_modem_name">Raw modem diagnostics</string>
-    <string name="cell_cap_raw_modem_detail">Read-only walk of Qualcomm qcom_smd*/qmi_devices/rmnet&lt;N&gt; sysfs nodes; shows \"Unsupported\" cleanly on non-Qualcomm SoCs</string>
-    <string name="cell_cap_signal_deep_name">Per-band signal deep dump</string>
-    <string name="cell_cap_signal_deep_detail">Read-only per-band RSRP/RSRQ/SINR breakdown via vendor sysfs nodes, when present</string>
 
     <!-- Rooted diagnostics panel -->
     <string name="cell_root_modem_dump_title">Raw modem diagnostics</string>

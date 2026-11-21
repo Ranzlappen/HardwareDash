@@ -33,57 +33,11 @@ import dev.ranzlappen.gadget.feature.microphone.components.MicrophoneToolsCard
 @Composable
 internal fun microphoneModuleInfo(isRootedFlavor: Boolean): ModuleInfo = ModuleInfo(
     compatibility = OsCompatibility(minSdk = 1),
-    capabilities = listOf(
-        ModuleCapability(
-            name = stringResource(R.string.microphone_cap_gain_boost_name),
-            detail = stringResource(R.string.microphone_cap_gain_boost_detail),
-            status = { rootedCapabilityStatus(isRootedFlavor) },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.microphone_cap_direct_pcm_name),
-            detail = stringResource(R.string.microphone_cap_direct_pcm_detail),
-            status = { rootedCapabilityStatus(isRootedFlavor) },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.microphone_cap_custom_rate_name),
-            detail = stringResource(R.string.microphone_cap_custom_rate_detail),
-            status = { rootedCapabilityStatus(isRootedFlavor) },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.microphone_cap_multi_mic_name),
-            detail = stringResource(R.string.microphone_cap_multi_mic_detail),
-            status = { rootedCapabilityStatus(isRootedFlavor) },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.microphone_cap_disable_effects_name),
-            detail = stringResource(R.string.microphone_cap_disable_effects_detail),
-            status = { rootedCapabilityStatus(isRootedFlavor) },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.microphone_cap_system_audio_name),
-            detail = stringResource(R.string.microphone_cap_system_audio_detail),
-            status = { rootedCapabilityStatus(isRootedFlavor) },
-        ),
-    ),
+    // v2's six "Active — rooted build" rows claimed nothing real; the
+    // tools themselves are gated as experimental (v3 B13).
+    capabilities = emptyList(),
 )
 
-@Composable
-private fun rootedCapabilityStatus(isRootedFlavor: Boolean): CapabilityStatus = if (isRootedFlavor) {
-    CapabilityStatus(kind = GadgetStatusKind.Success, message = stringResource(R.string.microphone_cap_rooted_active))
-} else {
-    CapabilityStatus(kind = GadgetStatusKind.Warning, message = stringResource(R.string.microphone_cap_rooted_required))
-}
-
-/**
- * Stateless screen content — a single [MicrophoneScreenState] snapshot plus a
- * flat [MicrophoneUiEvent] dispatcher. Hilt-free so it's directly usable from
- * previews and instrumented tests. Mirror of `VibrationScreenContent`.
- *
- * Owns the two mandatory confirm dialogs inline (rather than inside
- * [MicrophoneToolsCard]) since they gate the whole screen, not just their
- * originating row: the custom-sample-rate kernel-lockup-risk warning and the
- * system-audio-capture call-recording-legality disclaimer.
- */
 @Composable
 internal fun MicrophoneScreenContent(
     state: MicrophoneScreenState,

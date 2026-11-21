@@ -14,16 +14,6 @@
     <string name="adbdebug_cap_state_detail">Lit directement Settings.Global.ADB_ENABLED — aucune autorisation particulière requise</string>
     <string name="adbdebug_cap_state_enabled">Le débogage ADB est activé</string>
     <string name="adbdebug_cap_state_disabled">Le débogage ADB est désactivé</string>
-    <string name="adbdebug_cap_toggle_name">Interrupteur ADB activé</string>
-    <string name="adbdebug_cap_toggle_detail">Écrit settings put global adb_enabled 0|1</string>
-    <string name="adbdebug_cap_network_name">ADB via le réseau</string>
-    <string name="adbdebug_cap_network_detail">Active l\'ADB sans fil sur un port autorisé (5555-5599)</string>
-    <string name="adbdebug_cap_dump_name">Instantané getprop</string>
-    <string name="adbdebug_cap_dump_detail">Capture getprop en lecture seule, limitée à 16 Ko, avec persistance facultative dans Logbook</string>
-    <string name="adbdebug_cap_setprop_name">Substitution setprop</string>
-    <string name="adbdebug_cap_setprop_detail">Substitution setprop autorisée sur 7 clés exactes et les entrées log.tag.*</string>
-    <string name="adbdebug_cap_rooted_active">Actif — build rooté</string>
-    <string name="adbdebug_cap_rooted_required">Nécessite un build rooté</string>
 
     <!-- Standard-tier state card -->
     <string name="adbdebug_card_state_title">État du débogage ADB</string>

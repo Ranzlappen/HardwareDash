@@ -146,38 +146,8 @@ private fun usbDebugModuleInfo(state: UsbDebugState): ModuleInfo = ModuleInfo(
                 )
             },
         ),
-        ModuleCapability(
-            name = stringResource(R.string.usbdebug_cap_function_switch_name),
-            detail = stringResource(R.string.usbdebug_cap_function_switch_detail),
-            status = { rootedCapabilityStatus(state.isRootedFlavor) },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.usbdebug_cap_dump_usb_name),
-            detail = stringResource(R.string.usbdebug_cap_dump_usb_detail),
-            status = { rootedCapabilityStatus(state.isRootedFlavor) },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.usbdebug_cap_dump_serial_name),
-            detail = stringResource(R.string.usbdebug_cap_dump_serial_detail),
-            status = { rootedCapabilityStatus(state.isRootedFlavor) },
-        ),
-        ModuleCapability(
-            name = stringResource(R.string.usbdebug_cap_dump_debugfs_name),
-            detail = stringResource(R.string.usbdebug_cap_dump_debugfs_detail),
-            status = { rootedCapabilityStatus(state.isRootedFlavor) },
-        ),
     ),
 )
-
-@Composable
-private fun rootedCapabilityStatus(isRootedFlavor: Boolean): CapabilityStatus =
-    if (isRootedFlavor) CapabilityStatus(
-        kind = GadgetStatusKind.Success,
-        message = stringResource(R.string.usbdebug_cap_rooted_active),
-    ) else CapabilityStatus(
-        kind = GadgetStatusKind.Warning,
-        message = stringResource(R.string.usbdebug_cap_rooted_required),
-    )
 
 @Composable
 internal fun UsbDebugScreenContent(

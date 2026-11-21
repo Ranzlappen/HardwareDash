@@ -318,9 +318,12 @@ is green and its smoke-test lines pass.
       render only when `verified = true` or opted in, with an
       "Experimental — unverified" banner. `RootVerificationTest`;
       `:core:root` tests now in CI.
-- [ ] **B13b** Strip the remaining fake "Active — rooted build" capability
-      rows (adbdebug, lock, IR, cell, display, flipper, gps, notification…)
-      as done for camera / audio / NFC.
+- [x] **B13b** Stripped the remaining fake "Active — rooted build"
+      capability rows: 44 rows in 15 screens (ADB, USB, Lock, IR, Cell,
+      Sub-GHz, Display, Flipper, GPS, Wi-Fi, Bluetooth, Storage, Battery,
+      Diagnostics, Microphone) whose status was only `isRootedFlavor`, plus
+      their helpers and 118 now-unused strings in four locales. Module info
+      now lists only capabilities with a real check.
 - [ ] **B13c** On the Galaxy A17 with experimental tools on: test each rooted
       section, promote what works (`RootVerification.verified` +
       `verified = true` at the call site).
