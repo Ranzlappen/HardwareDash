@@ -12,6 +12,15 @@ the standard and rooted debug APKs; kept 7 days). They install as a **separate a
 `dev.ranzlappen.gadget.rooted.v3`), beside any other Gadget, with their own
 data. Each new test build updates the previous one (same release key,
 versionCode 1000 + run). Builds before run 347 can't install — skip them.
+Direct download (no zip): `releases/download/v3-dev/Gadget-v3-standard.apk`
+/ `…/Gadget-v3-rooted.apk` (rolling prerelease, replaced on every push).
+
+**Play Protect blocks the install** ("App not installed" /
+`INSTALL_FAILED_VERIFICATION_FAILURE`): Gadget declares a notification
+listener, which Play Protect's enhanced fraud protection refuses for
+sideloaded apps. Decision (2026-11-21): keep the listener; to install, Play
+Store → profile icon → Play Protect → ⚙️ → turn off "Scan apps with Play
+Protect", install, turn it back on.
 
 **Standard flavor:** Xiaomi 14T Pro · HyperOS · not rooted · build: _(APK / commit)_
 **Rooted flavor:** Samsung Galaxy A17 · rooted · build: _(APK / commit)_
