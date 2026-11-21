@@ -65,7 +65,13 @@ class BtViewModelTest {
     }
 
     private fun createViewModel(isRootedFlavor: Boolean = false): BtViewModel =
-        BtViewModel(context, adapter, enhancedInfo, rootRegistry(isRootedFlavor))
+        BtViewModel(
+            context,
+            adapter,
+            enhancedInfo,
+            mockk<dev.ranzlappen.gadget.feature.radios.bt.control.BluetoothController>(relaxed = true),
+            rootRegistry(isRootedFlavor),
+        )
 
     // ---- construction ----
 
