@@ -35,7 +35,7 @@ import dev.ranzlappen.gadget.core.designsystem.theme.GadgetLightColorScheme
 import dev.ranzlappen.gadget.core.designsystem.theme.customColorScheme
 import dev.ranzlappen.gadget.core.designsystem.theme.GadgetTheme
 import android.nfc.NfcAdapter
-import androidx.activity.viewModels
+import android.nfc.Tag
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ranzlappen.gadget.feature.apps.AppRepository
 import dev.ranzlappen.gadget.feature.apps.appsScreen
@@ -71,7 +71,7 @@ import dev.ranzlappen.gadget.feature.microphone.microphoneScreen
 import dev.ranzlappen.gadget.feature.notification.notificationScreen
 import dev.ranzlappen.gadget.feature.radios.bt.btScreen
 import dev.ranzlappen.gadget.feature.radios.cell.cellScreen
-import dev.ranzlappen.gadget.feature.radios.nfc.NfcViewModel
+import dev.ranzlappen.gadget.feature.radios.nfc.tag.NfcTagInbox
 import dev.ranzlappen.gadget.feature.radios.wifi.wifiScreen
 import dev.ranzlappen.gadget.feature.radios.subghz.subghzScreen
 import dev.ranzlappen.gadget.feature.flipper.flipperScreen
@@ -114,7 +114,8 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var launchGate: LaunchGate
     @Inject lateinit var companionDetector: CompanionModuleDetector
 
-    private val nfcViewModel: NfcViewModel by viewModels()
+    /** Tags delivered by the NFC intent filters (Gadget opened by a tag), see [handleNfcIntent]. */
+    @Inject lateinit var nfcTagInbox: NfcTagInbox
 
     // Phase 2 / Batch 1 — new typed user-preferences repository. Drives
     // the GadgetApp theme params reactively (dark mode, dynamic colour,
@@ -135,6 +136,7 @@ class MainActivity : ComponentActivity() {
         bootstrapLegacyManagers()
         if (savedInstanceState == null) {
             pendingRoute = intent?.getStringExtra(GadgetDestination.EXTRA_ROUTE)
+            intent?.let(::handleNfcIntent)
         }
 
         setContent {
@@ -276,12 +278,25 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         intent.getStringExtra(GadgetDestination.EXTRA_ROUTE)?.let { pendingRoute = it }
+        handleNfcIntent(intent)
+    }
+
+    /**
+     * A tag dispatched to the activity (the NFC screen itself uses reader
+     * mode): hand it to the NFC screen's view model and open that screen.
+     */
+    private fun handleNfcIntent(intent: Intent) {
         val action = intent.action
-        if (action == NfcAdapter.ACTION_NDEF_DISCOVERED ||
-            action == NfcAdapter.ACTION_TAG_DISCOVERED ||
-            action == NfcAdapter.ACTION_TECH_DISCOVERED) {
-            nfcViewModel.onNewIntent(intent)
+        if (action != NfcAdapter.ACTION_NDEF_DISCOVERED &&
+            action != NfcAdapter.ACTION_TAG_DISCOVERED &&
+            action != NfcAdapter.ACTION_TECH_DISCOVERED
+        ) {
+            return
         }
+        @Suppress("DEPRECATION")
+        val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
+        nfcTagInbox.offer(tag)
+        pendingRoute = GadgetDestination.RadiosNfc.route
     }
 
     private fun bootstrapLegacyManagers() {

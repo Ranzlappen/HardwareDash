@@ -6,7 +6,6 @@ import android.nfc.NdefRecord
 import dev.ranzlappen.gadget.core.automation.ActionParamType
 import dev.ranzlappen.gadget.core.automation.ActionResult
 import dev.ranzlappen.gadget.feature.radios.nfc.hce.NfcHceState
-import io.mockk.anyConstructed
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor

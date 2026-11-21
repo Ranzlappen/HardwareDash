@@ -1,9 +1,7 @@
 package dev.ranzlappen.gadget.feature.radios.nfc
 
-import android.content.Intent
 import android.nfc.NdefMessage
 import android.nfc.NdefRecord
-import android.nfc.NfcAdapter
 import android.nfc.Tag
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,9 +12,12 @@ import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcController
 import dev.ranzlappen.gadget.feature.radios.nfc.control.NfcControllerResult
 import dev.ranzlappen.gadget.feature.radios.nfc.control.RawNciCommandConfig
 import dev.ranzlappen.gadget.feature.radios.nfc.hce.NfcHceState
+import dev.ranzlappen.gadget.feature.radios.nfc.tag.NfcParsing
+import dev.ranzlappen.gadget.feature.radios.nfc.tag.NfcTagInbox
+import dev.ranzlappen.gadget.feature.radios.nfc.tag.NfcTagIo
+import dev.ranzlappen.gadget.feature.radios.nfc.tag.NfcWriteMode
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplate
 import dev.ranzlappen.gadget.feature.radios.nfc.template.NfcTemplateRepository
-import java.nio.charset.Charset
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +37,8 @@ class NfcViewModel @Inject constructor(
     private val hceState: NfcHceState,
     private val templateRepository: NfcTemplateRepository,
     private val nfcController: NfcController,
+    private val tagIo: NfcTagIo,
+    private val tagInbox: NfcTagInbox,
     rootCapabilityRegistry: RootCapabilityRegistry,
 ) : ViewModel() {
 
@@ -93,31 +96,50 @@ class NfcViewModel @Inject constructor(
                 templates = templateRepository.templates,
             )
         }
+        viewModelScope.launch {
+            tagInbox.incoming.collect { tag ->
+                tagInbox.consumed()
+                onTag(tag)
+            }
+        }
     }
 
     fun refresh() {
         _state.update { it.copy(adapterPresent = adapter.isAvailable(), adapterEnabled = adapter.isEnabled()) }
     }
 
-    fun onNewIntent(intent: Intent) {
-        val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
-        val tagId = tag.id.joinToString("") { "%02X".format(it) }
-        val techList = tag.techList.joinToString(", ") { it.substringAfterLast('.') }
-
-        val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
-        val payload = if (rawMsgs != null && rawMsgs.isNotEmpty()) {
-            val msg = rawMsgs[0] as? NdefMessage
-            msg?.records?.firstOrNull()?.let { parseNdefRecord(it) }
-        } else null
-
-        _state.update {
-            it.copy(
-                lastTagPayload = payload,
-                lastTagFormat = techList,
-                lastTagId = tagId,
-            )
+    /**
+     * A tag was presented (reader mode on the NFC screen, or the activity's
+     * NFC intent via [NfcTagInbox]). If a write is armed it is written first,
+     * then the tag is read back so the card shows what is on it now.
+     */
+    fun onTag(tag: Tag) {
+        viewModelScope.launch {
+            _state.update { it.copy(readingTag = true) }
+            val s = _state.value
+            if (s.writeArmed && s.canWrite) {
+                val outcome = tagIo.write(tag, buildWriteMessage(s.writeMode, s.writeText))
+                _state.update { it.copy(writeArmed = false, writeOutcome = outcome) }
+            }
+            val info = tagIo.read(tag)
+            _state.update { it.copy(tag = info, readingTag = false) }
         }
     }
+
+    fun setWriteMode(mode: NfcWriteMode) = _state.update { it.copy(writeMode = mode, writeOutcome = null) }
+
+    fun setWriteText(text: String) = _state.update { it.copy(writeText = text, writeOutcome = null) }
+
+    fun armWrite() = _state.update { if (it.canWrite) it.copy(writeArmed = true, writeOutcome = null) else it }
+
+    fun cancelWrite() = _state.update { it.copy(writeArmed = false) }
+
+    private fun buildWriteMessage(mode: NfcWriteMode, text: String): NdefMessage = NdefMessage(
+        when (mode) {
+            NfcWriteMode.Text -> NdefRecord.createTextRecord(null, text)
+            NfcWriteMode.Url -> NdefRecord.createUri(NfcParsing.normalizeUrl(text))
+        },
+    )
 
     fun setHcePayload(text: String) {
         _state.update { it.copy(hcePayload = text) }
@@ -172,22 +194,6 @@ class NfcViewModel @Inject constructor(
             }
             hceState.setPayload(ndefBytes)
             _state.update { it.copy(hceMode = mode) }
-        }
-    }
-
-    private fun parseNdefRecord(record: NdefRecord): String? {
-        return when (record.tnf) {
-            NdefRecord.TNF_WELL_KNOWN -> {
-                if (record.type.contentEquals(NdefRecord.RTD_TEXT)) {
-                    val payload = record.payload
-                    val languageCodeLength = payload[0].toInt() and 0x3F
-                    String(payload, 1 + languageCodeLength, payload.size - 1 - languageCodeLength, Charsets.UTF_8)
-                } else if (record.type.contentEquals(NdefRecord.RTD_URI)) {
-                    record.toUri()?.toString()
-                } else null
-            }
-            NdefRecord.TNF_MIME_MEDIA -> String(record.payload, Charset.forName("UTF-8"))
-            else -> record.payload.joinToString("") { "%02X".format(it) }
         }
     }
 

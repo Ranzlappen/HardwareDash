@@ -5,10 +5,13 @@
     <uses-feature android:name="android.hardware.nfc" android:required="false" />
 
     <application>
+        <!-- BIND_NFC_SERVICE: only the system NFC stack may bind a HostApduService.
+             (v2 declared android.permission.NFC here, so the stack never
+             bound it and HCE emulation never answered a reader.) -->
         <service
             android:name=".hce.NfcEmulationService"
             android:exported="true"
-            android:permission="android.permission.NFC">
+            android:permission="android.permission.BIND_NFC_SERVICE">
             <intent-filter>
                 <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
             </intent-filter>

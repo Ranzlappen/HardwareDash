@@ -48,7 +48,7 @@ is ticked.
 | Connect | Wi-Fi | `radios-wifi` (+`-rooted`) | ⚪ | keep |
 | Connect | Bluetooth | `radios-bt` (+`-rooted`) | ⚪ | keep |
 | Connect | Cellular | `radios-cell` (+`-rooted`) | ⚪ | keep |
-| Connect | NFC (read, HCE, templates) | `radios-nfc` (+`-rooted`) | ⚪ | parity check vs v1 write tools (B11) |
+| Connect | NFC (read, write, protection, HCE, templates) | `radios-nfc` (+`-rooted`) | ⚪ | B11 ✓ v1 parity minus bypass; awaiting phone check |
 | Connect | IR blaster | `radios-ir` (+`-rooted`) | ⚪ | keep |
 | Connect | Sub-GHz device detection | `radios-subghz` | ⚪ | keep |
 | Connect | Flipper Zero bridge | `flipper` (+`-rooted`) | ⚪ | keep |

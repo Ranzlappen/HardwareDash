@@ -230,6 +230,14 @@ of [Roadmap & Status](Roadmap-and-Status):
   permission manager + `pm grant` one-up.
 - **Radios** (`:feature:radios-wifi/-bt/-nfc/-ir` + `-rooted`) — all
   live with monitors and ActionHandlers.
+- **NFC** (`:feature:radios-nfc`, v3 B11) — reader mode while the screen is
+  open (paused during HCE): UID, chip (NTAG21x / Ultralight EV1 via
+  GET_VERSION, MIFARE Classic, ISO-DEP), NDEF type + used/max bytes +
+  writable, every NDEF record decoded with copy, write protection (lock
+  bits, CC read-only flag, AUTH0 password); write a Text or URL record
+  (formats blank NDEF-formatable tags); HCE emulation + templates. Tags
+  that open the app go through `NfcTagInbox`. v1's protection *bypass*
+  (default passwords / keys) is deliberately not carried over.
 - **Cellular** (`:feature:radios-cell` + `-rooted`) — standard
   `TelephonyManager` screen (SIM state, carrier, network type, live
   signal bars) + rooted raw-modem-dump panel; `cell_signal` MetricSource.

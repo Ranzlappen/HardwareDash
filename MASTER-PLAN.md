@@ -282,10 +282,10 @@ is green and its smoke-test lines pass.
       camera's own state; capture to `Pictures/Gadget` with open / share.
       v2's fake "rooted active" capability rows dropped. `CameraLensesTest`.
 - [ ] **CI gap** (found in B9): `ci-refactor.yml` never ran the unit tests of
-      ~~`audio`~~ (B10), `lock`, `radios-bt`, `radios-ir`, `radios-nfc`, `radios-wifi`,
+      ~~`audio`~~ (B10), `lock`, `radios-bt`, `radios-ir`, ~~`radios-nfc`~~ (B11), `radios-wifi`,
       `settings` (camera added in B9). Enable them one module per commit and
       fix what was silently red.
-      Known red: `nfc` + `settings` tests `import io.mockk.anyConstructed` /
+      Known red: `settings` tests `import io.mockk.anyConstructed` /
       `constructedWith` (scope members, not top-level — fixed in audio, B10).
 - [x] **B10** Audio: live level + 32-band log FFT spectrum with peak frequency
       (one lifecycle-aware `AudioRecord` on IO, `SpectrumMath` + test);
@@ -294,7 +294,13 @@ is green and its smoke-test lines pass.
       names. Dropped the fake "rooted active" capability rows and the
       duplicate live dB monitor; dB meter metric no longer reads the mic on
       the collector's thread. Audio unit tests now run in CI.
-- [ ] **B11** NFC parity check vs v1 (write, tag type, protection info); fill gaps.
+- [x] **B11** NFC: reader mode on the screen (tags reached a different,
+      activity-scoped VM before — never shown); tag details incl. NTAG chip
+      via GET_VERSION and write protection (lock bits / CC / AUTH0, v1's
+      chip table corrected); all records; write Text/URL (+format); HCE
+      service now `BIND_NFC_SERVICE` (it could never be bound). v1's
+      protection bypass (default passwords/keys) intentionally dropped.
+      `NfcParsingTest`; nfc tests now in CI.
 - [ ] **B12** File metadata / EXIF viewer (approved, §8.3): browse a file via
       the system picker, show name/size/MIME/dates, read + edit image EXIF,
       audio/video media metadata.

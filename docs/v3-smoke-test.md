@@ -52,7 +52,7 @@ Format: `- [ ] Tool — job · notes`
 - [ ] Wi-Fi — SSID, signal, frequency shown and live ·
 - [ ] Bluetooth — adapter state and bonded devices listed ·
 - [ ] Cellular — carrier, network type and signal bars shown (after permission) ·
-- [ ] NFC — read a tag's NDEF content ·
+- [ ] NFC — with the NFC screen open, a tag shows UID, chip (e.g. NTAG215), NDEF bytes used/max, records and write protection; "Write" a URL, tap the tag, it reads back the new URL; tapping a tag while Gadget is closed opens the NFC screen with it; (2nd phone) HCE text is readable ·
 - [ ] IR — _(needs an IR emitter)_ send a saved code to a TV ·
 - [ ] Sub-GHz — attached SDR/transceiver is detected ·
 - [ ] Flipper — connects over USB or BLE; ping succeeds ·

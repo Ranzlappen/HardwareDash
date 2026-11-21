@@ -8,10 +8,7 @@
     <string name="nfc_capability_adapter_detail">Liest und emuliert NFC-Tags</string>
     <string name="nfc_tag_card_title">Zuletzt gescannter Tag</string>
     <string name="nfc_tag_empty">Telefon zum Scannen in die Nähe eines NFC-Tags halten</string>
-    <string name="nfc_tag_format">Format</string>
     <string name="nfc_tag_id">Tag-ID</string>
-    <string name="nfc_tag_payload">Nutzdaten</string>
-    <string name="nfc_tag_copy">Nutzdaten kopieren</string>
     <string name="nfc_hce_card_title">HCE-Emulation</string>
     <string name="nfc_hce_text_label">Text-Nutzdaten</string>
     <string name="nfc_hce_url_label">URL-Nutzdaten</string>
@@ -35,10 +32,6 @@
     <string name="nfc_live_monitor_title">NFC-Status (live)</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="nfc_cap_rooted_active">Aktiv — gerooteter Build</string>
-    <string name="nfc_cap_rooted_required">Erfordert gerooteten Build</string>
-    <string name="nfc_cap_raw_nci_name">Raw-NCI-Befehlsinjektion</string>
-    <string name="nfc_cap_raw_nci_detail">Sendet beliebige NCI-Frames über /dev/nfc an den NFC-Controller, unter Umgehung des NFC-Stacks</string>
     <!-- Rooted tools (in-screen, W6 write-tier) -->
     <string name="nfc_root_tools_title">Root-Tools</string>
     <string name="nfc_root_tools_unavailable">Erfordert die gerootete App-Version.</string>
@@ -58,4 +51,46 @@
     <string name="nfc_tools_send">NCI senden</string>
     <string name="nfc_tools_confirm_title">Rohen NCI-Befehl senden?</string>
     <string name="nfc_tools_confirm_message">Dies schreibt einen beliebigen Frame direkt an den NFC-Controller und kann ihn in einen unerwarteten Zustand versetzen. Fortfahren?</string>
+
+    <!-- ─── v3 B11: tag details, protection, write ─────────────────── -->
+    <string name="nfc_tag_reading">Tag wird gelesen…</string>
+    <string name="nfc_tag_reading_paused">Lesen pausiert, solange die HCE-Emulation aktiv ist</string>
+    <string name="nfc_tag_chip">Chip</string>
+    <string name="nfc_tag_techs">Technologien</string>
+    <string name="nfc_tag_ndef">NDEF</string>
+    <string name="nfc_tag_ndef_usage">%1$s · %2$d von %3$d Byte belegt</string>
+    <string name="nfc_tag_not_ndef">Nicht NDEF-formatiert</string>
+    <string name="nfc_tag_writable">beschreibbar</string>
+    <string name="nfc_tag_read_only">schreibgeschützt</string>
+    <string name="nfc_tag_records">Datensätze (%1$d)</string>
+    <string name="nfc_tag_no_records">Keine NDEF-Datensätze</string>
+    <string name="nfc_record_text">Text</string>
+    <string name="nfc_record_uri">URI</string>
+    <string name="nfc_record_mime">MIME</string>
+    <string name="nfc_record_external">Extern</string>
+    <string name="nfc_record_smart_poster">Smart Poster</string>
+    <string name="nfc_record_empty">Leer</string>
+    <string name="nfc_record_other">Sonstige</string>
+    <string name="nfc_record_copy">Kopieren</string>
+    <string name="nfc_protection_title">Schreibschutz</string>
+    <string name="nfc_protection_none">Kein Schreibschutz</string>
+    <string name="nfc_protection_locked">Lock-Bits gesetzt – diese Seiten sind dauerhaft schreibgeschützt</string>
+    <string name="nfc_protection_read_only">Nur-Lesen-Flag gesetzt (Capability Container)</string>
+    <string name="nfc_protection_password">Passwortgeschützt</string>
+    <string name="nfc_protection_unknown">Bei diesem Tag-Typ nicht lesbar</string>
+    <string name="nfc_write_card_title">Auf Tag schreiben</string>
+    <string name="nfc_write_mode_text">Text</string>
+    <string name="nfc_write_mode_url">URL</string>
+    <string name="nfc_write_text_label">Zu schreibender Text</string>
+    <string name="nfc_write_url_label">Zu schreibende URL</string>
+    <string name="nfc_write_arm">Schreiben</string>
+    <string name="nfc_write_armed">Tag ans Telefon halten zum Schreiben…</string>
+    <string name="nfc_write_cancel">Abbrechen</string>
+    <string name="nfc_write_done">Geschrieben: %1$d Byte</string>
+    <string name="nfc_write_done_formatted">Formatiert und geschrieben: %1$d Byte</string>
+    <string name="nfc_write_read_only">Tag ist schreibgeschützt</string>
+    <string name="nfc_write_too_large">Zu groß: %1$d Byte, der Tag fasst %2$d</string>
+    <string name="nfc_write_unsupported">Dieser Tag kann keine NDEF-Daten speichern</string>
+    <string name="nfc_write_tag_lost">Tag entfernt – ruhig halten und erneut versuchen</string>
+    <string name="nfc_write_failed">Schreiben fehlgeschlagen: %1$s</string>
 </resources>

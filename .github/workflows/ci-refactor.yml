@@ -100,6 +100,7 @@ jobs:
             :feature:microphone:testDebugUnitTest \
             :feature:notification:testDebugUnitTest \
             :feature:radios-cell:testDebugUnitTest \
+            :feature:radios-nfc:testDebugUnitTest \
             :feature:radios-subghz:testDebugUnitTest \
             :feature:radios-wifi-rooted:testDebugUnitTest \
             :feature:sensors:testDebugUnitTest \

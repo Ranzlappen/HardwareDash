@@ -91,7 +91,7 @@ internal fun GadgetDestination.hubSummary(): String? = when (this) {
     GadgetDestination.RadiosWifi -> "Network, signal, frequency"
     GadgetDestination.RadiosBt -> "Adapter and paired devices"
     GadgetDestination.RadiosCell -> "Carrier, network type, signal"
-    GadgetDestination.RadiosNfc -> "Read tags, emulate cards"
+    GadgetDestination.RadiosNfc -> "Read, write, emulate tags"
     GadgetDestination.RadiosIr -> "Infrared remote codes"
     GadgetDestination.RadiosSubghz -> "SDR and transceiver detection"
     GadgetDestination.Flipper -> "Flipper Zero over USB or Bluetooth"

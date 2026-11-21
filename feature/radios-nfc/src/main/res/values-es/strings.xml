@@ -8,10 +8,7 @@
     <string name="nfc_capability_adapter_detail">Lee y emula etiquetas NFC</string>
     <string name="nfc_tag_card_title">Última etiqueta escaneada</string>
     <string name="nfc_tag_empty">Acerca el teléfono a una etiqueta NFC para escanearla</string>
-    <string name="nfc_tag_format">Formato</string>
     <string name="nfc_tag_id">ID de etiqueta</string>
-    <string name="nfc_tag_payload">Contenido</string>
-    <string name="nfc_tag_copy">Copiar contenido</string>
     <string name="nfc_hce_card_title">Emulación HCE</string>
     <string name="nfc_hce_text_label">Contenido de texto</string>
     <string name="nfc_hce_url_label">Contenido de URL</string>
@@ -35,10 +32,6 @@
     <string name="nfc_live_monitor_title">Estado de NFC (en vivo)</string>
 
     <!-- ─── Rooted capabilities ──────────────────────────────────────────── -->
-    <string name="nfc_cap_rooted_active">Activo: compilación rooteada</string>
-    <string name="nfc_cap_rooted_required">Requiere compilación rooteada</string>
-    <string name="nfc_cap_raw_nci_name">Inyección de comandos NCI sin procesar</string>
-    <string name="nfc_cap_raw_nci_detail">Envía tramas NCI arbitrarias al controlador NFC mediante /dev/nfc, evitando la pila NFC</string>
     <!-- Rooted tools (in-screen, W6 write-tier) -->
     <string name="nfc_root_tools_title">Herramientas root</string>
     <string name="nfc_root_tools_unavailable">Requiere la versión rooteada de la app.</string>
@@ -58,4 +51,46 @@
     <string name="nfc_tools_send">Enviar NCI</string>
     <string name="nfc_tools_confirm_title">¿Enviar comando NCI en bruto?</string>
     <string name="nfc_tools_confirm_message">Esto escribe una trama arbitraria directamente en el controlador NFC y puede dejarlo en un estado inesperado. ¿Continuar?</string>
+
+    <!-- ─── v3 B11: tag details, protection, write ─────────────────── -->
+    <string name="nfc_tag_reading">Leyendo etiqueta…</string>
+    <string name="nfc_tag_reading_paused">La lectura está en pausa mientras la emulación HCE esté activa</string>
+    <string name="nfc_tag_chip">Chip</string>
+    <string name="nfc_tag_techs">Tecnologías</string>
+    <string name="nfc_tag_ndef">NDEF</string>
+    <string name="nfc_tag_ndef_usage">%1$s · %2$d de %3$d bytes usados</string>
+    <string name="nfc_tag_not_ndef">Sin formato NDEF</string>
+    <string name="nfc_tag_writable">escribible</string>
+    <string name="nfc_tag_read_only">solo lectura</string>
+    <string name="nfc_tag_records">Registros (%1$d)</string>
+    <string name="nfc_tag_no_records">Sin registros NDEF</string>
+    <string name="nfc_record_text">Texto</string>
+    <string name="nfc_record_uri">URI</string>
+    <string name="nfc_record_mime">MIME</string>
+    <string name="nfc_record_external">Externo</string>
+    <string name="nfc_record_smart_poster">Smart poster</string>
+    <string name="nfc_record_empty">Vacío</string>
+    <string name="nfc_record_other">Otro</string>
+    <string name="nfc_record_copy">Copiar</string>
+    <string name="nfc_protection_title">Protección contra escritura</string>
+    <string name="nfc_protection_none">Sin protección contra escritura</string>
+    <string name="nfc_protection_locked">Bits de bloqueo activos: esas páginas son de solo lectura para siempre</string>
+    <string name="nfc_protection_read_only">Marca de solo lectura activa (capability container)</string>
+    <string name="nfc_protection_password">Protegida con contraseña</string>
+    <string name="nfc_protection_unknown">No legible en este tipo de etiqueta</string>
+    <string name="nfc_write_card_title">Escribir en etiqueta</string>
+    <string name="nfc_write_mode_text">Texto</string>
+    <string name="nfc_write_mode_url">URL</string>
+    <string name="nfc_write_text_label">Texto a escribir</string>
+    <string name="nfc_write_url_label">URL a escribir</string>
+    <string name="nfc_write_arm">Escribir</string>
+    <string name="nfc_write_armed">Acerca una etiqueta al teléfono para escribir…</string>
+    <string name="nfc_write_cancel">Cancelar</string>
+    <string name="nfc_write_done">Escrito: %1$d bytes</string>
+    <string name="nfc_write_done_formatted">Formateado y escrito: %1$d bytes</string>
+    <string name="nfc_write_read_only">La etiqueta es de solo lectura</string>
+    <string name="nfc_write_too_large">Demasiado grande: %1$d bytes, la etiqueta admite %2$d</string>
+    <string name="nfc_write_unsupported">Esta etiqueta no puede guardar datos NDEF</string>
+    <string name="nfc_write_tag_lost">La etiqueta se alejó: mantenla quieta e inténtalo de nuevo</string>
+    <string name="nfc_write_failed">Error al escribir: %1$s</string>
 </resources>
