@@ -6,6 +6,12 @@ plugins {
 
 android {
     namespace = "dev.ranzlappen.gadget.feature.lock"
+
+    // LockMonitor builds an IntentFilter in init; the plain android.jar stub
+    // throws "Stub!" on that. Same unit-test config as :feature:gps / :app.
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
