@@ -5,8 +5,6 @@ import android.content.Intent
 import dev.ranzlappen.gadget.core.automation.ActionResult
 import dev.ranzlappen.gadget.feature.audio.AudioRecordService
 import io.mockk.EqMatcher
-import io.mockk.anyConstructed
-import io.mockk.constructedWith
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor

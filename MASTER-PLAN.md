@@ -285,6 +285,8 @@ is green and its smoke-test lines pass.
       ~~`audio`~~ (B10), `lock`, `radios-bt`, `radios-ir`, `radios-nfc`, `radios-wifi`,
       `settings` (camera added in B9). Enable them one module per commit and
       fix what was silently red.
+      Known red: `nfc` + `settings` tests `import io.mockk.anyConstructed` /
+      `constructedWith` (scope members, not top-level — fixed in audio, B10).
 - [x] **B10** Audio: live level + 32-band log FFT spectrum with peak frequency
       (one lifecycle-aware `AudioRecord` on IO, `SpectrumMath` + test);
       recordings list from MediaStore `Music/Gadget` with play / share /

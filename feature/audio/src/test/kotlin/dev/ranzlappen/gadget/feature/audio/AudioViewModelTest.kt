@@ -9,9 +9,7 @@ import androidx.core.content.ContextCompat
 import dev.ranzlappen.gadget.core.root.RootCapabilityRegistry
 import dev.ranzlappen.gadget.feature.audio.control.AudioRoutingController
 import io.mockk.EqMatcher
-import io.mockk.anyConstructed
 import io.mockk.coEvery
-import io.mockk.constructedWith
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
