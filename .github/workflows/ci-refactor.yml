@@ -157,10 +157,34 @@ jobs:
       # app/src/rooted/assets/. Standard variant is unaffected by the
       # property (the asset-copy task only attaches to the rooted variant's
       # preBuild).
+      # Pushes to claude/v3-** produce phone-test APKs, so they must install
+      # OVER the production build already on the phone: sign with the
+      # production keystore (same secrets as build-apk.yml) and use a
+      # versionCode above every main release (1000 + run number; main's
+      # build-apk.yml starts at 3000 + run number, so a later release still
+      # updates over a test build). PR runs keep the throwaway debug key.
       - name: Assemble standard + rooted debug APKs
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          EXTRA=()
+          if [ "${{ github.event_name }}" = "push" ] && [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/Gadget-release.jks"
+            EXTRA=(
+              -Pandroid.injected.signing.store.file="$RUNNER_TEMP/Gadget-release.jks"
+              -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD"
+              -Pandroid.injected.signing.key.alias="$KEY_ALIAS"
+              -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+              -PCI_VERSION_CODE=$((1000 + ${{ github.run_number }}))
+              -PCI_VERSION_NAME=3.0-dev.${{ github.run_number }}
+            )
+          fi
           ./gradlew \
             -PenableLsposedModule=true \
+            "${EXTRA[@]}" \
             assembleStandardDebug \
             assembleRootedDebug \
             --stacktrace
