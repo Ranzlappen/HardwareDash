@@ -282,10 +282,16 @@ is green and its smoke-test lines pass.
       camera's own state; capture to `Pictures/Gadget` with open / share.
       v2's fake "rooted active" capability rows dropped. `CameraLensesTest`.
 - [ ] **CI gap** (found in B9): `ci-refactor.yml` never ran the unit tests of
-      `audio`, `lock`, `radios-bt`, `radios-ir`, `radios-nfc`, `radios-wifi`,
+      ~~`audio`~~ (B10), `lock`, `radios-bt`, `radios-ir`, `radios-nfc`, `radios-wifi`,
       `settings` (camera added in B9). Enable them one module per commit and
       fix what was silently red.
-- [ ] **B10** Audio: live FFT spectrum; recordings list with playback/share/delete.
+- [x] **B10** Audio: live level + 32-band log FFT spectrum with peak frequency
+      (one lifecycle-aware `AudioRecord` on IO, `SpectrumMath` + test);
+      recordings list from MediaStore `Music/Gadget` with play / share /
+      delete (confirm), elapsed time while recording, `Gadget_<date>.wav`
+      names. Dropped the fake "rooted active" capability rows and the
+      duplicate live dB monitor; dB meter metric no longer reads the mic on
+      the collector's thread. Audio unit tests now run in CI.
 - [ ] **B11** NFC parity check vs v1 (write, tag type, protection info); fill gaps.
 - [ ] **B12** File metadata / EXIF viewer (approved, §8.3): browse a file via
       the system picker, show name/size/MIME/dates, read + edit image EXIF,

@@ -32,6 +32,11 @@ class AudioRecorder @Inject constructor(
     private val _isRecording = MutableStateFlow(false)
     val isRecording: StateFlow<Boolean> = _isRecording
 
+    private val _lastSaved = MutableStateFlow<Uri?>(null)
+
+    /** The most recent saved recording, so the screen can refresh its list. */
+    val lastSaved: StateFlow<Uri?> = _lastSaved
+
     fun startRecording() {
         if (_isRecording.value) return
         val sampleRate = 44_100
@@ -79,7 +84,7 @@ class AudioRecorder @Inject constructor(
         if (pcmData.isEmpty()) return null
 
         val wavData = buildWav(pcmData, sampleRate = 44_100, channels = 1, bitsPerSample = 16)
-        return saveToMediaStore(wavData)
+        return saveToMediaStore(wavData)?.also { _lastSaved.value = it }
     }
 
     private fun buildWav(pcm: ByteArray, sampleRate: Int, channels: Int, bitsPerSample: Int): ByteArray {
@@ -114,9 +119,9 @@ class AudioRecorder @Inject constructor(
 
     private fun saveToMediaStore(wavData: ByteArray): Uri? {
         val values = ContentValues().apply {
-            put(MediaStore.Audio.Media.DISPLAY_NAME, "recording_${System.currentTimeMillis()}.wav")
+            put(MediaStore.Audio.Media.DISPLAY_NAME, recordingFileName(System.currentTimeMillis()))
             put(MediaStore.Audio.Media.MIME_TYPE, "audio/wav")
-            put(MediaStore.Audio.Media.RELATIVE_PATH, "Music/Gadget")
+            put(MediaStore.Audio.Media.RELATIVE_PATH, Recordings.RELATIVE_PATH)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 put(MediaStore.Audio.Media.IS_PENDING, 1)
             }

@@ -1,35 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="audio_capability_mic">Microphone</string>
-    <string name="audio_capability_mic_detail">Mesure en dB et enregistrement WAV</string>
     <string name="audio_permission_card_title">Autorisation requise</string>
     <string name="audio_permission_body">L\'accès au microphone est nécessaire pour mesurer le niveau sonore et enregistrer de l\'audio.</string>
     <string name="audio_permission_grant">Accorder l\'autorisation</string>
-    <string name="audio_db_meter_card_title">Sonomètre</string>
-    <string name="audio_db_level">Niveau sonore</string>
     <string name="audio_db_unit">dB</string>
     <string name="audio_monitor_title">Historique du sonomètre</string>
     <string name="audio_record_card_title">Enregistrement vocal</string>
     <string name="audio_record_start">Démarrer l\'enregistrement</string>
     <string name="audio_record_stop">Arrêter</string>
-    <string name="audio_record_saved">Enregistré dans le dossier Musique</string>
     <string name="audio_record_share">Partager</string>
-    <string name="audio_record_idle">Appuyez pour démarrer l\'enregistrement</string>
     <string name="audio_notification_channel">Enregistrement audio</string>
     <string name="audio_notification_title">Enregistrement audio en cours</string>
     <string name="audio_notification_text">Appuyez pour ouvrir Gadget</string>
     <string name="audio_notification_stop">Arrêter l\'enregistrement</string>
     <string name="audio_capability_available">Enregistrement disponible</string>
     <string name="audio_capability_permission_required">Autorisation requise</string>
-    <string name="audio_live_monitor_title">Sonomètre — en direct</string>
-    <string name="audio_capability_rooted_active">Actif — build rooté</string>
-    <string name="audio_capability_rooted_required">Nécessite un build rooté</string>
-    <string name="audio_capability_gain_boost">Amplification du gain micro</string>
-    <string name="audio_capability_gain_boost_detail">Remplace le registre de gain matériel au-delà des limites du système</string>
-    <string name="audio_capability_direct_pcm">Capture PCM directe</string>
-    <string name="audio_capability_direct_pcm_detail">Contourne la pile AudioRecord pour une capture brute au niveau du noyau</string>
-    <string name="audio_capability_custom_sample_rate">Fréquence d\'échantillonnage personnalisée</string>
-    <string name="audio_capability_custom_sample_rate_detail">Demande des fréquences de capture non standard (par ex. 96 kHz)</string>
     <!-- ─── Rooted tools (in-screen, W6) ───────────────────────────────── -->
     <string name="audio_root_tools_title">Outils root</string>
     <string name="audio_root_tools_unavailable">Nécessite la version rootée de l\'application.</string>
@@ -39,4 +25,22 @@
     <string name="audio_root_mic_tools_label">Outils avancés du micro</string>
     <string name="audio_root_mic_tools_detail">Gain, PCM brut, fréquences d’échantillonnage personnalisées, multi-micro et capture audio système. Expérimental — pas encore vérifié sur un appareil.</string>
     <string name="audio_root_open">Ouvrir</string>
+
+    <!-- ─── v3 B10: spectrum + recordings ─────────────────────────────── -->
+    <string name="audio_capability_mic_detail">Sonomètre, spectre en direct et enregistrement WAV</string>
+    <string name="audio_spectrum_title">Niveau et spectre</string>
+    <string name="audio_spectrum_peak">Pic %1$s</string>
+    <string name="audio_spectrum_listening">Écoute…</string>
+    <string name="audio_record_idle">Enregistré en WAV dans Music/Gadget</string>
+    <string name="audio_record_elapsed">Enregistrement · %1$s</string>
+    <string name="audio_recordings_title">Enregistrements</string>
+    <string name="audio_recordings_empty">Aucun enregistrement</string>
+    <string name="audio_recording_meta">%1$s · %2$s</string>
+    <string name="audio_recording_play">Lire</string>
+    <string name="audio_recording_stop_playback">Arrêter la lecture</string>
+    <string name="audio_recording_delete">Supprimer</string>
+    <string name="audio_recording_delete_title">Supprimer l\'enregistrement ?</string>
+    <string name="audio_recording_delete_body">%1$s sera supprimé de Music/Gadget.</string>
+    <string name="audio_recording_delete_failed">Suppression impossible : le fichier appartient à une autre app.</string>
+    <string name="audio_cancel">Annuler</string>
 </resources>

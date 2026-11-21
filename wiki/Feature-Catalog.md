@@ -217,8 +217,11 @@ of [Roadmap & Status](Roadmap-and-Status):
   barcode scanner (all formats), scan history, Wi-Fi / URL deep-open.
   Rooted extreme-tier rows (high FPS, manual exposure, RAW, multi-camera,
   HAL bypass, shutter sound) unchanged — unverified, see B13.
-- **Audio** (`:feature:audio` + `-rooted`) — dB meter + WAV recording,
-  live dB monitor, rooted mic rows.
+- **Audio** (`:feature:audio` + `-rooted`, v3 B10) — live dB level and a
+  32-band log spectrum (40 Hz – 16 kHz) with peak frequency, mic open only
+  while the screen is visible; WAV recorder (foreground service, elapsed
+  timer) saving `Gadget_<date>.wav` to `Music/Gadget`; recordings list with
+  play / share / delete; dB-meter monitor history; rooted audio-policy dump.
 - **Storage** (`:feature:storage` + `-rooted`) — volume cards, used-%
   monitor, storage widget, rooted diskstats / fstrim actions.
 - **Lock / Diagnostics / Health** (`:feature:lock`,

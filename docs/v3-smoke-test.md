@@ -27,7 +27,7 @@ Format: `- [ ] Tool — job · notes`
 - [ ] Torch — on/off from the screen, the QS tile and a widget; strobe runs and stops ·
 - [ ] Vibration — Click / Tick / Double / Heavy effects play; custom pattern plays; saved pattern reloads; a rule with "Play haptic effect" (heavy click) vibrates ·
 - [ ] Camera — Photo: preview shows, lens chips switch lenses (or 0.6× / 2× zoom chips on a single logical camera), tap focuses, pinch zooms, exposure slider brightens/darkens, torch toggles, "Take photo" saves to Pictures/Gadget and Open / Share work; Scan: a QR code is read and copyable ·
-- [ ] Audio — dB meter moves with noise; record a clip; clip is saved; (rooted) "Advanced microphone tools" opens the mic tools with a back arrow ·
+- [ ] Audio — dB and spectrum bars move with noise; whistling shows a matching peak Hz; record a clip (timer counts); the clip appears in Recordings, plays, shares, and deletes after confirming; leaving the app turns the mic indicator off within ~2 s; (rooted) "Advanced microphone tools" opens the mic tools with a back arrow ·
 - [ ] Display — brightness slider changes screen brightness ·
 - [ ] Apps — create a folder, add apps, launch an app from it; folder widget pins and opens ·
 - [ ] Logbook — add an entry; add a checkpoint with a due date; reminder fires ·
