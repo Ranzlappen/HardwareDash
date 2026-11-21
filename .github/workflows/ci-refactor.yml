@@ -75,6 +75,7 @@ jobs:
           ./gradlew \
             :core:automation:testDebugUnitTest \
             :core:data:testDebugUnitTest \
+            :core:datastore:testDebugUnitTest \
             :core:designsystem:testDebugUnitTest \
             :core:hardware:testDebugUnitTest \
             :core:monitoring:testDebugUnitTest \
@@ -96,14 +97,19 @@ jobs:
             :feature:flipper:testDebugUnitTest \
             :feature:flipper-rooted:testDebugUnitTest \
             :feature:gps:testDebugUnitTest \
+            :feature:lock:testDebugUnitTest \
             :feature:lock-rooted:testDebugUnitTest \
             :feature:logbook:testDebugUnitTest \
             :feature:metricwidget:testDebugUnitTest \
             :feature:microphone:testDebugUnitTest \
             :feature:notification:testDebugUnitTest \
+            :feature:radios-bt:testDebugUnitTest \
             :feature:radios-cell:testDebugUnitTest \
+            :feature:radios-ir:testDebugUnitTest \
             :feature:radios-nfc:testDebugUnitTest \
             :feature:radios-subghz:testDebugUnitTest \
+            :feature:radios-wifi:testDebugUnitTest \
+            :feature:settings:testDebugUnitTest \
             :feature:radios-wifi-rooted:testDebugUnitTest \
             :feature:sensors:testDebugUnitTest \
             :feature:storage:testDebugUnitTest \
